@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: instanceofGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+class Foo {
+	a = 1;
+}
+
+function alwaysTruthyAfterGuard(x: number | Foo) {
+	if (x instanceof Foo) {
+		// `x` is narrowed to a `Foo` instance here, so this condition is
+		// always truthy.
+		if (x) {
+			x.a;
+		}
+	}
+}
+
+// The narrowing carries into the left operand of a logical expression too.
+function alwaysTruthyInLogicalAnd(x: number | Foo) {
+	if (x instanceof Foo) {
+		x && x.a;
+	}
+}
+
+```
+
+# Diagnostics
+```
+instanceofGuardNarrowingInvalid.ts:11:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+     9 │ 		// `x` is narrowed to a `Foo` instance here, so this condition is
+    10 │ 		// always truthy.
+  > 11 │ 		if (x) {
+       │ 		    ^
+    12 │ 			x.a;
+    13 │ 		}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+instanceofGuardNarrowingInvalid.ts:20:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    18 │ function alwaysTruthyInLogicalAnd(x: number | Foo) {
+    19 │ 	if (x instanceof Foo) {
+  > 20 │ 		x && x.a;
+       │ 		^
+    21 │ 	}
+    22 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

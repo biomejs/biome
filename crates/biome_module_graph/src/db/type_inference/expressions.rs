@@ -11,23 +11,25 @@ use crate::db::queries::{
     ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
 };
 use biome_js_semantic::ScopeId;
+use biome_js_syntax::unescape_js_string_text;
 use biome_js_type_info::{
     CallArgumentType as RawCallArgumentType, DestructureField as RawDestructureField,
-    Literal as RawLiteral, Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier,
-    TypeResolverLevel, TypeofExpression as RawTypeofExpression, global_type_id_for_qualifier,
-    global_types,
+    Literal as RawLiteral, MemberEqualsPredicate, NarrowingPredicate as RawNarrowingPredicate,
+    Path, RawTypeData, TypeId, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
+    TypeofExpression as RawTypeofExpression, TypeofTag, global_type_id_for_qualifier, global_types,
     interned_types::{
         CallArgumentType as InferredCallArgumentType, ConditionalSubset, ConditionalType,
-        InternedClass as InferredClass, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction,
+        FunctionParameter as InferredFunctionParameter, InternedClass as InferredClass,
+        InternedConstructor as InferredConstructor, InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
         InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
         Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
-        NamedFunctionParameter as InferredNamedFunctionParameter, ReturnType as InferredReturnType,
+        NamedFunctionParameter as InferredNamedFunctionParameter,
+        NarrowingPredicate as InferredNarrowingPredicate,
+        PredicateCallPredicate as InferredPredicateCallPredicate, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
     },
-    literal::NumberLiteral,
 };
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
@@ -167,6 +169,33 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let right = self.resolve(&expression.right);
                 self.resolve_logical_or_expression(left, right)
             }
+            RawTypeofExpression::Narrowed(expression) => {
+                let ty = self.resolve(&expression.ty);
+                let predicate = match &expression.predicate {
+                    RawNarrowingPredicate::Assigned(assigned) => {
+                        InferredNarrowingPredicate::Assigned(self.resolve(assigned))
+                    }
+                    RawNarrowingPredicate::Falsy => InferredNarrowingPredicate::Falsy,
+                    RawNarrowingPredicate::InstanceOf(guard) => {
+                        InferredNarrowingPredicate::InstanceOf(self.resolve(guard))
+                    }
+                    RawNarrowingPredicate::MemberEquals(predicate) => {
+                        InferredNarrowingPredicate::MemberEquals(predicate.clone())
+                    }
+                    RawNarrowingPredicate::PredicateCall(predicate) => {
+                        InferredNarrowingPredicate::PredicateCall(InferredPredicateCallPredicate {
+                            callee: self.resolve(&predicate.callee),
+                            argument_index: predicate.argument_index,
+                        })
+                    }
+                    RawNarrowingPredicate::StringEquals(value) => {
+                        InferredNarrowingPredicate::StringEquals(value.clone())
+                    }
+                    RawNarrowingPredicate::Truthy => InferredNarrowingPredicate::Truthy,
+                    RawNarrowingPredicate::Typeof(tag) => InferredNarrowingPredicate::Typeof(*tag),
+                };
+                Some(self.resolve_narrowed_expression(ty, &predicate))
+            }
             RawTypeofExpression::New(expression) => {
                 let callee = self.resolve(&expression.callee);
                 let arguments = self.resolve_call_arguments(&expression.arguments);
@@ -274,6 +303,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             InferredTypeofExpression::LogicalOr(expression) => {
                 self.resolve_logical_or_expression(expression.left, expression.right)
+            }
+            InferredTypeofExpression::Narrowed(expression) => {
+                Some(self.resolve_narrowed_expression(expression.ty, &expression.predicate))
             }
             InferredTypeofExpression::New(expression) => {
                 let arguments = self.resolve_inferred_call_arguments(&expression.arguments);
@@ -2202,54 +2234,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         argument: InferredTypeData<'db>,
     ) -> InferredTypeData<'db> {
-        match self.resolve_inferred_type(argument) {
-            InferredTypeData::BigInt => self.typeof_string_literal("bigint"),
-            InferredTypeData::Boolean => self.typeof_string_literal("boolean"),
-            InferredTypeData::Function(_) => self.typeof_string_literal("function"),
-            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                InferredLiteral::BigInt(_) => self.typeof_string_literal("bigint"),
-                InferredLiteral::Boolean(_) => self.typeof_string_literal("boolean"),
-                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => {
-                    self.typeof_string_literal("object")
-                }
-                InferredLiteral::Number(_) => self.typeof_string_literal("number"),
-                InferredLiteral::String(_) | InferredLiteral::Template(_) => {
-                    self.typeof_string_literal("string")
-                }
-            },
-            InferredTypeData::Null => self.typeof_string_literal("object"),
-            InferredTypeData::Number => self.typeof_string_literal("number"),
-            InferredTypeData::Object(_) | InferredTypeData::Tuple(_) => {
-                self.typeof_string_literal("object")
-            }
-            InferredTypeData::String => self.typeof_string_literal("string"),
-            InferredTypeData::Symbol => self.typeof_string_literal("symbol"),
-            InferredTypeData::Undefined => self.typeof_string_literal("undefined"),
-            InferredTypeData::Unknown
-            | InferredTypeData::Global
-            | InferredTypeData::GlobalType(_)
-            | InferredTypeData::Conditional
-            | InferredTypeData::Class(_)
-            | InferredTypeData::Constructor(_)
-            | InferredTypeData::Interface(_)
-            | InferredTypeData::Module(_)
-            | InferredTypeData::Namespace(_)
-            | InferredTypeData::Generic(_)
-            | InferredTypeData::Local(_)
-            | InferredTypeData::Intersection(_)
-            | InferredTypeData::Union(_)
-            | InferredTypeData::TypeOperator(_)
-            | InferredTypeData::InstanceOf(_)
-            | InferredTypeData::MergedReference(_)
-            | InferredTypeData::TypeofExpression(_)
-            | InferredTypeData::TypeofType(_)
-            | InferredTypeData::TypeofValue(_)
-            | InferredTypeData::AnyKeyword
-            | InferredTypeData::NeverKeyword
-            | InferredTypeData::ObjectKeyword
-            | InferredTypeData::ThisKeyword
-            | InferredTypeData::UnknownKeyword
-            | InferredTypeData::VoidKeyword => self.typeof_return_union(),
+        let resolved = self.resolve_inferred_type(argument);
+        match self.typeof_tag_of(resolved) {
+            Some(tag) => self.typeof_string_literal(tag.as_str()),
+            None => self.typeof_return_union(),
         }
     }
 
@@ -2345,81 +2333,35 @@ impl<'db> ResolutionCtx<'db, '_> {
         ConditionalType::Unknown
     }
 
+    /// Narrows `ty` to the union variants that belong to the given `subset`.
+    ///
+    /// See [`Self::narrow_union_leaves`] for the result.
     fn filter_type_to_subset(
         &mut self,
         ty: InferredTypeData<'db>,
         subset: ConditionalSubset,
     ) -> Option<InferredTypeData<'db>> {
-        let mut types = Vec::new();
-        let mut seen = FxHashSet::default();
-        let mut pending = Vec::from([ty]);
-
-        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
-            let Some(ty) = pending.pop() else {
-                return collected_type_result(self.db, types);
+        self.narrow_union_leaves(ty, |ctx, ty| {
+            // An instance is classified by the type it is an instance of.
+            let InferredTypeData::InstanceOf(instance) = ty else {
+                return ctx.filter_action(ty, subset);
             };
-            let ty = self.resolve_inferred_type(ty);
-            if !seen.insert(ty) {
-                continue;
-            }
-
-            match self.filter_action(ty, subset) {
-                FilterAction::Mapped(ty) => types.push(ty),
-                FilterAction::Retained => match ty {
-                    InferredTypeData::InstanceOf(instance) => {
-                        let target = self.resolve_inferred_type(instance.ty(self.db));
-                        if target.should_flatten_instance(instance.type_parameters(self.db)) {
-                            pending.push(target);
-                        } else {
-                            types.push(ty);
-                        }
+            let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+            match subset {
+                ConditionalSubset::Typeof(tag) => {
+                    filter_by_typeof_tag(ctx.instance_typeof_tag(target), tag)
+                }
+                ConditionalSubset::Falsy
+                | ConditionalSubset::Truthy
+                | ConditionalSubset::NonNullish => {
+                    if ctx.instance_excluded_from_subset(target, subset) {
+                        FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
-                    InferredTypeData::Union(union) => {
-                        pending.extend(union.types(self.db).iter().rev().copied());
-                    }
-                    InferredTypeData::TypeofExpression(expression) => pending.push(
-                        self.resolve_inferred_typeof_expression(expression.expression(self.db))
-                            .unwrap_or(InferredTypeData::Unknown),
-                    ),
-                    InferredTypeData::TypeofType(ty) => pending.push(ty.ty(self.db)),
-                    InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
-                    InferredTypeData::Unknown
-                    | InferredTypeData::Global
-                    | InferredTypeData::GlobalType(_)
-                    | InferredTypeData::BigInt
-                    | InferredTypeData::Boolean
-                    | InferredTypeData::Null
-                    | InferredTypeData::Number
-                    | InferredTypeData::String
-                    | InferredTypeData::Symbol
-                    | InferredTypeData::Undefined
-                    | InferredTypeData::Conditional
-                    | InferredTypeData::Class(_)
-                    | InferredTypeData::Constructor(_)
-                    | InferredTypeData::Function(_)
-                    | InferredTypeData::Interface(_)
-                    | InferredTypeData::Module(_)
-                    | InferredTypeData::Namespace(_)
-                    | InferredTypeData::Object(_)
-                    | InferredTypeData::Tuple(_)
-                    | InferredTypeData::Generic(_)
-                    | InferredTypeData::Local(_)
-                    | InferredTypeData::Intersection(_)
-                    | InferredTypeData::TypeOperator(_)
-                    | InferredTypeData::Literal(_)
-                    | InferredTypeData::MergedReference(_)
-                    | InferredTypeData::AnyKeyword
-                    | InferredTypeData::NeverKeyword
-                    | InferredTypeData::ObjectKeyword
-                    | InferredTypeData::ThisKeyword
-                    | InferredTypeData::UnknownKeyword
-                    | InferredTypeData::VoidKeyword => types.push(ty),
-                },
-                FilterAction::Stripped => {}
+                }
             }
-        }
-
-        None
+        })
     }
 
     fn filter_action(
@@ -2431,9 +2373,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             ConditionalSubset::Falsy => match ty {
                 InferredTypeData::BigInt => FilterAction::Mapped(self.bigint_literal("0n")),
                 InferredTypeData::Boolean => FilterAction::Mapped(self.boolean_literal(false)),
-                InferredTypeData::Number => FilterAction::Mapped(self.number_literal("0")),
                 InferredTypeData::String => FilterAction::Mapped(self.string_literal("")),
-                InferredTypeData::Unknown
+                // `0` is not the only falsy number: `-0` and `NaN` are falsy
+                // too, and neither has a literal type to map to.
+                InferredTypeData::Number
+                | InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
                 | InferredTypeData::Null
@@ -2465,13 +2409,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_truthy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
@@ -2512,26 +2453,725 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::ThisKeyword
                 | InferredTypeData::UnknownKeyword
                 | InferredTypeData::VoidKeyword => {
-                    if ty
-                        .conditional_type_shallow(self.db)
-                        .is_none_or(|conditional| !conditional.is_falsy())
-                    {
-                        FilterAction::Retained
-                    } else {
+                    if self.excluded_from_subset(ty, subset) {
                         FilterAction::Stripped
+                    } else {
+                        FilterAction::Retained
                     }
                 }
             },
             ConditionalSubset::NonNullish => {
-                if ty
-                    .conditional_type_shallow(self.db)
-                    .is_none_or(|conditional| !conditional.is_nullish())
-                {
-                    FilterAction::Retained
-                } else {
+                if self.excluded_from_subset(ty, subset) {
                     FilterAction::Stripped
+                } else {
+                    FilterAction::Retained
                 }
             }
+            ConditionalSubset::Typeof(tag) => filter_by_typeof_tag(self.typeof_tag_of(ty), tag),
+        }
+    }
+
+    /// Returns the tag the `typeof` operator evaluates to for values of the
+    /// given type, or `None` if the tag cannot be determined statically.
+    fn typeof_tag_of(&self, ty: InferredTypeData<'db>) -> Option<TypeofTag> {
+        match ty {
+            InferredTypeData::BigInt => Some(TypeofTag::Bigint),
+            InferredTypeData::Boolean => Some(TypeofTag::Boolean),
+            // A class value is a constructor function at runtime.
+            InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_) => Some(TypeofTag::Function),
+            InferredTypeData::Literal(literal) => match literal.literal(self.db) {
+                InferredLiteral::BigInt(_) => Some(TypeofTag::Bigint),
+                InferredLiteral::Boolean(_) => Some(TypeofTag::Boolean),
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => Some(TypeofTag::Object),
+                InferredLiteral::Number(_) => Some(TypeofTag::Number),
+                InferredLiteral::String(_) | InferredLiteral::Template(_) => {
+                    Some(TypeofTag::String)
+                }
+            },
+            InferredTypeData::Null => Some(TypeofTag::Object),
+            InferredTypeData::Number => Some(TypeofTag::Number),
+            InferredTypeData::Interface(interface) => {
+                if is_callable_at_runtime(interface.members(self.db)) {
+                    Some(TypeofTag::Function)
+                } else if interface.extends(self.db).is_empty() {
+                    Some(TypeofTag::Object)
+                } else {
+                    // A base interface could contribute a call or construct
+                    // signature.
+                    None
+                }
+            }
+            InferredTypeData::Object(object) => {
+                if is_callable_at_runtime(object.members(self.db)) {
+                    Some(TypeofTag::Function)
+                } else {
+                    Some(TypeofTag::Object)
+                }
+            }
+            InferredTypeData::Tuple(_) => Some(TypeofTag::Object),
+            InferredTypeData::String => Some(TypeofTag::String),
+            InferredTypeData::Symbol => Some(TypeofTag::Symbol),
+            InferredTypeData::Undefined => Some(TypeofTag::Undefined),
+            // A global is classified by its definition.
+            InferredTypeData::GlobalType(_) => {
+                let expanded = ty.expand_canonical_global(self.db);
+                if matches!(expanded, InferredTypeData::GlobalType(_)) {
+                    None
+                } else {
+                    self.typeof_tag_of(expanded)
+                }
+            }
+            InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::Conditional
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::InstanceOf(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::VoidKeyword => None,
+        }
+    }
+
+    /// Narrows `ty` according to the given guard `predicate`.
+    ///
+    /// Returns `ty` unchanged if the predicate cannot make it any more
+    /// specific.
+    fn resolve_narrowed_expression(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &InferredNarrowingPredicate<'db>,
+    ) -> InferredTypeData<'db> {
+        let narrowed = match predicate {
+            InferredNarrowingPredicate::Assigned(assigned) => {
+                self.narrow_to_assigned(ty, *assigned)
+            }
+            InferredNarrowingPredicate::Falsy => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Falsy)
+            }
+            InferredNarrowingPredicate::InstanceOf(guard) => self.narrow_to_instance_of(ty, *guard),
+            InferredNarrowingPredicate::MemberEquals(predicate) => {
+                self.narrow_by_member_equals(ty, predicate)
+            }
+            InferredNarrowingPredicate::PredicateCall(predicate) => {
+                self.narrow_by_predicate_call(predicate)
+            }
+            InferredNarrowingPredicate::StringEquals(value) => {
+                self.narrow_by_string_equals(ty, value)
+            }
+            InferredNarrowingPredicate::Truthy => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Truthy)
+            }
+            InferredNarrowingPredicate::Typeof(tag) => {
+                self.filter_type_to_subset(ty, ConditionalSubset::Typeof(*tag))
+            }
+        };
+        narrowed.unwrap_or(ty)
+    }
+
+    /// Narrows a value to the type it was assigned.
+    ///
+    /// Like TypeScript, an assigned literal widens to its primitive when the
+    /// declared type `ty` admits that primitive, and stays a literal
+    /// otherwise:
+    ///
+    /// ```ts
+    /// let x: string | undefined;
+    /// x = "on";
+    /// x; // string
+    ///
+    /// let y: "a" | "b";
+    /// y = "a";
+    /// y; // "a"
+    /// ```
+    ///
+    /// Returns `None` when the assigned type resolves to `Unknown`, so the
+    /// value keeps its declared type.
+    fn narrow_to_assigned(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        assigned: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let assigned = self.resolve_inferred_type(assigned);
+        if assigned == InferredTypeData::Unknown {
+            return None;
+        }
+        let InferredTypeData::Literal(literal) = assigned else {
+            return Some(assigned);
+        };
+        let primitive = match literal.literal(self.db) {
+            InferredLiteral::BigInt(_) => InferredTypeData::BigInt,
+            InferredLiteral::Boolean(_) => InferredTypeData::Boolean,
+            InferredLiteral::Number(_) => InferredTypeData::Number,
+            InferredLiteral::String(_) | InferredLiteral::Template(_) => InferredTypeData::String,
+            InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => return Some(assigned),
+        };
+        let declared = self.collect_union_leaves(ty, |_, _| FilterAction::Retained)?;
+        let admits_primitive = declared.iter().any(|leaf| {
+            *leaf == primitive
+                || matches!(
+                    leaf,
+                    InferredTypeData::Unknown
+                        | InferredTypeData::AnyKeyword
+                        | InferredTypeData::UnknownKeyword
+                )
+        });
+        Some(if admits_primitive {
+            primitive
+        } else {
+            assigned
+        })
+    }
+
+    /// Narrows the union variants of `ty` to those the `leaf` callback
+    /// retains.
+    ///
+    /// Every guard strips a variant only when it cannot pass the test, so no
+    /// variant left means the guarded code cannot run and the value is
+    /// `never`:
+    ///
+    /// ```js
+    /// function f(x: "a" | "b") {
+    ///   if (x === "a") {
+    ///     if (x === "b") { x; } // `x` is `never`
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Returns `None` if the traversal runs out of steps.
+    fn narrow_union_leaves(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let types = self.collect_union_leaves(ty, leaf)?;
+        Some(collected_type_result(self.db, types).unwrap_or(InferredTypeData::NeverKeyword))
+    }
+
+    /// Collects the union variants of `ty` that the `leaf` callback retains.
+    /// Nested unions, `typeof` types and flattenable instances are expanded
+    /// first, so `leaf` only sees the types that stand for themselves.
+    ///
+    /// Returns `None` after [`MAX_CONDITIONAL_FILTER_STEPS`] steps, which
+    /// bounds the work on cyclic types.
+    fn collect_union_leaves(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        mut leaf: impl FnMut(&mut Self, InferredTypeData<'db>) -> FilterAction<'db>,
+    ) -> Option<Vec<InferredTypeData<'db>>> {
+        let mut types = Vec::new();
+        let mut seen = FxHashSet::default();
+        let mut pending = Vec::from([ty]);
+
+        for _ in 0..MAX_CONDITIONAL_FILTER_STEPS {
+            let Some(ty) = pending.pop() else {
+                return Some(types);
+            };
+            let ty = self.resolve_inferred_type(ty);
+            if !seen.insert(ty) {
+                continue;
+            }
+
+            if let InferredTypeData::InstanceOf(instance) = ty {
+                let target = self.resolve_inferred_type(instance.ty(self.db));
+                if target.should_flatten_instance(instance.type_parameters(self.db)) {
+                    pending.push(target);
+                    continue;
+                }
+            }
+
+            match ty {
+                InferredTypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().rev().copied());
+                }
+                InferredTypeData::TypeofExpression(expression) => pending.push(
+                    self.resolve_inferred_typeof_expression(expression.expression(self.db))
+                        .unwrap_or(InferredTypeData::Unknown),
+                ),
+                InferredTypeData::TypeofType(inner) => pending.push(inner.ty(self.db)),
+                InferredTypeData::TypeofValue(value) => pending.push(value.ty(self.db)),
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Class(_)
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => match leaf(self, ty) {
+                    FilterAction::Mapped(mapped) => types.push(mapped),
+                    FilterAction::Retained => types.push(ty),
+                    FilterAction::Stripped => {}
+                },
+            }
+        }
+
+        None
+    }
+
+    /// Narrows `ty` to the union variants whose member may strictly equal
+    /// the string of the given `predicate`.
+    ///
+    /// Only a variant whose member is a literal of a different value is
+    /// stripped.
+    fn narrow_by_member_equals(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &MemberEqualsPredicate,
+    ) -> Option<InferredTypeData<'db>> {
+        self.narrow_union_leaves(ty, |ctx, ty| {
+            if ctx.member_may_equal_string(ty, predicate) {
+                FilterAction::Retained
+            } else {
+                FilterAction::Stripped
+            }
+        })
+    }
+
+    /// Returns whether the member named by the given `predicate` may
+    /// strictly equal its string on values of type `ty`.
+    ///
+    /// Only a member that is a literal of a different value yields `false`.
+    fn member_may_equal_string(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        predicate: &MemberEqualsPredicate,
+    ) -> bool {
+        let Some(member_ty) = self.resolve_static_member_expression(ty, predicate.member.text())
+        else {
+            // We cannot tell whether the member exists, let alone its value.
+            return true;
+        };
+        let InferredTypeData::Literal(literal) = self.resolve_inferred_type(member_ty) else {
+            return true;
+        };
+        self.literal_may_equal_string(literal, predicate.value.text())
+    }
+
+    /// Returns whether a literal type may strictly equal the string `value`.
+    fn literal_may_equal_string(&self, literal: InferredInternedLiteral<'db>, value: &str) -> bool {
+        match literal.literal(self.db) {
+            // Literal types retain their escape sequences, while the guard
+            // value is unescaped; compare the unescaped values.
+            InferredLiteral::String(string) => literal_string_may_equal(string.as_str(), value),
+            // A template literal's value is not statically known.
+            InferredLiteral::Template(_) => true,
+            // A literal of another kind is never strictly equal to a string.
+            InferredLiteral::BigInt(_)
+            | InferredLiteral::Boolean(_)
+            | InferredLiteral::Number(_)
+            | InferredLiteral::Object(_)
+            | InferredLiteral::RegExp(_) => false,
+        }
+    }
+
+    /// Narrows a value passed as an argument to a call, to the type the
+    /// callee's type predicate establishes for it.
+    ///
+    /// The predicate's type replaces the declared type rather than
+    /// intersecting with it.
+    ///
+    /// Returns `None` if the callee does not turn out to be a type
+    /// predicate over the parameter in the position the value was passed
+    /// at.
+    fn narrow_by_predicate_call(
+        &mut self,
+        predicate: &InferredPredicateCallPredicate<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let callee = self.resolve_inferred_type(predicate.callee);
+        let function = callee.callable_function(self.db)?;
+        let InferredReturnType::Predicate(predicate_return) = function.return_type(self.db) else {
+            return None;
+        };
+
+        let parameters = function.parameters(self.db);
+        // A `this` parameter takes no argument position.
+        let parameters = match parameters.split_first() {
+            Some((InferredFunctionParameter::Named(first), rest)) if first.name == "this" => rest,
+            _ => parameters,
+        };
+        let parameter = parameters.get(predicate.argument_index)?;
+        let InferredFunctionParameter::Named(parameter) = parameter else {
+            return None;
+        };
+        if parameter.is_rest || parameter.name != predicate_return.parameter_name {
+            return None;
+        }
+
+        // A value satisfying the predicate is an instance of its type.
+        let target = self.resolve_inferred_type(predicate_return.ty);
+        if let InferredTypeData::InstanceOf(_) = target {
+            Some(target)
+        } else {
+            Some(InferredTypeData::instance_of(
+                self.db,
+                target,
+                Box::default(),
+            ))
+        }
+    }
+
+    /// Narrows `ty` to the union variants that may strictly equal the given
+    /// string `value`.
+    ///
+    /// Only a variant whose values are never strings is stripped.
+    fn narrow_by_string_equals(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        value: &Text,
+    ) -> Option<InferredTypeData<'db>> {
+        self.narrow_union_leaves(ty, |ctx, ty| {
+            if ctx.value_may_equal_string(ty, value) {
+                FilterAction::Retained
+            } else {
+                FilterAction::Stripped
+            }
+        })
+    }
+
+    /// Returns whether values of type `ty` may strictly equal the string
+    /// `value`.
+    ///
+    /// Only a type whose values are never strings yields `false`.
+    fn value_may_equal_string(&mut self, ty: InferredTypeData<'db>, value: &Text) -> bool {
+        match ty {
+            InferredTypeData::Literal(literal) => {
+                self.literal_may_equal_string(literal, value.text())
+            }
+            // A non-flattened instance can only be ruled out when its
+            // `typeof` tag is statically known to differ from `"string"`.
+            // An unresolvable target, such as a generic type parameter,
+            // could stand for a string, so it stays in.
+            InferredTypeData::InstanceOf(instance) => {
+                let target = self.resolve_inferred_type(instance.ty(self.db));
+                match self.instance_typeof_tag(target) {
+                    Some(tag) => tag == TypeofTag::String,
+                    None => true,
+                }
+            }
+            // Values of these types are never strings.
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::VoidKeyword => false,
+            // A string may satisfy these, or we cannot tell. Biome does not
+            // model the members of `String`, so an object-like type is never
+            // ruled out.
+            InferredTypeData::Interface(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::String
+            | InferredTypeData::Conditional
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword => true,
+        }
+    }
+
+    /// Narrows `ty` to the subset that may be an instance of the `guard`
+    /// class.
+    ///
+    /// Variants that cannot be an instance of the guard class are stripped,
+    /// and variants the guard class derives from are replaced by an instance
+    /// of the guard class itself.
+    ///
+    /// Returns `None` if the guard is not a class.
+    fn narrow_to_instance_of(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        guard: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let guard = self
+            .resolve_inferred_type(guard)
+            .expand_canonical_global(self.db);
+        let InferredTypeData::Class(guard_class) = guard else {
+            return None;
+        };
+
+        self.narrow_union_leaves(ty, |ctx, ty| match ty {
+            InferredTypeData::InstanceOf(instance) => {
+                let target = ctx.resolve_inferred_type(instance.ty(ctx.db));
+                match target.expand_canonical_global(ctx.db) {
+                    InferredTypeData::Class(target_class) => {
+                        let target_contains_guard =
+                            ctx.class_extends_chain_contains(target_class, guard_class);
+                        let guard_contains_target =
+                            ctx.class_extends_chain_contains(guard_class, target_class);
+                        match (target_contains_guard, guard_contains_target) {
+                            // The variant is at least as specific as the
+                            // guard already.
+                            (
+                                ExtendsChainLookup::Contains,
+                                ExtendsChainLookup::Contains
+                                | ExtendsChainLookup::DoesNotContain
+                                | ExtendsChainLookup::Unknown,
+                            ) => FilterAction::Retained,
+                            // The guard is more specific; downcast to it.
+                            (
+                                ExtendsChainLookup::DoesNotContain | ExtendsChainLookup::Unknown,
+                                ExtendsChainLookup::Contains,
+                            ) => FilterAction::Mapped(InferredTypeData::instance_of(
+                                ctx.db,
+                                guard,
+                                Box::default(),
+                            )),
+                            // Both chains reach their roots without meeting
+                            // the other class.
+                            (
+                                ExtendsChainLookup::DoesNotContain,
+                                ExtendsChainLookup::DoesNotContain,
+                            ) => FilterAction::Stripped,
+                            // One chain has a link we cannot resolve; keep
+                            // the variant.
+                            (ExtendsChainLookup::DoesNotContain, ExtendsChainLookup::Unknown)
+                            | (
+                                ExtendsChainLookup::Unknown,
+                                ExtendsChainLookup::DoesNotContain | ExtendsChainLookup::Unknown,
+                            ) => FilterAction::Retained,
+                        }
+                    }
+                    // We cannot reason about non-class instance targets.
+                    InferredTypeData::Unknown
+                    | InferredTypeData::Global
+                    | InferredTypeData::GlobalType(_)
+                    | InferredTypeData::BigInt
+                    | InferredTypeData::Boolean
+                    | InferredTypeData::Null
+                    | InferredTypeData::Number
+                    | InferredTypeData::String
+                    | InferredTypeData::Symbol
+                    | InferredTypeData::Undefined
+                    | InferredTypeData::Conditional
+                    | InferredTypeData::Constructor(_)
+                    | InferredTypeData::Function(_)
+                    | InferredTypeData::Interface(_)
+                    | InferredTypeData::Module(_)
+                    | InferredTypeData::Namespace(_)
+                    | InferredTypeData::Object(_)
+                    | InferredTypeData::Tuple(_)
+                    | InferredTypeData::Generic(_)
+                    | InferredTypeData::Local(_)
+                    | InferredTypeData::Intersection(_)
+                    | InferredTypeData::Union(_)
+                    | InferredTypeData::TypeOperator(_)
+                    | InferredTypeData::Literal(_)
+                    | InferredTypeData::InstanceOf(_)
+                    | InferredTypeData::MergedReference(_)
+                    | InferredTypeData::TypeofExpression(_)
+                    | InferredTypeData::TypeofType(_)
+                    | InferredTypeData::TypeofValue(_)
+                    | InferredTypeData::AnyKeyword
+                    | InferredTypeData::NeverKeyword
+                    | InferredTypeData::ObjectKeyword
+                    | InferredTypeData::ThisKeyword
+                    | InferredTypeData::UnknownKeyword
+                    | InferredTypeData::VoidKeyword => FilterAction::Retained,
+                }
+            }
+            InferredTypeData::Literal(literal) => match literal.literal(ctx.db) {
+                // Object and regular expression literals are objects.
+                InferredLiteral::Object(_) | InferredLiteral::RegExp(_) => FilterAction::Retained,
+                // Primitive literals are never class instances.
+                InferredLiteral::BigInt(_)
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Number(_)
+                | InferredLiteral::String(_)
+                | InferredLiteral::Template(_) => FilterAction::Stripped,
+            },
+            // Values of these types are never class instances.
+            InferredTypeData::BigInt
+            | InferredTypeData::Boolean
+            | InferredTypeData::Null
+            | InferredTypeData::Number
+            | InferredTypeData::String
+            | InferredTypeData::Symbol
+            | InferredTypeData::Undefined
+            | InferredTypeData::NeverKeyword
+            | InferredTypeData::VoidKeyword => FilterAction::Stripped,
+            // We cannot rule these out; keep them.
+            InferredTypeData::Unknown
+            | InferredTypeData::Global
+            | InferredTypeData::GlobalType(_)
+            | InferredTypeData::Conditional
+            | InferredTypeData::Class(_)
+            | InferredTypeData::Constructor(_)
+            | InferredTypeData::Function(_)
+            | InferredTypeData::Interface(_)
+            | InferredTypeData::Module(_)
+            | InferredTypeData::Namespace(_)
+            | InferredTypeData::Object(_)
+            | InferredTypeData::Tuple(_)
+            | InferredTypeData::Generic(_)
+            | InferredTypeData::Local(_)
+            | InferredTypeData::Intersection(_)
+            | InferredTypeData::Union(_)
+            | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::MergedReference(_)
+            | InferredTypeData::TypeofExpression(_)
+            | InferredTypeData::TypeofType(_)
+            | InferredTypeData::TypeofValue(_)
+            | InferredTypeData::AnyKeyword
+            | InferredTypeData::ObjectKeyword
+            | InferredTypeData::ThisKeyword
+            | InferredTypeData::UnknownKeyword => FilterAction::Retained,
+        })
+    }
+
+    /// Returns whether the extends chain of `class`, including `class`
+    /// itself, contains `needle`. A link that is not a class, such as a mixin
+    /// call, ends the walk with [`ExtendsChainLookup::Unknown`]; so does a
+    /// cycle, which the parser accepts.
+    fn class_extends_chain_contains(
+        &mut self,
+        class: InferredClass<'db>,
+        needle: InferredClass<'db>,
+    ) -> ExtendsChainLookup {
+        let mut current = class;
+        let mut seen = FxHashSet::default();
+        loop {
+            if current == needle {
+                return ExtendsChainLookup::Contains;
+            }
+            if !seen.insert(current) {
+                return ExtendsChainLookup::Unknown;
+            }
+            let Some(extends) = current.extends(self.db) else {
+                return ExtendsChainLookup::DoesNotContain;
+            };
+            match self
+                .resolve_inferred_type(extends)
+                .expand_canonical_global(self.db)
+            {
+                InferredTypeData::Class(parent) => current = parent,
+                InferredTypeData::Unknown
+                | InferredTypeData::Global
+                | InferredTypeData::GlobalType(_)
+                | InferredTypeData::BigInt
+                | InferredTypeData::Boolean
+                | InferredTypeData::Null
+                | InferredTypeData::Number
+                | InferredTypeData::String
+                | InferredTypeData::Symbol
+                | InferredTypeData::Undefined
+                | InferredTypeData::Conditional
+                | InferredTypeData::Constructor(_)
+                | InferredTypeData::Function(_)
+                | InferredTypeData::Interface(_)
+                | InferredTypeData::Module(_)
+                | InferredTypeData::Namespace(_)
+                | InferredTypeData::Object(_)
+                | InferredTypeData::Tuple(_)
+                | InferredTypeData::Generic(_)
+                | InferredTypeData::Local(_)
+                | InferredTypeData::Intersection(_)
+                | InferredTypeData::Union(_)
+                | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::Literal(_)
+                | InferredTypeData::InstanceOf(_)
+                | InferredTypeData::MergedReference(_)
+                | InferredTypeData::TypeofExpression(_)
+                | InferredTypeData::TypeofType(_)
+                | InferredTypeData::TypeofValue(_)
+                | InferredTypeData::AnyKeyword
+                | InferredTypeData::NeverKeyword
+                | InferredTypeData::ObjectKeyword
+                | InferredTypeData::ThisKeyword
+                | InferredTypeData::UnknownKeyword
+                | InferredTypeData::VoidKeyword => return ExtendsChainLookup::Unknown,
+            }
+        }
+    }
+
+    /// Returns whether `ty` cannot belong to `subset`, judged from its own
+    /// shallow classification.
+    fn excluded_from_subset(&self, ty: InferredTypeData<'db>, subset: ConditionalSubset) -> bool {
+        ty.conditional_type_shallow(self.db)
+            .is_some_and(|conditional| conditional_excluded_from_subset(conditional, subset))
+    }
+
+    /// Returns whether instances of the given `target` type fall outside the
+    /// given `subset`, judged from the target: instances of a class or an
+    /// interface are objects, a generic type parameter could be anything.
+    fn instance_excluded_from_subset(
+        &self,
+        target: InferredTypeData<'db>,
+        subset: ConditionalSubset,
+    ) -> bool {
+        target
+            .expand_canonical_global(self.db)
+            .conditional_type_shallow(self.db)
+            .is_some_and(|conditional| conditional_excluded_from_subset(conditional, subset))
+    }
+
+    /// Returns the tag the `typeof` operator evaluates to for instances of
+    /// the given `target` type, or `None` if the tag cannot be determined
+    /// statically.
+    fn instance_typeof_tag(&self, target: InferredTypeData<'db>) -> Option<TypeofTag> {
+        let target = target.expand_canonical_global(self.db);
+        // A class value is itself a function, but its instances are objects.
+        if matches!(target, InferredTypeData::Class(_)) {
+            Some(TypeofTag::Object)
+        } else {
+            self.typeof_tag_of(target)
         }
     }
 
@@ -2546,13 +3186,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         InferredTypeData::Literal(InferredInternedLiteral::new(
             self.db,
             InferredLiteral::Boolean(value.into()),
-        ))
-    }
-
-    fn number_literal(&self, value: &'static str) -> InferredTypeData<'db> {
-        InferredTypeData::Literal(InferredInternedLiteral::new(
-            self.db,
-            InferredLiteral::Number(NumberLiteral::new(Text::new_static(value))),
         ))
     }
 
@@ -2607,6 +3240,65 @@ fn rest_member_mode_allows(member: &InferredTypeMember<'_>, mode: RestMemberMode
         RestMemberMode::Instance => !member.kind.is_static(),
         RestMemberMode::ClassStatic => member.kind.is_static() && !member.kind.is_constructor(),
     }
+}
+
+/// Returns whether values of a type with these members are functions at
+/// runtime. Construct signatures count, since `typeof Ctor` is `"function"`
+/// for an `interface Ctor { new (): T }`.
+fn is_callable_at_runtime(members: &[InferredTypeMember<'_>]) -> bool {
+    members
+        .iter()
+        .any(|member| member.kind.is_call_signature() || member.kind.is_constructor())
+}
+
+/// Returns whether a value classified as `conditional` cannot belong to
+/// `subset`.
+///
+/// A `typeof` subset never excludes anything here: truthiness says nothing
+/// about which `typeof` tag a value has, so those variants are decided by
+/// their tag instead.
+fn conditional_excluded_from_subset(
+    conditional: ConditionalType,
+    subset: ConditionalSubset,
+) -> bool {
+    match subset {
+        ConditionalSubset::Falsy => conditional.is_truthy(),
+        ConditionalSubset::Truthy => conditional.is_falsy(),
+        ConditionalSubset::NonNullish => conditional.is_nullish(),
+        ConditionalSubset::Typeof(_) => false,
+    }
+}
+
+/// Decides a type against a `typeof` guard from the tag it is known to have.
+///
+/// A type whose tag cannot be determined statically is kept, since the guard
+/// cannot rule it out.
+fn filter_by_typeof_tag<'db>(known_tag: Option<TypeofTag>, tag: TypeofTag) -> FilterAction<'db> {
+    match known_tag {
+        Some(known_tag) if known_tag == tag => FilterAction::Retained,
+        Some(_) => FilterAction::Stripped,
+        None => FilterAction::Retained,
+    }
+}
+
+/// Returns whether a literal string with the given raw `literal` source
+/// text may strictly equal the unescaped `value`.
+///
+/// A replacement character marks a lossy unescape, such as a lone surrogate
+/// escape; equality can be neither proven nor refuted then.
+fn literal_string_may_equal(literal: &str, value: &str) -> bool {
+    let unescaped = unescape_js_string_text(literal);
+    unescaped == value || unescaped.contains('\u{fffd}') || value.contains('\u{fffd}')
+}
+
+/// Result of searching a class extends chain for a specific class.
+enum ExtendsChainLookup {
+    /// The chain contains the class.
+    Contains,
+    /// The chain was walked to its root without finding the class.
+    DoesNotContain,
+    /// The chain contains a link that could not be resolved to a class.
+    Unknown,
 }
 
 enum FilterAction<'db> {

@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: predicateGuardNarrowingValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+type SyncTask = { run: () => void };
+
+function isSyncTask(value: unknown): value is SyncTask {
+	return typeof value === "object" && value !== null && "run" in value;
+}
+
+// Narrowing must not turn `run` into a promise-returning method.
+function syncCall(value: unknown) {
+	if (isSyncTask(value)) {
+		value.run();
+	}
+}
+
+function isNumber(value: Promise<void> | number): value is number {
+	return typeof value === "number";
+}
+
+// `value` is narrowed to `number`, so the bare statement cannot be a
+// floating promise.
+function narrowedToNumber(value: Promise<void> | number) {
+	if (isNumber(value)) {
+		value;
+	}
+}
+
+declare const rest: unknown[];
+
+function isPromiseAt(first: unknown, value: unknown): value is Promise<void> {
+	return value instanceof Promise;
+}
+
+// A spread before the checked argument can shift it to another parameter,
+// so narrowing is declined and `value` keeps its declared type.
+function spreadBeforeArgument(value: unknown) {
+	if (isPromiseAt(...rest, value)) {
+		value;
+	}
+}
+
+```

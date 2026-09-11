@@ -4,9 +4,9 @@ use biome_js_syntax::{
     AnyJsTemplateElement, JsAssignmentOperator, JsAwaitExpression, JsCaseClause,
     JsDoWhileStatement, JsElseClause, JsExportDefaultExpressionClause, JsExpressionStatement,
     JsForInStatement, JsForOfStatement, JsInExpression, JsInstanceofExpression, JsLanguage,
-    JsLogicalOperator, JsModule, JsNewExpression, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsUnaryOperator, JsYieldArgument,
-    JsYieldExpression,
+    JsLogicalOperator, JsModule, JsNewExpression, JsReturnStatement, JsSyntaxNode, JsSyntaxToken,
+    JsThrowStatement, JsUnaryExpression, JsUnaryOperator, JsYieldArgument, JsYieldExpression,
+    is_non_async_function_boundary,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
 
@@ -383,7 +383,7 @@ pub fn is_in_async_function(node: &JsSyntaxNode) -> bool {
         if let Some(func) = AnyFunctionLike::cast_ref(&ancestor) {
             return func.is_async();
         }
-        if is_sync_only_function_boundary(ancestor.kind()) {
+        if is_non_async_function_boundary(ancestor.kind()) {
             return false;
         }
     }
@@ -400,7 +400,7 @@ pub fn is_await_allowed(node: &JsSyntaxNode) -> bool {
         if let Some(func) = AnyFunctionLike::cast_ref(&ancestor) {
             return func.is_async();
         }
-        if is_sync_only_function_boundary(ancestor.kind()) {
+        if is_non_async_function_boundary(ancestor.kind()) {
             return false;
         }
         if JsModule::can_cast(ancestor.kind()) {
@@ -408,24 +408,6 @@ pub fn is_await_allowed(node: &JsSyntaxNode) -> bool {
         }
     }
     false
-}
-
-/// Returns `true` if the node kind is a sync-only function boundary where
-/// `async` is never valid (getters, setters, static initialization blocks).
-fn is_sync_only_function_boundary(kind: JsSyntaxKind) -> bool {
-    matches!(
-        kind,
-        JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-            | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-            | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
-    )
-}
-
-/// Returns `true` if the node kind is any function-like scope boundary.
-pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
-    AnyFunctionLike::can_cast(kind) || is_sync_only_function_boundary(kind)
 }
 
 #[cfg(test)]

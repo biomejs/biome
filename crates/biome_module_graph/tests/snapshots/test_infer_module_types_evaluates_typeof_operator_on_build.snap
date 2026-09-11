@@ -13,8 +13,11 @@ export function readValue(): string {
 	return "value";
 }
 
+export class Service {}
+
 export const valueType = typeof value;
 export const functionType = typeof readValue;
+export const classType = typeof Service;
 export const unknownType = typeof notDeclared;
 ```
 
@@ -35,6 +38,12 @@ Binding readValue "readValue" => sync Function "readValue" {
 
 Expression "\"value\"" => string: value
 
+Binding Service "Service" => class "Service" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
 Binding valueType "valueType" => string: number
 
 Expression "typeof value" => string: number
@@ -51,6 +60,16 @@ Expression "readValue" => sync Function "readValue" {
     type_args: []
   }
   returns: string
+}
+
+Binding classType "classType" => string: function
+
+Expression "typeof Service" => string: function
+
+Expression "Service" => class "Service" {
+  extends: none
+  implements: []
+  type_args: []
 }
 
 Binding unknownType "unknownType" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined

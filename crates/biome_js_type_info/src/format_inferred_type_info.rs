@@ -5,8 +5,8 @@ use crate::interned_types::{
     InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
     InternedInterface, InternedLiteral, InternedMergedReference, InternedModule, InternedNamespace,
     InternedObject, InternedTuple, InternedTypeInstance, InternedTypeofExpression, Literal,
-    NamedFunctionParameter, PatternFunctionParameter, ReturnType, TupleElementType, TypeData,
-    TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
+    NamedFunctionParameter, NarrowingPredicate, PatternFunctionParameter, ReturnType,
+    TupleElementType, TypeData, TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{FormatContext, TransformSourceMap, format_args, write};
@@ -831,6 +831,66 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     &expr.right
                 ])]]
             ),
+            Self::Narrowed(expr) => {
+                let predicate = format_with(|f| match &expr.predicate {
+                    NarrowingPredicate::Assigned(assigned) => {
+                        write!(f, [&format_args![token("assigned"), space(), assigned]])
+                    }
+                    NarrowingPredicate::Falsy => write!(f, [token("falsy")]),
+                    NarrowingPredicate::InstanceOf(guard) => {
+                        write!(f, [&format_args![token("instanceof"), space(), guard]])
+                    }
+                    NarrowingPredicate::MemberEquals(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("."),
+                            text(predicate.member.text(), None),
+                            token(" == \""),
+                            text(predicate.value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
+                    NarrowingPredicate::PredicateCall(predicate) => write!(
+                        f,
+                        [&format_args![
+                            token("predicate"),
+                            space(),
+                            &predicate.callee,
+                            token("["),
+                            text(&predicate.argument_index.to_string(), None),
+                            token("]")
+                        ]]
+                    ),
+                    NarrowingPredicate::StringEquals(value) => write!(
+                        f,
+                        [&format_args![
+                            token("== \""),
+                            text(value.text(), None),
+                            token("\"")
+                        ]]
+                    ),
+                    NarrowingPredicate::Truthy => write!(f, [token("truthy")]),
+                    NarrowingPredicate::Typeof(tag) => write!(
+                        f,
+                        [&format_args![
+                            token("typeof == \""),
+                            text(tag.as_str(), None),
+                            token("\"")
+                        ]]
+                    ),
+                });
+                write!(
+                    f,
+                    [&format_args![
+                        token("Narrowed("),
+                        predicate,
+                        token(","),
+                        space(),
+                        &expr.ty,
+                        token(")")
+                    ]]
+                )
+            }
             Self::New(expr) => write!(
                 f,
                 [&format_args![
@@ -1142,5 +1202,88 @@ impl<'a, 'db> Format<FormatInferredTypeContext<'db>> for FmtNames<'a> {
             joiner.finish()
         });
         write!(f, [&format_args![&names]])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::interned_types::{PredicateCallPredicate, TypeofNarrowedExpression};
+    use crate::type_data::{MemberEqualsPredicate, TypeofTag};
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    fn class<'db>(db: &'db TestDb, name: &'static str) -> TypeData<'db> {
+        TypeData::Class(InternedClass::new(
+            db,
+            Box::default(),
+            None,
+            Box::default(),
+            Box::default(),
+            Some(Text::new_static(name)),
+            false,
+        ))
+    }
+
+    fn narrowed<'db>(
+        db: &'db TestDb,
+        ty: TypeData<'db>,
+        predicate: NarrowingPredicate<'db>,
+    ) -> TypeData<'db> {
+        TypeData::TypeofExpression(InternedTypeofExpression::new(
+            db,
+            TypeofExpression::Narrowed(TypeofNarrowedExpression { ty, predicate }),
+        ))
+    }
+
+    #[test]
+    fn formats_every_narrowing_predicate() {
+        let db = TestDb::default();
+        let cls = class(&db, "Cls");
+
+        let predicates = [
+            NarrowingPredicate::Assigned(TypeData::String),
+            NarrowingPredicate::Falsy,
+            NarrowingPredicate::InstanceOf(cls),
+            NarrowingPredicate::MemberEquals(Box::new(MemberEqualsPredicate {
+                member: Text::new_static("kind"),
+                value: Text::new_static("left"),
+            })),
+            NarrowingPredicate::PredicateCall(PredicateCallPredicate {
+                callee: cls,
+                argument_index: 1,
+            }),
+            NarrowingPredicate::StringEquals(Text::new_static("left")),
+            NarrowingPredicate::Truthy,
+            NarrowingPredicate::Typeof(TypeofTag::String),
+        ];
+
+        let formatted = predicates
+            .into_iter()
+            .map(|predicate| format_inferred_type(&db, narrowed(&db, TypeData::Unknown, predicate)))
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        insta::assert_snapshot!(formatted);
     }
 }

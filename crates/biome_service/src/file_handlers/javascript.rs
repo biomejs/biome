@@ -87,7 +87,9 @@ use biome_js_syntax::{
     AnyJsRoot, JsLanguage, JsSyntaxNode, JsTemplateChunkElement, TextRange, TextSize, TokenAtOffset,
 };
 #[cfg(feature = "type_inference")]
-use biome_js_type_info::{RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore};
+use biome_js_type_info::{
+    NarrowingInvalidationCache, RawTypeCollector, ScopeId, TypeData, TypeId, TypeStore,
+};
 #[cfg(feature = "js_embeds")]
 use biome_languages::CssFileSource;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
@@ -1170,10 +1172,19 @@ fn debug_registered_types(
 #[derive(Default)]
 struct DebugTypeCollector {
     types: TypeStore,
+    narrowing_invalidation_cache: NarrowingInvalidationCache,
 }
 
 #[cfg(feature = "type_inference")]
 impl RawTypeCollector for DebugTypeCollector {
+    fn narrowing_enabled(&self) -> bool {
+        biome_module_graph::TYPE_NARROWING_ENABLED
+    }
+
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache {
+        &mut self.narrowing_invalidation_cache
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }

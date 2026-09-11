@@ -1,0 +1,143 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowingInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// Deleting the guard leaves every case below reported except the last one,
+// so they catch narrowing suppressing a diagnostic rather than causing one.
+function narrowedToPromise(x: number | Promise<void>) {
+	if (typeof x === "object") {
+		x;
+	}
+}
+
+function guardedCall(x: number | (() => Promise<void>)) {
+	if (typeof x === "function") {
+		x();
+	}
+}
+
+function reversedOperands(x: number | (() => Promise<void>)) {
+	if ("function" === typeof x) {
+		x();
+	}
+}
+
+function looseEquality(x: number | (() => Promise<void>)) {
+	if (typeof x == "function") {
+		x();
+	}
+}
+
+interface AsyncFn {
+	(): Promise<void>;
+}
+
+// The one case that needs narrowing: without the guard, calling
+// `number | AsyncFn` resolves to nothing and is not reported.
+function guardedCallableInterface(f: number | AsyncFn) {
+	if (typeof f === "function") {
+		f();
+	}
+}
+
+```
+
+# Diagnostics
+```
+typeofGuardNarrowingInvalid.ts:7:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ function narrowedToPromise(x: number | Promise<void>) {
+    6 │ 	if (typeof x === "object") {
+  > 7 │ 		x;
+      │ 		^^
+    8 │ 	}
+    9 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:13:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    11 │ function guardedCall(x: number | (() => Promise<void>)) {
+    12 │ 	if (typeof x === "function") {
+  > 13 │ 		x();
+       │ 		^^^^
+    14 │ 	}
+    15 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:19:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ function reversedOperands(x: number | (() => Promise<void>)) {
+    18 │ 	if ("function" === typeof x) {
+  > 19 │ 		x();
+       │ 		^^^^
+    20 │ 	}
+    21 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:25:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    23 │ function looseEquality(x: number | (() => Promise<void>)) {
+    24 │ 	if (typeof x == "function") {
+  > 25 │ 		x();
+       │ 		^^^^
+    26 │ 	}
+    27 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+typeofGuardNarrowingInvalid.ts:37:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    35 │ function guardedCallableInterface(f: number | AsyncFn) {
+    36 │ 	if (typeof f === "function") {
+  > 37 │ 		f();
+       │ 		^^^^
+    38 │ 	}
+    39 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

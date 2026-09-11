@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: instanceClassificationInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+// The outer guard leaves `undefined`, so the inner condition is always falsy.
+function alwaysFalsyPromise(p: Promise<void> | undefined) {
+	if (!p) {
+		if (p) {
+			p;
+		}
+	}
+}
+
+interface Task {
+	run(): void;
+}
+
+function alwaysFalsyInterface(t: Task | undefined) {
+	if (!t) {
+		if (t) {
+			t;
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+instanceClassificationInvalid.ts:6:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    4 │ function alwaysFalsyPromise(p: Promise<void> | undefined) {
+    5 │ 	if (!p) {
+  > 6 │ 		if (p) {
+      │ 		    ^
+    7 │ 			p;
+    8 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+instanceClassificationInvalid.ts:18:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    16 │ function alwaysFalsyInterface(t: Task | undefined) {
+    17 │ 	if (!t) {
+  > 18 │ 		if (t) {
+       │ 		    ^
+    19 │ 			t;
+    20 │ 		}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
