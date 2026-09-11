@@ -59,3 +59,7 @@ class Example4 {
 		return this.prop3;
 	}
 }
+
+class ExampleStatic {
+	static prop = 42;
+}
