@@ -3651,6 +3651,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         let (parsed_source, parsed_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
 
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.as_ref().source_path().unwrap_or_default().as_path(),
+                        &settings.as_ref().get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
+        };
+
         let mut result = code_actions(CodeActionsParams {
             parsed_source: parsed_source.into(),
             range,
@@ -3663,7 +3678,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             skip: &skip,
             suppression_reason: None,
             enabled_rules: &enabled_rules,
-            plugins: Vec::new(),
+            plugins: plugins.clone(),
             categories,
             working_directory: Some(working_directory.as_path()),
             compute_actions,
@@ -3699,7 +3714,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 suppression_reason: None,
                 enabled_rules: &enabled_rules,
-                plugins: Vec::new(),
+                plugins: plugins.clone(),
                 categories,
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,

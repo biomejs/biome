@@ -103,10 +103,6 @@ pub struct PluginVisitor<L: Language> {
     query: SyntaxKindSet<L>,
     plugin: Arc<Box<dyn AnalyzerPlugin>>,
 
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
     /// Cached result of `applies_to_file` for the current file path.
     applies_to_file: FileApplicability,
 }
@@ -125,7 +121,6 @@ where
         Self {
             query,
             plugin,
-            skip_subtree: None,
             applies_to_file: FileApplicability::Unknown,
         }
     }
@@ -142,29 +137,9 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
 
         // TODO: Integrate to [`VisitorContext::match_query`]?
         let kind = node.kind();
@@ -230,11 +205,6 @@ pub struct BatchPluginVisitor<L: Language> {
     /// Union of all plugin queries.
     any_query: SyntaxKindSet<L>,
 
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
-
     /// Cached per-plugin results of `applies_to_file`. Populated lazily on
     /// first `WalkEvent::Enter` — the file path is constant for the entire walk.
     applicable: Option<Vec<bool>>,
@@ -264,7 +234,6 @@ where
         Self {
             plugins,
             any_query,
-            skip_subtree: None,
             applicable: None,
         }
     }
@@ -281,29 +250,9 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
 
         let kind = node.kind();
 

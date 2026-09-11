@@ -1,12 +1,12 @@
 use super::tests::{load_test_plugin_from_source, render_diagnostics, services, snap_diagnostics};
 use super::*;
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never};
-use biome_diagnostics::PrintDescription;
+use biome_diagnostics::{Diagnostic, PrintDescription};
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_semantic::{SemanticModel, SemanticModelOptions, semantic_model};
 use biome_js_syntax::JsSyntaxKind;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange, TextSize};
 use serde_json::{Value, json};
 
 fn native_summary(model: &SemanticModel) -> Value {
@@ -299,6 +299,59 @@ fn semantic_rules_use_the_supplied_model_and_syntax_rules_keep_their_context() {
         plugin_source,
         &[("/file.js", "let value = 1; value;")],
         rendered,
+    );
+}
+
+#[test]
+fn analysis_range_filters_plugin_diagnostics_not_queries() {
+    let plugin_source = r#"import { defineRule, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
+        export const reportDeclaration = defineRule({
+            query: semantic("JS_REFERENCE_IDENTIFIER"),
+            run(node, { model }) {
+                const binding = model.binding(node);
+                registerDiagnostic(binding.syntax(), "information", "declaration");
+                registerDiagnostic(node, "information", "reference");
+            },
+        });"#;
+    let plugin = load_test_plugin_from_source("/plugin.js", plugin_source, None);
+    let source_type = JsFileSource::js_module();
+    let parsed = parse(
+        "let value = 1;\nvalue;",
+        source_type,
+        JsParserOptions::default(),
+    );
+    let model = semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type));
+    let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> = vec![Arc::new(Box::new(plugin))];
+    let declaration_range = TextRange::new(TextSize::from(4), TextSize::from(9));
+    let mut emitted = Vec::new();
+
+    let (_, diagnostics) = biome_js_analyze::analyze(
+        &parsed.tree(),
+        AnalysisFilter {
+            enabled_rules: Some(&[]),
+            range: Some(declaration_range),
+            ..AnalysisFilter::default()
+        },
+        &AnalyzerOptions::default(),
+        &plugins,
+        JsAnalyzerServices::default()
+            .with_source_type(source_type)
+            .with_semantic_model(&model),
+        |signal| {
+            if let Some(diagnostic) = signal.diagnostic() {
+                emitted.push((
+                    PrintDescription(&diagnostic).to_string(),
+                    diagnostic.location().span,
+                ));
+            }
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
+    assert_eq!(
+        emitted,
+        [(String::from("declaration"), Some(declaration_range))]
     );
 }
 
