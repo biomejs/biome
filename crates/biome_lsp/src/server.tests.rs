@@ -2692,6 +2692,131 @@ export { describe, test, z };
 }
 
 #[tokio::test]
+async fn organize_imports_embedded_offsets_issue_8177() -> Result<()> {
+    let imports = "import { ref } from 'vue'
+import { useMagicKeys } from '@vueuse/core'
+import { useRemoteModel } from '~/models/remote-model'
+import { useLogModel } from '~/models/log-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    let sorted = "import { useMagicKeys } from '@vueuse/core'
+import { ref } from 'vue'
+import { useLogModel } from '~/models/log-model'
+import { useRemoteModel } from '~/models/remote-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    for (uri, language, prefix, suffix) in [
+        (
+            uri!("document.vue"),
+            "vue",
+            "<template>\n    <v-app-bar>\n        \n    </v-app-bar>\n</template>\n\n<script setup lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (
+            uri!("document.svelte"),
+            "svelte",
+            "<div>é</div>\n<script lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (uri!("document.astro"), "astro", "---\n", "---\n<div />\n"),
+    ] {
+        for full_support in [false, true] {
+            for resolve in [false, true] {
+                let fs = MemoryFileSystem::default();
+                fs.insert(
+                    to_utf8_file_path_buf(uri!("biome.json")),
+                    serde_json::json!({
+                        "linter": { "enabled": false },
+                        "html": { "experimentalFullSupportEnabled": full_support }
+                    })
+                    .to_string(),
+                );
+                let factory = ServerFactory::new_with_fs(Arc::new(fs));
+                let (service, client) = factory.create().into_inner();
+                let (stream, sink) = client.split();
+                let mut server = Server::new(service);
+                let (sender, _receiver) = channel(CHANNEL_BUFFER_SIZE);
+                let reader = tokio::spawn(client_handler(stream, sink, sender));
+                if resolve {
+                    server.initialize_with_resolve_support().await?;
+                } else {
+                    server.initialize().await?;
+                }
+                server.initialized().await?;
+                let input = format!("{prefix}{imports}{suffix}");
+                server
+                    .open_named_document(&input, uri.clone(), language)
+                    .await?;
+                let actions: CodeActionResponse = server
+                    .request(
+                        "textDocument/codeAction",
+                        "code_actions",
+                        CodeActionParams {
+                            text_document: TextDocumentIdentifier { uri: uri.clone() },
+                            range: Range::new(
+                                Position::default(),
+                                Position::new(input.lines().count() as u32, 0),
+                            ),
+                            context: CodeActionContext {
+                                diagnostics: vec![],
+                                only: Some(vec![CodeActionKind::new(
+                                    "source.organizeImports.biome",
+                                )]),
+                                trigger_kind: None,
+                            },
+                            work_done_progress_params: Default::default(),
+                            partial_result_params: Default::default(),
+                        },
+                    )
+                    .await?
+                    .context("codeAction returned None")?;
+                assert_eq!(
+                    actions.len(),
+                    1,
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                let CodeActionOrCommand::CodeAction(mut action) =
+                    actions.into_iter().next().unwrap()
+                else {
+                    panic!("Expected a code action");
+                };
+                if resolve {
+                    assert!(action.edit.is_none());
+                    action = server
+                        .request("codeAction/resolve", "resolve_code_action", action)
+                        .await?
+                        .context("codeAction/resolve returned None")?;
+                }
+                let edits = action.edit.unwrap().changes.unwrap().remove(&uri).unwrap();
+                assert!(!edits.is_empty());
+                let changes = edits
+                    .into_iter()
+                    .rev()
+                    .map(|edit| TextDocumentContentChangeEvent {
+                        range: Some(edit.range),
+                        range_length: None,
+                        text: edit.new_text,
+                    })
+                    .collect();
+                let output = crate::utils::apply_document_changes(
+                    biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+                    input,
+                    changes,
+                );
+                assert_eq!(
+                    output,
+                    format!("{prefix}{sorted}{suffix}"),
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                server.shutdown().await?;
+                reader.abort();
+            }
+        }
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{

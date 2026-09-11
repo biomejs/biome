@@ -3684,6 +3684,18 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             compute_actions,
         });
 
+        // TODO: remove this once legacy HTML-ish support is removed
+        if let Some(offset) = self
+            .documents
+            .pin()
+            .get(path.as_path())
+            .and_then(|document| Self::legacy_diagnostic_offset(&path, language, &document.content))
+        {
+            for action in &mut result.actions {
+                action.offset.get_or_insert(TextSize::from(offset));
+            }
+        }
+
         for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
             &parsed_source.into(),
             language,
