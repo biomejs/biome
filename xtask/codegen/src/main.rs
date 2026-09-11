@@ -10,6 +10,8 @@ mod generate_css_keywords;
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
+#[cfg(feature = "configuration")]
+mod generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 mod generate_module_replacements;
 mod move_rule;
@@ -29,6 +31,8 @@ use crate::generate_css_keywords::generate_css_keywords;
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
+#[cfg(feature = "configuration")]
+use crate::generate_migrate_stylelint::generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 use crate::generate_module_replacements::generate_module_replacements;
 use crate::move_rule::move_rule;
@@ -64,6 +68,10 @@ fn main() -> Result<()> {
         TaskCommand::MigrateEslint => {
             #[cfg(feature = "configuration")]
             generate_migrate_eslint(Overwrite)?;
+        }
+        TaskCommand::MigrateStylelint => {
+            #[cfg(feature = "configuration")]
+            generate_migrate_stylelint(Overwrite)?;
         }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]

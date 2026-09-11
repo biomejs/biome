@@ -76,5 +76,7 @@ Available commands:
                               configuration.
     eslint                    Imports an ESLint configuration and ignore settings from the current
                               working directory into the Biome configuration.
+    stylelint                 Imports a Stylelint configuration and ignore settings from the current
+                              working directory into the Biome configuration.
 
 ```

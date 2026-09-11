@@ -71,9 +71,10 @@ gen-module-replacements:
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
 
-# Generates code for eslint migration
+# Generates code for eslint and stylelint migration
 gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo run -p xtask_codegen --features configuration -- migrate-stylelint
 
 # Generates the initial files for all formatter crates
 gen-formatter *args='':

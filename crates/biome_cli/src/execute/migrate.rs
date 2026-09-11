@@ -38,6 +38,10 @@ mod eslint_unicorn;
 mod ignorefile;
 mod node;
 mod prettier;
+mod stylelint;
+mod stylelint_any_rule_to_biome;
+mod stylelint_stylelint;
+mod stylelint_to_biome;
 mod unsupported_rules;
 
 pub(crate) struct MigratePayload<'a> {
@@ -363,6 +367,91 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 let path = working_directory.join(eslint_path);
                 let path = path.canonicalize_utf8().unwrap_or(path);
                 results.eslint_path = Some(path.to_string().into());
+            }
+            results.write = write;
+            console.log(markup! {{PrintDiagnostic::simple(&results)}});
+            Ok(result)
+        }
+        Some(MigrateSubCommand::Stylelint {
+            include_inspired,
+            include_nursery,
+        }) => {
+            let stylelint::Config {
+                path: stylelint_path,
+                data: stylelint_config,
+            } = stylelint::read_stylelint_config(fs, console)?;
+            let biome_config =
+                deserialize_from_json_ast::<Configuration>(&parsed.tree(), "").into_deserialized();
+            let Some(mut biome_config) = biome_config else {
+                return Ok(MigrationFileResult::HasErrors);
+            };
+            let old_biome_config = biome_config.clone();
+            let (updated_biome_config, mut results) =
+                stylelint_to_biome::merge_biome_config_with_stylelint(
+                    biome_config,
+                    stylelint_config,
+                    &stylelint_to_biome::MigrationOptions {
+                        include_inspired: *include_inspired,
+                        include_nursery: *include_nursery,
+                    },
+                );
+            biome_config = updated_biome_config;
+            if let Ok(ignore_patterns) = ignorefile::read_ignore_file(fs, stylelint::IGNORE_FILE) {
+                if !ignore_patterns.patterns.is_empty() {
+                    biome_config
+                        .linter
+                        .get_or_insert(Default::default())
+                        .includes
+                        .get_or_insert(Default::default())
+                        .extend(ignore_patterns.patterns);
+                }
+                if write && biome_config != old_biome_config {
+                    console.log(markup!{
+                        <Info><Emphasis>{stylelint::IGNORE_FILE}</Emphasis>" has been successfully migrated."</Info>
+                    });
+                }
+            }
+            let result = if biome_config == old_biome_config {
+                MigrationFileResult::NoMigrationNeeded
+            } else {
+                let new_content = serde_json::to_string(&biome_config).map_err(|err| {
+                    CliDiagnostic::MigrateError(MigrationDiagnostic {
+                        reason: err.to_string(),
+                    })
+                })?;
+                workspace.change_file(ChangeFileParams {
+                    project_key,
+                    path: biome_path.clone(),
+                    content: new_content,
+                    version: 1,
+                    inline_config: None,
+                    editor_features: None,
+                })?;
+                let printed = workspace.format_file(FormatFileParams {
+                    project_key,
+                    path: biome_path,
+                    inline_config: None,
+                })?;
+                if write {
+                    biome_config_file.set_content(printed.as_code().as_bytes())?;
+                    MigrationFileResult::Migrated
+                } else {
+                    let file_name = configuration_file_path.to_string();
+                    let diagnostic = MigrateDiffDiagnostic {
+                        file_name,
+                        diff: ContentDiffAdvice {
+                            old: biome_config_content,
+                            new: printed.as_code().to_string(),
+                        },
+                    };
+                    console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
+                    MigrationFileResult::NeedsMigration
+                }
+            };
+            if let Some(working_directory) = fs.working_directory() {
+                let path = working_directory.join(stylelint_path);
+                let path = path.canonicalize_utf8().unwrap_or(path);
+                results.stylelint_path = Some(path.to_string().into());
             }
             results.write = write;
             console.log(markup! {{PrintDiagnostic::simple(&results)}});

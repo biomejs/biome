@@ -953,7 +953,7 @@ fn migrate_eslint_rule(
     }
 }
 
-fn to_biome_includes(
+pub(crate) fn to_biome_includes(
     files: &[impl AsRef<str>],
     ignores: &[impl AsRef<str>],
 ) -> Vec<biome_glob::NormalizedGlob> {

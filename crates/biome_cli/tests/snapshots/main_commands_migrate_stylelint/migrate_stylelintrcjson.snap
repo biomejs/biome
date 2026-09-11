@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "block-no-empty": true,
+            "color-no-hex": true,
+            "no-descending-specificity": null,
+            "unit-no-unknown": [true, { "severity": "warning" }],
+            "indentation": 2,
+            "unknown-stylelint-rule": true
+        },
+        "ignoreFiles": ["dist/**"]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "correctness":·{·"noUnknownUnit":·"warn"·},
+       7 │ + → → → "style":·{·"noHexColors":·"error"·},
+       8 │ + → → → "suspicious":·{·"noEmptyBlock":·"error"·}
+       9 │ + → → },
+      10 │ + → → "includes":·["**",·"!dist/**"]
+      11 │ + → }
+      12 │ + }
+      13 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 5 Stylelint rules found
+    - 3 can be migrated to Biome's rules (run with --write to migrate)
+    - 60% (3) of your Stylelint rules are fully covered by Biome
+      - 60% (3) via direct migration to Biome rules
+  
+  
+  i Rules that can be migrated:
+  
+  - block-no-empty
+  - color-no-hex
+  - unit-no-unknown
+  
+  i These rules don't have an equivalent Biome rule yet:
+  
+  - indentation
+  - unknown-stylelint-rule
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```
