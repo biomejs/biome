@@ -2062,7 +2062,8 @@ TsTypeList = (TsReferenceType (',' TsReferenceType)*)
 TsTypeMemberList = AnyTsTypeMember*
 
 AnyTsTypeMember =
-	TsCallSignatureTypeMember
+	JsMetavariable
+	| TsCallSignatureTypeMember
 	| TsPropertySignatureTypeMember
 	| TsConstructSignatureTypeMember
 	| TsMethodSignatureTypeMember

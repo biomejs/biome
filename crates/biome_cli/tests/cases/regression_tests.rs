@@ -314,6 +314,67 @@ import { ButtonLink } from "other/components";
 }
 
 #[test]
+fn issue_7363() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["interface.grit"],
+    "formatter": {
+        "enabled": false
+    },
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "interface.grit".into(),
+        br#"`interface $name { $body }` where {
+    register_diagnostic(span=$name, severity="warn", message="found interface")
+}
+"#,
+    );
+
+    let ts_file = Utf8Path::new("interface.ts");
+    fs.insert(
+        ts_file.into(),
+        br#"interface Zero {}
+
+interface Single {
+    f1: string;
+}
+
+interface Multi {
+    id: number;
+    name: string;
+    email: string;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", ts_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7363",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn issue_6782() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

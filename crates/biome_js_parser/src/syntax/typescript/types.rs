@@ -1215,7 +1215,11 @@ impl ParseNodeList for TypeMembers {
     const LIST_KIND: Self::Kind = TS_TYPE_MEMBER_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
-        parse_ts_type_member(p, self.context)
+        if p.cur().is_metavariable() {
+            parse_metavariable(p)
+        } else {
+            parse_ts_type_member(p, self.context)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {

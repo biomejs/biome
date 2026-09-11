@@ -1339,6 +1339,7 @@ fn selector_from_object_member(member: &AnyJsObjectMember) -> Option<Selector> {
 fn selector_from_type_member(member: &AnyTsTypeMember) -> Option<Selector> {
     match member {
         AnyTsTypeMember::JsBogusMember(_)
+        | AnyTsTypeMember::JsMetavariable(_)
         | AnyTsTypeMember::TsCallSignatureTypeMember(_)
         | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
         AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
