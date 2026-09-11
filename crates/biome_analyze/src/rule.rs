@@ -526,6 +526,21 @@ impl<'a> RuleSource<'a> {
         (self.to_rule_url(), self.as_rule_name())
     }
 
+    /// Whether this source is one of the [eslint-react.xyz](https://eslint-react.xyz/)
+    /// subset plugins (react-x, react-dom, react-jsx, react-rsc, react-naming-convention)
+    /// that the umbrella `@eslint-react/eslint-plugin` plugin ([`Self::EslintReactXyz`])
+    /// re-exports.
+    pub const fn is_eslint_react_xyz_subset(&self) -> bool {
+        matches!(
+            self,
+            Self::EslintReactX(_)
+                | Self::EslintReactJsx(_)
+                | Self::EslintReactDom(_)
+                | Self::EslintReactRsc(_)
+                | Self::EslintReactNamingConvention(_)
+        )
+    }
+
     /// Original ESLint rule
     pub const fn is_eslint(&self) -> bool {
         matches!(self, Self::Eslint(_))
