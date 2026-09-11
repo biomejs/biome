@@ -11,7 +11,7 @@ var foo = 0 + 1 + -4 + 4;
 var foo = 0 + 1 + 5;
 
 console.log(0x1A + 0x02);
-console.log(071);
+console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
 
 var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
 function getSecondsInMinute() {return 60;}
@@ -31,15 +31,36 @@ function callLater(func) {
 
 var a = <div arrayProp={[1,2,3]}></div>;
 
+function getMillisecondsSinceStart() {
+	return getSecondsInDay() * 1000;
+}
 
+function schedule(work) {
+	setTimeout(work, 100);
+}
+
+const existing = 1;
+function usesFallback(value) {
+	return value + 31;
+}
+
+const numericKeys = {};
+numericKeys[7] = 31;
+
+const bigintTotal = bigintValue + 123n;
+const commented = value + /* keep */ 37;
+
+const assertedNumber = (31 as const) + value;
+const mixedAssertions = [31 as const, 31];
+const nestedAssertion = ((31 as const) as number) + value;
+
+type NumericLiteral = 31;
 
 ```
-
-_Note: The parser emitted 1 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid.tsx:1:15 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:1:15 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -50,11 +71,19 @@ invalid.tsx:1:15 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into FOO_31.
+  
+     1    │ - var·foo·=·0·+·31;
+        1 │ + const·FOO_31·=·31;
+        2 │ + var·foo·=·0·+·FOO_31;
+     2  3 │   a = a + 5;
+     3  4 │   a += 5;
+  
 
 ```
 
 ```
-invalid.tsx:2:9 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:2:9 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -66,11 +95,20 @@ invalid.tsx:2:9 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into NUMBER_5.
+  
+        1 │ + const·NUMBER_5·=·5;
+     1  2 │   var foo = 0 + 31;
+     2    │ - a·=·a·+·5;
+        3 │ + a·=·a·+·NUMBER_5;
+     3  4 │   a += 5;
+     4  5 │   var foo = 0 + 1 + -4 + 4;
+  
 
 ```
 
 ```
-invalid.tsx:3:6 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:3:6 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -83,11 +121,21 @@ invalid.tsx:3:6 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into NUMBER_5.
+  
+        1 │ + const·NUMBER_5·=·5;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+     3    │ - a·+=·5;
+        4 │ + a·+=·NUMBER_5;
+     4  5 │   var foo = 0 + 1 + -4 + 4;
+     5  6 │   var foo = 0 + 1 + 5;
+  
 
 ```
 
 ```
-invalid.tsx:4:20 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:4:20 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -100,11 +148,22 @@ invalid.tsx:4:20 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into FOO_4.
+  
+        1 │ + const·FOO_4·=·4;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+     3  4 │   a += 5;
+     4    │ - var·foo·=·0·+·1·+·-4·+·4;
+        5 │ + var·foo·=·0·+·1·+·-FOO_4·+·4;
+     5  6 │   var foo = 0 + 1 + 5;
+     6  7 │   
+  
 
 ```
 
 ```
-invalid.tsx:4:24 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:4:24 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -117,11 +176,22 @@ invalid.tsx:4:24 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into FOO_4.
+  
+        1 │ + const·FOO_4·=·4;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+     3  4 │   a += 5;
+     4    │ - var·foo·=·0·+·1·+·-4·+·4;
+        5 │ + var·foo·=·0·+·1·+·-4·+·FOO_4;
+     5  6 │   var foo = 0 + 1 + 5;
+     6  7 │   
+  
 
 ```
 
 ```
-invalid.tsx:5:19 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:5:19 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -134,11 +204,23 @@ invalid.tsx:5:19 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into NUMBER_5.
+  
+        1 │ + const·NUMBER_5·=·5;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+     3  4 │   a += 5;
+     4  5 │   var foo = 0 + 1 + -4 + 4;
+     5    │ - var·foo·=·0·+·1·+·5;
+        6 │ + var·foo·=·0·+·1·+·NUMBER_5;
+     6  7 │   
+     7  8 │   console.log(0x1A + 0x02);
+  
 
 ```
 
 ```
-invalid.tsx:7:13 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:7:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -146,16 +228,29 @@ invalid.tsx:7:13 lint/style/noMagicNumbers ━━━━━━━━━━━━�
     6 │ 
   > 7 │ console.log(0x1A + 0x02);
       │             ^^^^
-    8 │ console.log(071);
+    8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
     9 │ 
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into LOG_0X1A.
+  
+        1 │ + const·LOG_0X1A·=·0x1A;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     5  6 │   var foo = 0 + 1 + 5;
+     6  7 │   
+     7    │ - console.log(0x1A·+·0x02);
+        8 │ + console.log(LOG_0X1A·+·0x02);
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+  
 
 ```
 
 ```
-invalid.tsx:7:20 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:7:20 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -163,36 +258,62 @@ invalid.tsx:7:20 lint/style/noMagicNumbers ━━━━━━━━━━━━�
     6 │ 
   > 7 │ console.log(0x1A + 0x02);
       │                    ^^^^
-    8 │ console.log(071);
+    8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
     9 │ 
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into LOG_0X02.
+  
+        1 │ + const·LOG_0X02·=·0x02;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     5  6 │   var foo = 0 + 1 + 5;
+     6  7 │   
+     7    │ - console.log(0x1A·+·0x02);
+        8 │ + console.log(0x1A·+·LOG_0X02);
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+  
 
 ```
 
 ```
-invalid.tsx:8:13 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:8:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
      7 │ console.log(0x1A + 0x02);
-   > 8 │ console.log(071);
-       │             ^^^
+   > 8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+       │             ^^^^
      9 │ 
     10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into LOG_0O71.
+  
+        1 │ + const·LOG_0O71·=·0o71;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     6  7 │   
+     7  8 │   console.log(0x1A + 0x02);
+     8    │ - console.log(0o71);·//·Equivalent·to·the·legacy-octal·071·case;·kept·parseable·for·action·validation.
+        9 │ + console.log(LOG_0O71);·//·Equivalent·to·the·legacy-octal·071·case;·kept·parseable·for·action·validation.
+     9 10 │   
+    10 11 │   var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
+  
 
 ```
 
 ```
-invalid.tsx:10:31 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:10:31 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
-     8 │ console.log(071);
+     8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
      9 │ 
   > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
        │                               ^
@@ -201,15 +322,28 @@ invalid.tsx:10:31 lint/style/noMagicNumbers ━━━━━━━━━━━━
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into RED_3.
+  
+        1 │ + const·RED_3·=·3;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+    10    │ - var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·5;
+       11 │ + var·colors·=·{};·colors.RED·=·RED_3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·5;
+    11 12 │   function getSecondsInMinute() {return 60;}
+    12 13 │   function getNegativeSecondsInMinute() {return -60;}
+  
 
 ```
 
 ```
-invalid.tsx:10:50 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:10:50 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
-     8 │ console.log(071);
+     8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
      9 │ 
   > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
        │                                                  ^
@@ -218,15 +352,28 @@ invalid.tsx:10:50 lint/style/noMagicNumbers ━━━━━━━━━━━━
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into FOO_4.
+  
+        1 │ + const·FOO_4·=·4;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+    10    │ - var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·5;
+       11 │ + var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·FOO_4;·colors.BLUE·=·4·+·5;
+    11 12 │   function getSecondsInMinute() {return 60;}
+    12 13 │   function getNegativeSecondsInMinute() {return -60;}
+  
 
 ```
 
 ```
-invalid.tsx:10:67 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:10:67 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
-     8 │ console.log(071);
+     8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
      9 │ 
   > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
        │                                                                   ^
@@ -235,15 +382,28 @@ invalid.tsx:10:67 lint/style/noMagicNumbers ━━━━━━━━━━━━
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into FOO_4.
+  
+        1 │ + const·FOO_4·=·4;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+    10    │ - var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·5;
+       11 │ + var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·FOO_4·+·5;
+    11 12 │   function getSecondsInMinute() {return 60;}
+    12 13 │   function getNegativeSecondsInMinute() {return -60;}
+  
 
 ```
 
 ```
-invalid.tsx:10:71 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:10:71 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
-     8 │ console.log(071);
+     8 │ console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
      9 │ 
   > 10 │ var colors = {}; colors.RED = 3; colors.YELLOW = 4; colors.BLUE = 4 + 5;
        │                                                                       ^
@@ -252,11 +412,24 @@ invalid.tsx:10:71 lint/style/noMagicNumbers ━━━━━━━━━━━━
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into NUMBER_5.
+  
+        1 │ + const·NUMBER_5·=·5;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+     8  9 │   console.log(0o71); // Equivalent to the legacy-octal 071 case; kept parseable for action validation.
+     9 10 │   
+    10    │ - var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·5;
+       11 │ + var·colors·=·{};·colors.RED·=·3;·colors.YELLOW·=·4;·colors.BLUE·=·4·+·NUMBER_5;
+    11 12 │   function getSecondsInMinute() {return 60;}
+    12 13 │   function getNegativeSecondsInMinute() {return -60;}
+  
 
 ```
 
 ```
-invalid.tsx:19:4 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:19:4 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -269,11 +442,24 @@ invalid.tsx:19:4 lint/style/noMagicNumbers ━━━━━━━━━━━━�
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into GET_MILLISECONDS_IN_DAY_1000.
+  
+        1 │ + const·GET_MILLISECONDS_IN_DAY_1000·=·1000;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    17 18 │   function getMillisecondsInDay() {
+    18 19 │     return (getSecondsInDay() *
+    19    │ - → → (1000)
+       20 │ + → → (GET_MILLISECONDS_IN_DAY_1000)
+    20 21 │     );
+    21 22 │   }
+  
 
 ```
 
 ```
-invalid.tsx:23:19 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:23:19 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -286,11 +472,24 @@ invalid.tsx:23:19 lint/style/noMagicNumbers ━━━━━━━━━━━━
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   
+  i Unsafe fix: Extract the magic number into CALL_LATER_SET_TIMEOUT_100.
+  
+        1 │ + const·CALL_LATER_SET_TIMEOUT_100·=·100;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    21 22 │   }
+    22 23 │   function callLater(func) {
+    23    │ - → setTimeout(func,·100);
+       24 │ + → setTimeout(func,·CALL_LATER_SET_TIMEOUT_100);
+    24 25 │   }
+    25 26 │   
+  
 
 ```
 
 ```
-invalid.tsx:26:30 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:26:30 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Magic number detected. Extract it to a constant with a meaningful name.
   
@@ -299,6 +498,291 @@ invalid.tsx:26:30 lint/style/noMagicNumbers ━━━━━━━━━━━━
   > 26 │ var a = <div arrayProp={[1,2,3]}></div>;
        │                              ^
     27 │ 
+    28 │ function getMillisecondsSinceStart() {
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into RED_3.
+  
+        1 │ + const·RED_3·=·3;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    24 25 │   }
+    25 26 │   
+    26    │ - var·a·=·<div·arrayProp={[1,2,3]}></div>;
+       27 │ + var·a·=·<div·arrayProp={[1,2,RED_3]}></div>;
+    27 28 │   
+    28 29 │   function getMillisecondsSinceStart() {
+  
+
+```
+
+```
+invalid.tsx:29:29 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    28 │ function getMillisecondsSinceStart() {
+  > 29 │ 	return getSecondsInDay() * 1000;
+       │ 	                           ^^^^
+    30 │ }
+    31 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into GET_MILLISECONDS_IN_DAY_1000.
+  
+        1 │ + const·GET_MILLISECONDS_IN_DAY_1000·=·1000;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    27 28 │   
+    28 29 │   function getMillisecondsSinceStart() {
+    29    │ - → return·getSecondsInDay()·*·1000;
+       30 │ + → return·getSecondsInDay()·*·GET_MILLISECONDS_IN_DAY_1000;
+    30 31 │   }
+    31 32 │   
+  
+
+```
+
+```
+invalid.tsx:33:19 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    32 │ function schedule(work) {
+  > 33 │ 	setTimeout(work, 100);
+       │ 	                 ^^^
+    34 │ }
+    35 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into CALL_LATER_SET_TIMEOUT_100.
+  
+        1 │ + const·CALL_LATER_SET_TIMEOUT_100·=·100;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    31 32 │   
+    32 33 │   function schedule(work) {
+    33    │ - → setTimeout(work,·100);
+       34 │ + → setTimeout(work,·CALL_LATER_SET_TIMEOUT_100);
+    34 35 │   }
+    35 36 │   
+  
+
+```
+
+```
+invalid.tsx:38:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    36 │ const existing = 1;
+    37 │ function usesFallback(value) {
+  > 38 │ 	return value + 31;
+       │ 	               ^^
+    39 │ }
+    40 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into FOO_31.
+  
+        1 │ + const·FOO_31·=·31;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    36 37 │   const existing = 1;
+    37 38 │   function usesFallback(value) {
+    38    │ - → return·value·+·31;
+       39 │ + → return·value·+·FOO_31;
+    39 40 │   }
+    40 41 │   
+  
+
+```
+
+```
+invalid.tsx:42:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    41 │ const numericKeys = {};
+  > 42 │ numericKeys[7] = 31;
+       │                  ^^
+    43 │ 
+    44 │ const bigintTotal = bigintValue + 123n;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into FOO_31.
+  
+        1 │ + const·FOO_31·=·31;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    40 41 │   
+    41 42 │   const numericKeys = {};
+    42    │ - numericKeys[7]·=·31;
+       43 │ + numericKeys[7]·=·FOO_31;
+    43 44 │   
+    44 45 │   const bigintTotal = bigintValue + 123n;
+  
+
+```
+
+```
+invalid.tsx:44:35 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    42 │ numericKeys[7] = 31;
+    43 │ 
+  > 44 │ const bigintTotal = bigintValue + 123n;
+       │                                   ^^^^
+    45 │ const commented = value + /* keep */ 37;
+    46 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into BIGINT_TOTAL_123N.
+  
+        1 │ + const·BIGINT_TOTAL_123N·=·123n;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    42 43 │   numericKeys[7] = 31;
+    43 44 │   
+    44    │ - const·bigintTotal·=·bigintValue·+·123n;
+       45 │ + const·bigintTotal·=·bigintValue·+·BIGINT_TOTAL_123N;
+    45 46 │   const commented = value + /* keep */ 37;
+    46 47 │   
+  
+
+```
+
+```
+invalid.tsx:45:38 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    44 │ const bigintTotal = bigintValue + 123n;
+  > 45 │ const commented = value + /* keep */ 37;
+       │                                      ^^
+    46 │ 
+    47 │ const assertedNumber = (31 as const) + value;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into COMMENTED_37.
+  
+        1 │ + const·COMMENTED_37·=·37;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    43 44 │   
+    44 45 │   const bigintTotal = bigintValue + 123n;
+    45    │ - const·commented·=·value·+·/*·keep·*/·37;
+       46 │ + const·commented·=·value·+·/*·keep·*/·COMMENTED_37;
+    46 47 │   
+    47 48 │   const assertedNumber = (31 as const) + value;
+  
+
+```
+
+```
+invalid.tsx:47:25 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    45 │ const commented = value + /* keep */ 37;
+    46 │ 
+  > 47 │ const assertedNumber = (31 as const) + value;
+       │                         ^^
+    48 │ const mixedAssertions = [31 as const, 31];
+    49 │ const nestedAssertion = ((31 as const) as number) + value;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:48:26 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    47 │ const assertedNumber = (31 as const) + value;
+  > 48 │ const mixedAssertions = [31 as const, 31];
+       │                          ^^
+    49 │ const nestedAssertion = ((31 as const) as number) + value;
+    50 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:48:39 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    47 │ const assertedNumber = (31 as const) + value;
+  > 48 │ const mixedAssertions = [31 as const, 31];
+       │                                       ^^
+    49 │ const nestedAssertion = ((31 as const) as number) + value;
+    50 │ 
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+  i Unsafe fix: Extract the magic number into FOO_31.
+  
+        1 │ + const·FOO_31·=·31;
+     1  2 │   var foo = 0 + 31;
+     2  3 │   a = a + 5;
+    ····· │ 
+    46 47 │   
+    47 48 │   const assertedNumber = (31 as const) + value;
+    48    │ - const·mixedAssertions·=·[31·as·const,·31];
+       49 │ + const·mixedAssertions·=·[31·as·const,·FOO_31];
+    49 50 │   const nestedAssertion = ((31 as const) as number) + value;
+    50 51 │   
+  
+
+```
+
+```
+invalid.tsx:49:27 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    47 │ const assertedNumber = (31 as const) + value;
+    48 │ const mixedAssertions = [31 as const, 31];
+  > 49 │ const nestedAssertion = ((31 as const) as number) + value;
+       │                           ^^
+    50 │ 
+    51 │ type NumericLiteral = 31;
+  
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+  
+
+```
+
+```
+invalid.tsx:51:23 lint/style/noMagicNumbers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+  
+    49 │ const nestedAssertion = ((31 as const) as number) + value;
+    50 │ 
+  > 51 │ type NumericLiteral = 31;
+       │                       ^^
+    52 │ 
   
   i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
   

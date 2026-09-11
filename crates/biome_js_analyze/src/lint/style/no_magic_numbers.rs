@@ -1,20 +1,34 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
+    FixKind, QueryMatch, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    JsArrayAssignmentPatternElement, JsAssignmentExpression, JsAssignmentOperator,
-    JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsFormalParameter, JsInitializerClause,
-    JsNumberLiteralExpression, JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression,
-    JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression,
-    JsUnaryOperator, JsxExpressionAttributeValue, JsxExpressionChild, TsAsExpression,
-    TsEnumMemberList, TsIndexedAccessType, TsNonNullAssertionExpression, TsNumberLiteralType,
-    TsPredicateReturnType, TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation,
-    TsTypeAssertionExpression, TsUnionTypeVariantList,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsRoot, AnyTsType, JsArrayAssignmentPatternElement,
+    JsAssignmentExpression, JsAssignmentOperator, JsBigintLiteralExpression, JsBinaryExpression,
+    JsBinaryOperator, JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
+    JsFormalParameter, JsInitializerClause, JsNumberLiteralExpression,
+    JsObjectBindingPatternShorthandProperty, JsParenthesizedExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
+    JsxExpressionAttributeValue, JsxExpressionChild, TsAsExpression, TsEnumMemberList,
+    TsIndexedAccessType, TsNonNullAssertionExpression, TsNumberLiteralType, TsPredicateReturnType,
+    TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAnnotation, TsTypeAssertionExpression,
+    TsUnionTypeVariantList,
 };
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_magic_numbers::NoMagicNumbersOptions;
+use rustc_hash::{FxHashMap, FxHashSet};
+use std::cell::RefCell;
+
+use crate::{
+    JsRuleAction,
+    services::semantic::Semantic,
+    utils::module_constant::{
+        collision_free_module_constant_name_with_facts,
+        extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
+        module_constant_facts, module_constant_insertion_slot, module_constant_numeric_name,
+    },
+};
 
 declare_lint_rule! {
     /// Reports usage of "magic numbers" — numbers used directly instead of being assigned to named constants.
@@ -51,17 +65,21 @@ declare_lint_rule! {
     /// const TAX_RATE = 1.23 as const;
     /// let total = price * TAX_RATE;
     /// ```
+    ///
+    /// The unsafe fix creates a module-level constant. Review the generated declaration and its
+    /// placement before applying it.
     pub NoMagicNumbers {
         version: "2.1.0",
         name: "noMagicNumbers",
         language: "ts",
         sources: &[RuleSource::Eslint("no-magic-numbers").inspired(), RuleSource::EslintTypeScript("no-magic-numbers").same()],
         recommended: false,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for NoMagicNumbers {
-    type Query = Ast<JsOrTsNumericLiteral>;
+    type Query = Semantic<JsOrTsNumericLiteral>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoMagicNumbersOptions;
@@ -91,6 +109,163 @@ impl Rule for NoMagicNumbers {
             }),
         )
     }
+
+    /// Builds an unsafe action that extracts the actionable literal into a collision-free constant.
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let numeric_literal = AnyJsNumericLiteral::cast(ctx.query().syntax().clone())?;
+        if !is_actionable_numeric_literal(&numeric_literal) {
+            return None;
+        }
+        let value = match numeric_literal.clone() {
+            AnyJsNumericLiteral::JsNumberLiteralExpression(literal) => {
+                AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+                )
+            }
+            AnyJsNumericLiteral::JsBigintLiteralExpression(literal) => {
+                AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsBigintLiteralExpression(literal),
+                )
+            }
+        };
+        let root = ctx.root();
+        let (candidate_name, reserved_names, transfer_header) =
+            coordinated_extraction(&root, ctx.model(), &numeric_literal)?;
+        let (mutation, name) = extract_module_constant_with_reserved_names(
+            &root,
+            ctx.model(),
+            numeric_literal.syntax(),
+            value,
+            &candidate_name,
+            &reserved_names,
+            transfer_header,
+        )?;
+
+        Some(JsRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Extract the magic number into "<Emphasis>{name}</Emphasis>"." }.to_owned(),
+            mutation,
+        ))
+    }
+}
+
+/// Coordinates constant names and insertion metadata for the current literal with other extractable
+/// literals in the file.
+fn coordinated_extraction(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+    current: &AnyJsNumericLiteral,
+) -> Option<(String, FxHashSet<String>, bool)> {
+    let current_range = current.syntax().text_range();
+
+    NUMERIC_COORDINATION.with(|cache| {
+        let mut cache = cache.borrow_mut();
+        if cache
+            .as_ref()
+            .is_none_or(|cached| !cached.root.eq(root.syntax()))
+        {
+            *cache = Some(CachedNumericCoordination {
+                root: root.syntax().clone(),
+                extractions: build_coordinated_extractions(root, model),
+            });
+        }
+
+        let extraction = cache.as_ref()?.extractions.get(&current_range)?.clone();
+        Some((
+            extraction.name,
+            extraction.reserved_names,
+            extraction.transfer_header,
+        ))
+    })
+}
+
+fn build_coordinated_extractions(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+) -> FxHashMap<TextRange, CoordinatedExtraction> {
+    let facts = module_constant_facts(root, model);
+    let mut extractions = FxHashMap::default();
+    let mut reserved_names = FxHashSet::default();
+    let mut names_by_value: FxHashMap<String, Vec<String>> = FxHashMap::default();
+
+    for descendant in root.syntax().descendants() {
+        let Some(numeric_literal) = AnyJsNumericLiteral::cast(descendant) else {
+            continue;
+        };
+        let query = JsOrTsNumericLiteral::AnyJsNumericLiteral(numeric_literal.clone());
+        if is_valid_number_in_relevant_context(&query)
+            || !is_actionable_numeric_literal(&numeric_literal)
+            || !is_module_constant_extractable_with_facts(root, numeric_literal.syntax(), &facts)
+        {
+            continue;
+        }
+
+        let value_key = numeric_literal.syntax().text_trimmed().to_string();
+        let candidate_name = module_constant_numeric_name(numeric_literal.syntax(), &value_key);
+        let (name, reused_name) = if let Some(names) = names_by_value.get(&value_key) {
+            let reusable_name = names.iter().find(|name| {
+                let name = name.as_str();
+                let mut names_available_for_target = reserved_names.clone();
+                names_available_for_target.remove(name);
+                collision_free_module_constant_name_with_facts(
+                    model,
+                    numeric_literal.syntax(),
+                    name,
+                    &names_available_for_target,
+                    &facts,
+                ) == name
+            });
+
+            if let Some(name) = reusable_name {
+                (name.clone(), true)
+            } else {
+                (
+                    collision_free_module_constant_name_with_facts(
+                        model,
+                        numeric_literal.syntax(),
+                        &candidate_name,
+                        &reserved_names,
+                        &facts,
+                    ),
+                    false,
+                )
+            }
+        } else {
+            (
+                collision_free_module_constant_name_with_facts(
+                    model,
+                    numeric_literal.syntax(),
+                    &candidate_name,
+                    &reserved_names,
+                    &facts,
+                ),
+                false,
+            )
+        };
+
+        let mut names_for_current = reserved_names.clone();
+        names_for_current.remove(&name);
+        extractions.insert(
+            numeric_literal.syntax().text_range(),
+            CoordinatedExtraction {
+                name: name.clone(),
+                reserved_names: names_for_current,
+                transfer_header: module_constant_insertion_slot(root, numeric_literal.syntax())
+                    == Some(0),
+            },
+        );
+
+        if !reused_name {
+            names_by_value
+                .entry(value_key)
+                .or_default()
+                .push(name.clone());
+            reserved_names.insert(name);
+        }
+    }
+
+    extractions
 }
 
 declare_node_union! {
@@ -99,6 +274,22 @@ declare_node_union! {
 
 declare_node_union! {
     pub JsOrTsNumericLiteral = AnyJsNumericLiteral | TsNumberLiteralType
+}
+
+#[derive(Clone)]
+struct CoordinatedExtraction {
+    name: String,
+    reserved_names: FxHashSet<String>,
+    transfer_header: bool,
+}
+
+struct CachedNumericCoordination {
+    root: JsSyntaxNode,
+    extractions: FxHashMap<TextRange, CoordinatedExtraction>,
+}
+
+thread_local! {
+    static NUMERIC_COORDINATION: RefCell<Option<CachedNumericCoordination>> = const { RefCell::new(None) };
 }
 
 /// Checks if the given `numeric_literal` is not a magic number.
@@ -128,6 +319,37 @@ fn is_valid_number_in_relevant_context(numeric_literal: &JsOrTsNumericLiteral) -
     }
 
     false
+}
+
+fn is_ts_const_assertion(numeric_literal: &AnyJsNumericLiteral) -> bool {
+    numeric_literal.syntax().ancestors().any(|ancestor| {
+        let ty = if let Some(expression) = TsAsExpression::cast(ancestor.clone()) {
+            expression.ty().ok()
+        } else {
+            TsTypeAssertionExpression::cast(ancestor).and_then(|expression| expression.ty().ok())
+        };
+        ty.is_some_and(|ty| is_ts_const_type(&ty))
+    })
+}
+
+fn is_actionable_numeric_literal(numeric_literal: &AnyJsNumericLiteral) -> bool {
+    !is_ts_const_assertion(numeric_literal)
+}
+
+fn is_ts_const_type(ty: &AnyTsType) -> bool {
+    let Some(reference) = ty.as_ts_reference_type() else {
+        return false;
+    };
+    let Ok(name) = reference.name() else {
+        return false;
+    };
+    let Some(identifier) = name.as_js_reference_identifier() else {
+        return false;
+    };
+    let Ok(token) = identifier.value_token() else {
+        return false;
+    };
+    token.text_trimmed() == "const"
 }
 
 const BITWISE_BINARY_OPERATORS: &[JsBinaryOperator] = &[
@@ -412,4 +634,38 @@ fn is_allowed_number(numeric_literal: &AnyJsNumericLiteral) -> bool {
         AnyJsNumericLiteral::JsBigintLiteralExpression(expr) => expr.value_token(),
     }
     .is_ok_and(|token| ALWAYS_IGNORED_IN_ARITHMETIC_OPERATIONS.contains(&token.text_trimmed()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{AnyJsNumericLiteral, coordinated_extraction};
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_languages::JsFileSource;
+    use biome_rowan::AstNode;
+
+    #[test]
+    fn does_not_reuse_numeric_name_when_shadowed() {
+        let parsed = parse(
+            r#"function read(value) {
+    value + 123;
+    ((READ_123) => value + 123)(value);
+}
+"#,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        let literals = parsed
+            .syntax()
+            .descendants()
+            .filter_map(AnyJsNumericLiteral::cast)
+            .collect::<Vec<_>>();
+        let second = literals.get(1).expect("expected a second numeric literal");
+
+        let (name, _, _) = coordinated_extraction(&parsed.tree(), &model, second)
+            .expect("expected a coordinated extraction");
+
+        assert_eq!(name, "READ_123_2");
+    }
 }

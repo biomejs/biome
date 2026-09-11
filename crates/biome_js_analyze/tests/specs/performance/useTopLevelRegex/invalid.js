@@ -1,3 +1,26 @@
+"use strict"
+import dependency from "dependency"
+
+function parseInput(input) {
+	return /[a-z]+/.test(input);
+}
+
+const parser = {
+	parseValue(input) {
+		return /[0-9]+/.test(input);
+	}
+};
+
+class Parser {
+	parseToken(input) {
+		return /[A-Z]+/.test(input);
+	}
+}
+
+const matches = [1].map(() => /[!]/);
+
+[1].map(() => /[?]/);
+
 function foo(someString) {
 	return /[a-Z]*/.test(someString)
 }

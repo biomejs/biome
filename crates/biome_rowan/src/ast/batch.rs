@@ -31,7 +31,8 @@ where
 
 /// Stores the changes internally used by the [BatchMutation::commit] algorithm.
 /// It needs to be sorted by depth in decreasing order, then by range start and
-/// by slot in increasing order.
+/// by slot in increasing order. The mutation order breaks ties between
+/// independent insertions at the same list slot.
 ///
 /// This is necessary so we can aggregate all changes to the same node using "peek".
 #[derive(Debug, Clone)]
@@ -42,6 +43,11 @@ struct CommitChange<L: Language> {
     new_node_slot: usize,
     new_node: Option<SyntaxElement<L>>,
     is_from_action: bool,
+    is_insertion: bool,
+    is_header_transfer: bool,
+    is_header_cleanup: bool,
+    previous_range: Option<TextRange>,
+    order: usize,
 }
 
 impl<L: Language> CommitChange<L> {
@@ -51,7 +57,7 @@ impl<L: Language> CommitChange<L> {
     /// index of the corresponding change.
     ///
     /// So, we order first by depth. Then by the range of the node. Then by the
-    /// slot index of the node.
+    /// slot index of the node and the mutation order.
     ///
     /// The first is important to guarantee that all nodes that will be changed
     /// in the future are still valid with using SyntaxNode that we have.
@@ -62,12 +68,29 @@ impl<L: Language> CommitChange<L> {
     ///
     /// All of them will be prioritized in the descending order in a binary heap
     /// to ensure one change won't invalidate its following changes.
-    fn key(&self) -> (usize, u32, usize) {
+    fn key(&self) -> (usize, u32, usize, u8, usize) {
         (
             self.parent_depth,
             self.parent_range.map(|(start, _)| start).unwrap_or(0),
             self.new_node_slot,
+            u8::from(!self.is_insertion),
+            self.order,
         )
+    }
+
+    /// Reports whether both changes insert identical elements into the same parent slot.
+    fn is_duplicate_insertion(&self, other: &Self) -> bool {
+        self.is_insertion
+            && other.is_insertion
+            && self.parent == other.parent
+            && self.new_node_slot == other.new_node_slot
+            && match (&self.new_node, &other.new_node) {
+                (Some(left), Some(right)) => {
+                    left.kind() == right.kind() && left.to_string() == right.to_string()
+                }
+                (None, None) => true,
+                _ => false,
+            }
     }
 }
 
@@ -96,6 +119,7 @@ where
 {
     root: SyntaxNode<L>,
     changes: BinaryHeap<CommitChange<L>>,
+    next_order: usize,
 }
 
 impl<L> BatchMutation<L>
@@ -181,6 +205,7 @@ where
         Self {
             root,
             changes: BinaryHeap::new(),
+            next_order: 0,
         }
     }
 
@@ -197,6 +222,106 @@ where
             "Cannot merge mutations from different trees"
         );
         self.changes.extend(other.changes);
+    }
+
+    /// Merge mutations produced by separate analyzer actions.
+    ///
+    /// Action mutations need additional ordering and trivia handling because
+    /// they are collected independently and applied together during fix-all.
+    /// This keeps identical list insertions from being repeated, coalesces
+    /// header cleanup with replacements, and preserves the order in which
+    /// actions were collected.
+    pub fn merge_actions(&mut self, other: Self) {
+        debug_assert!(
+            self.root == other.root,
+            "Cannot merge mutations from different trees"
+        );
+        let order_offset = self.next_order;
+        self.next_order += other.next_order;
+        let mut existing_changes = std::mem::take(&mut self.changes).into_vec();
+        let incoming_changes = other.changes.into_vec();
+        let incoming_replacement_ranges = incoming_changes
+            .iter()
+            .filter(|change| {
+                !change.is_insertion && !change.is_header_cleanup && change.new_node.is_some()
+            })
+            .filter_map(|change| change.previous_range)
+            .collect::<Vec<_>>();
+        let existing_replacement_ranges = existing_changes
+            .iter()
+            .filter(|change| {
+                !change.is_insertion && !change.is_header_cleanup && change.new_node.is_some()
+            })
+            .filter_map(|change| change.previous_range)
+            .collect::<Vec<_>>();
+        existing_changes.retain(|change| {
+            !change.is_header_cleanup
+                || !change
+                    .previous_range
+                    .is_some_and(|range| incoming_replacement_ranges.contains(&range))
+        });
+        let existing_insertions = existing_changes
+            .iter()
+            .filter(|change| change.is_insertion)
+            .cloned()
+            .collect::<Vec<_>>();
+        let existing_header_transfers = existing_changes
+            .iter()
+            .filter(|change| change.is_header_transfer)
+            .filter_map(|change| {
+                change
+                    .parent
+                    .clone()
+                    .map(|parent| (parent, change.new_node_slot))
+            })
+            .collect::<Vec<_>>();
+        self.changes.extend(existing_changes);
+        self.changes
+            .extend(incoming_changes.into_iter().filter_map(|mut change| {
+                if existing_insertions
+                    .iter()
+                    .any(|existing| existing.is_duplicate_insertion(&change))
+                {
+                    return None;
+                }
+                change.order += order_offset;
+                if change.is_header_cleanup
+                    && change
+                        .previous_range
+                        .is_some_and(|range| existing_replacement_ranges.contains(&range))
+                {
+                    return None;
+                }
+                let has_matching_header_transfer = change.is_header_transfer
+                    && existing_header_transfers.iter().any(|(parent, slot)| {
+                        *slot == change.new_node_slot
+                            && change
+                                .parent
+                                .as_ref()
+                                .is_some_and(|change_parent| change_parent == parent)
+                    });
+                if has_matching_header_transfer {
+                    change.new_node = change.new_node.map(Self::remove_leading_trivia);
+                    change.is_header_transfer = false;
+                }
+                Some(change)
+            }));
+    }
+
+    /// Removes leading trivia from the first token of a node or from a token element.
+    fn remove_leading_trivia(element: SyntaxElement<L>) -> SyntaxElement<L> {
+        match element {
+            SyntaxElement::Node(node) => node
+                .first_token()
+                .and_then(|token| {
+                    let replacement = token.with_leading_trivia_pieces([]);
+                    node.clone().replace_child(token.into(), replacement.into())
+                })
+                .map_or_else(|| node.into(), SyntaxElement::Node),
+            SyntaxElement::Token(token) => {
+                SyntaxElement::Token(token.with_leading_trivia_pieces([]))
+            }
+        }
     }
 
     /// Push a change to replace the "prev_node" with "next_node".
@@ -287,6 +412,60 @@ where
         self.push_change(prev_element, Some(next_element))
     }
 
+    /// Push a change that inserts an element into a list at `slot_index`.
+    ///
+    /// List insertions are kept separate from replacements so independent
+    /// mutations can be merged without one list replacement overwriting the other.
+    pub fn insert_element(
+        &mut self,
+        parent: SyntaxNode<L>,
+        slot_index: usize,
+        new_element: SyntaxElement<L>,
+    ) {
+        self.insert_element_internal(parent, slot_index, new_element, false);
+    }
+
+    /// Push a list insertion whose leading trivia came from the original first item.
+    ///
+    /// When two such mutations are merged, the first insertion retains the header and later
+    /// insertions have only their copied leading trivia removed.
+    pub fn insert_element_with_header(
+        &mut self,
+        parent: SyntaxNode<L>,
+        slot_index: usize,
+        new_element: SyntaxElement<L>,
+    ) {
+        self.insert_element_internal(parent, slot_index, new_element, true);
+    }
+
+    /// Records a list insertion together with its slot, merge order, and header-transfer state.
+    fn insert_element_internal(
+        &mut self,
+        parent: SyntaxNode<L>,
+        slot_index: usize,
+        new_element: SyntaxElement<L>,
+        is_header_transfer: bool,
+    ) {
+        debug_assert!(parent.kind().is_list());
+        debug_assert!(slot_index <= parent.slots().count());
+
+        let parent_range = parent.text_range_with_trivia();
+        self.changes.push(CommitChange {
+            parent_depth: parent.ancestors().count(),
+            parent: Some(parent),
+            parent_range: Some((parent_range.start().into(), parent_range.end().into())),
+            new_node_slot: slot_index,
+            new_node: Some(new_element),
+            is_from_action: true,
+            is_insertion: true,
+            is_header_transfer,
+            is_header_cleanup: false,
+            previous_range: None,
+            order: self.next_order,
+        });
+        self.next_order += 1;
+    }
+
     /// Push a change to replace the "prev_node" with "next_node".
     ///
     /// Changes to take effect must be committed.
@@ -309,6 +488,13 @@ where
         next_token: SyntaxToken<L>,
     ) {
         self.replace_element_discard_trivia(prev_token.into(), next_token.into())
+    }
+
+    /// Pushes a leading-trivia cleanup that can be coalesced with a merged
+    /// replacement of the same syntax element.
+    pub fn clear_leading_trivia(&mut self, token: SyntaxToken<L>) {
+        let next_token = token.with_leading_trivia_pieces([]);
+        self.push_header_cleanup_change(token.into(), Some(next_token.into()));
     }
 
     /// Push a change to replace the "prev_node" with "next_node".
@@ -441,6 +627,25 @@ where
         prev_element: SyntaxElement<L>,
         next_element: Option<SyntaxElement<L>>,
     ) {
+        self.push_change_internal(prev_element, next_element, false);
+    }
+
+    /// Records a leading-trivia removal that can be coalesced with a later replacement.
+    fn push_header_cleanup_change(
+        &mut self,
+        prev_element: SyntaxElement<L>,
+        next_element: Option<SyntaxElement<L>>,
+    ) {
+        self.push_change_internal(prev_element, next_element, true);
+    }
+
+    /// Records a replacement or removal and preserves the metadata needed to merge it safely.
+    fn push_change_internal(
+        &mut self,
+        prev_element: SyntaxElement<L>,
+        next_element: Option<SyntaxElement<L>>,
+        is_header_cleanup: bool,
+    ) {
         let new_node_slot = prev_element.index();
         let parent = prev_element.parent();
         #[cfg(debug_assertions)]
@@ -456,6 +661,10 @@ where
         });
         let parent_depth = parent.as_ref().map(|p| p.ancestors().count()).unwrap_or(0);
 
+        let previous_range = match &prev_element {
+            SyntaxElement::Node(node) => node.text_range_with_trivia(),
+            SyntaxElement::Token(token) => token.text_range(),
+        };
         self.changes.push(CommitChange {
             parent_depth,
             parent,
@@ -463,7 +672,13 @@ where
             new_node_slot,
             new_node: next_element,
             is_from_action: true,
+            is_insertion: false,
+            is_header_transfer: false,
+            is_header_cleanup,
+            previous_range: Some(previous_range),
+            order: self.next_order,
         });
+        self.next_order += 1;
     }
 
     /// Returns the range of the document modified by this mutation along with
@@ -516,7 +731,9 @@ where
         self,
         with_text_range_and_edit: bool,
     ) -> (SyntaxNode<L>, Option<(TextRange, TextEdit)>) {
-        let Self { root, mut changes } = self;
+        let Self {
+            root, mut changes, ..
+        } = self;
 
         // Ordered text mutation list sorted by text range
         let mut text_mutation_list: Vec<(TextRange, Option<SyntaxElement<L>>)> =
@@ -532,6 +749,8 @@ where
             parent: curr_parent,
             parent_depth: curr_parent_depth,
             is_from_action: curr_is_from_action,
+            is_insertion: curr_is_insertion,
+            order: curr_order,
             ..
         }) = changes.pop()
         {
@@ -547,8 +766,13 @@ where
 
                 // Aggregate all modifications to the current parent
                 // This works because of the Ord we defined in the [CommitChange] struct
-                let mut modifications =
-                    vec![(curr_new_node_slot, curr_new_node, curr_is_from_action)];
+                let mut modifications = vec![(
+                    curr_new_node_slot,
+                    curr_new_node,
+                    curr_is_from_action,
+                    curr_is_insertion,
+                    curr_order,
+                )];
 
                 while changes
                     .peek()
@@ -560,47 +784,111 @@ where
                         new_node: next_new_node,
                         new_node_slot: next_new_node_slot,
                         is_from_action: next_is_from_action,
+                        is_insertion: next_is_insertion,
+                        order: next_order,
                         ..
                     } = changes.pop().expect("changes.pop");
 
                     // If we have two modifications to the same slot,
                     // last write wins
-                    if let Some(&(prev_new_node_slot, ..)) = modifications.last()
+                    if let Some(&(prev_new_node_slot, _, _, prev_is_insertion, _)) =
+                        modifications.last()
                         && prev_new_node_slot == next_new_node_slot
+                        && !prev_is_insertion
+                        && !next_is_insertion
                     {
-                        modifications.pop();
+                        // Heap priority visits the later replacement first, so keep it and
+                        // discard the earlier write to preserve last-write-wins semantics.
+                        continue;
                     }
 
                     // Add to the modifications
-                    modifications.push((next_new_node_slot, next_new_node, next_is_from_action));
+                    modifications.push((
+                        next_new_node_slot,
+                        next_new_node,
+                        next_is_from_action,
+                        next_is_insertion,
+                        next_order,
+                    ));
                 }
 
+                // Each same-slot splice is placed before the prior insertion. Apply those
+                // changes in reverse mutation order so the committed CST follows merge order,
+                // while keeping higher slots ahead of lower slots.
+                modifications.sort_by(|left, right| {
+                    right.0.cmp(&left.0).then_with(|| match (left.3, right.3) {
+                        (false, true) => cmp::Ordering::Less,
+                        (true, false) => cmp::Ordering::Greater,
+                        (true, true) => right.4.cmp(&left.4),
+                        (false, false) => right.4.cmp(&left.4),
+                    })
+                });
                 // Collect text mutations, this has to be done before the detach below,
                 // or we'll lose the "deleted_text_range" info
                 if with_text_range_and_edit {
-                    for (new_node_slot, new_node, is_from_action) in &modifications {
+                    let mut text_modifications = modifications.clone();
+                    text_modifications.sort_by(|left, right| {
+                        right.0.cmp(&left.0).then_with(|| match (left.3, right.3) {
+                            (false, true) => cmp::Ordering::Less,
+                            (true, false) => cmp::Ordering::Greater,
+                            (true, true) => left.4.cmp(&right.4),
+                            (false, false) => right.4.cmp(&left.4),
+                        })
+                    });
+                    for (new_node_slot, new_node, is_from_action, is_insertion, _) in
+                        &text_modifications
+                    {
                         if !is_from_action {
                             continue;
                         }
-                        let deleted_text_range = match curr_parent.slots().nth(*new_node_slot) {
-                            Some(SyntaxSlot::Node(node)) => node.text_range_with_trivia(),
-                            Some(SyntaxSlot::Token(token)) => token.text_range(),
-                            Some(SyntaxSlot::Empty { index }) => {
-                                TextRange::new(index.into(), index.into())
+                        let deleted_text_range = if *is_insertion {
+                            let position = match curr_parent.slots().nth(*new_node_slot) {
+                                Some(SyntaxSlot::Node(node)) => {
+                                    node.text_range_with_trivia().start()
+                                }
+                                Some(SyntaxSlot::Token(token)) => token.text_range().start(),
+                                Some(SyntaxSlot::Empty { index }) => index.into(),
+                                None => curr_parent.text_range_with_trivia().end(),
+                            };
+                            TextRange::new(position, position)
+                        } else {
+                            match curr_parent.slots().nth(*new_node_slot) {
+                                Some(SyntaxSlot::Node(node)) => node.text_range_with_trivia(),
+                                Some(SyntaxSlot::Token(token)) => token.text_range(),
+                                Some(SyntaxSlot::Empty { index }) => {
+                                    TextRange::new(index.into(), index.into())
+                                }
+                                None => continue,
                             }
-                            None => continue,
                         };
-                        // We use binary search to keep the text mutations in order
-                        match text_mutation_list
-                            .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
-                        {
-                            // Overwrite the text mutation with an overlapping text range
-                            Ok(pos) => {
-                                text_mutation_list[pos] = (deleted_text_range, new_node.clone())
+                        // Keep the text mutations ordered by source range. Equal insertion
+                        // ranges use an explicit upper-bound scan because binary search may
+                        // return any one of several equal entries.
+                        if deleted_text_range.is_empty() && new_node.is_some() {
+                            let mut pos = match text_mutation_list
+                                .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
+                            {
+                                Ok(pos) | Err(pos) => pos,
+                            };
+                            while text_mutation_list
+                                .get(pos)
+                                .is_some_and(|(range, _)| *range == deleted_text_range)
+                            {
+                                pos += 1;
                             }
-                            // Insert the text mutation at the correct position
-                            Err(pos) => text_mutation_list
-                                .insert(pos, (deleted_text_range, new_node.clone())),
+                            text_mutation_list.insert(pos, (deleted_text_range, new_node.clone()));
+                        } else {
+                            match text_mutation_list
+                                .binary_search_by(|(range, _)| range.ordering(deleted_text_range))
+                            {
+                                // Overwrite an overlapping non-insertion text mutation.
+                                Ok(pos) => {
+                                    text_mutation_list[pos] = (deleted_text_range, new_node.clone())
+                                }
+                                // Insert the text mutation at the correct position.
+                                Err(pos) => text_mutation_list
+                                    .insert(pos, (deleted_text_range, new_node.clone())),
+                            }
                         }
                     }
                 }
@@ -609,8 +897,10 @@ where
                 // and push a pending change to its parent
                 let mut current_parent = curr_parent.detach();
                 let is_list = current_parent.kind().is_list();
-                for (new_node_slot, new_node, ..) in modifications.clone() {
-                    current_parent = if is_list && new_node.is_none() {
+                for (new_node_slot, new_node, _, is_insertion, _) in modifications.clone() {
+                    current_parent = if is_insertion {
+                        current_parent.splice_slots(new_node_slot..new_node_slot, once(new_node))
+                    } else if is_list && new_node.is_none() {
                         current_parent.splice_slots(new_node_slot..=new_node_slot, empty())
                     } else {
                         current_parent.splice_slots(new_node_slot..=new_node_slot, once(new_node))
@@ -624,6 +914,11 @@ where
                     new_node_slot: curr_parent_slot,
                     new_node: Some(SyntaxElement::Node(current_parent)),
                     is_from_action: false,
+                    is_insertion: false,
+                    is_header_transfer: false,
+                    is_header_cleanup: false,
+                    previous_range: None,
+                    order: curr_order,
                 });
             }
             // If parent is None, we reached the document root
@@ -799,6 +1094,22 @@ pub mod test {
             .unwrap()
     }
 
+    fn literal_with_header(value: &str, header: &str) -> LiteralExpression {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            &format!("{header}{value}"),
+            &[TriviaPiece::single_line_comment(header.len() as u32)],
+            &[],
+        );
+        builder.finish_node();
+        builder
+            .finish()
+            .cast::<LiteralExpression>()
+            .expect("literal expression")
+    }
+
     #[test]
     pub fn ok_batch_mutation_no_changes() {
         let (before, before_debug) = tree_one("a");
@@ -840,6 +1151,74 @@ pub mod test {
         let after = batch.commit();
 
         assert_eq!(expected_debug, format!("{after:#?}"));
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_merge_same_slot_last_write_wins() {
+        let (before, _) = tree_one("a");
+        let (expected, expected_debug) = tree_one("c");
+
+        let a = find(&before, "a");
+        let b = clone_detach(&tree_one("b").0, "b");
+        let c = clone_detach(&expected, "c");
+
+        let mut first = before.clone().begin();
+        first.replace_node(a.clone(), b);
+        let source = before.syntax().text_with_trivia().to_string();
+        let mut second = before.begin();
+        second.replace_node(a, c);
+        first.merge_actions(second);
+
+        let (after, text_edit) = first.commit_with_text_range_and_edit(true);
+        assert_eq!(expected_debug, format!("{after:#?}"));
+        let (_, text_edit) = text_edit.expect("replacement should produce a text edit");
+        assert_eq!(text_edit.new_string(&source), after.to_string());
+    }
+
+    #[test]
+    pub fn ok_batch_mutation_merge_header_transfer_is_scoped_to_parent() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+        builder
+            .start_node(RawLanguageKind::LITERAL_EXPRESSION)
+            .token(RawLanguageKind::STRING_TOKEN, "first")
+            .finish_node()
+            .finish_node();
+        builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+        builder
+            .start_node(RawLanguageKind::LITERAL_EXPRESSION)
+            .token(RawLanguageKind::STRING_TOKEN, "second")
+            .finish_node()
+            .finish_node();
+        builder.finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+        let lists = root
+            .syntax()
+            .descendants()
+            .filter(|node| node.kind() == RawLanguageKind::EXPRESSION_LIST)
+            .collect::<Vec<_>>();
+        assert_eq!(lists.len(), 2);
+
+        let mut first = root.clone().begin();
+        first.insert_element_with_header(
+            lists[0].clone(),
+            0,
+            literal_with_header("A", "// first\n").into_syntax().into(),
+        );
+        let mut second = root.begin();
+        second.insert_element_with_header(
+            lists[1].clone(),
+            0,
+            literal_with_header("B", "// second\n").into_syntax().into(),
+        );
+        first.merge_actions(second);
+
+        let output = first.commit().to_string();
+        assert_eq!(output.matches("// first\n").count(), 1);
+        assert_eq!(output.matches("// second\n").count(), 1);
+        assert!(output.contains("// first\nAfirst"));
+        assert!(output.contains("// second\nBsecond"));
     }
 
     /// Builds a tree with two LITERAL_EXPRESSION nodes where the first node's
