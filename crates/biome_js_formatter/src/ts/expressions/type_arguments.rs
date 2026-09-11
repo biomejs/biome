@@ -92,10 +92,7 @@ impl FormatNodeRule<TsTypeArguments> for FormatTsTypeArguments {
                 f,
                 [group(&format_args![
                     l_angle_token.format(),
-                    indent(&format_args![
-                        hard_line_break(),
-                        ts_type_argument_list.format()
-                    ]),
+                    block_indent(&ts_type_argument_list.format()),
                     r_angle_token.format()
                 ])]
             )

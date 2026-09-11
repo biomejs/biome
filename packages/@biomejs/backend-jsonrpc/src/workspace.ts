@@ -2908,6 +2908,11 @@ See https://biomejs.dev/linter/rules/use-unicode-regex
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
+	* Enforce valid titles for unit test cases and test suites.
+See https://biomejs.dev/linter/rules/use-valid-test-title 
+	 */
+	useValidTestTitle?: UseValidTestTitleConfiguration;
+	/**
 	* Require var declarations to appear at the top of their containing scope.
 See https://biomejs.dev/linter/rules/use-vars-on-top 
 	 */
@@ -5115,6 +5120,9 @@ export type UseThisInClassMethodsConfiguration =
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
+export type UseValidTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidTestTitleOptions;
 export type UseVarsOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVarsOnTopOptions;
@@ -7190,6 +7198,11 @@ export interface RuleWithUseUnicodeRegexOptions {
 	level: RulePlainConfiguration;
 	options?: UseUnicodeRegexOptions;
 }
+export interface RuleWithUseValidTestTitleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseValidTestTitleOptions;
+}
 export interface RuleWithUseVarsOnTopOptions {
 	level: RulePlainConfiguration;
 	options?: UseVarsOnTopOptions;
@@ -9036,6 +9049,12 @@ Defaults to `false`.
 	ignoreOverrideMethods?: boolean;
 }
 export type UseUnicodeRegexOptions = {};
+export interface UseValidTestTitleOptions {
+	/**
+	 * A list of words that are disallowed in test titles.
+	 */
+	disallowedWords?: string[];
+}
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -10333,6 +10352,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"

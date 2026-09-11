@@ -332,6 +332,7 @@ define_categories! {
     "lint/nursery/useUniqueGraphqlOperationName": "https://biomejs.dev/linter/rules/use-unique-graphql-operation-name",
     "lint/nursery/useUniqueInputFieldNames": "https://biomejs.dev/linter/rules/use-unique-input-field-names",
     "lint/nursery/useUniqueVariableNames": "https://biomejs.dev/linter/rules/use-unique-variable-names",
+    "lint/nursery/useValidTestTitle": "https://biomejs.dev/linter/rules/use-valid-test-title",
     "lint/nursery/useVarsOnTop": "https://biomejs.dev/linter/rules/use-vars-on-top",
     "lint/nursery/useVueBaseImport": "https://biomejs.dev/linter/rules/use-vue-base-import",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
