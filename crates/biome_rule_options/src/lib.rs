@@ -162,6 +162,7 @@ pub mod no_label_without_control;
 pub mod no_leaked_render;
 pub mod no_loop_func;
 pub mod no_magic_numbers;
+pub mod no_meaningless_void_operator;
 pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;
 pub mod no_misleading_return_type;

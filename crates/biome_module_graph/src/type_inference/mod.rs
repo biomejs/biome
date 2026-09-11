@@ -25,7 +25,8 @@ pub use requests::{
     ArrayOfPromisesClassificationRequest, CallableMemberRequest, ExpectedCallArgumentTypeRequest,
     ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
     NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest, PromiseClassificationRequest,
-    PromiseReturningFunctionClassificationRequest, TypeInferenceArgument, TypeInferenceSource,
+    PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
+    TypeInferenceArgument, TypeInferenceSource,
 };
 
 pub(crate) use request::Sealed;

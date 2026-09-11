@@ -776,6 +776,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_magic_numbers::NoMagicNumbersOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMeaninglessVoidOperator",
+        TypeId::of::<
+            biome_rule_options::no_meaningless_void_operator::NoMeaninglessVoidOperatorOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noMisleadingCharacterClass",
         TypeId::of::<

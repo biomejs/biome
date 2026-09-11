@@ -2470,6 +2470,11 @@ See https://biomejs.dev/linter/rules/no-loop-func
 	 */
 	noLoopFunc?: NoLoopFuncConfiguration;
 	/**
+	* Disallow void when it does not discard a call's return value or a thenable.
+See https://biomejs.dev/linter/rules/no-meaningless-void-operator 
+	 */
+	noMeaninglessVoidOperator?: NoMeaninglessVoidOperatorConfiguration;
+	/**
 	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
 See https://biomejs.dev/linter/rules/no-misleading-return-type 
 	 */
@@ -4867,6 +4872,9 @@ export type NoJsxNamespaceConfiguration =
 export type NoLoopFuncConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLoopFuncOptions;
+export type NoMeaninglessVoidOperatorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMeaninglessVoidOperatorOptions;
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
@@ -6831,6 +6839,11 @@ export interface RuleWithNoLoopFuncOptions {
 	level: RulePlainConfiguration;
 	options?: NoLoopFuncOptions;
 }
+export interface RuleWithNoMeaninglessVoidOperatorOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMeaninglessVoidOperatorOptions;
+}
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
@@ -8737,6 +8750,7 @@ Each entry can describe one of these cases:
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
+export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
@@ -10259,6 +10273,7 @@ export type Category =
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
+	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
