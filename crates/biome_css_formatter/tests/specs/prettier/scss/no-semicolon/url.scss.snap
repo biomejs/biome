@@ -51,21 +51,5 @@ url.scss:1:9 parse ━━━━━━━━━━━━━━━━━━━━�
       │   ^^
     3 │ 
   
-url.scss:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `;` but instead the file ends
-  
-    1 │ @import ur
-    2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
-  > 3 │ 
-      │ 
-  
-  i the file ends here
-  
-    1 │ @import ur
-    2 │   l(//fonts.googleapis.com/css?family=Open+Sans:400,400italic);
-  > 3 │ 
-      │ 
-  
 
 ```

@@ -1,0 +1,56 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+
+export const fixer = defineRule({
+	query: ast("JS_CALL_EXPRESSION"),
+	run(call) {
+		const first = call.arguments.args[0];
+		const mutation = createMutation(first);
+		mutation.removeNode(first);
+		mutation.removeNode(first);
+		registerDiagnostic(first, "warning", "Native batch parity", {
+			mutation,
+			message: "Apply edit",
+			kind: "safe",
+		});
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Native batch parity
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Safe fix: Apply edit
+  
+    1 │ call(1,2);
+      │      -
+```

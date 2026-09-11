@@ -36,6 +36,8 @@ use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
 
+#[path = "spec_tests/callback_parameters.test.rs"]
+mod callback_parameters;
 #[path = "spec_tests/calls.test.rs"]
 mod calls;
 #[path = "spec_tests/css_classes.test.rs"]

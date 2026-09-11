@@ -1,0 +1,6 @@
+.card:not(.disabled)#{} { color: red; }
+.after-empty { width: 1px; }
+.card[data-state]#{1 +} { color: blue; }
+.after-operand { width: 1px; }
+.card:not(.disabled)#{$suffix { color: red; }
+.after-missing { width: 1px; }

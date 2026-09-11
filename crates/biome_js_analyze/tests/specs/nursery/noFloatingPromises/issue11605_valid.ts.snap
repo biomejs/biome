@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605_valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+interface Service {
+	go(): Promise<void>;
+	sync(): void;
+}
+interface Context {
+	service: Service;
+}
+
+declare function test<T>(callback: (args: T) => Promise<void>): void;
+
+// Awaited or otherwise handled calls.
+test<Context>(async (args) => {
+	await args.service.go();
+	void args.service.go();
+	args.service.go().catch(() => {});
+	args.service.sync();
+});
+
+// Without type arguments, `T` remains generic and nothing is reported.
+test(async (args) => {
+	args.service.go();
+});
+
+// The parameter type is not a callback type.
+declare function consume(value: Context): void;
+consume({
+	service: {
+		go: async () => {},
+		sync: () => {},
+	},
+});
+
+// A callback declared with more parameters than expected.
+declare function run(callback: (args: Context) => Promise<void>): void;
+run(async (args, extra) => {
+	extra.service.go();
+});
+
+// Parameters that do not carry a Promise-returning member.
+declare function each(callback: (item: Context, index: number) => Promise<void>): void;
+each(async (item, index) => {
+	index.toFixed();
+	item.service.sync();
+});
+
+// The callback is spread rather than passed directly.
+declare const callbacks: Array<(args: Context) => Promise<void>>;
+run(...callbacks);
+
+// Explicit type arguments on a call whose result is not a Promise.
+declare function make<T>(): T;
+make<Service>().sync();
+
+```

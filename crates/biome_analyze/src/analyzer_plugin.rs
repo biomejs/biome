@@ -2,12 +2,14 @@ use biome_diagnostics::Applicability;
 use biome_rowan::{
     AnySyntaxNode, Language, RawSyntaxKind, SyntaxKindSet, SyntaxNode, TextRange, WalkEvent,
 };
+use biome_text_edit::TextEdit;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::{fmt::Debug, sync::Arc};
 
 use crate::matcher::SignalRuleKey;
 use crate::{
-    PluginSignal, RuleCategory, RuleDiagnostic, SignalEntry, Visitor, VisitorContext, profiling,
+    PluginSignal, RuleCategory, RuleDiagnostic, ServiceBag, SignalEntry, Visitor, VisitorContext,
+    profiling,
 };
 
 /// Slice of analyzer plugins that can be cheaply cloned.
@@ -21,10 +23,8 @@ pub type AnalyzerPluginVec = Vec<Arc<Box<dyn AnalyzerPlugin>>>;
 pub struct PluginActionData {
     /// The source range this action applies to.
     pub source_range: TextRange,
-    /// The original source text that was matched.
-    pub original_text: String,
-    /// The rewritten text to replace the original.
-    pub rewritten_text: String,
+    /// Precomputed edit in the analyzed source's coordinates.
+    pub text_edit: TextEdit,
     /// A message describing the action.
     pub message: String,
     /// Whether this fix is safe or unsafe.
@@ -53,7 +53,12 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
 
     fn query(&self) -> Vec<RawSyntaxKind>;
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult;
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        services: &ServiceBag,
+    ) -> PluginEvalResult;
 
     /// Returns true if this plugin should run on the given file path.
     fn applies_to_file(&self, _path: &Utf8Path) -> bool {
@@ -98,10 +103,6 @@ pub struct PluginVisitor<L: Language> {
     query: SyntaxKindSet<L>,
     plugin: Arc<Box<dyn AnalyzerPlugin>>,
 
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
     /// Cached result of `applies_to_file` for the current file path.
     applies_to_file: FileApplicability,
 }
@@ -120,7 +121,6 @@ where
         Self {
             query,
             plugin,
-            skip_subtree: None,
             applies_to_file: FileApplicability::Unknown,
         }
     }
@@ -137,29 +137,9 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
 
         // TODO: Integrate to [`VisitorContext::match_query`]?
         let kind = node.kind();
@@ -180,9 +160,11 @@ where
         }
 
         let rule_timer = profiling::start_plugin_rule(self.plugin.name());
-        let eval_result = self
-            .plugin
-            .evaluate(node.clone().into(), ctx.options.file_path.clone());
+        let eval_result = self.plugin.evaluate(
+            node.clone().into(),
+            ctx.options.file_path.clone(),
+            ctx.services,
+        );
         rule_timer.stop();
 
         let signals = eval_result.entries.into_iter().map(|entry| {
@@ -223,11 +205,6 @@ pub struct BatchPluginVisitor<L: Language> {
     /// Union of all plugin queries.
     any_query: SyntaxKindSet<L>,
 
-    /// When set, all nodes in this subtree are skipped until we leave it.
-    /// Used to skip subtrees that fall entirely outside the analysis range
-    /// (see the `ctx.range` check in `visit`).
-    skip_subtree: Option<SyntaxNode<L>>,
-
     /// Cached per-plugin results of `applies_to_file`. Populated lazily on
     /// first `WalkEvent::Enter` — the file path is constant for the entire walk.
     applicable: Option<Vec<bool>>,
@@ -257,7 +234,6 @@ where
         Self {
             plugins,
             any_query,
-            skip_subtree: None,
             applicable: None,
         }
     }
@@ -274,29 +250,9 @@ where
         event: &WalkEvent<SyntaxNode<Self::Language>>,
         ctx: VisitorContext<Self::Language>,
     ) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
 
         let kind = node.kind();
 
@@ -317,7 +273,11 @@ where
             }
 
             let rule_timer = profiling::start_plugin_rule(plugin.name());
-            let eval_result = plugin.evaluate(node.clone().into(), ctx.options.file_path.clone());
+            let eval_result = plugin.evaluate(
+                node.clone().into(),
+                ctx.options.file_path.clone(),
+                ctx.services,
+            );
             rule_timer.stop();
 
             let signals = eval_result.entries.into_iter().map(|entry| {

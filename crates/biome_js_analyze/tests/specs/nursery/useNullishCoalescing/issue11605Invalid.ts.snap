@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605Invalid.ts
+---
+# Input
+```ts
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<string | null>((value) => {
+	value || "default";
+});
+
+```
+
+# Diagnostics
+```
+issue11605Invalid.ts:4:8 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    3 │ consume<string | null>((value) => {
+  > 4 │ 	value || "default";
+      │ 	      ^^
+    5 │ });
+    6 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

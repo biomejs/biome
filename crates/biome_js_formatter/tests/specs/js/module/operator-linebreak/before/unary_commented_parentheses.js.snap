@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/operator-linebreak/before/unary_commented_parentheses.js
+---
+
+# Input
+
+```js
+!(// leading
+a || b);
+
+!((// leading
+firstLongOperand || secondLongOperand || thirdLongOperand || fourthLongOperand || fifthLongOperand));
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+        "operatorLinebreak": "before"
+    }
+    
+  }
+}
+```
+
+# Formatted
+
+```js
+!(
+	// leading
+	a || b
+);
+
+!(
+	// leading
+	firstLongOperand
+	|| secondLongOperand
+	|| thirdLongOperand
+	|| fourthLongOperand
+	|| fifthLongOperand
+);
+
+```

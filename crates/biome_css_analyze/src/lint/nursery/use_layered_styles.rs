@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseLayeredStyles {
-        version: "next",
+        version: "2.5.13",
         name: "useLayeredStyles",
         language: "css",
         recommended: false,

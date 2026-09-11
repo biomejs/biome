@@ -10,6 +10,8 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKindSet, TriviaPiece};
 
+pub(crate) mod dom;
+
 /// Add any leading and trailing trivia from given source node to the token.
 ///
 /// Adds whitespace trivia if needed for safe replacement of source node.

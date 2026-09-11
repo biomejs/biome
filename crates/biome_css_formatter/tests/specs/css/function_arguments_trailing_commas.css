@@ -1,6 +1,9 @@
 a {
   custom-property-empty-fallback: var(--name,);
   custom-property-with-fallback: var(--name, red,);
+  custom-property-uppercase-empty-fallback: VAR(--name,);
+  ordinary-empty: func();
+  ordinary-single-argument: func(red,);
 
   transition-timing-function: func1(
       func2(

@@ -1,4 +1,5 @@
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use std::marker::PhantomData;
 
 use crate::{
     AddVisitor, Phases, QueryKey, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext,
@@ -44,17 +45,11 @@ impl<L: Language + 'static> QueryMatch for SyntaxNode<L> {
 /// The [SyntaxVisitor] is the simplest form of visitor implemented for the
 /// analyzer, it simply broadcast each [WalkEvent::Enter] as a query match
 /// event for the [SyntaxNode] being entered
-pub struct SyntaxVisitor<L: Language> {
-    /// If a subtree is currently being skipped by the visitor, for instance
-    /// because it has a suppression comment, this stores the root [SyntaxNode]
-    /// of that subtree. The visitor will then ignore all events until it
-    /// receives a [WalkEvent::Leave] for the `skip_subtree` node
-    skip_subtree: Option<SyntaxNode<L>>,
-}
+pub struct SyntaxVisitor<L: Language>(PhantomData<L>);
 
 impl<L: Language> Default for SyntaxVisitor<L> {
     fn default() -> Self {
-        Self { skip_subtree: None }
+        Self(PhantomData)
     }
 }
 
@@ -62,29 +57,9 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
     type Language = L;
 
     fn visit(&mut self, event: &WalkEvent<SyntaxNode<Self::Language>>, mut ctx: VisitorContext<L>) {
-        let node = match event {
-            WalkEvent::Enter(node) => node,
-            WalkEvent::Leave(node) => {
-                if let Some(skip_subtree) = &self.skip_subtree
-                    && skip_subtree == node
-                {
-                    self.skip_subtree = None;
-                }
-
-                return;
-            }
+        let WalkEvent::Enter(node) = event else {
+            return;
         };
-
-        if self.skip_subtree.is_some() {
-            return;
-        }
-
-        if let Some(range) = ctx.range
-            && node.text_range_with_trivia().ordering(range).is_ne()
-        {
-            self.skip_subtree = Some(node.clone());
-            return;
-        }
 
         ctx.match_query(node.clone());
     }
@@ -93,7 +68,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
 #[cfg(test)]
 mod tests {
     use biome_rowan::{
-        AstNode, BatchMutation, SyntaxNode, SyntaxToken,
+        AstNode, BatchMutation, SyntaxNode, SyntaxToken, TextRange, TextSize,
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
@@ -121,9 +96,10 @@ mod tests {
         }
     }
 
-    /// Checks the syntax visitor emits a [QueryMatch] for each node in the syntax tree
+    /// Checks the syntax visitor emits a [QueryMatch] for each node in the syntax tree,
+    /// including query nodes outside the requested signal range.
     #[test]
-    fn syntax_visitor() {
+    fn syntax_visitor_emits_queries_outside_the_signal_range() {
         let root = {
             let mut builder = RawSyntaxTreeBuilder::new();
 
@@ -212,7 +188,7 @@ mod tests {
 
         let ctx: AnalyzerContext<RawLanguage> = AnalyzerContext {
             root,
-            range: None,
+            range: Some(TextRange::new(TextSize::from(1), TextSize::from(2))),
             services: ServiceBag::default(),
             options: &AnalyzerOptions::default(),
         };

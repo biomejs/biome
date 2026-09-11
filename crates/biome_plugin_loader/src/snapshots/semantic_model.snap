@@ -1,0 +1,1388 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	defineRule,
+	semantic,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+export const inspect = defineRule({
+	query: semantic("JS_MODULE", "TS_DECLARATION_MODULE"),
+	run(root, { model }) {
+		const reference = (ref) => [
+			ref.syntax().kind,
+			ref.syntax().text,
+			ref.isRead(),
+			ref.isWrite(),
+			ref.binding()?.syntax().text,
+		];
+		registerDiagnostic(
+			root,
+			"information",
+			JSON.stringify(
+				{
+					bindings: model.allBindings().map((binding) => {
+						const node = binding.syntax();
+						const found = model.asBinding(node);
+						return [
+							found.syntax().kind,
+							found.syntax().text,
+							binding.allReferences().map(reference),
+							binding.allReads().map(reference),
+							binding.allWrites().map(reference),
+							binding.isImported(),
+							binding.isExported(),
+							model.isImported(node),
+							model.isExported(node),
+							binding.declarationKind(),
+							binding.exports().map((site) => [site.kind, site.text]),
+							binding.exportRanges(),
+						];
+					}),
+					exported: model
+						.allExportedBindings()
+						.map((binding) => binding.syntax().text)
+						.sort(),
+					hasExports: model.hasExports(),
+					globals: model
+						.allGlobalReferences()
+						.map((ref) => [
+							ref.syntax().kind,
+							ref.syntax().text,
+							ref.isRead(),
+							ref.isWrite(),
+						]),
+					unresolved: model
+						.allUnresolvedReferences()
+						.map((ref) => [
+							ref.syntax().kind,
+							ref.syntax().text,
+							model.isUnresolvedReference(ref.syntax()),
+						]),
+				},
+				0,
+				2,
+			),
+		);
+		const nodes = root.children().flatMap(function visit(node) {
+			return [node, ...node.children().flatMap(visit)];
+		});
+		for (const node of nodes) {
+			if (
+				![
+					"JS_REFERENCE_IDENTIFIER",
+					"JS_IDENTIFIER_ASSIGNMENT",
+					"JSX_REFERENCE_IDENTIFIER",
+				].includes(node.kind)
+			)
+				continue;
+			registerDiagnostic(
+				node,
+				"information",
+				JSON.stringify(
+					[
+						model.binding(node)?.syntax().text ?? null,
+						model.isImported(node),
+						model.isExported(node),
+						model.isGlobalReference(node),
+						model.isUnresolvedReference(node),
+					],
+					0,
+					2,
+				),
+			);
+		}
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+```
+
+## `/file.ts`
+
+```ts
+import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+```
+
+## `/file.jsx`
+
+```jsx
+const Café = () => null; let café = 1; café; <Café />; <Missing />;
+```
+
+## `/file.d.ts`
+
+```ts
+declare const value: number;
+```
+
+## `/malformed.js`
+
+```js
+let broken = ; broken;
+```
+
+## `/exports.js`
+
+```js
+export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+```
+
+## `/reexports.js`
+
+```js
+export * from 'pkg'; export { remote as alias } from 'other'; export default 42; export {};
+```
+
+## `/kinds.ts`
+
+```ts
+var hoisted; using resource = acquire(); export class C {} export enum E { Member } namespace N { export const x = 1; } module M {} export type Alias<T> = T; declare module 'pkg' { export const external: number; }
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "imported",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "imported",
+              true,
+              false,
+              "imported"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "imported",
+              true,
+              false,
+              "imported"
+            ]
+          ],
+          [],
+          true,
+          false,
+          true,
+          false,
+          "import",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "outer",
+          [
+            [
+              "JS_IDENTIFIER_ASSIGNMENT",
+              "outer",
+              false,
+              true,
+              "outer"
+            ]
+          ],
+          [],
+          [
+            [
+              "JS_IDENTIFIER_ASSIGNMENT",
+              "outer",
+              false,
+              true,
+              "outer"
+            ]
+          ],
+          false,
+          true,
+          false,
+          true,
+          "value",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "outer"
+            ]
+          ],
+          [
+            {
+              "start": 55,
+              "end": 60
+            }
+          ]
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "f",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "function",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "outer",
+          [
+            [
+              "JS_IDENTIFIER_ASSIGNMENT",
+              "outer",
+              false,
+              true,
+              "outer"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "outer",
+              true,
+              false,
+              "outer"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "outer",
+              true,
+              false,
+              "outer"
+            ]
+          ],
+          [
+            [
+              "JS_IDENTIFIER_ASSIGNMENT",
+              "outer",
+              false,
+              true,
+              "outer"
+            ]
+          ],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ]
+      ],
+      "exported": [
+        "outer"
+      ],
+      "hasExports": true,
+      "globals": [
+        [
+          "JS_REFERENCE_IDENTIFIER",
+          "configured",
+          true,
+          false
+        ],
+        [
+          "JS_IDENTIFIER_ASSIGNMENT",
+          "configured",
+          false,
+          true
+        ]
+      ],
+      "unresolved": [
+        [
+          "JS_REFERENCE_IDENTIFIER",
+          "missing",
+          true
+        ]
+      ]
+    }
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/file.js:1:87 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "outer",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                       ^^^^^
+  
+
+/file.js:1:105 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "outer",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                         ^^^^^
+  
+
+/file.js:1:114 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "outer",
+      false,
+      true,
+      false,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                                  ^^^^^
+  
+
+/file.js:1:123 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "imported",
+      true,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                                           ^^^^^^^^
+  
+
+/file.js:1:133 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      null,
+      false,
+      false,
+      true,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                                                     ^^^^^^^^^^
+  
+
+/file.js:1:145 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      null,
+      false,
+      false,
+      true,
+      false
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                                                                 ^^^^^^^^^^
+  
+
+/file.js:1:161 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      null,
+      false,
+      false,
+      false,
+      true
+    ]
+  
+  > 1 │ import { external as imported } from 'pkg'; export let outer = 1; function f(outer) { outer = 2; return outer; } outer++; imported; configured; configured = 1; missing;
+      │                                                                                                                                                                 ^^^^^^^
+  
+
+/file.ts:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "dependency",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "dependency",
+              true,
+              false,
+              "dependency"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "dependency",
+              true,
+              false,
+              "dependency"
+            ]
+          ],
+          [],
+          true,
+          false,
+          true,
+          false,
+          "import",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "TypeDependency",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "TypeDependency",
+              true,
+              false,
+              "TypeDependency"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "TypeDependency",
+              true,
+              false,
+              "TypeDependency"
+            ]
+          ],
+          [],
+          true,
+          false,
+          true,
+          false,
+          "importType",
+          [],
+          []
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "T",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "interface",
+          [],
+          []
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "U",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "type",
+          [],
+          []
+        ],
+        [
+          "TS_TYPE_PARAMETER_NAME",
+          "T",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "generic",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "value",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "value",
+              true,
+              false,
+              "value"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "value",
+              true,
+              false,
+              "value"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "D",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "type",
+          [],
+          []
+        ]
+      ],
+      "exported": [],
+      "hasExports": false,
+      "globals": [],
+      "unresolved": []
+    }
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/file.ts:1:111 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "T",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │                                                                                                               ^
+  
+
+/file.ts:1:125 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "T",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │                                                                                                                             ^
+  
+
+/file.ts:1:128 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "value",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │                                                                                                                                ^^^^^
+  
+
+/file.ts:1:135 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "dependency",
+      true,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │                                                                                                                                       ^^^^^^^^^^
+  
+
+/file.ts:1:156 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "TypeDependency",
+      true,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ import dependency = require('pkg'); import type TypeDependency = require('types'); interface T {} type U<T> = T; let value: T; value; dependency; type D = TypeDependency;
+      │                                                                                                                                                            ^^^^^^^^^^^^^^
+  
+
+/file.jsx:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "Café",
+          [
+            [
+              "JSX_REFERENCE_IDENTIFIER",
+              "Café",
+              true,
+              false,
+              "Café"
+            ]
+          ],
+          [
+            [
+              "JSX_REFERENCE_IDENTIFIER",
+              "Café",
+              true,
+              false,
+              "Café"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "café",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "café",
+              true,
+              false,
+              "café"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "café",
+              true,
+              false,
+              "café"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ]
+      ],
+      "exported": [],
+      "hasExports": false,
+      "globals": [],
+      "unresolved": [
+        [
+          "JSX_REFERENCE_IDENTIFIER",
+          "Missing",
+          true
+        ]
+      ]
+    }
+  
+  > 1 │ const Café = () => null; let café = 1; café; <Café />; <Missing />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/file.jsx:1:40 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "café",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ const Café = () => null; let café = 1; café; <Café />; <Missing />;
+      │                                        ^^^^
+  
+
+/file.jsx:1:47 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "Café",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ const Café = () => null; let café = 1; café; <Café />; <Missing />;
+      │                                               ^^^^
+  
+
+/file.jsx:1:57 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      null,
+      false,
+      false,
+      false,
+      true
+    ]
+  
+  > 1 │ const Café = () => null; let café = 1; café; <Café />; <Missing />;
+      │                                                         ^^^^^^^
+  
+
+/file.d.ts:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "value",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ]
+      ],
+      "exported": [],
+      "hasExports": false,
+      "globals": [],
+      "unresolved": []
+    }
+  
+  > 1 │ declare const value: number;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/malformed.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "broken",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "broken",
+              true,
+              false,
+              "broken"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "broken",
+              true,
+              false,
+              "broken"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "value",
+          [],
+          []
+        ]
+      ],
+      "exported": [],
+      "hasExports": false,
+      "globals": [],
+      "unresolved": []
+    }
+  
+  > 1 │ let broken = ; broken;
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/malformed.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "broken",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ let broken = ; broken;
+      │                ^^^^^^
+  
+
+/exports.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "café",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "café",
+              true,
+              false,
+              "café"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "café",
+              true,
+              false,
+              "café"
+            ]
+          ],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "value",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "café"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "café"
+            ]
+          ],
+          [
+            {
+              "start": 13,
+              "end": 18
+            },
+            {
+              "start": 68,
+              "end": 73
+            }
+          ]
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "local",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local",
+              true,
+              false,
+              "local"
+            ]
+          ],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "value",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local"
+            ],
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "local"
+            ]
+          ],
+          [
+            {
+              "start": 50,
+              "end": 55
+            },
+            {
+              "start": 91,
+              "end": 96
+            },
+            {
+              "start": 124,
+              "end": 129
+            }
+          ]
+        ]
+      ],
+      "exported": [
+        "café",
+        "local"
+      ],
+      "hasExports": true,
+      "globals": [],
+      "unresolved": []
+    }
+  
+  > 1 │ export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/exports.js:1:50 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "local",
+      false,
+      true,
+      false,
+      false
+    ]
+  
+  > 1 │ export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+      │                                                  ^^^^^
+  
+
+/exports.js:1:68 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "café",
+      false,
+      true,
+      false,
+      false
+    ]
+  
+  > 1 │ export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+      │                                                                    ^^^^
+  
+
+/exports.js:1:89 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "local",
+      false,
+      true,
+      false,
+      false
+    ]
+  
+  > 1 │ export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+      │                                                                                         ^^^^^
+  
+
+/exports.js:1:122 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "local",
+      false,
+      true,
+      false,
+      false
+    ]
+  
+  > 1 │ export const café = 1; const local = 2; export { local as renamed, café as renamedCafé, local as again }; export default local; export * from 'pkg'; export { remote } from 'other';
+      │                                                                                                                          ^^^^^
+  
+
+/reexports.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [],
+      "exported": [],
+      "hasExports": false,
+      "globals": [],
+      "unresolved": []
+    }
+  
+  > 1 │ export * from 'pkg'; export { remote as alias } from 'other'; export default 42; export {};
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/kinds.ts:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i {
+      "bindings": [
+        [
+          "JS_IDENTIFIER_BINDING",
+          "hoisted",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "hoistedValue",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "resource",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "using",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "C",
+          [],
+          [],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "class",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "C"
+            ]
+          ],
+          [
+            {
+              "start": 54,
+              "end": 55
+            }
+          ]
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "E",
+          [],
+          [],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "enum",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "E"
+            ]
+          ],
+          [
+            {
+              "start": 71,
+              "end": 72
+            }
+          ]
+        ],
+        [
+          "TS_LITERAL_ENUM_MEMBER_NAME",
+          "Member",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "enum",
+          [],
+          []
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "N",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "namespace",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "x",
+          [],
+          [],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "value",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "x"
+            ]
+          ],
+          [
+            {
+              "start": 111,
+              "end": 112
+            }
+          ]
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "M",
+          [],
+          [],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "module",
+          [],
+          []
+        ],
+        [
+          "TS_IDENTIFIER_BINDING",
+          "Alias",
+          [],
+          [],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "type",
+          [
+            [
+              "TS_IDENTIFIER_BINDING",
+              "Alias"
+            ]
+          ],
+          [
+            {
+              "start": 144,
+              "end": 149
+            }
+          ]
+        ],
+        [
+          "TS_TYPE_PARAMETER_NAME",
+          "T",
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [
+            [
+              "JS_REFERENCE_IDENTIFIER",
+              "T",
+              true,
+              false,
+              "T"
+            ]
+          ],
+          [],
+          false,
+          false,
+          false,
+          false,
+          "generic",
+          [],
+          []
+        ],
+        [
+          "JS_IDENTIFIER_BINDING",
+          "external",
+          [],
+          [],
+          [],
+          false,
+          true,
+          false,
+          true,
+          "value",
+          [
+            [
+              "JS_IDENTIFIER_BINDING",
+              "external"
+            ]
+          ],
+          [
+            {
+              "start": 194,
+              "end": 202
+            }
+          ]
+        ]
+      ],
+      "exported": [
+        "Alias",
+        "C",
+        "E",
+        "external",
+        "x"
+      ],
+      "hasExports": true,
+      "globals": [],
+      "unresolved": [
+        [
+          "JS_REFERENCE_IDENTIFIER",
+          "acquire",
+          true
+        ]
+      ]
+    }
+  
+  > 1 │ var hoisted; using resource = acquire(); export class C {} export enum E { Member } namespace N { export const x = 1; } module M {} export type Alias<T> = T; declare module 'pkg' { export const external: number; }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+/kinds.ts:1:31 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      null,
+      false,
+      false,
+      false,
+      true
+    ]
+  
+  > 1 │ var hoisted; using resource = acquire(); export class C {} export enum E { Member } namespace N { export const x = 1; } module M {} export type Alias<T> = T; declare module 'pkg' { export const external: number; }
+      │                               ^^^^^^^
+  
+
+/kinds.ts:1:156 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i [
+      "T",
+      false,
+      false,
+      false,
+      false
+    ]
+  
+  > 1 │ var hoisted; using resource = acquire(); export class C {} export enum E { Member } namespace N { export const x = 1; } module M {} export type Alias<T> = T; declare module 'pkg' { export const external: number; }
+      │                                                                                                                                                            ^
+```

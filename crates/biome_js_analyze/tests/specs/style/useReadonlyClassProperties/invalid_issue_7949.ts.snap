@@ -1,0 +1,264 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_issue_7949.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+class SomeClass {
+	private static VALUE = "ASDF";
+}
+
+class StaticAndInstanceMembersAreIndependent {
+	private static VALUE = "ASDF";
+	private VALUE = "ASDF";
+
+	updateInstance() {
+		this.VALUE = "updated";
+	}
+}
+
+class StaticNamesAreIndependent {
+	private static A = "A";
+	private static B = "B";
+
+	static update() {
+		this.B = "updated";
+	}
+}
+
+class MutableStatic {
+	private static VALUE = "ASDF";
+
+	static update() {
+		this.VALUE = "updated";
+	}
+}
+
+class MutableStaticInBlock {
+	private static VALUE = "ASDF";
+
+	static {
+		this.VALUE = "updated";
+	}
+}
+
+class MutableStaticThroughBlockAlias {
+	private static VALUE = "ASDF";
+
+	static {
+		{
+			const Class = this;
+			Class.VALUE = "updated";
+		}
+	}
+}
+
+class MutableStaticInInitializer {
+	private static VALUE = "ASDF";
+	private static readonly UPDATED_VALUE = (this.VALUE = "updated");
+}
+
+class MutableComputedStatic {
+	private static VALUE = "ASDF";
+
+	static update() {
+		this["VALUE"] = "updated";
+	}
+}
+
+class MutableComputedClassNameStatic {
+	private static VALUE = "ASDF";
+
+	static update() {
+		MutableComputedClassNameStatic["VALUE"] = "updated";
+	}
+}
+
+class MutableStringNamedStatic {
+	private static "VALUE" = "ASDF";
+
+	static update() {
+		this["VALUE"] = "updated";
+	}
+}
+
+class MutableEmptyStringNamedStatic {
+	private static "" = "ASDF";
+
+	static update() {
+		this[``] = "updated";
+	}
+}
+
+class MutableNonNullStatic {
+	private static VALUE = "ASDF";
+
+	static update() {
+		this.VALUE! = "updated";
+	}
+}
+
+class MutableParenthesizedThisStatic {
+	private static VALUE = "ASDF";
+
+	static update() {
+		(this).VALUE = "updated";
+	}
+}
+
+class MutableNumericStatic {
+	private static 1 = "ASDF";
+
+	static update() {
+		this[1.0] = "updated";
+	}
+}
+
+class MutableThroughClassAlias {
+	private static VALUE = "ASDF";
+
+	static update() {
+		const Class = MutableThroughClassAlias;
+		Class.VALUE = "updated";
+	}
+}
+
+class MutableThroughAssignedThisAlias {
+	private static VALUE = "ASDF";
+
+	static update() {
+		let Class;
+		Class = this;
+		Class.VALUE = "updated";
+	}
+}
+
+class MutableThroughAssignedClassAlias {
+	private static VALUE = "ASDF";
+
+	static update() {
+		let Class;
+		Class = MutableThroughAssignedClassAlias;
+		Class.VALUE = "updated";
+	}
+}
+
+class ThisPropertyIsNotAnAlias {
+	private static VALUE = "ASDF";
+	private static readonly HOLDER = { VALUE: "ASDF" };
+
+	static update() {
+		const holder = this.HOLDER;
+		holder.VALUE = "updated";
+	}
+}
+
+class MutableStaticInForOf {
+	private static VALUE = "ASDF";
+
+	static update(values: string[]) {
+		for (this.VALUE of values) {
+		}
+	}
+}
+
+const MutableClassExpression = class {
+	private static VALUE = "ASDF";
+
+	static update() {
+		MutableClassExpression.VALUE = "updated";
+	}
+};
+
+const MutableParenthesizedClassExpression = (class {
+	private static VALUE = "ASDF";
+
+	static update() {
+		MutableParenthesizedClassExpression.VALUE = "updated";
+	}
+});
+
+```
+
+# Diagnostics
+```
+invalid_issue_7949.ts:4:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'VALUE' is never reassigned.
+  
+    3 │ class SomeClass {
+  > 4 │ 	private static VALUE = "ASDF";
+      │ 	               ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    4 │ → private·static·readonly·VALUE·=·"ASDF";
+      │                  +++++++++               
+
+```
+
+```
+invalid_issue_7949.ts:8:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'VALUE' is never reassigned.
+  
+     7 │ class StaticAndInstanceMembersAreIndependent {
+   > 8 │ 	private static VALUE = "ASDF";
+       │ 	               ^^^^^
+     9 │ 	private VALUE = "ASDF";
+    10 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    8 │ → private·static·readonly·VALUE·=·"ASDF";
+      │                  +++++++++               
+
+```
+
+```
+invalid_issue_7949.ts:17:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'A' is never reassigned.
+  
+    16 │ class StaticNamesAreIndependent {
+  > 17 │ 	private static A = "A";
+       │ 	               ^
+    18 │ 	private static B = "B";
+    19 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    17 │ → private·static·readonly·A·=·"A";
+       │                  +++++++++        
+
+```
+
+```
+invalid_issue_7949.ts:143:17 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Member 'VALUE' is never reassigned.
+  
+    142 │ class ThisPropertyIsNotAnAlias {
+  > 143 │ 	private static VALUE = "ASDF";
+        │ 	               ^^^^^
+    144 │ 	private static readonly HOLDER = { VALUE: "ASDF" };
+    145 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    143 │ → private·static·readonly·VALUE·=·"ASDF";
+        │                  +++++++++               
+
+```

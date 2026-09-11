@@ -1,0 +1,74 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<font color="red">Text</font>
+<applet />
+<center><span>Text</span></center>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The font element is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <font color="red">Text</font>
+      │  ^^^^
+    3 │ <applet />
+    4 │ <center><span>Text</span></center>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The applet element is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <font color="red">Text</font>
+  > 3 │ <applet />
+      │  ^^^^^^
+    4 │ <center><span>Text</span></center>
+    5 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:4:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The center element is obsolete.
+  
+    2 │ <font color="red">Text</font>
+    3 │ <applet />
+  > 4 │ <center><span>Text</span></center>
+      │  ^^^^^^
+    5 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

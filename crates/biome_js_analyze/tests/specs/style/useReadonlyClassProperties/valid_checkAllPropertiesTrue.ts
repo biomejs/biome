@@ -71,3 +71,10 @@ class Example4 {
 	}
 }
 
+class ExampleStatic {
+	static prop = 42;
+
+	static update() {
+		this.prop = 43;
+	}
+}

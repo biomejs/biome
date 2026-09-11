@@ -54,17 +54,26 @@
 //! and right side of each Right side.
 
 use crate::prelude::*;
-use biome_formatter::{Buffer, CstFormatContext, format_args, write};
+use biome_formatter::trivia::{
+    format_leading_comments_from_slice, format_trailing_comments_from_slice,
+};
+use biome_formatter::{Buffer, CstFormatContext, FormatContext, format_args, write};
 use biome_js_syntax::binary_like_expression::{
     AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
 };
 
 use crate::{JsFormatOptions, context::OperatorLinebreak};
-use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression};
+use biome_js_syntax::{
+    AnyJsExpression, JsArrayExpression, JsArrowFunctionExpression, JsClassExpression, JsLanguage,
+    JsObjectExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression,
+};
 
 use crate::js::expressions::static_member_expression::AnyJsStaticMemberLike;
-use biome_rowan::{AstNode, SyntaxResult};
-use std::fmt::Debug;
+use crate::js::expressions::unary_expression::FormatJsUnaryExpression;
+use crate::jsx::expressions::tag_expression::FormatJsxTagExpression;
+use crate::utils::format_node_without_comments::FormatAnyJsExpressionWithoutComments;
+use crate::verbatim::format_suppressed_node_skip_comments;
+use biome_rowan::{AstNode, SyntaxKindSet, SyntaxResult};
 use std::iter::FusedIterator;
 
 impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
@@ -77,6 +86,15 @@ impl Format<JsFormatContext> for AnyJsBinaryLikeExpression {
         // Don't indent inside of conditions because conditions add their own indent and grouping.
         if is_inside_condition {
             return write!(f, [&format_once(|f| { f.join().entries(parts).finish() })]);
+        }
+
+        if FormatJsUnaryExpression::can_omit_argument_parentheses(self.syntax(), f) {
+            return write!(
+                f,
+                [group(&format_once(|f| {
+                    f.join().entries(parts).finish()
+                }))]
+            );
         }
 
         if let Some(parent) = parent.as_ref() {
@@ -273,31 +291,10 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
                     .mark_suppression_checked(binary_like_expression.syntax());
 
                 let right = binary_like_expression.right()?;
-                let operator_token = binary_like_expression.operator_token()?;
 
-                let operator_and_right_expression = format_with(|f| {
-                    let should_inline = binary_like_expression.should_inline_logical_expression();
-                    let options: &JsFormatOptions = f.options();
-                    let op_linebreak = options.operator_linebreak();
-
-                    if should_inline {
-                        write!(f, [space(), operator_token.format(), space()])?;
-                    } else if let OperatorLinebreak::Before = op_linebreak {
-                        write!(
-                            f,
-                            [soft_line_break_or_space(), operator_token.format(), space()]
-                        )?;
-                    } else {
-                        write!(
-                            f,
-                            [space(), operator_token.format(), soft_line_break_or_space()]
-                        )?;
-                    }
-
-                    write!(f, [right.format()])?;
-
-                    Ok(())
-                });
+                let operator_and_right_expression = FormatBinaryLikeOperatorAndRight {
+                    expression: binary_like_expression,
+                };
 
                 let syntax = binary_like_expression.syntax();
                 let parent = syntax.parent();
@@ -358,6 +355,93 @@ impl Format<JsFormatContext> for BinaryLeftOrRightSide {
                 Ok(())
             }
         }
+    }
+}
+
+struct FormatBinaryLikeOperatorAndRight<'a> {
+    expression: &'a AnyJsBinaryLikeExpression,
+}
+
+const EXPRESSIONS_WITH_INTERNAL_DANGLING_COMMENTS: SyntaxKindSet<JsLanguage> =
+    JsArrayExpression::KIND_SET
+        .union(JsObjectExpression::KIND_SET)
+        .union(JsArrowFunctionExpression::KIND_SET)
+        .union(JsClassExpression::KIND_SET);
+
+impl Format<JsFormatContext> for FormatBinaryLikeOperatorAndRight<'_> {
+    fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
+        let right = self.expression.right()?;
+        let operator_token = self.expression.operator_token()?;
+        let should_inline = self.expression.should_inline_logical_expression();
+        let options: &JsFormatOptions = f.options();
+        let op_linebreak = options.operator_linebreak();
+
+        if op_linebreak == OperatorLinebreak::Before
+            && f.comments().has_leading_own_line_comment(right.syntax())
+        {
+            let comments = f.comments().clone();
+            let is_suppressed = comments.is_suppressed(right.syntax())
+                || comments.is_global_suppressed(right.syntax());
+            let mut leading_comments = comments.leading_comments(right.syntax());
+            let mut trailing_comments = comments.trailing_comments(right.syntax());
+            if is_suppressed {
+                let source_range = f.context().source_map().map_or_else(
+                    || right.syntax().text_trimmed_range(),
+                    |source_map| source_map.trimmed_source_range(right.syntax()),
+                );
+                let outside_leading = leading_comments.partition_point(|comment| {
+                    comment.piece().text_range().end() <= source_range.start()
+                });
+                leading_comments = &leading_comments[..outside_leading];
+                let inside_trailing = trailing_comments.partition_point(|comment| {
+                    comment.piece().text_range().end() <= source_range.end()
+                });
+                trailing_comments = &trailing_comments[inside_trailing..];
+            }
+            write!(
+                f,
+                [
+                    soft_line_break_or_space(),
+                    format_leading_comments_from_slice(leading_comments),
+                    operator_token.format(),
+                    space(),
+                ]
+            )?;
+            if is_suppressed {
+                write!(f, [format_suppressed_node_skip_comments(right.syntax())])?;
+            } else {
+                if let AnyJsExpression::JsxTagExpression(node) = &right {
+                    FormatJsxTagExpression::without_comments().fmt_node(node, f)?;
+                } else {
+                    FormatAnyJsExpressionWithoutComments.fmt(&right, f)?;
+                }
+                if !EXPRESSIONS_WITH_INTERNAL_DANGLING_COMMENTS.matches(right.syntax().kind()) {
+                    write!(
+                        f,
+                        [format_dangling_comments(right.syntax()).with_soft_block_indent()]
+                    )?;
+                }
+            }
+            return write!(f, [format_trailing_comments_from_slice(trailing_comments)]);
+        }
+
+        if should_inline {
+            write!(f, [space(), operator_token.format(), space()])?;
+        } else if let OperatorLinebreak::Before = op_linebreak {
+            write!(
+                f,
+                [soft_line_break_or_space(), operator_token.format(), space()]
+            )?;
+        } else {
+            write!(
+                f,
+                [space(), operator_token.format(), soft_line_break_or_space()]
+            )?;
+        }
+
+        write!(f, [right.format()])?;
+
+        Ok(())
     }
 }
 

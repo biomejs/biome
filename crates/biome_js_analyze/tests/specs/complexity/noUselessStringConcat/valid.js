@@ -22,3 +22,11 @@ const stylisticConcatLeading = `foo`
 const a = t`translate-me` + "!"
 const a = "prefix" + sql`query`
 const a = tag`a` + tag`b`
+const lastString = 1 +
+  "longStringThatGoesOverLimit"
+const lastNum = "longStringThatGoesOverLimit" +
+  3
+const middleErrors = 1 +
+  "longStringThatGoesOverLimit" +
+  3
+const plusplusone = +1 + "ddd"

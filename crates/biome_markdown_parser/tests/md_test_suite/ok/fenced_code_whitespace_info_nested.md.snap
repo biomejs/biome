@@ -1,0 +1,219 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+> ```   
+> quoted
+> ```
+
+- list item
+
+  ```   
+  listed
+  ```
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdQuote {
+            prefix: MdQuotePrefix {
+                pre_marker_indent: MdQuoteIndentList [],
+                marker_token: R_ANGLE@0..1 ">" [] [],
+                post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] [],
+            },
+            content: MdBlockList [
+                MdFencedCodeBlock {
+                    indent: MdIndentTokenList [],
+                    l_fence: TRIPLE_BACKTICK@2..5 "```" [] [],
+                    code_list: MdCodeNameList [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@5..9 "\n" [Whitespace("   ")] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@9..10 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@10..11 " " [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@11..17 "quoted" [] [],
+                        },
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                        },
+                        MdQuotePrefix {
+                            pre_marker_indent: MdQuoteIndentList [],
+                            marker_token: R_ANGLE@18..19 ">" [] [],
+                            post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] [],
+                        },
+                    ],
+                    r_fence_indent: MdIndentTokenList [],
+                    r_fence: TRIPLE_BACKTICK@20..23 "```" [] [],
+                },
+                MdNewline {
+                    value_token: NEWLINE@23..24 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@24..25 "\n" [] [],
+        },
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@25..26 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@26..27 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@27..36 "list item" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@36..37 "\n" [] [],
+                                },
+                            ],
+                        },
+                        MdNewline {
+                            value_token: NEWLINE@37..38 "\n" [] [],
+                        },
+                        MdContinuationIndent {
+                            indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@38..40 "  " [] [],
+                                },
+                            ],
+                        },
+                        MdFencedCodeBlock {
+                            indent: MdIndentTokenList [],
+                            l_fence: TRIPLE_BACKTICK@40..43 "```" [] [],
+                            code_list: MdCodeNameList [],
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@43..47 "\n" [Whitespace("   ")] [],
+                                },
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@47..49 "  " [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@49..55 "listed" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@55..56 "\n" [] [],
+                                },
+                            ],
+                            r_fence_indent: MdIndentTokenList [
+                                MdIndentToken {
+                                    md_indent_char_token: MD_INDENT_CHAR@56..58 "  " [] [],
+                                },
+                            ],
+                            r_fence: TRIPLE_BACKTICK@58..61 "```" [] [],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@61..62 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@62..62 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..62
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..62
+    0: MD_QUOTE@0..24
+      0: MD_QUOTE_PREFIX@0..2
+        0: MD_QUOTE_INDENT_LIST@0..0
+        1: R_ANGLE@0..1 ">" [] []
+        2: MD_QUOTE_POST_MARKER_SPACE@1..2 " " [] []
+      1: MD_BLOCK_LIST@2..24
+        0: MD_FENCED_CODE_BLOCK@2..23
+          0: MD_INDENT_TOKEN_LIST@2..2
+          1: TRIPLE_BACKTICK@2..5 "```" [] []
+          2: MD_CODE_NAME_LIST@5..5
+          3: MD_INLINE_ITEM_LIST@5..20
+            0: MD_TEXTUAL@5..9
+              0: MD_TEXTUAL_LITERAL@5..9 "\n" [Whitespace("   ")] []
+            1: MD_QUOTE_PREFIX@9..11
+              0: MD_QUOTE_INDENT_LIST@9..9
+              1: R_ANGLE@9..10 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@10..11 " " [] []
+            2: MD_TEXTUAL@11..17
+              0: MD_TEXTUAL_LITERAL@11..17 "quoted" [] []
+            3: MD_TEXTUAL@17..18
+              0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+            4: MD_QUOTE_PREFIX@18..20
+              0: MD_QUOTE_INDENT_LIST@18..18
+              1: R_ANGLE@18..19 ">" [] []
+              2: MD_QUOTE_POST_MARKER_SPACE@19..20 " " [] []
+          4: MD_INDENT_TOKEN_LIST@20..20
+          5: TRIPLE_BACKTICK@20..23 "```" [] []
+        1: MD_NEWLINE@23..24
+          0: NEWLINE@23..24 "\n" [] []
+    1: MD_NEWLINE@24..25
+      0: NEWLINE@24..25 "\n" [] []
+    2: MD_BULLET_LIST_ITEM@25..61
+      0: MD_BULLET_LIST@25..61
+        0: MD_BULLET@25..61
+          0: MD_LIST_MARKER_PREFIX@25..27
+            0: MD_INDENT_TOKEN_LIST@25..25
+            1: MINUS@25..26 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@26..27 " " [] []
+            3: MD_INDENT_TOKEN_LIST@27..27
+          1: MD_BLOCK_LIST@27..61
+            0: MD_PARAGRAPH@27..37
+              0: MD_INLINE_ITEM_LIST@27..37
+                0: MD_TEXTUAL@27..36
+                  0: MD_TEXTUAL_LITERAL@27..36 "list item" [] []
+                1: MD_TEXTUAL@36..37
+                  0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
+            1: MD_NEWLINE@37..38
+              0: NEWLINE@37..38 "\n" [] []
+            2: MD_CONTINUATION_INDENT@38..40
+              0: MD_INDENT_TOKEN_LIST@38..40
+                0: MD_INDENT_TOKEN@38..40
+                  0: MD_INDENT_CHAR@38..40 "  " [] []
+            3: MD_FENCED_CODE_BLOCK@40..61
+              0: MD_INDENT_TOKEN_LIST@40..40
+              1: TRIPLE_BACKTICK@40..43 "```" [] []
+              2: MD_CODE_NAME_LIST@43..43
+              3: MD_INLINE_ITEM_LIST@43..56
+                0: MD_TEXTUAL@43..47
+                  0: MD_TEXTUAL_LITERAL@43..47 "\n" [Whitespace("   ")] []
+                1: MD_INDENT_TOKEN@47..49
+                  0: MD_INDENT_CHAR@47..49 "  " [] []
+                2: MD_TEXTUAL@49..55
+                  0: MD_TEXTUAL_LITERAL@49..55 "listed" [] []
+                3: MD_TEXTUAL@55..56
+                  0: MD_TEXTUAL_LITERAL@55..56 "\n" [] []
+              4: MD_INDENT_TOKEN_LIST@56..58
+                0: MD_INDENT_TOKEN@56..58
+                  0: MD_INDENT_CHAR@56..58 "  " [] []
+              5: TRIPLE_BACKTICK@58..61 "```" [] []
+    3: MD_NEWLINE@61..62
+      0: NEWLINE@61..62 "\n" [] []
+  3: EOF@62..62 "" [] []
+
+```

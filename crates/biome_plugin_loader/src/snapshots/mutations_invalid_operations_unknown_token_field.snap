@@ -1,0 +1,48 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+		const mutation = createMutation(root);
+		first.token("unknown");
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule fixer errored: TypeError: node.token("unknown") cannot find a token field named "unknown" on a node of kind JS_NUMBER_LITERAL_EXPRESSION. Check this node's plugin API type definition and pass a token field name declared for that type. (/plugin.js:14:12)
+        at run (/plugin.js:14:12)
+```

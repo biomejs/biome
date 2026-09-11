@@ -1,0 +1,10 @@
+.explicit { @apply py-3; width: 1px; }
+.final { @apply py-3 }
+.block-comment { @apply mb-2 /* utility */ }
+.line-comment {
+  @apply clear-both // utility
+  /* close */
+}
+.slashes { @apply w-1/2 bg-[url(http://example.com/a.svg)] content-['/*x*/']; }
+.after { width: 1px; }
+@apply py-3

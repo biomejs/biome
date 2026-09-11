@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 197
+expression: valid.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<>
+	<div
+		onFullscreenChange={handleFullscreenChange}
+		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+		onFullscreenError={handleFullscreenError}
+		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+	/>
+	<iframe credentialless />
+	<svg>
+		<mask maskType="alpha" />
+	</svg>
+</>;
+
+```

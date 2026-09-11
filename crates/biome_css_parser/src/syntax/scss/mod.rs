@@ -10,15 +10,16 @@ mod token_sets;
 mod value;
 
 pub(crate) use at_rule::{
-    is_at_scss_interpolated_media_in_parens, is_at_scss_keyframes_name,
-    is_at_scss_keyframes_selector, is_at_scss_media_condition, is_at_scss_media_query,
-    is_at_scss_supports_interpolated_condition, parse_bogus_scss_else_at_rule,
-    parse_scss_at_root_at_rule, parse_scss_content_at_rule, parse_scss_debug_at_rule,
-    parse_scss_each_at_rule, parse_scss_error_at_rule, parse_scss_extend_at_rule,
-    parse_scss_for_at_rule, parse_scss_forward_at_rule, parse_scss_function_at_rule,
-    parse_scss_if_at_rule, parse_scss_import_at_rule, parse_scss_include_at_rule,
-    parse_scss_interpolated_media_in_parens, parse_scss_interpolated_query_feature,
-    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_media_condition,
+    expect_scss_semicolon_at_rule, is_at_scss_interpolated_media_in_parens,
+    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_media_condition,
+    is_at_scss_media_query, is_at_scss_supports_interpolated_condition,
+    parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
+    parse_scss_debug_at_rule, parse_scss_each_at_rule, parse_scss_error_at_rule,
+    parse_scss_extend_at_rule, parse_scss_for_at_rule, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_import_at_rule,
+    parse_scss_include_at_rule, parse_scss_interpolated_media_in_parens,
+    parse_scss_interpolated_query_feature, parse_scss_keyframes_name,
+    parse_scss_keyframes_selector, parse_scss_media_condition,
     parse_scss_media_condition_from_query, parse_scss_media_query, parse_scss_mixin_at_rule,
     parse_scss_return_at_rule, parse_scss_supports_interpolated_condition, parse_scss_use_at_rule,
     parse_scss_warn_at_rule, parse_scss_while_at_rule,
@@ -65,7 +66,8 @@ pub(crate) use selector::{
     is_at_scss_pseudo_class_nth, is_nth_at_scss_placeholder_selector,
     parse_scss_interpolated_attribute_modifier,
     parse_scss_interpolated_pseudo_class_function_arguments,
-    parse_scss_interpolated_pseudo_element_function_arguments, parse_scss_parent_selector,
+    parse_scss_interpolated_pseudo_element_function_arguments,
+    parse_scss_interpolated_sub_selector, parse_scss_parent_selector,
     parse_scss_placeholder_selector, parse_scss_pseudo_class_nth,
 };
 pub(crate) use token_sets::{

@@ -1,0 +1,15 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<Font />
+<Center>Text</Center>
+<Applet />
+<UI.Font />
+<custom-font />
+<span>Text</span>
+
+```

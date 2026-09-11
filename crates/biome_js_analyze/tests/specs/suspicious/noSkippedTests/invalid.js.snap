@@ -38,6 +38,13 @@ test("bare skip", async () => {
     test.skip();
 });
 
+xsuite('foo', () => {});
+suite.skip("test", () => {});
+suite.fixme("fixme suite", () => {});
+suite["skip"]("bracket notation", async () => {});
+test.suite.skip("skipped suite", () => {});
+
+
 ```
 
 # Diagnostics
@@ -555,6 +562,139 @@ invalid.js:32:10 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━�
        32 │ + ····test();
     33 33 │   });
     34 34 │   
+  
+
+```
+
+```
+invalid.js:35:1 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    33 │ });
+    34 │ 
+  > 35 │ xsuite('foo', () => {});
+       │ ^^^^^^
+    36 │ suite.skip("test", () => {});
+    37 │ suite.fixme("fixme suite", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    33 33 │   });
+    34 34 │   
+    35    │ - xsuite('foo',·()·=>·{});
+       35 │ + suite('foo',·()·=>·{});
+    36 36 │   suite.skip("test", () => {});
+    37 37 │   suite.fixme("fixme suite", () => {});
+  
+
+```
+
+```
+invalid.js:36:7 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    35 │ xsuite('foo', () => {});
+  > 36 │ suite.skip("test", () => {});
+       │       ^^^^
+    37 │ suite.fixme("fixme suite", () => {});
+    38 │ suite["skip"]("bracket notation", async () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    34 34 │   
+    35 35 │   xsuite('foo', () => {});
+    36    │ - suite.skip("test",·()·=>·{});
+       36 │ + suite("test",·()·=>·{});
+    37 37 │   suite.fixme("fixme suite", () => {});
+    38 38 │   suite["skip"]("bracket notation", async () => {});
+  
+
+```
+
+```
+invalid.js:37:7 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    35 │ xsuite('foo', () => {});
+    36 │ suite.skip("test", () => {});
+  > 37 │ suite.fixme("fixme suite", () => {});
+       │       ^^^^^
+    38 │ suite["skip"]("bracket notation", async () => {});
+    39 │ test.suite.skip("skipped suite", () => {});
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    35 35 │   xsuite('foo', () => {});
+    36 36 │   suite.skip("test", () => {});
+    37    │ - suite.fixme("fixme·suite",·()·=>·{});
+       37 │ + suite("fixme·suite",·()·=>·{});
+    38 38 │   suite["skip"]("bracket notation", async () => {});
+    39 39 │   test.suite.skip("skipped suite", () => {});
+  
+
+```
+
+```
+invalid.js:38:7 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    36 │ suite.skip("test", () => {});
+    37 │ suite.fixme("fixme suite", () => {});
+  > 38 │ suite["skip"]("bracket notation", async () => {});
+       │       ^^^^^^
+    39 │ test.suite.skip("skipped suite", () => {});
+    40 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    38 │ suite["skip"]("bracket·notation",·async·()·=>·{});
+       │      --------                                     
+
+```
+
+```
+invalid.js:39:12 lint/suspicious/noSkippedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't disable tests.
+  
+    37 │ suite.fixme("fixme suite", () => {});
+    38 │ suite["skip"]("bracket notation", async () => {});
+  > 39 │ test.suite.skip("skipped suite", () => {});
+       │            ^^^^
+    40 │ 
+  
+  i Disabling tests is useful when debugging or creating placeholder while working.
+  
+  i If this is intentional, and you want to commit a disabled test, add a suppression comment.
+  
+  i Unsafe fix: Enable the test.
+  
+    37 37 │   suite.fixme("fixme suite", () => {});
+    38 38 │   suite["skip"]("bracket notation", async () => {});
+    39    │ - test.suite.skip("skipped·suite",·()·=>·{});
+       39 │ + test.suite("skipped·suite",·()·=>·{});
+    40 40 │   
+    41 41 │   
   
 
 ```

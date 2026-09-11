@@ -1,0 +1,42 @@
+%base{color:red}
+.target:not(.x){color:red}
+.line{@extend %base // target
+}
+.block-line{@extend %base /* inside */ // outside
+}
+.line-block{@extend %base // first
+/* inside */ }
+.mixed{@extend %base // first
+/* inside */ // outside
+// last
+}
+.explicit{@extend %base /* inside */ // outside
+;}
+.import{@import "theme.css" /* inside */ // outside
+}
+.unknown{@foo bar // first
+/* inside */ // outside
+}
+.apply{@apply py-3 /* inside */ // outside
+// last
+}
+.own-line{@apply py-3
+// outside
+
+// last
+}
+.pseudo{@extend :not(.x) // target
+}
+.pseudo-after{@extend :not(.x) // first
+; /* second */ }
+.after-block{@extend %base // first
+; /* second */ }
+.after-line{@apply py-3 // first
+; // second
+}
+.suppressed{
+/* biome-ignore format: keep statement */
+@apply    py-3; // outside
+}
+.after{width:1px}
+@foo bar /* inside */ // outside

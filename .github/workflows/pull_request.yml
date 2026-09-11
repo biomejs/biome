@@ -44,7 +44,7 @@ jobs:
         if: matrix.os == 'depot-windows-2022'
         run: git config --system core.longpaths true
       - name: Checkout PR Branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -78,9 +78,9 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install cargo-deny
-        uses: taiki-e/install-action@82cd3e7658a6f96c86c0234aeeda1748937cb0a1 # v2.85.13
+        uses: taiki-e/install-action@7b8d4719ee4aaa279bdf55df38dacb9ebfe12a6c # v2.87.6
         with:
           tool: cargo-deny
       - name: Audit crates.io dependencies
@@ -99,7 +99,7 @@ jobs:
         if: matrix.os == 'depot-windows-2022-16'
         run: git config --system core.longpaths true
       - name: Checkout PR branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -121,7 +121,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
@@ -138,7 +138,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-arm
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:

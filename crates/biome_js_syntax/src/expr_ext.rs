@@ -935,19 +935,27 @@ impl AnyJsExpression {
     /// - `test.(only|skip|fixme|todo|fails|failing|concurrent|sequential).(only|skip|fixme|todo|fails|failing|concurrent|sequential)`
     /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
     /// - `describe.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `suite.(only|skip|fixme|todo|shuffle|concurrent|sequential)`
+    /// - `suite.(only|skip|fixme|todo|shuffle|concurrent|sequential).(only|skip|fixme|todo|shuffle|concurrent|sequential)`
     /// - `test.step`
     /// - `test.step.(skip|fixme)`
     /// - `test.describe`
     /// - `test.describe.(only|skip|fixme)`
     /// - `test.describe.(parallel|serial)`
     /// - `test.describe.(parallel|serial).(only|skip|fixme)`
+    /// - `test.suite`
+    /// - `test.suite.(only|skip|fixme)`
+    /// - `test.suite.(parallel|serial)`
+    /// - `test.suite.(parallel|serial).(only|skip|fixme)`
     /// - `skip`
     /// - `xit`
     /// - `xdescribe`
     /// - `xtest`
+    /// - `xsuite`
     /// - `fit`
     /// - `fdescribe`
     /// - `ftest`
+    /// - `fsuite`
     /// - `Deno.test`
     ///
     /// Elements within parentheses `()` can be any of the listed options separated by `|`.
@@ -974,7 +982,7 @@ impl AnyJsExpression {
         let fifth = members.next().map(TokenText::text);
 
         match first {
-            Some("describe") => match second {
+            Some("describe" | "suite") => match second {
                 None => true,
                 Some(
                     "concurrent" | "sequential" | "only" | "skip" | "fixme" | "todo" | "shuffle",
@@ -1017,7 +1025,7 @@ impl AnyJsExpression {
                             | "failing",
                     )
                 ),
-                Some("describe") => match third {
+                Some("describe" | "suite") => match third {
                     None => true,
                     Some("only" | "skip" | "fixme") => fourth.is_none(),
                     Some("parallel" | "serial") => match fourth {
@@ -1033,7 +1041,10 @@ impl AnyJsExpression {
                 Some("test") => third.is_none(),
                 _ => false,
             },
-            Some("skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest") => true,
+            Some(
+                "skip" | "xit" | "xdescribe" | "xtest" | "fit" | "fdescribe" | "ftest" | "fsuite"
+                | "xsuite",
+            ) => true,
             _ => false,
         }
     }
@@ -1052,9 +1063,11 @@ impl AnyJsExpression {
     ///
     /// - `test.each`
     /// - `describe.each`
+    /// - `suite.each`
     /// - `it.each`
     /// - `test.only.each`
     /// - `describe.skip.each`
+    /// - `suite.skip.each`
     /// - `it.concurrent.each`
     /// - `test.prop`
     ///
@@ -1086,12 +1099,12 @@ impl AnyJsExpression {
     }
 
     /// Checks whether the current function call is:
-    /// - `describe`
+    /// - `describe` or `suite`
     pub fn contains_describe_call(&self) -> bool {
         let mut members = CalleeNamesIterator::new(self.clone());
 
         if let Some(member) = members.next() {
-            return member.text() == "describe";
+            return matches!(member.text(), "describe" | "suite");
         }
         false
     }
@@ -1125,8 +1138,8 @@ impl AnyJsExpression {
     /// Checks whether the current expression contains a focused test pattern.
     ///
     /// This method detects any of the following focused test patterns:
-    /// - `describe.only`, `it.only`, `test.only`
-    /// - `fdescribe`, `fit`, `ftest`
+    /// - `describe.only`, `it.only`, `test.only`, `suite.only`
+    /// - `fdescribe`, `fit`, `ftest`, `fsuite`
     /// - `test.concurrent.only`
     /// - `it.concurrent.only`
     ///
@@ -1149,16 +1162,16 @@ impl AnyJsExpression {
         // Jasmine / Angular focused test patterns (f prepended)
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest") && second.is_none() {
+            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite") && second.is_none() {
                 return Ok(true);
             }
         }
 
         // Handle cases with .only
         if let (Some(first_token), Some(second_token)) = (&first, &second) {
-            // Check for direct .only pattern: test.only, it.only, describe.only
+            // Check for direct .only pattern: test.only, it.only, describe.only, suite.only
             if first_token.text() == "only"
-                && matches!(second_token.text(), "test" | "it" | "describe")
+                && matches!(second_token.text(), "test" | "it" | "describe" | "suite")
             {
                 return Ok(true);
             }
@@ -1181,6 +1194,7 @@ impl AnyJsExpression {
     /// This method detects patterns like:
     /// - `test.only.each`
     /// - `describe.only.each`
+    /// - `suite.only.each`
     /// - `it.only.each`
     ///
     /// ## Examples
@@ -1216,12 +1230,15 @@ impl AnyJsExpression {
                 "test"
                     | "it"
                     | "describe"
+                    | "suite"
                     | "xtest"
                     | "xit"
                     | "xdescribe"
+                    | "xsuite"
                     | "ftest"
                     | "fit"
                     | "fdescribe"
+                    | "fsuite"
             ) {
                 return Ok(true);
             }

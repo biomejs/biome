@@ -1,7 +1,7 @@
-use crate::run_cli;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, message_to_string};
+use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use bpaf::Args;
 use camino::Utf8Path;
 
@@ -167,4 +167,33 @@ fn reports_diagnostics_github_format_command() {
         console,
         result,
     ));
+}
+
+// Don't snapshot, fails on Windows due to path.
+#[test]
+fn reports_diagnostics_github_from_nested_directory() {
+    let mut fs = TemporaryFs::new("reports_diagnostics_github_from_nested_directory");
+    let mut console = BufferConsole::default();
+
+    fs.create_file("packages/ui/main.ts", "debugger;\n");
+    fs.append_to_working_directory("packages/ui");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--reporter=github", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    let output = console
+        .out_buffer
+        .iter()
+        .map(message_to_string)
+        .collect::<String>()
+        .replace('\\', "/");
+    assert!(
+        output.contains("/packages/ui/main.ts"),
+        "unexpected output: {output}"
+    );
 }

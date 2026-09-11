@@ -2,17 +2,19 @@ use std::fmt::{Debug, Formatter};
 use std::ops::DerefMut;
 use std::sync::Arc;
 
-use boa_engine::{JsNativeError, JsResult, JsValue};
+use boa_engine::{JsNativeError, JsResult};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use biome_analyze::{
     AnalyzerPlugin, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+    ServiceBag,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_glob::NormalizedGlob;
 use biome_js_runtime::{JsExecContext, JsPluginRule};
 use biome_js_syntax::JsSyntaxNode;
+use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
@@ -116,7 +118,26 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         self.kinds.clone()
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, _path: Utf8PathBuf) -> PluginEvalResult {
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        services: &ServiceBag,
+    ) -> PluginEvalResult {
+        let Some(source_type) = services.get_service::<JsFileSource>() else {
+            return PluginEvalResult {
+                entries: vec![PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!(
+                            "Could not run the plugin because the analyzed file's source type is unavailable."
+                        ),
+                    ),
+                    action: None,
+                }],
+            };
+        };
         let mut plugin = match self
             .loaded
             .get_mut_or_try_init(|| load_plugin(self.fs.clone(), &self.path))
@@ -152,33 +173,30 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         };
 
         let kind = node.kind();
-        let ast = ctx.create_js_ast(node);
         let mut entries = Vec::new();
 
         for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
-            let result =
-                ctx.call_function(&rule.run, &JsValue::undefined(), std::slice::from_ref(&ast));
+            let result = ctx.call_rule(rule, node.clone(), &path, *source_type, services);
 
             // Drain the diagnostics even on errors, so a failed rule can't leak
             // its diagnostics into the next one.
             let mut diagnostics = ctx.pull_diagnostics();
 
             if let Err(err) = result {
-                diagnostics.push(RuleDiagnostic::new(
-                    category!("plugin"),
-                    None::<TextRange>,
-                    markup!("Rule "<Emphasis>{rule.name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
-                ));
+                diagnostics.push(PluginDiagnosticEntry {
+                    diagnostic: RuleDiagnostic::new(
+                        category!("plugin"),
+                        None::<TextRange>,
+                        markup!("Rule "<Emphasis>{rule.name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
+                    ),
+                    action: None,
+                });
             }
 
-            entries.extend(
-                diagnostics
-                    .into_iter()
-                    .map(|diagnostic| PluginDiagnosticEntry {
-                        diagnostic: diagnostic.subcategory(rule.name.clone()),
-                        action: None,
-                    }),
-            );
+            entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
+                diagnostic: entry.diagnostic.subcategory(rule.name.clone()),
+                action: entry.action,
+            }));
         }
 
         PluginEvalResult { entries }
@@ -188,21 +206,274 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_utils::snapshot_content;
+    use biome_diagnostics::advice::CodeSuggestionAdvice;
     use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::JsSyntaxKind;
-    use biome_languages::JsFileSource;
+    use boa_engine::JsValue;
+
+    pub(super) fn services(source_type: JsFileSource) -> ServiceBag {
+        let mut services = ServiceBag::default();
+        services.insert_service(source_type);
+        services
+    }
+
+    #[test]
+    fn rule_context_represents_source_type() {
+        use biome_languages::javascript::{
+            JsEmbeddingKind, LanguageVersion, SvelteEmbeddingKind, SvelteFileKind,
+        };
+
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            export const sourceMode = defineRule({
+                query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
+                run(root, context) {
+                    const source = context.sourceType;
+                    registerDiagnostic(root, "information", JSON.stringify([
+                        source.language, source.variant, source.moduleKind,
+                        source.version, source.embeddingKind,
+                    ]));
+                },
+            });"#,
+            None,
+        );
+        for (source, expected) in [
+            (
+                JsFileSource::js_module(),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_script(),
+                r#"[{"kind":"javascript"},"standard","script","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::jsx(),
+                r#"[{"kind":"javascript"},"jsx","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::ts(),
+                r#"[{"kind":"typescript","definitionFile":false},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::ts_restricted(),
+                r#"[{"kind":"typescript","definitionFile":false},"standardRestricted","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::tsx(),
+                r#"[{"kind":"typescript","definitionFile":false},"jsx","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::d_ts(),
+                r#"[{"kind":"typescript","definitionFile":true},"standard","module","es2022",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_version(LanguageVersion::ESNext),
+                r#"[{"kind":"javascript"},"standard","module","esNext",{"kind":"none"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    frontmatter: true,
+                    is_class_attribute: false,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":true,"isClassAttribute":false}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    frontmatter: false,
+                    is_class_attribute: true,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":false,"isClassAttribute":true}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    setup: true,
+                    is_source: true,
+                    event_handler: false,
+                    allow_statements: true,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":true,"isSource":true,"eventHandler":false}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    setup: false,
+                    is_source: false,
+                    event_handler: true,
+                    allow_statements: false,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":false,"isSource":false,"eventHandler":true}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::SourceModule,
+                    embedding_kind: SvelteEmbeddingKind::Source,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"sourceModule","embeddingKind":"source"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Expression,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"expression"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::SnippetSignature,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"snippetSignature"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::LegacyConst,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"legacyConst"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::Declaration,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"declaration"}]"#,
+            ),
+        ] {
+            let parse = biome_js_parser::parse(
+                "",
+                source.with_embedding_kind(JsEmbeddingKind::None),
+                JsParserOptions::default(),
+            );
+            let result =
+                plugin.evaluate(parse.syntax().into(), "/file.js".into(), &services(source));
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected one diagnostic for {source:?}: {result:?}");
+            };
+            assert_eq!(PrintDescription(&entry.diagnostic).to_string(), expected);
+        }
+    }
+
+    #[test]
+    fn rule_context_is_readonly_and_retains_its_file() {
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            let saved;
+            export const contextValues = defineRule({
+                query: ast("JS_MODULE"),
+                run(root, context) {
+                    const objects = [context, context.sourceType,
+                        context.sourceType.language, context.sourceType.embeddingKind];
+                    const readonly = objects.every(object => Object.keys(object).every(key =>
+                        !Reflect.set(object, key, null) &&
+                        !Reflect.deleteProperty(object, key) &&
+                        !Reflect.defineProperty(object, key, { value: null })
+                    ));
+                    registerDiagnostic(root, "information", JSON.stringify([
+                        context, saved, readonly,
+                    ]));
+                    saved = context;
+                },
+            });"#,
+            None,
+        );
+        let mut previous = serde_json::Value::Null;
+        for (path, source, language) in [
+            (
+                "/src/café.js",
+                JsFileSource::js_module(),
+                serde_json::json!({"kind": "javascript"}),
+            ),
+            (
+                "relative/文件.ts",
+                JsFileSource::ts(),
+                serde_json::json!({"kind": "typescript", "definitionFile": false}),
+            ),
+        ] {
+            let parse = biome_js_parser::parse("", source, JsParserOptions::default());
+            let result = plugin.evaluate(parse.syntax().into(), path.into(), &services(source));
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected one diagnostic: {result:?}");
+            };
+            let current = serde_json::json!({
+                "filePath": path,
+                "sourceType": {
+                    "language": language, "variant": "standard", "moduleKind": "module",
+                    "version": "es2022", "embeddingKind": { "kind": "none" },
+                },
+            });
+            let actual: serde_json::Value =
+                serde_json::from_str(&PrintDescription(&entry.diagnostic).to_string()).unwrap();
+            assert_eq!(actual, serde_json::json!([current, previous, true]));
+            previous = current;
+        }
+    }
+
+    #[test]
+    fn rule_context_receives_analyzer_services_for_descendants() {
+        use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never};
+        use biome_js_analyze::JsAnalyzerServices;
+
+        let plugin = load_test_plugin_from_source(
+            "/plugin.js",
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            export const contextValues = defineRule({
+                query: ast("JS_VARIABLE_STATEMENT"),
+                run(node, context) {
+                    registerDiagnostic(node, "information",
+                        `${context.filePath}|${context.sourceType.language.kind}|${context.sourceType.variant}`);
+                },
+            });"#,
+            None,
+        );
+        let source = JsFileSource::tsx();
+        let parse =
+            biome_js_parser::parse("let value: number;", source, JsParserOptions::default());
+        assert!(!parse.has_errors());
+        let mut options = AnalyzerOptions::default();
+        options.file_path = "/component.js".into();
+        let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> = vec![Arc::new(Box::new(plugin))];
+        let mut messages = Vec::new();
+        let (_, diagnostics) = biome_js_analyze::analyze(
+            &parse.tree(),
+            AnalysisFilter {
+                enabled_rules: Some(&[]),
+                ..AnalysisFilter::default()
+            },
+            &options,
+            &plugins,
+            JsAnalyzerServices::default().with_source_type(source),
+            |signal| {
+                if let Some(diagnostic) = signal.diagnostic() {
+                    messages.push(PrintDescription(&diagnostic).to_string());
+                }
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+        assert!(diagnostics.is_empty(), "{diagnostics:?}");
+        assert_eq!(messages, ["/component.js|typescript|jsx"]);
+    }
 
     /// Renders the diagnostics of a single evaluation the same way the CLI does, by attaching the
     /// path and the content of the analyzed file so the code frame can be printed.
-    fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
+    pub(super) fn render_diagnostics(path: &str, source: &str, result: PluginEvalResult) -> String {
         result
             .entries
             .into_iter()
             .map(|entry| {
+                let mut diagnostic = entry.diagnostic;
+                if let Some(action) = entry.action {
+                    diagnostic = diagnostic.with_advices(CodeSuggestionAdvice {
+                        applicability: action.applicability,
+                        msg: markup!({ action.message }).to_owned(),
+                        suggestion: action.text_edit,
+                    });
+                }
                 print_diagnostic_to_string(
-                    &Error::from(entry.diagnostic)
+                    &Error::from(diagnostic)
                         .with_file_path(path)
                         .with_file_source_code(source.to_string()),
                 )
@@ -210,9 +481,17 @@ mod tests {
             .collect()
     }
 
-    fn snap_diagnostics(test_name: &str, content: String) {
-        // Normalize Windows paths...
-        let content = content.replace('\\', "/");
+    pub(super) fn snap_diagnostics(
+        test_name: &str,
+        plugin_path: &str,
+        plugin_source: &str,
+        inputs: &[(&str, &str)],
+        mut diagnostics: String,
+    ) {
+        for path in std::iter::once(plugin_path).chain(inputs.iter().map(|(path, _)| *path)) {
+            diagnostics = diagnostics.replace(&path.replace('/', "\\"), &path.replace('\\', "/"));
+        }
+        let content = snapshot_content(&[(plugin_path, plugin_source)], inputs, &diagnostics);
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
@@ -221,7 +500,7 @@ mod tests {
         });
     }
 
-    fn load_test_plugin_from_source(
+    pub(super) fn load_test_plugin_from_source(
         path: &str,
         source: &str,
         includes: Option<&[NormalizedGlob]>,
@@ -235,7 +514,7 @@ mod tests {
     fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerJsPlugin {
         load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -281,7 +560,7 @@ mod tests {
     fn passes_the_matched_node_to_run() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -305,7 +584,11 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
@@ -323,7 +606,7 @@ mod tests {
     fn traverses_parents_and_ancestors_of_queried_descendants() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_EXPRESSION_STATEMENT", "JS_NUMBER_LITERAL_EXPRESSION", "JS_YIELD_ARGUMENT"),
                 run(node) {
@@ -388,7 +671,11 @@ mod tests {
                 .descendants()
                 .find(|node| node.kind() == kind)
                 .unwrap();
-            let result = plugin.evaluate(node.into(), "/file.js".into());
+            let result = plugin.evaluate(
+                node.into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {content}, got {result:?}");
             };
@@ -404,7 +691,7 @@ mod tests {
     fn reports_ancestor_ranges_from_child_access() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -423,7 +710,11 @@ mod tests {
             JsParserOptions::default(),
         );
         assert!(!parse.has_errors());
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [
             ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
             ("JS_PARENTHESIZED_EXPRESSION", 10, 13),
@@ -449,7 +740,7 @@ mod tests {
     fn roots_have_no_parent_or_ancestors() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE", "JS_SCRIPT", "TS_DECLARATION_MODULE"),
                 run(root) {
@@ -498,7 +789,8 @@ mod tests {
         ] {
             let parse = biome_js_parser::parse(content, source, JsParserOptions::default());
             assert!(!parse.has_errors(), "{content}");
-            let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+            let result =
+                plugin.evaluate(parse.syntax().into(), "/file.js".into(), &services(source));
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {expected}, got {result:?}");
             };
@@ -510,7 +802,7 @@ mod tests {
     fn traversal_members_are_shared_non_enumerable_and_validate_receivers() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const ancestry = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -558,7 +850,11 @@ mod tests {
             JsFileSource::js_module(),
             JsParserOptions::default(),
         );
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
         };
@@ -572,7 +868,7 @@ mod tests {
     fn children_return_fresh_raw_nodes_in_source_order() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_MODULE", "JS_BLOCK_STATEMENT", "JS_CALL_EXPRESSION", "JS_CALL_ARGUMENTS",
                     "JS_PARENTHESIZED_EXPRESSION", "JS_NUMBER_LITERAL_EXPRESSION", "JS_EXPRESSION_STATEMENT",
@@ -731,7 +1027,11 @@ mod tests {
                 .descendants()
                 .find(|node| node.kind() == kind)
                 .unwrap();
-            let result = plugin.evaluate(node.into(), "/file.jsx".into());
+            let result = plugin.evaluate(
+                node.into(),
+                "/file.jsx".into(),
+                &services(JsFileSource::jsx()),
+            );
             let [entry] = result.entries.as_slice() else {
                 panic!("expected a single diagnostic for {content}, got {result:?}");
             };
@@ -747,7 +1047,7 @@ mod tests {
     fn queries_lists_and_reports_diagnostics_on_lists_and_their_children() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_CALL_ARGUMENT_LIST"),
                 run(list) {
@@ -783,7 +1083,11 @@ mod tests {
             .descendants()
             .find(|node| plugin.query().contains(&node.kind().to_raw()))
             .unwrap();
-        let result = plugin.evaluate(list.into(), "/file.js".into());
+        let result = plugin.evaluate(
+            list.into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [("JS_CALL_ARGUMENT_LIST", 5, 9), ("1", 5, 6), ("2", 8, 9)];
         assert_eq!(result.entries.len(), expected.len(), "{result:?}");
         for (entry, (message, start, end)) in result.entries.iter().zip(expected) {
@@ -800,7 +1104,7 @@ mod tests {
     fn reports_children_ranges_and_exposes_normal_fields() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const children = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -833,7 +1137,11 @@ mod tests {
             JsParserOptions::default(),
         );
         assert!(!parse.has_errors());
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
         let expected = [
             ("JS_MODULE_ITEM_LIST", 2, 15),
             ("JS_EXPRESSION_STATEMENT", 2, 15),
@@ -859,7 +1167,7 @@ mod tests {
     fn queries_the_kinds_declared_by_the_rules() {
         let plugin = load_test_plugin_from_source(
             "/plugin.js",
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
             export const rule1 = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT", "JS_CALL_EXPRESSION"),
                 run(node) {},
@@ -902,7 +1210,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert(
             "/plugin.js".into(),
-            r#"import { ast, defineRule } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule } from "@biomejs/runtime/plugin";
             export const myRule = defineRule({
                 query: ast("NOT_A_KIND"),
                 run(node) {},
@@ -922,7 +1230,7 @@ mod tests {
 
     #[test]
     fn reports_top_level_var_declarations_using_ast_fields() {
-        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const noTopLevelVar = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
@@ -948,10 +1256,17 @@ mod tests {
         );
 
         let plugin = load_test_plugin_from_source("/plugin.js", source, None);
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         snap_diagnostics(
             "reports_top_level_var_declarations_using_ast_fields",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
             render_diagnostics("/file.js", content, result),
         );
     }
@@ -960,7 +1275,7 @@ mod tests {
     /// name of the rule that registered it.
     #[test]
     fn dispatches_nodes_to_the_matching_rules() {
-        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const noVar = defineRule({
                 query: ast("JS_VARIABLE_STATEMENT"),
                 run(statement) {
@@ -991,12 +1306,22 @@ mod tests {
                 render_diagnostics(
                     "/file.js",
                     content,
-                    plugin.evaluate(node.into(), "/file.js".into()),
+                    plugin.evaluate(
+                        node.into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    ),
                 )
             })
             .collect();
 
-        snap_diagnostics("dispatches_nodes_to_the_matching_rules", content_rendered);
+        snap_diagnostics(
+            "dispatches_nodes_to_the_matching_rules",
+            "/plugin.js",
+            source,
+            &[("/file.js", content)],
+            content_rendered,
+        );
     }
 
     /// Plugins can be written in TypeScript: the types are erased before the module is
@@ -1005,8 +1330,8 @@ mod tests {
     fn evaluate_typescript_plugin() {
         let plugin = load_test_plugin_from_source(
             "/plugin.ts",
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
-            import type { AnyJsRoot, Severity } from "@biomejs/plugin-api";
+            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+            import type { AnyJsRoot, Severity } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root: AnyJsRoot): void {
@@ -1021,7 +1346,11 @@ mod tests {
             JsParserOptions::default(),
         );
 
-        let result = plugin.evaluate(parse.syntax().into(), "/file.js".into());
+        let result = plugin.evaluate(
+            parse.syntax().into(),
+            "/file.js".into(),
+            &services(JsFileSource::js_module()),
+        );
 
         let [entry] = result.entries.as_slice() else {
             panic!("expected a single diagnostic, got {result:?}");
@@ -1037,11 +1366,9 @@ mod tests {
     #[test]
     fn reject_typescript_plugin_with_unerasable_syntax() {
         let fs = MemoryFileSystem::default();
-        fs.insert(
-            "/plugin.ts".into(),
-            r#"enum Severity { Information }
-            export default function useMyPlugin() {}"#,
-        );
+        let source = r#"enum Severity { Information }
+            export default function useMyPlugin() {}"#;
+        fs.insert("/plugin.ts".into(), source);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let error = AnalyzerJsPlugin::load(fs, "/plugin.ts".into(), None)
@@ -1049,6 +1376,9 @@ mod tests {
 
         snap_diagnostics(
             "reject_typescript_plugin_with_unerasable_syntax",
+            "/plugin.ts",
+            source,
+            &[],
             print_diagnostic_to_string(&Error::from(error)),
         );
     }
@@ -1058,16 +1388,14 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/foo.js".into(), "let foo;");
         fs.insert("/bar.js".into(), "let bar;");
-        fs.insert(
-            "/plugin.js".into(),
-            r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/plugin-api";
+        let source = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
             export const useMyPlugin = defineRule({
                 query: ast("JS_MODULE"),
                 run(root) {
                     registerDiagnostic(root, "information", "Hello, world!");
                 },
-            });"#,
-        );
+            });"#;
+        fs.insert("/plugin.js".into(), source);
 
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
         let plugin =
@@ -1083,7 +1411,11 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), "/foo.js".into())
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    "/foo.js".into(),
+                    &services(JsFileSource::js_module()),
+                )
             })
         };
 
@@ -1097,7 +1429,11 @@ mod tests {
                     JsParserOptions::default(),
                 );
 
-                plugin.evaluate(parse.syntax().into(), "/bar.js".into())
+                plugin.evaluate(
+                    parse.syntax().into(),
+                    "/bar.js".into(),
+                    &services(JsFileSource::js_module()),
+                )
             })
         };
 
@@ -1110,6 +1446,782 @@ mod tests {
         let content = render_diagnostics("/foo.js", "let foo;", result1)
             + &render_diagnostics("/bar.js", "let bar;", result2);
 
-        snap_diagnostics("evaluate_in_worker_threads", content);
+        snap_diagnostics(
+            "evaluate_in_worker_threads",
+            "/plugin.js",
+            source,
+            &[("/foo.js", "let foo;"), ("/bar.js", "let bar;")],
+            content,
+        );
+    }
+
+    mod mutations {
+        use super::*;
+        use biome_diagnostics::Applicability;
+        use biome_rowan::BatchMutation;
+
+        const API: &str = r#"
+            import { ast, createMutation, defineRule, factory, registerDiagnostic } from "@biomejs/runtime/plugin";
+        "#;
+
+        fn evaluate(source: &str, body: &str) -> (String, PluginEvalResult) {
+            let plugin_source = format!(
+                r#"{API}
+                    export const fixer = defineRule({{
+                        query: ast("JS_MODULE"),
+                        run(root) {{
+                            const statement = root.items[0];
+                            const call = statement.expression;
+                            const args = call.arguments;
+                            const list = args.children()[0];
+                            const [first, second] = args.args;
+                            const token = first.token("valueToken");
+                            {body}
+                        }},
+                    }});"#
+            );
+            let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+            let parse = biome_js_parser::parse(
+                source,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            assert!(!parse.has_errors(), "{source}");
+            let result = plugin.evaluate(
+                parse.syntax().into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
+            assert_eq!(parse.syntax().text_with_trivia(), source);
+            (plugin_source, result)
+        }
+
+        fn assert_action(
+            entry: &PluginDiagnosticEntry,
+            source: &str,
+            expected: &str,
+            applicability: Applicability,
+        ) {
+            let action = entry.action.as_ref().expect("expected a paired action");
+            assert_eq!(action.text_edit.new_string(source), expected);
+            assert_eq!(action.message, "Apply edit");
+            assert_eq!(action.applicability, applicability);
+            assert!(action.source_range.end() <= biome_text_size::TextSize::of(source));
+        }
+
+        #[test]
+        fn imported_mutation_methods_produce_paired_text_edits() {
+            let source = "call(1,2);";
+            for (case, operation, expected) in [
+                (
+                    "replace_node",
+                    "mutation.replaceNode(first, updated)",
+                    "call(9,2);",
+                ),
+                (
+                    "replace_token",
+                    "mutation.replaceToken(token, replacement)",
+                    "call(9,2);",
+                ),
+                (
+                    "replace_element_node",
+                    "mutation.replaceElement(first, updated)",
+                    "call(9,2);",
+                ),
+                (
+                    "replace_element_token",
+                    "mutation.replaceElement(token, replacement)",
+                    "call(9,2);",
+                ),
+                ("remove_node", "mutation.removeNode(first)", "call(,2);"),
+                (
+                    "remove_token",
+                    "mutation.removeToken(statement.token('semicolonToken'))",
+                    "call(1,2)",
+                ),
+                (
+                    "remove_element_node",
+                    "mutation.removeElement(first)",
+                    "call(,2);",
+                ),
+                (
+                    "remove_element_token",
+                    "mutation.removeElement(list.childrenWithTokens()[1])",
+                    "call(12);",
+                ),
+                (
+                    "remove_node_and_token",
+                    "mutation.removeNode(first); mutation.removeToken(list.childrenWithTokens()[1])",
+                    "call(2);",
+                ),
+            ] {
+                for (kind, applicability) in [
+                    ("safe", Applicability::Always),
+                    ("unsafe", Applicability::MaybeIncorrect),
+                ] {
+                    let (plugin_source, result) = evaluate(
+                        source,
+                        &format!(
+                            r#"
+                            const mutation = createMutation(first);
+                            const replacement = factory.token("JS_NUMBER_LITERAL", "9");
+                            const updated = first.withValueToken(replacement);
+                            {operation};
+                            registerDiagnostic(first, "warning", "Change argument", {{
+                                mutation, message: "Apply edit", kind: "{kind}",
+                            }});
+                            "#
+                        ),
+                    );
+                    let [entry] = result.entries.as_slice() else {
+                        panic!("{operation} ({kind}): {result:?}");
+                    };
+                    assert_eq!(
+                        PrintDescription(&entry.diagnostic).to_string(),
+                        "Change argument"
+                    );
+                    assert_eq!(
+                        entry.diagnostic.span(),
+                        Some(TextRange::new(5.into(), 6.into()))
+                    );
+                    assert_action(entry, source, expected, applicability);
+                    snap_diagnostics(
+                        &format!("mutations_{case}_{kind}"),
+                        "/plugin.js",
+                        &plugin_source,
+                        &[("/file.js", source)],
+                        render_diagnostics("/file.js", source, result),
+                    );
+                }
+            }
+        }
+
+        #[test]
+        fn derived_field_replacements_preserve_comments_and_source_handles() {
+            for (case, source, target, replacement, expected) in [
+                (
+                    "callee_and_arguments",
+                    "call(/* keep */1,2);",
+                    "call",
+                    "call.withArguments(args.withArgs(list).withLParenToken(factory.token('L_PAREN'))).withCallee(second)",
+                    "2(/* keep */1,2);",
+                ),
+                (
+                    "argument_list",
+                    "call(/* keep */1,2);other(3);",
+                    "args",
+                    "args.withArgs(root.items[1].expression.arguments.children()[0])",
+                    "call(/* keep */3);other(3);",
+                ),
+                (
+                    "value_token",
+                    "call(/* keep */1,2);",
+                    "first",
+                    "first.withValueToken(factory.token('JS_NUMBER_LITERAL', '9'))",
+                    "call(/* keep */9,2);",
+                ),
+                (
+                    "remove_semicolon",
+                    "call(/* keep */1,2);",
+                    "statement",
+                    "statement.withSemicolonToken(undefined)",
+                    "call(/* keep */1,2)",
+                ),
+                (
+                    "remove_optional_chain",
+                    "call?.(/* keep */1,2);",
+                    "call",
+                    "call.withOptionalChainToken(undefined).withTypeArguments(undefined)",
+                    "call(/* keep */1,2);",
+                ),
+            ] {
+                let (plugin_source, result) = evaluate(
+                    source,
+                    &format!(
+                        r#"
+                        const updated = {replacement};
+                        const mutation = createMutation(root);
+                        mutation.replaceNode({target}, updated);
+                        registerDiagnostic(root, "warning", "Updated field", {{
+                            mutation, message: "Apply edit", kind: "safe",
+                        }});
+                        "#
+                    ),
+                );
+                let [entry] = result.entries.as_slice() else {
+                    panic!("{replacement}: {result:?}");
+                };
+                assert_eq!(
+                    PrintDescription(&entry.diagnostic).to_string(),
+                    "Updated field"
+                );
+                assert_action(entry, source, expected, Applicability::Always);
+                snap_diagnostics(
+                    &format!("mutations_derived_field_replacements_{case}"),
+                    "/plugin.js",
+                    &plugin_source,
+                    &[("/file.js", source)],
+                    render_diagnostics("/file.js", source, result),
+                );
+            }
+        }
+
+        #[test]
+        fn native_tokens_and_field_updates_validate_properties_and_arguments() {
+            let source = "call(1,2)";
+            let (plugin_source, result) = evaluate(
+                source,
+                r#"
+                registerDiagnostic(root, "information", JSON.stringify([
+                    first.valueToken, token.text, token.kind, token.parent.kind,
+                    token.parent.valueToken, statement.token("semicolonToken"),
+                ]));
+                registerDiagnostic(root, "information",
+                    list.childrenWithTokens().map(element => element.kind).join(","));
+                const detached = factory.token("COMMA");
+                registerDiagnostic(root, "information", JSON.stringify([
+                    detached.kind, detached.text, detached.parent,
+                    factory.token("IDENT", "a b").text,
+                    factory.token("JS_NUMBER_LITERAL", "1e").text,
+                    factory.token("JSX_TEXT_LITERAL", "a{b}").text,
+                ]));
+                "#,
+            );
+            assert_eq!(
+                result
+                    .entries
+                    .iter()
+                    .map(|entry| PrintDescription(&entry.diagnostic).to_string())
+                    .collect::<Vec<_>>(),
+                [
+                    r#"["1","1","JS_NUMBER_LITERAL","JS_NUMBER_LITERAL_EXPRESSION","1",null]"#,
+                    "JS_NUMBER_LITERAL_EXPRESSION,COMMA,JS_NUMBER_LITERAL_EXPRESSION",
+                    r#"["COMMA",",",null,"a b","1e","a{b}"]"#,
+                ]
+            );
+            assert!(result.entries.iter().all(|entry| entry.action.is_none()));
+            snap_diagnostics(
+                "mutations_native_tokens_and_field_updates_validate_properties_and_arguments",
+                "/plugin.js",
+                &plugin_source,
+                &[("/file.js", source)],
+                render_diagnostics("/file.js", source, result),
+            );
+        }
+
+        #[test]
+        fn invalid_fix_descriptors_are_atomic_and_failed_rules_drain_pairs() {
+            for (case, descriptor) in [
+                ("null", "null"),
+                ("empty", "{}"),
+                (
+                    "invalid_mutation",
+                    "{ mutation: {}, message: 'Apply edit', kind: 'safe' }",
+                ),
+                ("invalid_message", "{ mutation, message: 42, kind: 'safe' }"),
+                ("missing_kind", "{ mutation, message: 'Apply edit' }"),
+                (
+                    "invalid_kind",
+                    "{ mutation, message: 'Apply edit', kind: 'invalid' }",
+                ),
+                (
+                    "boxed_kind",
+                    "{ mutation, message: 'Apply edit', kind: new String('safe') }",
+                ),
+                (
+                    "throwing_message_getter",
+                    "{ mutation, get message() { return factory.token('UNKNOWN'); }, kind: 'safe' }",
+                ),
+            ] {
+                let plugin_source = format!(
+                    r#"{API}
+                        export const aFailed = defineRule({{
+                            query: ast("JS_MODULE"),
+                            run(root) {{
+                                const first = root.items[0].expression.arguments.args[0];
+                                const preserved = createMutation(root);
+                                preserved.replaceToken(first.token("valueToken"), factory.token("JS_NUMBER_LITERAL", "9"));
+                                registerDiagnostic(root, "warning", "Before failure", {{
+                                    mutation: preserved, message: "Apply edit", kind: "safe",
+                                }});
+                                const mutation = createMutation(root);
+                                registerDiagnostic(root, "warning", "Invalid descriptor", {descriptor});
+                            }},
+                        }});
+                        export const bHealthy = defineRule({{
+                            query: ast("JS_MODULE"),
+                            run(root) {{
+                                const second = root.items[0].expression.arguments.args[1];
+                                const mutation = createMutation(second);
+                                mutation.replaceToken(second.token("valueToken"), factory.token("JS_NUMBER_LITERAL", "8"));
+                                registerDiagnostic(second, "warning", "Healthy fix", {{ mutation, message: "Apply edit", kind: "unsafe" }});
+                            }},
+                        }});"#
+                );
+                let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+                let source = "call(1,2);";
+                let parse = biome_js_parser::parse(
+                    source,
+                    JsFileSource::js_module(),
+                    JsParserOptions::default(),
+                );
+                let mut diagnostics = String::new();
+                for _ in 0..2 {
+                    let result = plugin.evaluate(
+                        parse.syntax().into(),
+                        "/file.js".into(),
+                        &services(JsFileSource::js_module()),
+                    );
+                    let [before, failure, healthy] = result.entries.as_slice() else {
+                        panic!("{descriptor}: {result:?}");
+                    };
+                    for (entry, message) in [(before, "Before failure"), (healthy, "Healthy fix")] {
+                        assert_eq!(
+                            PrintDescription(&entry.diagnostic).to_string(),
+                            message,
+                            "{descriptor}"
+                        );
+                    }
+                    assert!(
+                        PrintDescription(&failure.diagnostic)
+                            .to_string()
+                            .contains("Rule aFailed errored: TypeError:")
+                    );
+                    assert!(failure.action.is_none());
+                    assert_action(before, source, "call(9,2);", Applicability::Always);
+                    assert_action(healthy, source, "call(1,8);", Applicability::MaybeIncorrect);
+                    diagnostics.push_str(&render_diagnostics("/file.js", source, result));
+                }
+                snap_diagnostics(
+                    &format!("mutations_invalid_fix_descriptors_{case}"),
+                    "/plugin.js",
+                    &plugin_source,
+                    &[("/file.js", source)],
+                    diagnostics,
+                );
+            }
+        }
+
+        #[test]
+        fn invalid_mutation_operations_report_engine_errors() {
+            let source = "call(1,2);";
+            for (case, operation) in [
+                ("replace_node_type", "mutation.replaceNode(first, token)"),
+                ("replace_token_arity", "mutation.replaceToken(token)"),
+                (
+                    "replace_element_receiver",
+                    "mutation.replaceElement.call({}, first, first)",
+                ),
+                ("remove_node_type", "mutation.removeNode(token)"),
+                ("remove_token_arity", "mutation.removeToken(token, token)"),
+                (
+                    "remove_element_receiver",
+                    "mutation.removeElement.call(Object.create(mutation), first)",
+                ),
+                ("unknown_token_field", "first.token('unknown')"),
+                (
+                    "wrong_token_field_kind",
+                    "first.withValueToken(factory.token('COMMA'))",
+                ),
+                ("list_field_array", "args.withArgs(args.args)"),
+                ("optional_field_null", "statement.withSemicolonToken(null)"),
+                ("factory_arity", "factory.token()"),
+                ("factory_text_type", "factory.token('IDENT', 1)"),
+                ("factory_fixed_spelling", "factory.token('COMMA', ';')"),
+                ("forged_anchor", "createMutation(Object.create(root))"),
+                ("create_mutation_arity", "createMutation(root, root)"),
+                (
+                    "consumed_target",
+                    r#"
+                    mutation.replaceToken(token, factory.token("JS_NUMBER_LITERAL", "9"));
+                    registerDiagnostic(first, "warning", "Before failure", {
+                        mutation, message: "Apply edit", kind: "safe",
+                    });
+                    mutation.removeNode(second)
+                    "#,
+                ),
+            ] {
+                let (plugin_source, result) = evaluate(
+                    source,
+                    &format!("const mutation = createMutation(root);\n{operation};"),
+                );
+                let (failure, before) = result.entries.split_last().expect("expected an error");
+                if case == "consumed_target" {
+                    let [entry] = before else {
+                        panic!("{case}: {result:?}");
+                    };
+                    assert_eq!(
+                        PrintDescription(&entry.diagnostic).to_string(),
+                        "Before failure"
+                    );
+                    assert_action(entry, source, "call(9,2);", Applicability::Always);
+                    assert!(PrintDescription(&failure.diagnostic).to_string().contains(
+                        "This mutation has already been passed to registerDiagnostic()."
+                    ));
+                } else {
+                    assert!(before.is_empty(), "{case}: {result:?}");
+                }
+                assert!(failure.action.is_none(), "{case}");
+                let message = PrintDescription(&failure.diagnostic).to_string();
+                assert!(
+                    message.contains("Rule fixer errored: TypeError:"),
+                    "{case}: {result:?}"
+                );
+                assert!(
+                    message
+                        .lines()
+                        .next()
+                        .map(|line| line.rsplit_once(" (").map_or(line, |(message, _)| message))
+                        .is_some_and(|line| line.ends_with('.')),
+                    "{case}: {message}"
+                );
+                snap_diagnostics(
+                    &format!("mutations_invalid_operations_{case}"),
+                    "/plugin.js",
+                    &plugin_source,
+                    &[("/file.js", source)],
+                    render_diagnostics("/file.js", source, result),
+                );
+            }
+        }
+
+        #[test]
+        fn duplicate_and_ancestor_targets_match_native_batches() {
+            let source = "call(1,2);";
+            let parse = biome_js_parser::parse(
+                source,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let root = parse.syntax();
+            let call = root
+                .descendants()
+                .find(|node| node.kind() == JsSyntaxKind::JS_CALL_EXPRESSION)
+                .unwrap();
+            let first = call
+                .descendants()
+                .find(|node| node.kind() == JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION)
+                .unwrap();
+            for (case, operation) in [
+                (
+                    "repeated_node_removal",
+                    "mutation.removeNode(first); mutation.removeNode(first);",
+                ),
+                (
+                    "ancestor_then_descendant",
+                    "mutation.replaceNode(call, call); mutation.removeNode(first);",
+                ),
+            ] {
+                let plugin_source = format!(
+                    r#"{API}
+                    export const fixer = defineRule({{
+                        query: ast("JS_CALL_EXPRESSION"),
+                        run(call) {{
+                            const first = call.arguments.args[0];
+                            const mutation = createMutation(first);
+                            {operation}
+                            registerDiagnostic(first, "warning", "Native batch parity", {{
+                                mutation, message: "Apply edit", kind: "safe",
+                            }});
+                        }},
+                    }});"#
+                );
+                let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+                let result = plugin.evaluate(
+                    call.clone().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
+                let mut native = BatchMutation::new(root.clone());
+                if case == "repeated_node_removal" {
+                    native.remove_element(first.clone().into());
+                } else {
+                    native.replace_element(call.clone().into(), call.clone().into());
+                }
+                native.remove_element(first.clone().into());
+                let (_, edit) = native.to_text_range_and_edit().unwrap();
+                let expected = edit.new_string(source);
+                let [entry] = result.entries.as_slice() else {
+                    panic!("{case}: {result:?}");
+                };
+                assert_eq!(
+                    PrintDescription(&entry.diagnostic).to_string(),
+                    "Native batch parity"
+                );
+                if expected == source {
+                    assert!(entry.action.is_none(), "{case}");
+                } else {
+                    assert_action(entry, source, &expected, Applicability::Always);
+                }
+                assert_eq!(root.text_with_trivia(), source);
+                snap_diagnostics(
+                    &format!("mutations_native_batch_parity_{case}"),
+                    "/plugin.js",
+                    &plugin_source,
+                    &[("/file.js", source)],
+                    render_diagnostics("/file.js", source, result),
+                );
+            }
+        }
+
+        #[test]
+        fn saved_handles_and_batches_remain_usable_on_the_same_source() {
+            let plugin_source = format!(
+                r#"{API}
+                let saved;
+                export const savedHandles = defineRule({{
+                    query: ast("JS_MODULE"),
+                    run(root) {{
+                        const first = root.items[0].expression.arguments.args[0];
+                        if (saved) {{
+                            saved.mutation.replaceToken(saved.token, factory.token("JS_NUMBER_LITERAL", "9"));
+                            registerDiagnostic(saved.first, "warning", "Saved batch", {{
+                                mutation: saved.mutation, message: "Apply edit", kind: "safe",
+                            }});
+                            const mutation = createMutation(saved.first);
+                            mutation.replaceNode(saved.first, saved.replacement);
+                            registerDiagnostic(saved.first, "warning", "Saved anchor", {{
+                                mutation, message: "Apply edit", kind: "safe",
+                            }});
+                        }}
+                        const mutation = createMutation(first);
+                        mutation.removeToken(root.items[0].token("semicolonToken"));
+                        saved = {{
+                            first, mutation, token: first.token("valueToken"),
+                            replacement: first.withValueToken(factory.token("JS_NUMBER_LITERAL", "9")),
+                        }};
+                    }},
+                }});"#
+            );
+            let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+            let source = "call(1,2);";
+            let parse = biome_js_parser::parse(
+                source,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let mut diagnostics = String::new();
+            for invocation in 0..3 {
+                let result = plugin.evaluate(
+                    parse.syntax().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
+                assert_eq!(result.entries.len(), if invocation == 0 { 0 } else { 2 });
+                if invocation > 0 {
+                    for (entry, message, expected) in [
+                        (&result.entries[0], "Saved batch", "call(9,2)"),
+                        (&result.entries[1], "Saved anchor", "call(9,2);"),
+                    ] {
+                        assert_eq!(PrintDescription(&entry.diagnostic).to_string(), message);
+                        assert_action(entry, source, expected, Applicability::Always);
+                    }
+                }
+                diagnostics.push_str(&render_diagnostics("/file.js", source, result));
+            }
+            snap_diagnostics(
+                "mutations_saved_handles_and_batches_remain_usable_on_the_same_source",
+                "/plugin.js",
+                &plugin_source,
+                &[("/file.js", source)],
+                diagnostics,
+            );
+
+            let fs = MemoryFileSystem::default();
+            fs.insert("/plugin.js".into(), plugin_source);
+            let LoadedPlugin { mut ctx, rules } =
+                load_plugin(Arc::new(fs), "/plugin.js".into()).unwrap();
+            let ast = ctx.create_js_ast(parse.syntax());
+            ctx.call_function(
+                &rules[0].run,
+                &JsValue::undefined(),
+                std::slice::from_ref(&ast),
+            )
+            .unwrap();
+            assert!(ctx.pull_diagnostics().is_empty());
+            let _current = ctx.create_js_ast(parse.syntax());
+            ctx.call_function(
+                &rules[0].run,
+                &JsValue::undefined(),
+                std::slice::from_ref(&ast),
+            )
+            .unwrap();
+            let entries = ctx.pull_diagnostics();
+            assert_eq!(entries.len(), 2);
+            assert_action(&entries[0], source, "call(9,2)", Applicability::Always);
+            assert_action(&entries[1], source, "call(9,2);", Applicability::Always);
+            assert!(
+                ctx.call_function(&rules[0].run, &JsValue::undefined(), &[ast])
+                    .is_err()
+            );
+            assert!(ctx.pull_diagnostics().is_empty());
+        }
+
+        #[test]
+        fn replacements_from_another_source_remain_usable() {
+            let plugin_source = format!(
+                r#"{API}
+                let saved;
+                export const replacements = defineRule({{
+                    query: ast("JS_MODULE"),
+                    run(root) {{
+                        const [first, second, third] = root.items[0].expression.arguments.args;
+                        if (!saved) {{
+                            saved = {{
+                                first, token: second.token("valueToken"),
+                                derived: third.withValueToken(factory.token("JS_NUMBER_LITERAL", "6")),
+                            }};
+                            return;
+                        }}
+                        const mutation = createMutation(first);
+                        mutation.replaceNode(first, saved.first);
+                        mutation.replaceToken(second.token("valueToken"), saved.token);
+                        mutation.replaceNode(third, saved.derived);
+                        registerDiagnostic(first, "warning", "Foreign replacements", {{
+                            mutation, message: "Apply edit", kind: "safe",
+                        }});
+                    }},
+                }});"#
+            );
+            let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+            let foreign = biome_js_parser::parse(
+                "other(9,8,7);",
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            assert!(
+                plugin
+                    .evaluate(
+                        foreign.syntax().into(),
+                        "/other.js".into(),
+                        &services(JsFileSource::js_module())
+                    )
+                    .entries
+                    .is_empty()
+            );
+            let source = "call(1,2,3);";
+            let parse = biome_js_parser::parse(
+                source,
+                JsFileSource::js_module(),
+                JsParserOptions::default(),
+            );
+            let result = plugin.evaluate(
+                parse.syntax().into(),
+                "/file.js".into(),
+                &services(JsFileSource::js_module()),
+            );
+            let [entry] = result.entries.as_slice() else {
+                panic!("expected one diagnostic: {result:?}");
+            };
+            assert_eq!(
+                PrintDescription(&entry.diagnostic).to_string(),
+                "Foreign replacements"
+            );
+            assert_action(entry, source, "call(9,8,6);", Applicability::Always);
+            assert_eq!(parse.syntax().text_with_trivia(), source);
+            assert_eq!(foreign.syntax().text_with_trivia(), "other(9,8,7);");
+        }
+
+        #[test]
+        fn foreign_batches_and_diagnostics_are_rejected() {
+            for (case, operation) in [
+                (
+                    "batch",
+                    "registerDiagnostic(first, 'warning', 'Foreign batch', { mutation: saved.mutation, message: 'Apply edit', kind: 'safe' });",
+                ),
+                (
+                    "diagnostic",
+                    "registerDiagnostic(saved.first, 'warning', 'Foreign diagnostic', { mutation, message: 'Apply edit', kind: 'safe' });",
+                ),
+                (
+                    "batch_and_diagnostic",
+                    "registerDiagnostic(saved.first, 'warning', 'Foreign pair', { mutation: saved.mutation, message: 'Apply edit', kind: 'safe' });",
+                ),
+            ] {
+                let plugin_source = format!(
+                    r#"{API}
+                    let saved;
+                    export const foreign = defineRule({{
+                        query: ast("JS_MODULE"),
+                        run(root) {{
+                            const first = root.items[0].expression.arguments.args[0];
+                            const mutation = createMutation(first);
+                            mutation.replaceToken(first.token("valueToken"), factory.token("JS_NUMBER_LITERAL", "9"));
+                            if (!saved) {{
+                                saved = {{ first, mutation }};
+                                return;
+                            }}
+                            {operation}
+                        }},
+                    }});"#
+                );
+                let plugin = load_test_plugin_from_source("/plugin.js", &plugin_source, None);
+                let source = "call(1,2);";
+                let original = biome_js_parser::parse(
+                    source,
+                    JsFileSource::js_module(),
+                    JsParserOptions::default(),
+                );
+                assert!(
+                    plugin
+                        .evaluate(
+                            original.syntax().into(),
+                            "/file.js".into(),
+                            &services(JsFileSource::js_module())
+                        )
+                        .entries
+                        .is_empty()
+                );
+                let foreign = biome_js_parser::parse(
+                    source,
+                    JsFileSource::js_module(),
+                    JsParserOptions::default(),
+                );
+                let result = plugin.evaluate(
+                    foreign.syntax().into(),
+                    "/file.js".into(),
+                    &services(JsFileSource::js_module()),
+                );
+                let [entry] = result.entries.as_slice() else {
+                    panic!("{case}: {result:?}");
+                };
+                assert!(entry.action.is_none(), "{case}");
+                assert!(
+                    PrintDescription(&entry.diagnostic)
+                        .to_string()
+                        .contains("Rule foreign errored: TypeError:"),
+                    "{case}: {result:?}"
+                );
+                assert_eq!(original.syntax().text_with_trivia(), source);
+                assert_eq!(foreign.syntax().text_with_trivia(), source);
+            }
+        }
+
+        #[test]
+        fn no_op_batches_do_not_publish_actions() {
+            for operation in ["", "mutation.replaceNode(first, first);"] {
+                let (_, result) = evaluate(
+                    "call(1,2);",
+                    &format!(
+                        r#"
+                        const mutation = createMutation(first);
+                        {operation}
+                        registerDiagnostic(first, "warning", "No change", {{
+                            mutation, message: "Apply edit", kind: "safe",
+                        }});
+                        "#
+                    ),
+                );
+                let [entry] = result.entries.as_slice() else {
+                    panic!("{operation}: {result:?}");
+                };
+                assert_eq!(PrintDescription(&entry.diagnostic).to_string(), "No change");
+                assert!(entry.action.is_none());
+            }
+        }
     }
 }
+
+#[cfg(test)]
+#[path = "semantic.tests.rs"]
+mod semantic_tests;

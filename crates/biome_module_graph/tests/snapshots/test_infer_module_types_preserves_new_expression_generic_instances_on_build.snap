@@ -42,9 +42,9 @@ Expression "this.value = value" => unknown
 
 Expression "value" => instanceof T
 
-Binding explicit "explicit" => instanceof Box<string: value>
+Binding explicit "explicit" => instanceof Box<string>
 
-Expression "new Box<string>(\"value\")" => instanceof Box<string: value>
+Expression "new Box<string>(\"value\")" => instanceof Box<string>
 
 Expression "Box" => class "Box" {
   extends: none
@@ -54,11 +54,11 @@ Expression "Box" => class "Box" {
 
 Expression "\"value\"" => string: value
 
-Binding explicitValue "explicitValue" => string: value
+Binding explicitValue "explicitValue" => string
 
-Expression "explicit" => instanceof Box<string: value>
+Expression "explicit" => instanceof Box<string>
 
-Expression "explicit.value" => string: value
+Expression "explicit.value" => string
 
 Binding inferred "inferred" => instanceof Box<number: 1>
 

@@ -10,16 +10,16 @@
   "dependencies": {
     "@biomejs/js-api": "workspace:*",
     "@biomejs/wasm-nodejs": "workspace:*",
-    "@opentui/core": "^0.1.103",
-    "@opentui/react": "^0.1.103",
-    "prettier": "^3.9.4",
+    "@opentui/core": "^0.5.10",
+    "@opentui/react": "^0.5.10",
+    "prettier": "^3.9.6",
     "prettier-plugin-astro": "^0.14.1",
-    "prettier-plugin-svelte": "^3.5.1",
-    "react": "^19.2.5"
+    "prettier-plugin-svelte": "^4.1.1",
+    "react": "^19.2.8"
   },
   "devDependencies": {
-    "@types/node": "22.19.17",
-    "@types/react": "19.2.14",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
     "typescript": "5.9.3"
   },
   "license": "MIT OR Apache-2.0"
