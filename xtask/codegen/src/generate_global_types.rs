@@ -7,6 +7,7 @@ use std::path::Path;
 pub mod collect;
 pub mod compare;
 mod emit;
+pub use emit::render_declarations;
 pub mod lower;
 pub mod manifest;
 pub mod source;

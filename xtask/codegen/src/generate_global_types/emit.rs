@@ -3,9 +3,9 @@ use std::path::Path;
 use anyhow::{Result, bail};
 
 use super::lower::{
-    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
-    LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
-    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
+    LoweredClass, LoweredConstructor, LoweredDeclarations, LoweredFunction,
+    LoweredFunctionParameter, LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes,
+    LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
@@ -111,13 +111,37 @@ fn render_registrations(lowered: &LoweredGlobalTypes) -> Result<String> {
     Ok(registrations)
 }
 
+/// Renders a Rust expression containing the complete local type table.
+///
+/// The expression is intended for a module inside `biome_js_type_info`.
+/// Local references index this table starting at zero; consumers must preserve its order.
+pub fn render_declarations(lowered: &LoweredDeclarations) -> String {
+    let types = lowered
+        .types()
+        .iter()
+        .map(render_type_data)
+        .collect::<Vec<_>>()
+        .join(",\n");
+    format!("Box::new([{types}])")
+}
+
 /// Dispatches lowered data to its Rust expression renderer.
 fn render_type_data(data: &LoweredTypeData) -> String {
     match data {
+        LoweredTypeData::Boolean => "crate::TypeData::Boolean".to_string(),
+        LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
         LoweredTypeData::Class(class) => render_class(class),
         LoweredTypeData::Constructor(constructor) => render_constructor(constructor),
         LoweredTypeData::Function(function) => render_function(function),
         LoweredTypeData::Interface(interface) => render_interface(interface),
+        LoweredTypeData::StringLiteral(value) => format!(
+            "crate::TypeData::Literal(Box::new(crate::Literal::String(biome_rowan::Text::new_static({}).into())))",
+            rust_string_literal(value.text()),
+        ),
+        LoweredTypeData::Union(types) => format!(
+            "crate::TypeData::Union(Box::new(crate::Union({})))",
+            render_type_references(types),
+        ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
     }
 }
@@ -159,10 +183,11 @@ fn render_interface(interface: &LoweredInterface) -> String {
         "crate::TypeData::Interface(Box::new(crate::Interface {{
             name: biome_rowan::Text::new_static({name}),
             type_parameters: Box::default(),
-            extends: Box::default(),
+            extends: {extends},
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(interface.name()),
+        extends = render_type_references(interface.extends()),
         members = render_members(interface.members()),
     )
 }
@@ -322,6 +347,9 @@ fn render_function_parameter(parameter: &LoweredFunctionParameter) -> String {
 /// Builds a generated `TypeReference` expression.
 fn render_type_reference(reference: &LoweredTypeReference) -> String {
     match reference {
+        LoweredTypeReference::Local(index) => {
+            format!("crate::RawTypeId::Local(crate::TypeId::new({index})).into()")
+        }
         LoweredTypeReference::Predefined(id) => {
             format!("crate::globals::{id}.into()")
         }
