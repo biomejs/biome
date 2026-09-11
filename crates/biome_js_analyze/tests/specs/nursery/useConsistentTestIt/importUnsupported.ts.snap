@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importUnsupported.ts
+---
+# Input
+```ts
+import test from "node:test";
+import { fit } from "@jest/globals";
+test("first", () => {});
+fit("focused", () => {});
+
+```
+
+# Diagnostics
+```
+importUnsupported.ts:3:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import test from "node:test";
+    2 │ import { fit } from "@jest/globals";
+  > 3 │ test("first", () => {});
+      │ ^^^^
+    4 │ fit("focused", () => {});
+    5 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    1   │ - import·test·from·"node:test";
+      1 │ + import·it·from·"node:test";
+    2 2 │   import { fit } from "@jest/globals";
+    3   │ - test("first",·()·=>·{});
+      3 │ + it("first",·()·=>·{});
+    4 4 │   fit("focused", () => {});
+    5 5 │   
+  
+
+```
+
+```
+importUnsupported.ts:4:1 lint/nursery/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function fit is inconsistent with the configured preferred function it.only.
+  
+    2 │ import { fit } from "@jest/globals";
+    3 │ test("first", () => {});
+  > 4 │ fit("focused", () => {});
+      │ ^^^
+    5 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
