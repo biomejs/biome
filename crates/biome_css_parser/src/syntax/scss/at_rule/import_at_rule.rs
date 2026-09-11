@@ -1,3 +1,4 @@
+use super::expect_scss_semicolon_at_rule;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::media::{is_at_any_media_query, parse_any_media_query};
@@ -18,8 +19,9 @@ use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 use biome_parser::{TokenSet, token_set};
 
-const SCSS_IMPORT_ITEM_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;]];
-const SCSS_IMPORT_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> = token_set![T![,], T![;]];
+const SCSS_IMPORT_ITEM_LIST_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}'], T![@]];
+const SCSS_IMPORT_ITEM_LIST_RECOVERY_SET: TokenSet<CssSyntaxKind> =
+    SCSS_IMPORT_ITEM_LIST_END_SET.union(token_set![T![,]]);
 
 #[inline]
 pub(crate) fn is_at_scss_import_at_rule(p: &mut CssParser) -> bool {
@@ -43,7 +45,7 @@ pub(crate) fn parse_scss_import_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![import]);
     parse_scss_import_item_list(p);
-    p.expect(T![;]);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, SCSS_IMPORT_AT_RULE))
 }
@@ -251,7 +253,7 @@ impl ParseSeparatedList for ScssImportMediaQueryList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![;]) || (p.at(T![,]) && is_nth_at_scss_import_item(p, 1))
+        p.at_ts(SCSS_IMPORT_ITEM_LIST_END_SET) || (p.at(T![,]) && is_nth_at_scss_import_item(p, 1))
     }
 
     fn recover(
@@ -261,7 +263,7 @@ impl ParseSeparatedList for ScssImportMediaQueryList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_MEDIA_QUERY, token_set![T![,], T![;]]),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_MEDIA_QUERY, SCSS_IMPORT_ITEM_LIST_RECOVERY_SET),
             expected_media_query,
         )
     }

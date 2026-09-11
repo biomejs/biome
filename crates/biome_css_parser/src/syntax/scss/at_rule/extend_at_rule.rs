@@ -1,3 +1,4 @@
+use super::expect_scss_semicolon_at_rule;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_selector;
 use crate::syntax::selector::SelectorList;
@@ -9,7 +10,7 @@ use biome_parser::prelude::*;
 use biome_parser::{CompletedMarker, TokenSet, token_set};
 
 const SCSS_EXTEND_SELECTOR_LIST_END_SET: TokenSet<CssSyntaxKind> =
-    token_set![T![!], T![;], T!['{'], T!['}']];
+    token_set![T![!], T![;], T!['{'], T!['}'], T![@]];
 
 /// Parses the SCSS `@extend` at-rule.
 ///
@@ -39,7 +40,7 @@ pub(crate) fn parse_scss_extend_at_rule(p: &mut CssParser) -> ParsedSyntax {
 
     // The `!optional` modifier is optional in the grammar, so `Absent` is valid here.
     parse_scss_extend_optional_modifier(p).ok();
-    p.expect(T![;]);
+    expect_scss_semicolon_at_rule(p);
 
     Present(m.complete(p, SCSS_EXTEND_AT_RULE))
 }

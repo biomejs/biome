@@ -93,7 +93,7 @@ pub(super) fn parse_scss_expression_at_rule(
 /// @mixin x { @include button }
 /// ```
 #[inline]
-pub(super) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
+pub(crate) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
     // Dart Sass allows omitting the final semicolon only at the end of the
     // current block or file, not before the next statement.
     if p.eat(T![;]) || p.at(T!['}']) || p.at(EOF) {

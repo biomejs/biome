@@ -9,7 +9,6 @@ expression: snapshot
 @extend;
 @extend !optional;
 @extend .message !;
-@extend .message
 
 ```
 
@@ -66,39 +65,17 @@ CssRoot {
                 semicolon_token: SEMICOLON@46..47 ";" [] [],
             },
         },
-        CssAtRule {
-            at_token: AT@47..49 "@" [Newline("\n")] [],
-            rule: ScssExtendAtRule {
-                extend_token: EXTEND_KW@49..56 "extend" [] [Whitespace(" ")],
-                css_selector_list: CssSelectorList [
-                    CssCompoundSelector {
-                        nesting_selectors: CssNestedSelectorList [],
-                        simple_selector: missing (optional),
-                        sub_selectors: CssSubSelectorList [
-                            CssClassSelector {
-                                dot_token: DOT@56..57 "." [] [],
-                                name: CssCustomIdentifier {
-                                    value_token: IDENT@57..64 "message" [] [],
-                                },
-                            },
-                        ],
-                    },
-                ],
-                optional_modifier: missing (optional),
-                semicolon_token: missing (required),
-            },
-        },
     ],
-    eof_token: EOF@64..65 "" [Newline("\n")] [],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..65
+0: CSS_ROOT@0..48
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..64
+  1: CSS_ROOT_ITEM_LIST@0..47
     0: CSS_AT_RULE@0..8
       0: AT@0..1 "@" [] []
       1: SCSS_EXTEND_AT_RULE@1..8
@@ -132,22 +109,7 @@ CssRoot {
           0: BANG@45..46 "!" [] []
           1: (empty)
         3: SEMICOLON@46..47 ";" [] []
-    3: CSS_AT_RULE@47..64
-      0: AT@47..49 "@" [Newline("\n")] []
-      1: SCSS_EXTEND_AT_RULE@49..64
-        0: EXTEND_KW@49..56 "extend" [] [Whitespace(" ")]
-        1: CSS_SELECTOR_LIST@56..64
-          0: CSS_COMPOUND_SELECTOR@56..64
-            0: CSS_NESTED_SELECTOR_LIST@56..56
-            1: (empty)
-            2: CSS_SUB_SELECTOR_LIST@56..64
-              0: CSS_CLASS_SELECTOR@56..64
-                0: DOT@56..57 "." [] []
-                1: CSS_CUSTOM_IDENTIFIER@57..64
-                  0: IDENT@57..64 "message" [] []
-        2: (empty)
-        3: (empty)
-  2: EOF@64..65 "" [Newline("\n")] []
+  2: EOF@47..48 "" [Newline("\n")] []
 
 ```
 
@@ -178,7 +140,7 @@ extend.scss:2:9 parse ━━━━━━━━━━━━━━━━━━━�
   > 2 │ @extend !optional;
       │         ^
     3 │ @extend .message !;
-    4 │ @extend .message
+    4 │ 
   
   i Expected a selector here.
   
@@ -186,7 +148,7 @@ extend.scss:2:9 parse ━━━━━━━━━━━━━━━━━━━�
   > 2 │ @extend !optional;
       │         ^
     3 │ @extend .message !;
-    4 │ @extend .message
+    4 │ 
   
 extend.scss:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -196,25 +158,8 @@ extend.scss:3:19 parse ━━━━━━━━━━━━━━━━━━━
     2 │ @extend !optional;
   > 3 │ @extend .message !;
       │                   ^
-    4 │ @extend .message
-    5 │ 
+    4 │ 
   
   i Remove ;
-  
-extend.scss:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `;` but instead the file ends
-  
-    3 │ @extend .message !;
-    4 │ @extend .message
-  > 5 │ 
-      │ 
-  
-  i the file ends here
-  
-    3 │ @extend .message !;
-    4 │ @extend .message
-  > 5 │ 
-      │ 
   
 ```
