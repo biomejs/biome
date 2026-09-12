@@ -1,0 +1,23 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/template-expression-invalid.astro
+---
+
+# Input
+
+```astro
+<div>{ foo( }</div>
+<div>{ 1 + }</div>
+<div>{ }</div>
+
+```
+
+
+# Formatted
+
+```astro
+<div>{foo(}</div>
+<div>{1 +}</div>
+<div>{}</div>
+
+```

@@ -1,10 +1,12 @@
 use crate::prelude::*;
 
 use crate::jsx::lists::child_list::{FormatChildrenResult, FormatJsxChildList, JsxChildListLayout};
-use crate::utils::jsx::{is_jsx_suppressed, is_meaningful_jsx_text};
+use crate::utils::jsx::{is_astro_raw_text_element, is_jsx_suppressed, is_meaningful_jsx_child};
+use crate::verbatim::format_verbatim_skipped;
 use biome_formatter::{CstFormatContext, FormatResult, FormatRuleWithOptions, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsxChild, JsxChildList, JsxElement, JsxExpressionChild, JsxFragment,
+    JsxText,
 };
 use biome_rowan::{SyntaxResult, declare_node_union};
 
@@ -18,6 +20,11 @@ impl FormatNodeRule<JsxElement> for FormatJsxElement {
 
     fn is_suppressed(&self, node: &JsxElement, f: &JsFormatter) -> bool {
         is_jsx_suppressed(&node.clone().into(), f.comments())
+    }
+
+    /// [`AnyJsxTagWithChildren`] prints them between the tags instead of after `</name>`.
+    fn fmt_dangling_comments(&self, _: &JsxElement, _: &mut JsFormatter) -> FormatResult<()> {
+        Ok(())
     }
 }
 
@@ -34,7 +41,19 @@ impl Format<JsFormatContext> for AnyJsxTagWithChildren {
 
         match layout {
             ElementLayout::NoChildren => {
-                write!(f, [format_opening, format_closing])
+                let dangling = format_dangling_comments(self.syntax()).with_block_indent();
+                write!(f, [format_opening, dangling, format_closing])
+            }
+
+            ElementLayout::RawText(text) => {
+                write!(
+                    f,
+                    [
+                        format_opening,
+                        format_verbatim_skipped(text.syntax()),
+                        format_closing
+                    ]
+                )
             }
 
             ElementLayout::Template(expression) => {
@@ -120,32 +139,44 @@ impl AnyJsxTagWithChildren {
 
         let children = self.children();
 
-        let layout = match children.len() {
-            0 => ElementLayout::NoChildren,
-            1 => {
-                // SAFETY: Safe because of length check above
-                let child = children.first().unwrap();
+        if let Self::JsxElement(element) = self
+            && let Some(JsxText(text)) = children.iter().next()
+            && children.len() == 1
+            && f.options()
+                .source_type()
+                .as_embedding_kind()
+                .is_astro_template()
+            && is_astro_raw_text_element(&element.opening_element()?)
+        {
+            return Ok(ElementLayout::RawText(text));
+        }
 
-                match child {
-                    JsxText(text) => {
-                        let value_token = text.value_token()?;
-                        if !is_meaningful_jsx_text(value_token.text()) {
-                            // Text nodes can't have suppressions
-                            f.context_mut()
-                                .comments()
-                                .mark_suppression_checked(text.syntax());
-                            // It's safe to ignore the tokens here because JSX text tokens can't have comments (nor whitespace) attached.
-                            f.state_mut().track_token(&value_token);
+        // Text carrying no meaning must not sway the layout, or the passes disagree.
+        let mut meaningless_texts = Vec::new();
+        let mut meaningful_children = Vec::new();
+        for child in &children {
+            if is_meaningful_jsx_child(&child) {
+                meaningful_children.push(child);
+            } else if let JsxText(text) = child {
+                meaningless_texts.push(text);
+            }
+        }
 
-                            ElementLayout::NoChildren
-                        } else {
-                            ElementLayout::Default
-                        }
-                    }
-                    JsxExpressionChild(expression) => match expression.expression() {
-                        Some(JsTemplateExpression(_)) => ElementLayout::Template(expression),
-                        _ => ElementLayout::Default,
-                    },
+        let layout = match meaningful_children.as_slice() {
+            [] => {
+                for text in &meaningless_texts {
+                    // Text nodes can't have suppressions
+                    f.context_mut()
+                        .comments()
+                        .mark_suppression_checked(text.syntax());
+                    f.state_mut().track_token(&text.value_token()?);
+                }
+
+                ElementLayout::NoChildren
+            }
+            [JsxExpressionChild(expression)] if meaningless_texts.is_empty() => {
+                match expression.expression() {
+                    Some(JsTemplateExpression(_)) => ElementLayout::Template(expression.clone()),
                     _ => ElementLayout::Default,
                 }
             }
@@ -160,6 +191,13 @@ impl AnyJsxTagWithChildren {
 enum ElementLayout {
     /// Empty Tag with no children or contains no meaningful text.
     NoChildren,
+
+    /// The children of an Astro raw-text element, printed byte for byte.
+    ///
+    /// ```astro
+    /// <div is:raw>{ this   is   not   JSX }</div>
+    /// ```
+    RawText(JsxText),
 
     /// Prefer breaking the template if it is the only child of the element
     /// ```javascript

@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro_expr/raw_text_script_style.tsx
+---
+
+# Input
+
+```tsx
+<div><script>  let a   =   1;
+
+  let b = 2;  </script><style>  .a { color : red }  </style><span is:raw></span></div>
+
+```
+
+
+# Formatted
+
+```tsx
+(
+	<div>
+		<script>  let a   =   1;
+
+  let b = 2;  </script>
+		<style>  .a { color : red }  </style>
+		<span is:raw></span>
+	</div>
+)
+```
