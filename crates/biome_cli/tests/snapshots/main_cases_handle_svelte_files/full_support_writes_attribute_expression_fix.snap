@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": { "recommended": false, "style": { "useBlockStatements": "warn" } }
+  }
+}
+```
+
+## `file.svelte`
+
+```svelte
+<script lang="ts">
+	let open = true;
+
+	function close() {
+		open = false;
+	}
+</script>
+
+<button
+	type="button"
+	onclick={() => {
+		if (open) { close(); }
+	}}
+>
+	Close
+</button>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```
