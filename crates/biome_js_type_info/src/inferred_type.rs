@@ -122,6 +122,17 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every variant is `void` or `undefined`.
+    ///
+    /// Returns `None` when unresolved types, cycles, or the traversal limit
+    /// prevent a conclusive result.
+    pub fn is_void_like(self) -> Option<bool> {
+        self.try_all_variants_match(|data| {
+            matches!(data, TypeData::VoidKeyword | TypeData::Undefined)
+        })
+        .ok()
+    }
+
     pub fn is_all_number_like(self) -> bool {
         self.try_all_variants_match(|data| {
             matches!(data, TypeData::Number)
@@ -568,6 +579,113 @@ impl<'db> InferredType<'db> {
             }
             TraversalOutcome::Complete { .. } | TraversalOutcome::LimitExceeded => None,
         }
+    }
+
+    /// Returns whether a traversed type declares multiple members with `name`.
+    /// Returns `None` when unresolved types, cycles, or the traversal limit
+    /// prevent ruling out an overload set.
+    pub fn has_overloaded_member(self, name: &str) -> Option<bool> {
+        let mut pending = vec![self.data];
+        let mut seen = FxHashSet::default();
+        for _ in 0..MAX_TYPE_VARIANT_STEPS {
+            let Some(data) = pending.pop() else {
+                return Some(false);
+            };
+            let data = data.expand_canonical_global(self.db);
+            if !seen.insert(data) || data.is_indeterminate() {
+                return None;
+            }
+            let members = match data {
+                TypeData::Class(class) => {
+                    pending.extend(class.extends(self.db));
+                    Some(class.members(self.db))
+                }
+                TypeData::Interface(interface) => {
+                    pending.extend(interface.extends(self.db).iter().copied());
+                    Some(interface.members(self.db))
+                }
+                TypeData::Object(object) => {
+                    pending.extend(object.prototype(self.db));
+                    Some(object.members(self.db))
+                }
+                TypeData::Literal(literal) => match literal.literal(self.db) {
+                    Literal::Object(members) => Some(members),
+                    _ => None,
+                },
+                TypeData::InstanceOf(instance) => {
+                    pending.push(instance.ty(self.db));
+                    None
+                }
+                TypeData::Union(union) => {
+                    pending.extend(union.types(self.db).iter().copied());
+                    None
+                }
+                TypeData::Intersection(intersection) => {
+                    pending.extend(intersection.types(self.db).iter().copied());
+                    None
+                }
+                TypeData::MergedReference(reference) => {
+                    pending.extend(reference.targets(self.db));
+                    None
+                }
+                TypeData::Generic(generic) => {
+                    pending.push(generic.constraint(self.db)?);
+                    None
+                }
+                TypeData::TypeOperator(operator) => {
+                    pending.push(operator.ty(self.db));
+                    None
+                }
+                TypeData::TypeofType(ty) => {
+                    pending.push(ty.ty(self.db));
+                    None
+                }
+                TypeData::TypeofValue(ty) => {
+                    pending.push(ty.ty(self.db));
+                    None
+                }
+                _ => None,
+            };
+            if members.is_some_and(|members| {
+                members
+                    .iter()
+                    .filter(|member| {
+                        member.kind.has_name(name)
+                            || member.kind.computed_value_type().is_some_and(|ty| {
+                                ty.is_string_literal_key(self.db, name)
+                                    || ty.is_string_key_type(self.db)
+                            })
+                    })
+                    .take(2)
+                    .count()
+                    > 1
+            }) {
+                return Some(true);
+            }
+        }
+        None
+    }
+
+    /// Returns whether this callable has a first parameter that accepts a callback.
+    ///
+    /// Returns `None` for unresolved or ambiguous signatures and rest parameters.
+    /// An explicit `this` parameter does not count as a call argument.
+    pub fn has_callable_first_parameter(self) -> Option<bool> {
+        if !self.is_callable()? {
+            return Some(false);
+        }
+        let callable = self.callable_type_with(|data| data)?;
+        let function = callable.callable_function(self.db)?;
+        let parameter = function.parameters(self.db).iter().find(|parameter| {
+            !matches!(parameter, crate::interned_types::FunctionParameter::Named(parameter) if parameter.name.text() == "this")
+        });
+        let Some(parameter) = parameter else {
+            return Some(false);
+        };
+        if parameter.is_rest() {
+            return None;
+        }
+        Self::new(self.db, parameter.ty()).is_callable()
     }
 
     pub fn is_at_least_as_wide_as_object(self) -> bool {
@@ -1685,6 +1803,33 @@ mod tests {
 
         assert!(array.is_always_truthy());
         assert!(array.is_non_nullish());
+    }
+
+    #[test]
+    fn void_like_variants_preserve_uncertainty() {
+        let db = TestDb::default();
+        for (data, expected) in [
+            (TypeData::VoidKeyword, Some(true)),
+            (TypeData::Undefined, Some(true)),
+            (TypeData::Null, Some(false)),
+            (TypeData::NeverKeyword, Some(false)),
+            (TypeData::AnyKeyword, None),
+            (TypeData::UnknownKeyword, None),
+            (TypeData::Unknown, None),
+        ] {
+            assert_eq!(InferredType::new(&db, data).is_void_like(), expected);
+        }
+        for (other, expected) in [
+            (TypeData::Undefined, Some(true)),
+            (TypeData::String, Some(false)),
+            (TypeData::Unknown, None),
+        ] {
+            let union = TypeData::Union(InternedUnion::new(
+                &db,
+                Vec::from([TypeData::VoidKeyword, other]).into_boxed_slice(),
+            ));
+            assert_eq!(InferredType::new(&db, union).is_void_like(), expected);
+        }
     }
 
     #[test]

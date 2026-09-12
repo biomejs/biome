@@ -1,0 +1,563 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare function log(): void;
+declare function nothing(): undefined;
+declare function maybe(): void | undefined;
+void log();
+void nothing();
+void maybe();
+void (log() as void);
+void (<void>log());
+void (log() satisfies void);
+void (nothing(), log());
+declare const box: { value: string; method(): void; optional?: () => void };
+void box;
+void box.value;
+void box.method();
+void (box.value as string);
+void (<string>box.value);
+void (box.value satisfies string);
+void box.value!;
+void (log(), box.value);
+const result = void box.value;
+const callResult = void log();
+type Empty = void | undefined;
+declare function alias(): Empty;
+void alias();
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    3 │ declare function nothing(): undefined;
+    4 │ declare function maybe(): void | undefined;
+  > 5 │ void log();
+      │ ^^^^^^^^^^
+    6 │ void nothing();
+    7 │ void maybe();
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     3  3 │   declare function nothing(): undefined;
+     4  4 │   declare function maybe(): void | undefined;
+     5    │ - void·log();
+        5 │ + (log());
+     6  6 │   void nothing();
+     7  7 │   void maybe();
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    4 │ declare function maybe(): void | undefined;
+    5 │ void log();
+  > 6 │ void nothing();
+      │ ^^^^^^^^^^^^^^
+    7 │ void maybe();
+    8 │ void (log() as void);
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     4  4 │   declare function maybe(): void | undefined;
+     5  5 │   void log();
+     6    │ - void·nothing();
+        6 │ + (nothing());
+     7  7 │   void maybe();
+     8  8 │   void (log() as void);
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    5 │ void log();
+    6 │ void nothing();
+  > 7 │ void maybe();
+      │ ^^^^^^^^^^^^
+    8 │ void (log() as void);
+    9 │ void (<void>log());
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     5  5 │   void log();
+     6  6 │   void nothing();
+     7    │ - void·maybe();
+        7 │ + (maybe());
+     8  8 │   void (log() as void);
+     9  9 │   void (<void>log());
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     6 │ void nothing();
+     7 │ void maybe();
+   > 8 │ void (log() as void);
+       │ ^^^^^^^^^^^^^^^^^^^^
+     9 │ void (<void>log());
+    10 │ void (log() satisfies void);
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     6  6 │   void nothing();
+     7  7 │   void maybe();
+     8    │ - void·(log()·as·void);
+        8 │ + ((log()·as·void));
+     9  9 │   void (<void>log());
+    10 10 │   void (log() satisfies void);
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     7 │ void maybe();
+     8 │ void (log() as void);
+   > 9 │ void (<void>log());
+       │ ^^^^^^^^^^^^^^^^^^
+    10 │ void (log() satisfies void);
+    11 │ void (nothing(), log());
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     7  7 │   void maybe();
+     8  8 │   void (log() as void);
+     9    │ - void·(<void>log());
+        9 │ + ((<void>log()));
+    10 10 │   void (log() satisfies void);
+    11 11 │   void (nothing(), log());
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     8 │ void (log() as void);
+     9 │ void (<void>log());
+  > 10 │ void (log() satisfies void);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ void (nothing(), log());
+    12 │ declare const box: { value: string; method(): void; optional?: () => void };
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     8  8 │   void (log() as void);
+     9  9 │   void (<void>log());
+    10    │ - void·(log()·satisfies·void);
+       10 │ + ((log()·satisfies·void));
+    11 11 │   void (nothing(), log());
+    12 12 │   declare const box: { value: string; method(): void; optional?: () => void };
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     9 │ void (<void>log());
+    10 │ void (log() satisfies void);
+  > 11 │ void (nothing(), log());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ declare const box: { value: string; method(): void; optional?: () => void };
+    13 │ void box;
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     9  9 │   void (<void>log());
+    10 10 │   void (log() satisfies void);
+    11    │ - void·(nothing(),·log());
+       11 │ + ((nothing(),·log()));
+    12 12 │   declare const box: { value: string; method(): void; optional?: () => void };
+    13 13 │   void box;
+  
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    11 │ void (nothing(), log());
+    12 │ declare const box: { value: string; method(): void; optional?: () => void };
+  > 13 │ void box;
+       │ ^^^^^^^^
+    14 │ void box.value;
+    15 │ void box.method();
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    11 11 │   void (nothing(), log());
+    12 12 │   declare const box: { value: string; method(): void; optional?: () => void };
+    13    │ - void·box;
+       13 │ + (box);
+    14 14 │   void box.value;
+    15 15 │   void box.method();
+  
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    12 │ declare const box: { value: string; method(): void; optional?: () => void };
+    13 │ void box;
+  > 14 │ void box.value;
+       │ ^^^^^^^^^^^^^^
+    15 │ void box.method();
+    16 │ void (box.value as string);
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    12 12 │   declare const box: { value: string; method(): void; optional?: () => void };
+    13 13 │   void box;
+    14    │ - void·box.value;
+       14 │ + (box.value);
+    15 15 │   void box.method();
+    16 16 │   void (box.value as string);
+  
+
+```
+
+```
+invalid.ts:15:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    13 │ void box;
+    14 │ void box.value;
+  > 15 │ void box.method();
+       │ ^^^^^^^^^^^^^^^^^
+    16 │ void (box.value as string);
+    17 │ void (<string>box.value);
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    13 13 │   void box;
+    14 14 │   void box.value;
+    15    │ - void·box.method();
+       15 │ + (box.method());
+    16 16 │   void (box.value as string);
+    17 17 │   void (<string>box.value);
+  
+
+```
+
+```
+invalid.ts:16:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    14 │ void box.value;
+    15 │ void box.method();
+  > 16 │ void (box.value as string);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ void (<string>box.value);
+    18 │ void (box.value satisfies string);
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    14 14 │   void box.value;
+    15 15 │   void box.method();
+    16    │ - void·(box.value·as·string);
+       16 │ + ((box.value·as·string));
+    17 17 │   void (<string>box.value);
+    18 18 │   void (box.value satisfies string);
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    15 │ void box.method();
+    16 │ void (box.value as string);
+  > 17 │ void (<string>box.value);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ void (box.value satisfies string);
+    19 │ void box.value!;
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    15 15 │   void box.method();
+    16 16 │   void (box.value as string);
+    17    │ - void·(<string>box.value);
+       17 │ + ((<string>box.value));
+    18 18 │   void (box.value satisfies string);
+    19 19 │   void box.value!;
+  
+
+```
+
+```
+invalid.ts:18:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    16 │ void (box.value as string);
+    17 │ void (<string>box.value);
+  > 18 │ void (box.value satisfies string);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ void box.value!;
+    20 │ void (log(), box.value);
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    16 16 │   void (box.value as string);
+    17 17 │   void (<string>box.value);
+    18    │ - void·(box.value·satisfies·string);
+       18 │ + ((box.value·satisfies·string));
+    19 19 │   void box.value!;
+    20 20 │   void (log(), box.value);
+  
+
+```
+
+```
+invalid.ts:19:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    17 │ void (<string>box.value);
+    18 │ void (box.value satisfies string);
+  > 19 │ void box.value!;
+       │ ^^^^^^^^^^^^^^^
+    20 │ void (log(), box.value);
+    21 │ const result = void box.value;
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    17 17 │   void (<string>box.value);
+    18 18 │   void (box.value satisfies string);
+    19    │ - void·box.value!;
+       19 │ + (box.value!);
+    20 20 │   void (log(), box.value);
+    21 21 │   const result = void box.value;
+  
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    18 │ void (box.value satisfies string);
+    19 │ void box.value!;
+  > 20 │ void (log(), box.value);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ const result = void box.value;
+    22 │ const callResult = void log();
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    18 18 │   void (box.value satisfies string);
+    19 19 │   void box.value!;
+    20    │ - void·(log(),·box.value);
+       20 │ + ((log(),·box.value));
+    21 21 │   const result = void box.value;
+    22 22 │   const callResult = void log();
+  
+
+```
+
+```
+invalid.ts:21:16 lint/nursery/noMeaninglessVoidOperator ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    19 │ void box.value!;
+    20 │ void (log(), box.value);
+  > 21 │ const result = void box.value;
+       │                ^^^^^^^^^^^^^^
+    22 │ const callResult = void log();
+    23 │ type Empty = void | undefined;
+  
+  i This operand is neither a function call nor a thenable.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:20 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    20 │ void (log(), box.value);
+    21 │ const result = void box.value;
+  > 22 │ const callResult = void log();
+       │                    ^^^^^^^^^^
+    23 │ type Empty = void | undefined;
+    24 │ declare function alias(): Empty;
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    20 20 │   void (log(), box.value);
+    21 21 │   const result = void box.value;
+    22    │ - const·callResult·=·void·log();
+       22 │ + const·callResult·=·(log());
+    23 23 │   type Empty = void | undefined;
+    24 24 │   declare function alias(): Empty;
+  
+
+```
+
+```
+invalid.ts:25:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    23 │ type Empty = void | undefined;
+    24 │ declare function alias(): Empty;
+  > 25 │ void alias();
+       │ ^^^^^^^^^^^^
+    26 │ 
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    23 23 │   type Empty = void | undefined;
+    24 24 │   declare function alias(): Empty;
+    25    │ - void·alias();
+       25 │ + (alias());
+    26 26 │   
+  
+
+```

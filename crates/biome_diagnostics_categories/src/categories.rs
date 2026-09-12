@@ -225,6 +225,7 @@ define_categories! {
     "lint/nursery/noJsxLeakedDollar": "https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
     "lint/nursery/noJsxNamespace": "https://biomejs.dev/linter/rules/no-jsx-namespace",
     "lint/nursery/noLoopFunc": "https://biomejs.dev/linter/rules/no-loop-func",
+    "lint/nursery/noMeaninglessVoidOperator": "https://biomejs.dev/linter/rules/no-meaningless-void-operator",
     "lint/nursery/noMisleadingReturnType": "https://biomejs.dev/linter/rules/no-misleading-return-type",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
