@@ -216,3 +216,127 @@ fn assert_nullable(
     assert_eq!(&types[0], item);
     assert_eq!(local(table, &types[1]), &LoweredTypeData::Null);
 }
+
+#[test]
+fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
+    for (source, expected) in [
+        ("any", LoweredTypeData::AnyKeyword),
+        ("unknown", LoweredTypeData::UnknownKeyword),
+        ("never", LoweredTypeData::NeverKeyword),
+        ("undefined", LoweredTypeData::Undefined),
+        ("bigint", LoweredTypeData::BigInt),
+        ("symbol", LoweredTypeData::Symbol),
+        ("boolean", LoweredTypeData::Boolean),
+        ("null", LoweredTypeData::Null),
+        ("true", LoweredTypeData::BooleanLiteral(true)),
+        ("false", LoweredTypeData::BooleanLiteral(false)),
+        ("0", LoweredTypeData::NumberLiteral("0".into())),
+        ("-0", LoweredTypeData::NumberLiteral("-0".into())),
+        (
+            "1_000.25",
+            LoweredTypeData::NumberLiteral("1_000.25".into()),
+        ),
+        ("1e-3", LoweredTypeData::NumberLiteral("1e-3".into())),
+        ("0xff", LoweredTypeData::NumberLiteral("0xff".into())),
+        ("0b10", LoweredTypeData::NumberLiteral("0b10".into())),
+        ("0o10", LoweredTypeData::NumberLiteral("0o10".into())),
+        (
+            "- /* trivia */ 0xFF",
+            LoweredTypeData::NumberLiteral("-0xFF".into()),
+        ),
+        ("123n", LoweredTypeData::BigIntLiteral("123n".into())),
+        ("0n", LoweredTypeData::BigIntLiteral("0n".into())),
+        ("-0n", LoweredTypeData::BigIntLiteral("-0n".into())),
+        (
+            "9_007_199_254_740_993n",
+            LoweredTypeData::BigIntLiteral("9_007_199_254_740_993n".into()),
+        ),
+        ("0b10n", LoweredTypeData::BigIntLiteral("0b10n".into())),
+        ("0o10n", LoweredTypeData::BigIntLiteral("0o10n".into())),
+        (
+            "- /* trivia */ 0xFFn",
+            LoweredTypeData::BigIntLiteral("-0xFFn".into()),
+        ),
+        ("'ready'", LoweredTypeData::StringLiteral("ready".into())),
+    ] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!(
+            "interface Example {{ value?: ({source}); method(input: {source}): {source}; callback: (input: {source}) => {source}; alternatives: {source} | string; }}"
+        ).into_bytes();
+        let table = lower(&[file], &["Example"]).with_context(|| source)?;
+        let reference = table.interface_reference("Example").unwrap();
+        let LoweredTypeData::Interface(interface) = local(&table, &reference) else {
+            panic!("expected interface")
+        };
+        assert_eq!(
+            local(&table, interface.member("value").unwrap().type_reference()),
+            &expected,
+            "{source}"
+        );
+        for name in ["method", "callback"] {
+            let LoweredTypeData::Function(function) =
+                local(&table, interface.member(name).unwrap().type_reference())
+            else {
+                panic!("expected function")
+            };
+            assert_eq!(
+                local(&table, function.parameters()[0].type_reference()),
+                &expected,
+                "{source}"
+            );
+            assert_eq!(local(&table, function.return_type()), &expected, "{source}");
+        }
+        let LoweredTypeData::Union(union) = local(
+            &table,
+            interface.member("alternatives").unwrap().type_reference(),
+        ) else {
+            panic!("expected union")
+        };
+        assert_eq!(local(&table, &union[0]), &expected, "{source}");
+        syn::parse_str::<syn::Expr>(&render_declarations(&table))?;
+    }
+    Ok(())
+}
+
+#[test]
+fn declaration_scalar_support_does_not_accept_type_operators_or_objects() -> Result<()> {
+    for source in [
+        "unique symbol",
+        "keyof symbol",
+        "object",
+        "{ value: bigint }",
+        "bigint[]",
+        "`text`",
+    ] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!("interface Example {{ value: {source}; }}").into_bytes();
+        let error = lower(&[file], &["Example"]).expect_err(source);
+        assert!(
+            format!("{error:#}").contains("unsupported type syntax"),
+            "{source}: {error:#}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn declaration_scalar_runtime_fixture_matches_emission() -> Result<()> {
+    let files = [fixture("lowering.scalars.d.ts")?];
+    let table = lower(&files, &["Scalars"])?;
+    let output = render_declarations(&table);
+    let formatted = xtask_glue::reformat_without_preamble(format!(
+        "fn scalar_types() -> Box<[crate::TypeData]> {{ {output} }}"
+    ))?;
+    let formatted = format!(
+        "// Generated from xtask/codegen/tests/fixtures/global-types/lowering.scalars.d.ts.\n\
+         // Regenerate with BIOME_GLOBAL_TYPES_UPDATE_FIXTURES=1 cargo test -p xtask_codegen --features global_types --test declaration_lowering declaration_scalar_runtime_fixture_matches_emission\n\
+         {formatted}"
+    );
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../crates/biome_js_type_info/src/generated/scalar_test_types.rs");
+    if std::env::var_os("BIOME_GLOBAL_TYPES_UPDATE_FIXTURES").is_some() {
+        fs::write(&path, &formatted)?;
+    }
+    assert_eq!(formatted, fs::read_to_string(path)?);
+    Ok(())
+}
