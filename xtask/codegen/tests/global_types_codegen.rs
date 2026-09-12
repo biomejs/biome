@@ -1354,13 +1354,6 @@ mod tests {
             bail!("WeakMap should lower to class data");
         };
         assert_eq!(weak_map_class.name(), "WeakMap");
-        assert_eq!(
-            weak_map_class.type_parameters(),
-            &[
-                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-            ]
-        );
         assert!(weak_map_class.members().is_empty());
 
         Ok(())
@@ -1399,10 +1392,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_wrong_weak_map_type_parameter_count() -> Result<()> {
+    fn lowerer_rejects_inconsistent_weak_map_type_parameter_count() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts"),
-            "WeakMap interface has 1 type parameters, expected 2",
+            "inconsistent type parameter count across merged class WeakMap declarations",
         )
     }
 

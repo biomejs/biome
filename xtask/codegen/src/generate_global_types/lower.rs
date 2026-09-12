@@ -27,12 +27,18 @@ use crate::generate_global_types::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredGlobalTypes {
     globals: Box<[LoweredGlobal]>,
+    local_types: Box<[LoweredTypeData]>,
 }
 
 impl LoweredGlobalTypes {
     /// Returns all lowered globals in deterministic output order.
     pub fn globals(&self) -> &[LoweredGlobal] {
         &self.globals
+    }
+
+    /// Supporting types addressed by local references, with dependencies before users.
+    pub fn local_types(&self) -> &[LoweredTypeData] {
+        &self.local_types
     }
 
     /// Returns one lowered global by TypeScript global name.
@@ -86,6 +92,8 @@ pub enum LoweredTypeData {
     Union(Box<[LoweredTypeReference]>),
     Undefined,
     UnknownKeyword,
+    ThisKeyword,
+    GenericParameter(Text),
 }
 
 /// Lowered class-like global.
@@ -311,9 +319,25 @@ pub fn lower_global_types(
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
+    let local_types = if manifest.global_group("WeakMap").is_some() {
+        let mut class = LoweredClass {
+            name: Text::from("WeakMap"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let local_types = declarations::lower_class_members(manifest, source_files, &mut class)?;
+        globals.push(LoweredGlobal {
+            name: class.name.clone(),
+            id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Class(class),
+        });
+        local_types
+    } else {
+        Box::default()
+    };
 
     Ok(LoweredGlobalTypes {
+        local_types,
         globals: globals.into_boxed_slice(),
     })
 }
@@ -515,12 +539,6 @@ const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
     name: "Set",
     id_constant: "SET_ID_GLOBAL_TYPE_ID",
     type_parameter_ids: &["GLOBAL_T_ID"],
-};
-
-const WEAK_MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "WeakMap",
-    id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
 };
 
 const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;

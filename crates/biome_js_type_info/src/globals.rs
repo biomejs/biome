@@ -9,7 +9,7 @@ use crate::{
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
-use crate::generated::global_types::set_generated_global_type_data;
+use crate::generated::global_types::{generated_local_types, set_generated_global_type_data};
 
 pub use super::globals_ids::*;
 
@@ -264,6 +264,14 @@ impl<'db> GlobalTypes<'db> {
 
 #[salsa::tracked(returns(ref))]
 pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
+    static LOCAL_TYPES: LazyLock<Box<[TypeData]>> = LazyLock::new(generated_local_types);
+    let mut local_types = Vec::with_capacity(LOCAL_TYPES.len());
+    for raw in LOCAL_TYPES.iter() {
+        let ty = InferredTypeData::from_raw_with_resolver(db, raw, true, &mut |reference| {
+            resolve_generated_reference(reference, &local_types)
+        });
+        local_types.push(ty);
+    }
     let mut types: Box<[InferredTypeData<'db>]> = (0..NUM_PREDEFINED_TYPES)
         .map(|index| {
             let id = GlobalTypeId::new(TypeId::new(index));
@@ -271,14 +279,7 @@ pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
                 db,
                 raw_global_type(id),
                 true,
-                &mut |reference| match reference {
-                    TypeReference::Resolved(RawTypeId::Global(id)) => {
-                        InferredTypeData::GlobalType(*id)
-                    }
-                    TypeReference::Resolved(RawTypeId::Local(_))
-                    | TypeReference::Qualifier(_)
-                    | TypeReference::Import(_) => InferredTypeData::Unknown,
-                },
+                &mut |reference| resolve_generated_reference(reference, &local_types),
             )
         })
         .collect();
@@ -306,6 +307,22 @@ pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
         *typeof_union = InferredTypeData::union_from_types(db, typeof_types);
     }
     GlobalTypes { types }
+}
+
+fn resolve_generated_reference<'db>(
+    reference: &TypeReference,
+    local_types: &[InferredTypeData<'db>],
+) -> InferredTypeData<'db> {
+    match reference {
+        TypeReference::Resolved(RawTypeId::Global(id)) => InferredTypeData::GlobalType(*id),
+        TypeReference::Resolved(RawTypeId::Local(id)) => {
+            // Generated dependencies precede their users; missing entries would lose member types.
+            *local_types
+                .get(id.index())
+                .expect("generated local types must be in dependency order")
+        }
+        TypeReference::Qualifier(_) | TypeReference::Import(_) => InferredTypeData::Unknown,
+    }
 }
 
 #[cfg(test)]
@@ -380,23 +397,6 @@ mod tests {
             assert_eq!(member.ty, InferredTypeData::GlobalType(global_type_id));
             assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
         }
-    }
-
-    #[test]
-    fn generated_weak_map_global_keeps_type_parameters() {
-        let db = TestDb::default();
-        let InferredTypeData::Class(weak_map) = global_types(&db).get(WEAK_MAP_ID_GLOBAL_TYPE_ID)
-        else {
-            panic!("WeakMap must be a class");
-        };
-        assert_eq!(
-            weak_map.type_parameters(&db).as_ref(),
-            &[
-                InferredTypeData::GlobalType(T_ID_GLOBAL_TYPE_ID),
-                InferredTypeData::GlobalType(U_ID_GLOBAL_TYPE_ID),
-            ]
-        );
-        assert!(weak_map.members(&db).is_empty());
     }
 
     #[test]

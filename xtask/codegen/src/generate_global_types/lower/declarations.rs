@@ -46,6 +46,7 @@ pub fn lower_interfaces(
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
+        class_parameters: None,
     };
     for name in names {
         lowerer.named_reference(name)?;
@@ -75,10 +76,17 @@ struct DeclarationLowerer<'a> {
     interfaces: BTreeMap<String, usize>,
     pending: Vec<(String, usize)>,
     types: Vec<Option<LoweredTypeData>>,
+    class_parameters: Option<BTreeMap<Text, LoweredTypeReference>>,
 }
 
 impl DeclarationLowerer<'_> {
     fn named_reference(&mut self, name: &str) -> Result<LoweredTypeReference> {
+        if let Some(parameters) = &self.class_parameters {
+            return parameters
+                .get(name)
+                .cloned()
+                .with_context(|| format!("unsupported class member type reference {name}"));
+        }
         if let Some(index) = self.interfaces.get(name) {
             return Ok(LoweredTypeReference::Local(*index));
         }
@@ -222,6 +230,9 @@ impl DeclarationLowerer<'_> {
             return Ok(self.register(data));
         }
         match ty {
+            AnyTsType::TsThisType(_) if self.class_parameters.is_some() => {
+                Ok(self.register(LoweredTypeData::ThisKeyword))
+            }
             AnyTsType::TsReferenceType(reference) => {
                 if reference.type_arguments().is_some() {
                     bail!("unsupported type arguments in type reference");
@@ -289,4 +300,110 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
     } else {
         Text::from(token.token_text_trimmed())
     }
+}
+
+/// Lowers named instance properties and nongeneric methods with declaration-derived
+/// generic parameters. Constraints, defaults, value-side declarations, and computed members
+/// are excluded. Other unsupported member shapes and external type references are errors.
+/// `this` remains a keyword; lowering does not bind it to a call receiver.
+/// Local types are registered after their dependencies for runtime conversion in one pass.
+pub(super) fn lower_class_members(
+    manifest: &GlobalManifest,
+    source_files: &[DiscoveredFile],
+    class: &mut LoweredClass,
+) -> Result<Box<[LoweredTypeData]>> {
+    let mut lowerer = DeclarationLowerer {
+        manifest,
+        sources: ParsedSourceCache::new(source_files),
+        interfaces: BTreeMap::new(),
+        pending: Vec::new(),
+        types: Vec::new(),
+        class_parameters: Some(BTreeMap::new()),
+    };
+    let group = manifest
+        .global_group(class.name())
+        .context("missing class declaration group")?;
+    let mut members: Vec<LoweredTypeMember> = Vec::new();
+    let mut class_parameters = None;
+    for record in group.declarations() {
+        match record.kind {
+            DeclarationKind::Interface => {}
+            DeclarationKind::TypeAlias => {
+                bail!("unsupported type alias merged with class {}", class.name())
+            }
+            _ => continue,
+        }
+        let declaration = lowerer
+            .sources
+            .find_interface_declaration(record)?
+            .context("missing class interface")?;
+        if declaration.extends_clause().is_some() {
+            bail!("unsupported extends clause on class {}", class.name());
+        }
+        let names = declaration
+            .type_parameters()
+            .map(|parameters| {
+                parameters
+                    .items()
+                    .into_iter()
+                    .map(|parameter| {
+                        Ok(Text::from(
+                            parameter?.name()?.ident_token()?.token_text_trimmed(),
+                        ))
+                    })
+                    .collect::<Result<Vec<_>>>()
+            })
+            .transpose()?
+            .unwrap_or_default();
+        let references = class_parameters.get_or_insert_with(|| {
+            names
+                .iter()
+                .map(|name| lowerer.register(LoweredTypeData::GenericParameter(name.clone())))
+                .collect::<Box<[_]>>()
+        });
+        if names.len() != references.len() {
+            bail!(
+                "inconsistent type parameter count across merged class {} declarations",
+                class.name()
+            );
+        }
+        lowerer.class_parameters =
+            Some(names.into_iter().zip(references.iter().cloned()).collect());
+        for member in declaration.members() {
+            if !supports_class_member(&member)? {
+                continue;
+            }
+            let member = lowerer.lower_member(member).with_context(|| {
+                format!("in {} from {}", class.name(), record.file_repo_relative)
+            })?;
+            if members.iter().any(|previous| previous.name == member.name) {
+                bail!(
+                    "unsupported duplicate member {}.{}",
+                    class.name(),
+                    member.name
+                );
+            }
+            members.push(member);
+        }
+    }
+    class.type_parameters =
+        class_parameters.context("class must include an interface declaration")?;
+    class.members = members.into_boxed_slice();
+    lowerer
+        .types
+        .into_iter()
+        .collect::<Option<Box<[_]>>>()
+        .context("unfilled class member type")
+}
+
+fn supports_class_member(member: &AnyTsTypeMember) -> Result<bool> {
+    let name = match member {
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        _ => bail!("unsupported class member: {:?}", member.syntax().kind()),
+    };
+    Ok(!matches!(
+        name,
+        AnyJsObjectMemberName::JsComputedMemberName(_)
+    ))
 }

@@ -377,12 +377,29 @@ pub(crate) fn set_generated_global_type_data(
     let data = crate::TypeData::Class(Box::new(crate::Class {
         name: Some(biome_rowan::Text::new_static("WeakMap")),
         type_parameters: Box::new([
-            crate::globals::GLOBAL_T_ID.into(),
-            crate::globals::GLOBAL_U_ID.into(),
+            crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
         ]),
         extends: None,
         implements: Box::default(),
-        members: Box::new([]),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("delete")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("get")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("set")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+            },
+        ]),
     }));
     builder.set_type_data(crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
@@ -449,4 +466,98 @@ pub(crate) fn set_generated_global_type_data(
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into()),
     }));
     builder.set_type_data(crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID, data);
+}
+
+/// Supporting types in dependency order; local references address this table.
+pub(crate) fn generated_local_types() -> Box<[crate::TypeData]> {
+    Box::new([
+        crate::TypeData::from(crate::GenericTypeParameter {
+            name: biome_rowan::Text::new_static("K"),
+            constraint: crate::TypeReference::unknown(),
+            default: crate::TypeReference::unknown(),
+        }),
+        crate::TypeData::from(crate::GenericTypeParameter {
+            name: biome_rowan::Text::new_static("V"),
+            constraint: crate::TypeReference::unknown(),
+            default: crate::TypeReference::unknown(),
+        }),
+        crate::TypeData::Boolean,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("delete")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("key"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+            ),
+        })),
+        crate::TypeData::Undefined,
+        crate::TypeData::Union(Box::new(crate::Union(Box::new([
+            crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+            crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+        ])))),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("get")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("key"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+            ),
+        })),
+        crate::TypeData::Boolean,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("has")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("key"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+            ),
+        })),
+        crate::TypeData::ThisKeyword,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("set")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("key"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("value"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+            ),
+        })),
+    ])
 }
