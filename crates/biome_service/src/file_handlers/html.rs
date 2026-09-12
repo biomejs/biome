@@ -961,7 +961,11 @@ fn lint(params: LintParams) -> LintResults {
             }
         },
         project_layout: Some(params.project_layout.clone()),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(params.workspace_db.rc_language_db());
+    #[cfg(feature = "html_embeds")]
+    let html_services = html_services.with_embedded_data(params.embedded_data.clone());
     let suppression = HtmlSuppressionService::new(
         &tree,
         source_type,
@@ -1052,7 +1056,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
         },
         project_layout: Some(project_layout),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(workspace_db.rc_language_db());
 
     let suppression =
         HtmlSuppressionService::new(&tree, source_type, &parsed_source.into(), &workspace_db);
@@ -1155,7 +1161,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     }
                 },
                 project_layout: Some(params.project_layout.clone()),
-            };
+                ..HtmlAnalyzerServices::default()
+            }
+            .with_language_db(params.workspace_db.rc_language_db());
+            #[cfg(feature = "html_embeds")]
+            let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
             let suppression = HtmlSuppressionService::new(
                 &tree,
@@ -1217,7 +1227,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
         let suppression = HtmlSuppressionService::new(
             &tree,
@@ -1262,7 +1276,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
         let suppression = HtmlSuppressionService::new(
             &tree,
             source_type,

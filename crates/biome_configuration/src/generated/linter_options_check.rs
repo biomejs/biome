@@ -1632,6 +1632,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("correctness", "noVueSetupPropsReactivityLoss", TypeId::of::<biome_rule_options::no_vue_setup_props_reactivity_loss::NoVueSetupPropsReactivityLossOptions>()));
     result.push((
+        "nursery",
+        "noVueUndeclaredDirectives",
+        TypeId::of::<
+            biome_rule_options::no_vue_undeclared_directives::NoVueUndeclaredDirectivesOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noVueVIfWithVFor",
         TypeId::of::<biome_rule_options::no_vue_v_if_with_v_for::NoVueVIfWithVForOptions>(),

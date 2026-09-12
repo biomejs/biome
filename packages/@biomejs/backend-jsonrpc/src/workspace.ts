@@ -2670,6 +2670,11 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 	 */
 	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
 	/**
+	* Disallow custom Vue directives that are not declared.
+See https://biomejs.dev/linter/rules/no-vue-undeclared-directives 
+	 */
+	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
+	/**
 	* Disallow deprecated number modifiers on Vue v-on directives.
 See https://biomejs.dev/linter/rules/no-vue-v-on-number-values 
 	 */
@@ -4982,6 +4987,9 @@ export type NoVueImportCompilerMacrosConfiguration =
 export type NoVueRefAsOperandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefAsOperandOptions;
+export type NoVueUndeclaredDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredDirectivesOptions;
 export type NoVueVOnNumberValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVOnNumberValuesOptions;
@@ -6992,6 +7000,10 @@ export interface RuleWithNoVueRefAsOperandOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRefAsOperandOptions;
 }
+export interface RuleWithNoVueUndeclaredDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredDirectivesOptions;
+}
 export interface RuleWithNoVueVOnNumberValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVOnNumberValuesOptions;
@@ -8828,6 +8840,13 @@ export type NoUselessTypeConversionOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
+export interface NoVueUndeclaredDirectivesOptions {
+	/**
+	* Names of directives registered globally with `app.directive(...)`,
+such as `highlight` for `v-highlight`. 
+	 */
+	globals?: string[];
+}
 export type NoVueVOnNumberValuesOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type UseArraySomeOptions = {};
@@ -10288,6 +10307,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/useArraySome"

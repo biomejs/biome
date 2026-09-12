@@ -268,6 +268,7 @@ define_categories! {
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
+    "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
     "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
     "lint/nursery/useArraySome": "https://biomejs.dev/linter/rules/use-array-some",
