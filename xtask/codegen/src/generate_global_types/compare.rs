@@ -10,7 +10,7 @@ use super::lower::{
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
-const ARRAY_MEMBER_COUNT: usize = 4;
+const ARRAY_MEMBER_COUNT: usize = 5;
 const ARRAY_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const ARRAY_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] =
@@ -19,7 +19,7 @@ const PROMISE_MEMBER_COUNT: usize = 11;
 const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
-const SYMBOL_MEMBER_COUNT: usize = 2;
+const SYMBOL_MEMBER_COUNT: usize = 3;
 const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
     LoweredTypeReference::Predefined("GLOBAL_T_ID"),
     LoweredTypeReference::Predefined("GLOBAL_U_ID"),
@@ -535,7 +535,7 @@ fn assert_memberless_class_shape(
     Ok(())
 }
 
-/// Validates the generated `Symbol` class and its two symbol-valued helpers.
+/// Validates the generated `Symbol` class and its symbol-valued helpers.
 fn assert_symbol_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(symbol) = lowered.global("Symbol") else {
         bail!("generated globals are missing the Symbol global");
@@ -563,6 +563,12 @@ fn assert_symbol_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
         );
     }
 
+    assert_symbol_member(class, "iterator", "GLOBAL_SYMBOL_ITERATOR_ID")?;
+    assert_symbol_helper(
+        lowered,
+        "Symbol.iterator",
+        "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
+    )?;
     assert_symbol_member(class, "dispose", "GLOBAL_SYMBOL_DISPOSE_ID")?;
     assert_symbol_member(class, "asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")?;
     assert_symbol_helper(

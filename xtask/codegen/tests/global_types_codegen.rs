@@ -1316,7 +1316,15 @@ mod tests {
             async_dispose.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
         );
-        assert_eq!(symbol_class.members().len(), 2);
+        assert_eq!(symbol_class.members().len(), 3);
+        let iterator = symbol_class
+            .member("iterator")
+            .expect("Symbol.iterator should be lowered");
+        assert_eq!(iterator.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            iterator.type_reference(),
+            &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ITERATOR_ID")
+        );
 
         let dispose_helper = lowered
             .global("Symbol.dispose")

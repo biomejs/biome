@@ -20,6 +20,7 @@ interface SymbolConstructor {
 
 interface SymbolConstructor {
     readonly [Symbol.iterator]: unique symbol;
+    readonly iterator: unique symbol;
     readonly dispose: unique symbol;
     readonly asyncDispose: unique symbol;
 }
@@ -39,6 +40,11 @@ interface Array<T> {
     filter(predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any): T[];
     forEach(callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any): void;
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
+}
+
+interface ArrayConstructor {
+    from<T>(items: ArrayLike<T>): T[];
+    from<T, U>(items: ArrayLike<T>, mapfn: (value: T, index: number) => U, thisArg?: any): U[];
 }
 
 interface Promise<T> {
