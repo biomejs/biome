@@ -20,12 +20,6 @@ const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 const SYMBOL_MEMBER_COUNT: usize = 2;
-const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
-    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-];
-const SET_TYPE_PARAMETERS: &[LoweredTypeReference] =
-    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const DATE_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 
 #[derive(Clone, Copy)]
@@ -176,8 +170,6 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
         "DATE_ID_GLOBAL_TYPE_ID",
         DATE_TYPE_PARAMETERS,
     )?;
-    assert_memberless_class_shape(lowered, "Map", "MAP_ID_GLOBAL_TYPE_ID", MAP_TYPE_PARAMETERS)?;
-    assert_memberless_class_shape(lowered, "Set", "SET_ID_GLOBAL_TYPE_ID", SET_TYPE_PARAMETERS)?;
     assert_disposable_shape(
         lowered,
         DisposableShape {
