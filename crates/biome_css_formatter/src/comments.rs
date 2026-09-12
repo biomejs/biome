@@ -760,11 +760,10 @@ fn handle_declaration_name_comment(
                 return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
 
-            if preceding_node
-                .parent()
-                .and_then(CssGenericComponentValueList::cast)
-                .is_some()
-            {
+            if preceding_node.parent().is_some_and(|parent| {
+                CssGenericComponentValueList::can_cast(parent.kind())
+                    || ScssExpressionItemList::can_cast(parent.kind())
+            }) {
                 CommentPlacement::Default(comment)
             } else {
                 CommentPlacement::leading(preceding_node.clone(), comment)
