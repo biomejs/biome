@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validAssertions.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+declare function assert(value: unknown): asserts value;
+declare function assertSecond(message: unknown, value: unknown): asserts value;
+declare function assertString(value: unknown): asserts value is string;
+declare function assertUnknown(value: unknown): asserts value is unknown;
+declare function assertUnresolved(value: unknown): asserts value is MissingType;
+function checks(number: number | null, string: string, object: object | null, values: unknown[]) {
+    assert(number != null);
+    assert(string);
+    assert(object);
+    assertSecond(number, true);
+    assertString(number);
+    assertUnknown(number);
+    assertUnresolved(number);
+    assertSecond(...values);
+    const ordinary = (value: unknown) => {};
+    ordinary(number);
+}
+
+```

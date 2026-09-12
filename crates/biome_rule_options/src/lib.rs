@@ -507,6 +507,7 @@ pub mod use_sorted_selection_set;
 pub mod use_sorted_type_fields;
 pub mod use_spread_over_apply;
 pub mod use_static_response_methods;
+pub mod use_strict_boolean_expressions;
 pub mod use_strict_mode;
 pub mod use_string_starts_ends_with;
 pub mod use_svelte_require_each_key;

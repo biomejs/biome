@@ -31,7 +31,7 @@ pub use globals::{
 };
 pub use globals_ids::GlobalTypeId;
 pub use inferred_type::{
-    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, TypeTraversalError,
+    BooleanCoercion, IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, TypeTraversalError,
 };
 pub use interned_types::{RawTypeData, TypeDb};
 pub use return_type_relation::{

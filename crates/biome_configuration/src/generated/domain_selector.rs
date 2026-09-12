@@ -165,6 +165,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useIncludes"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
+        RuleFilter::Rule("nursery", "useStrictBooleanExpressions"),
         RuleFilter::Rule("nursery", "useStringStartsEndsWith"),
         RuleFilter::Rule("style", "useConsistentEnumValueType"),
         RuleFilter::Rule("suspicious", "noUnnecessaryConditions"),

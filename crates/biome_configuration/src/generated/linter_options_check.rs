@@ -2382,6 +2382,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useStrictBooleanExpressions",
+        TypeId::of::<
+            biome_rule_options::use_strict_boolean_expressions::UseStrictBooleanExpressionsOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "useStrictMode",
         TypeId::of::<biome_rule_options::use_strict_mode::UseStrictModeOptions>(),

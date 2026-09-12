@@ -1943,11 +1943,15 @@ impl ReturnType {
                                 Text::new_static("this")
                             }
                         },
-                        ty: ty
-                            .predicate()
-                            .and_then(|asserts| asserts.ty().ok())
-                            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                            .unwrap_or_default(),
+                        ty: match ty.predicate() {
+                            Some(predicate) => predicate
+                                .ty()
+                                .ok()
+                                .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                                .unwrap_or_default(),
+                            // Bare assertions require truthiness, rather than a specific type.
+                            None => collector.reference_to_owned_data(TypeData::Conditional),
+                        },
                     })))
                 })
             }
