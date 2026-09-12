@@ -2014,11 +2014,18 @@ impl ReturnType {
                                 Text::new_static("this")
                             }
                         },
-                        ty: ty
-                            .predicate()
-                            .and_then(|asserts| asserts.ty().ok())
-                            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                            .unwrap_or_default(),
+                        ty: match ty.predicate() {
+                            Some(predicate) => predicate
+                                .ty()
+                                .ok()
+                                .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                                .unwrap_or_default(),
+                            // Bare assertions require truthiness, rather than a specific type.
+                            // `Conditional` marks a value whose truthiness decides a condition,
+                            // and no type annotation resolves to it, so it cannot be confused
+                            // with an `asserts value is T` predicate.
+                            None => collector.reference_to_owned_data(TypeData::Conditional),
+                        },
                     })))
                 })
             }

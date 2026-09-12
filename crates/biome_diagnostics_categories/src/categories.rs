@@ -331,6 +331,7 @@ define_categories! {
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
     "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
+    "lint/nursery/useStrictBooleanExpressions": "https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteKitRuneImports": "https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
