@@ -743,7 +743,10 @@ where
         // Jump right to where we've left of last time rather than going through all tokens again.
         let mut remaining = n - self.lookahead.non_trivia_len();
         let current_length = self.lookahead.all_len();
-        let iter = self.lookahead_iter().skip(current_length);
+        let iter = LookaheadIterator {
+            buffered: self,
+            nth: current_length,
+        };
 
         for item in iter {
             if !item.kind().is_trivia() {
