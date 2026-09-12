@@ -480,3 +480,65 @@ fn class_callbacks_preserve_self_type_arguments_in_a_shared_table() -> Result<()
     }
     Ok(())
 }
+
+#[test]
+fn class_extensions_preserve_projections_and_exclude_intl_overloads() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    let mut file = fixture("manifest.disposables.d.ts")?;
+    let manifest = build_global_manifest(collect(&file).records);
+    let original = lower_global_types(&manifest, std::slice::from_ref(&file))?;
+    file.bytes.extend_from_slice(
+        b"
+        interface RegExp { extra?: boolean; check(input: string): boolean; }
+        interface Date {
+            format(): string;
+            format(locales?: string[], options?: Intl.DateTimeFormatOptions): string;
+            custom(options: Intl.CustomOptions): string;
+            readonly [Symbol.toPrimitive]: Unsupported;
+        }
+    ",
+    );
+    let manifest = build_global_manifest(collect(&file).records);
+    let lowered = lower_global_types(&manifest, &[file])?;
+    let LoweredTypeData::Class(regexp) = lowered.global("RegExp").unwrap().data() else {
+        panic!("expected class")
+    };
+    let LoweredTypeData::Class(original_regexp) = original.global("RegExp").unwrap().data() else {
+        panic!("expected class")
+    };
+    assert_eq!(regexp.member("exec"), original_regexp.member("exec"));
+    assert_eq!(
+        lowered.global("RegExp.exec"),
+        original.global("RegExp.exec")
+    );
+    assert_eq!(
+        regexp.member("extra").unwrap().kind(),
+        &LoweredMemberKind::Named { optional: true }
+    );
+    assert!(regexp.member("check").is_some());
+    let LoweredTypeData::Class(date) = lowered.global("Date").unwrap().data() else {
+        panic!("expected class")
+    };
+    assert!(date.member("custom").is_none());
+    let LoweredTypeReference::Local(index) = date.member("format").unwrap().type_reference() else {
+        panic!("expected local reference")
+    };
+    let LoweredTypeData::Function(format) = &lowered.local_types()[*index] else {
+        panic!("expected function")
+    };
+    assert!(format.parameters().is_empty());
+    Ok(())
+}
+
+#[test]
+fn intl_exclusion_does_not_hide_other_unsupported_overloads() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes =
+        b"interface Date { format(): string; format(options: Custom.Options): string; }".to_vec();
+    let manifest = build_global_manifest(collect(&file).records);
+    let error =
+        lower_global_types(&manifest, &[file]).expect_err("unsupported namespace must fail");
+    assert!(format!("{error:#}").contains("unsupported qualified type reference"));
+    Ok(())
+}

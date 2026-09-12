@@ -267,10 +267,40 @@ pub(crate) fn set_generated_global_type_data(
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
-        members: Box::new([crate::TypeMember {
-            kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("exec")),
-            ty: crate::globals::GLOBAL_REGEXP_EXEC_ID.into(),
-        }]),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("exec")),
+                ty: crate::globals::GLOBAL_REGEXP_EXEC_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("test")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(84)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("source")),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("global")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(85)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("ignoreCase")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(86)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("multiline")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(87)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("lastIndex")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("compile")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(89)).into(),
+            },
+        ]),
     }));
     builder.set_type_data(crate::globals::REGEXP_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Function(Box::new(crate::Function {
@@ -352,7 +382,194 @@ pub(crate) fn set_generated_global_type_data(
         type_parameters: Box::default(),
         extends: None,
         implements: Box::default(),
-        members: Box::new([]),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(39)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toDateString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(40)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toTimeString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(41)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toLocaleString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(42)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "toLocaleDateString",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(43)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "toLocaleTimeString",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(44)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("valueOf")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(45)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getTime")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(46)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getFullYear")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(47)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCFullYear")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(48)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getMonth")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(49)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCMonth")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(50)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getDate")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(51)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCDate")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(52)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getDay")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(53)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCDay")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(54)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getHours")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(55)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCHours")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(56)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getMinutes")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(57)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCMinutes")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(58)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getSeconds")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(59)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("getUTCSeconds")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(60)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "getMilliseconds",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(61)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "getUTCMilliseconds",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(62)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "getTimezoneOffset",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(63)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setTime")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(64)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "setMilliseconds",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(65)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static(
+                    "setUTCMilliseconds",
+                )),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(66)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setSeconds")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(67)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCSeconds")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(68)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setMinutes")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(69)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCMinutes")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(70)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setHours")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(71)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCHours")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(72)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setDate")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(73)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCDate")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(74)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setMonth")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(75)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCMonth")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(76)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setFullYear")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(77)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("setUTCFullYear")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(78)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toUTCString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(79)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toISOString")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(80)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("toJSON")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(82)).into(),
+            },
+        ]),
     }));
     builder.set_type_data(crate::globals::DATE_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Class(Box::new(crate::Class {
@@ -874,6 +1091,571 @@ pub(crate) fn generated_local_types() -> Box<[crate::TypeData]> {
             ]),
             return_type: crate::ReturnType::Type(
                 crate::RawTypeId::Local(crate::TypeId::new(37)).into(),
+            ),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toDateString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toTimeString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toLocaleString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toLocaleDateString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toLocaleTimeString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("valueOf")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getTime")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getFullYear")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCFullYear")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getMonth")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCMonth")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getDate")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCDate")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getDay")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCDay")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getHours")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCHours")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getMinutes")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCMinutes")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getSeconds")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCSeconds")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getMilliseconds")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getUTCMilliseconds")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("getTimezoneOffset")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setTime")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("time"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setMilliseconds")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCMilliseconds")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setSeconds")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCSeconds")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setMinutes")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("min"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCMinutes")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("min"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setHours")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("hours"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("min"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCHours")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("hours"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("min"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("sec"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("ms"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setDate")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCDate")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setMonth")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("month"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCMonth")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("month"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setFullYear")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("year"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("month"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("setUTCFullYear")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("year"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("month"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("date"),
+                    ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toUTCString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toISOString")),
+            parameters: Box::new([]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::AnyKeyword,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("toJSON")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("key"),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(81)).into(),
+                    is_optional: true,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+        })),
+        crate::TypeData::Boolean,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("test")),
+            parameters: Box::new([crate::FunctionParameter::Named(
+                crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("string"),
+                    ty: crate::globals::GLOBAL_STRING_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                },
+            )]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(83)).into(),
+            ),
+        })),
+        crate::TypeData::Boolean,
+        crate::TypeData::Boolean,
+        crate::TypeData::Boolean,
+        crate::TypeData::ThisKeyword,
+        crate::TypeData::Function(Box::new(crate::Function {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: Some(biome_rowan::Text::new_static("compile")),
+            parameters: Box::new([
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("pattern"),
+                    ty: crate::globals::GLOBAL_STRING_ID.into(),
+                    is_optional: false,
+                    is_rest: false,
+                }),
+                crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                    name: biome_rowan::Text::new_static("flags"),
+                    ty: crate::globals::GLOBAL_STRING_ID.into(),
+                    is_optional: true,
+                    is_rest: false,
+                }),
+            ]),
+            return_type: crate::ReturnType::Type(
+                crate::RawTypeId::Local(crate::TypeId::new(88)).into(),
             ),
         })),
     ])
