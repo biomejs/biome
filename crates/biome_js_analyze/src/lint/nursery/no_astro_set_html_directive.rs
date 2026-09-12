@@ -50,7 +50,11 @@ impl Rule for NoAstroSetHtmlDirective {
     type Options = NoAstroSetHtmlDirectiveOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<JsFileSource>().as_embedding_kind().is_astro() {
+        if !ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+        {
             return None;
         }
 
