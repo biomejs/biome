@@ -5,13 +5,14 @@
 //! behavior consistent between requests.
 
 use biome_js_type_info::interned_types::{
-    CallArgumentType as InferredCallArgumentType, TypeData as InferredTypeData,
+    CallArgumentType as InferredCallArgumentType, ConditionalType, TypeData as InferredTypeData,
 };
 use biome_rowan::TextRange;
 
 use crate::db::queries::{
-    BindingTypeInput, ExpressionTypeInput, find_member_type, find_value_member_type,
-    infer_binding_type, infer_export_type, infer_expression_function_returns_promise,
+    BindingTypeInput, ExpressionCaseLiteralInput, ExpressionTypeInput, find_member_type,
+    find_value_member_type, infer_binding_type, infer_export_type, infer_expression_case_literal,
+    infer_expression_conditional_type, infer_expression_function_returns_promise,
     infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
     resolve_callable_type,
 };
@@ -20,7 +21,7 @@ use crate::{
     infer_call_argument_type, infer_constructor_argument_type, normalize_type,
 };
 
-use super::{TypeInferenceClassification, TypeInferenceRequestContext};
+use super::{CaseLiteral, TypeInferenceClassification, TypeInferenceRequestContext};
 
 impl<'db> TypeInferenceRequestContext<'db> {
     /// Resolves the collected type of an expression.
@@ -34,6 +35,28 @@ impl<'db> TypeInferenceRequestContext<'db> {
     ) -> Option<InferredTypeData<'db>> {
         let db = self.db();
         infer_expression_type(db, ExpressionTypeInput::new(db, module, range))
+    }
+
+    pub(crate) fn conditional_type(
+        &self,
+        module: ModuleInfo,
+        range: TextRange,
+    ) -> Option<ConditionalType> {
+        let db = self.db();
+        infer_expression_conditional_type(db, ExpressionTypeInput::new(db, module, range))
+    }
+
+    pub(crate) fn case_literal(
+        &self,
+        module: ModuleInfo,
+        range: TextRange,
+        literal: CaseLiteral,
+    ) -> Option<bool> {
+        let db = self.db();
+        infer_expression_case_literal(
+            db,
+            ExpressionCaseLiteralInput::new(db, module, range, literal),
+        )
     }
 
     pub(crate) fn classify_expression_as_promise(

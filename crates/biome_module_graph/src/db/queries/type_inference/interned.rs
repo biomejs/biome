@@ -5,6 +5,7 @@
 //! cached by interning.
 
 use crate::ModuleInfo;
+use crate::type_inference::CaseLiteral;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
     TypeData as InferredTypeData,
@@ -20,6 +21,17 @@ pub struct ExpressionTypeInput<'db> {
     pub module: ModuleInfo,
     /// Source location that identifies the expression in the module's raw table.
     pub expression: TextRange,
+}
+
+/// Interned input for switch-case compatibility queries.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct ExpressionCaseLiteralInput<'db> {
+    pub module: ModuleInfo,
+    /// Source location that identifies the expression in the module's raw table.
+    pub expression: TextRange,
+    #[returns(ref)]
+    pub literal: CaseLiteral,
 }
 
 /// Interned input for [`super::infer_binding_type`].

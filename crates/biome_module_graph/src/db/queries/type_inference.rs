@@ -26,6 +26,7 @@
 //! shapes produce `Unknown` or `None` instead of a TypeScript diagnostic.
 
 mod calls;
+mod conditional;
 mod exports;
 mod interned;
 mod lookups;
@@ -39,11 +40,12 @@ pub(in crate::db) use calls::{
 pub use calls::{
     infer_call_argument_type, infer_call_expression_type, infer_constructor_argument_type,
 };
+pub(crate) use conditional::{infer_expression_case_literal, infer_expression_conditional_type};
 pub use exports::infer_export_type;
 pub(crate) use exports::{namespace_export_names, resolved_export_origin};
 pub use interned::{
-    BindingTypeInput, CallArgumentTypeInput, CallExpressionTypeInput, ExpressionTypeInput,
-    LocalTypeInput, NormalizeTypeInput,
+    BindingTypeInput, CallArgumentTypeInput, CallExpressionTypeInput, ExpressionCaseLiteralInput,
+    ExpressionTypeInput, LocalTypeInput, NormalizeTypeInput,
 };
 pub(crate) use interned::{BindingTypeWithImportBudgetInput, LocalTypeWithImportBudgetInput};
 pub use lookups::{

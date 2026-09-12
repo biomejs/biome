@@ -12,6 +12,7 @@ use biome_js_syntax::{
     JsUnaryOperator, JsWhileStatement, inner_string_text,
 };
 use biome_js_type_info::InferredType;
+use biome_module_graph::type_inference::CaseLiteral as TypeInferenceCaseLiteral;
 use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
 
@@ -172,6 +173,17 @@ enum CaseLiteral {
     Number(f64),
     Boolean(bool),
     Null,
+}
+
+fn to_type_inference_case_literal(literal: &CaseLiteral) -> TypeInferenceCaseLiteral {
+    match literal {
+        CaseLiteral::String(value) => {
+            TypeInferenceCaseLiteral::String(value.text().to_string().into())
+        }
+        CaseLiteral::Number(value) => TypeInferenceCaseLiteral::Number(value.to_bits()),
+        CaseLiteral::Boolean(value) => TypeInferenceCaseLiteral::Boolean(*value),
+        CaseLiteral::Null => TypeInferenceCaseLiteral::Null,
+    }
 }
 
 impl Rule for NoUnnecessaryConditions {
@@ -457,10 +469,10 @@ fn check_condition_necessity(
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
 
-            let ty = ctx.type_of_expression(expr)?;
-            if ty.is_always_truthy() {
+            let conditional = ctx.conditional_type_of_expression(expr)?;
+            if conditional.is_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-            } else if ty.is_always_falsy() {
+            } else if conditional.is_falsy() {
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
         }
@@ -491,10 +503,10 @@ fn check_condition_necessity(
                 return None;
             }
 
-            let ty = ctx.type_of_expression(expr)?;
-            if ty.is_always_truthy() {
+            let conditional = ctx.conditional_type_of_expression(expr)?;
+            if conditional.is_truthy() {
                 return Some(IssueKind::AlwaysTruthyCondition(expr.range()));
-            } else if ty.is_always_falsy() {
+            } else if conditional.is_falsy() {
                 return Some(IssueKind::AlwaysFalsyCondition(expr.range()));
             }
         }
@@ -545,8 +557,8 @@ fn check_nullish_necessity(
     }
 
     // Type-aware path: report when the left-hand side is statically non-nullish.
-    let ty = ctx.type_of_expression(expr)?;
-    if ty.is_non_nullish() {
+    let conditional = ctx.conditional_type_of_expression(expr)?;
+    if conditional.is_non_nullish() {
         return Some(IssueKind::UnnecessaryCoalescing(
             expr.range(),
             optional_chain_range,
@@ -579,8 +591,8 @@ fn check_optional_chain_necessity(
     }
 
     // Type-aware path: report when the object is statically non-nullish.
-    let ty = ctx.type_of_expression(expr)?;
-    if ty.is_non_nullish() {
+    let conditional = ctx.conditional_type_of_expression(expr)?;
+    if conditional.is_non_nullish() {
         return Some(IssueKind::UnnecessaryOptionalChain(
             expr.range(),
             optional_chain_range,
@@ -738,12 +750,11 @@ fn check_comparison_necessity(
         _ => return None,
     };
 
-    let ty = ctx.type_of_expression(typed_side)?;
-
     // Is the non-null side known to be non-nullish? Then the comparison is unnecessary
     // for any equality operator: `x === null`, `x !== undefined`, `x == null` are
     // all statically false/true.
-    if ty.is_non_nullish() {
+    let conditional = ctx.conditional_type_of_expression(typed_side)?;
+    if conditional.is_non_nullish() {
         let range = TextRange::new(left.range().start(), right.range().end());
         return Some(IssueKind::UnnecessaryComparison(range));
     }
@@ -755,7 +766,7 @@ fn check_comparison_necessity(
     // literal, so skip those to avoid false positives.
     // Note: this narrow pass does not detect `void 0` because it's a unary
     // expression, not an identifier.
-    if ty.is_nullish()
+    if conditional.is_nullish()
         && matches!(
             operator,
             JsBinaryOperator::Equality | JsBinaryOperator::Inequality
@@ -829,8 +840,18 @@ fn check_case_clause_reachability(
         .find_map(JsSwitchStatement::cast)?;
     let discriminant = switch_stmt.discriminant().ok()?;
 
-    let discriminant_ty = ctx.type_of_expression(&discriminant)?;
-    if type_could_equal_literal(discriminant_ty, &case_literal) {
+    let could_equal = match ctx.could_equal_case_literal(
+        &discriminant,
+        to_type_inference_case_literal(&case_literal),
+    ) {
+        Some(could_equal) => could_equal,
+        None => {
+            let discriminant_ty = ctx.type_of_expression(&discriminant)?;
+            type_could_equal_literal(discriminant_ty, &case_literal)
+        }
+    };
+
+    if could_equal {
         None
     } else {
         Some(IssueKind::UnreachableCase(test.range()))
