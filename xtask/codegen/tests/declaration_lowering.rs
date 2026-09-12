@@ -340,3 +340,84 @@ fn declaration_scalar_runtime_fixture_matches_emission() -> Result<()> {
     assert_eq!(formatted, fs::read_to_string(path)?);
     Ok(())
 }
+
+#[test]
+fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    for (key, value, member_name) in [("K", "V", "lookup"), ("Key", "Value", "renamed")] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!(
+            "interface WeakMap<{key} extends MissingConstraint, {value}> {{ {member_name}(key: {key}): {value} | undefined; }}
+             interface WeakMap<{key} extends MissingConstraint, {value}> {{ extra?: boolean; chain(): this; readonly [Symbol.toStringTag]: Unsupported; }}
+             declare var WeakMap: UnsupportedConstructor;"
+        ).into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_global_types(&manifest, &[file])?;
+        let LoweredTypeData::Class(class) = lowered.global("WeakMap").unwrap().data() else {
+            panic!("expected class")
+        };
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local reference")
+            };
+            &lowered.local_types()[*index]
+        };
+        let LoweredTypeData::Function(method) =
+            local(class.member(member_name).unwrap().type_reference())
+        else {
+            panic!("expected method")
+        };
+        assert_eq!(
+            method.parameters()[0].type_reference(),
+            &class.type_parameters()[0]
+        );
+        let LoweredTypeData::Union(types) = local(method.return_type()) else {
+            panic!("expected union")
+        };
+        assert_eq!(&types[0], &class.type_parameters()[1]);
+        assert_eq!(local(&types[1]), &LoweredTypeData::Undefined);
+        let property = class.member("extra").unwrap();
+        assert_eq!(
+            property.kind(),
+            &LoweredMemberKind::Named { optional: true }
+        );
+        assert_eq!(local(property.type_reference()), &LoweredTypeData::Boolean);
+        let LoweredTypeData::Function(chain) =
+            local(class.member("chain").unwrap().type_reference())
+        else {
+            panic!("expected method")
+        };
+        assert_eq!(local(chain.return_type()), &LoweredTypeData::ThisKeyword);
+        assert!(
+            class
+                .members()
+                .iter()
+                .all(|member| matches!(member.kind(), LoweredMemberKind::Named { .. }))
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn class_members_reject_unsupported_named_shapes() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    for (member, expected) in [
+        ("method<T>(value: T): T;", "unsupported type parameters"),
+        ("value: Missing;", "unsupported class member type reference"),
+        ("value: K<string>;", "unsupported type arguments"),
+        ("method(): V; method(): K;", "unsupported duplicate member"),
+        ("[key: string]: V;", "unsupported class member"),
+    ] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!("interface WeakMap<K, V> {{ {member} }}").into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let error = lower_global_types(&manifest, &[file]).expect_err(member);
+        assert!(
+            format!("{error:#}").contains(expected),
+            "{member}: {error:#}"
+        );
+    }
+    Ok(())
+}

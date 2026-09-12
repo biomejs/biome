@@ -153,3 +153,47 @@ fn test_infer_module_types_resolves_builtin_global_identities_on_build() {
         &fs,
     );
 }
+
+#[test]
+fn weak_map_members_infer_calls_with_instance_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const strings: WeakMap<object, string>;
+        declare const numbers: WeakMap<object, number>;
+        declare const key: object;
+        export const text = strings.get(key);
+        export const number = numbers.get(key);
+        export const present = strings.has(key);
+        export const removed = numbers.delete(key);
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for (name, expected) in [
+        ("text", InferredTypeData::String),
+        ("number", InferredTypeData::Number),
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let ty = inferred.resolve_type(&db, ty);
+        let InferredTypeData::Union(union) = ty else {
+            panic!("expected optional value for {name}, got {ty:?}")
+        };
+        assert!(
+            union
+                .types(&db)
+                .iter()
+                .any(|ty| inferred.resolve_type(&db, *ty) == expected),
+            "{name}: {} {:?}",
+            format_inferred_type(&db, ty),
+            union.types(&db)
+        );
+        assert!(union.types(&db).contains(&InferredTypeData::Undefined));
+    }
+    for name in ["present", "removed"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        assert_eq!(inferred.resolve_type(&db, ty), InferredTypeData::Boolean);
+    }
+}

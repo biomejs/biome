@@ -69,6 +69,12 @@ fn generated_body(
 ) -> Result<String> {
     let migrated_ids = render_migrated_ids(lowered)?;
     let registrations = render_registrations(lowered)?;
+    let local_types = lowered
+        .local_types()
+        .iter()
+        .map(render_type_data)
+        .collect::<Vec<_>>()
+        .join(",\n");
 
     Ok(format!(
         r#"// Generated from microsoft/TypeScript {typescript_tag} (git commit {typescript_sha}).
@@ -80,6 +86,11 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 /// Registers all generated global type data into the resolver builder.
 pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
 {registrations}}}
+
+/// Supporting types in dependency order; local references address this table.
+pub(crate) fn generated_local_types() -> Box<[crate::TypeData]> {{
+    Box::new([{local_types}])
+}}
 "#,
         typescript_tag = pin.tag(),
         typescript_sha = pin.sha(),
@@ -158,6 +169,11 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
+        LoweredTypeData::GenericParameter(name) => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: crate::TypeReference::unknown() }})",
+            rust_string_literal(name.text()),
+        ),
+        LoweredTypeData::ThisKeyword => "crate::TypeData::ThisKeyword".to_string(),
         LoweredTypeData::UnknownKeyword => "crate::TypeData::UnknownKeyword".to_string(),
     }
 }

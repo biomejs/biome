@@ -13,3 +13,5 @@ interface ErrorConstructor {
 declare var Error: ErrorConstructor;
 
 interface WeakMap<K> {}
+
+interface WeakMap<K, V> {}
