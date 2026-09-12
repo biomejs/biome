@@ -30,6 +30,11 @@ impl LoweredDeclarations {
 /// order. Recursive references share local table entries. Unsupported syntax in selected
 /// declarations or their dependencies, and unresolved references, return errors.
 /// No global IDs or runtime name registrations are allocated.
+///
+/// Member types support primitive keywords, boolean/number/bigint/string literals,
+/// global interface references, parentheses, unions, and nongeneric function types.
+/// Type aliases, type arguments, qualified references, object and template literal types,
+/// and type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
@@ -213,9 +218,10 @@ impl DeclarationLowerer<'_> {
         if let Some(reference) = lower_primitive_reference(ty) {
             return Ok(reference);
         }
+        if let Some(data) = lower_scalar_type(ty)? {
+            return Ok(self.register(data));
+        }
         match ty {
-            AnyTsType::TsBooleanType(_) => Ok(self.register(LoweredTypeData::Boolean)),
-            AnyTsType::TsNullLiteralType(_) => Ok(self.register(LoweredTypeData::Null)),
             AnyTsType::TsReferenceType(reference) => {
                 if reference.type_arguments().is_some() {
                     bail!("unsupported type arguments in type reference");
@@ -237,9 +243,6 @@ impl DeclarationLowerer<'_> {
                     .collect::<Result<Box<[_]>>>()?;
                 Ok(self.register(LoweredTypeData::Union(types)))
             }
-            AnyTsType::TsStringLiteralType(literal) => Ok(self.register(
-                LoweredTypeData::StringLiteral(Text::from(literal.inner_string_text()?)),
-            )),
             AnyTsType::TsFunctionType(function) => {
                 if function.type_parameters().is_some() {
                     bail!("unsupported function type parameters");
@@ -250,5 +253,40 @@ impl DeclarationLowerer<'_> {
             }
             _ => bail!("unsupported type syntax: {:?}", ty.syntax().kind()),
         }
+    }
+}
+
+fn lower_scalar_type(ty: &AnyTsType) -> Result<Option<LoweredTypeData>> {
+    let data = match ty {
+        AnyTsType::TsAnyType(_) => LoweredTypeData::AnyKeyword,
+        AnyTsType::TsBigintType(_) => LoweredTypeData::BigInt,
+        AnyTsType::TsBooleanType(_) => LoweredTypeData::Boolean,
+        AnyTsType::TsNeverType(_) => LoweredTypeData::NeverKeyword,
+        AnyTsType::TsNullLiteralType(_) => LoweredTypeData::Null,
+        AnyTsType::TsSymbolType(_) => LoweredTypeData::Symbol,
+        AnyTsType::TsUndefinedType(_) => LoweredTypeData::Undefined,
+        AnyTsType::TsUnknownType(_) => LoweredTypeData::UnknownKeyword,
+        AnyTsType::TsBooleanLiteralType(literal) => {
+            LoweredTypeData::BooleanLiteral(literal.literal()?.kind() == T![true])
+        }
+        AnyTsType::TsNumberLiteralType(literal) => LoweredTypeData::NumberLiteral(
+            signed_literal_text(literal.minus_token().is_some(), literal.literal_token()?),
+        ),
+        AnyTsType::TsBigintLiteralType(literal) => LoweredTypeData::BigIntLiteral(
+            signed_literal_text(literal.minus_token().is_some(), literal.literal_token()?),
+        ),
+        AnyTsType::TsStringLiteralType(literal) => {
+            LoweredTypeData::StringLiteral(Text::from(literal.inner_string_text()?))
+        }
+        _ => return Ok(None),
+    };
+    Ok(Some(data))
+}
+
+fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) -> Text {
+    if negative {
+        Text::from(format!("-{}", token.text_trimmed()))
+    } else {
+        Text::from(token.token_text_trimmed())
     }
 }
