@@ -69,6 +69,16 @@ fn generated_body(
 ) -> Result<String> {
     let migrated_ids = render_migrated_ids(lowered)?;
     let registrations = render_registrations(lowered)?;
+    let mut names = String::new();
+    for (name, _, reference) in super::lower::declarations::ITERATOR_DECLARATIONS {
+        if let Some(global) = lowered.global(name) {
+            names.push_str(&format!(
+                "({:?}, crate::globals::{}),\n",
+                global.name(),
+                reference
+            ));
+        }
+    }
     let local_types = lowered
         .local_types()
         .iter()
@@ -82,6 +92,9 @@ fn generated_body(
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 {migrated_ids}];
+
+/// Type-only declaration names and their global identities.
+pub(crate) const DECLARATION_GLOBALS: &[(&str, crate::RawTypeId)] = &[{names}];
 
 /// Registers all generated global type data into the resolver builder.
 pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
@@ -167,6 +180,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::Union(Box::new(crate::Union({})))",
             render_type_references(types),
         ),
+        LoweredTypeData::Tuple(elements) => format!("crate::TypeData::from(crate::Tuple(Box::new([{}])))", elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(",")),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
@@ -177,9 +191,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(ty),
             render_type_references(type_parameters),
         ),
-        LoweredTypeData::GenericParameter(name) => format!(
-            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: crate::TypeReference::unknown() }})",
+        LoweredTypeData::GenericParameter { name, default } => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: {} }})",
             rust_string_literal(name.text()),
+            default.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
         ),
         LoweredTypeData::ThisKeyword => "crate::TypeData::ThisKeyword".to_string(),
         LoweredTypeData::UnknownKeyword => "crate::TypeData::UnknownKeyword".to_string(),
@@ -222,11 +237,12 @@ fn render_interface(interface: &LoweredInterface) -> String {
     format!(
         "crate::TypeData::Interface(Box::new(crate::Interface {{
             name: biome_rowan::Text::new_static({name}),
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             extends: {extends},
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(interface.name()),
+        type_parameters = render_type_references(interface.type_parameters()),
         extends = render_type_references(interface.extends()),
         members = render_members(interface.members()),
     )
@@ -419,7 +435,11 @@ fn for_each_global_in_emit_order(
     mut visit: impl FnMut(&LoweredGlobal),
 ) -> Result<()> {
     for global in lowered.globals() {
-        if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant()) {
+        if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
+            && !super::lower::declarations::ITERATOR_DECLARATIONS
+                .iter()
+                .any(|(_, id, _)| *id == global.id_constant())
+        {
             bail!(
                 "generated global {} targets {}, but the ID is missing from GLOBAL_ID_EMIT_ORDER",
                 global.name(),
@@ -430,6 +450,15 @@ fn for_each_global_in_emit_order(
 
     for id_constant in GLOBAL_ID_EMIT_ORDER {
         visit(global_with_id_constant(lowered, id_constant)?);
+    }
+    for (_, id, _) in super::lower::declarations::ITERATOR_DECLARATIONS {
+        if let Some(global) = lowered
+            .globals()
+            .iter()
+            .find(|global| global.id_constant() == *id)
+        {
+            visit(global);
+        }
     }
 
     Ok(())

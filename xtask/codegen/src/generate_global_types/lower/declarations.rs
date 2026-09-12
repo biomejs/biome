@@ -47,6 +47,8 @@ pub fn lower_interfaces(
         pending: Vec::new(),
         types: Vec::new(),
         class_scope: None,
+        declaration_parameters: BTreeMap::new(),
+        predefined_declarations: false,
         local_type_offset: 0,
     };
     for name in names {
@@ -78,6 +80,8 @@ struct DeclarationLowerer<'a> {
     pending: Vec<(String, usize)>,
     types: Vec<Option<LoweredTypeData>>,
     class_scope: Option<ClassScope>,
+    declaration_parameters: BTreeMap<Text, LoweredTypeReference>,
+    predefined_declarations: bool,
     local_type_offset: usize,
 }
 
@@ -89,6 +93,19 @@ struct ClassScope {
 
 impl DeclarationLowerer<'_> {
     fn named_reference(&mut self, name: &str) -> Result<LoweredTypeReference> {
+        if let Some(reference) = self.declaration_parameters.get(name) {
+            return Ok(reference.clone());
+        }
+        if self.predefined_declarations {
+            self.manifest
+                .global_group(name)
+                .with_context(|| format!("missing declaration dependency {name}"))?;
+            return ITERATOR_DECLARATIONS
+                .iter()
+                .find(|(declared, _, _)| *declared == name)
+                .map(|(_, _, reference)| LoweredTypeReference::Predefined(reference))
+                .with_context(|| format!("unsupported declaration dependency {name}"));
+        }
         if let Some(scope) = &self.class_scope {
             return scope
                 .parameters
@@ -142,7 +159,7 @@ impl DeclarationLowerer<'_> {
                 .sources
                 .find_interface_declaration(record)?
                 .with_context(|| format!("missing interface declaration {name}"))?;
-            if declaration.type_parameters().is_some() {
+            if declaration.type_parameters().is_some() && !self.predefined_declarations {
                 bail!("unsupported type parameters on interface {name}");
             }
             if let Some(clause) = declaration.extends_clause() {
@@ -163,6 +180,7 @@ impl DeclarationLowerer<'_> {
         }
         Ok(LoweredInterface {
             name: Text::from(name.to_owned()),
+            type_parameters: Box::default(),
             extends: extends.into_boxed_slice(),
             members: members.into_boxed_slice(),
         })
@@ -270,10 +288,41 @@ impl DeclarationLowerer<'_> {
                         type_parameters,
                     }));
                 }
+                if self.predefined_declarations && !self.declaration_parameters.contains_key(name) {
+                    let ty = self.named_reference(name)?;
+                    let type_parameters = reference
+                        .type_arguments()
+                        .map(|arguments| {
+                            arguments
+                                .ts_type_argument_list()
+                                .into_iter()
+                                .map(|ty| self.lower_reference(&ty?))
+                                .collect::<Result<Box<[_]>>>()
+                        })
+                        .transpose()?
+                        .unwrap_or_default();
+                    return Ok(self.register(LoweredTypeData::InstanceOf {
+                        ty,
+                        type_parameters,
+                    }));
+                }
                 if reference.type_arguments().is_some() {
                     bail!("unsupported type arguments in type reference");
                 }
                 self.named_reference(name)
+            }
+            AnyTsType::TsTupleType(tuple) if self.predefined_declarations => {
+                let elements = tuple
+                    .elements()
+                    .into_iter()
+                    .map(|element| {
+                        let biome_js_syntax::AnyTsTupleTypeElement::AnyTsType(ty) = element? else {
+                            bail!("named, optional, and rest tuple elements are not supported");
+                        };
+                        self.lower_reference(&ty)
+                    })
+                    .collect::<Result<Box<[_]>>>()?;
+                Ok(self.register(LoweredTypeData::Tuple(elements)))
             }
             AnyTsType::TsParenthesizedType(parenthesized) => {
                 self.lower_reference(&parenthesized.ty()?)
@@ -356,6 +405,8 @@ pub(super) fn lower_class_members(
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
+        declaration_parameters: BTreeMap::new(),
+        predefined_declarations: false,
         class_scope: Some(ClassScope {
             name: class.name.clone(),
             reference: class_reference,
@@ -401,7 +452,12 @@ pub(super) fn lower_class_members(
         let references = class_parameters.get_or_insert_with(|| {
             names
                 .iter()
-                .map(|name| lowerer.register(LoweredTypeData::GenericParameter(name.clone())))
+                .map(|name| {
+                    lowerer.register(LoweredTypeData::GenericParameter {
+                        name: name.clone(),
+                        default: None,
+                    })
+                })
                 .collect::<Box<[_]>>()
         });
         if names.len() != references.len() {
@@ -484,4 +540,126 @@ fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> 
         }
     }
     Ok(false)
+}
+
+/// Named protocol declarations with stable runtime identities. Member selection is syntax-driven.
+pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str, &str)] = &[
+    (
+        "IteratorYieldResult",
+        "ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERATOR_YIELD_RESULT_ID",
+    ),
+    (
+        "IteratorReturnResult",
+        "ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERATOR_RETURN_RESULT_ID",
+    ),
+    (
+        "IteratorResult",
+        "ITERATOR_RESULT_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERATOR_RESULT_ID",
+    ),
+    (
+        "Iterator",
+        "ITERATOR_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERATOR_ID",
+    ),
+];
+
+/// Lowers the synchronous iterator protocol, including its result dependencies.
+/// Generic constraints, merged declarations, and dependencies outside this selection are errors.
+/// Computed members are excluded. Tuples support required unnamed elements.
+pub(super) fn lower_iterator_globals(
+    manifest: &GlobalManifest,
+    sources: &[DiscoveredFile],
+    globals: &mut Vec<LoweredGlobal>,
+    local_types: &mut Vec<LoweredTypeData>,
+) -> Result<()> {
+    let mut lowerer = DeclarationLowerer {
+        manifest,
+        sources: ParsedSourceCache::new(sources),
+        interfaces: BTreeMap::new(),
+        pending: Vec::new(),
+        types: Vec::new(),
+        class_scope: None,
+        declaration_parameters: BTreeMap::new(),
+        predefined_declarations: true,
+        local_type_offset: local_types.len(),
+    };
+    for &(name, id_constant, _) in ITERATOR_DECLARATIONS {
+        let Some(group) = manifest.global_group(name) else {
+            continue;
+        };
+        let [record] = group.declarations() else {
+            bail!("merged protocol declarations are not supported: {name}");
+        };
+        let module = lowerer.sources.module_for(record)?;
+        let node = module
+            .syntax()
+            .descendants()
+            .find(|node| {
+                node.kind() == record.syntax_kind && node.text_trimmed_range() == record.text_range
+            })
+            .with_context(|| format!("missing declaration {name}"))?;
+        let (parameters, alias) =
+            if let Some(interface) = TsInterfaceDeclaration::cast(node.clone()) {
+                (interface.type_parameters(), None)
+            } else if let Some(alias) = biome_js_syntax::TsTypeAliasDeclaration::cast(node) {
+                (alias.type_parameters(), Some(alias.ty()?))
+            } else {
+                bail!("unsupported protocol declaration {name}");
+            };
+        lowerer.declaration_parameters.clear();
+        let mut type_parameters = Vec::new();
+        if let Some(parameters) = parameters {
+            for parameter in parameters.items() {
+                let parameter = parameter?;
+                if parameter.constraint().is_some() || !parameter.modifiers().is_empty() {
+                    bail!("unsupported constrained or modified protocol type parameter");
+                }
+                let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
+                let default = parameter
+                    .default()
+                    .map(|default| lowerer.lower_reference(&default.ty()?))
+                    .transpose()?;
+                let reference = lowerer.register(LoweredTypeData::GenericParameter {
+                    name: name.clone(),
+                    default,
+                });
+                if lowerer
+                    .declaration_parameters
+                    .insert(name, reference.clone())
+                    .is_some()
+                {
+                    bail!("duplicate protocol type parameter");
+                }
+                type_parameters.push(reference);
+            }
+        }
+        let type_parameters = type_parameters.into_boxed_slice();
+        let data = if let Some(alias) = alias {
+            let ty = lowerer.lower_reference(&alias)?;
+            LoweredTypeData::InstanceOf {
+                ty,
+                type_parameters,
+            }
+        } else {
+            let mut interface = lowerer.lower_interface(name)?;
+            interface.type_parameters = type_parameters;
+            LoweredTypeData::Interface(interface)
+        };
+        globals.push(LoweredGlobal {
+            name: Text::from(record.declared_name.clone()),
+            id_constant,
+            data,
+        });
+    }
+    local_types.extend(
+        lowerer
+            .types
+            .into_iter()
+            .collect::<Option<Vec<_>>>()
+            .context("unfilled protocol type")?,
+    );
+    Ok(())
 }
