@@ -1,5 +1,9 @@
 //! Lowers collected global declaration groups into a codegen-friendly model.
 
+mod declarations;
+
+pub use declarations::{LoweredDeclarations, lower_interfaces};
+
 use anyhow::{Context, Result, bail};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
@@ -65,11 +69,15 @@ impl LoweredGlobal {
 /// Lowered type data variants supported by the generator.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredTypeData {
+    Boolean,
+    Null,
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
     Interface(LoweredInterface),
     Symbol,
+    StringLiteral(Text),
+    Union(Box<[LoweredTypeReference]>),
 }
 
 /// Lowered class-like global.
@@ -108,10 +116,16 @@ impl LoweredClass {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredInterface {
     name: Text,
+    extends: Box<[LoweredTypeReference]>,
     members: Box<[LoweredTypeMember]>,
 }
 
 impl LoweredInterface {
+    /// Base interfaces in declaration order.
+    pub fn extends(&self) -> &[LoweredTypeReference] {
+        &self.extends
+    }
+
     /// Interface name.
     pub fn name(&self) -> &str {
         self.name.text()
@@ -263,6 +277,7 @@ pub enum LoweredMemberKind {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredTypeReference {
     Predefined(&'static str),
+    Local(usize),
 }
 
 /// Lowers supported global groups into generated global type definitions.
@@ -2133,6 +2148,9 @@ impl<'a> ParsedSourceCache<'a> {
         let source = std::str::from_utf8(&source_file.bytes)
             .with_context(|| format!("{} is not valid UTF-8", source_file.repo_relative))?;
         let parsed = parse(source, JsFileSource::d_ts(), JsParserOptions::default());
+        if parsed.has_errors() {
+            bail!("parser diagnostics in {}", source_file.repo_relative);
+        }
         let AnyJsRoot::TsDeclarationModule(module) = parsed.tree() else {
             bail!(
                 "{} is not a TypeScript declaration module",
@@ -2257,6 +2275,7 @@ fn lower_disposable_global(
         id_constant: spec.global_id_constant,
         data: LoweredTypeData::Interface(LoweredInterface {
             name: Text::from(spec.interface_name),
+            extends: Box::default(),
             members: Box::new([lowered_member]),
         }),
     });
@@ -2756,21 +2775,31 @@ fn lower_call_signature(member: &TsCallSignatureTypeMember) -> Result<LoweredFun
 
 /// Lowers function-like parameters for the `ErrorConstructor`.
 fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionParameter]>> {
+    lower_parameters_with(parameters, &mut lower_type_reference)
+}
+
+fn lower_parameters_with(
+    parameters: JsParameters,
+    lower_reference: &mut impl FnMut(&AnyTsType) -> Result<LoweredTypeReference>,
+) -> Result<Box<[LoweredFunctionParameter]>> {
     let mut lowered = Vec::new();
     for parameter in parameters.items() {
         match parameter? {
             AnyJsParameter::AnyJsFormalParameter(parameter) => {
                 let AnyJsFormalParameter::JsFormalParameter(parameter) = parameter else {
-                    bail!("unsupported ErrorConstructor formal parameter");
+                    bail!("unsupported function formal parameter");
                 };
+                if !parameter.decorators().is_empty() || parameter.initializer().is_some() {
+                    bail!("unsupported function parameter");
+                }
                 let name = lower_binding_name(parameter.binding()?)?;
                 let is_optional = parameter.question_mark_token().is_some();
                 let type_reference = parameter
                     .type_annotation()
-                    .context("ErrorConstructor parameter is missing a type annotation")?
+                    .context("function parameter is missing a type annotation")?
                     .ty()
-                    .context("ErrorConstructor parameter has malformed type annotation")
-                    .and_then(|type_node| lower_type_reference(&type_node))?;
+                    .context("function parameter has malformed type annotation")
+                    .and_then(|type_node| lower_reference(&type_node))?;
                 lowered.push(LoweredFunctionParameter {
                     binding: LoweredFunctionParameterBinding::Named(name),
                     type_reference,
@@ -2782,10 +2811,10 @@ fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionPara
                 let name = lower_binding_name(parameter.binding()?)?;
                 let type_reference = parameter
                     .type_annotation()
-                    .context("ErrorConstructor rest parameter is missing a type annotation")?
+                    .context("function rest parameter is missing a type annotation")?
                     .ty()
-                    .context("ErrorConstructor rest parameter has malformed type annotation")
-                    .and_then(|type_node| lower_type_reference(&type_node))?;
+                    .context("function rest parameter has malformed type annotation")
+                    .and_then(|type_node| lower_reference(&type_node))?;
                 lowered.push(LoweredFunctionParameter {
                     binding: LoweredFunctionParameterBinding::Named(name),
                     type_reference,
@@ -2794,7 +2823,7 @@ fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionPara
                 });
             }
             AnyJsParameter::TsThisParameter(_) => {
-                bail!("this parameters are not supported in ErrorConstructor")
+                bail!("this parameters are not supported in function")
             }
         }
     }
@@ -2805,10 +2834,10 @@ fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionPara
 /// Extracts a simple identifier binding name.
 fn lower_binding_name(binding: AnyJsBindingPattern) -> Result<Text> {
     let Some(binding) = binding.as_any_js_binding() else {
-        bail!("unsupported destructured ErrorConstructor parameter");
+        bail!("unsupported destructured function parameter");
     };
     let Some(binding) = binding.as_js_identifier_binding() else {
-        bail!("unsupported ErrorConstructor parameter binding");
+        bail!("unsupported function parameter binding");
     };
     Ok(Text::from(binding.name_token()?.token_text_trimmed()))
 }
@@ -2819,16 +2848,17 @@ fn lower_object_member_name(name: AnyJsObjectMemberName) -> Result<Text> {
         AnyJsObjectMemberName::JsLiteralMemberName(name) => Ok(Text::from(name.name()?)),
         AnyJsObjectMemberName::JsComputedMemberName(_)
         | AnyJsObjectMemberName::JsMetavariable(_) => {
-            bail!("unsupported computed or metavariable member name in Error global")
+            bail!("unsupported computed or metavariable member name")
         }
     }
 }
 
 /// Maps a supported TypeScript type node to a lowered reference.
 fn lower_type_reference(type_node: &AnyTsType) -> Result<LoweredTypeReference> {
+    if let Some(reference) = lower_primitive_reference(type_node) {
+        return Ok(reference);
+    }
     match type_node {
-        AnyTsType::TsStringType(_) => Ok(LoweredTypeReference::Predefined("GLOBAL_STRING_ID")),
-        AnyTsType::TsVoidType(_) => Ok(LoweredTypeReference::Predefined("GLOBAL_VOID_ID")),
         AnyTsType::TsReferenceType(reference) => {
             let name = reference.name().context("missing type reference name")?;
             let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = name else {
@@ -2865,4 +2895,14 @@ fn instance_return_reference(reference: LoweredTypeReference) -> LoweredTypeRefe
         }
         reference => reference,
     }
+}
+
+fn lower_primitive_reference(type_node: &AnyTsType) -> Option<LoweredTypeReference> {
+    let id = match type_node {
+        AnyTsType::TsStringType(_) => "GLOBAL_STRING_ID",
+        AnyTsType::TsNumberType(_) => "GLOBAL_NUMBER_ID",
+        AnyTsType::TsVoidType(_) => "GLOBAL_VOID_ID",
+        _ => return None,
+    };
+    Some(LoweredTypeReference::Predefined(id))
 }
