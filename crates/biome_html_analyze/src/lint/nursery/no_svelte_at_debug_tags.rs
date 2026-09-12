@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// - [Svelte debug tag](https://svelte.dev/docs/svelte/@debug)
     ///
     pub NoSvelteAtDebugTags {
-        version: "next",
+        version: "2.5.14",
         name: "noSvelteAtDebugTags",
         language: "html",
         domains: &[RuleDomain::Svelte],

@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseValidTestTitle {
-        version: "next",
+        version: "2.5.14",
         name: "useValidTestTitle",
         language: "js",
         recommended: false,

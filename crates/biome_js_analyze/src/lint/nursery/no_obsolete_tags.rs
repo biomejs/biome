@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// - [HTML specification: Non-conforming features](https://html.spec.whatwg.org/multipage/obsolete.html#non-conforming-features)
     ///
     pub NoObsoleteTags {
-        version: "next",
+        version: "2.5.14",
         name: "noObsoleteTags",
         language: "jsx",
         recommended: false,
