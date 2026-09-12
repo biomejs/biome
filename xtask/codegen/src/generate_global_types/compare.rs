@@ -20,13 +20,6 @@ const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 const SYMBOL_MEMBER_COUNT: usize = 2;
-const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
-    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-];
-const SET_TYPE_PARAMETERS: &[LoweredTypeReference] =
-    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
-const DATE_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 
 #[derive(Clone, Copy)]
 struct PromiseMethodShape {
@@ -170,14 +163,6 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     assert_symbol_shape(lowered)?;
     assert_promise_shape(lowered)?;
     assert_regexp_shape(lowered)?;
-    assert_memberless_class_shape(
-        lowered,
-        "Date",
-        "DATE_ID_GLOBAL_TYPE_ID",
-        DATE_TYPE_PARAMETERS,
-    )?;
-    assert_memberless_class_shape(lowered, "Map", "MAP_ID_GLOBAL_TYPE_ID", MAP_TYPE_PARAMETERS)?;
-    assert_memberless_class_shape(lowered, "Set", "SET_ID_GLOBAL_TYPE_ID", SET_TYPE_PARAMETERS)?;
     assert_disposable_shape(
         lowered,
         DisposableShape {
@@ -434,7 +419,7 @@ fn assert_array_method(
     Ok(())
 }
 
-/// Rejects output that differs from the predefined `RegExp` projection used by the resolver.
+/// Validates the retained predefined `RegExp.exec` projection.
 fn assert_regexp_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(regexp) = lowered.global("RegExp") else {
         bail!("generated globals are missing the RegExp global");
@@ -457,11 +442,8 @@ fn assert_regexp_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     if !class.type_parameters().is_empty() {
         bail!("generated RegExp global must not have type parameters");
     }
-    let [exec_member] = class.members() else {
-        bail!(
-            "generated RegExp global has {} members, expected one",
-            class.members().len()
-        );
+    let Some(exec_member) = class.member("exec") else {
+        bail!("generated RegExp global is missing its exec projection");
     };
     if exec_member.name() != "exec"
         || exec_member.kind() != &(LoweredMemberKind::Named { optional: false })
@@ -486,40 +468,6 @@ fn assert_regexp_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     }
     if exec.return_type() != &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_REGEXP_ID") {
         bail!("generated RegExp.exec helper has unexpected return type");
-    }
-
-    Ok(())
-}
-
-fn assert_memberless_class_shape(
-    lowered: &LoweredGlobalTypes,
-    name: &str,
-    id_constant: &str,
-    type_parameters: &[LoweredTypeReference],
-) -> Result<()> {
-    let Some(global) = lowered.global(name) else {
-        bail!("generated globals are missing the {name} global");
-    };
-    if global.id_constant() != id_constant {
-        bail!(
-            "generated {name} global targets {}, expected {id_constant}",
-            global.id_constant()
-        );
-    }
-    let LoweredTypeData::Class(class) = global.data() else {
-        bail!("generated {name} global is not a class");
-    };
-    if class.name() != name {
-        bail!(
-            "generated {name} class has name {}, expected {name}",
-            class.name(),
-        );
-    }
-    if class.type_parameters() != type_parameters {
-        bail!("generated {name} global has unexpected type parameters");
-    }
-    if !class.members().is_empty() {
-        bail!("generated {name} global must not have members");
     }
 
     Ok(())

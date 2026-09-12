@@ -94,6 +94,10 @@ pub enum LoweredTypeData {
     UnknownKeyword,
     ThisKeyword,
     GenericParameter(Text),
+    InstanceOf {
+        ty: LoweredTypeReference,
+        type_parameters: Box<[LoweredTypeReference]>,
+    },
 }
 
 /// Lowered class-like global.
@@ -316,28 +320,49 @@ pub fn lower_global_types(
         &mut globals,
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
-    let local_types = if manifest.global_group("WeakMap").is_some() {
-        let mut class = LoweredClass {
-            name: Text::from("WeakMap"),
-            type_parameters: Box::default(),
-            members: Box::default(),
+    let mut local_types = Vec::new();
+    for (name, id_constant, reference) in [
+        (
+            "WeakMap",
+            "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            "GLOBAL_WEAK_MAP_ID",
+        ),
+        ("Set", "SET_ID_GLOBAL_TYPE_ID", "GLOBAL_SET_ID"),
+        ("Map", "MAP_ID_GLOBAL_TYPE_ID", "GLOBAL_MAP_ID"),
+        ("Date", "DATE_ID_GLOBAL_TYPE_ID", "GLOBAL_DATE_ID"),
+        ("RegExp", "REGEXP_ID_GLOBAL_TYPE_ID", "GLOBAL_REGEXP_ID"),
+    ] {
+        if manifest.global_group(name).is_none() {
+            continue;
+        }
+        let index = if let Some(index) = globals.iter().position(|global| global.name() == name) {
+            index
+        } else {
+            globals.push(LoweredGlobal {
+                name: Text::from(name),
+                id_constant,
+                data: LoweredTypeData::Class(LoweredClass {
+                    name: Text::from(name),
+                    type_parameters: Box::default(),
+                    members: Box::default(),
+                }),
+            });
+            globals.len() - 1
         };
-        let local_types = declarations::lower_class_members(manifest, source_files, &mut class)?;
-        globals.push(LoweredGlobal {
-            name: class.name.clone(),
-            id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-            data: LoweredTypeData::Class(class),
-        });
-        local_types
-    } else {
-        Box::default()
-    };
+        let LoweredTypeData::Class(class) = &mut globals[index].data else {
+            bail!("expected class data for {name}");
+        };
+        local_types.extend(declarations::lower_class_members(
+            manifest,
+            source_files,
+            class,
+            reference,
+            local_types.len(),
+        )?);
+    }
 
     Ok(LoweredGlobalTypes {
-        local_types,
+        local_types: local_types.into_boxed_slice(),
         globals: globals.into_boxed_slice(),
     })
 }
@@ -513,32 +538,6 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     helper_id_constant: "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
     helper_type_id: "GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID",
     return_kind: DisposableReturnKind::PromiseLikeVoid,
-};
-
-/// Configuration for lowering a global interface to a class without members.
-#[derive(Clone, Copy)]
-struct MemberlessClassSpec {
-    name: &'static str,
-    id_constant: &'static str,
-    type_parameter_ids: &'static [&'static str],
-}
-
-const DATE_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Date",
-    id_constant: "DATE_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &[],
-};
-
-const MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Map",
-    id_constant: "MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
-};
-
-const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Set",
-    id_constant: "SET_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID"],
 };
 
 const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;
@@ -1935,93 +1934,6 @@ fn validate_regexp_exec_parameter(parameters: JsParameters) -> Result<()> {
         .context("RegExp.exec parameter has a malformed type annotation")?;
     if !matches!(type_node, AnyTsType::TsStringType(_)) {
         bail!("RegExp.exec must have one required string parameter");
-    }
-
-    Ok(())
-}
-
-fn lower_memberless_class_global(
-    manifest: &GlobalManifest,
-    source_cache: &mut ParsedSourceCache,
-    globals: &mut Vec<LoweredGlobal>,
-    spec: MemberlessClassSpec,
-) -> Result<()> {
-    let Some(group) = manifest.global_group(spec.name) else {
-        return Ok(());
-    };
-    if !group.has_role(GlobalDeclarationRole::Type) {
-        bail!("{} global must have a type-side declaration", spec.name);
-    }
-
-    let mut saw_interface = false;
-    for record in group.declarations() {
-        match &record.kind {
-            DeclarationKind::Interface => {
-                saw_interface = true;
-                let declaration = source_cache
-                    .find_interface_declaration(record)?
-                    .with_context(|| {
-                        format!(
-                            "failed to find interface declaration {} at {:?}",
-                            record.declared_name.text(),
-                            record.text_range
-                        )
-                    })?;
-                validate_memberless_class_interface(&declaration, spec)?;
-            }
-            DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the {} global", spec.name)
-            }
-            DeclarationKind::DeclareFunction
-            | DeclarationKind::VariableDeclarator { .. }
-            | DeclarationKind::ImportEquals => {}
-        }
-    }
-    if !saw_interface {
-        bail!("{} global must include an interface declaration", spec.name);
-    }
-
-    globals.push(LoweredGlobal {
-        name: Text::from(spec.name),
-        id_constant: spec.id_constant,
-        data: LoweredTypeData::Class(LoweredClass {
-            name: Text::from(spec.name),
-            type_parameters: spec
-                .type_parameter_ids
-                .iter()
-                .map(|id| LoweredTypeReference::Predefined(id))
-                .collect(),
-            members: Box::default(),
-        }),
-    });
-
-    Ok(())
-}
-
-fn validate_memberless_class_interface(
-    declaration: &TsInterfaceDeclaration,
-    spec: MemberlessClassSpec,
-) -> Result<()> {
-    if declaration.extends_clause().is_some() {
-        bail!("{} interface extends clauses are not supported", spec.name);
-    }
-
-    let mut type_parameter_count = 0;
-    if let Some(type_parameters) = declaration.type_parameters() {
-        for type_parameter in type_parameters.items() {
-            type_parameter.with_context(|| {
-                format!("{} interface has a malformed type parameter", spec.name)
-            })?;
-            type_parameter_count += 1;
-        }
-    }
-
-    let expected_type_parameter_count = spec.type_parameter_ids.len();
-    if type_parameter_count != expected_type_parameter_count {
-        bail!(
-            "{} interface has {type_parameter_count} type parameters, expected {expected_type_parameter_count}",
-            spec.name
-        );
     }
 
     Ok(())

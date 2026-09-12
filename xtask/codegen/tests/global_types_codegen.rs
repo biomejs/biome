@@ -1370,7 +1370,7 @@ mod tests {
         };
         assert_eq!(date_class.name(), "Date");
         assert!(date_class.type_parameters().is_empty());
-        assert!(date_class.members().is_empty());
+        assert!(!date_class.members().is_empty());
 
         Ok(())
     }
@@ -1379,16 +1379,21 @@ mod tests {
     fn lowerer_rejects_date_extends_clause() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.date-extends.d.ts"),
-            "Date interface extends clauses are not supported",
+            "unsupported extends clause on class Date",
         )
     }
 
     #[test]
-    fn lowerer_rejects_date_type_parameters() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.date-type-parameters.d.ts"),
-            "Date interface has 1 type parameters, expected 0",
-        )
+    fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
+        let LoweredTypeData::Class(class) = lowered.global("Date").unwrap().data() else {
+            bail!("expected class");
+        };
+        assert_eq!(
+            class.member("value").unwrap().type_reference(),
+            &class.type_parameters()[0]
+        );
+        Ok(())
     }
 
     #[test]

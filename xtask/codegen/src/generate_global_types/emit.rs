@@ -169,6 +169,14 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
+        LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } => format!(
+            "crate::TypeData::instance_of(crate::TypeInstance {{ ty: {}, type_parameters: {} }})",
+            render_type_reference(ty),
+            render_type_references(type_parameters),
+        ),
         LoweredTypeData::GenericParameter(name) => format!(
             "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: crate::TypeReference::unknown() }})",
             rust_string_literal(name.text()),

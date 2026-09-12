@@ -371,6 +371,16 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         }
 
         match ty {
+            InferredTypeData::Literal(literal)
+                if matches!(literal.literal(db), InferredLiteral::RegExp(_)) =>
+            {
+                state.ty = InferredTypeData::instance_of(
+                    db,
+                    InferredTypeData::regexp_class(),
+                    Box::default(),
+                );
+                pending.push(state);
+            }
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
                     if matches!(

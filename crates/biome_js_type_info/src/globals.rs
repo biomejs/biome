@@ -398,26 +398,4 @@ mod tests {
             assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
         }
     }
-
-    #[test]
-    fn generated_date_global_keeps_existing_shape() {
-        let TypeData::Class(raw_date) = raw_global_type(DATE_ID_GLOBAL_TYPE_ID) else {
-            panic!("Date must be a class");
-        };
-        assert_eq!(raw_date.name.as_ref().map(Text::text), Some("Date"));
-        assert!(raw_date.type_parameters.is_empty());
-        assert!(raw_date.extends.is_none());
-        assert!(raw_date.implements.is_empty());
-        assert!(raw_date.members.is_empty());
-
-        let db = TestDb::default();
-        let InferredTypeData::Class(date) = global_types(&db).get(DATE_ID_GLOBAL_TYPE_ID) else {
-            panic!("Date must be a class");
-        };
-        assert_eq!(date.name(&db).as_ref().map(Text::text), Some("Date"));
-        assert!(date.type_parameters(&db).is_empty());
-        assert!(date.extends(&db).is_none());
-        assert!(date.implements(&db).is_empty());
-        assert!(date.members(&db).is_empty());
-    }
 }
