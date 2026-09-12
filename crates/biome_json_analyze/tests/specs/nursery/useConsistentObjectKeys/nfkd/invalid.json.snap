@@ -1,0 +1,71 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: invalid.json
+---
+# Input
+```json
+{
+  "\uFB00": "latin ligature ff",
+  "\u00BD": "vulgar fraction one half"
+}
+
+```
+
+# Diagnostics
+```
+invalid.json:2:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object key mixes Unicode characters that can be encoded in more than one way.
+  
+    1 │ {
+  > 2 │   "\uFB00": "latin ligature ff",
+      │   ^^^^^^^^
+    3 │   "\u00BD": "vulgar fraction one half"
+    4 │ }
+  
+  i Characters that look identical can have different byte representations, so such keys may fail to compare as equal.
+  
+  i Rewrite the key so equivalent characters use a single, consistent Unicode encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the key using a consistent Unicode encoding.
+  
+    1 1 │   {
+    2   │ - ··"\uFB00":·"latin·ligature·ff",
+      2 │ + ··"ff":·"latin·ligature·ff",
+    3 3 │     "\u00BD": "vulgar fraction one half"
+    4 4 │   }
+  
+
+```
+
+```
+invalid.json:3:3 lint/nursery/useConsistentObjectKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This object key mixes Unicode characters that can be encoded in more than one way.
+  
+    1 │ {
+    2 │   "\uFB00": "latin ligature ff",
+  > 3 │   "\u00BD": "vulgar fraction one half"
+      │   ^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Characters that look identical can have different byte representations, so such keys may fail to compare as equal.
+  
+  i Rewrite the key so equivalent characters use a single, consistent Unicode encoding.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rewrite the key using a consistent Unicode encoding.
+  
+    1 1 │   {
+    2 2 │     "\uFB00": "latin ligature ff",
+    3   │ - ··"\u00BD":·"vulgar·fraction·one·half"
+      3 │ + ··"1⁄2":·"vulgar·fraction·one·half"
+    4 4 │   }
+    5 5 │   
+  
+
+```
