@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule [`noSvelteAtDebugTags`](https://biomejs.dev/linter/rules/no-svelte-at-debug-tags/), which disallows Svelte's `{@debug}` tag.
+Added the nursery rule [`noSvelteAtDebugTags`](https://biomejs.dev/linter/rules/no-svelte-at-debug-tags/) (part of [#10540](https://github.com/biomejs/biome/issues/10540)), which disallows Svelte's `{@debug}` tag.
 
 ```svelte
 <!-- Invalid: leftover debugging tag -->
