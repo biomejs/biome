@@ -184,6 +184,15 @@ impl<'a> SelectorBoundary<'a> {
         right: &AnyCssSelector,
         comments: &'a [SourceComment<CssLanguage>],
     ) -> Self {
+        if comments.is_empty() {
+            return Self {
+                before_combinator: comments,
+                after_combinator: comments,
+                descendant_lines: None,
+                right_lines: 0,
+            };
+        }
+
         let combinator_range = combinator.text_trimmed_range();
         // Comment slices are source ordered. Keep the original side of the
         // combinator while retaining borrowed subslices for formatting.

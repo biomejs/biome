@@ -230,7 +230,9 @@ where
 
         // Set following node to `None` because it now becomes the enclosing node.
         if let Some(following_node) = self.following_node() {
-            self.flush_comments(Some(&following_node.clone()));
+            if !self.pending_comments.is_empty() {
+                self.flush_comments(Some(&following_node.clone()));
+            }
             self.following_node_index = None;
 
             // The following node is only set after entering a node
@@ -285,6 +287,10 @@ where
     }
 
     fn flush_comments(&mut self, following: Option<&SyntaxNode<Style::Language>>) {
+        if self.pending_comments.is_empty() {
+            return;
+        }
+
         for mut comment in self.pending_comments.drain(..) {
             comment.following = following.cloned();
 

@@ -1,0 +1,7 @@
+.descendant
+
+ .child>
+ .adjacent+
+ .sibling~
+ .column||
+ .target{color:red}
