@@ -153,6 +153,7 @@ pub mod no_invalid_property_init_value;
 pub mod no_invalid_use_before_declaration;
 pub mod no_irregular_whitespace;
 pub mod no_js_restricted_properties;
+pub mod no_json_unsafe_values;
 pub mod no_jsx_leaked_dollar;
 pub mod no_jsx_literals;
 pub mod no_jsx_namespace;

@@ -732,6 +732,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noJsonUnsafeValues",
+        TypeId::of::<biome_rule_options::no_json_unsafe_values::NoJsonUnsafeValuesOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noJsxLeakedDollar",
         TypeId::of::<biome_rule_options::no_jsx_leaked_dollar::NoJsxLeakedDollarOptions>(),
     ));
