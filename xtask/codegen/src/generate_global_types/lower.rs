@@ -1,6 +1,6 @@
 //! Lowers collected global declaration groups into a codegen-friendly model.
 
-mod declarations;
+pub(super) mod declarations;
 
 pub use declarations::{LoweredDeclarations, lower_interfaces};
 
@@ -93,7 +93,11 @@ pub enum LoweredTypeData {
     Undefined,
     UnknownKeyword,
     ThisKeyword,
-    GenericParameter(Text),
+    GenericParameter {
+        name: Text,
+        default: Option<LoweredTypeReference>,
+    },
+    Tuple(Box<[LoweredTypeReference]>),
     InstanceOf {
         ty: LoweredTypeReference,
         type_parameters: Box<[LoweredTypeReference]>,
@@ -136,11 +140,16 @@ impl LoweredClass {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredInterface {
     name: Text,
+    type_parameters: Box<[LoweredTypeReference]>,
     extends: Box<[LoweredTypeReference]>,
     members: Box<[LoweredTypeMember]>,
 }
 
 impl LoweredInterface {
+    pub fn type_parameters(&self) -> &[LoweredTypeReference] {
+        &self.type_parameters
+    }
+
     /// Base interfaces in declaration order.
     pub fn extends(&self) -> &[LoweredTypeReference] {
         &self.extends
@@ -360,6 +369,8 @@ pub fn lower_global_types(
             local_types.len(),
         )?);
     }
+
+    declarations::lower_iterator_globals(manifest, source_files, &mut globals, &mut local_types)?;
 
     Ok(LoweredGlobalTypes {
         local_types: local_types.into_boxed_slice(),
@@ -2209,6 +2220,7 @@ fn lower_disposable_global(
         id_constant: spec.global_id_constant,
         data: LoweredTypeData::Interface(LoweredInterface {
             name: Text::from(spec.interface_name),
+            type_parameters: Box::default(),
             extends: Box::default(),
             members: Box::new([lowered_member]),
         }),
@@ -2733,7 +2745,12 @@ fn lower_parameters_with(
                 });
             }
             AnyJsParameter::JsRestParameter(parameter) => {
-                let name = lower_binding_name(parameter.binding()?)?;
+                let binding = match parameter.binding()? {
+                    AnyJsBindingPattern::JsArrayBindingPattern(_) => {
+                        LoweredFunctionParameterBinding::Pattern
+                    }
+                    binding => LoweredFunctionParameterBinding::Named(lower_binding_name(binding)?),
+                };
                 let type_reference = parameter
                     .type_annotation()
                     .context("function rest parameter is missing a type annotation")?
@@ -2741,7 +2758,7 @@ fn lower_parameters_with(
                     .context("function rest parameter has malformed type annotation")
                     .and_then(|type_node| lower_reference(&type_node))?;
                 lowered.push(LoweredFunctionParameter {
-                    binding: LoweredFunctionParameterBinding::Named(name),
+                    binding,
                     type_reference,
                     is_optional: false,
                     is_rest: true,

@@ -542,3 +542,133 @@ fn intl_exclusion_does_not_hide_other_unsupported_overloads() -> Result<()> {
     assert!(format!("{error:#}").contains("unsupported qualified type reference"));
     Ok(())
 }
+
+#[test]
+fn iterator_declarations_translate_generics_aliases_and_rest_tuples() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    for method in ["advance", "step"] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!(r#"
+            interface IteratorYieldResult<Value> {{ done?: false; value: Value; }}
+            interface IteratorReturnResult<End> {{ done: true; value: End; }}
+            type IteratorResult<Value, End = boolean> = IteratorYieldResult<Value> | IteratorReturnResult<End>;
+            interface Iterator<Value, End = boolean, Input = unknown> {{
+                {method}(...[input]: [] | [Input]): IteratorResult<Value, End>;
+                finish?(value?: End): IteratorResult<Value, End>;
+            }}
+        "#).into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_global_types(&manifest, &[file])?;
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected supporting type")
+            };
+            &lowered.local_types()[*index]
+        };
+        let LoweredTypeData::Interface(iterator) = lowered.global("Iterator").unwrap().data()
+        else {
+            panic!("expected interface")
+        };
+        let LoweredTypeData::Function(function) =
+            local(iterator.member(method).unwrap().type_reference())
+        else {
+            panic!("expected function")
+        };
+        let [parameter] = function.parameters() else {
+            panic!("expected a rest parameter")
+        };
+        assert!(parameter.is_rest());
+        assert_eq!(
+            parameter.binding(),
+            &LoweredFunctionParameterBinding::Pattern
+        );
+        let LoweredTypeData::Union(alternatives) = local(parameter.type_reference()) else {
+            panic!("expected tuple union")
+        };
+        assert_eq!(
+            local(&alternatives[0]),
+            &LoweredTypeData::Tuple(Box::default())
+        );
+        assert_eq!(
+            local(&alternatives[1]),
+            &LoweredTypeData::Tuple(Box::new([iterator.type_parameters()[2].clone()]))
+        );
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = local(function.return_type())
+        else {
+            panic!("expected result application")
+        };
+        assert_eq!(
+            ty,
+            &LoweredTypeReference::Predefined("GLOBAL_ITERATOR_RESULT_ID")
+        );
+        assert_eq!(type_parameters.as_ref(), &iterator.type_parameters()[..2]);
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = lowered.global("IteratorResult").unwrap().data()
+        else {
+            panic!("expected alias declaration")
+        };
+        let LoweredTypeData::GenericParameter {
+            default: Some(default),
+            ..
+        } = local(&type_parameters[1])
+        else {
+            panic!("expected default")
+        };
+        assert_eq!(local(default), &LoweredTypeData::Boolean);
+        let LoweredTypeData::Union(results) = local(ty) else {
+            panic!("expected alias union")
+        };
+        for (result, parameter) in results.iter().zip(type_parameters) {
+            let LoweredTypeData::InstanceOf {
+                type_parameters, ..
+            } = local(result)
+            else {
+                panic!("expected result interface")
+            };
+            assert_eq!(type_parameters.as_ref(), std::slice::from_ref(parameter));
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn iterator_declarations_reject_unsupported_dependencies_and_shapes() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    for (source, expected) in [
+        (
+            "interface Iterator<T> { next(): Missing<T>; }",
+            "missing declaration dependency",
+        ),
+        (
+            "interface Iterator<T extends object> {}",
+            "unsupported constrained",
+        ),
+        (
+            "interface Iterator<T> { next(...[x]: [value?: T]): T; }",
+            "tuple elements are not supported",
+        ),
+        (
+            "interface Iterator<T> { [Symbol.iterator](): T; }",
+            "unsupported computed",
+        ),
+        (
+            "interface Iterator<T> {} interface Iterator<T> {}",
+            "merged protocol declarations",
+        ),
+    ] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = source.as_bytes().to_vec();
+        let manifest = build_global_manifest(collect(&file).records);
+        let error = lower_global_types(&manifest, &[file]).expect_err(source);
+        assert!(
+            format!("{error:#}").contains(expected),
+            "{source}: {error:#}"
+        );
+    }
+    Ok(())
+}

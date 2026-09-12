@@ -321,3 +321,38 @@ fn date_and_regexp_scalar_members_infer_from_declarations() {
         assert!(is_inferred_boolean(&db, binding(name)), "{name}");
     }
 }
+
+#[test]
+fn iterator_results_infer_yield_and_completion_values() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const iterator: Iterator<string, number, boolean>;
+        declare const result: IteratorResult<string, number>;
+        export const nextResult = iterator.next(true);
+        export const nextValue = nextResult.value;
+        export const value = result.value;
+        export const done = result.done;
+        declare const defaultResult: IteratorResult<string>;
+        export const defaultValue = defaultResult.value;
+        type Defaulted<T, U = T> = IteratorYieldResult<U>;
+        declare const dependentDefault: Defaulted<string>;
+        export const dependentValue = dependentDefault.value;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for name in ["value", "nextValue"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let ty = inferred.resolve_type(&db, ty);
+        assert!(contains_inferred_string(&db, ty), "{name}: {ty:?}");
+        assert!(contains_inferred_number(&db, ty), "{name}: {ty:?}");
+    }
+    let ty = inferred_binding_ty_by_name(&db, module, inferred, "defaultValue").unwrap();
+    let ty = inferred.resolve_type(&db, ty);
+    assert_eq!(ty, InferredTypeData::AnyKeyword);
+    let ty = inferred_binding_ty_by_name(&db, module, inferred, "dependentValue").unwrap();
+    assert!(is_inferred_string(&db, inferred.resolve_type(&db, ty)));
+}

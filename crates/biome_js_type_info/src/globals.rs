@@ -188,6 +188,15 @@ pub(crate) fn raw_global_type(type_id: GlobalTypeId) -> &'static TypeData {
 }
 
 pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Option<GlobalTypeId> {
+    if qualifier.type_only
+        && let Some(name) = qualifier.path.identifier()
+        && let Some((_, RawTypeId::Global(id))) =
+            crate::generated::global_types::DECLARATION_GLOBALS
+                .iter()
+                .find(|(declared, _)| *declared == name.text())
+    {
+        return Some(*id);
+    }
     let id = if qualifier.has_known_type_parameters() {
         return None;
     } else if qualifier.is_array() {
