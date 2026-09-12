@@ -263,6 +263,7 @@ fn find_cycle(
             resolved_path,
             phase,
             kind,
+            ..
         } in module_info.all_import_paths()
         {
             if options.ignore_types() && !kind.is_dynamic() && phase == JsImportPhase::Type {
