@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_11304.svelte
+---
+
+# Input
+
+```svelte
+<form onsubmit={(event)=>{event.preventDefault();submitForm();  trackSubmission();}}></form>
+
+<input bind:value={name}>
+<div class={{active: isActive}}></div>
+<button on:click={(visible = !visible)}>toggle</button>
+<Select options={['a', 'b']} />
+
+<button on:click={handler // the comment stays inside the expression
+}>commented</button>
+
+<button on:click={a +}>unformattable</button>
+
+```
+
+
+# Formatted
+
+```svelte
+<form
+	onsubmit={(event) => {
+		event.preventDefault();
+		submitForm();
+		trackSubmission();
+	}}
+></form>
+
+<input bind:value={name}>
+<div class={{ active: isActive }}></div>
+<button on:click={(visible = !visible)}>toggle</button>
+<Select options={["a", "b"]} />
+
+<button
+	on:click={handler // the comment stays inside the expression
+	}
+>
+	commented
+</button>
+
+<button on:click={a +}>unformattable</button>
+
+```

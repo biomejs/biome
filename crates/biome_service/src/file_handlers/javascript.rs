@@ -48,7 +48,7 @@ use biome_db::AnyParsedSource;
 #[cfg(feature = "js_embeds")]
 use biome_formatter::FormatElement;
 #[cfg(feature = "js_embeds")]
-use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
+use biome_formatter::prelude::{Document, EmbeddedDocument, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatError,
     IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
@@ -1754,7 +1754,9 @@ fn format_embedded(
                         .embedded_syntax::<CssLanguage>();
                     let formatted =
                         biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                    Some(wrap_document(formatted.into_document()))
+                    Some(EmbeddedDocument::Block(wrap_document(
+                        formatted.into_document(),
+                    )))
                 }
                 #[cfg(feature = "lang_graphql")]
                 DocumentFileSource::Graphql(_) => {
@@ -1771,7 +1773,9 @@ fn format_embedded(
                     let formatted =
                         biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
                             .ok()?;
-                    Some(wrap_document(formatted.into_document()))
+                    Some(EmbeddedDocument::Block(wrap_document(
+                        formatted.into_document(),
+                    )))
                 }
                 _ => None,
             }

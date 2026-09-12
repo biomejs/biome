@@ -14,7 +14,7 @@ pub use crate::format_element::tag::{LabelId, Tag, TagKind};
 pub use crate::token::number::{NumberFormatOptions, format_trimmed_number};
 
 pub use crate::{
-    Buffer as _, BufferExtensions, Format, Format as _, FormatResult, FormatRule,
+    Buffer as _, BufferExtensions, EmbeddedDocument, Format, Format as _, FormatResult, FormatRule,
     FormatTextCaseExt as _, FormatWithRule as _, SimpleFormatContext, best_fitting, dbg_write,
     format, format_args, write,
 };

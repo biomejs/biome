@@ -1074,6 +1074,42 @@ pub struct SourceMarker {
     pub dest: TextSize,
 }
 
+/// The document a caller produces for an embedded node, together with the
+/// layout the embed protocol applies to it.
+///
+/// The layout is a property of the host construct, not of the embedded
+/// content: the same guest language is formatted as a block where it occupies
+/// a whole host node and inline where it is spliced into one position of a
+/// host line.
+#[derive(Debug, Clone)]
+pub enum EmbeddedDocument {
+    /// The embedded content occupies a whole block of the host document.
+    ///
+    /// The embed protocol closes a block embed with a hard line so the host
+    /// token that follows it starts on a new line and the enclosing groups
+    /// break.
+    Block(Document),
+
+    /// The embedded content is spliced into a single position of the host
+    /// document, such as a template expression inside an attribute value.
+    ///
+    /// The embed protocol inserts no line break of its own, so the enclosing
+    /// layout stays free to keep the embed on one line. The embed only forces
+    /// the enclosing groups to break when the embedded document itself
+    /// contains a hard line.
+    Inline(Document),
+}
+
+/// The layout of the most recently visited `StartEmbedded` tag.
+///
+/// `EndEmbedded` carries no payload of its own, so the layout is recovered from
+/// the start tag it closes.
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+enum EmbeddedLayout {
+    Block,
+    Inline,
+}
+
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Formatted<Context> {
     document: Document,
@@ -1090,35 +1126,45 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
-    /// Visits each embedded element and replaces it with elements contained inside the [Document]
-    /// emitted by `fn_format_embedded`
+    /// Visits each embedded element and replaces it with elements contained inside the
+    /// [EmbeddedDocument] emitted by `fn_format_embedded`
     pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
-        F: FnMut(TextRange) -> Option<Document>,
+        F: FnMut(TextRange) -> Option<EmbeddedDocument>,
     {
-        let mut last_start_resolved = false;
+        let mut last_start = None;
         self.document.transform(move |element| match element {
             FormatElement::Tag(Tag::StartEmbedded(range)) => match fn_format_embedded(*range) {
-                Some(document) => {
-                    last_start_resolved = true;
+                Some(EmbeddedDocument::Block(document)) => {
+                    last_start = Some(EmbeddedLayout::Block);
+                    Some(FormatElement::Interned(Interned::new(
+                        document.into_elements(),
+                    )))
+                }
+                Some(EmbeddedDocument::Inline(document)) => {
+                    last_start = Some(EmbeddedLayout::Inline);
                     Some(FormatElement::Interned(Interned::new(
                         document.into_elements(),
                     )))
                 }
                 None => {
                     // Keep the StartEmbedded tag so it stays paired with EndEmbedded.
-                    last_start_resolved = false;
+                    last_start = None;
                     None
                 }
             },
-            FormatElement::Tag(Tag::EndEmbedded) => {
-                if last_start_resolved {
-                    Some(FormatElement::Line(LineMode::Hard))
-                } else {
-                    // Keep EndEmbedded paired with the unresolved StartEmbedded.
-                    None
+            FormatElement::Tag(Tag::EndEmbedded) => match last_start {
+                Some(EmbeddedLayout::Block) => Some(FormatElement::Line(LineMode::Hard)),
+                // An inline embed is spliced into its host position, so its end
+                // tag contributes no output of its own. The caller decides what
+                // follows the embed and where any pending line suffix has to be
+                // flushed before it.
+                Some(EmbeddedLayout::Inline) => {
+                    Some(FormatElement::Interned(Interned::new(Vec::new())))
                 }
-            }
+                // Keep EndEmbedded paired with the unresolved StartEmbedded.
+                None => None,
+            },
             _ => None,
         });
     }

@@ -52,10 +52,10 @@ use biome_formatter::FormatElement;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::format_element::{Interned, LineMode};
 #[cfg(feature = "html_embeds")]
-use biome_formatter::prelude::{Document, Tag};
+use biome_formatter::prelude::{Document, EmbeddedDocument, Tag, TextWidth};
 use biome_formatter::{
-    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
-    TrailingNewline,
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LINE_TERMINATORS, LineEnding,
+    LineWidth, Printed, TrailingNewline, normalize_newlines,
 };
 use biome_fs::BiomePath;
 use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
@@ -80,6 +80,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkEleme
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
+#[cfg(feature = "html_embeds")]
+use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
 #[cfg(feature = "html_embeds")]
@@ -800,6 +802,7 @@ fn format_embedded(
 
     let tree = parse.syntax(&workspace_db);
     let indent_script_and_style = options.indent_script_and_style().value();
+    let indent_width = options.indent_width();
     let mut formatted = format_node(options, &tree, true)?;
     formatted.format_embedded(move |range| {
         let mut iter = embedded_nodes.iter();
@@ -838,21 +841,63 @@ fn format_embedded(
                     .parsed_origin()
                     .parse(&workspace_db)
                     .embedded_syntax::<JsLanguage>();
-                let formatted =
-                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
+                let formatted = biome_js_formatter::format_node_with_offset(js_options, &node).ok();
 
-                let document = formatted.into_document();
                 if file_source.is_svelte_declaration() {
-                    Some(Document::new(vec![
+                    Some(EmbeddedDocument::Block(Document::new(vec![
                         FormatElement::Token { text: "{" },
-                        FormatElement::Interned(Interned::new(document.into_elements())),
+                        FormatElement::Interned(Interned::new(
+                            formatted?.into_document().into_elements(),
+                        )),
                         FormatElement::Token { text: "}" },
-                    ]))
+                    ])))
+                } else if matches!(
+                    file_source.as_embedding_kind(),
+                    JsEmbeddingKind::Svelte {
+                        embedding_kind: SvelteEmbeddingKind::Expression,
+                        ..
+                    }
+                ) {
+                    // An expression inside an attribute shares its line with the
+                    // attribute list, so it must not close with a block break.
+                    let payload = match formatted {
+                        Some(formatted) => FormatElement::Interned(Interned::new(
+                            formatted.into_document().into_elements(),
+                        )),
+                        // The host node is printed as nothing but this embed, so
+                        // an unresolved payload would remove the expression from
+                        // the document. Keeping the parsed text leaves a payload
+                        // the JavaScript formatter rejects, such as `{a +}`, in
+                        // place until the syntax error is fixed.
+                        None => {
+                            let source = node.inner().text_trimmed().to_string();
+                            // The printer expands only `\n` into the configured
+                            // line ending, so every other line terminator has to
+                            // become `\n` before the text is handed over.
+                            let text = normalize_newlines(&source, LINE_TERMINATORS);
+                            let text_width = TextWidth::from_text(&text, indent_width);
+                            FormatElement::Text {
+                                text: text.into_owned().into(),
+                                text_width,
+                            }
+                        }
+                    };
+                    Some(EmbeddedDocument::Inline(Document::new(vec![
+                        FormatElement::Token { text: "{" },
+                        payload,
+                        // A payload that ends in a line comment, such as
+                        // `{handler // note}`, leaves a line suffix pending. The
+                        // closing brace has to be separated from it, or the
+                        // brace is printed inside the comment and the source no
+                        // longer parses back to the same expression.
+                        FormatElement::LineSuffixBoundary,
+                        FormatElement::Token { text: "}" },
+                    ])))
                 } else {
-                    Some(wrap_document(
-                        document,
+                    Some(EmbeddedDocument::Block(wrap_document(
+                        formatted?.into_document(),
                         !file_source.as_embedding_kind().is_astro_frontmatter(),
-                    ))
+                    )))
                 }
             }
             DocumentFileSource::Json(_) => {
@@ -864,7 +909,10 @@ fn format_embedded(
                     .embedded_syntax::<JsonLanguage>();
                 let formatted =
                     biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
+                Some(EmbeddedDocument::Block(wrap_document(
+                    formatted.into_document(),
+                    true,
+                )))
             }
             DocumentFileSource::Css(_) => {
                 let css_options = css::resolve_format_options(
@@ -879,7 +927,10 @@ fn format_embedded(
                     .embedded_syntax::<CssLanguage>();
                 let formatted =
                     biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
+                Some(EmbeddedDocument::Block(wrap_document(
+                    formatted.into_document(),
+                    true,
+                )))
             }
             _ => None,
         }
