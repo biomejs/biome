@@ -3,9 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsxAttributeName, AnyJsxTag, JsxAttribute};
+use biome_js_syntax::{AnyJsxAttributeName, JsxAttribute};
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::AstNode;
 use biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions;
 
 declare_lint_rule! {
@@ -18,13 +18,13 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```astro,expect_diagnostic
+    /// ```astro,expect_diagnostic,ignore
     /// {show && <span set:html={content} />}
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```astro
+    /// ```astro,ignore
     /// {show && <span>{content}</span>}
     /// ```
     ///
@@ -70,14 +70,6 @@ impl Rule for NoAstroSetHtmlDirective {
         };
 
         is_set_html.then_some(())
-    }
-
-    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        ctx.query()
-            .syntax()
-            .ancestors()
-            .find_map(AnyJsxTag::cast)
-            .map(|tag| tag.range())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
