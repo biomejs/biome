@@ -334,10 +334,12 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 
 /// Lowers named instance properties and nongeneric methods with declaration-derived
 /// generic parameters. Constraints, defaults, value-side declarations, computed members,
-/// and methods returning `MapIterator` or `SetIterator` are excluded. References to the
+/// methods returning `MapIterator` or `SetIterator`, and methods referencing Intl types
+/// are excluded. References to the
 /// enclosing class may carry type arguments. Other external references and unsupported
 /// member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
+/// Existing class members retain their projections; their declarations are not lowered again.
 /// Local types are registered after their dependencies for runtime conversion in one pass.
 pub(super) fn lower_class_members(
     manifest: &GlobalManifest,
@@ -360,7 +362,7 @@ pub(super) fn lower_class_members(
     let group = manifest
         .global_group(class.name())
         .context("missing class declaration group")?;
-    let mut members: Vec<LoweredTypeMember> = Vec::new();
+    let mut members = class.members.to_vec();
     let mut class_parameters = None;
     for record in group.declarations() {
         match record.kind {
@@ -408,7 +410,7 @@ pub(super) fn lower_class_members(
             scope.parameters = names.into_iter().zip(references.iter().cloned()).collect();
         }
         for member in declaration.members() {
-            if !supports_class_member(&member)? {
+            if !supports_class_member(&member, class)? {
                 continue;
             }
             let member = lowerer.lower_member(member).with_context(|| {
@@ -434,10 +436,13 @@ pub(super) fn lower_class_members(
         .context("unfilled class member type")
 }
 
-fn supports_class_member(member: &AnyTsTypeMember) -> Result<bool> {
+fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
     let name = match member {
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
         AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+            if method_uses_intl_types(method)? {
+                return Ok(false);
+            }
             if let Some(annotation) = method.return_type_annotation()
                 && let AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(reference)) =
                     annotation.ty()?
@@ -454,10 +459,27 @@ fn supports_class_member(member: &AnyTsTypeMember) -> Result<bool> {
         }
         _ => bail!("unsupported class member: {:?}", member.syntax().kind()),
     };
-    Ok(!matches!(
-        name,
-        AnyJsObjectMemberName::JsComputedMemberName(_)
-    ))
+    match name {
+        AnyJsObjectMemberName::JsComputedMemberName(_) => Ok(false),
+        name => Ok(class
+            .member(lower_object_member_name(name)?.text())
+            .is_none()),
+    }
+}
+
+fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
+    for name in method
+        .syntax()
+        .descendants()
+        .filter_map(biome_js_syntax::TsQualifiedName::cast)
+    {
+        if let biome_js_syntax::AnyTsName::JsReferenceIdentifier(root) = name.left()?
+            && root.value_token()?.text_trimmed() == "Intl"
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
 
 #[cfg(test)]

@@ -281,3 +281,43 @@ fn map_and_set_members_infer_instance_values_and_callback_parameters() {
         );
     }
 }
+
+#[test]
+fn date_and_regexp_scalar_members_infer_from_declarations() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const date: Date;
+        export const time = date.getTime();
+        export const adjusted = date.setHours(12, 30);
+        export const iso = date.toISOString();
+        export const locale = date.toLocaleDateString();
+        export const json = date.toJSON();
+        export const matched = /ab/.test("abc");
+        export const source = /ab/.source;
+        export const global = /ab/g.global;
+        export const ignoreCase = /ab/i.ignoreCase;
+        export const multiline = /ab/m.multiline;
+        export const lastIndex = /ab/g.lastIndex;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in ["time", "adjusted", "lastIndex"] {
+        assert!(is_inferred_number(&db, binding(name)), "{name}");
+    }
+    for name in ["iso", "locale", "json", "source"] {
+        assert!(is_inferred_string(&db, binding(name)), "{name}");
+    }
+    for name in ["matched", "global", "ignoreCase", "multiline"] {
+        assert!(is_inferred_boolean(&db, binding(name)), "{name}");
+    }
+}
