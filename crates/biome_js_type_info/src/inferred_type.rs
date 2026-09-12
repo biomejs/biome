@@ -1,3 +1,6 @@
+mod boolean_coercion;
+pub use boolean_coercion::BooleanCoercion;
+
 use crate::TypeDb;
 use crate::global_types;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};

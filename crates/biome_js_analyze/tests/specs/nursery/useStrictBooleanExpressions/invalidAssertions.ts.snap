@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAssertions.ts
+---
+# Input
+```ts
+// should generate diagnostics
+declare function assert(value: unknown): asserts value;
+declare function assertSecond(message: string, value: unknown): asserts value;
+function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+    assert(number);
+    assertSecond("present", string);
+    assert(boolean);
+    assert(true && number);
+    assert(number || string);
+    assert((boolean));
+}
+
+```
+
+# Diagnostics
+```
+invalidAssertions.ts:5:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    3 │ declare function assertSecond(message: string, value: unknown): asserts value;
+    4 │ function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+  > 5 │     assert(number);
+      │            ^^^^^^
+    6 │     assertSecond("present", string);
+    7 │     assert(boolean);
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:6:29 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+    4 │ function checks(number: number | null, string: string | undefined, boolean?: boolean) {
+    5 │     assert(number);
+  > 6 │     assertSecond("present", string);
+      │                             ^^^^^^
+    7 │     assert(boolean);
+    8 │     assert(true && number);
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:7:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable boolean.
+  
+    5 │     assert(number);
+    6 │     assertSecond("present", string);
+  > 7 │     assert(boolean);
+      │            ^^^^^^^
+    8 │     assert(true && number);
+    9 │     assert(number || string);
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:8:20 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+     6 │     assertSecond("present", string);
+     7 │     assert(boolean);
+   > 8 │     assert(true && number);
+       │                    ^^^^^^
+     9 │     assert(number || string);
+    10 │     assert((boolean));
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:9:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+     7 │     assert(boolean);
+     8 │     assert(true && number);
+   > 9 │     assert(number || string);
+       │            ^^^^^^
+    10 │     assert((boolean));
+    11 │ }
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:9:22 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable string.
+  
+     7 │     assert(boolean);
+     8 │     assert(true && number);
+   > 9 │     assert(number || string);
+       │                      ^^^^^^
+    10 │     assert((boolean));
+    11 │ }
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAssertions.ts:10:13 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable boolean.
+  
+     8 │     assert(true && number);
+     9 │     assert(number || string);
+  > 10 │     assert((boolean));
+       │             ^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
