@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 65;
+const PREDEFINED_TYPE_COUNT: usize = 67;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -183,4 +183,6 @@ predefined_globals! {
     (BOOLEAN_ID, BOOLEAN_ID_NAME, BOOLEAN_ID_GLOBAL_TYPE_ID, _, "boolean", Primitive),
     (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME, ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CONSTRUCTOR_ID, "Error.constructor", ManualSynthetic),
     (ERROR_CALL_ID, ERROR_CALL_ID_NAME, ERROR_CALL_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CALL_ID, "Error.call", ManualSynthetic),
+    (ARRAY_FROM_ID, ARRAY_FROM_ID_NAME, ARRAY_FROM_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_FROM_ID, "Array.from", ManualSynthetic),
+    (ARRAY_FROM_CALLBACK_ID, ARRAY_FROM_CALLBACK_ID_NAME, ARRAY_FROM_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_FROM_CALLBACK_ID, "Array.from callback", Helper),
 }

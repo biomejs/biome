@@ -41,6 +41,11 @@ interface Array<T> {
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
 }
 
+interface ArrayConstructor {
+    from<T>(items: ArrayLike<T>): T[];
+    from<T, U>(items: ArrayLike<T>, mapfn: (value: T, index: number) => U, thisArg?: any): U[];
+}
+
 interface Promise<T> {
     catch(): Promise<T>;
     then(): Promise<T>;

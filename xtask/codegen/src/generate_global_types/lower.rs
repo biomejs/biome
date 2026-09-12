@@ -11,7 +11,7 @@ use biome_js_syntax::{
     TsTypeParameters,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstNodeList, SyntaxResult, Text};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxResult, Text};
 
 use crate::generate_global_types::{
     collect::{DeclarationKind, DeclarationRecord},
@@ -746,6 +746,8 @@ fn lower_array_globals(
         bail!("Array is missing map");
     }
 
+    lower_array_from(manifest, source_cache, globals)?;
+
     globals.push(LoweredGlobal {
         name: Text::from("Array"),
         id_constant: "ARRAY_ID_GLOBAL_TYPE_ID",
@@ -773,6 +775,11 @@ fn lower_array_globals(
                     kind: LoweredMemberKind::Named { optional: false },
                     type_reference: LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID"),
                 },
+                LoweredTypeMember {
+                    name: Text::from("from"),
+                    kind: LoweredMemberKind::NamedStatic,
+                    type_reference: LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_ID"),
+                },
             ]),
         }),
     });
@@ -798,6 +805,165 @@ fn lower_array_globals(
         "GLOBAL_INSTANCEOF_ARRAY_U_ID",
     ));
 
+    Ok(())
+}
+
+/// Retains the mapping overload's callback return type while leaving the input
+/// iterable or array-like type unknown. Element types without a mapper remain unresolved.
+fn lower_array_from(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
+    let constructor = manifest
+        .global_group("ArrayConstructor")
+        .context("Array.from requires ArrayConstructor")?;
+    let mut saw_mapping_overload = false;
+    for record in constructor.declarations() {
+        let declaration = source_cache
+            .find_interface_declaration(record)?
+            .context("ArrayConstructor must be an interface")?;
+        for member in declaration.members() {
+            let AnyTsTypeMember::TsMethodSignatureTypeMember(method) = member else {
+                continue;
+            };
+            let AnyJsObjectMemberName::JsLiteralMemberName(name) = method.name()? else {
+                continue;
+            };
+            if name.name()?.text() != "from" || method.parameters()?.items().len() == 1 {
+                continue;
+            }
+            let type_parameters = method
+                .type_parameters()
+                .context("Array.from must be generic")?;
+            let names = type_parameters
+                .items()
+                .into_iter()
+                .map(|parameter| {
+                    let parameter = parameter?;
+                    if !parameter.modifiers().is_empty()
+                        || parameter.constraint().is_some()
+                        || parameter.default().is_some()
+                    {
+                        bail!("Array.from has an unsupported type parameter");
+                    }
+                    Ok(Text::from(
+                        parameter.name()?.ident_token()?.token_text_trimmed(),
+                    ))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            let [input, output] = names.as_slice() else {
+                bail!("Array.from mapping overload must have two type parameters");
+            };
+            let mut parameters = method.parameters()?.items().into_iter();
+            let items = required_formal_parameter(parameters.next(), "Array.from", "an input")?;
+            let mapper = required_formal_parameter(parameters.next(), "Array.from", "a mapper")?;
+            if method.optional_token().is_some()
+                || items.question_mark_token().is_some()
+                || mapper.question_mark_token().is_some()
+            {
+                bail!("Array.from and its input and mapper must be required");
+            }
+            let this_arg =
+                required_formal_parameter(parameters.next(), "Array.from", "an optional thisArg")?;
+            if parameters.next().is_some()
+                || this_arg.question_mark_token().is_none()
+                || !matches!(
+                    this_arg
+                        .type_annotation()
+                        .context("Array.from thisArg must have a type")?
+                        .ty()?,
+                    AnyTsType::TsAnyType(_)
+                )
+            {
+                bail!("Array.from must end with an optional any-typed thisArg");
+            }
+            let AnyTsType::TsFunctionType(callback) = mapper
+                .type_annotation()
+                .context("Array.from mapper must have a type")?
+                .ty()?
+            else {
+                bail!("Array.from mapper must be a function");
+            };
+            if callback.type_parameters().is_some() {
+                bail!("Array.from mapper must not be generic");
+            }
+            let mut callback_parameters = callback.parameters()?.items().into_iter();
+            let value = required_formal_parameter(
+                callback_parameters.next(),
+                "Array.from",
+                "a callback value",
+            )?;
+            let index = required_formal_parameter(
+                callback_parameters.next(),
+                "Array.from",
+                "a callback index",
+            )?;
+            if callback_parameters.next().is_some() {
+                bail!("Array.from mapper must have two parameters");
+            }
+            validate_reference_type(
+                &required_array_callback_parameter_type(&value, "Array.from")?,
+                input.text(),
+                "Array.from",
+            )?;
+            if !matches!(
+                required_array_callback_parameter_type(&index, "Array.from")?,
+                AnyTsType::TsNumberType(_)
+            ) {
+                bail!("Array.from mapper index must be number");
+            }
+            validate_reference_type(
+                &regular_return_type(callback.return_type()?, "Array.from")?,
+                output.text(),
+                "Array.from",
+            )?;
+            validate_array_method_array_return(&method, "Array.from", output.text())?;
+            saw_mapping_overload = true;
+        }
+    }
+    if !saw_mapping_overload {
+        bail!("Array.from is missing its mapping overload");
+    }
+
+    let parameter = |name, type_id, is_optional| LoweredFunctionParameter {
+        binding: LoweredFunctionParameterBinding::Named(Text::from(name)),
+        type_reference: LoweredTypeReference::Predefined(type_id),
+        is_optional,
+        is_rest: false,
+    };
+    globals.push(LoweredGlobal {
+        name: Text::from("Array.from"),
+        id_constant: "ARRAY_FROM_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Function(LoweredFunction {
+            is_async: false,
+            type_parameters: Box::new([
+                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
+                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+            ]),
+            name: Some(Text::from("Array.from")),
+            parameters: Box::new([
+                parameter("items", "GLOBAL_UNKNOWN_ID", false),
+                parameter("mapfn", "GLOBAL_ARRAY_FROM_CALLBACK_ID", false),
+                parameter("thisArg", "GLOBAL_UNKNOWN_ID", true),
+            ]),
+            return_type: LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_ARRAY_U_ID"),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Array.from callback"),
+        id_constant: "ARRAY_FROM_CALLBACK_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Function(LoweredFunction {
+            is_async: false,
+            type_parameters: Box::default(),
+            name: None,
+            parameters: Box::new([
+                parameter("value", "GLOBAL_T_ID", false),
+                parameter("index", "GLOBAL_NUMBER_ID", false),
+            ]),
+            return_type: LoweredTypeReference::Predefined("GLOBAL_U_ID"),
+        }),
+    });
     Ok(())
 }
 

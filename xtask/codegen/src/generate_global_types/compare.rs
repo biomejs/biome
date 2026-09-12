@@ -10,7 +10,7 @@ use super::lower::{
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
-const ARRAY_MEMBER_COUNT: usize = 4;
+const ARRAY_MEMBER_COUNT: usize = 5;
 const ARRAY_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const ARRAY_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] =
