@@ -492,6 +492,87 @@ const imported = <Fragment><span>Child</span></Fragment>;
 }
 
 #[test]
+fn issue_7644() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let mut temp_fs = TemporaryFs::new("issue_7644");
+
+    for (path, content) in [
+        (
+            "biome.json",
+            r#"{
+    "formatter": { "enabled": false },
+    "assist": { "enabled": false },
+    "linter": {
+        "rules": {
+            "preset": "none",
+            "correctness": {
+                "useImportExtensions": "error"
+            }
+        }
+    }
+}
+"#,
+        ),
+        ("package.json", "{}\n"),
+        (
+            "tsconfig.json",
+            r#"{
+    "files": [],
+    "references": [
+        { "path": "./tsconfig.app.json" }
+    ]
+}
+"#,
+        ),
+        (
+            "tsconfig.app.json",
+            r#"{
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src"]
+}
+"#,
+        ),
+        (
+            "src/index.js",
+            r#"import { helper } from "@/utils";
+
+console.log(helper());
+"#,
+        ),
+        (
+            "src/utils.js",
+            r#"export function helper() {
+    return "test";
+}
+"#,
+        ),
+    ] {
+        temp_fs.create_file(path, content);
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(temp_fs.create_os()),
+        &mut console,
+        Args::from(["check", temp_fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7644",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn issue_7771() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

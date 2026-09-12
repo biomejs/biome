@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/index.js:1:24 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Add a file extension for relative imports.
+  
+  > 1 │ import { helper } from "@/utils";
+      │                        ^^^^^^^^^
+    2 │ 
+    3 │ console.log(helper());
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Safe fix: Add import extension .js.
+  
+    1   │ - import·{·helper·}·from·"@/utils";
+      1 │ + import·{·helper·}·from·"@/utils.js";
+    2 2 │   
+    3 3 │   console.log(helper());
+  
+
+```
+
+```block
+Checked 6 files in <TIME>. No fixes applied.
+Found 1 error.
+```

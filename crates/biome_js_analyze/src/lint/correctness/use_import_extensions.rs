@@ -1,5 +1,5 @@
 use biome_diagnostics::Severity;
-use biome_module_graph::JsImportPath;
+use biome_resolver::ResolutionKind;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
@@ -162,11 +162,16 @@ impl Rule for UseImportExtensions {
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();
-        let resolved_path = module_info
-            .get_import_path_by_js_node(node)
-            .and_then(JsImportPath::as_path)?;
+        let import_path = module_info.get_import_path_by_js_node(node)?;
+        let resolved_path = import_path.as_path()?;
 
-        get_extensionless_import(node, resolved_path, ctx, force_js_extensions)
+        get_extensionless_import(
+            node,
+            resolved_path,
+            import_path.resolution_kind(),
+            ctx,
+            force_js_extensions,
+        )
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -219,6 +224,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     node: &AnyJsImportLike,
     resolved_path: &Utf8Path,
+    resolution_kind: ResolutionKind,
     ctx: &RuleContext<UseImportExtensions>,
     force_js_extensions: bool,
 ) -> Option<UseImportExtensionsState> {
@@ -231,18 +237,12 @@ fn get_extensionless_import(
     if !matches!(
         first_component,
         Utf8Component::CurDir | Utf8Component::ParentDir
-    ) {
-        // TypeScript path aliases should still be considered.
-        // The same does *not* apply for `package.json` aliases, because
-        // extensions are not automatically applied to those.
-        let matches_path_alias = ctx
-            .project_layout()
-            .query_tsconfig_for_path(ctx.file_path(), |tsconfig| {
-                tsconfig.matches_path_alias(path.as_str())
-            })?;
-        if !matches_path_alias {
-            return None;
-        }
+    ) && resolution_kind
+        != (ResolutionKind::TsConfigPathMapping {
+            can_add_extension: true,
+        })
+    {
+        return None;
     }
 
     let resolved_stem = resolved_path.file_stem();
