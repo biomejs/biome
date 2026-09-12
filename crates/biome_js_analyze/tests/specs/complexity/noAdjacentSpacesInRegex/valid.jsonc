@@ -3,5 +3,11 @@
     "/foo bar baz/;",
     "/foo bar\tbaz/;",
     "/foo /;",
-	"/\u200E\u2066\u2069/gu;"
+	"/\u200E\u2066\u2069/gu;",
+	// Adjacent spaces inside a character class are redundant set members,
+	// not a countable run: `{n}` isn't a quantifier there, so merging them
+	// would corrupt what the class matches. See issue #11419.
+	"/[\\s   ]/g;",
+	"/[   ]/;",
+	"/[a-z   ]/;"
 ]

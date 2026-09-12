@@ -69,8 +69,24 @@ impl Rule for NoAdjacentSpacesInRegex {
         let mut range_list = vec![];
         let mut previous_is_space = false;
         let mut first_consecutive_space_index = 0;
+        // Inside a character class (`[...]`), adjacent spaces are redundant
+        // set members, not a countable run: `{n}` is not a quantifier there,
+        // so merging them into one would change what the class matches.
+        // Track class depth (ignoring escaped brackets) to skip those spaces.
+        let mut in_class = false;
+        let mut escaped = false;
         for (i, ch) in trimmed_text.bytes().enumerate() {
-            if ch == b' ' {
+            let is_escaped = escaped;
+            escaped = ch == b'\\' && !is_escaped;
+            if !is_escaped {
+                match ch {
+                    b'[' if !in_class => in_class = true,
+                    b']' if in_class => in_class = false,
+                    _ => {}
+                }
+            }
+
+            if ch == b' ' && !in_class {
                 if !previous_is_space {
                     previous_is_space = true;
                     first_consecutive_space_index = i;
