@@ -94,6 +94,10 @@ pub enum LoweredTypeData {
     UnknownKeyword,
     ThisKeyword,
     GenericParameter(Text),
+    InstanceOf {
+        ty: LoweredTypeReference,
+        type_parameters: Box<[LoweredTypeReference]>,
+    },
 }
 
 /// Lowered class-like global.
@@ -317,27 +321,40 @@ pub fn lower_global_types(
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
-    let local_types = if manifest.global_group("WeakMap").is_some() {
+    let mut local_types = Vec::new();
+    for (name, id_constant, reference) in [
+        (
+            "WeakMap",
+            "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            "GLOBAL_WEAK_MAP_ID",
+        ),
+        ("Set", "SET_ID_GLOBAL_TYPE_ID", "GLOBAL_SET_ID"),
+        ("Map", "MAP_ID_GLOBAL_TYPE_ID", "GLOBAL_MAP_ID"),
+    ] {
+        if manifest.global_group(name).is_none() {
+            continue;
+        }
         let mut class = LoweredClass {
-            name: Text::from("WeakMap"),
+            name: Text::from(name),
             type_parameters: Box::default(),
             members: Box::default(),
         };
-        let local_types = declarations::lower_class_members(manifest, source_files, &mut class)?;
+        local_types.extend(declarations::lower_class_members(
+            manifest,
+            source_files,
+            &mut class,
+            reference,
+            local_types.len(),
+        )?);
         globals.push(LoweredGlobal {
             name: class.name.clone(),
-            id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            id_constant,
             data: LoweredTypeData::Class(class),
         });
-        local_types
-    } else {
-        Box::default()
-    };
+    }
 
     Ok(LoweredGlobalTypes {
-        local_types,
+        local_types: local_types.into_boxed_slice(),
         globals: globals.into_boxed_slice(),
     })
 }
@@ -527,18 +544,6 @@ const DATE_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
     name: "Date",
     id_constant: "DATE_ID_GLOBAL_TYPE_ID",
     type_parameter_ids: &[],
-};
-
-const MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Map",
-    id_constant: "MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
-};
-
-const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Set",
-    id_constant: "SET_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID"],
 };
 
 const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;

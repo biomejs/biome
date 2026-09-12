@@ -421,3 +421,62 @@ fn class_members_reject_unsupported_named_shapes() -> Result<()> {
     }
     Ok(())
 }
+
+#[test]
+fn class_callbacks_preserve_self_type_arguments_in_a_shared_table() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"
+        interface WeakMap<K, V> { value: V; }
+        interface Set<Element> { visit(callback: (owner: Set<Element>) => void): void; }
+        interface Map<Left, Right> {
+            visit(callback: (owner: Map<Right, Left>) => void): void;
+            walk(): MapIterator<Left>;
+            entries(): boolean;
+        }
+        interface Set<Element> { walk(): SetIterator<Element>; entries(): boolean; }
+    "
+    .to_vec();
+    let manifest = build_global_manifest(collect(&file).records);
+    let lowered = lower_global_types(&manifest, &[file])?;
+    let local = |reference: &LoweredTypeReference| {
+        let LoweredTypeReference::Local(index) = reference else {
+            panic!("expected local reference")
+        };
+        &lowered.local_types()[*index]
+    };
+    for (name, global_reference) in [("Set", "GLOBAL_SET_ID"), ("Map", "GLOBAL_MAP_ID")] {
+        let LoweredTypeData::Class(class) = lowered.global(name).unwrap().data() else {
+            panic!("expected class")
+        };
+        assert!(class.member("walk").is_none());
+        assert!(class.member("entries").is_some());
+        let LoweredTypeData::Function(visit) =
+            local(class.member("visit").unwrap().type_reference())
+        else {
+            panic!("expected method")
+        };
+        let LoweredTypeData::Function(callback) = local(visit.parameters()[0].type_reference())
+        else {
+            panic!("expected callback")
+        };
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = local(callback.parameters()[0].type_reference())
+        else {
+            panic!("expected instance")
+        };
+        assert_eq!(ty, &LoweredTypeReference::Predefined(global_reference));
+        assert_eq!(
+            type_parameters.as_ref(),
+            class
+                .type_parameters()
+                .iter()
+                .cloned()
+                .rev()
+                .collect::<Vec<_>>()
+        );
+    }
+    Ok(())
+}
