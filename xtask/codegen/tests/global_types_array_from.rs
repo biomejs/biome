@@ -40,7 +40,34 @@ fn array_from_mapping_signature() -> anyhow::Result<()> {
         array.member("from").unwrap().kind(),
         &LoweredMemberKind::NamedStatic
     );
-    let LoweredTypeData::Function(from) = lowered.global("Array.from").unwrap().data() else {
+    let LoweredTypeData::Interface(overloads) = lowered.global("Array.from").unwrap().data() else {
+        panic!("Array.from must have overloads");
+    };
+    assert_eq!(overloads.members().len(), 2);
+    assert!(
+        overloads
+            .members()
+            .iter()
+            .all(|member| member.kind() == &LoweredMemberKind::CallSignature)
+    );
+    let LoweredTypeData::Function(copy) = lowered.global("Array.from copy").unwrap().data() else {
+        panic!("copy overload must be callable");
+    };
+    assert_eq!(
+        copy.type_parameters(),
+        &[LoweredTypeReference::Predefined("GLOBAL_T_ID")]
+    );
+    assert_eq!(copy.parameters().len(), 1);
+    assert_eq!(
+        copy.parameters()[0].type_reference(),
+        &LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_SOURCE_ID")
+    );
+    assert_eq!(
+        copy.return_type(),
+        &LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_RESULT_ID")
+    );
+    let LoweredTypeData::Function(from) = lowered.global("Array.from mapped").unwrap().data()
+    else {
         panic!("Array.from must be callable");
     };
     assert_eq!(
@@ -84,6 +111,13 @@ fn array_from_mapping_signature() -> anyhow::Result<()> {
 #[test]
 fn array_from_rejects_incompatible_mapping_declarations() {
     for (before, after) in [
+        (
+            "from<T>(items: ArrayLike<T>): T[]",
+            "from<T>(items: ArrayLike<T>): string[]",
+        ),
+        ("from<T>(items:", "from<T>(items?:"),
+        ("ArrayLike<T>", "ArrayLike<string>"),
+        ("ArrayLike<T>", "Unrelated<T>"),
         ("mapfn:", "mapfn?:"),
         (
             "(value: T, index: number) => U",
@@ -101,4 +135,10 @@ fn array_from_rejects_incompatible_mapping_declarations() {
             "accepted {after}"
         );
     }
+}
+
+#[test]
+fn array_from_accepts_iterable_overloads() -> anyhow::Result<()> {
+    lower(&SOURCE.replace("items: ArrayLike<T>", "items: Iterable<T> | ArrayLike<T>"))?;
+    Ok(())
 }

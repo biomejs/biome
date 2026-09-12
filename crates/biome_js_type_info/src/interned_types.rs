@@ -22,7 +22,7 @@ use crate::{
         DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID,
         PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
         SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
+        SYMBOL_ID_GLOBAL_TYPE_ID, SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
@@ -38,6 +38,9 @@ const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
 pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
     match ty {
+        TypeData::GlobalType(id) if id == SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID => {
+            Some(Text::new_static("Symbol.iterator"))
+        }
         TypeData::GlobalType(id) if id == SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID => {
             Some(Text::new_static("Symbol.dispose"))
         }
@@ -50,6 +53,7 @@ pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
 
 pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
     let id = match member_name {
+        "iterator" => SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID,
         "dispose" => SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
         "asyncDispose" => SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
         _ => return None,

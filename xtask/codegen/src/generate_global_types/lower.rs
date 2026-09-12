@@ -808,8 +808,7 @@ fn lower_array_globals(
     Ok(())
 }
 
-/// Retains the mapping overload's callback return type while leaving the input
-/// iterable or array-like type unknown. Element types without a mapper remain unresolved.
+/// Validates the source overloads before emitting the reduced Array.from model.
 fn lower_array_from(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -819,6 +818,7 @@ fn lower_array_from(
         .global_group("ArrayConstructor")
         .context("Array.from requires ArrayConstructor")?;
     let mut saw_mapping_overload = false;
+    let mut saw_copy_overload = false;
     for record in constructor.declarations() {
         let declaration = source_cache
             .find_interface_declaration(record)?
@@ -830,7 +830,7 @@ fn lower_array_from(
             let AnyJsObjectMemberName::JsLiteralMemberName(name) = method.name()? else {
                 continue;
             };
-            if name.name()?.text() != "from" || method.parameters()?.items().len() == 1 {
+            if name.name()?.text() != "from" {
                 continue;
             }
             let type_parameters = method
@@ -852,6 +852,32 @@ fn lower_array_from(
                     ))
                 })
                 .collect::<Result<Vec<_>>>()?;
+            let items = required_formal_parameter(
+                method.parameters()?.items().into_iter().next(),
+                "Array.from",
+                "an input",
+            )?;
+            if method.optional_token().is_some() || items.question_mark_token().is_some() {
+                bail!("Array.from and its input must be required");
+            }
+            let input = names
+                .first()
+                .context("Array.from needs an input type parameter")?;
+            validate_array_from_input(
+                items
+                    .type_annotation()
+                    .context("Array.from input must have a type")?
+                    .ty()?,
+                input.text(),
+            )?;
+            if method.parameters()?.items().len() == 1 {
+                if names.len() != 1 {
+                    bail!("Array.from copy overload must have one type parameter");
+                }
+                validate_array_method_array_return(&method, "Array.from", input.text())?;
+                saw_copy_overload = true;
+                continue;
+            }
             let [input, output] = names.as_slice() else {
                 bail!("Array.from mapping overload must have two type parameters");
             };
@@ -922,8 +948,8 @@ fn lower_array_from(
             saw_mapping_overload = true;
         }
     }
-    if !saw_mapping_overload {
-        bail!("Array.from is missing its mapping overload");
+    if !saw_mapping_overload || !saw_copy_overload {
+        bail!("Array.from requires both copy and mapping overloads");
     }
 
     let parameter = |name, type_id, is_optional| LoweredFunctionParameter {
@@ -935,6 +961,36 @@ fn lower_array_from(
     globals.push(LoweredGlobal {
         name: Text::from("Array.from"),
         id_constant: "ARRAY_FROM_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Interface(LoweredInterface {
+            name: Text::from("Array.from"),
+            members: Box::new([
+                LoweredTypeMember {
+                    name: Text::from("copy"),
+                    kind: LoweredMemberKind::CallSignature,
+                    type_reference: LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_COPY_ID"),
+                },
+                LoweredTypeMember {
+                    name: Text::from("mapped"),
+                    kind: LoweredMemberKind::CallSignature,
+                    type_reference: LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_MAPPED_ID"),
+                },
+            ]),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Array.from copy"),
+        id_constant: "ARRAY_FROM_COPY_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Function(LoweredFunction {
+            is_async: false,
+            type_parameters: Box::new([LoweredTypeReference::Predefined("GLOBAL_T_ID")]),
+            name: Some(Text::from("Array.from")),
+            parameters: Box::new([parameter("items", "GLOBAL_ARRAY_FROM_SOURCE_ID", false)]),
+            return_type: LoweredTypeReference::Predefined("GLOBAL_ARRAY_FROM_RESULT_ID"),
+        }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Array.from mapped"),
+        id_constant: "ARRAY_FROM_MAPPED_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(LoweredFunction {
             is_async: false,
             type_parameters: Box::new([
@@ -943,7 +999,7 @@ fn lower_array_from(
             ]),
             name: Some(Text::from("Array.from")),
             parameters: Box::new([
-                parameter("items", "GLOBAL_UNKNOWN_ID", false),
+                parameter("items", "GLOBAL_ARRAY_FROM_SOURCE_ID", false),
                 parameter("mapfn", "GLOBAL_ARRAY_FROM_CALLBACK_ID", false),
                 parameter("thisArg", "GLOBAL_UNKNOWN_ID", true),
             ]),
@@ -964,6 +1020,43 @@ fn lower_array_from(
             return_type: LoweredTypeReference::Predefined("GLOBAL_U_ID"),
         }),
     });
+    Ok(())
+}
+
+fn validate_array_from_input(ty: AnyTsType, parameter: &str) -> Result<()> {
+    let types = match ty {
+        AnyTsType::TsUnionType(union) => {
+            union.types().into_iter().collect::<Result<Vec<_>, _>>()?
+        }
+        ty => vec![ty],
+    };
+    let mut saw_array_like = false;
+    let mut saw_iterable = false;
+    for ty in types {
+        let AnyTsType::TsReferenceType(reference) = ty else {
+            bail!("Array.from input must be ArrayLike<T> or Iterable<T> | ArrayLike<T>");
+        };
+        let name = reference.name()?.syntax().text_trimmed().to_string();
+        match name.as_str() {
+            "ArrayLike" if !saw_array_like => saw_array_like = true,
+            "Iterable" if !saw_iterable => saw_iterable = true,
+            _ => bail!("unsupported Array.from input {name}"),
+        }
+        let arguments = reference
+            .type_arguments()
+            .context("Array.from input must be generic")?;
+        let mut arguments = arguments.ts_type_argument_list().into_iter();
+        let argument = arguments
+            .next()
+            .context("Array.from input needs one type argument")??;
+        validate_reference_type(&argument, parameter, "Array.from input")?;
+        if arguments.next().is_some() {
+            bail!("Array.from input needs one type argument");
+        }
+    }
+    if !saw_array_like {
+        bail!("Array.from input must include ArrayLike<T>");
+    }
     Ok(())
 }
 
@@ -1710,6 +1803,7 @@ struct ParsedSourceCache<'a> {
 
 #[derive(Clone, Copy)]
 enum SelectedSymbolMember {
+    Iterator,
     Dispose,
     AsyncDispose,
 }
@@ -1717,13 +1811,14 @@ enum SelectedSymbolMember {
 impl SelectedSymbolMember {
     fn name(self) -> &'static str {
         match self {
+            Self::Iterator => "iterator",
             Self::Dispose => "dispose",
             Self::AsyncDispose => "asyncDispose",
         }
     }
 }
 
-/// Lowers the predefined `Symbol` projection and its two well-known symbol helpers.
+/// Lowers the predefined `Symbol` projection and its well-known symbol helpers.
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -1757,6 +1852,11 @@ fn lower_symbol_globals(
             type_parameters: Box::default(),
             members: Box::new([
                 LoweredTypeMember {
+                    name: Text::from("iterator"),
+                    kind: LoweredMemberKind::NamedStatic,
+                    type_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ITERATOR_ID"),
+                },
+                LoweredTypeMember {
                     name: Text::from("dispose"),
                     kind: LoweredMemberKind::NamedStatic,
                     type_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID"),
@@ -1770,6 +1870,11 @@ fn lower_symbol_globals(
                 },
             ]),
         }),
+    });
+    globals.push(LoweredGlobal {
+        name: Text::from("Symbol.iterator"),
+        id_constant: "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
+        data: LoweredTypeData::Symbol,
     });
     globals.push(LoweredGlobal {
         name: Text::from("Symbol.dispose"),
@@ -2157,6 +2262,7 @@ fn validate_symbol_constructor_members(
     records: &[DeclarationRecord],
     source_cache: &mut ParsedSourceCache,
 ) -> Result<()> {
+    let mut saw_iterator = false;
     let mut saw_dispose = false;
     let mut saw_async_dispose = false;
 
@@ -2187,6 +2293,7 @@ fn validate_symbol_constructor_members(
                 AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                     if let Some(member) = selected_symbol_member(property.name()?)? {
                         let saw_member = match member {
+                            SelectedSymbolMember::Iterator => &mut saw_iterator,
                             SelectedSymbolMember::Dispose => &mut saw_dispose,
                             SelectedSymbolMember::AsyncDispose => &mut saw_async_dispose,
                         };
@@ -2218,6 +2325,9 @@ fn validate_symbol_constructor_members(
         }
     }
 
+    if !saw_iterator {
+        bail!("SymbolConstructor is missing iterator");
+    }
     if !saw_dispose {
         bail!("SymbolConstructor is missing dispose");
     }
@@ -2241,6 +2351,7 @@ fn selected_symbol_member(name: AnyJsObjectMemberName) -> Result<Option<Selected
     };
 
     Ok(match name.name()?.text() {
+        "iterator" => Some(SelectedSymbolMember::Iterator),
         "dispose" => Some(SelectedSymbolMember::Dispose),
         "asyncDispose" => Some(SelectedSymbolMember::AsyncDispose),
         _ => None,

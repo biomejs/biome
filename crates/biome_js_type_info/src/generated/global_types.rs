@@ -38,6 +38,9 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
     crate::globals::ARRAY_FROM_ID_GLOBAL_TYPE_ID,
     crate::globals::ARRAY_FROM_CALLBACK_ID_GLOBAL_TYPE_ID,
+    crate::globals::ARRAY_FROM_COPY_ID_GLOBAL_TYPE_ID,
+    crate::globals::ARRAY_FROM_MAPPED_ID_GLOBAL_TYPE_ID,
+    crate::globals::SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID,
 ];
 
 /// Registers all generated global type data into the resolver builder.
@@ -294,6 +297,10 @@ pub(crate) fn set_generated_global_type_data(
         implements: Box::default(),
         members: Box::new([
             crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("iterator")),
+                ty: crate::globals::GLOBAL_SYMBOL_ITERATOR_ID.into(),
+            },
+            crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("dispose")),
                 ty: crate::globals::GLOBAL_SYMBOL_DISPOSE_ID.into(),
             },
@@ -455,34 +462,20 @@ pub(crate) fn set_generated_global_type_data(
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into()),
     }));
     builder.set_type_data(crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID, data);
-    let data = crate::TypeData::Function(Box::new(crate::Function {
-        is_async: false,
-        type_parameters: Box::new([
-            crate::globals::GLOBAL_T_ID.into(),
-            crate::globals::GLOBAL_U_ID.into(),
+    let data = crate::TypeData::Interface(Box::new(crate::Interface {
+        name: biome_rowan::Text::new_static("Array.from"),
+        type_parameters: Box::default(),
+        extends: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::CallSignature,
+                ty: crate::globals::GLOBAL_ARRAY_FROM_COPY_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::CallSignature,
+                ty: crate::globals::GLOBAL_ARRAY_FROM_MAPPED_ID.into(),
+            },
         ]),
-        name: Some(biome_rowan::Text::new_static("Array.from")),
-        parameters: Box::new([
-            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
-                name: biome_rowan::Text::new_static("items"),
-                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                is_optional: false,
-                is_rest: false,
-            }),
-            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
-                name: biome_rowan::Text::new_static("mapfn"),
-                ty: crate::globals::GLOBAL_ARRAY_FROM_CALLBACK_ID.into(),
-                is_optional: false,
-                is_rest: false,
-            }),
-            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
-                name: biome_rowan::Text::new_static("thisArg"),
-                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
-                is_optional: true,
-                is_rest: false,
-            }),
-        ]),
-        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ARRAY_U_ID.into()),
     }));
     builder.set_type_data(crate::globals::ARRAY_FROM_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Function(Box::new(crate::Function {
@@ -506,4 +499,51 @@ pub(crate) fn set_generated_global_type_data(
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_U_ID.into()),
     }));
     builder.set_type_data(crate::globals::ARRAY_FROM_CALLBACK_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::new([crate::globals::GLOBAL_T_ID.into()]),
+        name: Some(biome_rowan::Text::new_static("Array.from")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("items"),
+                ty: crate::globals::GLOBAL_ARRAY_FROM_SOURCE_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_ARRAY_FROM_RESULT_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_FROM_COPY_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::new([
+            crate::globals::GLOBAL_T_ID.into(),
+            crate::globals::GLOBAL_U_ID.into(),
+        ]),
+        name: Some(biome_rowan::Text::new_static("Array.from")),
+        parameters: Box::new([
+            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("items"),
+                ty: crate::globals::GLOBAL_ARRAY_FROM_SOURCE_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            }),
+            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("mapfn"),
+                ty: crate::globals::GLOBAL_ARRAY_FROM_CALLBACK_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            }),
+            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("thisArg"),
+                ty: crate::globals::GLOBAL_UNKNOWN_ID.into(),
+                is_optional: true,
+                is_rest: false,
+            }),
+        ]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ARRAY_U_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ARRAY_FROM_MAPPED_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Symbol;
+    builder.set_type_data(crate::globals::SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID, data);
 }

@@ -20,6 +20,7 @@ interface SymbolConstructor {
 
 interface SymbolConstructor {
     readonly [Symbol.iterator]: unique symbol;
+    readonly iterator: unique symbol;
     readonly dispose: unique symbol;
     readonly asyncDispose: unique symbol;
 }

@@ -50,6 +50,9 @@ const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
     "ARRAY_FROM_ID_GLOBAL_TYPE_ID",
     "ARRAY_FROM_CALLBACK_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FROM_COPY_ID_GLOBAL_TYPE_ID",
+    "ARRAY_FROM_MAPPED_ID_GLOBAL_TYPE_ID",
+    "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
 ];
 
 /// Emits the global types module with LF-normalized output.

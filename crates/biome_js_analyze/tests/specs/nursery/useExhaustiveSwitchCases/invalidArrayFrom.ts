@@ -20,3 +20,24 @@ switch (mapped[0].state) {
 	case "running":
 		break;
 }
+
+declare const source: readonly Player[];
+const copied = Array.from(source);
+switch (copied[0].state) {
+	case "running":
+		break;
+}
+
+const contextual = Array.from(source, player => player.state);
+switch (contextual[0]) {
+	case "running":
+	case undefined:
+		break;
+}
+
+declare const iterable: Iterable<Player>;
+const fromIterable = Array.from(iterable);
+switch (fromIterable[0].state) {
+	case "running":
+		break;
+}

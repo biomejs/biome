@@ -27,6 +27,27 @@ switch (mapped[0].state) {
 		break;
 }
 
+declare const source: readonly Player[];
+const copied = Array.from(source);
+switch (copied[0].state) {
+	case "running":
+		break;
+}
+
+const contextual = Array.from(source, player => player.state);
+switch (contextual[0]) {
+	case "running":
+	case undefined:
+		break;
+}
+
+declare const iterable: Iterable<Player>;
+const fromIterable = Array.from(iterable);
+switch (fromIterable[0].state) {
+	case "running":
+		break;
+}
+
 ```
 
 # Diagnostics
@@ -82,6 +103,7 @@ invalidArrayFrom.ts:19:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━�
   > 22 │ }
        │ ^
     23 │ 
+    24 │ declare const source: readonly Player[];
   
   i Some variants of the union type are not handled here.
   
@@ -102,6 +124,122 @@ invalidArrayFrom.ts:19:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━�
        23 │ + → case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
     22 24 │   }
     23 25 │   
+  
+
+```
+
+```
+invalidArrayFrom.ts:26:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    24 │ declare const source: readonly Player[];
+    25 │ const copied = Array.from(source);
+  > 26 │ switch (copied[0].state) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │ 	case "running":
+  > 28 │ 		break;
+  > 29 │ }
+       │ ^
+    30 │ 
+    31 │ const contextual = Array.from(source, player => player.state);
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "jumping"
+  - "ducking"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    26 26 │   switch (copied[0].state) {
+    27 27 │     case "running":
+    28    │ - → → break;
+       28 │ + → → break;
+       29 │ + → case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
+       30 │ + → case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
+    29 31 │   }
+    30 32 │   
+  
+
+```
+
+```
+invalidArrayFrom.ts:32:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    31 │ const contextual = Array.from(source, player => player.state);
+  > 32 │ switch (contextual[0]) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+  > 33 │ 	case "running":
+  > 34 │ 	case undefined:
+  > 35 │ 		break;
+  > 36 │ }
+       │ ^
+    37 │ 
+    38 │ declare const iterable: Iterable<Player>;
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "jumping"
+  - "ducking"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    33 33 │     case "running":
+    34 34 │     case undefined:
+    35    │ - → → break;
+       35 │ + → → break;
+       36 │ + → case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
+       37 │ + → case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
+    36 38 │   }
+    37 39 │   
+  
+
+```
+
+```
+invalidArrayFrom.ts:40:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    38 │ declare const iterable: Iterable<Player>;
+    39 │ const fromIterable = Array.from(iterable);
+  > 40 │ switch (fromIterable[0].state) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 41 │ 	case "running":
+  > 42 │ 		break;
+  > 43 │ }
+       │ ^
+    44 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "jumping"
+  - "ducking"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    40 40 │   switch (fromIterable[0].state) {
+    41 41 │     case "running":
+    42    │ - → → break;
+       42 │ + → → break;
+       43 │ + → case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
+       44 │ + → case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
+    43 45 │   }
+    44 46 │   
   
 
 ```
