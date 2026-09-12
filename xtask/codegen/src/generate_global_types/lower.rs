@@ -47,9 +47,15 @@ pub struct LoweredGlobal {
     name: Text,
     id_constant: &'static str,
     data: LoweredTypeData,
+    local_types: Box<[LoweredTypeData]>,
 }
 
 impl LoweredGlobal {
+    /// Supporting types addressed by local references, with dependencies before users.
+    pub fn local_types(&self) -> &[LoweredTypeData] {
+        &self.local_types
+    }
+
     /// TypeScript global name.
     pub fn name(&self) -> &str {
         self.name.text()
@@ -86,6 +92,8 @@ pub enum LoweredTypeData {
     Union(Box<[LoweredTypeReference]>),
     Undefined,
     UnknownKeyword,
+    ThisKeyword,
+    GenericParameter(Text),
 }
 
 /// Lowered class-like global.
@@ -311,7 +319,20 @@ pub fn lower_global_types(
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
     lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
+    if manifest.global_group("WeakMap").is_some() {
+        let mut class = LoweredClass {
+            name: Text::from("WeakMap"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let local_types = declarations::lower_class_members(manifest, source_files, &mut class)?;
+        globals.push(LoweredGlobal {
+            local_types,
+            name: class.name.clone(),
+            id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Class(class),
+        });
+    }
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
@@ -394,6 +415,7 @@ fn lower_error_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error"),
         id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -403,11 +425,13 @@ fn lower_error_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error.constructor"),
         id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Constructor(constructor),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error.call"),
         id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(call),
@@ -515,12 +539,6 @@ const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
     name: "Set",
     id_constant: "SET_ID_GLOBAL_TYPE_ID",
     type_parameter_ids: &["GLOBAL_T_ID"],
-};
-
-const WEAK_MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "WeakMap",
-    id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
 };
 
 const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;
@@ -770,6 +788,7 @@ fn lower_array_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Array"),
         id_constant: "ARRAY_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -945,6 +964,7 @@ fn lower_promise_globals(
     .chain(PROMISE_METHOD_SPECIFICATIONS.map(promise_member))
     .collect();
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Promise"),
         id_constant: "PROMISE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -954,6 +974,7 @@ fn lower_promise_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Promise.constructor"),
         id_constant: "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1185,6 +1206,7 @@ fn promise_member(specification: PromiseMethodSpecification) -> LoweredTypeMembe
 /// Keeps the resolver's parameter-free callable projection for selected Promise methods.
 fn promise_method_global(specification: PromiseMethodSpecification) -> LoweredGlobal {
     LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(specification.global_name),
         id_constant: specification.id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1206,6 +1228,7 @@ fn array_method_global(
     return_type_id: &'static str,
 ) -> LoweredGlobal {
     LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(name),
         id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1607,6 +1630,7 @@ fn lower_symbol_globals(
     validate_symbol_constructor_members(constructor_group.declarations(), source_cache)?;
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Symbol"),
         id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -1629,11 +1653,13 @@ fn lower_symbol_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Symbol.dispose"),
         id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Symbol,
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Symbol.asyncDispose"),
         id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Symbol,
@@ -1794,6 +1820,7 @@ fn lower_regexp_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("RegExp"),
         id_constant: "REGEXP_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -1807,6 +1834,7 @@ fn lower_regexp_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("RegExp.exec"),
         id_constant: "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1964,6 +1992,7 @@ fn lower_memberless_class_global(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(spec.name),
         id_constant: spec.id_constant,
         data: LoweredTypeData::Class(LoweredClass {
@@ -2279,6 +2308,7 @@ fn lower_disposable_global(
         .with_context(|| format!("{} is missing {}", spec.interface_name, spec.member_name))?;
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(spec.interface_name),
         id_constant: spec.global_id_constant,
         data: LoweredTypeData::Interface(LoweredInterface {
@@ -2288,6 +2318,7 @@ fn lower_disposable_global(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(spec.helper_name),
         id_constant: spec.helper_id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
