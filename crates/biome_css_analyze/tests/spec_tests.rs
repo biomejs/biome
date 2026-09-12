@@ -12,10 +12,10 @@ use biome_languages::CssFileSource;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use biome_test_utils::{
-    CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
-    has_bogus_nodes_or_empty_slots, module_graph_for_css_test_file, parse_test_path,
-    project_layout_for_test_file, register_leak_checker, scripts_from_json,
+    CheckActionType, analyze_with_workspace, assert_diagnostics_expectation_comment,
+    assert_errors_are_absent, code_fix_to_string, create_analyzer_options, create_parser_options,
+    diagnostic_to_string, has_bogus_nodes_or_empty_slots, module_graph_for_css_test_file,
+    parse_test_path, project_layout_for_test_file, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
 use camino::Utf8Path;
@@ -23,7 +23,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{css,scss,json,jsonc}", crate::run_test, "module"}
+tests_macros::gen_tests! {"tests/specs/**/*.{astro,css,scss,json,jsonc}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{css,json,jsonc}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
@@ -98,6 +98,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let parser_options = create_parser_options::<CssLanguage>(input_file, &mut diagnostics);
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+
+    if extension == "astro" {
+        let snapshot = analyze_with_workspace(input_file, input_code, group, rule);
+        insta::with_settings!({
+            prepend_module_to_snapshot => false,
+            snapshot_path => input_file.parent().unwrap(),
+        }, {
+            insta::assert_snapshot!(file_name, snapshot, file_name);
+        });
+        return;
+    }
 
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {

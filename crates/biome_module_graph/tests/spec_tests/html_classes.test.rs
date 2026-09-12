@@ -6,8 +6,8 @@ use biome_service::db::WorkspaceDb;
 use camino::Utf8Path;
 
 use super::support::{
-    astro_css_source, build_html_db, html_css_source, parse_embedded_css, svelte_css_source,
-    vue_css_source,
+    astro_css_source, build_html_db, build_module_db_via_workspace, html_css_source,
+    parse_embedded_css, svelte_css_source, vue_css_source,
 };
 
 fn classes(
@@ -201,4 +201,150 @@ fn test_svelte_global_pseudo_class_is_visible() {
         EmbeddingStyleApplicability::Global
     );
     assert!(classes.contains(&"prose".into()));
+}
+
+#[test]
+fn test_astro_static_class_references_are_collected() {
+    let source = r#"
+<div class="static plain"></div>
+<div class={"expression template"}></div>
+<div class={`literal`}></div>
+<div class:list={["array", { object: enabled }, enabled ? "yes" : "no", enabled && "and"]}></div>
+"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert!(!info.has_unknown_astro_class_reference);
+    assert!(
+        [
+            "static",
+            "plain",
+            "expression",
+            "template",
+            "literal",
+            "array",
+            "object",
+            "yes",
+            "no",
+            "and",
+        ]
+        .into_iter()
+        .all(|class| info.astro_class_references.contains(class))
+    );
+}
+
+#[test]
+fn test_astro_unknown_class_references_are_recorded() {
+    let source = r#"<div class:list={getClasses()} {...attributes}></div>"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert!(info.has_unknown_astro_class_reference);
+}
+
+#[test]
+fn test_astro_define_vars_are_matched_per_style() {
+    let source = r#"
+<style define:vars={{ color, unused: "blue" }}>
+.card { color: var(--color); }
+</style>
+<style define:vars={{ gap }}>
+.other { gap: var(--gap); }
+</style>
+"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert_eq!(info.astro_styles.len(), 2);
+    assert_eq!(
+        info.astro_styles[0]
+            .definitions
+            .iter()
+            .map(|variable| variable.name.text())
+            .collect::<Vec<_>>(),
+        ["color", "unused"]
+    );
+    assert!(info.astro_styles[0].references.contains("color"));
+    assert!(!info.astro_styles[0].references.contains("gap"));
+    assert_eq!(
+        info.astro_styles[1]
+            .definitions
+            .iter()
+            .map(|variable| variable.name.text())
+            .collect::<Vec<_>>(),
+        ["gap"]
+    );
+    assert!(info.astro_styles[1].references.contains("gap"));
+}
+
+#[test]
+fn test_astro_define_vars_skip_broken_object_members() {
+    let source = r#"
+<style define:vars={{ unused: "red", broken: }}>
+.card { color: red; }
+</style>
+"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert_eq!(info.astro_styles.len(), 1);
+    assert_eq!(
+        info.astro_styles[0]
+            .definitions
+            .iter()
+            .map(|variable| variable.name.text())
+            .collect::<Vec<_>>(),
+        ["unused"]
+    );
+}
+
+#[test]
+fn test_astro_escaped_shorthand_class_is_unknown() {
+    let source = r#"<div class:list={{ f\u006fo }}></div>"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert!(info.has_unknown_astro_class_reference);
+}
+
+#[test]
+fn test_astro_define_vars_skip_escaped_shorthand() {
+    let source = r#"
+<style define:vars={{ c\u006Flor }}>
+.card { color: var(--color); }
+</style>
+"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert_eq!(info.astro_styles.len(), 1);
+    assert!(info.astro_styles[0].definitions.is_empty());
+    assert!(info.astro_styles[0].references.contains("color"));
+}
+
+#[test]
+fn test_astro_define_vars_skip_style_with_escaped_reference() {
+    let source = r#"
+<style define:vars={{ color }}>
+.card { color: var(--\63olor); }
+</style>
+"#;
+    let db = build_module_db_via_workspace(&[("/src/Page.astro", source)]);
+    let info = db
+        .html_module_info_for_path(Utf8Path::new("/src/Page.astro"))
+        .unwrap();
+
+    assert!(info.astro_styles.is_empty());
 }

@@ -66,13 +66,16 @@ use biome_html_formatter::{
 };
 use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
-use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
+use biome_html_syntax::{
+    HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode, HtmlTextExpression,
+};
 #[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
 use biome_js_syntax::{JsLanguage, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "html_embeds")]
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
@@ -1067,45 +1070,50 @@ pub(crate) fn update_snippets(
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree(&workspace_db);
     let mut mutation = BatchMutation::new(tree.syntax().clone());
-    let iterator = tree
-        .syntax()
-        .descendants()
-        .filter_map(AnyEmbeddedContent::cast);
-
-    for element in iterator {
+    for node in tree.syntax().descendants() {
+        let Some((range, value_token)) = AnyEmbeddedContent::cast(node.clone())
+            .and_then(|element| element.value_token().map(|token| (element.range(), token)))
+            .or_else(|| {
+                let expression = HtmlTextExpression::cast(node)?;
+                expression
+                    .html_literal_token()
+                    .ok()
+                    .map(|token| (expression.range(), token))
+            })
+        else {
+            continue;
+        };
         let Some(snippet_index) = new_snippets
             .iter()
-            .position(|snippet| snippet.range == element.range())
+            .position(|snippet| snippet.range == range)
         else {
             continue;
         };
         let snippet = new_snippets.swap_remove(snippet_index);
 
-        if let Some(value_token) = element.value_token() {
-            let new_token_text = if snippet.needs_reindent {
-                // The formatted code doesn't carry the host's nesting
-                // indentation. Re-apply it to every line so the embed
-                // lines up with its surroundings.
-                let old_text = value_token.text_trimmed();
-                let leading_trivia = read_leading_trivia(old_text);
-                let trailing_trivia = read_trailing_trivia(old_text);
-                let indent_prefix = content_indent_prefix(&leading_trivia);
-                let mut reconstructed = String::new();
-                reconstructed.push_str(&leading_trivia);
-                push_reindented_code(
-                    &mut reconstructed,
-                    snippet.new_code.trim(),
-                    indent_prefix,
-                    &snippet.verbatim_ranges,
-                );
-                reconstructed.push_str(&trailing_trivia);
-                reconstructed
-            } else {
-                snippet.new_code
-            };
+        let new_token_text = if snippet.needs_reindent {
+            // The formatted code doesn't carry the host's nesting
+            // indentation. Re-apply it to every line so the embed
+            // lines up with its surroundings.
+            let old_text = value_token.text_trimmed();
+            let leading_trivia = read_leading_trivia(old_text);
+            let trailing_trivia = read_trailing_trivia(old_text);
+            let indent_prefix = content_indent_prefix(&leading_trivia);
+            let mut reconstructed = String::new();
+            reconstructed.push_str(&leading_trivia);
+            push_reindented_code(
+                &mut reconstructed,
+                snippet.new_code.trim(),
+                indent_prefix,
+                &snippet.verbatim_ranges,
+            );
+            reconstructed.push_str(&trailing_trivia);
+            reconstructed
+        } else {
+            snippet.new_code
+        };
 
-            mutation.replace_token(value_token, ident(&new_token_text));
-        }
+        mutation.replace_token(value_token, ident(&new_token_text));
     }
 
     let root = mutation.commit();

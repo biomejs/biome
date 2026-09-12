@@ -2358,6 +2358,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Reports prerender exports in Astro files outside a pages directory.
+See https://biomejs.dev/linter/rules/no-astro-prerender-export-outside-pages 
+	 */
+	noAstroPrerenderExportOutsidePages?: NoAstroPrerenderExportOutsidePagesConfiguration;
+	/**
 	* Require stringification to avoid values that only use the default object representation.
 See https://biomejs.dev/linter/rules/no-base-to-string 
 	 */
@@ -4696,6 +4701,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroPrerenderExportOutsidePagesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroPrerenderExportOutsidePagesOptions;
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
@@ -6570,6 +6578,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroPrerenderExportOutsidePagesOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroPrerenderExportOutsidePagesOptions;
+}
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
@@ -8408,6 +8420,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroPrerenderExportOutsidePagesOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
@@ -9929,6 +9942,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroPrerenderExportOutsidePages"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"

@@ -2062,16 +2062,16 @@ impl WorkspaceServerWithDb<'_> {
                                             css_source,
                                             snippet.content_offset(db),
                                         ))
-                                    } else if source
-                                        .and_then(|source| source.to_js_file_source())
-                                        .is_some()
-                                    {
-                                        Some(HtmlEmbeddedContent::Js(
-                                            snippet.parsed(db).tree(),
-                                            snippet.content_offset(db),
-                                        ))
                                     } else {
-                                        None
+                                        source.and_then(|source| source.to_js_file_source()).map(
+                                            |js_source| {
+                                                HtmlEmbeddedContent::Js(
+                                                    snippet.parsed(db).tree(),
+                                                    js_source,
+                                                    snippet.content_offset(db),
+                                                )
+                                            },
+                                        )
                                     }
                                 })
                                 .collect()

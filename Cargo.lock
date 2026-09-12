@@ -899,6 +899,7 @@ dependencies = [
  "camino",
  "codspeed-criterion-compat",
  "filetime",
+ "htmlize",
  "insta",
  "mimalloc",
  "phf 0.13.1",

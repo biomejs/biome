@@ -3096,6 +3096,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroPrerenderExportOutsidePagesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroPrerenderExportOutsidePagesOptions" }
+			]
+		},
+		"NoAstroPrerenderExportOutsidePagesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAsyncPromiseExecutorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6707,6 +6717,15 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroPrerenderExportOutsidePages": {
+					"description": "Reports prerender exports in Astro files outside a pages directory.\nSee https://biomejs.dev/linter/rules/no-astro-prerender-export-outside-pages",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noBaseToString": {
 					"description": "Require stringification to avoid values that only use the default object representation.\nSee https://biomejs.dev/linter/rules/no-base-to-string",
 					"anyOf": [
@@ -8179,6 +8198,17 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAssignInExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroPrerenderExportOutsidePagesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]

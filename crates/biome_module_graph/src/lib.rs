@@ -43,7 +43,8 @@ pub use db::queries::{
 pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
 pub use html_module_info::{
-    HtmlEmbeddedContent, HtmlImport, HtmlModuleInfo, SerializedHtmlModuleInfo,
+    AstroStyleInfo, AstroStyleVariable, HtmlEmbeddedContent, HtmlImport, HtmlModuleInfo,
+    SerializedHtmlModuleInfo,
 };
 pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{

@@ -4,10 +4,10 @@ use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
 use biome_css_syntax::{AnyCssRoot, TextRange};
 use biome_js_syntax::AnyJsRoot;
-use biome_languages::CssFileSource;
 use biome_languages::css::EmbeddingStyleApplicability;
+use biome_languages::{CssFileSource, JsFileSource};
 use biome_resolver::ResolvedPath;
-use biome_rowan::{TextSize, TokenText};
+use biome_rowan::{Text, TextSize, TokenText};
 use camino::Utf8Path;
 use indexmap::IndexMap;
 use indexmap::IndexSet;
@@ -36,8 +36,8 @@ pub enum HtmlEmbeddedContent {
     ///
     /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
     Css(AnyCssRoot, CssFileSource, TextSize),
-    /// A `<script>` block parsed as JS/TS with its content offset within the parent document.
-    Js(AnyJsRoot, TextSize),
+    /// A JavaScript block with its resolved source and content offset within the parent document.
+    Js(AnyJsRoot, JsFileSource, TextSize),
 }
 
 /// Information restricted to a single HTML module in the [ModuleGraph].
@@ -63,12 +63,18 @@ impl HtmlModuleInfo {
         referenced_classes: Vec<CssClassReference>,
         imported_stylesheets: Vec<HtmlImport>,
         import_paths: ImportPathMap<HtmlImport>,
+        astro_class_references: IndexSet<Text>,
+        has_unknown_astro_class_reference: bool,
+        astro_styles: Vec<AstroStyleInfo>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
             import_paths,
+            astro_class_references,
+            has_unknown_astro_class_reference,
+            astro_styles,
         };
         Self(Arc::new(info))
     }
@@ -143,6 +149,38 @@ pub struct HtmlModuleInfoInner {
 
     /// Resolved paths imported from embedded `<script>` blocks in source order.
     pub import_paths: ImportPathMap<HtmlImport>,
+
+    /// Statically known class names referenced by an Astro component.
+    pub astro_class_references: IndexSet<Text>,
+
+    /// Whether an Astro component contains a class-producing construct that cannot be resolved statically.
+    pub has_unknown_astro_class_reference: bool,
+
+    /// Variables passed to and referenced by individual Astro style blocks.
+    pub astro_styles: Vec<AstroStyleInfo>,
+}
+
+/// Information used to match an Astro `define:vars` object with one style block.
+#[derive(Clone, Debug)]
+pub struct AstroStyleInfo {
+    /// Range of the style element in the Astro document.
+    pub style_range: TextRange,
+    /// Range of the embedded `define:vars` expression.
+    pub define_vars_range: TextRange,
+    /// Statically known object keys passed to `define:vars`.
+    pub definitions: Vec<AstroStyleVariable>,
+    /// Custom property names referenced by `var()` in this style block.
+    pub references: IndexSet<Text>,
+    pub(crate) has_supported_css: bool,
+}
+
+/// A statically known key from an Astro `define:vars` object.
+#[derive(Clone, Debug)]
+pub struct AstroStyleVariable {
+    /// Decoded object key without the CSS custom-property prefix.
+    pub name: Text,
+    /// Absolute source range of the object key.
+    pub range: TextRange,
 }
 
 impl HtmlModuleInfoInner {

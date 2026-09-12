@@ -323,6 +323,53 @@ fn lint_and_fix_astro_files() {
     ));
 }
 
+fn assert_astro_lint_write_is_idempotent(rule: &str, source: &str, expected: &str) {
+    let fs = MemoryFileSystem::default();
+    let configuration = format!(
+        r#"{{ "html": {{ "experimentalFullSupportEnabled": true }}, "linter": {{ "rules": {{ "nursery": {{ "{rule}": "on" }} }} }} }}"#
+    );
+    fs.insert("biome.json".into(), configuration.as_bytes());
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(astro_file_path.into(), source.as_bytes());
+
+    let only = format!("--only=nursery/{rule}");
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", only.as_str(), astro_file_path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(&fs, astro_file_path, expected);
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", only.as_str(), astro_file_path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "second run_cli returned {result:?}");
+    assert_file_contents(&fs, astro_file_path, expected);
+}
+
+#[test]
+fn lint_write_astro_object_class_list_is_idempotent() {
+    assert_astro_lint_write_is_idempotent(
+        "useAstroObjectClassList",
+        r#"<div class:list={active ? "active" : ""}></div>"#,
+        r#"<div class:list={{"active": active}}></div>"#,
+    );
+}
+
+#[test]
+fn lint_write_astro_split_class_list_is_idempotent() {
+    assert_astro_lint_write_is_idempotent(
+        "useAstroSplitClassList",
+        r#"<div class:list={"card active"}></div>"#,
+        r#"<div class:list={["card", "active"]}></div>"#,
+    );
+}
+
 #[test]
 fn sorts_imports_check() {
     let fs = MemoryFileSystem::default();

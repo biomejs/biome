@@ -1,0 +1,13 @@
+<!-- should not generate diagnostics -->
+---
+export const value = 1;
+export { value as default };
+export { default } from "./value";
+export * from "./value";
+export default interface Props {}
+export default function helper(): void;
+---
+
+<script>
+export default function clientScript() {}
+</script>

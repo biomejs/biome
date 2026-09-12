@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_false.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+---
+export const prerender = false;
+---
+
+```
+
+# Diagnostics
+```
+invalid_false.astro:3:14 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ ---
+  > 3 │ export const prerender = false;
+      │              ^^^^^^^^^
+    4 │ ---
+    5 │ 
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

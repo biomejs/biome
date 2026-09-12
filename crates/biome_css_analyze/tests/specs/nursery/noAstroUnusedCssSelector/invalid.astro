@@ -1,0 +1,34 @@
+<!-- should generate diagnostics -->
+<div class="used"></div>
+<div class={"expression"}></div>
+<div class={`template`}></div>
+<div class:list={["array", { object: enabled }, enabled ? "first" : "second", enabled && "logical"]}></div>
+
+<style>
+.used { color: green; }
+.expression { color: green; }
+.template { color: green; }
+.array { color: green; }
+.object { color: green; }
+.first { color: green; }
+.second { color: green; }
+.logical { color: green; }
+.unused { color: red; }
+.compound.active { color: red; }
+.parent .child { color: red; }
+.pseudo:hover { color: red; }
+:global(.global) { color: red; }
+@keyframes unused-keyframes {}
+</style>
+
+<style>
+.second-unused { color: red; }
+</style>
+
+<style is:global>
+.global-unused { color: red; }
+</style>
+
+<style lang="scss">
+.unsupported { color: red; }
+</style>

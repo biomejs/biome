@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_class.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+---
+export default class ComponentState {}
+---
+
+```
+
+# Diagnostics
+```
+invalid_class.astro:3:8 lint/nursery/noAstroExportsFromComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Astro components cannot define a runtime default export.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ ---
+  > 3 │ export default class ComponentState {}
+      │        ^^^^^^^
+    4 │ ---
+    5 │ 
+  
+  i Astro generates the component's default export from the component template.
+  
+  i Remove this export or expose the value through a named export.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
