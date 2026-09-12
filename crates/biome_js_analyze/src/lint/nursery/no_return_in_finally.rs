@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// - MDN: [`Promise.prototype.finally` documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/finally)
     ///
     pub NoReturnInFinally {
-        version: "next",
+        version: "2.5.14",
         name: "noReturnInFinally",
         language: "js",
         recommended: true,

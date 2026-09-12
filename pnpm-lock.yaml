@@ -150,55 +150,55 @@ importers:
         version: 4.1.11(@types/node@24.13.3)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.3)(tsx@4.21.0)(yaml@2.9.0))
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-win32-x64
 
   packages/@biomejs/biome:
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-darwin-arm64
       '@biomejs/cli-darwin-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-darwin-x64
       '@biomejs/cli-linux-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-arm64
       '@biomejs/cli-linux-arm64-musl':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-arm64-musl
       '@biomejs/cli-linux-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-x64
       '@biomejs/cli-linux-x64-musl':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-linux-x64-musl
       '@biomejs/cli-win32-arm64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-win32-arm64
       '@biomejs/cli-win32-x64':
-        specifier: 2.5.13
+        specifier: 2.5.14
         version: link:../cli-win32-x64
 
   packages/@biomejs/cli-darwin-arm64: {}
@@ -2465,7 +2465,7 @@ snapshots:
 
   happy-dom@20.9.0:
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 24.13.3
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 7.0.1
