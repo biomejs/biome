@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 197
 expression: valid.js
 ---
 # Input
@@ -24,6 +23,11 @@ arr.indexOf(1, -1) !== -1;
 // lastIndexOf with fromIndex argument — semantics differ, leave alone
 arr.lastIndexOf(1, 2) !== -1;
 
+// spread argument may expand into a `fromIndex`, e.g. `...[value, fromIndex]`,
+// so it can search in the opposite direction — leave alone
+arr.indexOf(...[1, 0]) !== -1;
+arr.lastIndexOf(...[1, 0]) !== -1;
+
 // some with a non-strict-equality callback — different semantics
 arr.some((item) => item !== 1);
 arr.some((item) => item == 1);
@@ -41,6 +45,25 @@ arr.some((item) => { const x = 1; return item === x; });
 
 // some without a callback body comparison
 arr.some(Boolean);
+
+// some with a defaulted sole parameter — the default changes the compared value
+arr.some((item = "a") => item === "a");
+
+// some whose searched value is effectful — `some` may call it any number of
+// times, `includes` calls it exactly once
+arr.some((item) => item === next());
+arr.some((item) => item === obj.method());
+arr.some((item) => item === new Value());
+arr.some((item) => item === `${next()}`);
+
+// some whose searched value references the callback's own name — only bound
+// inside the function expression
+arr.some(function matches(item) { return item === matches; });
+
+// some whose searched value uses `this` or `arguments`, which rebind inside a
+// plain function callback
+arr.some(function (item) { return item === this; });
+arr.some(function (item) { return item === arguments; });
 
 // unrelated comparisons that happen to use indexOf result
 arr.indexOf(1) > 0;

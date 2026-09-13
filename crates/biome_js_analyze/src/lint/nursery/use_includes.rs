@@ -2,7 +2,10 @@ use crate::{JsRuleAction, services::typed::Typed};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::{fmt::Display, markup};
+use biome_console::{
+    fmt::{Display, Formatter},
+    markup,
+};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsCallArgument, AnyJsExpression,
@@ -92,14 +95,13 @@ impl Rule for UseIncludes {
                 rule_category!(),
                 state.node.range(),
                 markup! {
-                    "Using "<Emphasis>"some()"</Emphasis>" with a strict-equality callback to test for presence."
+                    "Using "<Emphasis>{state.method}</Emphasis>" with a strict-equality callback to test for presence."
                 },
             )
             .note(markup! {
                 "Use "<Emphasis>"includes()"</Emphasis>" instead, which directly expresses the intent and returns a boolean."
             }),
             SourceMethod::IndexOf | SourceMethod::LastIndexOf => {
-                let method = state.method.name();
                 let preferred = match state.kind {
                     CheckKind::Includes => "includes()",
                     CheckKind::NotIncludes => "!...includes()",
@@ -108,11 +110,11 @@ impl Rule for UseIncludes {
                     rule_category!(),
                     state.node.range(),
                     markup! {
-                        "Checking the result of "<Emphasis>{method}</Emphasis>" against "<Emphasis>"-1"</Emphasis>" to test for presence."
+                        "Checking the result of "<Emphasis>{state.method}</Emphasis>" against "<Emphasis>"-1"</Emphasis>" to test for presence."
                     },
                 )
                 .note(markup! {
-                    <Emphasis>{method}</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
+                    <Emphasis>{state.method}</Emphasis>" returns a numeric index, not a boolean. Comparing it against "<Emphasis>"-1"</Emphasis>" is error-prone and harder to read."
                 })
                 .note(markup! {
                     "Use "<Emphasis>{preferred}</Emphasis>" instead, which directly expresses the intent and returns a boolean."
@@ -187,13 +189,13 @@ pub enum SourceMethod {
     Some,
 }
 
-impl SourceMethod {
-    fn name(self) -> impl Display {
-        match self {
+impl Display for SourceMethod {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::io::Result<()> {
+        f.write_str(match self {
             Self::IndexOf => "indexOf()",
             Self::LastIndexOf => "lastIndexOf()",
             Self::Some => "some()",
-        }
+        })
     }
 }
 
@@ -265,9 +267,12 @@ fn as_index_of_call(expr: &AnyJsExpression) -> Option<(JsCallExpression, SourceM
     // Must have exactly one argument (the search value). If a `fromIndex` is
     // supplied we leave it alone because `includes(value, fromIndex)` has
     // different semantics from `indexOf(value, fromIndex) !== -1` when
-    // `fromIndex` is negative.
+    // `fromIndex` is negative. A spread argument is rejected because it can
+    // expand into a `fromIndex` too, e.g. `lastIndexOf(...[value, fromIndex])`.
     let args = call.arguments().ok()?;
-    if args.args().len() != 1 {
+    let mut args = args.args().iter();
+    let first = args.next()?.ok()?;
+    if args.next().is_some() || first.as_js_spread().is_some() {
         return None;
     }
     Some((call, method))
@@ -335,11 +340,11 @@ fn detect_some_pattern(
     let callback = args.args().iter().next()?.ok()?;
     let callback = callback.as_any_js_expression()?;
 
-    let (param_token, comparison) = extract_some_callback(callback)?;
-    let param = param_token.text_trimmed();
+    let callback_info = extract_some_callback(callback)?;
+    let param = callback_info.param.text_trimmed();
 
-    let left = comparison.left().ok()?.omit_parentheses();
-    let right = comparison.right().ok()?.omit_parentheses();
+    let left = callback_info.comparison.left().ok()?.omit_parentheses();
+    let right = callback_info.comparison.right().ok()?.omit_parentheses();
 
     // Exactly one side of `===` must be the callback parameter; the other side
     // is the value we search for.
@@ -354,6 +359,21 @@ fn detect_some_pattern(
     // Bail if the searched value also references the parameter, e.g.
     // `arr.some((x) => x === f(x))`, which is not equivalent to `includes`.
     if references_name(&search_value, param) {
+        return None;
+    }
+
+    // Bail if the searched value references a binding that resolves differently
+    // at the `some()` call site, such as a named function expression's own name
+    // or `this`/`arguments` inside a plain function callback.
+    if references_rebound_binding(&search_value, &callback_info) {
+        return None;
+    }
+
+    // `some()` may evaluate the search expression zero or many times, while the
+    // generated `includes()` call evaluates it exactly once. Only rewrite when
+    // the expression is side-effect-free, so the change in evaluation count is
+    // not observable.
+    if !is_repeatable_search_value(&search_value) {
         return None;
     }
 
@@ -383,12 +403,22 @@ fn detect_some_pattern(
     })
 }
 
-/// Returns the single callback parameter name token and the strict-equality
-/// comparison in its body, for a callback shaped like `(item) => item === value`
-/// or its block-bodied and function-expression equivalents.
-fn extract_some_callback(
-    callback: &AnyJsExpression,
-) -> Option<(JsSyntaxToken, JsBinaryExpression)> {
+/// A `some()` callback recognised as a simple strict-equality comparison,
+/// together with the bindings it introduces.
+struct SomeCallback {
+    /// The callback parameter compared against the search value.
+    param: JsSyntaxToken,
+    /// The strict-equality comparison forming the callback body.
+    comparison: JsBinaryExpression,
+    /// Name of a named function expression, in scope only inside the callback.
+    self_name: Option<JsSyntaxToken>,
+    /// Plain functions rebind `this` and `arguments`; arrows inherit them.
+    rebinds_receiver: bool,
+}
+
+/// Recognises a callback shaped like `(item) => item === value` or its
+/// block-bodied and function-expression equivalents.
+fn extract_some_callback(callback: &AnyJsExpression) -> Option<SomeCallback> {
     match callback {
         AnyJsExpression::JsArrowFunctionExpression(arrow) => {
             if arrow.async_token().is_some() {
@@ -404,7 +434,12 @@ fn extract_some_callback(
                 AnyJsFunctionBody::AnyJsExpression(expr) => as_strict_equality(&expr)?,
                 AnyJsFunctionBody::JsFunctionBody(body) => single_return_equality(&body)?,
             };
-            Some((param, comparison))
+            Some(SomeCallback {
+                param,
+                comparison,
+                self_name: None,
+                rebinds_receiver: false,
+            })
         }
         AnyJsExpression::JsFunctionExpression(func) => {
             if func.async_token().is_some() || func.star_token().is_some() {
@@ -412,7 +447,13 @@ fn extract_some_callback(
             }
             let param = single_param_token(&func.parameters().ok()?)?;
             let comparison = single_return_equality(&func.body().ok()?)?;
-            Some((param, comparison))
+            let self_name = func.id().as_ref().and_then(binding_name_token);
+            Some(SomeCallback {
+                param,
+                comparison,
+                self_name,
+                rebinds_receiver: true,
+            })
         }
         _ => None,
     }
@@ -429,6 +470,11 @@ fn single_param_token(params: &JsParameters) -> Option<JsSyntaxToken> {
     let formal = param
         .as_any_js_formal_parameter()?
         .as_js_formal_parameter()?;
+    // A default value changes which value the parameter holds, so the callback
+    // is no longer a plain identity comparison against the visited element.
+    if formal.initializer().is_some() {
+        return None;
+    }
     let binding = formal.binding().ok()?;
     binding_name_token(binding.as_any_js_binding()?)
 }
@@ -474,6 +520,78 @@ fn references_name(expr: &AnyJsExpression, name: &str) -> bool {
             .and_then(|reference| reference.value_token().ok())
             .is_some_and(|token| token.text_trimmed() == name)
     })
+}
+
+/// Whether `expr` references a binding that resolves differently once the
+/// expression is moved to the `some()` call site: a named function expression's
+/// own name, or `this`/`arguments` inside a plain function callback.
+fn references_rebound_binding(expr: &AnyJsExpression, callback: &SomeCallback) -> bool {
+    expr.syntax().descendants().any(|node| {
+        if callback.rebinds_receiver
+            && matches!(
+                node.kind(),
+                biome_js_syntax::JsSyntaxKind::JS_THIS_EXPRESSION
+                    | biome_js_syntax::JsSyntaxKind::JS_SUPER_EXPRESSION
+            )
+        {
+            return true;
+        }
+        JsReferenceIdentifier::cast(node)
+            .and_then(|reference| reference.value_token().ok())
+            .is_some_and(|token| {
+                let name = token.text_trimmed();
+                callback
+                    .self_name
+                    .as_ref()
+                    .is_some_and(|self_name| self_name.text_trimmed() == name)
+                    || (callback.rebinds_receiver && name == "arguments")
+            })
+    })
+}
+
+/// Whether `expr` can be moved into an `includes()` call that evaluates it
+/// exactly once. `some()` evaluates the callback body once per visited element
+/// (or not at all for an empty array), so only side-effect-free expressions,
+/// whose evaluation count is unobservable, are safe to rewrite.
+fn is_repeatable_search_value(expr: &AnyJsExpression) -> bool {
+    let expr = expr.clone().omit_parentheses();
+    match expr {
+        AnyJsExpression::AnyJsLiteralExpression(_)
+        | AnyJsExpression::JsIdentifierExpression(_)
+        | AnyJsExpression::JsThisExpression(_) => true,
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            // `delete` mutates its operand, so it is not side-effect-free.
+            let is_delete = unary
+                .operator_token()
+                .is_ok_and(|token| token.kind() == biome_js_syntax::JsSyntaxKind::DELETE_KW);
+            !is_delete
+                && unary
+                    .argument()
+                    .is_ok_and(|argument| is_repeatable_search_value(&argument))
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => member
+            .object()
+            .is_ok_and(|object| is_repeatable_search_value(&object)),
+        AnyJsExpression::JsComputedMemberExpression(member) => {
+            member
+                .object()
+                .is_ok_and(|object| is_repeatable_search_value(&object))
+                && member
+                    .member()
+                    .is_ok_and(|inner| is_repeatable_search_value(&inner))
+        }
+        AnyJsExpression::JsTemplateExpression(template) => {
+            // A tag is a call; interpolations may hold arbitrary expressions.
+            template.tag().is_none()
+                && template.elements().iter().all(|element| {
+                    element
+                        .as_js_template_element()
+                        .and_then(|element| element.expression().ok())
+                        .is_none_or(|expr| is_repeatable_search_value(&expr))
+                })
+        }
+        _ => false,
+    }
 }
 
 /// Whether `expr` may evaluate to `NaN` or `undefined`, values for which
