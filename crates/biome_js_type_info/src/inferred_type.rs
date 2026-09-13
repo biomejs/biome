@@ -190,6 +190,18 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    pub fn is_all_array_or_tuple(self) -> bool {
+        self.try_all_variants_match(|data| {
+            matches!(data, TypeData::Tuple(_))
+                || matches!(
+                    data,
+                    TypeData::InstanceOf(instance)
+                        if instance.ty(self.db).is_array_class(self.db)
+                )
+        })
+        .unwrap_or(false)
+    }
+
     pub fn is_regexp_literal_without_global_flag(self) -> bool {
         matches!(
         self.data,

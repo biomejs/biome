@@ -2,7 +2,7 @@ use crate::{JsRuleAction, services::typed::Typed};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
-use biome_console::markup;
+use biome_console::{fmt::Display, markup};
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsCallArgument, AnyJsExpression,
@@ -51,18 +51,13 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```ts,file=valid1.ts
+    /// ```ts
     /// const arr = [1, 2, 3];
+    ///
     /// arr.includes(1);
-    /// ```
     ///
-    /// ```ts,file=valid2.ts
-    /// const arr = [1, 2, 3];
     /// !arr.includes(1);
-    /// ```
     ///
-    /// ```ts,file=valid3.ts
-    /// const arr = [1, 2, 3];
     /// // Positional use of indexOf is fine
     /// const pos = arr.indexOf(1);
     /// ```
@@ -177,7 +172,7 @@ declare_node_union! {
     pub AnyUseIncludesQuery = JsBinaryExpression | JsCallExpression
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum CheckKind {
     /// `arr.indexOf(x) !== -1` → `arr.includes(x)`
     Includes,
@@ -185,7 +180,7 @@ pub enum CheckKind {
     NotIncludes,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum SourceMethod {
     IndexOf,
     LastIndexOf,
@@ -193,7 +188,7 @@ pub enum SourceMethod {
 }
 
 impl SourceMethod {
-    const fn name(self) -> &'static str {
+    fn name(self) -> impl Display {
         match self {
             Self::IndexOf => "indexOf()",
             Self::LastIndexOf => "lastIndexOf()",
@@ -362,10 +357,17 @@ fn detect_some_pattern(
         return None;
     }
 
+    // `some()` compares with strict equality and skips holes, while
+    // `includes()` uses SameValueZero and treats holes as `undefined`. When the
+    // search value is `NaN` or `undefined`, the two are not equivalent, so bail.
+    if is_nan_or_undefined(&search_value) {
+        return None;
+    }
+
     let object = member.object().ok()?;
     if !ctx
         .type_of_expression(&object)
-        .is_some_and(|ty| ty.is_all_string_array_or_tuple())
+        .is_some_and(|ty| ty.is_all_array_or_tuple())
     {
         return None;
     }
@@ -472,6 +474,47 @@ fn references_name(expr: &AnyJsExpression, name: &str) -> bool {
             .and_then(|reference| reference.value_token().ok())
             .is_some_and(|token| token.text_trimmed() == name)
     })
+}
+
+/// Whether `expr` may evaluate to `NaN` or `undefined`, values for which
+/// `some()` with strict equality and `includes()` with SameValueZero (and its
+/// hole handling) are not equivalent.
+fn is_nan_or_undefined(expr: &AnyJsExpression) -> bool {
+    let expr = expr.clone().omit_parentheses();
+    match &expr {
+        // `undefined`, `NaN`
+        AnyJsExpression::JsIdentifierExpression(ident) => ident
+            .name()
+            .ok()
+            .and_then(|reference| reference.value_token().ok())
+            .is_some_and(|token| matches!(token.text_trimmed(), "undefined" | "NaN")),
+        // `Number.NaN`
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let is_nan_member = member
+                .member()
+                .ok()
+                .and_then(|name| name.as_js_name()?.value_token().ok())
+                .is_some_and(|token| token.text_trimmed() == "NaN");
+            let is_number_object = member
+                .object()
+                .ok()
+                .and_then(|object| {
+                    object
+                        .as_js_identifier_expression()?
+                        .name()
+                        .ok()?
+                        .value_token()
+                        .ok()
+                })
+                .is_some_and(|token| token.text_trimmed() == "Number");
+            is_nan_member && is_number_object
+        }
+        // `void <expr>` always evaluates to `undefined`.
+        AnyJsExpression::JsUnaryExpression(unary) => unary
+            .operator_token()
+            .is_ok_and(|token| token.kind() == biome_js_syntax::JsSyntaxKind::VOID_KW),
+        _ => false,
+    }
 }
 
 /// Flips a comparison operator for when `indexOf` is on the right-hand side.
