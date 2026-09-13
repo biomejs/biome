@@ -3,9 +3,9 @@ use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
-    is_at_scss_binary_operator, is_at_scss_interpolation, is_at_scss_namespaced_variable,
-    is_at_scss_variable, is_nth_at_scss_interpolation, parse_scss_expression_from_head,
-    parse_scss_expression_until, parse_scss_interpolated_name,
+    complete_scss_expression_from_item, is_at_scss_binary_operator, is_at_scss_interpolation,
+    is_at_scss_namespaced_variable, is_at_scss_variable, is_nth_at_scss_interpolation,
+    parse_scss_expression_from_head, parse_scss_expression_until, parse_scss_interpolated_name,
     parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
     parse_scss_variable,
 };
@@ -241,12 +241,7 @@ fn parse_query_feature_value_until(
     {
         if head.kind(p) == SCSS_MODULE_MEMBER_ACCESS {
             // Module accesses are expression operands, not direct query-feature values.
-            return Present(
-                head.precede(p)
-                    .complete(p, SCSS_EXPRESSION_ITEM_LIST)
-                    .precede(p)
-                    .complete(p, SCSS_EXPRESSION),
-            );
+            return Present(complete_scss_expression_from_item(p, head));
         }
         return Present(head);
     }
