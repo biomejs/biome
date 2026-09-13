@@ -212,9 +212,9 @@ fn parse_query_feature_value(p: &mut CssParser) -> ParsedSyntax {
     parse_query_feature_value_until(p, QUERY_FEATURE_VALUE_END_SET)
 }
 
-/// Parses a query-feature value, allowing parenthesized Sass expressions in SCSS.
-/// Other values retain their CSS-compatible head and switch to a SassScript
-/// tail only when a Sass operator follows.
+/// Parses a query-feature value, allowing parenthesized Sass expressions and
+/// leading unary `+` or `-` in SCSS. Other values retain their CSS-compatible
+/// head and switch to a SassScript tail only when a Sass operator follows.
 ///
 /// Example: `500px + 100px` in `@media (500px + 100px < width) {}`.
 #[inline]
@@ -232,13 +232,26 @@ fn parse_query_feature_value_until(
         );
     }
 
+    if p.at_ts(token_set![T![+], T![-]]) && !is_at_any_query_feature_value(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                parse_scss_expression_until(
+                    p,
+                    end_ts
+                        .union(QUERY_FEATURE_RANGE_COMPARISON_OPERATOR_SET)
+                        .union(token_set![T!['{']]),
+                )
+            },
+            |p, marker| scss_only_syntax_error(p, "SCSS unary query values", marker.range(p)),
+        );
+    }
+
     let Present(head) = parse_any_query_feature_value(p) else {
         return Absent;
     };
 
-    if CssSyntaxFeatures::Scss.is_unsupported(p)
-        || !is_at_scss_query_feature_value_tail(p, &head, end_ts)
-    {
+    if !is_at_scss_query_feature_value_tail(p, &head, end_ts) {
         if head.kind(p) == SCSS_MODULE_MEMBER_ACCESS {
             // Module accesses are expression operands, not direct query-feature values.
             return Present(complete_scss_expression_from_item(p, head));
@@ -246,7 +259,11 @@ fn parse_query_feature_value_until(
         return Present(head);
     }
 
-    parse_scss_expression_from_head(p, head, end_ts)
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        |p| parse_scss_expression_from_head(p, head, end_ts.union(token_set![T!['{']])),
+        |p, marker| scss_only_syntax_error(p, "SCSS query expressions", marker.range(p)),
+    )
 }
 
 /// Returns whether a parsed query-feature value head has a SassScript tail.
