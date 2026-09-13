@@ -1192,6 +1192,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noSvelteAtDebugTags",
+        TypeId::of::<biome_rule_options::no_svelte_at_debug_tags::NoSvelteAtDebugTagsOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noSvelteAtHtmlTags",
         TypeId::of::<biome_rule_options::no_svelte_at_html_tags::NoSvelteAtHtmlTagsOptions>(),
     ));

@@ -247,6 +247,7 @@ define_categories! {
     "lint/nursery/noReactStringRefs": "https://biomejs.dev/linter/rules/no-react-string-refs",
     "lint/nursery/noRestrictedDependencies": "https://biomejs.dev/linter/rules/no-restricted-dependencies",
     "lint/nursery/noReturnInFinally": "https://biomejs.dev/linter/rules/no-return-in-finally",
+    "lint/nursery/noSvelteAtDebugTags": "https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",
     "lint/nursery/noSvelteAtHtmlTags": "https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
     "lint/nursery/noSvelteLegacyConst": "https://biomejs.dev/linter/rules/no-svelte-legacy-const",
     "lint/nursery/noSvelteUnnecessaryStateWrap": "https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",

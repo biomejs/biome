@@ -2575,6 +2575,11 @@ See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	* Disallow the use of Svelte's {@debug} tag.
+See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
+	 */
+	noSvelteAtDebugTags?: NoSvelteAtDebugTagsConfiguration;
+	/**
 	* Disallow the use of Svelte's {@html} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
 	 */
@@ -4925,6 +4930,9 @@ export type NoRestrictedDependenciesConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoSvelteAtDebugTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAtDebugTagsOptions;
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
@@ -6913,6 +6921,11 @@ export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
 }
+export interface RuleWithNoSvelteAtDebugTagsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteAtDebugTagsOptions;
+}
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
@@ -8750,6 +8763,7 @@ export interface NoReactNativeRawTextOptions {
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -10267,6 +10281,7 @@ export type Category =
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"

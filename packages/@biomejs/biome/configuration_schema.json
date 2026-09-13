@@ -5680,6 +5680,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteAtDebugTagsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteAtDebugTagsOptions" }
+			]
+		},
+		"NoSvelteAtDebugTagsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteAtHtmlTagsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7144,6 +7154,13 @@
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteAtDebugTags": {
+					"description": "Disallow the use of Svelte's {@debug} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteAtDebugTagsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10594,6 +10611,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSuspiciousSemicolonInJsxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteAtDebugTagsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteAtDebugTagsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

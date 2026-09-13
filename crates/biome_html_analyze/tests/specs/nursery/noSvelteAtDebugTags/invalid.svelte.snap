@@ -1,0 +1,121 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<script>
+	let user;
+</script>
+
+{@debug user}
+<div>{@debug user}</div>
+{@debug user1, user2, user3}
+{@debug}
+
+```
+
+# Diagnostics
+```
+invalid.svelte:7:1 lint/nursery/noSvelteAtDebugTags  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected {@debug} tag.
+  
+    5 │ </script>
+    6 │ 
+  > 7 │ {@debug user}
+      │ ^^^^^^^^^^^^^
+    8 │ <div>{@debug user}</div>
+    9 │ {@debug user1, user2, user3}
+  
+  i The {@debug} tag should be removed once you no longer need it for debugging.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the {@debug} tag.
+  
+     4 4 │   	let user;
+     5 5 │   </script>
+     6   │ - 
+     7   │ - {@debug·user}
+     8 6 │   <div>{@debug user}</div>
+     9 7 │   {@debug user1, user2, user3}
+  
+
+```
+
+```
+invalid.svelte:8:6 lint/nursery/noSvelteAtDebugTags  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected {@debug} tag.
+  
+     7 │ {@debug user}
+   > 8 │ <div>{@debug user}</div>
+       │      ^^^^^^^^^^^^^
+     9 │ {@debug user1, user2, user3}
+    10 │ {@debug}
+  
+  i The {@debug} tag should be removed once you no longer need it for debugging.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the {@debug} tag.
+  
+    8 │ <div>{@debug·user}</div>
+      │      -------------      
+
+```
+
+```
+invalid.svelte:9:1 lint/nursery/noSvelteAtDebugTags  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected {@debug} tag.
+  
+     7 │ {@debug user}
+     8 │ <div>{@debug user}</div>
+   > 9 │ {@debug user1, user2, user3}
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ {@debug}
+    11 │ 
+  
+  i The {@debug} tag should be removed once you no longer need it for debugging.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the {@debug} tag.
+  
+     7  7 │   {@debug user}
+     8  8 │   <div>{@debug user}</div>
+     9    │ - {@debug·user1,·user2,·user3}
+    10  9 │   {@debug}
+    11 10 │   
+  
+
+```
+
+```
+invalid.svelte:10:1 lint/nursery/noSvelteAtDebugTags  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected {@debug} tag.
+  
+     8 │ <div>{@debug user}</div>
+     9 │ {@debug user1, user2, user3}
+  > 10 │ {@debug}
+       │ ^^^^^^^^
+    11 │ 
+  
+  i The {@debug} tag should be removed once you no longer need it for debugging.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the {@debug} tag.
+  
+     8  8 │   <div>{@debug user}</div>
+     9  9 │   {@debug user1, user2, user3}
+    10    │ - {@debug}
+    11 10 │   
+  
+
+```
