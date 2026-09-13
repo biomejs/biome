@@ -56,7 +56,7 @@ impl ScssExpressionOptions {
 
     pub(super) fn optional_value(end_ts: TokenSet<CssSyntaxKind>) -> Self {
         Self {
-            function_call_context: FunctionCallContext::LooseRecovery,
+            function_call_context: FunctionCallContext::SourceTight,
             end_ts,
             allows_empty_value: true,
             allows_keyword_arguments: false,
@@ -80,7 +80,7 @@ impl ScssExpressionOptions {
 
     pub(super) fn variable_value(end_ts: TokenSet<CssSyntaxKind>) -> Self {
         Self {
-            function_call_context: FunctionCallContext::LooseRecovery,
+            function_call_context: FunctionCallContext::SourceTight,
             end_ts,
             allows_empty_value: false,
             allows_keyword_arguments: false,
