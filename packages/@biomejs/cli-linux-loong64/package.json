@@ -1,0 +1,26 @@
+{
+  "name": "@biomejs/cli-linux-loong64",
+  "version": "2.2.2",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biomejs/biome.git",
+    "directory": "packages/@biomejs/biome/cli-linux-loong64"
+  },
+  "engines": {
+    "node": ">=14.21.3"
+  },
+  "homepage": "https://biomejs.dev",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "loong64"
+  ],
+  "libc": [
+    "glibc"
+  ],
+  "publishConfig": {
+    "provenance": true
+  }
+}
