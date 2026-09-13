@@ -8843,7 +8843,8 @@ export type NoVueRefAsOperandOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	* Names of directives registered globally with `app.directive(...)`,
-such as `highlight` for `v-highlight`. 
+written in kebab-case without the `v-` prefix, such as
+`click-outside` for `v-click-outside`. 
 	 */
 	globals?: string[];
 }

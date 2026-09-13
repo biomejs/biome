@@ -7,7 +7,7 @@
         "noVueUndeclaredDirectives": {
           "level": "on",
           "options": {
-            "globals": ["configuredGlobal"]
+            "globals": ["configured-global"]
           }
         }
       }

@@ -6774,7 +6774,7 @@
 			"type": "object",
 			"properties": {
 				"globals": {
-					"description": "Names of directives registered globally with `app.directive(...)`,\nsuch as `highlight` for `v-highlight`.",
+					"description": "Names of directives registered globally with `app.directive(...)`,\nwritten in kebab-case without the `v-` prefix, such as\n`click-outside` for `v-click-outside`.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}

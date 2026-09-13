@@ -157,6 +157,12 @@ pub fn vue_directive_declarations_from_source(
     collect_embedded_bindings(host_source, file.parsed(db), &snippets).vue_directive_declarations
 }
 
+/// Walks the host document and its script snippets once, collecting both the
+/// cross-language bindings and the Vue directive declarations.
+///
+/// The two results come from the same traversal because a `<script setup>`
+/// binding is simultaneously a binding the template can reference and a
+/// potential custom-directive declaration.
 fn collect_embedded_bindings(
     host_source: DocumentFileSource,
     host_parse: &AnyParse,
@@ -214,6 +220,7 @@ fn collect_embedded_bindings(
     }
 }
 
+/// Everything [`collect_embedded_bindings`] produces from one traversal.
 #[derive(Default)]
 struct CollectedEmbeddedBindings {
     bindings: Vec<EmbeddedBinding>,
@@ -359,6 +366,13 @@ fn is_script_element_snippet(root: &HtmlRoot, content_range: TextRange) -> bool 
     })
 }
 
+/// Returns whether the document has a `<script src="...">` block.
+///
+/// Vue single-file components can move a language block into a separate file
+/// through the `src` attribute. Such a block has no inline content and thus no
+/// embedded snippet, so any `<script setup>` binding or `directives` option it
+/// defines is invisible to the visitor. Callers treat its presence as a reason
+/// to mark the component's directive declarations as unknown.
 fn has_external_script_element(root: &HtmlRoot) -> bool {
     root.syntax().descendants().any(|node| {
         if let Some(element) = HtmlElement::cast_ref(&node) {
@@ -376,19 +390,42 @@ fn has_external_script_element(root: &HtmlRoot) -> bool {
     })
 }
 
+/// Whether a binding survives TypeScript compilation.
+///
+/// Every binding is recorded for cross-language reference checks, since a
+/// template may legitimately reference a type. Only runtime bindings can back
+/// a Vue custom directive, so the distinction decides whether a
+/// `<script setup>` binding is also recorded as a directive declaration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum BindingErasure {
+    /// The binding exists in the compiled JavaScript.
     Runtime,
+    /// The binding is erased by TypeScript: `type`, `interface`,
+    /// `import type { X }`, or `import { type X }`.
     TypeOnly,
 }
 
 #[derive(Debug)]
 struct EmbeddedBindingsBuilder {
     js_bindings: Vec<(TextRange, TokenText, Option<TokenText>)>,
+    /// Runtime bindings declared at the top level of a Vue `<script setup>`
+    /// block; see [`VueDirectiveDeclarations`].
     vue_setup_bindings: Vec<TokenText>,
+    /// Keys of the `directives` option found in the component's options
+    /// object; see [`VueDirectiveDeclarations`].
     vue_directive_option_names: Vec<TokenText>,
+    /// Set when a Vue declaration site cannot be read statically, which
+    /// turns unresolved directives into [`VueDirectiveResolution::Unknown`].
+    ///
+    /// [`VueDirectiveResolution::Unknown`]: crate::VueDirectiveResolution::Unknown
     has_unknown_vue_directive_options: bool,
+    /// Whether the host document is a Vue single-file component. Only Vue
+    /// scripts are inspected for a component options object.
     is_vue_source: bool,
+    /// Whether the snippet being visited is a Vue `<script setup>` block, in
+    /// which top-level bindings are exposed to the template. Nested scopes
+    /// are visited for cross-language references but do not contribute
+    /// directive declarations, because Vue does not expose them.
     is_vue_setup: bool,
 }
 
@@ -1122,6 +1159,9 @@ impl EmbeddedBindingsBuilder {
         Some(())
     }
 
+    /// Reads the component options passed to `defineOptions(...)` inside
+    /// `<script setup>`, which is where such a component declares its
+    /// `directives` option.
     fn visit_define_options_call(&mut self, call_expression: &JsCallExpression) {
         let Ok(callee) = call_expression.callee() else {
             return;
@@ -1154,6 +1194,11 @@ impl EmbeddedBindingsBuilder {
         self.visit_vue_options_object(&object);
     }
 
+    /// Reads the component options out of `export default <expression>`.
+    ///
+    /// Only an object literal, or a `defineComponent(...)` call whose last
+    /// argument is an object literal, can be inspected. Anything else marks
+    /// the directive options as unknown.
     fn visit_vue_default_export(&mut self, expression: &AnyJsExpression) {
         let Some(expression) = expression.clone().inner_expression() else {
             self.has_unknown_vue_directive_options = true;
@@ -1197,6 +1242,11 @@ impl EmbeddedBindingsBuilder {
         }
     }
 
+    /// Reads the `directives` member of a component options object.
+    ///
+    /// `extends` and `mixins` pull directives from other modules, so their
+    /// presence marks the options as unknown. So does a `directives` value
+    /// that is not an object literal, since its keys cannot be enumerated.
     fn visit_vue_options_object(&mut self, object: &biome_js_syntax::JsObjectExpression) {
         for member in object.members().iter().flatten() {
             let Some(name) = member.name() else {
@@ -1229,6 +1279,12 @@ impl EmbeddedBindingsBuilder {
         }
     }
 
+    /// Records every statically named key of a `directives` object literal.
+    ///
+    /// A computed key with a literal value, such as `["focus"]`, has a static
+    /// name. A spread or a computed key built from an expression does not,
+    /// and marks the options as unknown because the registry may contain
+    /// names that are not listed.
     fn visit_vue_directive_registry(&mut self, registry: &biome_js_syntax::JsObjectExpression) {
         for member in registry.members().iter().flatten() {
             let Some(name) = member.name() else {
@@ -1498,6 +1554,13 @@ impl EmbeddedBindingsBuilder {
     }
 }
 
+/// Returns whether `clause` exports a default binding through a form other
+/// than `export default <expression>`: a declaration (`export default class`),
+/// a renamed specifier (`export { options as default }`), or a re-export
+/// (`export { default } from "./options"`).
+///
+/// A Vue component whose options arrive this way cannot be inspected, since
+/// the options object is not written in the export itself.
 fn has_non_expression_default_export(clause: &AnyJsExportClause) -> bool {
     match clause {
         AnyJsExportClause::JsExportDefaultDeclarationClause(_) => true,

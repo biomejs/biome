@@ -1,14 +1,7 @@
----
-source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid-external-script.vue
----
-# Input
-```vue
 <!-- should not generate diagnostics -->
+<!-- `src` moves the whole script block, including any `directives` option, into a file Biome does not read -->
 <script src="./options.js"></script>
 
 <template>
     <div v-may-come-from-the-external-script></div>
 </template>
-
-```

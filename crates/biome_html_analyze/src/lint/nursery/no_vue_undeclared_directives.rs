@@ -3,9 +3,7 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_embeds::{
-    VueDirectiveResolution, vue_directive_binding_name, vue_directive_name_matches_option_name,
-};
+use biome_embeds::{VueDirectiveResolution, vue_directive_binding_name};
 use biome_html_syntax::{HtmlSyntaxToken, VueDirective};
 use biome_languages::HtmlFileSource;
 use biome_rule_options::no_vue_undeclared_directives::NoVueUndeclaredDirectivesOptions;
@@ -28,7 +26,8 @@ declare_lint_rule! {
     ///
     /// Built-in directives such as `v-if` are never reported. Nothing is reported either
     /// when the component's options cannot be resolved statically, which happens when they
-    /// use `extends`, `mixins`, a spread, or a default export that is not an object literal.
+    /// use `extends`, `mixins`, a spread, or a default export that is not an object literal,
+    /// or when a `<script>` block uses `src="..."` to load its content from another file.
     ///
     /// ## Examples
     ///
@@ -69,15 +68,16 @@ declare_lint_rule! {
     /// ### `globals`
     ///
     /// A list of directive names that are registered globally with `app.directive(...)`.
-    /// Use the name passed to `app.directive`, such as `highlight` for `v-highlight`.
-    /// Names may be written in camelCase, PascalCase, or kebab-case.
+    /// Write each name in kebab-case, exactly as it appears in the template without the
+    /// `v-` prefix: `click-outside` for `v-click-outside`. Other spellings such as
+    /// `clickOutside` or `vClickOutside` do not match.
     ///
     /// Default: `[]`
     ///
     /// ```json,options
     /// {
     ///     "options": {
-    ///         "globals": ["highlight"]
+    ///         "globals": ["click-outside"]
     ///     }
     /// }
     /// ```
@@ -86,7 +86,7 @@ declare_lint_rule! {
     ///
     /// ```vue,use_options
     /// <template>
-    ///     <div v-highlight></div>
+    ///     <div v-click-outside></div>
     /// </template>
     /// ```
     pub NoVueUndeclaredDirectives {
@@ -117,11 +117,14 @@ impl Rule for NoVueUndeclaredDirectives {
 
         let token = directive.name_token().ok()?;
         let name = token.text_trimmed();
+        // `globals` entries are the kebab-case name without `v-`, so a plain
+        // comparison suffices.
+        let global_name = name.strip_prefix("v-")?;
         if ctx
             .options()
             .globals()
             .iter()
-            .any(|global| vue_directive_name_matches_option_name(name, global))
+            .any(|global| global.as_ref() == global_name)
         {
             return None;
         }

@@ -1,10 +1,11 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-expression: valid-external-script-self-closing.vue
+expression: valid-script-src-import-self-closing.vue
 ---
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<!-- `src` moves the whole script block, including any `directives` option, into a file Biome does not read -->
 <script src="./options.js" />
 
 <template>

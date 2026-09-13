@@ -6,34 +6,83 @@ use crate::references::{
 use biome_rowan::TokenText;
 
 /// The result of resolving a Vue custom directive in an embedded document.
+///
+/// The three states let a lint rule distinguish "declared nowhere we can see"
+/// from "declared somewhere we cannot see". Only [`Self::Undeclared`] is a
+/// reportable finding; [`Self::Unknown`] means the component's declarations
+/// are incomplete, so silence is the only answer that avoids false positives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VueDirectiveResolution {
     /// A local declaration resolves the directive.
     Declared,
-    /// No local declaration resolves the directive.
+    /// No local declaration resolves the directive, and every declaration
+    /// site in the component was readable.
     Undeclared,
     /// The component may declare the directive through syntax that cannot be
-    /// resolved statically.
+    /// resolved statically. See `VueDirectiveDeclarations` for the syntax
+    /// that produces this state.
     Unknown,
 }
 
-/// Vue custom-directive declarations collected from an embedded document.
+/// Vue custom-directive declarations collected from a single-file component.
+///
+/// Vue resolves `v-foo` in a template against three sources, in this order:
+/// the `<script setup>` binding `vFoo`, the component's `directives` option,
+/// and the application's global registry. The first two are collected here;
+/// the global registry lives outside the component and is the caller's
+/// concern (a lint rule takes it as an option).
+///
+/// Collection is purely syntactic, so it gives up as soon as a declaration
+/// site could be populated by something it cannot read:
+///
+/// - the component options use `extends` or `mixins`, whose directives are
+///   defined in another module;
+/// - the `directives` value is not an object literal, or contains a spread
+///   or a computed key whose name is not a literal (`[name]` as opposed to
+///   `["focus"]`);
+/// - the default export is neither an object literal nor a
+///   `defineComponent(...)` call whose last argument is an object literal;
+/// - a `<script>` block uses `src="..."`, which moves its entire content into
+///   a file that is not part of the embedded snippets.
+///
+/// In each of those cases `has_unknown_options` is set and [`Self::resolve`]
+/// answers [`VueDirectiveResolution::Unknown`] for every name it cannot find,
+/// instead of [`VueDirectiveResolution::Undeclared`].
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct VueDirectiveDeclarations {
-    setup_bindings: Vec<TokenText>,
-    option_names: Vec<TokenText>,
+    /// Runtime bindings declared at the top level of `<script setup>`.
+    ///
+    /// Vue exposes only top-level bindings to the template, so bindings
+    /// nested in functions or blocks are not collected. Type-only bindings
+    /// (`type`, `interface`, `import type`) are erased before the code runs
+    /// and are not collected either. Names are matched with
+    /// [`vue_directive_name_matches_reference_name`], so `vClickOutside`
+    /// declares `v-click-outside`.
+    setup_bindings: Box<[TokenText]>,
+    /// Keys of the component's `directives` option, taken from
+    /// `export default { ... }`, `defineComponent({ ... })`, or
+    /// `defineOptions({ ... })`.
+    ///
+    /// Keys keep the spelling used in the source. Vue's runtime looks a
+    /// directive up under its kebab-case, camelCase, and PascalCase forms, so
+    /// [`vue_directive_name_matches_option_name`] accepts all three.
+    option_names: Box<[TokenText]>,
+    /// Whether a declaration site was found that cannot be read statically.
+    /// See the type-level documentation for the list of such sites.
     has_unknown_options: bool,
 }
 
 impl VueDirectiveDeclarations {
+    /// Builds declarations from the bindings and option keys collected by the
+    /// embedded-language visitor.
     pub(crate) fn new(
         setup_bindings: Vec<TokenText>,
         option_names: Vec<TokenText>,
         has_unknown_options: bool,
     ) -> Self {
         Self {
-            setup_bindings,
-            option_names,
+            setup_bindings: setup_bindings.into_boxed_slice(),
+            option_names: option_names.into_boxed_slice(),
             has_unknown_options,
         }
     }
@@ -47,7 +96,13 @@ impl VueDirectiveDeclarations {
         }
     }
 
-    /// Resolves a template directive name against statically known declarations.
+    /// Resolves a template directive name such as `v-click-outside` against
+    /// the collected declarations.
+    ///
+    /// A name that is not shaped like a custom directive (no `v-` prefix, a
+    /// trailing or doubled hyphen) is [`VueDirectiveResolution::Undeclared`]
+    /// regardless of `has_unknown_options`, because no declaration could ever
+    /// match it.
     pub fn resolve(&self, directive_name: &str) -> VueDirectiveResolution {
         if !is_potential_vue_directive_name(directive_name) {
             return VueDirectiveResolution::Undeclared;
@@ -195,8 +250,15 @@ pub fn vue_directive_binding_name(directive_name: &str) -> Option<String> {
 }
 
 /// Returns whether the template directive `directive_name` is registered under
-/// `option_name`, accepting camelCase, PascalCase, and kebab-case spellings.
-pub fn vue_directive_name_matches_option_name(directive_name: &str, option_name: &str) -> bool {
+/// the `directives` option key `option_name`.
+///
+/// Vue's runtime looks the key up under its literal, camelCase, and PascalCase
+/// forms, so `v-click-outside` matches `click-outside`, `clickOutside`, and
+/// `ClickOutside`. The comparison walks both strings once without allocating.
+pub(crate) fn vue_directive_name_matches_option_name(
+    directive_name: &str,
+    option_name: &str,
+) -> bool {
     let Some(directive_name) = directive_name.strip_prefix("v-") else {
         return false;
     };

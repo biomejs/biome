@@ -7,7 +7,7 @@
         "noVueUndeclaredDirectives": {
           "level": "on",
           "options": {
-            "globals": ["click-outside", "FocusTrap"]
+            "globals": ["click-outside", "focus-trap"]
           }
         }
       }

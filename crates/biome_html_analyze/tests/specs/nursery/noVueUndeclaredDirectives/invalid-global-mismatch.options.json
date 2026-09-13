@@ -7,7 +7,7 @@
         "noVueUndeclaredDirectives": {
           "level": "on",
           "options": {
-            "globals": ["vHighlight"]
+            "globals": ["vHighlight", "clickOutside", "FocusTrap"]
           }
         }
       }

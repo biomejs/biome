@@ -7,6 +7,8 @@ expression: invalid-global-mismatch.vue
 <!-- should generate diagnostics -->
 <template>
     <div v-highlight></div>
+    <div v-click-outside></div>
+    <div v-focus-trap></div>
 </template>
 
 ```
@@ -21,10 +23,48 @@ invalid-global-mismatch.vue:3:10 lint/nursery/noVueUndeclaredDirectives ━━�
     2 │ <template>
   > 3 │     <div v-highlight></div>
       │          ^^^^^^^^^^^
-    4 │ </template>
-    5 │ 
+    4 │     <div v-click-outside></div>
+    5 │     <div v-focus-trap></div>
   
   i Declare vHighlight in <script setup>, register the directive in the component's directives option, or list it in the rule's globals option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-global-mismatch.vue:4:10 lint/nursery/noVueUndeclaredDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-click-outside is undeclared.
+  
+    2 │ <template>
+    3 │     <div v-highlight></div>
+  > 4 │     <div v-click-outside></div>
+      │          ^^^^^^^^^^^^^^^
+    5 │     <div v-focus-trap></div>
+    6 │ </template>
+  
+  i Declare vClickOutside in <script setup>, register the directive in the component's directives option, or list it in the rule's globals option.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-global-mismatch.vue:5:10 lint/nursery/noVueUndeclaredDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The custom directive v-focus-trap is undeclared.
+  
+    3 │     <div v-highlight></div>
+    4 │     <div v-click-outside></div>
+  > 5 │     <div v-focus-trap></div>
+      │          ^^^^^^^^^^^^
+    6 │ </template>
+    7 │ 
+  
+  i Declare vFocusTrap in <script setup>, register the directive in the component's directives option, or list it in the rule's globals option.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
