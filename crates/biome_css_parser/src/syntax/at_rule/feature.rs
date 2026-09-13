@@ -3,10 +3,11 @@ use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
-    is_at_scss_binary_operator, is_at_scss_interpolation, is_at_scss_variable,
-    is_nth_at_scss_interpolation, parse_scss_expression_from_head, parse_scss_expression_until,
-    parse_scss_interpolated_name, parse_scss_interpolated_query_feature,
-    parse_scss_interpolation_or_identifier, parse_scss_variable,
+    complete_scss_expression_from_item, is_at_scss_binary_operator, is_at_scss_interpolation,
+    is_at_scss_namespaced_variable, is_at_scss_variable, is_nth_at_scss_interpolation,
+    parse_scss_expression_from_head, parse_scss_expression_until, parse_scss_interpolated_name,
+    parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
+    parse_scss_variable,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, parse_any_value,
@@ -30,6 +31,10 @@ pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
                 scss_only_syntax_error(p, "SCSS interpolated query features", marker.range(p))
             },
         )
+    } else if is_at_scss_namespaced_variable(p)
+        && p.nth_at_ts(4, QUERY_FEATURE_RANGE_COMPARISON_OPERATOR_SET)
+    {
+        parse_value_prefixed_query_feature(p)
     } else if is_at_query_feature_name(p) {
         parse_named_query_feature(p)
     } else if is_at_any_query_feature_value(p) {
@@ -234,6 +239,10 @@ fn parse_query_feature_value_until(
     if CssSyntaxFeatures::Scss.is_unsupported(p)
         || !is_at_scss_query_feature_value_tail(p, &head, end_ts)
     {
+        if head.kind(p) == SCSS_MODULE_MEMBER_ACCESS {
+            // Module accesses are expression operands, not direct query-feature values.
+            return Present(complete_scss_expression_from_item(p, head));
+        }
         return Present(head);
     }
 

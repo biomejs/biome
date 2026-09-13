@@ -1,0 +1,16 @@
+@use "tokens";
+$tablet: 32rem;
+
+@media (min-width: tokens.$tablet) {
+  .a { display: block; }
+}
+
+@media (min-width: (tokens.$tablet)) { .grouped { display: block; } }
+@media (min-width: tokens.$tablet + 1rem) { .arithmetic { display: block; } }
+@media (width >= tokens.$tablet) { .comparison { display: block; } }
+@media (tokens.$tablet <= width) { .reverse { display: block; } }
+@media (tokens.$tablet <= width < 80rem) { .lower { display: block; } }
+@media (30rem < width <= tokens.$tablet) { .upper { display: block; } }
+@media (80rem > width >= tokens.$tablet) { .descending { display: block; } }
+@media (min-width: $tablet) { .plain-variable { display: block; } }
+@media (min-width: 48rem) and (aspect-ratio: 16/9) { .native { display: block; } }
