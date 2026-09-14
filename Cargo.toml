@@ -132,7 +132,7 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.2" }
 insta                        = "1.48.0"
-jiff                         = "0.2.35"
+jiff                         = "0.2.37"
 libc                         = "0.2.189"
 # mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
 # See: https://github.com/biomejs/biome/issues/10270
