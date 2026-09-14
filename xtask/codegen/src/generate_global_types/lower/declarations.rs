@@ -32,9 +32,9 @@ impl LoweredDeclarations {
 /// No global IDs or runtime name registrations are allocated.
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
-/// global interface references, arrays, parentheses, unions, and nongeneric function types.
-/// Methods may declare type parameters with constraints and defaults using supported types
-/// and earlier parameters. Their bindings are local to the method signature.
+/// global interface references, arrays, parentheses, unions, and function types.
+/// Methods, call signatures, and function types may declare type parameters with constraints
+/// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Type aliases, type arguments, qualified references, object and template literal types,
 /// and type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
@@ -177,10 +177,11 @@ impl DeclarationLowerer<'_> {
             }
             for member in declaration.members() {
                 let member = self.lower_member(member)?;
-                if members
-                    .iter()
-                    .any(|previous: &LoweredTypeMember| previous.name == member.name)
-                {
+                if members.iter().any(|previous: &LoweredTypeMember| {
+                    previous.name == member.name
+                        && previous.kind != LoweredMemberKind::CallSignature
+                        && member.kind != LoweredMemberKind::CallSignature
+                }) {
                     bail!("unsupported duplicate member {name}.{}", member.name);
                 }
                 members.push(member);
@@ -196,6 +197,24 @@ impl DeclarationLowerer<'_> {
 
     fn lower_member(&mut self, member: AnyTsTypeMember) -> Result<LoweredTypeMember> {
         match member {
+            AnyTsTypeMember::TsCallSignatureTypeMember(signature) => {
+                let function = self
+                    .lower_signature(
+                        None,
+                        signature.type_parameters(),
+                        signature.parameters()?,
+                        signature
+                            .return_type_annotation()
+                            .context("call signature is missing a return type")?
+                            .ty()?,
+                    )
+                    .context("in call signature")?;
+                Ok(LoweredTypeMember {
+                    name: Text::default(),
+                    kind: LoweredMemberKind::CallSignature,
+                    type_reference: self.register(LoweredTypeData::Function(function)),
+                })
+            }
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                 let name = lower_object_member_name(property.name()?)?;
                 let ty = property
@@ -216,7 +235,7 @@ impl DeclarationLowerer<'_> {
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
                 let name = lower_object_member_name(method.name()?)?;
                 let function = self
-                    .lower_method(
+                    .lower_signature(
                         Some(name.clone()),
                         method.type_parameters(),
                         method.parameters()?,
@@ -238,7 +257,7 @@ impl DeclarationLowerer<'_> {
         }
     }
 
-    fn lower_method(
+    fn lower_signature(
         &mut self,
         name: Option<Text>,
         type_parameters: Option<TsTypeParameters>,
@@ -256,7 +275,7 @@ impl DeclarationLowerer<'_> {
                 let parameter = parameter?;
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
                 if !names.insert(name.clone()) {
-                    bail!("duplicate method type parameter {name}");
+                    bail!("duplicate signature type parameter {name}");
                 }
             }
             self.unbound_parameters.extend(names);
@@ -264,7 +283,7 @@ impl DeclarationLowerer<'_> {
             for parameter in type_parameters.items() {
                 let parameter = parameter?;
                 if !parameter.modifiers().is_empty() {
-                    bail!("modified method type parameters are not supported");
+                    bail!("modified signature type parameters are not supported");
                 }
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
                 let constraint = parameter
@@ -424,11 +443,12 @@ impl DeclarationLowerer<'_> {
                 Ok(self.register(LoweredTypeData::Union(types)))
             }
             AnyTsType::TsFunctionType(function) => {
-                if function.type_parameters().is_some() {
-                    bail!("unsupported function type parameters");
-                }
-                let function =
-                    self.lower_function(None, function.parameters()?, function.return_type()?)?;
+                let function = self.lower_signature(
+                    None,
+                    function.type_parameters(),
+                    function.parameters()?,
+                    function.return_type()?,
+                )?;
                 Ok(self.register(LoweredTypeData::Function(function)))
             }
             _ => bail!("unsupported type syntax: {:?}", ty.syntax().kind()),
@@ -679,32 +699,6 @@ pub(super) fn lower_constructor_members(
                 continue;
             }
             let mut member = match member {
-                AnyTsTypeMember::TsCallSignatureTypeMember(signature) => {
-                    if signature.type_parameters().is_some() {
-                        bail!("generic call signatures are not supported");
-                    }
-                    let function = lowerer
-                        .lower_function(
-                            None,
-                            signature.parameters()?,
-                            signature
-                                .return_type_annotation()
-                                .context("call signature is missing a return type")?
-                                .ty()?,
-                        )
-                        .with_context(|| {
-                            format!(
-                                "in {} call signature from {}",
-                                class.name(),
-                                record.file_repo_relative
-                            )
-                        })?;
-                    LoweredTypeMember {
-                        name: Text::default(),
-                        kind: LoweredMemberKind::CallSignature,
-                        type_reference: lowerer.register(LoweredTypeData::Function(function)),
-                    }
-                }
                 AnyTsTypeMember::TsPropertySignatureTypeMember(property)
                     if is_unique_symbol_property(&property)? =>
                 {
@@ -923,6 +917,162 @@ mod tests {
         collect::collect, emit::render_local_types, manifest::build_global_manifest,
         source::CanonicalPath,
     };
+
+    #[test]
+    fn generic_function_types_and_calls_share_translation() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "signatures.d.ts".to_owned(),
+            bytes: b"interface Owner {
+                identity: <T extends string = string>(value: T) => T;
+                <T extends string = string>(value: T): T;
+                <U extends boolean>(value: U): U;
+            }"
+            .to_vec(),
+        };
+        let files = [file];
+        let manifest = build_global_manifest(collect(&files[0]).records);
+        let table = lower_interfaces(&manifest, &files, &["Owner"])?;
+        let LoweredTypeReference::Local(index) = table.interface_reference("Owner").unwrap() else {
+            panic!("expected interface reference")
+        };
+        let LoweredTypeData::Interface(interface) = &table.types()[index] else {
+            panic!("expected interface")
+        };
+        let mut class = LoweredClass {
+            name: Text::from("Owner"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let static_types = lower_constructor_members(
+            &manifest,
+            &files,
+            manifest.global_group("Owner").unwrap().declarations(),
+            &mut class,
+            "GLOBAL_TEST_OWNER_ID",
+            |_| Ok(true),
+            &[],
+        )?;
+        for (members, types) in [
+            (interface.members(), table.types()),
+            (class.members(), static_types.as_ref()),
+        ] {
+            let identity = members
+                .iter()
+                .find(|member| member.name() == "identity")
+                .unwrap();
+            let calls = members
+                .iter()
+                .filter(|member| member.kind() == &LoweredMemberKind::CallSignature)
+                .collect::<Vec<_>>();
+            let [first, second] = calls.as_slice() else {
+                panic!("expected both call signatures")
+            };
+            assert_eq!(first.type_reference(), identity.type_reference());
+            assert_ne!(first.type_reference(), second.type_reference());
+            for call in calls {
+                let LoweredTypeReference::Local(index) = call.type_reference() else {
+                    panic!("expected local function")
+                };
+                let LoweredTypeData::Function(function) = &types[*index] else {
+                    panic!("expected function")
+                };
+                let [parameter] = function.type_parameters() else {
+                    panic!("expected generic parameter")
+                };
+                assert_eq!(function.name(), None);
+                assert_eq!(function.parameters()[0].type_reference(), parameter);
+                assert_eq!(function.return_type(), parameter);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn nested_generic_functions_restore_outer_bindings() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+            repo_relative: "nested.d.ts".to_owned(),
+            bytes: b"interface Owner {
+                callback: <T extends string = string>(shadow: <T extends boolean>(value: T) => T, capture: <U extends T = T>(value: U) => T, after: T) => T;
+            }".to_vec(),
+        };
+        let manifest = build_global_manifest(collect(&file).records);
+        let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local type")
+            };
+            &table.types()[*index]
+        };
+        let LoweredTypeData::Interface(interface) =
+            local(&table.interface_reference("Owner").unwrap())
+        else {
+            panic!("expected interface")
+        };
+        let LoweredTypeData::Function(outer) =
+            local(interface.member("callback").unwrap().type_reference())
+        else {
+            panic!("expected outer function")
+        };
+        let parameter = &outer.type_parameters()[0];
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(parameter)
+        else {
+            panic!("expected outer parameter")
+        };
+        assert_eq!(
+            constraint,
+            &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+        );
+        assert_eq!(default, constraint);
+        let LoweredTypeData::Function(shadow) = local(outer.parameters()[0].type_reference())
+        else {
+            panic!("expected shadowing callback")
+        };
+        let inner = &shadow.type_parameters()[0];
+        assert_ne!(parameter, inner);
+        assert_eq!(shadow.parameters()[0].type_reference(), inner);
+        assert_eq!(shadow.return_type(), inner);
+        let LoweredTypeData::GenericParameter {
+            constraint: Some(constraint),
+            default,
+            ..
+        } = local(inner)
+        else {
+            panic!("expected inner parameter")
+        };
+        assert_eq!(local(constraint), &LoweredTypeData::Boolean);
+        assert_eq!(default, &None);
+        let LoweredTypeData::Function(capture) = local(outer.parameters()[1].type_reference())
+        else {
+            panic!("expected capturing callback")
+        };
+        let captured = &capture.type_parameters()[0];
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(captured)
+        else {
+            panic!("expected capturing parameter")
+        };
+        assert_eq!(constraint.as_ref(), Some(parameter));
+        assert_eq!(default, constraint);
+        assert_eq!(capture.parameters()[0].type_reference(), captured);
+        assert_eq!(capture.return_type(), parameter);
+        assert_eq!(outer.parameters()[2].type_reference(), parameter);
+        assert_eq!(outer.return_type(), parameter);
+        Ok(())
+    }
 
     #[test]
     fn method_generics_bind_constraints_defaults_and_callbacks() -> Result<()> {
