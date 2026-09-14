@@ -178,11 +178,17 @@ impl LoweredInterface {
 /// Lowered constructor helper data.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredConstructor {
+    type_parameters: Box<[LoweredTypeReference]>,
     parameters: Box<[LoweredFunctionParameter]>,
     return_type: Option<LoweredTypeReference>,
 }
 
 impl LoweredConstructor {
+    /// Constructor type parameters in declaration order.
+    pub fn type_parameters(&self) -> &[LoweredTypeReference] {
+        &self.type_parameters
+    }
+
     /// Constructor parameters in declaration order.
     pub fn parameters(&self) -> &[LoweredFunctionParameter] {
         &self.parameters
@@ -2872,6 +2878,7 @@ fn lower_construct_signature(
         .and_then(|type_node| lower_type_reference(&type_node))?;
 
     Ok(LoweredConstructor {
+        type_parameters: Box::default(),
         parameters: lower_parameters(member.parameters()?)?,
         return_type: Some(return_type),
     })
