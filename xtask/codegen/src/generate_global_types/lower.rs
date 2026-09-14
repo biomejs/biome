@@ -1612,7 +1612,7 @@ impl SelectedSymbolMember {
     }
 }
 
-/// Lowers selected Symbol static members and the predefined disposable symbol helpers.
+/// Lowers selected Symbol constructor members and the predefined disposable symbol helpers.
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -1647,13 +1647,13 @@ fn lower_symbol_globals(
         type_parameters: Box::default(),
         members: Box::default(),
     };
-    let local_types = declarations::lower_constructor_static_members(
+    let local_types = declarations::lower_constructor_members(
         manifest,
         source_cache.source_files,
         constructor_group.declarations(),
         &mut class,
         "GLOBAL_SYMBOL_ID",
-        supports_symbol_static_member,
+        supports_symbol_constructor_member,
         &[
             ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
             ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
@@ -1681,11 +1681,12 @@ fn lower_symbol_globals(
     Ok(())
 }
 
-/// Selects named unique-symbol properties and the registry functions for/keyFor.
-/// Prototype properties, call/construct signatures, computed members, and other
+/// Selects call signatures, named unique-symbol properties, and the registry functions for/keyFor.
+/// Prototype properties, construct signatures, computed members, and other
 /// methods are outside this selection.
-fn supports_symbol_static_member(member: &AnyTsTypeMember) -> Result<bool> {
+fn supports_symbol_constructor_member(member: &AnyTsTypeMember) -> Result<bool> {
     match member {
+        AnyTsTypeMember::TsCallSignatureTypeMember(_) => Ok(true),
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
             if !matches!(
                 property.name()?,

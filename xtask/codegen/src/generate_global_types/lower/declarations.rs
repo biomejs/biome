@@ -565,11 +565,11 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
     }
 }
 
-/// Lowers selected constructor-interface members as static members of a class.
+/// Lowers selected constructor-interface members as static members and call signatures of a class.
 /// The caller selects members and supplies predefined identities for unique symbols.
 /// Other unique symbols use the runtime's symbol type. Function signatures use
 /// the same translation as instance methods.
-pub(super) fn lower_constructor_static_members(
+pub(super) fn lower_constructor_members(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
     records: &[DeclarationRecord],
@@ -610,6 +610,32 @@ pub(super) fn lower_constructor_static_members(
                 continue;
             }
             let mut member = match member {
+                AnyTsTypeMember::TsCallSignatureTypeMember(signature) => {
+                    if signature.type_parameters().is_some() {
+                        bail!("generic call signatures are not supported");
+                    }
+                    let function = lowerer
+                        .lower_function(
+                            None,
+                            signature.parameters()?,
+                            signature
+                                .return_type_annotation()
+                                .context("call signature is missing a return type")?
+                                .ty()?,
+                        )
+                        .with_context(|| {
+                            format!(
+                                "in {} call signature from {}",
+                                class.name(),
+                                record.file_repo_relative
+                            )
+                        })?;
+                    LoweredTypeMember {
+                        name: Text::default(),
+                        kind: LoweredMemberKind::CallSignature,
+                        type_reference: lowerer.register(LoweredTypeData::Function(function)),
+                    }
+                }
                 AnyTsTypeMember::TsPropertySignatureTypeMember(property)
                     if is_unique_symbol_property(&property)? =>
                 {
@@ -637,6 +663,10 @@ pub(super) fn lower_constructor_static_members(
                     )
                 })?,
             };
+            if member.kind == LoweredMemberKind::CallSignature {
+                members.push(member);
+                continue;
+            }
             // NamedStatic cannot represent an optional member without losing undefined.
             if member.kind != (LoweredMemberKind::Named { optional: false }) {
                 bail!(
@@ -646,10 +676,9 @@ pub(super) fn lower_constructor_static_members(
                 );
             }
             member.kind = LoweredMemberKind::NamedStatic;
-            if members
-                .iter()
-                .any(|previous: &LoweredTypeMember| previous.name == member.name)
-            {
+            if members.iter().any(|previous: &LoweredTypeMember| {
+                previous.kind == member.kind && previous.name == member.name
+            }) {
                 bail!(
                     "duplicate static member {}.{} cannot be represented by one member",
                     class.name(),
@@ -664,7 +693,7 @@ pub(super) fn lower_constructor_static_members(
         .types
         .into_iter()
         .collect::<Option<Box<[_]>>>()
-        .context("unfilled static member type")
+        .context("unfilled constructor member type")
 }
 
 fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
@@ -827,7 +856,7 @@ mod tests {
     };
 
     #[test]
-    fn constructor_statics_translate_without_symbol_selection() -> Result<()> {
+    fn constructor_members_translate_without_symbol_selection() -> Result<()> {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
         for (owner, constructor, method, scalar, expected) in [
             (
@@ -858,6 +887,7 @@ mod tests {
                     interface {constructor} {{
                         readonly stableKey: unique symbol;
                         {method}(input?: {scalar}): {scalar};
+                        (input?: {scalar}): {scalar} | undefined;
                     }}
                 "
                 )
@@ -876,7 +906,7 @@ mod tests {
                 type_parameters: Box::default(),
                 members: Box::default(),
             };
-            let types = lower_constructor_static_members(
+            let types = lower_constructor_members(
                 &manifest,
                 cache.source_files,
                 manifest
@@ -898,6 +928,7 @@ mod tests {
                 class
                     .members()
                     .iter()
+                    .filter(|member| member.kind() != &LoweredMemberKind::CallSignature)
                     .all(|member| member.kind() == &LoweredMemberKind::NamedStatic)
             );
             assert_eq!(
@@ -916,6 +947,22 @@ mod tests {
             assert!(function.parameters()[0].is_optional());
             assert_eq!(local(function.parameters()[0].type_reference()), &expected);
             assert_eq!(local(function.return_type()), &expected);
+            let call = class
+                .members()
+                .iter()
+                .find(|member| member.kind() == &LoweredMemberKind::CallSignature)
+                .expect("expected call signature");
+            let LoweredTypeData::Function(function) = local(call.type_reference()) else {
+                panic!("expected function")
+            };
+            assert_eq!(function.name(), None);
+            assert!(function.parameters()[0].is_optional());
+            assert_eq!(local(function.parameters()[0].type_reference()), &expected);
+            let LoweredTypeData::Union(types) = local(function.return_type()) else {
+                panic!("expected union return type")
+            };
+            assert_eq!(local(&types[0]), &expected);
+            assert_eq!(local(&types[1]), &LoweredTypeData::Undefined);
         }
         Ok(())
     }
