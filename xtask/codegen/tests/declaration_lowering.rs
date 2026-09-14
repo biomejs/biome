@@ -559,53 +559,58 @@ fn unresolved_constraints_report_the_parameter() -> Result<()> {
 fn generic_constraints_preserve_unions_and_defaults() -> Result<()> {
     use xtask_codegen::generate_global_types::lower::lower_global_types;
 
-    let mut file = fixture("lowering.interfaces.d.ts")?;
-    file.bytes =
-        b"interface Iterator<A extends string | number = string, B extends A = A> {}".to_vec();
-    let manifest = build_global_manifest(collect(&file).records);
-    let lowered = lower_global_types(&manifest, &[file])?;
-    let global = lowered.global("Iterator").unwrap();
-    let LoweredTypeData::Interface(interface) = global.data() else {
-        panic!("expected interface")
-    };
-    let local = |reference: &LoweredTypeReference| {
-        let LoweredTypeReference::Local(index) = reference else {
-            panic!("expected local type")
+    for name in ["Iterator", "WeakMap"] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes =
+            format!("interface {name}<A extends string | number = string, B extends A = A> {{}}")
+                .into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_global_types(&manifest, &[file])?;
+        let global = lowered.global(name).unwrap();
+        let parameters = match global.data() {
+            LoweredTypeData::Interface(interface) => interface.type_parameters(),
+            LoweredTypeData::Class(class) => class.type_parameters(),
+            _ => panic!("expected generic declaration"),
         };
-        &global.local_types()[*index]
-    };
-    let LoweredTypeData::GenericParameter {
-        constraint: Some(constraint),
-        default,
-        ..
-    } = local(&interface.type_parameters()[0])
-    else {
-        panic!("expected constrained parameter")
-    };
-    let LoweredTypeData::Union(types) = local(constraint) else {
-        panic!("expected union constraint")
-    };
-    assert_eq!(
-        types.as_ref(),
-        [
-            LoweredTypeReference::Predefined("GLOBAL_STRING_ID"),
-            LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")
-        ]
-    );
-    assert_eq!(
-        default,
-        &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
-    );
-    let LoweredTypeData::GenericParameter {
-        constraint,
-        default,
-        ..
-    } = local(&interface.type_parameters()[1])
-    else {
-        panic!("expected constrained parameter")
-    };
-    assert_eq!(constraint.as_ref(), Some(&interface.type_parameters()[0]));
-    assert_eq!(default, constraint);
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local type")
+            };
+            &global.local_types()[*index]
+        };
+        let LoweredTypeData::GenericParameter {
+            constraint: Some(constraint),
+            default,
+            ..
+        } = local(&parameters[0])
+        else {
+            panic!("expected constrained parameter")
+        };
+        let LoweredTypeData::Union(types) = local(constraint) else {
+            panic!("expected union constraint")
+        };
+        assert_eq!(
+            types.as_ref(),
+            [
+                LoweredTypeReference::Predefined("GLOBAL_STRING_ID"),
+                LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")
+            ]
+        );
+        assert_eq!(
+            default,
+            &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+        );
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(&parameters[1])
+        else {
+            panic!("expected constrained parameter")
+        };
+        assert_eq!(constraint.as_ref(), Some(&parameters[0]));
+        assert_eq!(default, constraint);
+    }
     Ok(())
 }
 
