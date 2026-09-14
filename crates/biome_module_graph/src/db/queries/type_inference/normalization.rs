@@ -50,6 +50,8 @@ fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
     matches!(
         ty,
         InferredTypeData::InstanceOf(_)
+            | InferredTypeData::IndexedAccess(_)
+            | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::MergedReference(_)

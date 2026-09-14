@@ -1,7 +1,7 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter};
+use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter, TsTypeAliasDeclaration};
 use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
 use biome_rowan::AstNode;
 
@@ -19,6 +19,28 @@ fn infer_type_of_identifier() {
     let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_identifier");
+}
+
+#[test]
+fn infer_type_of_indexed_access_preserves_operands() {
+    const CODE: &str = "type Element = (typeof values)[Index];";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert!(matches!(ty, TypeData::IndexedAccess(_)));
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_indexed_access_preserves_operands",
+    );
 }
 
 #[test]

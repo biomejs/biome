@@ -1032,6 +1032,7 @@ mod tests {
                 is_optional: false,
                 is_rest: false,
             }]) as Box<[_]>,
+            false,
         ))
     }
 
