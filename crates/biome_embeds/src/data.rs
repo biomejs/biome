@@ -51,13 +51,6 @@ pub enum VueDirectiveResolution {
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct VueDirectiveDeclarations {
     /// Runtime bindings declared at the top level of `<script setup>`.
-    ///
-    /// Vue exposes only top-level bindings to the template, so bindings
-    /// nested in functions or blocks are not collected. Type-only bindings
-    /// (`type`, `interface`, `import type`) are erased before the code runs
-    /// and are not collected either. Names are matched with
-    /// [`vue_directive_name_matches_reference_name`], so `vClickOutside`
-    /// declares `v-click-outside`.
     setup_bindings: Box<[TokenText]>,
     /// Keys of the component's `directives` option, taken from
     /// `export default { ... }`, `defineComponent({ ... })`, or
