@@ -41,6 +41,7 @@ biome_diagnostics         = { workspace = true }
 biome_embeds              = { workspace = true }
 biome_fs                  = { workspace = true }
 biome_glob                = { workspace = true, features = ["biome_deserialize", "serde"] }
+biome_js_control_flow     = { workspace = true }
 biome_js_factory          = { workspace = true }
 biome_js_semantic         = { workspace = true }
 biome_js_syntax           = { workspace = true }

@@ -2,12 +2,12 @@ use biome_control_flow::builder::BlockId;
 use biome_js_syntax::{JsElseClause, JsIfStatement};
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct IfVisitor {
+pub(crate) struct IfVisitor {
     /// Saved position of the control flow cursor before entering the statement
     entry_block: BlockId,
     /// First block of the consequent for this statement
@@ -83,7 +83,7 @@ impl NodeVisitor for IfVisitor {
     }
 }
 
-pub(in crate::services::control_flow) struct ElseVisitor {
+pub(crate) struct ElseVisitor {
     consequent_block: BlockId,
     alt_block: BlockId,
 }

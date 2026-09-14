@@ -1,7 +1,7 @@
 use biome_js_syntax::AnyJsBogusNode;
 use biome_rowan::{SyntaxError, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
@@ -11,7 +11,7 @@ use crate::services::control_flow::{
 /// The bogus visitor merely acts to abort control flow analysis inside broken
 /// code, which could otherwise mess with assumptions made inside other
 /// visitors.
-pub(in crate::services::control_flow) struct BogusVisitor;
+pub(crate) struct BogusVisitor;
 
 impl NodeVisitor for BogusVisitor {
     type Node = AnyJsBogusNode;

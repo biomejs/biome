@@ -20,6 +20,7 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_embeds::EmbeddedData;
+use biome_js_control_flow::ControlFlowModel;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
@@ -64,6 +65,7 @@ pub struct JsAnalyzerServices<'a> {
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
     semantic_model: Option<&'a SemanticModel>,
+    control_flow_model: Option<ControlFlowModel>,
 }
 
 impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices<'_> {
@@ -81,6 +83,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             project_layout,
             source_type,
             semantic_model: None,
+            control_flow_model: None,
         }
     }
 }
@@ -94,6 +97,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
             semantic_model: None,
+            control_flow_model: None,
         }
     }
 }
@@ -106,6 +110,11 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_semantic_model(mut self, model: &'a SemanticModel) -> Self {
         self.semantic_model = Some(model);
+        self
+    }
+
+    pub fn with_control_flow_model(mut self, model: ControlFlowModel) -> Self {
+        self.control_flow_model = Some(model);
         self
     }
 
@@ -160,6 +169,7 @@ where
         project_layout,
         source_type,
         semantic_model,
+        control_flow_model,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -232,6 +242,9 @@ where
     // interleaved with the analyzer's syntax-phase traversal (single pass).
     if let Some(semantic_model) = semantic_model {
         services.insert_service(semantic_model.clone());
+    }
+    if let Some(control_flow_model) = control_flow_model {
+        services.insert_service(control_flow_model);
     }
 
     (

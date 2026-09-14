@@ -2,12 +2,12 @@ use biome_control_flow::builder::BlockId;
 use biome_js_syntax::{JsForStatement, JsLabeledStatement, JsSyntaxToken};
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct ForVisitor {
+pub(crate) struct ForVisitor {
     // `label`, `continue_block` and `break_block` are used by the
     // `ContinueVisitor` and `BreakVisitor`
     pub(super) label: Option<JsSyntaxToken>,

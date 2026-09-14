@@ -3,13 +3,13 @@ use std::any::TypeId;
 use biome_js_syntax::JsContinueStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     nodes::{DoWhileVisitor, ForInVisitor, ForOfVisitor, ForVisitor, WhileVisitor},
     visitor::{FunctionVisitor, NodeVisitor, StatementStack, VisitorAdapter},
 };
 
-pub(in crate::services::control_flow) struct ContinueVisitor;
+pub(crate) struct ContinueVisitor;
 
 impl NodeVisitor for ContinueVisitor {
     type Node = JsContinueStatement;

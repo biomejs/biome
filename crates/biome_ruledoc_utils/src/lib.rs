@@ -16,6 +16,7 @@ use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
+use biome_js_control_flow::control_flow_model_from_source;
 use biome_js_parser::Parse;
 use biome_js_semantic::{SemanticModel, semantic_model_from_source};
 use biome_json_factory::make;
@@ -226,6 +227,9 @@ impl AnalyzerServicesBuilder {
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
+        .with_control_flow_model(
+            control_flow_model_from_source(&self.module_db, parsed_source).clone(),
+        )
         .with_semantic_model(
             self.semantic_model
                 .as_deref()

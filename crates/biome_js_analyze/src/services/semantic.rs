@@ -3,6 +3,7 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorFinishContext,
 };
+use biome_js_control_flow::ControlFlowModel;
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_languages::JsFileSource;
@@ -16,11 +17,16 @@ use biome_rowan::AstNode;
 /// Prefer the use of `Semantic<Node>` to trigger the rule only for those nodes that might trigger the rule.
 pub struct SemanticServices {
     model: SemanticModel,
+    control_flow: ControlFlowModel,
 }
 
 impl SemanticServices {
     pub fn model(&self) -> &SemanticModel {
         &self.model
+    }
+
+    pub fn control_flow_model(&self) -> &ControlFlowModel {
+        &self.control_flow
     }
 }
 
@@ -34,8 +40,12 @@ impl FromServices for SemanticServices {
         let model: &SemanticModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
+        let control_flow: &ControlFlowModel = services
+            .get_service()
+            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ControlFlowModel"]))?;
         Ok(Self {
             model: model.clone(),
+            control_flow: control_flow.clone(),
         })
     }
 }

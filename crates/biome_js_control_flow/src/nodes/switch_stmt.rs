@@ -2,12 +2,12 @@ use biome_control_flow::builder::BlockId;
 use biome_js_syntax::{AnyJsSwitchClause, JsLabeledStatement, JsSwitchStatement, JsSyntaxToken};
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct SwitchVisitor {
+pub(crate) struct SwitchVisitor {
     entry_block: BlockId,
     // `label` and `break_block` are used by the `BreakVisitor`
     pub(super) label: Option<JsSyntaxToken>,
@@ -80,7 +80,7 @@ impl NodeVisitor for SwitchVisitor {
     }
 }
 
-pub(in crate::services::control_flow) struct CaseVisitor;
+pub(crate) struct CaseVisitor;
 
 impl NodeVisitor for CaseVisitor {
     type Node = AnyJsSwitchClause;

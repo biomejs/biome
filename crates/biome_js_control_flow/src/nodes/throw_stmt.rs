@@ -1,12 +1,12 @@
 use biome_js_syntax::JsThrowStatement;
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct ThrowVisitor;
+pub(crate) struct ThrowVisitor;
 
 impl NodeVisitor for ThrowVisitor {
     type Node = JsThrowStatement;

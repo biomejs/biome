@@ -31,10 +31,7 @@ use crate::{
 };
 use biome_analyze::ActionFilter;
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
-use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
-    RuleCategoriesBuilder, RuleFilter,
-};
+use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never};
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
     JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
@@ -59,9 +56,8 @@ use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{
-    ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
-};
+use biome_js_analyze::{JsAnalyzerServices, analyze};
+use biome_js_control_flow::{control_flow_model, js_control_flow_model};
 use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
@@ -997,47 +993,17 @@ fn debug_control_flow(
     cursor: TextSize,
     workspace_db: WorkspaceDb,
 ) -> String {
-    let mut control_flow_graph = None;
-
-    let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default().with_lint().build(),
-        enabled_rules: Some(&[RuleFilter::Rule("correctness", "noUnreachable")]),
-        ..AnalysisFilter::default()
-    };
-    let options = AnalyzerOptions::default();
-
-    analyze_with_inspect_matcher(
-        &parse.tree(&workspace_db),
-        filter,
-        |match_params| {
-            let cfg = match match_params.query.downcast_ref::<ControlFlowGraph>() {
-                Some(cfg) => cfg,
-                _ => return,
-            };
-
-            let range = cfg.text_range();
-            if !range.contains(cursor) {
-                return;
-            }
-
-            match &control_flow_graph {
-                None => {
-                    control_flow_graph = Some((cfg.graph.to_string(), range));
-                }
-                Some((_, prev_range)) => {
-                    if range.len() < prev_range.len() {
-                        control_flow_graph = Some((cfg.graph.to_string(), range));
-                    }
-                }
-            }
-        },
-        &options,
-        &[],
-        Default::default(),
-        |_| ControlFlow::<Never>::Continue(()),
-    );
-
-    control_flow_graph.map(|(cfg, _)| cfg).unwrap_or_default()
+    js_control_flow_model(&workspace_db, &parse)
+        .graphs()
+        .filter(|graph| graph.node.text_trimmed_range().contains(cursor))
+        .min_by_key(|graph| {
+            (
+                graph.node.text_trimmed_range().len(),
+                std::cmp::Reverse(graph.node.ancestors().count()),
+            )
+        })
+        .map(|graph| graph.to_string())
+        .unwrap_or_default()
 }
 
 fn debug_formatter_ir(
@@ -1241,7 +1207,9 @@ fn js_analyzer_services_for_fix<'a>(
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
-    services.with_semantic_model(semantic_model)
+    services
+        .with_semantic_model(semantic_model)
+        .with_control_flow_model(control_flow_model(root))
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -1292,6 +1260,12 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
             semantic_model(&tree, SemanticModelOptions::from(&files_source))
         }
     };
+    let control_flow_model = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => {
+            js_control_flow_model(&params.workspace_db, source).clone()
+        }
+        super::ParsedOrigin::Interned { .. } => control_flow_model(&tree),
+    };
     let services = js_analyzer_services(
         &tree,
         &params.workspace_db,
@@ -1302,7 +1276,9 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     );
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
-    let services = services.with_semantic_model(&semantic_model);
+    let services = services
+        .with_semantic_model(&semantic_model)
+        .with_control_flow_model(control_flow_model);
 
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -1390,7 +1366,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         project_layout,
         source_type,
     )
-    .with_semantic_model(semantic_model);
+    .with_semantic_model(semantic_model)
+    .with_control_flow_model(js_control_flow_model(&workspace_db, &parsed_source).clone());
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1867,7 +1844,8 @@ pub(crate) fn pull_diagnostics_and_actions(
         project_layout,
         source_type,
     )
-    .with_semantic_model(semantic_model);
+    .with_semantic_model(semantic_model)
+    .with_control_flow_model(js_control_flow_model(&workspace_db, &parsed_source).clone());
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

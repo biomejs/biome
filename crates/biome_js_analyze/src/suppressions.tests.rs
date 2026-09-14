@@ -3,6 +3,7 @@ use biome_analyze::{ActionFilter, AnalyzerOptions, Never, RuleCategoriesBuilder,
 use biome_db::ParsedSource;
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
+use biome_js_control_flow::control_flow_model;
 use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{TextRange, TextSize};
@@ -65,6 +66,7 @@ fn quick_test() {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::tsx())
+        .with_control_flow_model(control_flow_model(&parsed.tree()))
         .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
@@ -120,6 +122,7 @@ fn quick_test_suppression() {
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
     let services = JsAnalyzerServices::from(&parsed.tree())
+        .with_control_flow_model(control_flow_model(&parsed.tree()))
         .with_semantic_model(&semantic_model)
         .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
@@ -209,6 +212,7 @@ fn suppression() {
     let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
     let services = JsAnalyzerServices::from(&parsed.tree())
         .with_semantic_model(&semantic_model)
+        .with_control_flow_model(control_flow_model(&parsed.tree()))
         .with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
@@ -287,7 +291,7 @@ fn suppression_syntax() {
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -331,7 +335,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -382,7 +386,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -428,7 +432,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -476,7 +480,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -525,7 +529,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -572,7 +576,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -617,7 +621,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -665,7 +669,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -715,7 +719,7 @@ let c;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -766,7 +770,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -818,7 +822,7 @@ let d;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -860,6 +864,7 @@ const foo0 = function (bar: string) {
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::ts())
+        .with_control_flow_model(control_flow_model(&root))
         .with_semantic_model(&semantic_model);
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
@@ -907,7 +912,7 @@ a == b;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default().with_control_flow_model(control_flow_model(&parsed.tree())),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -947,7 +952,9 @@ var foo = {
         ..AnalysisFilter::default()
     };
 
-    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree())
+        .with_control_flow_model(control_flow_model(&parsed.tree()))
+        .with_language_db(embedded_db(&parsed));
 
     let options = AnalyzerOptions::default();
     crate::analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
@@ -985,7 +992,9 @@ console.log("should be suppressed");"#;
     };
 
     let options = AnalyzerOptions::default();
-    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree())
+        .with_control_flow_model(control_flow_model(&parsed.tree()))
+        .with_language_db(embedded_db(&parsed));
     let mut diagnostic_found = false;
     analyze(&parsed.tree(), filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {

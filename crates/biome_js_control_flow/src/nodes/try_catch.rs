@@ -1,13 +1,13 @@
 use biome_control_flow::{ExceptionHandlerKind, builder::BlockId};
 use biome_js_syntax::{AnyJsTryStatement, JsCatchClause, JsFinallyClause};
-use biome_rowan::SyntaxResult;
+use biome_rowan::{SyntaxError, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct TryVisitor {
+pub(crate) struct TryVisitor {
     catch_block: Option<BlockId>,
     finally_block: Option<BlockId>,
     next_block: BlockId,
@@ -58,7 +58,7 @@ impl NodeVisitor for TryVisitor {
     }
 }
 
-pub(in crate::services::control_flow) struct CatchVisitor;
+pub(crate) struct CatchVisitor;
 
 impl NodeVisitor for CatchVisitor {
     type Node = JsCatchClause;
@@ -77,8 +77,9 @@ impl NodeVisitor for CatchVisitor {
         // Pop the catch block from the exception stack
         builder.pop_exception_target();
 
-        // SAFETY: This block should have been created by the `TryVisitor`
-        let catch_block = try_stmt.catch_block.unwrap();
+        let catch_block = try_stmt
+            .catch_block
+            .ok_or(SyntaxError::MissingRequiredChild)?;
         builder.set_cursor(catch_block);
 
         Ok(Self)
@@ -102,7 +103,7 @@ impl NodeVisitor for CatchVisitor {
     }
 }
 
-pub(in crate::services::control_flow) struct FinallyVisitor;
+pub(crate) struct FinallyVisitor;
 
 impl NodeVisitor for FinallyVisitor {
     type Node = JsFinallyClause;
@@ -114,8 +115,9 @@ impl NodeVisitor for FinallyVisitor {
     ) -> SyntaxResult<Self> {
         let try_stmt = stack.read_top::<TryVisitor>()?;
 
-        // SAFETY: This block should have been created by the `TryVisitor`
-        let finally_block = try_stmt.finally_block.unwrap();
+        let finally_block = try_stmt
+            .finally_block
+            .ok_or(SyntaxError::MissingRequiredChild)?;
 
         // If the try statement has no catch clause
         if try_stmt.catch_block.is_none() {

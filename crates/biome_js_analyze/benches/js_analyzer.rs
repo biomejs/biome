@@ -5,6 +5,7 @@ use biome_analyze::{
 };
 use biome_db::ParsedSource;
 use biome_js_analyze::JsAnalyzerServices;
+use biome_js_control_flow::control_flow_model;
 use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_rowan::AstNode;
@@ -109,8 +110,9 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                 vec![],
                             ));
                             db.js_source = Some(file_source);
-                            let services =
-                                JsAnalyzerServices::default().with_language_db(Rc::new(db));
+                            let services = JsAnalyzerServices::default()
+                                .with_control_flow_model(control_flow_model(&parse.tree()))
+                                .with_language_db(Rc::new(db));
                             biome_js_analyze::analyze(
                                 &parse.tree(),
                                 filter,
