@@ -57,7 +57,7 @@ use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
 use biome_js_analyze::{JsAnalyzerServices, analyze};
-use biome_js_control_flow::{control_flow_model, js_control_flow_model};
+use biome_js_control_flow::js_control_flow_model;
 use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
@@ -65,9 +65,7 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{
-    SVELTE_RUNES, SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model,
-};
+use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, js_semantic_model, semantic_model};
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeName, AnyJsxAttributeValue,
@@ -1170,13 +1168,13 @@ fn debug_semantic_model(
     Ok(model.to_string())
 }
 
-fn js_analyzer_services<'a>(
-    root: &'a AnyJsRoot,
+fn js_analyzer_services(
+    root: &AnyJsRoot,
     workspace_db: &WorkspaceDb,
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-) -> JsAnalyzerServices<'a> {
+) -> JsAnalyzerServices {
     #[cfg(feature = "module_graph")]
     let services = {
         let _ = root;
@@ -1190,12 +1188,11 @@ fn js_analyzer_services<'a>(
     services.with_language_db(workspace_db.rc_language_db())
 }
 
-fn js_analyzer_services_for_fix<'a>(
-    root: &'a AnyJsRoot,
-    semantic_model: &'a SemanticModel,
+fn js_analyzer_services_for_fix(
+    root: &AnyJsRoot,
     params: &FixAllParams,
     source_type: JsFileSource,
-) -> JsAnalyzerServices<'a> {
+) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
         &params.workspace_db,
@@ -1208,8 +1205,6 @@ fn js_analyzer_services_for_fix<'a>(
     let services = services.with_embedded_data(params.embedded_data.clone());
 
     services
-        .with_semantic_model(semantic_model)
-        .with_control_flow_model(control_flow_model(root))
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
@@ -1252,20 +1247,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let semantic_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            js_semantic_model(&params.workspace_db, source).clone()
-        }
-        super::ParsedOrigin::Interned { .. } => {
-            semantic_model(&tree, SemanticModelOptions::from(&files_source))
-        }
-    };
-    let control_flow_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            js_control_flow_model(&params.workspace_db, source).clone()
-        }
-        super::ParsedOrigin::Interned { .. } => control_flow_model(&tree),
-    };
     let services = js_analyzer_services(
         &tree,
         &params.workspace_db,
@@ -1276,9 +1257,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     );
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
-    let services = services
-        .with_semantic_model(&semantic_model)
-        .with_control_flow_model(control_flow_model);
 
     let (_, analyze_diagnostics) = analyze(
         &tree,
@@ -1356,7 +1334,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = js_analyzer_services(
         &tree,
@@ -1365,9 +1342,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         workspace_db.rc_module_db(),
         project_layout,
         source_type,
-    )
-    .with_semantic_model(semantic_model)
-    .with_control_flow_model(js_control_flow_model(&workspace_db, &parsed_source).clone());
+    );
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1463,9 +1438,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-            let services =
-                js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+            let services = js_analyzer_services_for_fix(&tree, &params, file_source);
 
             let mut pending_actions = Vec::new();
 
@@ -1510,8 +1483,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-        let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, &params, file_source);
 
         let mut pending_actions = Vec::new();
 
@@ -1564,8 +1536,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-        let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, &params, file_source);
 
         let (_, _) = analyze(
             &tree,
@@ -1835,7 +1806,6 @@ pub(crate) fn pull_diagnostics_and_actions(
             diagnostics: Vec::new(),
         };
     };
-    let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let services = js_analyzer_services(
         &tree,
         &workspace_db,
@@ -1843,9 +1813,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         workspace_db.rc_module_db(),
         project_layout,
         source_type,
-    )
-    .with_semantic_model(semantic_model)
-    .with_control_flow_model(js_control_flow_model(&workspace_db, &parsed_source).clone());
+    );
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

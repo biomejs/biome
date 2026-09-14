@@ -34,7 +34,6 @@ use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_semantic::db::css_semantic_model;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_db::AnyParsedSource;
@@ -717,14 +716,8 @@ fn lint(params: LintParams) -> LintResults {
     };
 
     let mut process_lint = ProcessLint::new(&params);
-    let semantic_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            css_semantic_model(&params.workspace_db, source).clone()
-        }
-        super::ParsedOrigin::Interned { .. } => semantic_model(&tree),
-    };
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(&semantic_model),
+        language_db: Some(params.workspace_db.rc_language_db()),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -813,7 +806,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
+        language_db: Some(workspace_db.rc_language_db()),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -912,7 +905,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
             let css_services = CssAnalyzerServices {
-                semantic_model: None,
+                language_db: Some(params.workspace_db.rc_language_db()),
                 file_source,
                 module_db: {
                     #[cfg(feature = "module_graph")]
@@ -970,7 +963,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     loop {
         let css_services = CssAnalyzerServices {
-            semantic_model: None,
+            language_db: Some(params.workspace_db.rc_language_db()),
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]
@@ -1037,7 +1030,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     // Phase 2: all rules for final diagnostics
     if params.collect_final_diagnostics {
         let css_services = CssAnalyzerServices {
-            semantic_model: None,
+            language_db: Some(params.workspace_db.rc_language_db()),
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]

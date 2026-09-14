@@ -1,13 +1,13 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
-    VisitorFinishContext,
 };
-use biome_js_control_flow::ControlFlowModel;
-use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
+use biome_db::AnyParsedSource;
+use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
-use biome_languages::JsFileSource;
+use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::AstNode;
+use camino::Utf8Path;
 
 /// ## Warning
 ///
@@ -17,16 +17,11 @@ use biome_rowan::AstNode;
 /// Prefer the use of `Semantic<Node>` to trigger the rule only for those nodes that might trigger the rule.
 pub struct SemanticServices {
     model: SemanticModel,
-    control_flow: ControlFlowModel,
 }
 
 impl SemanticServices {
     pub fn model(&self) -> &SemanticModel {
         &self.model
-    }
-
-    pub fn control_flow_model(&self) -> &ControlFlowModel {
-        &self.control_flow
     }
 }
 
@@ -40,12 +35,8 @@ impl FromServices for SemanticServices {
         let model: &SemanticModel = services
             .get_service()
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["SemanticModel"]))?;
-        let control_flow: &ControlFlowModel = services
-            .get_service()
-            .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["ControlFlowModel"]))?;
         Ok(Self {
             model: model.clone(),
-            control_flow: control_flow.clone(),
         })
     }
 }
@@ -65,8 +56,7 @@ impl Queryable for SemanticServices {
     type Language = JsLanguage;
     type Services = Self;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Semantic, || SemanticModelVisitor);
     }
 
@@ -92,8 +82,7 @@ where
     type Language = JsLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -105,67 +94,42 @@ where
         N::unwrap_cast(node.clone())
     }
 }
-/// Syntax-phase visitor that extracts semantic events and builds semantic data.
-///
-/// Flavor-specific behavior (for example Svelte semantics) is configured from
-/// the file source service when entering the root node.
-pub struct SemanticModelBuilderVisitor {
-    extractor: SemanticEventExtractor,
-    builder: SemanticModelBuilder,
-}
-
-impl SemanticModelBuilderVisitor {
-    pub(crate) fn new(root: &AnyJsRoot) -> Self {
-        Self {
-            extractor: SemanticEventExtractor::default(),
-            builder: SemanticModelBuilder::new(root.clone()),
-        }
+pub(super) fn matching_source(
+    db: &dyn biome_db::Db,
+    root: &AnyJsRoot,
+    path: &Utf8Path,
+) -> Option<AnyParsedSource> {
+    let syntax = root.syntax().as_send()?;
+    let source = db.parsed_source_for_path(path)?;
+    if source.parsed(db).as_send_node().as_ref() == Some(&syntax) {
+        return Some(source.into());
     }
+    source
+        .snippets(db)
+        .iter()
+        .find(|snippet| snippet.parsed(db).as_send_node().as_ref() == Some(&syntax))
+        .map(Into::into)
 }
 
-impl Visitor for SemanticModelBuilderVisitor {
-    type Language = JsLanguage;
-
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
-        // Visitor construction has no access to the service bag, so configure
-        // semantic flavor when we enter the root node.
-        if let WalkEvent::Enter(node) = event
-            && node.parent().is_none()
+pub(crate) fn model_for_root(
+    db: Option<&dyn LanguageDb>,
+    root: &AnyJsRoot,
+    path: &Utf8Path,
+    source_type: JsFileSource,
+) -> SemanticModel {
+    if let Some(db) = db
+        && let Some(source) = matching_source(db, root, path)
+    {
+        let model = js_semantic_model(db, &source);
+        // Semantic equality excludes locations, but analyzer consumers need the
+        // current syntax and the embedding flavor of the analyzed source.
+        if model.root().syntax().as_send() == root.syntax().as_send()
+            && model.flavor() == (&source_type).into()
         {
-            let source_type = ctx
-                .services
-                .get_service::<JsFileSource>()
-                .copied()
-                .unwrap_or_default();
-            let flavor = (&source_type).into();
-            self.extractor.set_flavor(flavor);
-            self.builder.set_flavor(flavor);
-        }
-
-        match event {
-            WalkEvent::Enter(node) => {
-                self.builder.push_node(node);
-                self.extractor.enter(node);
-            }
-            WalkEvent::Leave(node) => {
-                self.extractor.leave(node);
-            }
-        }
-
-        while let Some(e) = self.extractor.pop() {
-            self.builder.push_event(e);
+            return model.clone();
         }
     }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
-        // open_file/change_file cycle), skip building a new one.
-        if ctx.services.get_service::<SemanticModel>().is_some() {
-            return;
-        }
-        let model = self.builder.build();
-        ctx.services.insert_service(model);
-    }
+    semantic_model(root, SemanticModelOptions::from(&source_type))
 }
 
 pub struct SemanticModelVisitor;

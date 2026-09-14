@@ -9,6 +9,7 @@ pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
+use crate::services::semantic::model_for_root;
 use crate::services::typed::TypedModule;
 pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
@@ -20,8 +21,6 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_embeds::EmbeddedData;
-use biome_js_control_flow::ControlFlowModel;
-use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
@@ -58,17 +57,15 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 });
 
 #[derive(Default)]
-pub struct JsAnalyzerServices<'a> {
+pub struct JsAnalyzerServices {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
     embedded_data: Option<Arc<EmbeddedData>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    semantic_model: Option<&'a SemanticModel>,
-    control_flow_model: Option<ControlFlowModel>,
 }
 
-impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices<'_> {
+impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
     fn from(
         (module_db, project_layout, source_type): (
             Rc<dyn ModuleDb>,
@@ -82,13 +79,11 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             embedded_data: None,
             project_layout,
             source_type,
-            semantic_model: None,
-            control_flow_model: None,
         }
     }
 }
 
-impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
+impl From<&AnyJsRoot> for JsAnalyzerServices {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
@@ -96,25 +91,13 @@ impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
             embedded_data: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
-            semantic_model: None,
-            control_flow_model: None,
         }
     }
 }
 
-impl<'a> JsAnalyzerServices<'a> {
+impl JsAnalyzerServices {
     pub fn with_source_type(mut self, source_type: JsFileSource) -> Self {
         self.source_type = source_type;
-        self
-    }
-
-    pub fn with_semantic_model(mut self, model: &'a SemanticModel) -> Self {
-        self.semantic_model = Some(model);
-        self
-    }
-
-    pub fn with_control_flow_model(mut self, model: ControlFlowModel) -> Self {
-        self.control_flow_model = Some(model);
         self
     }
 
@@ -168,8 +151,6 @@ where
         embedded_data,
         project_layout,
         source_type,
-        semantic_model,
-        control_flow_model,
     } = services;
 
     let (registry, mut services, diagnostics, visitors) = registry.build();
@@ -221,6 +202,15 @@ where
             .map(|module| TypedModule::new(db.clone(), module))
     });
 
+    services.insert_lazy_service({
+        let root = root.clone();
+        let path = file_path.clone();
+        let db = embedded_db
+            .clone()
+            .or_else(|| module_db.clone().map(|db| -> Rc<dyn LanguageDb> { db }));
+        move || model_for_root(db.as_deref(), &root, &path, source_type)
+    });
+
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(TwSyntaxService::default());
     services.insert_service(source_type);
@@ -232,19 +222,13 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
+    if let Some(db) = &embedded_db {
+        services.insert_service(db.clone());
+    }
     if let Some(embedded_data) = embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data));
     } else if let Some(embedded_db) = embedded_db {
         services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
-    }
-    // If a pre-built model is available (workspace open_file/change_file path),
-    // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
-    // interleaved with the analyzer's syntax-phase traversal (single pass).
-    if let Some(semantic_model) = semantic_model {
-        services.insert_service(semantic_model.clone());
-    }
-    if let Some(control_flow_model) = control_flow_model {
-        services.insert_service(control_flow_model);
     }
 
     (

@@ -6,9 +6,7 @@ use biome_analyze::{
 };
 use biome_fs::MemoryFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_control_flow::control_flow_model;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_languages::JsFileSource;
 use biome_plugin_loader::AnalyzerGritPlugin;
 use camino::Utf8Path;
@@ -61,11 +59,7 @@ fn profiles_are_split_per_plugin() {
     };
 
     let options = AnalyzerOptions::default().with_file_path("/test.js");
-    let semantic_model = semantic_model(&root, SemanticModelOptions::default());
-    let services = JsAnalyzerServices::default()
-        .with_source_type(JsFileSource::js_module())
-        .with_semantic_model(&semantic_model)
-        .with_control_flow_model(control_flow_model(&root));
+    let services = JsAnalyzerServices::default().with_source_type(JsFileSource::js_module());
 
     profiling::reset();
     profiling::enable();

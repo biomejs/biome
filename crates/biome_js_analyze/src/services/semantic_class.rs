@@ -21,8 +21,6 @@ use biome_rowan::{
 use rustc_hash::FxHashSet;
 use std::option::Option;
 
-use super::semantic::SemanticModelBuilderVisitor;
-
 #[derive(Clone)]
 pub struct SemanticClassServices {
     pub model: SemanticClassModel,
@@ -137,8 +135,7 @@ where
     type Language = JsLanguage;
     type Services = SemanticClassServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Syntax, || SyntaxClassMemberReferencesVisitor {});
         analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }

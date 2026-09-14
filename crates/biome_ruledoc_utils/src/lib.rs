@@ -16,9 +16,8 @@ use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_control_flow::control_flow_model_from_source;
 use biome_js_parser::Parse;
-use biome_js_semantic::{SemanticModel, semantic_model_from_source};
+use biome_js_semantic::semantic_model_from_source;
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -44,7 +43,6 @@ pub struct AnalyzerServicesBuilder {
     file_system: MemoryFileSystem,
     path_info_cache: PathInfoCache,
     project_layout: Arc<ProjectLayout>,
-    semantic_model: Option<Arc<SemanticModel>>,
     enable_type_inference: bool,
 }
 
@@ -68,7 +66,6 @@ impl AnalyzerServicesBuilder {
                 file_system: MemoryFileSystem::default(),
                 path_info_cache: PathInfoCache::default(),
                 project_layout: Default::default(),
-                semantic_model: None,
                 enable_type_inference,
             };
         }
@@ -182,7 +179,6 @@ impl AnalyzerServicesBuilder {
             file_system: fs,
             path_info_cache,
             project_layout: Arc::new(layout),
-            semantic_model: None,
             enable_type_inference,
         }
     }
@@ -192,7 +188,7 @@ impl AnalyzerServicesBuilder {
         path: Utf8PathBuf,
         parse: Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
-    ) -> JsAnalyzerServices<'_> {
+    ) -> JsAnalyzerServices {
         let root = parse.tree();
         let source_index = self
             .module_db
@@ -219,7 +215,6 @@ impl AnalyzerServicesBuilder {
         );
         self.module_db
             .update_or_insert_module(path, ModuleInfoKind::Js(module_info));
-        self.semantic_model = Some(semantic_model);
 
         JsAnalyzerServices::from((
             self.module_db.rc_module_db(),
@@ -227,14 +222,6 @@ impl AnalyzerServicesBuilder {
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
-        .with_control_flow_model(
-            control_flow_model_from_source(&self.module_db, parsed_source).clone(),
-        )
-        .with_semantic_model(
-            self.semantic_model
-                .as_deref()
-                .expect("the semantic model was just created"),
-        )
     }
 
     pub fn build_for_html_parse(

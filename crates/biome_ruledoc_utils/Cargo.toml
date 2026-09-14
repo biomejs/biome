@@ -31,7 +31,6 @@ biome_html_analyze          = { workspace = true }
 biome_html_parser           = { workspace = true }
 biome_html_syntax           = { workspace = true }
 biome_js_analyze            = { workspace = true }
-biome_js_control_flow       = { workspace = true }
 biome_js_parser             = { workspace = true }
 biome_js_semantic           = { workspace = true }
 biome_js_syntax             = { workspace = true }

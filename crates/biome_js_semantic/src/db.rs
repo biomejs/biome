@@ -26,10 +26,10 @@ pub fn semantic_model_from_snippet(db: &dyn LanguageDb, file: ParsedSnippet) -> 
     semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type))
 }
 
-pub fn js_semantic_model<'db, Db>(db: &'db Db, file: &'db AnyParsedSource) -> &'db SemanticModel
-where
-    Db: LanguageDb,
-{
+pub fn js_semantic_model<'db>(
+    db: &'db dyn LanguageDb,
+    file: &AnyParsedSource,
+) -> &'db SemanticModel {
     match file {
         AnyParsedSource::ParsedSource(source) => semantic_model_from_source(db, *source),
         AnyParsedSource::ParsedSnippet(snippet) => semantic_model_from_snippet(db, *snippet),

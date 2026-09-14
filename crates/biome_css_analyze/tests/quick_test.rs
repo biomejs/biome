@@ -23,10 +23,7 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
     let mut error_ranges: Vec<TextRange> = Vec::new();
     let options = AnalyzerOptions::default();
     let rule_filter = RuleFilter::Rule("suspicious", "noDuplicateFontNames");
-    let semantic_model = biome_css_semantic::semantic_model(&parsed.tree());
-    let services = CssAnalyzerServices::default()
-        .with_file_source(CssFileSource::default())
-        .with_semantic_model(&semantic_model);
+    let services = CssAnalyzerServices::default().with_file_source(CssFileSource::default());
 
     analyze(
         &parsed.tree(),

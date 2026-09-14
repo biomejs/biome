@@ -8,9 +8,7 @@ use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
 use biome_js_analyze::{JsAnalyzerServices, analyze};
-use biome_js_control_flow::control_flow_model;
 use biome_js_parser::{JsParserOptions, Parse, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
@@ -105,11 +103,8 @@ fn quick_test() {
 
     let project_layout = project_layout_with_top_level_dependencies(dependencies);
     let db = module_graph_for_test_file(file_path.as_path(), project_layout.as_ref());
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
     let services =
         crate::JsAnalyzerServices::from((db.rc_module_db(), project_layout, JsFileSource::tsx()))
-            .with_semantic_model(&semantic_model)
-            .with_control_flow_model(control_flow_model(&parsed.tree()))
             .with_language_db(embedded_db(&parsed));
 
     analyze(
@@ -174,9 +169,7 @@ function App() {
         );
     let rule_filter = RuleFilter::Rule("correctness", "noUnusedImports");
 
-    let services = JsAnalyzerServices::default()
-        .with_control_flow_model(control_flow_model(&parsed.tree()))
-        .with_language_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::default().with_language_db(embedded_db(&parsed));
 
     analyze(
         &parsed.tree(),

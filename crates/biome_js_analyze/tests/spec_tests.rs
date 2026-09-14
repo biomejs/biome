@@ -6,9 +6,7 @@ use biome_db::ParsedSource;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
-use biome_js_control_flow::control_flow_model;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
@@ -256,12 +254,9 @@ pub(crate) fn analyze_and_snap(
     }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
-    let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
     let mut services = JsAnalyzerServices::default()
         .with_source_type(source_type)
-        .with_semantic_model(&semantic_model)
-        .with_control_flow_model(control_flow_model(&root))
         .with_project_layout(project_layout.clone())
         .with_language_db(embedded_db(&root, input_file, &source_type));
     if needs_module_graph {
