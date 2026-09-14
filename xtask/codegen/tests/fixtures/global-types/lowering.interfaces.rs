@@ -31,25 +31,25 @@ fn types() -> Box<[crate::TypeData]> {
                         kind: crate::TypeMemberKind::Named(
                             biome_rowan::Text::new_static("empty"),
                         ),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
                     },
                     crate::TypeMember {
                         kind: crate::TypeMemberKind::Named(
                             biome_rowan::Text::new_static("label"),
                         ),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
                     },
                     crate::TypeMember {
                         kind: crate::TypeMemberKind::NamedOptional(
                             biome_rowan::Text::new_static("find"),
                         ),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(18)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
                     },
                     crate::TypeMember {
                         kind: crate::TypeMemberKind::Named(
                             biome_rowan::Text::new_static("update"),
                         ),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(20)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
                     },
                     crate::TypeMember {
                         kind: crate::TypeMemberKind::Named(
@@ -85,7 +85,7 @@ fn types() -> Box<[crate::TypeData]> {
                         kind: crate::TypeMemberKind::Named(
                             biome_rowan::Text::new_static("tag"),
                         ),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
                     },
                 ]),
             }),
@@ -138,48 +138,9 @@ fn types() -> Box<[crate::TypeData]> {
                 ),
             ),
         ),
-        crate::TypeData::Null,
         crate::TypeData::Literal(
             Box::new(
                 crate::Literal::String(biome_rowan::Text::new_static("ready").into()),
-            ),
-        ),
-        crate::TypeData::Null,
-        crate::TypeData::Union(
-            Box::new(
-                crate::Union(
-                    Box::new([
-                        crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                        crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
-                    ]),
-                ),
-            ),
-        ),
-        crate::TypeData::Boolean,
-        crate::TypeData::Literal(
-            Box::new(
-                crate::Literal::String(biome_rowan::Text::new_static("pending").into()),
-            ),
-        ),
-        crate::TypeData::Union(
-            Box::new(
-                crate::Union(
-                    Box::new([
-                        crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
-                        crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
-                    ]),
-                ),
-            ),
-        ),
-        crate::TypeData::Null,
-        crate::TypeData::Union(
-            Box::new(
-                crate::Union(
-                    Box::new([
-                        crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                        crate::RawTypeId::Local(crate::TypeId::new(16)).into(),
-                    ]),
-                ),
             ),
         ),
         crate::TypeData::Function(
@@ -190,26 +151,21 @@ fn types() -> Box<[crate::TypeData]> {
                 parameters: Box::new([
                     crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("candidate"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                         is_optional: false,
                         is_rest: false,
                     }),
                     crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("state"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
                         is_optional: true,
                         is_rest: false,
                     }),
                 ]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(17)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                 ),
             }),
-        ),
-        crate::TypeData::Literal(
-            Box::new(
-                crate::Literal::String(biome_rowan::Text::new_static("ready").into()),
-            ),
         ),
         crate::TypeData::Function(
             Box::new(crate::Function {
@@ -225,7 +181,7 @@ fn types() -> Box<[crate::TypeData]> {
                     }),
                     crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("label"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
                         is_optional: true,
                         is_rest: false,
                     }),
