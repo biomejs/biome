@@ -1,0 +1,12 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: valid.json
+---
+# Input
+```json
+{
+  "caf\u00E9": "precomposed e-acute",
+  "\u00C5": "precomposed A-ring"
+}
+
+```
