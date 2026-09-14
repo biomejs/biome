@@ -69,8 +69,14 @@ impl LoweredGlobal {
 /// Lowered type data variants supported by the generator.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredTypeData {
+    AnyKeyword,
+    BigInt,
+    BigIntLiteral(Text),
     Boolean,
+    BooleanLiteral(bool),
+    NeverKeyword,
     Null,
+    NumberLiteral(Text),
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
@@ -78,6 +84,8 @@ pub enum LoweredTypeData {
     Symbol,
     StringLiteral(Text),
     Union(Box<[LoweredTypeReference]>),
+    Undefined,
+    UnknownKeyword,
 }
 
 /// Lowered class-like global.

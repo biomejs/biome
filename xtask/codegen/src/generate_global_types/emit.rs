@@ -128,8 +128,22 @@ pub fn render_declarations(lowered: &LoweredDeclarations) -> String {
 /// Dispatches lowered data to its Rust expression renderer.
 fn render_type_data(data: &LoweredTypeData) -> String {
     match data {
+        LoweredTypeData::AnyKeyword => "crate::TypeData::AnyKeyword".to_string(),
+        LoweredTypeData::BigInt => "crate::TypeData::BigInt".to_string(),
+        LoweredTypeData::BigIntLiteral(value) => format!(
+            "crate::TypeData::Literal(Box::new(crate::Literal::BigInt(biome_rowan::Text::new_static({}))))",
+            rust_string_literal(value.text()),
+        ),
         LoweredTypeData::Boolean => "crate::TypeData::Boolean".to_string(),
+        LoweredTypeData::BooleanLiteral(value) => {
+            format!("crate::TypeData::Literal(Box::new(crate::Literal::Boolean({value}.into())))")
+        }
+        LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
+        LoweredTypeData::NumberLiteral(value) => format!(
+            "crate::TypeData::Literal(Box::new(crate::Literal::Number(crate::literal::NumberLiteral::new(biome_rowan::Text::new_static({})))))",
+            rust_string_literal(value.text()),
+        ),
         LoweredTypeData::Class(class) => render_class(class),
         LoweredTypeData::Constructor(constructor) => render_constructor(constructor),
         LoweredTypeData::Function(function) => render_function(function),
@@ -143,6 +157,8 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_references(types),
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
+        LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
+        LoweredTypeData::UnknownKeyword => "crate::TypeData::UnknownKeyword".to_string(),
     }
 }
 
