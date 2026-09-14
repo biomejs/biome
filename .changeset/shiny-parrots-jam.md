@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Added the nursery rule [`noJsonUnsafeValues`](https://biomejs.dev/linter/rules/no-json-unsafe-values/), which disallows JSON values that are unsafe for interchange.
+Added the nursery rule [`noJsonUnsafeValues`](https://biomejs.dev/linter/rules/no-json-unsafe-values/), which disallows JSON values that are unsafe to use between different tools or languages.
 
 **Invalid:**
 

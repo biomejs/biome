@@ -31,27 +31,39 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```json,expect_diagnostic
-    /// 2e308
+    /// {
+    ///   "invalid1": 2e308
+    /// }
     /// ```
     ///
     /// ```json,expect_diagnostic
-    /// -2e308
+    /// {
+    ///   "invalid2": -2e308
+    /// }
     /// ```
     ///
     /// ```json,expect_diagnostic
-    /// "\ud83d"
+    /// {
+    ///   "invalid3": "\ud83d"
+    /// }
     /// ```
     ///
     /// ```json,expect_diagnostic
-    /// 1e-400
+    /// {
+    ///   "invalid4": 1e-400
+    /// }
     /// ```
     ///
     /// ```json,expect_diagnostic
-    /// 9007199254740992
+    /// {
+    ///   "invalid5": 9007199254740992
+    /// }
     /// ```
     ///
     /// ```json,expect_diagnostic
-    /// 2.2250738585072009e-308
+    /// {
+    ///   "invalid6": 2.2250738585072009e-308
+    /// }
     /// ```
     ///
     /// ### Valid
