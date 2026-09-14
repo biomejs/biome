@@ -36,7 +36,7 @@ switch (letter) {
 	case "A":
 	case "B":
 		console.log(letter);
-	// Preserve the fallthrough and fallback comments.
+	// A and B also execute the fallback.
 	default:
 		console.log("fallback");
 }
@@ -149,9 +149,9 @@ requireExplicitCaseInvalid.ts:5:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE
       4   4 │   
       5   5 │   switch (letter) {
       6     │ - → //·Runtime·fallback.
-          6 │ + → case·"A":·throw·new·Error("TODO:·Not·implemented·yet");
-          7 │ + → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
-          8 │ + → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+          6 │ + → case·"A":·
+          7 │ + → case·"B":·
+          8 │ + → case·"C":·
           9 │ + → //·Runtime·fallback.
       7  10 │     default:
       8  11 │       throw new Error("Unexpected letter");
@@ -190,8 +190,8 @@ requireExplicitCaseInvalid.ts:11:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      10  10 │   
      11  11 │   switch (letter) {
      12     │ - → default:
-         12 │ + → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
-         13 │ + → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+         12 │ + → case·"B":·
+         13 │ + → case·"C":·
          14 │ + → default:
      13  15 │       throw new Error("Unexpected letter");
      14  16 │     // Handle A explicitly.
@@ -229,7 +229,7 @@ requireExplicitCaseInvalid.ts:19:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      20  20 │     case "A":
      21  21 │       break;
      22     │ - → //·Runtime·fallback·between·cases.
-         22 │ + → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+         22 │ + → case·"C":·
          23 │ + → //·Runtime·fallback·between·cases.
      23  24 │     default:
      24  25 │       throw new Error("Unexpected letter");
@@ -266,9 +266,9 @@ requireExplicitCaseInvalid.ts:29:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
   
      31  31 │     case "B":
      32  32 │       console.log(letter);
-     33     │ - → //·Preserve·the·fallthrough·and·fallback·comments.
-         33 │ + → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
-         34 │ + → //·Preserve·the·fallthrough·and·fallback·comments.
+     33     │ - → //·A·and·B·also·execute·the·fallback.
+         33 │ + → case·"C":·
+         34 │ + → //·A·and·B·also·execute·the·fallback.
      34  35 │     default:
      35  36 │       console.log("fallback");
   
@@ -306,8 +306,8 @@ requireExplicitCaseInvalid.ts:39:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      40  40 │     case 0:
      41  41 │       break;
      42     │ - → default:
-         42 │ + → case·1:·throw·new·Error("TODO:·Not·implemented·yet");
-         43 │ + → case·2:·throw·new·Error("TODO:·Not·implemented·yet");
+         42 │ + → case·1:·
+         43 │ + → case·2:·
          44 │ + → default:
      43  45 │       break;
      44  46 │   }
@@ -345,7 +345,7 @@ requireExplicitCaseInvalid.ts:47:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      48  48 │     case true:
      49  49 │       break;
      50     │ - → default:
-         50 │ + → case·false:·throw·new·Error("TODO:·Not·implemented·yet");
+         50 │ + → case·false:·
          51 │ + → default:
      51  52 │       break;
      52  53 │   }
@@ -384,8 +384,8 @@ requireExplicitCaseInvalid.ts:55:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      56  56 │     case "A":
      57  57 │       break;
      58     │ - → default:
-         58 │ + → case·null:·throw·new·Error("TODO:·Not·implemented·yet");
-         59 │ + → case·undefined:·throw·new·Error("TODO:·Not·implemented·yet");
+         58 │ + → case·null:·
+         59 │ + → case·undefined:·
          60 │ + → default:
      59  61 │       break;
      60  62 │   }
@@ -452,7 +452,7 @@ requireExplicitCaseInvalid.ts:73:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      74  74 │     case "A":
      75  75 │       break;
      76     │ - → default:
-         76 │ + → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
+         76 │ + → case·"B":·
          77 │ + → default:
      77  78 │       break;
      78  79 │   }
@@ -490,7 +490,7 @@ requireExplicitCaseInvalid.ts:81:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      82  82 │     case "B":
      83  83 │       break;
      84     │ - → default:
-         84 │ + → case·"A":·throw·new·Error("TODO:·Not·implemented·yet");
+         84 │ + → case·"A":·
          85 │ + → default:
      85  86 │       break;
      86  87 │   }
@@ -528,7 +528,7 @@ requireExplicitCaseInvalid.ts:89:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
      90  90 │     case "start":
      91  91 │       break;
      92     │ - → default:
-         92 │ + → case·"stop":·throw·new·Error("TODO:·Not·implemented·yet");
+         92 │ + → case·"stop":·
          93 │ + → default:
      93  94 │       break;
      94  95 │   }
@@ -566,8 +566,8 @@ requireExplicitCaseInvalid.ts:97:1 lint/nursery/useExhaustiveSwitchCases  FIXABL
     100 100 │     case "C":
     101 101 │       break;
     102     │ - → default:
-        102 │ + → case·"A":·throw·new·Error("TODO:·Not·implemented·yet");
-        103 │ + → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
+        102 │ + → case·"A":·
+        103 │ + → case·"B":·
         104 │ + → default:
     103 105 │       break;
     104 106 │   }

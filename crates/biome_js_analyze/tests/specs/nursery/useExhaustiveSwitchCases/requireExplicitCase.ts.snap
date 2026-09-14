@@ -68,7 +68,7 @@ requireExplicitCase.ts:20:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━�
     23 23 │       case "B":
     24 24 │         return 1;
     25    │ - → → default:
-       25 │ + → → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+       25 │ + → → case·"C":·
        26 │ + → → default:
     26 27 │         throw new Error("bruh");
     27 28 │     }
