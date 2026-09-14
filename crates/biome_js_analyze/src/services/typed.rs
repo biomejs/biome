@@ -8,31 +8,39 @@ use biome_js_syntax::{
     JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
     JsSyntaxNode,
 };
-use biome_js_type_info::InferredType;
+use biome_js_type_info::{InferredType, interned_types::ConditionalType};
 use biome_module_graph::{
     ModuleDb, ModuleInfo,
     type_inference::{
-        ArrayOfPromisesClassificationRequest, CallableMemberRequest,
-        ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
-        FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedBindingTypeRequest,
-        NormalizedExpressionTypeRequest, PromiseClassificationRequest,
-        PromiseReturningFunctionClassificationRequest, TypeInferenceArgument, TypeInferenceCaller,
-        TypeInferenceClassification, TypeInferenceRequest, TypeInferenceSource,
-        execute_type_inference_request,
+        ArrayOfPromisesClassificationRequest, CallableMemberRequest, CaseLiteral,
+        CaseLiteralRequest, ConditionalTypeRequest, ExpectedCallArgumentTypeRequest,
+        ExpectedConstructorArgumentTypeRequest, FunctionReturnTypeRequest, MemberReturnTypeRequest,
+        NormalizedBindingTypeRequest, NormalizedExpressionTypeRequest,
+        PromiseClassificationRequest, PromiseReturningFunctionClassificationRequest,
+        TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
+        TypeInferenceRequest, TypeInferenceSource, execute_type_inference_request,
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
-use std::rc::Rc;
+use rustc_hash::FxHashMap;
+use std::{cell::RefCell, rc::Rc};
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
     db: Rc<dyn ModuleDb>,
     module: ModuleInfo,
+    conditional_types: Rc<RefCell<FxHashMap<TextRange, Option<ConditionalType>>>>,
+    case_literals: Rc<RefCell<FxHashMap<(TextRange, CaseLiteral), Option<bool>>>>,
 }
 
 impl TypedModule {
     pub(crate) fn new(db: Rc<dyn ModuleDb>, module: ModuleInfo) -> Self {
-        Self { db, module }
+        Self {
+            db,
+            module,
+            conditional_types: Rc::default(),
+            case_literals: Rc::default(),
+        }
     }
 }
 
@@ -79,6 +87,58 @@ impl TypedService {
         )?;
 
         Some(InferredType::new(typed_module.db.as_ref(), ty))
+    }
+
+    pub fn conditional_type_of_expression(
+        &self,
+        expression: &AnyJsExpression,
+    ) -> Option<ConditionalType> {
+        let typed_module = self.module.as_ref()?;
+        let range = expression.range();
+
+        if let Some(conditional) = typed_module.conditional_types.borrow().get(&range) {
+            return *conditional;
+        }
+
+        let conditional = if let Some(conditional) = self.execute_request(
+            typed_module,
+            ConditionalTypeRequest::new(typed_module.module, range),
+        ) {
+            Some(conditional)
+        } else {
+            self.execute_request(
+                typed_module,
+                NormalizedExpressionTypeRequest::new(typed_module.module, range),
+            )
+            .map(|ty| InferredType::new(typed_module.db.as_ref(), ty).conditional_type())
+        };
+
+        typed_module
+            .conditional_types
+            .borrow_mut()
+            .insert(range, conditional);
+        conditional
+    }
+
+    pub fn could_equal_case_literal(
+        &self,
+        expression: &AnyJsExpression,
+        literal: CaseLiteral,
+    ) -> Option<bool> {
+        let typed_module = self.module.as_ref()?;
+        let range = expression.range();
+        let key = (range, literal.clone());
+
+        if let Some(result) = typed_module.case_literals.borrow().get(&key) {
+            return *result;
+        }
+
+        let result = self.execute_request(
+            typed_module,
+            CaseLiteralRequest::new(typed_module.module, range, literal),
+        );
+        typed_module.case_literals.borrow_mut().insert(key, result);
+        result
     }
 
     /// Classifies an expression as a Promise without resolving unrelated members.
