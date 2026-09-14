@@ -28,3 +28,7 @@ import './sub/baz.css';
 import './sub/baz.css.com';
 
 import "./sub/generated/index.js";
+import "./sub/generated/index.jsx";
+import("./sub/generated/index.jsx");
+require("./sub/generated/index.jsx");
+export * from "./sub/generated/index.jsx";
