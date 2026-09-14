@@ -153,6 +153,38 @@ extraDependenciesInvalid.js:19:3 lint/correctness/useExhaustiveDependencies  FIX
 ```
 
 ```
+extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on someObj.
+  
+    26 │ function MyComponent1() {
+    27 │   let someObj = getObj();
+  > 28 │   useEffect(() => {
+       │   ^^^^^^^^^
+    29 │       console.log(someObj)
+    30 │   }, [someObj.id]);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    27 │   let someObj = getObj();
+    28 │   useEffect(() => {
+  > 29 │       console.log(someObj)
+       │                   ^^^^^^^
+    30 │   }, [someObj.id]);
+    31 │ }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Unsafe fix: Add the missing dependency someObj to the list.
+  
+    30 │ ··},·[someObj.id,·someObj]);
+       │                 +++++++++   
+
+```
+
+```
 extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This hook specifies a dependency more specific than its captures: someObj.id
@@ -182,38 +214,6 @@ extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies ━�
     31 │ }
     32 │ 
   
-
-```
-
-```
-extraDependenciesInvalid.js:28:3 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━
-
-  × This hook does not specify its dependency on someObj.
-  
-    26 │ function MyComponent1() {
-    27 │   let someObj = getObj();
-  > 28 │   useEffect(() => {
-       │   ^^^^^^^^^
-    29 │       console.log(someObj)
-    30 │   }, [someObj.id]);
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    27 │   let someObj = getObj();
-    28 │   useEffect(() => {
-  > 29 │       console.log(someObj)
-       │                   ^^^^^^^
-    30 │   }, [someObj.id]);
-    31 │ }
-  
-  i React relies on hook dependencies to determine when to re-compute Effects.
-    Failing to specify dependencies can result in Effects not updating correctly when state changes.
-    These "stale closures" are a common source of surprising bugs.
-  
-  i Unsafe fix: Add the missing dependency someObj to the list.
-  
-    30 │ ··},·[someObj.id,·someObj]);
-       │                 +++++++++   
 
 ```
 

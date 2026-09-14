@@ -96,6 +96,38 @@ issue3080.ts:5:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━�
 ```
 issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  × This hook does not specify its dependency on foo.
+  
+    15 │     // Missing diagnostics reported: foo and bar are missing from deps.
+  > 16 │     useEffect(myEffect, []);
+       │     ^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    10 │     function myEffect() {
+  > 11 │         console.log('foo', foo);
+       │                            ^^^
+    12 │         console.log('bar', bar);
+    13 │     }
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency foo to the list.
+  
+    16 │ ····useEffect(myEffect,·[foo]);
+       │                          +++   
+
+```
+
+```
+issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   × This hook does not specify its dependency on bar.
   
     15 │     // Missing diagnostics reported: foo and bar are missing from deps.
@@ -122,38 +154,6 @@ issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━
   i Unsafe fix: Add the missing dependency bar to the list.
   
     16 │ ····useEffect(myEffect,·[bar]);
-       │                          +++   
-
-```
-
-```
-issue3080.ts:16:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This hook does not specify its dependency on foo.
-  
-    15 │     // Missing diagnostics reported: foo and bar are missing from deps.
-  > 16 │     useEffect(myEffect, []);
-       │     ^^^^^^^^^
-    17 │ }
-    18 │ 
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    10 │     function myEffect() {
-  > 11 │         console.log('foo', foo);
-       │                            ^^^
-    12 │         console.log('bar', bar);
-    13 │     }
-  
-  i React relies on hook dependencies to determine when to re-compute Effects.
-    Failing to specify dependencies can result in Effects not updating correctly when state changes.
-    These "stale closures" are a common source of surprising bugs.
-  
-  i Either include it or remove the dependency array.
-  
-  i Unsafe fix: Add the missing dependency foo to the list.
-  
-    16 │ ····useEffect(myEffect,·[foo]);
        │                          +++   
 
 ```

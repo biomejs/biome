@@ -178,7 +178,7 @@ customHook.ts:38:20 lint/correctness/useExhaustiveDependencies ━━━━━�
 ```
 customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency on a.
+  × This hook specifies more dependencies than necessary: "foo".
   
     44 │     let a = 1;
     45 │     let b = 112345;
@@ -187,23 +187,23 @@ customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     47 │         console.log(a % b);
     48 │     });
   
-  i This dependency is being used here, but is not specified in the hook dependency list.
+  i This dependency can be removed from the list.
   
+    44 │     let a = 1;
     45 │     let b = 112345;
-    46 │     useEvenMoreEffect([], ["foo"], () => {
-  > 47 │         console.log(a % b);
-       │                     ^
+  > 46 │     useEvenMoreEffect([], ["foo"], () => {
+       │                            ^^^^^
+    47 │         console.log(a % b);
     48 │     });
-    49 │ 
   
   i React relies on hook dependencies to determine when to re-compute Effects.
-    Failing to specify dependencies can result in Effects not updating correctly when state changes.
-    These "stale closures" are a common source of surprising bugs.
+    Specifying more dependencies than required can lead to unnecessary re-rendering
+    and degraded performance.
   
-  i Unsafe fix: Add the missing dependency a to the list.
+  i Unsafe fix: Remove the extra dependencies from the list.
   
-    46 │ ····useEvenMoreEffect([],·["foo",·a],·()·=>·{
-       │                                 +++          
+    46 │ ····useEvenMoreEffect([],·["foo"],·()·=>·{
+       │                            -----          
 
 ```
 
@@ -242,7 +242,7 @@ customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
 ```
 customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook specifies more dependencies than necessary: "foo".
+  × This hook does not specify its dependency on a.
   
     44 │     let a = 1;
     45 │     let b = 112345;
@@ -251,23 +251,23 @@ customHook.ts:46:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
     47 │         console.log(a % b);
     48 │     });
   
-  i This dependency can be removed from the list.
+  i This dependency is being used here, but is not specified in the hook dependency list.
   
-    44 │     let a = 1;
     45 │     let b = 112345;
-  > 46 │     useEvenMoreEffect([], ["foo"], () => {
-       │                            ^^^^^
-    47 │         console.log(a % b);
+    46 │     useEvenMoreEffect([], ["foo"], () => {
+  > 47 │         console.log(a % b);
+       │                     ^
     48 │     });
+    49 │ 
   
   i React relies on hook dependencies to determine when to re-compute Effects.
-    Specifying more dependencies than required can lead to unnecessary re-rendering
-    and degraded performance.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
   
-  i Unsafe fix: Remove the extra dependencies from the list.
+  i Unsafe fix: Add the missing dependency a to the list.
   
-    46 │ ····useEvenMoreEffect([],·["foo"],·()·=>·{
-       │                            -----          
+    46 │ ····useEvenMoreEffect([],·["foo",·a],·()·=>·{
+       │                                 +++          
 
 ```
 
@@ -324,40 +324,6 @@ customHook.ts:53:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
 ```
 customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This hook does not specify its dependency on a.
-  
-    59 │     let a = "1";
-    60 │     let b = 112345;
-  > 61 │     doSomething([], "apple", () => {
-       │     ^^^^^^^^^^^
-    62 │         console.log(a + b);
-    63 │     });
-  
-  i This dependency is being used here, but is not specified in the hook dependency list.
-  
-    60 │     let b = 112345;
-    61 │     doSomething([], "apple", () => {
-  > 62 │         console.log(a + b);
-       │                     ^
-    63 │     });
-    64 │     doSomething(["a b"], [a], () => {
-  
-  i React relies on hook dependencies to determine when to re-compute Effects.
-    Failing to specify dependencies can result in Effects not updating correctly when state changes.
-    These "stale closures" are a common source of surprising bugs.
-  
-  i Either include it or remove the dependency array.
-  
-  i Unsafe fix: Add the missing dependency a to the list.
-  
-    61 │ ····doSomething([a],·"apple",·()·=>·{
-       │                  +                   
-
-```
-
-```
-customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   × This hook does not specify its dependency on b.
   
     59 │     let a = "1";
@@ -385,6 +351,40 @@ customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━�
   i Unsafe fix: Add the missing dependency b to the list.
   
     61 │ ····doSomething([b],·"apple",·()·=>·{
+       │                  +                   
+
+```
+
+```
+customHook.ts:61:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on a.
+  
+    59 │     let a = "1";
+    60 │     let b = 112345;
+  > 61 │     doSomething([], "apple", () => {
+       │     ^^^^^^^^^^^
+    62 │         console.log(a + b);
+    63 │     });
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    60 │     let b = 112345;
+    61 │     doSomething([], "apple", () => {
+  > 62 │         console.log(a + b);
+       │                     ^
+    63 │     });
+    64 │     doSomething(["a b"], [a], () => {
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency a to the list.
+  
+    61 │ ····doSomething([a],·"apple",·()·=>·{
        │                  +                   
 
 ```
