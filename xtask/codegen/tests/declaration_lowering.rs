@@ -378,6 +378,81 @@ fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
 }
 
 #[test]
+fn symbol_static_members_follow_merged_constructor_declarations() -> Result<()> {
+    use xtask_codegen::generate_global_types::{
+        compare::compare_lowered_globals, lower::lower_global_types,
+    };
+
+    for (constructor, property, scalar, expected) in [
+        (
+            "SymbolConstructor",
+            "customKey",
+            "boolean",
+            LoweredTypeData::Boolean,
+        ),
+        ("Registry", "anotherKey", "bigint", LoweredTypeData::BigInt),
+    ] {
+        let mut file = fixture("manifest.disposables.d.ts")?;
+        file.bytes = String::from_utf8(file.bytes)?
+            .replace("SymbolConstructor", constructor)
+            .into_bytes();
+        let mut extension = fixture("lowering.interfaces.d.ts")?;
+        extension.bytes = format!(
+            r#"
+            interface {constructor} {{ readonly {property}: unique symbol; }}
+            interface {constructor} {{
+                for(input?: {scalar}): {scalar} | undefined;
+                keyFor(input: {scalar}): {scalar};
+            }}
+        "#
+        )
+        .into_bytes();
+        let files = [file, extension];
+        let manifest = build_global_manifest(
+            files
+                .iter()
+                .flat_map(|file| collect(file).records)
+                .collect(),
+        );
+        let lowered = lower_global_types(&manifest, &files)?;
+        compare_lowered_globals(&lowered)?;
+        let global = lowered.global("Symbol").unwrap();
+        let LoweredTypeData::Class(class) = global.data() else {
+            panic!("expected class")
+        };
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local type")
+            };
+            &global.local_types()[*index]
+        };
+        let property = class.member(property).unwrap();
+        assert_eq!(property.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(local(property.type_reference()), &LoweredTypeData::Symbol);
+        for name in ["for", "keyFor"] {
+            let member = class.member(name).unwrap();
+            assert_eq!(member.kind(), &LoweredMemberKind::NamedStatic);
+            let LoweredTypeData::Function(function) = local(member.type_reference()) else {
+                panic!("expected function")
+            };
+            let parameter = &function.parameters()[0];
+            assert_eq!(local(parameter.type_reference()), &expected);
+            assert_eq!(parameter.is_optional(), name == "for");
+            if name == "for" {
+                let LoweredTypeData::Union(types) = local(function.return_type()) else {
+                    panic!("expected union")
+                };
+                assert_eq!(local(&types[0]), &expected);
+                assert_eq!(local(&types[1]), &LoweredTypeData::Undefined);
+            } else {
+                assert_eq!(local(function.return_type()), &expected);
+            }
+        }
+    }
+    Ok(())
+}
+
+#[test]
 fn generic_constraints_translate_types_and_parameter_references() -> Result<()> {
     use xtask_codegen::generate_global_types::lower::lower_global_types;
 

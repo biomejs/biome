@@ -19,7 +19,6 @@ const PROMISE_MEMBER_COUNT: usize = 11;
 const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
 const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
-const SYMBOL_MEMBER_COUNT: usize = 2;
 
 #[derive(Clone, Copy)]
 struct PromiseMethodShape {
@@ -438,14 +437,8 @@ fn assert_symbol_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
             class.name()
         );
     }
-    if class.members().len() != SYMBOL_MEMBER_COUNT {
-        bail!(
-            "generated Symbol global has {} members, expected {}",
-            class.members().len(),
-            SYMBOL_MEMBER_COUNT
-        );
-    }
-
+    // Disposable computed members address these predefined IDs directly.
+    // Their static properties must retain the same identities during lowering.
     assert_symbol_member(class, "dispose", "GLOBAL_SYMBOL_DISPOSE_ID")?;
     assert_symbol_member(class, "asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")?;
     assert_symbol_helper(

@@ -1612,7 +1612,7 @@ impl SelectedSymbolMember {
     }
 }
 
-/// Lowers the predefined `Symbol` projection and its two well-known symbol helpers.
+/// Lowers selected Symbol static members and the predefined disposable symbol helpers.
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -1628,38 +1628,42 @@ fn lower_symbol_globals(
         bail!("Symbol global must have a value-side declaration");
     }
 
-    validate_symbol_declarations(symbol_group.declarations(), source_cache)?;
-
-    let Some(constructor_group) = manifest.global_group("SymbolConstructor") else {
-        bail!("Symbol global value side references missing SymbolConstructor group");
-    };
+    let constructor_name =
+        resolve_constructor_name("Symbol", symbol_group.declarations(), source_cache)?;
+    let constructor_group = manifest
+        .global_group(constructor_name.text())
+        .with_context(|| {
+            format!("Symbol global references missing constructor {constructor_name}")
+        })?;
     if !constructor_group.has_role(GlobalDeclarationRole::Type) {
         bail!("SymbolConstructor must have a type-side declaration");
     }
+    // Disposable interface keys address predefined symbol IDs, so their declarations
+    // must exist and denote unique symbols before those IDs can be emitted.
     validate_symbol_constructor_members(constructor_group.declarations(), source_cache)?;
 
-    globals.push(LoweredGlobal {
-        local_types: Box::default(),
+    let mut class = LoweredClass {
         name: Text::from("Symbol"),
+        type_parameters: Box::default(),
+        members: Box::default(),
+    };
+    let local_types = declarations::lower_constructor_static_members(
+        manifest,
+        source_cache.source_files,
+        constructor_group.declarations(),
+        &mut class,
+        "GLOBAL_SYMBOL_ID",
+        supports_symbol_static_member,
+        &[
+            ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
+            ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+        ],
+    )?;
+    globals.push(LoweredGlobal {
+        local_types,
+        name: class.name.clone(),
         id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
-        data: LoweredTypeData::Class(LoweredClass {
-            name: Text::from("Symbol"),
-            type_parameters: Box::default(),
-            members: Box::new([
-                LoweredTypeMember {
-                    name: Text::from("dispose"),
-                    kind: LoweredMemberKind::NamedStatic,
-                    type_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID"),
-                },
-                LoweredTypeMember {
-                    name: Text::from("asyncDispose"),
-                    kind: LoweredMemberKind::NamedStatic,
-                    type_reference: LoweredTypeReference::Predefined(
-                        "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
-                    ),
-                },
-            ]),
-        }),
+        data: LoweredTypeData::Class(class),
     });
     globals.push(LoweredGlobal {
         local_types: Box::default(),
@@ -1677,35 +1681,80 @@ fn lower_symbol_globals(
     Ok(())
 }
 
-fn validate_symbol_declarations(
+/// Selects named unique-symbol properties and the registry functions for/keyFor.
+/// Prototype properties, call/construct signatures, computed members, and other
+/// methods are outside this selection.
+fn supports_symbol_static_member(member: &AnyTsTypeMember) -> Result<bool> {
+    match member {
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
+            if !matches!(
+                property.name()?,
+                AnyJsObjectMemberName::JsLiteralMemberName(_)
+            ) {
+                return Ok(false);
+            }
+            is_unique_symbol_property(property)
+        }
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+            let AnyJsObjectMemberName::JsLiteralMemberName(name) = method.name()? else {
+                return Ok(false);
+            };
+            Ok(matches!(name.name()?.text(), "for" | "keyFor"))
+        }
+        _ => Ok(false),
+    }
+}
+
+fn is_unique_symbol_property(property: &TsPropertySignatureTypeMember) -> Result<bool> {
+    let Some(annotation) = property.type_annotation() else {
+        return Ok(false);
+    };
+    let AnyTsType::TsTypeOperatorType(operator) = annotation.ty()? else {
+        return Ok(false);
+    };
+    Ok(operator.operator_token()?.kind() == T![unique]
+        && matches!(operator.ty()?, AnyTsType::TsSymbolType(_)))
+}
+
+fn resolve_constructor_name(
+    global_name: &str,
     records: &[DeclarationRecord],
     source_cache: &mut ParsedSourceCache,
-) -> Result<()> {
+) -> Result<Text> {
+    let mut constructor = None;
     for record in records {
         match &record.kind {
             DeclarationKind::Interface => {}
             DeclarationKind::VariableDeclarator { .. } => {
-                validate_symbol_constructor_reference(record, source_cache)?;
+                let name = resolve_constructor_reference(record, source_cache)?;
+                if constructor
+                    .as_ref()
+                    .is_some_and(|previous| previous != &name)
+                {
+                    bail!("{global_name} value declarations reference different constructor types");
+                }
+                constructor = Some(name);
             }
             DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the Symbol global")
+                bail!("type aliases are not supported in the {global_name} global")
             }
             DeclarationKind::DeclareFunction | DeclarationKind::ImportEquals => {
                 bail!(
-                    "unsupported value-side Symbol declaration {:?}",
+                    "unsupported value-side {global_name} declaration {:?}",
                     record.kind
                 )
             }
         }
     }
 
-    Ok(())
+    constructor.with_context(|| format!("{global_name} is missing a value declaration"))
 }
 
-fn validate_symbol_constructor_reference(
+fn resolve_constructor_reference(
     record: &DeclarationRecord,
     source_cache: &mut ParsedSourceCache,
-) -> Result<()> {
+) -> Result<Text> {
+    let global_name = record.declared_name.text();
     let declarator = source_cache
         .find_variable_declarator(record)?
         .with_context(|| {
@@ -1716,28 +1765,24 @@ fn validate_symbol_constructor_reference(
             )
         })?;
     let Some(annotation) = declarator.variable_annotation() else {
-        bail!("declare var Symbol is missing a type annotation");
+        bail!("declare var {global_name} is missing a type annotation");
     };
     let AnyTsVariableAnnotation::TsTypeAnnotation(annotation) = annotation else {
-        bail!("declare var Symbol uses unsupported definite assignment annotation");
+        bail!("declare var {global_name} uses unsupported definite assignment annotation");
     };
     let AnyTsType::TsReferenceType(reference) = annotation.ty()? else {
-        bail!("declare var Symbol must reference SymbolConstructor");
+        bail!("{global_name} value declaration must reference a constructor interface");
     };
     if reference.type_arguments().is_some() {
-        bail!("declare var Symbol must reference SymbolConstructor without type arguments");
+        bail!("{global_name} constructor reference must not have type arguments");
     }
     let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = reference
         .name()
-        .context("declare var Symbol is missing a type reference name")?
+        .with_context(|| format!("declare var {global_name} is missing a type reference name"))?
     else {
-        bail!("declare var Symbol must reference SymbolConstructor");
+        bail!("{global_name} value declaration must reference a constructor interface");
     };
-    if identifier.value_token()?.token_text_trimmed().text() != "SymbolConstructor" {
-        bail!("declare var Symbol must reference SymbolConstructor");
-    }
-
-    Ok(())
+    Ok(Text::from(identifier.value_token()?.token_text_trimmed()))
 }
 
 /// Validates the TypeScript `exec` signature before emitting the predefined `RegExp` projection.

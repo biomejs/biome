@@ -155,6 +155,39 @@ fn test_infer_module_types_resolves_builtin_global_identities_on_build() {
 }
 
 #[test]
+fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const registered = Symbol.for("entry");
+        export const key = Symbol.keyFor(registered);
+        export const iterator = Symbol.iterator;
+        export const asyncIterator = Symbol.asyncIterator;
+        export const tag = Symbol.toStringTag;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in ["registered", "iterator", "asyncIterator", "tag"] {
+        assert_eq!(binding(name), InferredTypeData::Symbol, "{name}");
+    }
+    let key = binding("key");
+    assert!(contains_inferred_string(&db, key));
+    let InferredTypeData::Union(key) = key else {
+        panic!("expected optional registry key")
+    };
+    assert!(key.types(&db).contains(&InferredTypeData::Undefined));
+}
+
+#[test]
 fn weak_map_members_infer_calls_with_instance_arguments() {
     let fs = MemoryFileSystem::default();
     fs.insert(
