@@ -205,6 +205,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         ),
         LoweredTypeData::Tuple(elements) => format!("crate::TypeData::from(crate::Tuple(Box::new([{}])))", elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(",")),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
+        LoweredTypeData::Readonly(ty) => format!(
+            "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Readonly, ty: {} }}))",
+            render_type_reference(ty),
+        ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
             ty,
@@ -214,8 +218,8 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(ty),
             render_type_references(type_parameters),
         ),
-        LoweredTypeData::GenericParameter { name, constraint, default } => format!(
-            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
+        LoweredTypeData::GenericParameter { is_const, name, constraint, default } => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ is_const: {is_const}, name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
             rust_string_literal(name.text()),
             constraint.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
             default.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),

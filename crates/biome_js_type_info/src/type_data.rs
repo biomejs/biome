@@ -716,6 +716,8 @@ pub struct FunctionParameterBinding {
 /// Definition of a generic type parameter.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GenericTypeParameter {
+    /// Whether inline call arguments use const-like inference for this parameter.
+    pub is_const: bool,
     /// Name of the type parameter.
     pub name: Text,
 
@@ -1488,6 +1490,8 @@ pub struct TypeofValue {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofUnaryMinusExpression {
+    /// Whether the operand syntax is a number or bigint literal.
+    pub is_literal_argument: bool,
     pub argument: TypeReference,
 }
 

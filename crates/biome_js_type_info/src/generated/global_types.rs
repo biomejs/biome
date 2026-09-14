@@ -1012,11 +1012,13 @@ pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11
         [
             crate::TypeData::ObjectKeyword,
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("K"),
                 constraint: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 default: crate::TypeReference::unknown(),
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("V"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
@@ -1104,6 +1106,7 @@ pub(crate) static SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("T"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
@@ -1222,11 +1225,13 @@ pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("K"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("V"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
@@ -1902,6 +1907,7 @@ pub(crate) static ITERATOR_YIELD_RESULT_LOCAL_TYPES: std::sync::LazyLock<[crate:
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("TYield"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
@@ -1913,6 +1919,7 @@ pub(crate) static ITERATOR_RETURN_RESULT_LOCAL_TYPES: std::sync::LazyLock<[crate
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("TReturn"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
@@ -1924,12 +1931,14 @@ pub(crate) static ITERATOR_RESULT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeD
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("T"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
             crate::TypeData::AnyKeyword,
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("TReturn"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
@@ -1952,17 +1961,20 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("T"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::TypeReference::unknown(),
             }),
             crate::TypeData::AnyKeyword,
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("TReturn"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             }),
             crate::TypeData::from(crate::GenericTypeParameter {
+                is_const: false,
                 name: biome_rowan::Text::new_static("TNext"),
                 constraint: crate::TypeReference::unknown(),
                 default: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),

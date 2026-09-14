@@ -1016,6 +1016,7 @@ mod tests {
         (0..length).fold(terminal, |constraint, index| {
             TypeData::Generic(InternedGenericTypeParameter::new(
                 db,
+                false,
                 Some(constraint),
                 None,
                 Text::new_owned(format!("T{index}").into_boxed_str()),
@@ -1125,6 +1126,7 @@ mod tests {
             InternedGenericTypeParameter::from_id(unsafe { salsa::Id::from_index(0) });
         let self_cycle = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             Some(TypeData::Generic(self_reference)),
             None,
             text("SelfCycle"),
@@ -1138,6 +1140,7 @@ mod tests {
             InternedGenericTypeParameter::from_id(unsafe { salsa::Id::from_index(1) });
         let first = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             Some(TypeData::Generic(second_reference)),
             None,
             text("First"),
@@ -1147,6 +1150,7 @@ mod tests {
         };
         InternedGenericTypeParameter::new(
             &db,
+            false,
             Some(TypeData::Generic(first_reference)),
             None,
             text("Second"),
@@ -1191,6 +1195,7 @@ mod tests {
             InternedGenericTypeParameter::from_id(unsafe { salsa::Id::from_index(0) });
         let cycle = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             Some(TypeData::Generic(cycle_reference)),
             None,
             text("Cycle"),
@@ -1288,6 +1293,7 @@ mod tests {
         let db = TestDb::default();
         let generic = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             None,
             text("T"),

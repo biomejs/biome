@@ -636,14 +636,18 @@ fn signature_accepts_arguments<'db>(
     if parameters
         .iter()
         .all(|parameter| matches!(parameter, ResolvedParameter::Required(_)))
-        && args
-            .iter()
-            .all(|argument| matches!(argument, ResolvedCallArgument::Argument(_)))
+        && args.iter().all(|argument| {
+            matches!(
+                argument,
+                ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+            )
+        })
     {
         return parameters.len() == args.len()
-            && parameters.iter().zip(args).all(|(parameter, argument)| {
-                ArgumentTypeCompatibility::new(parameter.ty(), argument.ty()).is_satisfied(db)
-            });
+            && parameters
+                .iter()
+                .zip(args)
+                .all(|(parameter, argument)| argument.matches_parameter(db, parameter.ty()));
     }
 
     matched_parameter_types(db, parameters, args, None).is_some()
@@ -679,10 +683,12 @@ fn infer_single_signature_resolved_parameter_type<'db>(
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
     args.get(argument_index)?;
-    if args[..argument_index]
-        .iter()
-        .all(|argument| matches!(argument, ResolvedCallArgument::Argument(_)))
-        && let Some(parameter) = parameters.get(argument_index)
+    if args[..argument_index].iter().all(|argument| {
+        matches!(
+            argument,
+            ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+        )
+    }) && let Some(parameter) = parameters.get(argument_index)
         && parameters
             .iter()
             .take(argument_index + 1)
@@ -728,9 +734,12 @@ fn infer_parameter_type_for_resolved_argument<'db>(
     if parameters
         .iter()
         .all(|parameter| matches!(parameter, ResolvedParameter::Required(_)))
-        && args
-            .iter()
-            .all(|argument| matches!(argument, ResolvedCallArgument::Argument(_)))
+        && args.iter().all(|argument| {
+            matches!(
+                argument,
+                ResolvedCallArgument::Argument(_) | ResolvedCallArgument::ConstArgument { .. }
+            )
+        })
     {
         let parameter = parameters.get(argument_index)?;
         args.get(argument_index)?;
@@ -740,9 +749,7 @@ fn infer_parameter_type_for_resolved_argument<'db>(
                 .zip(args)
                 .enumerate()
                 .all(|(index, (parameter, argument))| {
-                    index == argument_index
-                        || ArgumentTypeCompatibility::new(parameter.ty(), argument.ty())
-                            .is_satisfied(db)
+                    index == argument_index || argument.matches_parameter(db, parameter.ty())
                 }))
         .then(|| parameter.ty());
     }
@@ -827,12 +834,13 @@ fn matched_parameter_types<'db>(
             continue;
         }
 
-        let arg_ty = if argument.is_spread() {
-            spread_element_type(db, argument.ty())
+        let matches = if argument.is_spread() {
+            ArgumentTypeCompatibility::new(parameter.ty(), spread_element_type(db, argument.ty()))
+                .is_satisfied(db)
         } else {
-            argument.ty()
+            argument.matches_parameter(db, parameter.ty())
         };
-        if ArgumentTypeCompatibility::new(parameter.ty(), arg_ty).is_satisfied(db) {
+        if matches {
             push_consumed_sequence_states(
                 state,
                 parameter.is_spread(),
@@ -944,6 +952,7 @@ fn returns_void<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> 
 /// compound type, so callers must preserve this ordering.
 #[derive(Clone, Copy)]
 struct ArgumentTypeCompatibility<'db> {
+    const_inference: bool,
     parameter_ty: InferredTypeData<'db>,
     argument_ty: InferredTypeData<'db>,
 }
@@ -951,6 +960,7 @@ struct ArgumentTypeCompatibility<'db> {
 impl<'db> ArgumentTypeCompatibility<'db> {
     fn new(parameter_ty: InferredTypeData<'db>, argument_ty: InferredTypeData<'db>) -> Self {
         Self {
+            const_inference: false,
             parameter_ty,
             argument_ty,
         }
@@ -986,6 +996,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
         argument_ty: InferredTypeData<'db>,
     ) -> Self {
         Self {
+            const_inference: self.const_inference,
             parameter_ty,
             argument_ty,
         }
@@ -1137,6 +1148,37 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                         .map(|arg_ty| self.with_types(parameter_ty, *arg_ty))
                         .collect(),
                 )
+            }
+            (InferredTypeData::TypeOperator(parameter), arg_ty)
+                if self.const_inference
+                    && parameter.operator(db) == biome_js_type_info::TypeOperator::Readonly =>
+            {
+                let arg_ty = match arg_ty {
+                    InferredTypeData::TypeOperator(argument)
+                        if argument.operator(db) == biome_js_type_info::TypeOperator::Readonly =>
+                    {
+                        argument.ty(db)
+                    }
+                    ty => ty,
+                };
+                ArgumentMatchAction::All(Vec::from([self.with_types(parameter.ty(db), arg_ty)]))
+            }
+            (parameter_ty, InferredTypeData::TypeOperator(argument))
+                if self.const_inference
+                    && argument.operator(db) == biome_js_type_info::TypeOperator::Readonly =>
+            {
+                // Const candidates must not satisfy mutable array requirements,
+                // including requirements reached through unions or object members.
+                let mutable_array = matches!(parameter_ty, InferredTypeData::Tuple(_))
+                    || parameter_ty.is_array_class(db)
+                    || matches!(parameter_ty, InferredTypeData::InstanceOf(instance) if instance.ty(db).is_array_class(db));
+                if mutable_array {
+                    ArgumentMatchAction::Mismatch
+                } else {
+                    ArgumentMatchAction::All(Vec::from([
+                        self.with_types(parameter_ty, argument.ty(db))
+                    ]))
+                }
             }
             (InferredTypeData::InstanceOf(parameter), InferredTypeData::InstanceOf(argument)) => {
                 let mut pairs = Vec::from([self.with_types(parameter.ty(db), argument.ty(db))]);
@@ -1724,12 +1766,51 @@ fn infer_generic_return_type<'db>(
     args: &[ResolvedCallArgument<'db>],
 ) -> InferredTypeData<'db> {
     let mut substitutions: Vec<InferredTypeSubstitution<'db>> = Vec::new();
-    for (parameter, arg) in function
-        .parameters(db)
-        .iter()
-        .zip(args.iter().copied().map(ResolvedCallArgument::ty))
-    {
+    for (index, parameter) in function.parameters(db).iter().enumerate() {
         let parameter_ty = parameter.ty();
+        let const_parameter = matches!(parameter_ty, InferredTypeData::Generic(generic) if generic.is_const(db))
+            || matches!(parameter_ty, InferredTypeData::InstanceOf(instance) if matches!(instance.ty(db), InferredTypeData::Generic(generic) if generic.is_const(db)));
+        let arg = if parameter.is_rest() && const_parameter {
+            let remaining = args.get(index..).unwrap_or_default();
+            let tuple = |const_inference| {
+                InferredTypeData::Tuple(InferredTuple::new(
+                    db,
+                    remaining
+                        .iter()
+                        .map(|arg| InferredTupleElementType {
+                            name: None,
+                            ty: if const_inference {
+                                match arg {
+                                    ResolvedCallArgument::ConstArgument { const_ty, .. } => {
+                                        *const_ty
+                                    }
+                                    _ => arg.ty(),
+                                }
+                            } else {
+                                arg.ty()
+                            },
+                            is_optional: matches!(arg, ResolvedCallArgument::Optional(_)),
+                            is_rest: matches!(arg, ResolvedCallArgument::Spread(_)),
+                        })
+                        .collect::<Box<[_]>>(),
+                ))
+            };
+            ResolvedCallArgument::ConstArgument {
+                ty: tuple(false),
+                const_ty: InferredTypeData::TypeOperator(
+                    biome_js_type_info::interned_types::InternedTypeOperatorType::new(
+                        db,
+                        tuple(true),
+                        biome_js_type_info::TypeOperator::Readonly,
+                    ),
+                ),
+            }
+            .for_parameter(db, parameter_ty)
+        } else if let Some(arg) = args.get(index) {
+            arg.for_parameter(db, parameter_ty)
+        } else {
+            continue;
+        };
         if parameter_ty.is_generic_reference(db) {
             let substitution = InferredTypeSubstitution {
                 generic: parameter_ty,
@@ -1920,6 +2001,11 @@ enum TupleExpansionItem<'db> {
 pub(in crate::db) enum ResolvedCallArgument<'db> {
     /// A required argument that consumes one parameter position.
     Argument(InferredTypeData<'db>),
+    /// An inline literal with a separate candidate for const generic inference.
+    ConstArgument {
+        ty: InferredTypeData<'db>,
+        const_ty: InferredTypeData<'db>,
+    },
     /// An argument that may be absent and consumes at most one position.
     Optional(InferredTypeData<'db>),
     /// An argument that may consume zero or more parameter positions.
@@ -1928,7 +2014,7 @@ pub(in crate::db) enum ResolvedCallArgument<'db> {
 
 impl<'db> ResolvedCallArgument<'db> {
     fn accepts_zero(self) -> bool {
-        !matches!(self, Self::Argument(_))
+        !matches!(self, Self::Argument(_) | Self::ConstArgument { .. })
     }
 
     fn is_spread(self) -> bool {
@@ -1938,7 +2024,59 @@ impl<'db> ResolvedCallArgument<'db> {
     pub(in crate::db) fn ty(self) -> InferredTypeData<'db> {
         match self {
             Self::Argument(ty) | Self::Optional(ty) | Self::Spread(ty) => ty,
+            Self::ConstArgument { ty, .. } => ty,
         }
+    }
+
+    fn matches_parameter(self, db: &'db dyn ModuleDb, parameter: InferredTypeData<'db>) -> bool {
+        if ArgumentTypeCompatibility::new(parameter, self.ty()).is_satisfied(db) {
+            return true;
+        }
+        let is_const = matches!(parameter, InferredTypeData::Generic(generic) if generic.is_const(db))
+            || matches!(parameter, InferredTypeData::InstanceOf(instance) if matches!(instance.ty(db), InferredTypeData::Generic(generic) if generic.is_const(db)));
+        if is_const && let Self::ConstArgument { const_ty, .. } = self {
+            return ArgumentTypeCompatibility {
+                const_inference: true,
+                parameter_ty: parameter,
+                argument_ty: const_ty,
+            }
+            .is_satisfied(db);
+        }
+        false
+    }
+
+    pub(in crate::db) fn for_parameter(
+        self,
+        db: &'db dyn ModuleDb,
+        parameter: InferredTypeData<'db>,
+    ) -> InferredTypeData<'db> {
+        let generic = match parameter {
+            InferredTypeData::Generic(generic) => Some(generic),
+            InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+                InferredTypeData::Generic(generic) => Some(generic),
+                _ => None,
+            },
+            _ => None,
+        };
+        if let Some(generic) = generic
+            && generic.is_const(db)
+            && let Self::ConstArgument { const_ty, .. } = self
+        {
+            if let Some(constraint) = generic.constraint(db) {
+                let constraint = resolve_local_type_on_demand(db, constraint);
+                if !(ArgumentTypeCompatibility {
+                    const_inference: true,
+                    parameter_ty: constraint,
+                    argument_ty: const_ty,
+                })
+                .is_satisfied(db)
+                {
+                    return constraint;
+                }
+            }
+            return const_ty;
+        }
+        self.ty()
     }
 }
 
