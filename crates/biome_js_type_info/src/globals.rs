@@ -99,6 +99,7 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(T_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
+                is_const: false,
                 name: Text::new_static("T"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
@@ -106,6 +107,7 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(U_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
+                is_const: false,
                 name: Text::new_static("U"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),

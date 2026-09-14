@@ -621,7 +621,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
@@ -638,7 +645,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -1369,6 +1383,15 @@ impl TypeData {
                 JsUnaryOperator::Delete => Self::Boolean,
                 JsUnaryOperator::Minus => {
                     Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                        is_literal_argument: expr.argument().is_ok_and(|argument| {
+                            matches!(
+                                argument,
+                                AnyJsExpression::AnyJsLiteralExpression(
+                                    AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                        | AnyJsLiteralExpression::JsBigintLiteralExpression(_)
+                                )
+                            )
+                        }),
                         argument: expr
                             .argument()
                             .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
@@ -1925,6 +1948,10 @@ impl GenericTypeParameter {
             .name()
             .and_then(|name| name.ident_token())
             .map(|name| Self {
+                is_const: param
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                 name: name.token_text_trimmed().into(),
                 constraint: param
                     .constraint()
