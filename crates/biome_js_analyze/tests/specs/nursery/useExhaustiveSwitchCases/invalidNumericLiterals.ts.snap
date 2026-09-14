@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNumericLiterals.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+import type { Missing } from "./numericLiteralsTypes";
+
+function distinctMissingValues(value: Missing) {
+	switch (value) {
+		case -1: break;
+	}
+}
+
+function distinctLargeValues(value: 0x1000000000000081 | 0x1000000000000000) {
+	switch (value) {
+		case 1152921504606846976: break;
+	}
+}
+
+function equivalentFractions(value: 0.5 | .50 | 5e-1 | 1) {
+	switch (value) {
+		case 1: break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidNumericLiterals.ts:6:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     5 │ function distinctMissingValues(value: Missing) {
+   > 6 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+   > 7 │ 		case -1: break;
+   > 8 │ 	}
+       │ 	^
+     9 │ }
+    10 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - 16
+  - 1152921504606847200
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     5  5 │   function distinctMissingValues(value: Missing) {
+     6  6 │     switch (value) {
+     7    │ - → → case·-1:·break;
+        7 │ + → → case·-1:·break;
+        8 │ + → → case·16:·throw·new·Error("TODO:·Not·implemented·yet");
+        9 │ + → → case·1152921504606847200:·throw·new·Error("TODO:·Not·implemented·yet");
+     8 10 │     }
+     9 11 │   }
+  
+
+```
+
+```
+invalidNumericLiterals.ts:12:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    11 │ function distinctLargeValues(value: 0x1000000000000081 | 0x1000000000000000) {
+  > 12 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 13 │ 		case 1152921504606846976: break;
+  > 14 │ 	}
+       │ 	^
+    15 │ }
+    16 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - 1152921504606847200
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    11 11 │   function distinctLargeValues(value: 0x1000000000000081 | 0x1000000000000000) {
+    12 12 │     switch (value) {
+    13    │ - → → case·1152921504606846976:·break;
+       13 │ + → → case·1152921504606846976:·break;
+       14 │ + → → case·1152921504606847200:·throw·new·Error("TODO:·Not·implemented·yet");
+    14 15 │     }
+    15 16 │   }
+  
+
+```
+
+```
+invalidNumericLiterals.ts:18:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    17 │ function equivalentFractions(value: 0.5 | .50 | 5e-1 | 1) {
+  > 18 │ 	switch (value) {
+       │ 	^^^^^^^^^^^^^^^^
+  > 19 │ 		case 1: break;
+  > 20 │ 	}
+       │ 	^
+    21 │ }
+    22 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - 0.5
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    17 17 │   function equivalentFractions(value: 0.5 | .50 | 5e-1 | 1) {
+    18 18 │     switch (value) {
+    19    │ - → → case·1:·break;
+       19 │ + → → case·1:·break;
+       20 │ + → → case·0.5:·throw·new·Error("TODO:·Not·implemented·yet");
+    20 21 │     }
+    21 22 │   }
+  
+
+```

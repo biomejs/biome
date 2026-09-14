@@ -9,7 +9,9 @@ use crate::stringification::{
     StringificationAnalyzer, StringificationMode, StringificationUsefulness,
 };
 use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
-use biome_js_syntax::numbers::{canonicalize_js_bigint_literal, split_into_radix_and_number};
+use biome_js_syntax::numbers::{
+    canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 use std::{borrow::Cow, collections::VecDeque, fmt, ops::ControlFlow};
@@ -1111,21 +1113,11 @@ impl<'db> InferredType<'db> {
                         InferredSwitchCase::BooleanLiteral(boolean.as_bool())
                     }
                     Literal::Number(number) => {
-                        let parse = |text: &str| {
-                            let (radix, digits) = split_into_radix_and_number(text);
-                            if radix == 10 {
-                                digits.parse::<f64>().ok()
-                            } else {
-                                // Round once after parsing the integer. Rounding each radix
-                                // prefix separately can lose low bits of large literals.
-                                u128::from_str_radix(&digits, u32::from(radix))
-                                    .ok()
-                                    .map(|value| value as f64)
-                            }
-                        };
                         let value = match number.as_str().strip_prefix('-') {
-                            Some(unsigned) => parse(unsigned).map(|value| -value),
-                            None => parse(number.as_str()),
+                            Some(unsigned) => {
+                                parse_js_number_with_single_rounding(unsigned).map(|value| -value)
+                            }
+                            None => parse_js_number_with_single_rounding(number.as_str()),
                         };
                         match value {
                             Some(value) if value.is_finite() => {
