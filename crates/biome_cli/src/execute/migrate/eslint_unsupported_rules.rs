@@ -2,12 +2,12 @@
 
 use biome_analyze::RuleSource::*;
 
-use crate::execute::migrate::eslint_to_biome::UnsupportedRule;
-use crate::execute::migrate::eslint_to_biome::UnsupportedRuleReason::*;
+use crate::execute::migrate::migration::UnsupportedRule;
+use crate::execute::migrate::migration::UnsupportedRuleReason::*;
 
 // Sorted ESLint unsupported rules.
 /// The array is sorted to allow binary search.
-pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
+pub const ESLINT_UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(Eslint("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
         Eslint("array-bracket-spacing"),
@@ -397,12 +397,12 @@ mod tests {
 
     #[test]
     fn test_eslint_unsupported_rules_order() {
-        let is_sorted = UNSUPPORTED_RULES
+        let is_sorted = ESLINT_UNSUPPORTED_RULES
             .windows(2)
             .all(|pair| pair[0].0 <= pair[1].0);
 
         if !is_sorted {
-            let mut sorted_rules: Vec<_> = UNSUPPORTED_RULES.iter().collect();
+            let mut sorted_rules: Vec<_> = ESLINT_UNSUPPORTED_RULES.iter().collect();
             sorted_rules.sort_by_key(|rule| rule.0);
             panic!(
                 "UNSUPPORTED_RULES is not sorted. Expected order:\n{:?}",
@@ -416,7 +416,7 @@ mod tests {
         let mut seen = std::collections::HashSet::new();
         let mut duplicates = Vec::new();
 
-        for rule in UNSUPPORTED_RULES {
+        for rule in ESLINT_UNSUPPORTED_RULES {
             let rule_source = &rule.0;
             if !seen.insert(rule_source) {
                 duplicates.push(rule_source);
