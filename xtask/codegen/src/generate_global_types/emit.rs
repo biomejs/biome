@@ -281,10 +281,11 @@ fn render_constructor(constructor: &LoweredConstructor) -> String {
 
     format!(
         "crate::TypeData::Constructor(Box::new(crate::Constructor {{
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             parameters: Box::new([{parameters}]),
             return_type: {return_type},
         }}))",
+        type_parameters = render_type_references(constructor.type_parameters()),
         parameters = render_constructor_parameters(constructor.parameters()),
     )
 }
