@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use biome_db::ParsedSource;
 use biome_db::testing::{
@@ -90,6 +91,7 @@ mod snap;
 #[salsa::db]
 struct TestModuleDb {
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
+    module_lookups: AtomicUsize,
     events: Events,
     storage: Storage<Self>,
 }
@@ -99,6 +101,7 @@ impl TestModuleDb {
         let events = Events::default();
         let db = Self {
             modules: BTreeMap::new(),
+            module_lookups: AtomicUsize::new(0),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -160,6 +163,7 @@ impl biome_module_graph::TypeDb for TestModuleDb {
 #[salsa::db]
 impl ModuleDb for TestModuleDb {
     fn module_for_path(&self, path: &Utf8Path) -> Option<ModuleInfo> {
+        self.module_lookups.fetch_add(1, Ordering::Relaxed);
         self.modules.get(path).copied()
     }
 
