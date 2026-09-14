@@ -492,9 +492,9 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 }
 
 /// Lowers named instance properties and methods with declaration-derived
-/// generic parameters. Constraints use supported member types and earlier type parameters;
-/// the first interface supplies constraints for merged declarations. Class parameter defaults,
-/// value-side declarations, computed members, methods returning `MapIterator` or
+/// generic parameters. Constraints and defaults use supported member types and earlier parameters;
+/// the first interface supplies them for merged declarations.
+/// Value-side declarations, computed members, methods returning `MapIterator` or
 /// `SetIterator`, and methods referencing Intl types
 /// are excluded. References to the
 /// enclosing class may carry type arguments. Other external references and unsupported
@@ -570,10 +570,15 @@ pub(super) fn lower_class_members(
                         .map(|constraint| lowerer.lower_reference(&constraint.ty()?))
                         .transpose()
                         .with_context(|| format!("in constraint of {}.{name}", class.name()))?;
+                    let default = parameter
+                        .default()
+                        .map(|default| lowerer.lower_reference(&default.ty()?))
+                        .transpose()
+                        .with_context(|| format!("in default of {}.{name}", class.name()))?;
                     let reference = lowerer.register(LoweredTypeData::GenericParameter {
                         name: name.clone(),
                         constraint,
-                        default: None,
+                        default,
                     });
                     lowerer.unbound_parameters.remove(&name);
                     if let Some(scope) = &mut lowerer.class_scope {
