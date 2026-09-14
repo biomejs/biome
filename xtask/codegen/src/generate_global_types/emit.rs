@@ -186,6 +186,7 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         }
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
+        LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),
         LoweredTypeData::NumberLiteral(value) => format!(
             "crate::TypeData::Literal(Box::new(crate::Literal::Number(crate::literal::NumberLiteral::new(biome_rowan::Text::new_static({})))))",
             rust_string_literal(value.text()),
@@ -213,9 +214,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(ty),
             render_type_references(type_parameters),
         ),
-        LoweredTypeData::GenericParameter { name, default } => format!(
-            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: {} }})",
+        LoweredTypeData::GenericParameter { name, constraint, default } => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
             rust_string_literal(name.text()),
+            constraint.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
             default.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
         ),
         LoweredTypeData::ThisKeyword => "crate::TypeData::ThisKeyword".to_string(),

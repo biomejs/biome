@@ -326,8 +326,8 @@ fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
     for (key, value, member_name) in [("K", "V", "lookup"), ("Key", "Value", "renamed")] {
         let mut file = fixture("lowering.interfaces.d.ts")?;
         file.bytes = format!(
-            "interface WeakMap<{key} extends MissingConstraint, {value}> {{ {member_name}(key: {key}): {value} | undefined; }}
-             interface WeakMap<{key} extends MissingConstraint, {value}> {{ extra?: boolean; chain(): this; readonly [Symbol.toStringTag]: Unsupported; }}
+            "interface WeakMap<{key} extends boolean, {value}> {{ {member_name}(key: {key}): {value} | undefined; }}
+             interface WeakMap<{key} extends boolean, {value}> {{ extra?: boolean; chain(): this; readonly [Symbol.toStringTag]: Unsupported; }}
              declare var WeakMap: UnsupportedConstructor;"
         ).into_bytes();
         let manifest = build_global_manifest(collect(&file).records);
@@ -374,6 +374,164 @@ fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
                 .all(|member| matches!(member.kind(), LoweredMemberKind::Named { .. }))
         );
     }
+    Ok(())
+}
+
+#[test]
+fn generic_constraints_translate_types_and_parameter_references() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    for declaration in [
+        "interface WeakMap",
+        "interface Iterator",
+        "type IteratorResult",
+    ] {
+        for (source, expected) in [
+            ("boolean", LoweredTypeData::Boolean),
+            ("'bound'", LoweredTypeData::StringLiteral("bound".into())),
+            ("WeakKey", LoweredTypeData::ObjectKeyword),
+        ] {
+            let mut file = fixture("lowering.interfaces.d.ts")?;
+            let body = if declaration.starts_with("type") {
+                "= B;"
+            } else {
+                "{}"
+            };
+            file.bytes =
+                format!("{declaration}<A extends ({source}), B extends A, C> {body}").into_bytes();
+            let manifest = build_global_manifest(collect(&file).records);
+            let lowered = lower_global_types(&manifest, &[file])?;
+            let global = &lowered.globals()[0];
+            let parameters = match global.data() {
+                LoweredTypeData::Class(class) => class.type_parameters(),
+                LoweredTypeData::Interface(interface) => interface.type_parameters(),
+                LoweredTypeData::InstanceOf {
+                    type_parameters, ..
+                } => type_parameters,
+                _ => panic!("expected generic declaration"),
+            };
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &global.local_types()[*index]
+            };
+            let constraint = |reference: &LoweredTypeReference| {
+                let LoweredTypeData::GenericParameter { constraint, .. } = local(reference) else {
+                    panic!("expected generic parameter")
+                };
+                constraint.as_ref()
+            };
+            let bound = constraint(&parameters[0]).expect("constraint must be preserved");
+            assert_eq!(local(bound), &expected);
+            assert_eq!(constraint(&parameters[1]), Some(&parameters[0]));
+            assert_eq!(constraint(&parameters[2]), None);
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn generic_constraints_resolve_shadowed_names() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    for name in ["WeakMap", "Iterator"] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes =
+            format!("interface {name}<WeakKey extends boolean, Value extends WeakKey> {{}}")
+                .into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_global_types(&manifest, &[file])?;
+        let global = lowered.global(name).unwrap();
+        let parameters = match global.data() {
+            LoweredTypeData::Class(class) => class.type_parameters(),
+            LoweredTypeData::Interface(interface) => interface.type_parameters(),
+            _ => panic!("expected generic declaration"),
+        };
+        let LoweredTypeReference::Local(index) = parameters[1] else {
+            panic!("expected local parameter")
+        };
+        let LoweredTypeData::GenericParameter { constraint, .. } = &global.local_types()[index]
+        else {
+            panic!("expected generic parameter")
+        };
+        assert_eq!(constraint.as_ref(), Some(&parameters[0]));
+    }
+    Ok(())
+}
+
+#[test]
+fn unresolved_constraints_report_the_parameter() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    for name in ["WeakMap", "Iterator"] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes = format!("interface {name}<Value extends Missing> {{}}").into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let error =
+            lower_global_types(&manifest, &[file]).expect_err("unresolved constraint must fail");
+        let message = format!("{error:#}");
+        assert!(
+            message.contains("constraint")
+                && message.contains("Value")
+                && message.contains("Missing"),
+            "{message}"
+        );
+    }
+    Ok(())
+}
+
+#[test]
+fn generic_constraints_preserve_unions_and_defaults() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes =
+        b"interface Iterator<A extends string | number = string, B extends A = A> {}".to_vec();
+    let manifest = build_global_manifest(collect(&file).records);
+    let lowered = lower_global_types(&manifest, &[file])?;
+    let global = lowered.global("Iterator").unwrap();
+    let LoweredTypeData::Interface(interface) = global.data() else {
+        panic!("expected interface")
+    };
+    let local = |reference: &LoweredTypeReference| {
+        let LoweredTypeReference::Local(index) = reference else {
+            panic!("expected local type")
+        };
+        &global.local_types()[*index]
+    };
+    let LoweredTypeData::GenericParameter {
+        constraint: Some(constraint),
+        default,
+        ..
+    } = local(&interface.type_parameters()[0])
+    else {
+        panic!("expected constrained parameter")
+    };
+    let LoweredTypeData::Union(types) = local(constraint) else {
+        panic!("expected union constraint")
+    };
+    assert_eq!(
+        types.as_ref(),
+        [
+            LoweredTypeReference::Predefined("GLOBAL_STRING_ID"),
+            LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")
+        ]
+    );
+    assert_eq!(
+        default,
+        &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+    );
+    let LoweredTypeData::GenericParameter {
+        constraint,
+        default,
+        ..
+    } = local(&interface.type_parameters()[1])
+    else {
+        panic!("expected constrained parameter")
+    };
+    assert_eq!(constraint.as_ref(), Some(&interface.type_parameters()[0]));
+    assert_eq!(default, constraint);
     Ok(())
 }
 
@@ -605,10 +763,6 @@ fn iterator_declarations_reject_unsupported_dependencies_and_shapes() -> Result<
         (
             "interface Iterator<T> { next(): Missing<T>; }",
             "missing declaration dependency",
-        ),
-        (
-            "interface Iterator<T extends object> {}",
-            "unsupported constrained",
         ),
         (
             "interface Iterator<T> { next(...[x]: [value?: T]): T; }",
