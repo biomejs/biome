@@ -8923,7 +8923,13 @@ In the expression `document.querySelector('div')`, the receiver is `document`.
 	 */
 	ignore?: string[];
 }
-export type UseExhaustiveSwitchCasesOptions = {};
+export interface UseExhaustiveSwitchCasesOptions {
+	/**
+	* Require a `case` for each value in the union, even when the switch has a `default` clause.
+Default: `false`. 
+	 */
+	requireExplicitCase?: boolean;
+}
 export type UseExpectOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.

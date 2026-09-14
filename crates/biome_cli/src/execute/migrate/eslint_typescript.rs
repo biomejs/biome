@@ -33,7 +33,9 @@ impl From<SwitchExhaustivenessCheckOptions>
     fn from(value: SwitchExhaustivenessCheckOptions) -> Self {
         Self {
             require_explicit_case: Some(
-                !value.consider_default_exhaustive_for_unions.unwrap_or(false),
+                !value
+                    .consider_default_exhaustive_for_unions
+                    .unwrap_or(false),
             ),
         }
     }
