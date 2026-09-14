@@ -16,4 +16,9 @@ impl FormatNodeRule<JsxFragment> for FormatJsxFragment {
     fn is_suppressed(&self, node: &JsxFragment, f: &JsFormatter) -> bool {
         is_jsx_suppressed(&node.clone().into(), f.comments())
     }
+
+    /// [`AnyJsxTagWithChildren`] prints them between the tags instead of after `</>`.
+    fn fmt_dangling_comments(&self, _: &JsxFragment, _: &mut JsFormatter) -> FormatResult<()> {
+        Ok(())
+    }
 }

@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/template-expression-comments.astro
+---
+
+# Input
+
+```astro
+---
+const x = 1;
+---
+<div>{x && <section><!-- single --><p>hi</p></section>}</div>
+<div>{<!-- lead --> <a></a>}</div>
+<div>{x && <span is:raw>  keep   me  </span>}</div>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const x = 1;
+---
+
+<div>
+	{x && (
+		<section>
+			<!-- single -->
+			<p>hi</p>
+		</section>
+	)}
+</div>
+<div>
+	{<!-- lead -->
+	<a></a>}
+</div>
+<div>{x && <span is:raw>  keep   me  </span>}</div>
+
+```
