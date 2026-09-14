@@ -14,6 +14,7 @@ declare var Error: ErrorConstructor;
 interface Symbol {}
 
 interface SymbolConstructor {
+    readonly iterator: unique symbol;
     readonly dispose: unique symbol;
     readonly asyncDispose: unique symbol;
 }

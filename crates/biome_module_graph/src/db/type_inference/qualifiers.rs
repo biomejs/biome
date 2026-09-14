@@ -200,64 +200,23 @@ impl<'db> ResolutionCtx<'db, '_> {
             return self.resolve_readonly(qualifier);
         }
 
-        if qualifier.is_array() && qualifier.has_known_type_parameters() {
-            return InferredTypeData::array_instance(
-                self.db,
-                qualifier
+        if qualifier.has_known_type_parameters() {
+            let base = TypeReferenceQualifier {
+                type_parameters: Box::default(),
+                ..qualifier.clone()
+            };
+            if let Some(id) = global_type_id_for_qualifier(&base) {
+                let type_parameters = qualifier
                     .type_parameters
                     .iter()
                     .map(|parameter| self.resolve(parameter))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            );
-        }
-
-        if qualifier.is_map() && qualifier.has_known_type_parameters() {
-            return InferredTypeData::map_instance(
-                self.db,
-                qualifier
-                    .type_parameters
-                    .iter()
-                    .map(|parameter| self.resolve(parameter))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            );
-        }
-
-        if qualifier.is_promise() && qualifier.has_known_type_parameters() {
-            return InferredTypeData::promise_instance(
-                self.db,
-                qualifier
-                    .type_parameters
-                    .iter()
-                    .map(|parameter| self.resolve(parameter))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            );
-        }
-
-        if qualifier.is_set() && qualifier.has_known_type_parameters() {
-            return InferredTypeData::set_instance(
-                self.db,
-                qualifier
-                    .type_parameters
-                    .iter()
-                    .map(|parameter| self.resolve(parameter))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            );
-        }
-
-        if qualifier.is_weak_map() && qualifier.has_known_type_parameters() {
-            return InferredTypeData::weak_map_instance(
-                self.db,
-                qualifier
-                    .type_parameters
-                    .iter()
-                    .map(|parameter| self.resolve(parameter))
-                    .collect::<Vec<_>>()
-                    .into_boxed_slice(),
-            );
+                    .collect();
+                return InferredTypeData::instance_of(
+                    self.db,
+                    InferredTypeData::GlobalType(id),
+                    type_parameters,
+                );
+            }
         }
 
         if let Some(ty) = self.resolve_global_member_qualifier(qualifier) {
@@ -422,6 +381,28 @@ impl<'db> ResolutionCtx<'db, '_> {
     ) -> InferredTypeData<'db> {
         if qualifier.type_parameters.is_empty() {
             return target;
+        }
+
+        let resolved = target.expand_canonical_global(self.db);
+        let signatures = if let InferredTypeData::Interface(interface) = resolved {
+            interface
+                .type_parameters(self.db)
+                .is_empty()
+                .then(|| interface.members(self.db))
+        } else if let InferredTypeData::Object(object) = resolved {
+            Some(object.members(self.db))
+        } else {
+            None
+        };
+        if signatures
+            .is_some_and(|members| members.iter().any(|member| member.kind.is_call_signature()))
+        {
+            let arguments = qualifier
+                .type_parameters
+                .iter()
+                .map(|parameter| self.resolve(parameter))
+                .collect();
+            return InferredTypeData::instance_of(self.db, target, arguments);
         }
 
         let Some(declared_parameters) = self.declared_type_parameters(target) else {

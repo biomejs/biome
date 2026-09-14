@@ -177,6 +177,57 @@ impl Default for RawGlobalTypes {
         builder.set_manual_type_data(INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, || {
             TypeData::instance_of(TypeReference::from(GLOBAL_SYMBOL_ID))
         });
+        builder.set_manual_type_data(ITERATOR_ID_GLOBAL_TYPE_ID, || {
+            class("Iterator", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(ITERATOR_RESULT_ID_GLOBAL_TYPE_ID, || {
+            class("IteratorResult", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(ITERABLE_ITERATOR_ID_GLOBAL_TYPE_ID, || {
+            class("IterableIterator", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(GENERATOR_ID_GLOBAL_TYPE_ID, || {
+            class("Generator", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(READONLY_SET_ID_GLOBAL_TYPE_ID, || {
+            class("ReadonlySet", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(READONLY_MAP_ID_GLOBAL_TYPE_ID, || {
+            class(
+                "ReadonlyMap",
+                Box::new([GLOBAL_T_ID.into(), GLOBAL_U_ID.into()]),
+            )
+        });
+        builder.set_manual_type_data(READONLY_ARRAY_ID_GLOBAL_TYPE_ID, || {
+            class("ReadonlyArray", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(ARRAY_LIKE_ID_GLOBAL_TYPE_ID, || {
+            class("ArrayLike", Box::new([GLOBAL_T_ID.into()]))
+        });
+        builder.set_manual_type_data(ITERABLE_ID_GLOBAL_TYPE_ID, || {
+            class("Iterable", Box::new([GLOBAL_T_ID.into()]))
+        });
+        for (id, target) in [
+            (
+                INSTANCEOF_ARRAY_LIKE_T_ID_GLOBAL_TYPE_ID,
+                GLOBAL_ARRAY_LIKE_ID,
+            ),
+            (INSTANCEOF_ITERABLE_T_ID_GLOBAL_TYPE_ID, GLOBAL_ITERABLE_ID),
+            (ARRAY_FROM_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID),
+        ] {
+            builder.set_manual_type_data(id, || {
+                TypeData::instance_of(TypeInstance {
+                    ty: target.into(),
+                    type_parameters: Box::new([GLOBAL_T_ID.into()]),
+                })
+            });
+        }
+        builder.set_manual_type_data(ARRAY_FROM_SOURCE_ID_GLOBAL_TYPE_ID, || {
+            TypeData::Union(Box::new(Union(Box::new([
+                GLOBAL_INSTANCEOF_ITERABLE_T_ID.into(),
+                GLOBAL_INSTANCEOF_ARRAY_LIKE_T_ID.into(),
+            ]))))
+        });
         builder.build()
     }
 }
@@ -216,7 +267,19 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
         return qualifier
             .path
             .identifier()
-            .and_then(|name| global_type_id_for_value(name.text()));
+            .and_then(|name| match name.text() {
+                "ArrayLike" => Some(ARRAY_LIKE_ID_GLOBAL_TYPE_ID),
+                "ReadonlyArray" => Some(READONLY_ARRAY_ID_GLOBAL_TYPE_ID),
+                "Iterable" => Some(ITERABLE_ID_GLOBAL_TYPE_ID),
+                "Iterator" => Some(ITERATOR_ID_GLOBAL_TYPE_ID),
+                "IteratorResult" => Some(ITERATOR_RESULT_ID_GLOBAL_TYPE_ID),
+                "IterableIterator" => Some(ITERABLE_ITERATOR_ID_GLOBAL_TYPE_ID),
+                "Generator" => Some(GENERATOR_ID_GLOBAL_TYPE_ID),
+                "ReadonlySet" => Some(READONLY_SET_ID_GLOBAL_TYPE_ID),
+                "ReadonlyMap" => Some(READONLY_MAP_ID_GLOBAL_TYPE_ID),
+
+                _ => global_type_id_for_value(name.text()),
+            });
     };
     Some(id)
 }
@@ -366,9 +429,10 @@ mod tests {
             panic!("Symbol must be a class");
         };
         let members = symbol.members(&db);
-        assert_eq!(members.len(), 2);
+        assert_eq!(members.len(), 3);
 
         for (name, global_type_id) in [
+            ("iterator", SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID),
             ("dispose", SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID),
             ("asyncDispose", SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID),
         ] {

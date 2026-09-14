@@ -2481,7 +2481,7 @@ impl TypeMember {
                 } else {
                     scope_id
                 };
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let function = Function {
                         is_async: false,
                         type_parameters: generic_params_from_ts_type_params(
@@ -2489,7 +2489,7 @@ impl TypeMember {
                             scope_id,
                             type_parameters,
                         ),
-                        name: Some(name.clone().into()),
+                        name: name.name().map(Into::into),
                         parameters: function_params_from_js_params(
                             collector,
                             scope_id,
@@ -2504,15 +2504,15 @@ impl TypeMember {
                     };
                     let ty = collector.register_and_resolve(function.into()).into();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
+                    Self::from_object_member_info(collector, scope_id, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsPropertySignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = type_from_annotation(collector, scope_id, member.type_annotation())
                         .unwrap_or_default();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
+                    Self::from_object_member_info(collector, scope_id, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(_member) => {
@@ -2560,24 +2560,34 @@ impl TypeMember {
     }
 
     #[inline]
-    fn from_name_and_optional_type(
+    fn from_object_member_info(
         collector: &mut dyn RawTypeCollector,
-        name: TokenText,
+        scope_id: ScopeId,
+        name: AnyJsObjectMemberName,
         ty: TypeReference,
         is_optional: bool,
-    ) -> Self {
-        let name: Text = name.into();
-        Self {
-            kind: if is_optional {
-                TypeMemberKind::NamedOptional(name)
+    ) -> Option<Self> {
+        let kind = match name {
+            AnyJsObjectMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
+                computed_member_reference(collector, scope_id, &name.expression().ok()?),
+            ),
+            _ => {
+                let name = name.name()?.into();
+                if is_optional {
+                    TypeMemberKind::NamedOptional(name)
+                } else {
+                    TypeMemberKind::Named(name)
+                }
+            }
+        };
+        Some(Self {
+            kind,
+            ty: if is_optional {
+                RawTypeId::Local(collector.optional(ty)).into()
             } else {
-                TypeMemberKind::Named(name)
+                ty
             },
-            ty: match is_optional {
-                true => RawTypeId::Local(collector.optional(ty)).into(),
-                false => ty,
-            },
-        }
+        })
     }
 
     fn members_from_class_member_list(
@@ -2722,7 +2732,7 @@ fn computed_member_reference(
             member.member().ok().and_then(text_from_any_js_name),
         )
         && object_name.text() == "Symbol"
-        && matches!(member_name.text(), "dispose" | "asyncDispose")
+        && matches!(member_name.text(), "iterator" | "dispose" | "asyncDispose")
     {
         return TypeReferenceQualifier::from_path(
             scope_id,

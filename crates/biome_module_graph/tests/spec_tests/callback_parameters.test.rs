@@ -12,6 +12,312 @@ const SERVICE_DECLARATIONS: &str = r#"
     }
 "#;
 
+#[test]
+fn test_collection_overloads_keep_opaque_objects_viable() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "declare function read(value: Iterable<string>): number; declare function read(value: object): string; declare const value: object; const result = read(value);",
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    assert!(is_inferred_number(
+        &db,
+        normalized_binding_ty(&db, module, "result")
+    ));
+}
+
+#[test]
+fn test_concrete_parameters_do_not_exhaust_generic_inference() {
+    let variants = (0..65)
+        .map(|index| format!("'value{index}'"))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        format!(
+            "declare function read(value: string): number; declare const value: {variants}; const result = read(value);"
+        ),
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    assert!(is_inferred_number(
+        &db,
+        normalized_binding_ty(&db, module, "result")
+    ));
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        format!(
+            "declare function read<T>(tag: string, value: T): T; declare const tag: {variants}; declare const value: number; const result = read(tag, value);"
+        ),
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    assert!(is_inferred_number(
+        &db,
+        normalized_binding_ty(&db, module, "result")
+    ));
+}
+
+#[test]
+fn test_array_from_preserves_promise_returning_mappers() {
+    for call in [
+        "Array.from('abc', async value => value)",
+        "Array.from('abc', mapper)",
+        "Array.from<string, Promise<string>>('abc', async value => value)",
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/src/index.ts".into(),
+            format!(
+                "declare const mapper: (value: string) => Promise<string>; const result = {call};"
+            ),
+        );
+        let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+        let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+        let result = normalized_binding_ty(&db, module, "result");
+        let InferredTypeData::InstanceOf(array) = result else {
+            panic!("{call}: expected array");
+        };
+        assert!(array.ty(&db).is_array_class(&db), "{call}");
+        let element = *array.type_parameters(&db).first().expect("array element");
+        assert!(
+            is_inferred_promise_instance(&db, element),
+            "{call}: {}",
+            biome_js_type_info::format_inferred_type(&db, element)
+        );
+        let InferredTypeData::InstanceOf(promise) = element else {
+            unreachable!()
+        };
+        assert!(
+            is_inferred_string(
+                &db,
+                *promise.type_parameters(&db).first().expect("Promise value")
+            ),
+            "{call}"
+        );
+    }
+}
+
+#[test]
+fn test_array_from_infers_source_elements_and_mapper_parameters() {
+    for declaration in [
+        "declare const contexts: Context[];",
+        "declare const contexts: readonly Context[];",
+        "declare const contexts: ReadonlyArray<Context>;",
+        "declare const contexts: [Context, Context];",
+        "declare const contexts: { [Symbol.iterator](): { next(): { value: Context; done: false } | { value: undefined; done: true } } };",
+        "interface Contexts extends Iterable<Context> {} declare const contexts: Contexts;",
+        "interface Contexts extends ArrayLike<Context> {} declare const contexts: Contexts;",
+        "declare const contexts: Set<Context>;",
+        "declare const contexts: ReadonlySet<Context>;",
+        "declare const contexts: IterableIterator<Context>;",
+        "declare const contexts: Generator<Context, void, unknown>;",
+        "declare const contexts: { [Symbol.iterator](): Iterator<Context> };",
+        "declare const contexts: { [Symbol.iterator]: () => { next(): IteratorResult<Context> } };",
+        "declare const contexts: Iterable<Context>;",
+        "declare const contexts: ArrayLike<Context>;",
+        "declare const contexts: { length: number; [key: number]: Context };",
+        "declare const first: Context; const contexts = { 0: first, length: 1 };",
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            "/src/index.ts".into(),
+            source_with_declarations(&format!(
+                r#"
+                {declaration}
+                const copied = Array.from(contexts);
+                const copiedElement = copied[0];
+                const mapped = Array.from(contexts, (context, index) => context.service);
+                const mappedElement = mapped[0];
+            "#
+            )),
+        );
+        let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+        let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+        for name in ["copiedElement", "context"] {
+            assert_has_service_returning_promise(
+                &db,
+                module,
+                normalized_binding_ty(&db, module, name),
+            );
+        }
+        assert!(is_inferred_number(
+            &db,
+            normalized_binding_ty(&db, module, "index")
+        ));
+        assert_service_returns_promise(
+            &db,
+            module,
+            normalized_binding_ty(&db, module, "mappedElement"),
+        );
+    }
+}
+
+#[test]
+fn test_array_from_collection_and_overload_results() {
+    let mut failures = Vec::new();
+    for (source, expected) in [
+        (
+            "declare const source: object; const result = Array.from(source);",
+            "unknown",
+        ),
+        (
+            "declare const source: { length: number; [key: string]: string | number; [key: number]: string }; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "interface Indexed { [key: number]: string } interface Source extends Indexed { length: number; [key: string]: string | number } declare const source: Source; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "const source = { length: 1, get 0() { return 'a'; } }; const result = Array.from(source);",
+            "string: a",
+        ),
+        (
+            "const source = { length: 1, get 0() { return 'a'; } }; const result = Array.from(source, value => value);",
+            "string: a",
+        ),
+        (
+            "const result = Array.from({ length: 1, '01': 'bad' });",
+            "unknown",
+        ),
+        (
+            "type Result<T> = IteratorResult<T>; declare const source: { [Symbol.iterator](): { next(): Result<string> } }; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "type Cursor<T> = Iterator<T>; declare const source: { [Symbol.iterator](): Cursor<string> }; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "interface Base { length: 2; 0: 'a' } interface Source extends Base { 1: 'b' } declare const source: Source; const result = Array.from(source, value => value);",
+            "string: b | string: a",
+        ),
+        (
+            "declare const source: { length: 2; 0: 'a' } & { 1: 'b' }; const result = Array.from(source);",
+            "string: a | string: b",
+        ),
+        (
+            "interface Base { length: 1; 0: string } interface Source extends Base { 0: 'a' } declare const source: Source; const result = Array.from(source);",
+            "string: a",
+        ),
+        (
+            "interface Indexed { [n: number]: string } interface Source extends Indexed { length: number } declare const source: Source; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "interface Indexed<T> { [n: number]: T } interface Source extends Indexed<string> { length: number } declare const source: Source; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "interface Source extends ArrayLike<string | number> { [n: number]: string } declare const source: Source; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "interface Base { [Symbol.iterator](): Iterator<string> } interface Source extends Base { [Symbol.iterator](): Iterator<'specific'> } declare const source: Source; const result = Array.from(source);",
+            "string: specific",
+        ),
+        (
+            "declare const source: {length: number} & {[key: number]: string}; const result = Array.from(source);",
+            "string",
+        ),
+        ("const result = Array.from([]);", "never"),
+        (
+            "declare const source: ReadonlyMap<string, number>; const result = Array.from(source, entry => entry[0]);",
+            "string",
+        ),
+        (
+            "declare const source: [number?]; const result = Array.from(source);",
+            "number | undefined",
+        ),
+        (
+            "declare const source: [number, ...string[]]; const result = Array.from(source);",
+            "number | string",
+        ),
+        (
+            "declare const source: object; const result = Array.from({ length: 1, 0: 'known', ...source });",
+            "unknown",
+        ),
+        (
+            "interface Recursive extends Recursive { length: number } declare const source: Recursive; const result = Array.from(source);",
+            "unknown",
+        ),
+        (
+            "declare const source: { [Symbol.iterator](): {next(): {done: true; value: string}} }; const result = Array.from(source);",
+            "never",
+        ),
+        ("const result = Array.from('abc');", "string"),
+        (
+            "const result = Array.from('abc', value => value);",
+            "string",
+        ),
+        (
+            "const result = Array.from({ length: 3 }, (_, index) => index);",
+            "number",
+        ),
+        ("const result = Array.from({ length: 3 });", "unknown"),
+        (
+            "declare const source: unknown; const result = Array.from(source);",
+            "unknown",
+        ),
+        (
+            "const result = Array.from(['a', 'b'] as const);",
+            "string: a | string: b",
+        ),
+        (
+            "declare const source: Map<string, number>; const result = Array.from(source, entry => entry[1]);",
+            "number",
+        ),
+        (
+            "declare const source: Set<string>; const result = Array.from(source);",
+            "string",
+        ),
+        (
+            "declare const source: Iterable<string> | ArrayLike<number>; const result = Array.from(source);",
+            "number | string",
+        ),
+        (
+            "const from = Array.from; const result = from('abc', value => value);",
+            "string",
+        ),
+        (
+            "const result = Array.from<string>({ length: 3 });",
+            "string",
+        ),
+        (
+            "const result = Array.from<string, number>('abc', (_, index) => index);",
+            "number",
+        ),
+        (
+            "const result = Array.from('abc', (_, index) => index, {});",
+            "number",
+        ),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert("/src/index.ts".into(), source.to_string());
+        let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+        let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+        let result = normalized_binding_ty(&db, module, "result");
+        let InferredTypeData::InstanceOf(array) = result else {
+            panic!(
+                "{source}: expected array, got {}",
+                biome_js_type_info::format_inferred_type(&db, result)
+            );
+        };
+        assert!(array.ty(&db).is_array_class(&db), "{source}");
+        let element = *array.type_parameters(&db).first().expect("array element");
+        let actual = biome_js_type_info::format_inferred_type(&db, element);
+        if actual != expected {
+            failures.push(format!("{source}\nexpected: {expected}\nactual: {actual}"));
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n\n"));
+}
+
 fn source_with_declarations(source: &str) -> String {
     format!("{SERVICE_DECLARATIONS}\n{source}")
 }
@@ -509,4 +815,139 @@ fn test_non_generic_method_signatures_share_return_types() {
     };
 
     assert_eq!(return_type("first"), return_type("second"));
+}
+
+#[test]
+fn test_array_from_callback_tracks_only_consumed_modules() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        "export declare const source: Iterable<string>;",
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unrelated = 1;");
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { source } from "./source.ts";
+        export const result = Array.from(source, (value, index) => value);
+    "#,
+    );
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/source.ts", "/src/index.ts", "/src/unrelated.ts"],
+        true,
+    );
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let source_module = db.module_for_path(Utf8Path::new("/src/source.ts")).unwrap();
+    let unrelated_module = db
+        .module_for_path(Utf8Path::new("/src/unrelated.ts"))
+        .unwrap();
+    let range = binding_range_by_name(&db, module, "value");
+    assert!(is_inferred_string(
+        &db,
+        normalized_binding_ty(&db, module, "value")
+    ));
+
+    for (path, changed_module, source, recomputes) in [
+        (
+            "/src/unrelated.ts",
+            unrelated_module,
+            "export const unrelated = 'changed';",
+            false,
+        ),
+        (
+            "/src/source.ts",
+            source_module,
+            "export declare const source: Iterable<number>;",
+            true,
+        ),
+    ] {
+        fs.insert(path.into(), source);
+        let kind = resolve_js_module_kind_for_test(&fs, path, true);
+        salsa::Setter::to(changed_module.set_kind(&mut db), kind);
+        db.clear_salsa_events();
+        let input = BindingTypeInput::new(&db, module, range);
+        let ty = infer_binding_type(&db, input).unwrap();
+        let ty = normalize_type(&db, module, ty);
+        if recomputes {
+            assert!(is_inferred_number(&db, ty));
+        } else {
+            assert!(is_inferred_string(&db, ty));
+        }
+        let events = db.take_salsa_events();
+        if recomputes {
+            assert_function_query_was_run(&db, infer_binding_type, input, &events);
+        } else {
+            assert_function_query_was_not_run(&db, infer_binding_type, input, &events);
+        }
+        for module in [module, source_module, unrelated_module] {
+            assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+        }
+    }
+}
+
+#[test]
+fn test_generic_collection_arguments_contextually_type_callbacks() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        source_with_declarations(
+            r#"
+        declare function transform<T, U>(source: Iterable<T>, mapper: (value: T) => U): U[];
+        declare const source: Context[];
+        const result = transform(source, context => context.service);
+        const service = result[0];
+        const destructured = Array.from(source, ({ service: selected }) => selected);
+    "#,
+        ),
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    assert_has_service_returning_promise(
+        &db,
+        module,
+        normalized_binding_ty(&db, module, "context"),
+    );
+    for name in ["service", "selected"] {
+        assert_service_returns_promise(&db, module, normalized_binding_ty(&db, module, name));
+    }
+}
+
+#[test]
+fn test_iterator_signatures_keep_scoped_symbol_references_during_collection() {
+    use biome_js_type_info::{RawTypeData, TypeMemberKind, TypeReference};
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface MethodSource { [Symbol.iterator](): Iterator<string> }
+        interface PropertySource { [Symbol.iterator]: () => Iterator<string> }
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("JavaScript module expected")
+    };
+    for name in ["MethodSource", "PropertySource"] {
+        let interface = info
+            .raw_types
+            .iter()
+            .find_map(|ty| match ty {
+                RawTypeData::Interface(interface) if interface.name.text() == name => {
+                    Some(interface)
+                }
+                _ => None,
+            })
+            .unwrap();
+        let member = interface.members.first().expect("iterator member");
+        let TypeMemberKind::ComputedValue(TypeReference::Qualifier(key)) = &member.kind else {
+            panic!("iterator key must remain a scoped qualifier");
+        };
+        assert_eq!(
+            key.path.iter().map(|part| part.text()).collect::<Vec<_>>(),
+            ["Symbol", "iterator"]
+        );
+    }
 }

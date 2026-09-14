@@ -1,0 +1,27 @@
+// should not generate diagnostics
+type State = "running" | "jumping" | "ducking";
+declare function getState(): State;
+
+const states = Array.from({ length: 5 }, getState);
+switch (states[0]) {
+	case "running":
+	case "jumping":
+	case "ducking":
+	case undefined:
+		break;
+}
+
+const unknownElements = Array.from({ length: 5 });
+switch (unknownElements[0]) {
+	case "running":
+	case undefined:
+		break;
+}
+
+const shadowed = {
+	from: () => ["running" as const],
+};
+switch (shadowed.from()[0]) {
+	case "running":
+		break;
+}

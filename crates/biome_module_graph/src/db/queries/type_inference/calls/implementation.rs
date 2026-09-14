@@ -4,6 +4,8 @@
 //! incremental boundary. The algorithms here share bounded traversal state and
 //! resolved argument representations with expression inference.
 
+mod collections;
+
 use crate::db::queries::resolve_callable_type;
 use crate::db::type_inference::{
     apply_substitutions_to_root_body, collected_type_result, find_member_type_on_demand,
@@ -31,6 +33,7 @@ use rustc_hash::FxHashSet;
 const MAX_ARGUMENT_MATCH_STEPS: usize = 1024;
 const MAX_ARGUMENT_SEQUENCE_STEPS: usize = 4096;
 const MAX_ARGUMENT_TYPE_STEPS: usize = 1024;
+const MAX_ARGUMENT_REPLACEMENT_STEPS: usize = 64;
 const MAX_LOCAL_EXTENDS_STEPS: usize = 1024;
 const MAX_STRUCTURAL_MEMBER_STEPS: usize = 1024;
 
@@ -93,13 +96,10 @@ fn infer_function_call_type<'db>(
     callee: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
 ) -> Option<InferredTypeData<'db>> {
-    match callee {
+    match callee.expand_canonical_global(db) {
         InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
         InferredTypeData::InstanceOf(instance) => {
-            let target = instance.ty(db);
-            let substitutions =
-                substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
-            let target = apply_substitutions_to_root_body(db, target, &substitutions);
+            let target = instantiate_call_target(db, instance.ty(db), instance.type_parameters(db));
             infer_function_call_type(db, target, args)
         }
         InferredTypeData::Interface(interface) => {
@@ -132,6 +132,49 @@ fn infer_function_call_type<'db>(
     }
 }
 
+fn instantiate_call_target<'db>(
+    db: &'db dyn ModuleDb,
+    target: InferredTypeData<'db>,
+    arguments: &[InferredTypeData<'db>],
+) -> InferredTypeData<'db> {
+    let target = resolve_local_type_on_demand(db, target).expand_canonical_global(db);
+    let members = match target {
+        InferredTypeData::Interface(interface) if interface.type_parameters(db).is_empty() => {
+            Some(interface.members(db))
+        }
+        InferredTypeData::Object(object) => Some(object.members(db)),
+        _ => None,
+    };
+    if !arguments.is_empty()
+        && let Some(members) = members
+    {
+        let members = members
+            .iter()
+            .filter_map(|member| {
+                if !member.kind.is_call_signature() {
+                    return Some(member.clone());
+                }
+                let function = resolve_callable_function(db, member.ty)?;
+                let parameters = function.type_parameters(db);
+                if parameters.len() < arguments.len() || parameters.iter().skip(arguments.len()).any(|parameter| {
+                    !matches!(parameter, InferredTypeData::Generic(generic) if generic.default(db).is_some())
+                }) {
+                    return None;
+                }
+                let ty = InferredTypeData::Function(function);
+                let substitutions = substitutions_for_instance(db, ty, arguments, &[]);
+                Some(InferredTypeMember {
+                    kind: member.kind.clone(),
+                    ty: apply_substitutions_to_root_body(db, ty, &substitutions),
+                })
+            })
+            .collect();
+        return InferredTypeData::object_from_members(db, members);
+    }
+    let substitutions = substitutions_for_instance(db, target, arguments, &[]);
+    apply_substitutions_to_root_body(db, target, &substitutions)
+}
+
 fn select_call_signature<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
@@ -140,7 +183,7 @@ fn select_call_signature<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db));
+        .filter_map(|member| resolve_callable_function(db, member.ty));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return Some(first);
@@ -428,7 +471,7 @@ fn infer_call_signature_argument_type<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db));
+        .filter_map(|member| resolve_callable_function(db, member.ty));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_parameter_type(db, first, args, argument_index);
@@ -524,13 +567,10 @@ fn infer_argument_type<'db>(
                     pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
                 }
                 InferredTypeData::InstanceOf(instance) => {
-                    let target = resolve_local_type_on_demand(db, instance.ty(db));
-                    let substitutions =
-                        substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
-                    pending.push(ArgumentTypeItem::Type(apply_substitutions_to_root_body(
+                    pending.push(ArgumentTypeItem::Type(instantiate_call_target(
                         db,
-                        target,
-                        &substitutions,
+                        instance.ty(db),
+                        instance.type_parameters(db),
                     )));
                 }
                 InferredTypeData::Local(_) => {
@@ -660,7 +700,19 @@ fn infer_single_signature_parameter_type<'db>(
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
     let parameters = ResolvedParameters::from_function(db, function);
-    infer_single_signature_resolved_parameter_type(db, parameters.as_slice(), args, argument_index)
+    let ty = infer_single_signature_resolved_parameter_type(
+        db,
+        parameters.as_slice(),
+        args,
+        argument_index,
+    )?;
+    Some(infer_generic_type(
+        db,
+        function,
+        ty,
+        args,
+        Some(argument_index),
+    ))
 }
 
 fn infer_single_signature_resolved_parameter_type<'db>(
@@ -692,7 +744,19 @@ fn infer_parameter_type_for_argument<'db>(
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
     let parameters = ResolvedParameters::from_function(db, function);
-    infer_parameter_type_for_resolved_argument(db, parameters.as_slice(), args, argument_index)
+    let ty = infer_parameter_type_for_resolved_argument(
+        db,
+        parameters.as_slice(),
+        args,
+        argument_index,
+    )?;
+    Some(infer_generic_type(
+        db,
+        function,
+        ty,
+        args,
+        Some(argument_index),
+    ))
 }
 
 /// Finds the parameter that receives one call argument and returns its type.
@@ -904,6 +968,15 @@ pub(in crate::db) fn resolve_callable_function<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
 ) -> Option<InferredFunction<'db>> {
+    let ty = resolve_local_type_on_demand(db, ty);
+    let ty = if let InferredTypeData::GlobalType(id) = ty {
+        global_types(db)
+            .get(id)
+            .normalize_nested_types(db, |ty| ty.expand_structural_global(db))
+            .map_or(None, Some)?
+    } else {
+        ty
+    };
     if let InferredTypeData::InstanceOf(instance) = resolve_local_type_on_demand(db, ty) {
         let target = resolve_local_type_on_demand(db, instance.ty(db));
         let substitutions =
@@ -924,6 +997,19 @@ fn returns_void<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> 
         ReturnType::Type(ty) => matches!(
             resolve_local_type_on_demand(db, *ty),
             InferredTypeData::VoidKeyword
+        ),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
+    }
+}
+
+fn returns_unconstrained_generic<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+) -> bool {
+    match function.return_type(db) {
+        ReturnType::Type(ty) => matches!(
+            resolve_local_type_on_demand(db, *ty).expand_structural_global(db),
+            InferredTypeData::Generic(generic) if generic.constraint(db).is_none()
         ),
         ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
     }
@@ -952,7 +1038,8 @@ impl<'db> ArgumentTypeCompatibility<'db> {
     ///
     /// Unsupported relations and work-budget exhaustion remain viable.
     /// Callable types must also agree on whether they return a Promise, unless
-    /// the parameter discards its return value by declaring `void`.
+    /// the parameter discards its return value with `void` or leaves it generic
+    /// without a constraint.
     fn is_satisfied(self, db: &'db dyn ModuleDb) -> bool {
         if !self.may_match(db) {
             return false;
@@ -964,6 +1051,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
         ) {
             (Some(parameter_function), Some(argument_function)) => {
                 returns_void(db, parameter_function)
+                    || returns_unconstrained_generic(db, parameter_function)
                     || parameter_function.returns_promise(db)
                         == argument_function.returns_promise(db)
             }
@@ -1015,8 +1103,10 @@ impl<'db> ArgumentTypeCompatibility<'db> {
             // one iteration per alias would let a long chain exhaust the loop,
             // and exhaustion leaves every overload viable.
             let compatibility = compatibility.with_types(
-                resolve_local_type_on_demand(db, compatibility.parameter_ty),
-                resolve_local_type_on_demand(db, compatibility.argument_ty),
+                resolve_local_type_on_demand(db, compatibility.parameter_ty)
+                    .expand_structural_global(db),
+                resolve_local_type_on_demand(db, compatibility.argument_ty)
+                    .expand_structural_global(db),
             );
             if compatibility.parameter_ty == compatibility.argument_ty {
                 pending.push(continuation);
@@ -1053,6 +1143,30 @@ impl<'db> ArgumentTypeCompatibility<'db> {
 
     /// Decomposes a nontrivial relation into conjunctive or alternative requirements.
     fn action(self, db: &'db dyn ModuleDb) -> ArgumentMatchAction<'db> {
+        if let InferredTypeData::InstanceOf(parameter) = self.parameter_ty
+            && let Some(kind) = collections::CollectionKind::for_target(db, parameter.ty(db))
+        {
+            return match collections::element_type(db, self.argument_ty, kind) {
+                Some(element) => parameter
+                    .type_parameters(db)
+                    .first()
+                    .map_or(ArgumentMatchAction::Match, |expected| {
+                        ArgumentMatchAction::All(vec![self.with_types(*expected, element)])
+                    }),
+                None => ArgumentMatchAction::Mismatch,
+            };
+        }
+        if let (InferredTypeData::Union(_), InferredTypeData::Union(arguments)) =
+            (self.parameter_ty, self.argument_ty)
+        {
+            return ArgumentMatchAction::All(
+                arguments
+                    .types(db)
+                    .iter()
+                    .map(|argument| self.with_types(self.parameter_ty, *argument))
+                    .collect(),
+            );
+        }
         match (self.parameter_ty, self.argument_ty) {
             (InferredTypeData::Generic(generic), arg_ty) => {
                 generic
@@ -1678,17 +1792,122 @@ fn infer_function_return_type<'db>(
 ) -> Option<InferredTypeData<'db>> {
     match function.return_type(db) {
         ReturnType::Type(ty) => {
-            Some(infer_generic_return_type(db, function, *ty, args).expand_structural_global(db))
+            Some(infer_generic_type(db, function, *ty, args, None).expand_structural_global(db))
         }
         ReturnType::Predicate(_) | ReturnType::Asserts(_) => Some(InferredTypeData::Boolean),
     }
 }
 
-/// Substitutes generic references in a function's return type.
+fn collect_argument_replacements<'db>(
+    db: &'db dyn ModuleDb,
+    parameter: InferredTypeData<'db>,
+    argument: InferredTypeData<'db>,
+) -> Option<Vec<InferredTypeSubstitution<'db>>> {
+    let parameter = resolve_local_type_on_demand(db, parameter);
+    let mut may_contain_generics = false;
+    let inspected = parameter.normalize_nested_types(db, |ty| {
+        let ty = ty.expand_structural_global(db);
+        may_contain_generics |=
+            ty.is_generic_reference(db) || matches!(ty, InferredTypeData::Local(_));
+        ty
+    });
+    if matches!(inspected, TypeTransformResult::Transformed(_)) && !may_contain_generics {
+        return Some(Vec::new());
+    }
+    let mut pending = vec![(parameter, argument)];
+    let mut seen = Vec::new();
+    let mut replacements = Vec::new();
+    while let Some((parameter, argument)) = pending.pop() {
+        if seen.contains(&(parameter, argument)) {
+            continue;
+        }
+        if seen.len() >= MAX_ARGUMENT_REPLACEMENT_STEPS {
+            return None;
+        }
+        seen.push((parameter, argument));
+        let parameter = resolve_local_type_on_demand(db, parameter).expand_structural_global(db);
+        let argument = resolve_local_type_on_demand(db, argument).expand_structural_global(db);
+        if parameter.is_generic_reference(db) {
+            replacements.push(InferredTypeSubstitution {
+                generic: parameter,
+                replacement: argument,
+            });
+            continue;
+        }
+        if let InferredTypeData::Union(union) = argument {
+            if pending.len().saturating_add(union.types(db).len()) > MAX_ARGUMENT_REPLACEMENT_STEPS
+            {
+                return None;
+            }
+            pending.extend(
+                union
+                    .types(db)
+                    .iter()
+                    .map(|argument| (parameter, *argument)),
+            );
+            continue;
+        }
+        if let InferredTypeData::Union(union) = parameter {
+            for variant in union.types(db) {
+                if ArgumentTypeCompatibility::new(*variant, argument).is_satisfied(db) {
+                    pending.push((*variant, argument));
+                    break;
+                }
+            }
+            continue;
+        }
+        if let InferredTypeData::InstanceOf(instance) = parameter {
+            if let Some(kind) = collections::CollectionKind::for_target(db, instance.ty(db)) {
+                if let Some(generic) = instance.type_parameters(db).first()
+                    && let Some(element) = collections::element_type(db, argument, kind)
+                {
+                    pending.push((*generic, element));
+                }
+                continue;
+            }
+            if instance.ty(db).is_array_class(db)
+                && let Some(generic) = instance.type_parameters(db).first()
+                && let Some(element) =
+                    collections::element_type(db, argument, collections::CollectionKind::ArrayLike)
+            {
+                pending.push((*generic, element));
+                continue;
+            }
+            if let InferredTypeData::InstanceOf(actual) = argument
+                && resolve_local_type_on_demand(db, instance.ty(db))
+                    == resolve_local_type_on_demand(db, actual.ty(db))
+            {
+                pending.extend(
+                    instance
+                        .type_parameters(db)
+                        .iter()
+                        .copied()
+                        .zip(actual.type_parameters(db).iter().copied()),
+                );
+            }
+        }
+        if let Some(parameter_function) = resolve_callable_function(db, parameter)
+            && let ReturnType::Type(parameter_return) = parameter_function.return_type(db)
+            && let Some(argument_function) = resolve_callable_function(db, argument)
+            && let ReturnType::Type(argument_return) = argument_function.return_type(db)
+        {
+            replacements.extend(collect_callback_return_replacements(
+                db,
+                *parameter_return,
+                *argument_return,
+            )?);
+        }
+    }
+    Some(replacements)
+}
+
+/// Substitutes argument-derived generics into a return or expected parameter type.
 ///
-/// A direct generic parameter is inferred from its argument. A generic in a
-/// callback return type is inferred from the callback's return type. An
-/// unbound parameter uses its declared default. Defaults are processed in
+/// Direct generic parameters and collection element parameters are inferred
+/// from their arguments. A generic in a callback return type is inferred from
+/// the callback's return type. The ignored argument contributes no inference,
+/// allowing sibling arguments to contextually type a callback without a cycle.
+/// An unbound parameter uses its declared default. Defaults are processed in
 /// declaration order, so a default may refer to an earlier parameter.
 /// Parameters with no inferred value or default remain generic. A failed type
 /// transformation returns `Unknown`.
@@ -1708,61 +1927,50 @@ fn infer_function_return_type<'db>(
 /// declare function defaults<T = string, U = T>(): [T, U];
 /// const value = defaults();
 /// ```
-fn infer_generic_return_type<'db>(
+fn infer_generic_type<'db>(
     db: &'db dyn ModuleDb,
     function: InferredFunction<'db>,
     mut return_ty: InferredTypeData<'db>,
     args: &[ResolvedCallArgument<'db>],
+    ignored_argument: Option<usize>,
 ) -> InferredTypeData<'db> {
+    if function.type_parameters(db).is_empty() {
+        return return_ty;
+    }
     let mut substitutions: Vec<InferredTypeSubstitution<'db>> = Vec::new();
-    for (parameter, arg) in function
+    for (index, (parameter, arg)) in function
         .parameters(db)
         .iter()
         .zip(args.iter().copied().map(ResolvedCallArgument::ty))
+        .enumerate()
     {
-        let parameter_ty = parameter.ty();
-        if parameter_ty.is_generic_reference(db) {
-            let substitution = InferredTypeSubstitution {
-                generic: parameter_ty,
-                replacement: arg,
-            };
-            let TypeTransformResult::Transformed(substituted) =
-                return_ty.substitute_type(db, substitution)
-            else {
-                return InferredTypeData::Unknown;
-            };
-            return_ty = substituted;
-            substitutions.push(substitution);
+        if ignored_argument == Some(index) {
             continue;
         }
-
-        let Some(parameter_function) = resolve_callable_function(db, parameter_ty) else {
-            continue;
+        let Some(replacements) = collect_argument_replacements(db, parameter.ty(), arg) else {
+            return InferredTypeData::Unknown;
         };
-        let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
-            continue;
-        };
-        let Some(argument_function) = resolve_callable_function(db, arg) else {
-            continue;
-        };
-        let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {
-            continue;
-        };
-
-        let Some(callback_substitutions) =
-            collect_callback_return_replacements(db, *parameter_return_ty, *argument_return_ty)
+        for substitution in replacements {
+            if let Some(previous) = substitutions
+                .iter_mut()
+                .find(|previous| previous.generic == substitution.generic)
+            {
+                previous.replacement = InferredTypeData::union_from_types(
+                    db,
+                    vec![previous.replacement, substitution.replacement],
+                );
+            } else {
+                substitutions.push(substitution);
+            }
+        }
+    }
+    for substitution in &substitutions {
+        let TypeTransformResult::Transformed(substituted) =
+            return_ty.substitute_type(db, *substitution)
         else {
             return InferredTypeData::Unknown;
         };
-        for substitution in callback_substitutions {
-            let TypeTransformResult::Transformed(substituted) =
-                return_ty.substitute_type(db, substitution)
-            else {
-                return InferredTypeData::Unknown;
-            };
-            return_ty = substituted;
-            substitutions.push(substitution);
-        }
+        return_ty = substituted;
     }
 
     for type_parameter in function.type_parameters(db) {

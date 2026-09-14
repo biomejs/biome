@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: players.ts
+---
+# Input
+```ts
+import { Player } from "./player.js";
+
+export const players = Array.from({ length: 5 }, () => new Player("running"));
+
+```
