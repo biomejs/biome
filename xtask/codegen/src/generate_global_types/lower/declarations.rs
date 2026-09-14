@@ -46,7 +46,7 @@ pub fn lower_interfaces(
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
-        class_parameters: None,
+        class_scope: None,
     };
     for name in names {
         lowerer.named_reference(name)?;
@@ -76,13 +76,20 @@ struct DeclarationLowerer<'a> {
     interfaces: BTreeMap<String, usize>,
     pending: Vec<(String, usize)>,
     types: Vec<Option<LoweredTypeData>>,
-    class_parameters: Option<BTreeMap<Text, LoweredTypeReference>>,
+    class_scope: Option<ClassScope>,
+}
+
+struct ClassScope {
+    name: Text,
+    reference: &'static str,
+    parameters: BTreeMap<Text, LoweredTypeReference>,
 }
 
 impl DeclarationLowerer<'_> {
     fn named_reference(&mut self, name: &str) -> Result<LoweredTypeReference> {
-        if let Some(parameters) = &self.class_parameters {
-            return parameters
+        if let Some(scope) = &self.class_scope {
+            return scope
+                .parameters
                 .get(name)
                 .cloned()
                 .with_context(|| format!("unsupported class member type reference {name}"));
@@ -230,18 +237,41 @@ impl DeclarationLowerer<'_> {
             return Ok(self.register(data));
         }
         match ty {
-            AnyTsType::TsThisType(_) if self.class_parameters.is_some() => {
+            AnyTsType::TsThisType(_) if self.class_scope.is_some() => {
                 Ok(self.register(LoweredTypeData::ThisKeyword))
             }
             AnyTsType::TsReferenceType(reference) => {
-                if reference.type_arguments().is_some() {
-                    bail!("unsupported type arguments in type reference");
-                }
                 let biome_js_syntax::AnyTsName::JsReferenceIdentifier(name) = reference.name()?
                 else {
                     bail!("unsupported qualified type reference");
                 };
-                self.named_reference(name.value_token()?.text_trimmed())
+                let name = name.value_token()?;
+                let name = name.text_trimmed();
+                if let Some(scope) = &self.class_scope
+                    && scope.name == name
+                    && !scope.parameters.contains_key(name)
+                {
+                    let ty = LoweredTypeReference::Predefined(scope.reference);
+                    let type_parameters = reference
+                        .type_arguments()
+                        .map(|arguments| {
+                            arguments
+                                .ts_type_argument_list()
+                                .into_iter()
+                                .map(|ty| self.lower_reference(&ty?))
+                                .collect::<Result<Box<[_]>>>()
+                        })
+                        .transpose()?
+                        .unwrap_or_default();
+                    return Ok(self.register(LoweredTypeData::InstanceOf {
+                        ty,
+                        type_parameters,
+                    }));
+                }
+                if reference.type_arguments().is_some() {
+                    bail!("unsupported type arguments in type reference");
+                }
+                self.named_reference(name)
             }
             AnyTsType::TsParenthesizedType(parenthesized) => {
                 self.lower_reference(&parenthesized.ty()?)
@@ -303,14 +333,19 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 }
 
 /// Lowers named instance properties and nongeneric methods with declaration-derived
-/// generic parameters. Constraints, defaults, value-side declarations, and computed members
-/// are excluded. Other unsupported member shapes and external type references are errors.
+/// generic parameters. Constraints, defaults, value-side declarations, computed members,
+/// methods returning `MapIterator` or `SetIterator`, and methods referencing Intl types
+/// are excluded. References to the
+/// enclosing class may carry type arguments. Other external references and unsupported
+/// member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
+/// Existing class members retain their projections; their declarations are not lowered again.
 /// Local types are registered after their dependencies for runtime conversion in one pass.
 pub(super) fn lower_class_members(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
     class: &mut LoweredClass,
+    class_reference: &'static str,
 ) -> Result<Box<[LoweredTypeData]>> {
     let mut lowerer = DeclarationLowerer {
         manifest,
@@ -318,12 +353,16 @@ pub(super) fn lower_class_members(
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
-        class_parameters: Some(BTreeMap::new()),
+        class_scope: Some(ClassScope {
+            name: class.name.clone(),
+            reference: class_reference,
+            parameters: BTreeMap::new(),
+        }),
     };
     let group = manifest
         .global_group(class.name())
         .context("missing class declaration group")?;
-    let mut members: Vec<LoweredTypeMember> = Vec::new();
+    let mut members = class.members.to_vec();
     let mut class_parameters = None;
     for record in group.declarations() {
         match record.kind {
@@ -367,10 +406,11 @@ pub(super) fn lower_class_members(
                 class.name()
             );
         }
-        lowerer.class_parameters =
-            Some(names.into_iter().zip(references.iter().cloned()).collect());
+        if let Some(scope) = &mut lowerer.class_scope {
+            scope.parameters = names.into_iter().zip(references.iter().cloned()).collect();
+        }
         for member in declaration.members() {
-            if !supports_class_member(&member)? {
+            if !supports_class_member(&member, class)? {
                 continue;
             }
             let member = lowerer.lower_member(member).with_context(|| {
@@ -396,16 +436,50 @@ pub(super) fn lower_class_members(
         .context("unfilled class member type")
 }
 
-fn supports_class_member(member: &AnyTsTypeMember) -> Result<bool> {
+fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
     let name = match member {
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
-        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+            if method_uses_intl_types(method)? {
+                return Ok(false);
+            }
+            if let Some(annotation) = method.return_type_annotation()
+                && let AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(reference)) =
+                    annotation.ty()?
+                && reference.type_arguments().is_some()
+                && let biome_js_syntax::AnyTsName::JsReferenceIdentifier(name) = reference.name()?
+                && matches!(
+                    name.value_token()?.text_trimmed(),
+                    "MapIterator" | "SetIterator"
+                )
+            {
+                return Ok(false);
+            }
+            method.name()?
+        }
         _ => bail!("unsupported class member: {:?}", member.syntax().kind()),
     };
-    Ok(!matches!(
-        name,
-        AnyJsObjectMemberName::JsComputedMemberName(_)
-    ))
+    match name {
+        AnyJsObjectMemberName::JsComputedMemberName(_) => Ok(false),
+        name => Ok(class
+            .member(lower_object_member_name(name)?.text())
+            .is_none()),
+    }
+}
+
+fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
+    for name in method
+        .syntax()
+        .descendants()
+        .filter_map(biome_js_syntax::TsQualifiedName::cast)
+    {
+        if let biome_js_syntax::AnyTsName::JsReferenceIdentifier(root) = name.left()?
+            && root.value_token()?.text_trimmed() == "Intl"
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
 
 #[cfg(test)]
@@ -436,8 +510,12 @@ mod tests {
                 type_parameters: Box::default(),
                 members: Box::default(),
             };
-            let local_types =
-                lower_class_members(&manifest, std::slice::from_ref(&file), &mut class)?;
+            let local_types = lower_class_members(
+                &manifest,
+                std::slice::from_ref(&file),
+                &mut class,
+                id_constant,
+            )?;
             if let Some(member) = class.members().first() {
                 assert_eq!(member.type_reference(), &LoweredTypeReference::Local(0));
             }
