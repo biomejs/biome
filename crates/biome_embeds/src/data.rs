@@ -55,10 +55,6 @@ pub struct VueDirectiveDeclarations {
     /// Keys of the component's `directives` option, taken from
     /// `export default { ... }`, `defineComponent({ ... })`, or
     /// `defineOptions({ ... })`.
-    ///
-    /// Keys keep the spelling used in the source. Vue's runtime looks a
-    /// directive up under its kebab-case, camelCase, and PascalCase forms, so
-    /// [`vue_directive_name_matches_option_name`] accepts all three.
     option_names: Box<[TokenText]>,
     /// Whether a declaration site was found that cannot be read statically.
     /// See the type-level documentation for the list of such sites.
