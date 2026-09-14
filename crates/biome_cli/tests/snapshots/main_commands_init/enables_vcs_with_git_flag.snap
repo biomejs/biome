@@ -1,6 +1,5 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
-assertion_line: 577
 expression: redactor(content)
 ---
 ## `biome.json`
@@ -94,9 +93,10 @@ init ━━━━━━━━━━━━━━━━━━━━━━━━━
          biome check  checks formatting, import sorting, and lint rules.
          biome --help displays the available commands.
     
-      3. Migrate from ESLint and Prettier
-         biome migrate eslint   migrates your ESLint configuration to Biome.
-         biome migrate prettier migrates your Prettier configuration to Biome.
+      3. Migrate from ESLint, Stylelint and Prettier
+         biome migrate eslint    migrates your ESLint configuration to Biome.
+         biome migrate stylelint migrates your Stylelint configuration to Biome.
+         biome migrate prettier  migrates your Prettier configuration to Biome.
     
       4. Read the documentation
          Find guides and documentation at https://biomejs.dev/guides/getting-started/

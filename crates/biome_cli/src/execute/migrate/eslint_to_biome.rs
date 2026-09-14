@@ -1,7 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::execute::migrate::unsupported_rules::UNSUPPORTED_RULES;
+use crate::execute::migrate::eslint_unsupported_rules::ESLINT_UNSUPPORTED_RULES;
 
+use super::migration::{
+    MigrationOptions, RuleMigrationResult, UnsupportedRuleReason, to_biome_includes,
+};
 use super::{
     eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
     eslint_typescript,
@@ -10,7 +13,6 @@ use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
-use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
@@ -25,64 +27,8 @@ use rustc_hash::FxHashMap;
 ///   the equivalent Biome's rule of an Eslint rule
 /// - hand-written handling of Biome rules that have options in the current module.
 
-#[derive(Clone, Debug, Default)]
-pub(crate) struct MigrationOptions {
-    /// Migrate inspired rules from eslint and its plugins?
-    pub(crate) include_inspired: bool,
-    /// Migrate nursery rules from eslint and its plugins?
-    pub(crate) include_nursery: bool,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub(crate) struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
-
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub(crate) enum UnsupportedRuleReason {
-    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
-    ///
-    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
-    Stylistic,
-    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
-    ///
-    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
-    FormatterCovers,
-    /// The functionality is covered by a Biome formatter option.
-    FormatterOption(&'static str),
-    /// The rule belongs to a known source, but it is not yet implemented in Biome.
-    KnownSourceNotImplemented,
-    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
-    UnknownSource,
-    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
-    CoveredByRule(&'static str),
-}
-
-impl Display for UnsupportedRuleReason {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            Self::Stylistic => {
-                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
-            }
-            Self::FormatterCovers => {
-                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
-            }
-            Self::FormatterOption(option) => fmt.write_markup(
-                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
-            ),
-            Self::KnownSourceNotImplemented => {
-                fmt.write_markup(markup! { "Known source, not yet implemented." })
-            }
-            Self::UnknownSource => fmt.write_markup(markup! {
-                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
-            }),
-            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
-                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
-            }),
-        }
-    }
-}
-
 #[derive(Debug, Default)]
-pub(crate) struct MigrationResults {
+pub(crate) struct EslintMigrationResults {
     /// Path to the migrated ESlint configuration
     pub(crate) eslint_path: Option<Box<str>>,
     /// Is the Biome configuration updated?
@@ -93,7 +39,8 @@ pub(crate) struct MigrationResults {
     pub(crate) migrated: BTreeSet<EslintRuleName>,
     pub(crate) unsupported: BTreeMap<EslintRuleName, UnsupportedRuleReason>,
 }
-impl MigrationResults {
+
+impl EslintMigrationResults {
     pub(crate) fn add(&mut self, sourced_rule: &str, status: RuleMigrationResult) {
         let sourced = EslintRuleName::from_str(sourced_rule);
         match status {
@@ -117,7 +64,7 @@ impl MigrationResults {
         self.migrated.len() + self.inspired.len() + self.nursery.len() + self.unsupported.len()
     }
 }
-impl biome_diagnostics::Diagnostic for MigrationResults {
+impl biome_diagnostics::Diagnostic for EslintMigrationResults {
     fn category(&self) -> Option<&'static biome_diagnostics::Category> {
         Some(biome_diagnostics::category!("migrate"))
     }
@@ -341,18 +288,6 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub(crate) enum RuleMigrationResult {
-    /// A rule that has been migrated.
-    Migrated,
-    /// A rule that could be migrated if `--include-inspired` was passed
-    Inspired,
-    /// A rule that could be migrated if `--include-nursery` was passed
-    Nursery,
-    /// An unsupported rule
-    Unsupported,
-}
-
 #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub(crate) struct EslintRuleName {
     plugin_name: Option<Box<str>>,
@@ -444,8 +379,10 @@ fn unsupported_rule_reason(rule_name: &EslintRuleName) -> UnsupportedRuleReason 
         return UnsupportedRuleReason::UnknownSource;
     };
 
-    if let Ok(index) = UNSUPPORTED_RULES.binary_search_by(|rule| rule.0.cmp_any(&sourced_rule)) {
-        return UNSUPPORTED_RULES[index].1.clone();
+    if let Ok(index) =
+        ESLINT_UNSUPPORTED_RULES.binary_search_by(|rule| rule.0.cmp_any(&sourced_rule))
+    {
+        return ESLINT_UNSUPPORTED_RULES[index].1.clone();
     }
     UnsupportedRuleReason::KnownSourceNotImplemented
 }
@@ -471,7 +408,7 @@ impl eslint_eslint::AnyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::Configuration, MigrationResults) {
+    ) -> (biome_config::Configuration, EslintMigrationResults) {
         match self {
             Self::Flat(config) => config.into_biome_config(options),
             Self::Legacy(config) => config.into_biome_config(options),
@@ -483,7 +420,7 @@ pub(crate) fn merge_biome_config_with_eslint(
     mut biome_config: biome_config::Configuration,
     eslint_config: eslint_eslint::AnyConfigData,
     options: &MigrationOptions,
-) -> (biome_config::Configuration, MigrationResults) {
+) -> (biome_config::Configuration, EslintMigrationResults) {
     let (eslint_biome_config, results) = eslint_config.into_biome_config(options);
     biome_config.merge_with(eslint_biome_config);
     (biome_config, results)
@@ -493,8 +430,8 @@ impl eslint_eslint::FlatConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::Configuration, MigrationResults) {
-        let mut results = MigrationResults::default();
+    ) -> (biome_config::Configuration, EslintMigrationResults) {
+        let mut results = EslintMigrationResults::default();
         let mut biome_config = biome_config::Configuration::default();
         let mut linter = biome_config::LinterConfiguration::default();
         let mut overrides = biome_config::Overrides::default();
@@ -570,8 +507,8 @@ impl eslint_eslint::LegacyConfigData {
     pub(crate) fn into_biome_config(
         self,
         options: &MigrationOptions,
-    ) -> (biome_config::Configuration, MigrationResults) {
-        let mut results = MigrationResults::default();
+    ) -> (biome_config::Configuration, EslintMigrationResults) {
+        let mut results = EslintMigrationResults::default();
         let mut biome_config = biome_config::Configuration::default();
         if !self.globals.is_empty() {
             let globals = self.globals.enabled().collect::<rustc_hash::FxHashSet<_>>();
@@ -624,7 +561,7 @@ impl eslint_eslint::Rules {
     pub(crate) fn into_biome_rules(
         self,
         options: &MigrationOptions,
-        results: &mut MigrationResults,
+        results: &mut EslintMigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
         for eslint_rule in self.0 {
@@ -641,7 +578,7 @@ fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
     rule: eslint_eslint::Rule,
     opts: &MigrationOptions,
-    results: &mut MigrationResults,
+    results: &mut EslintMigrationResults,
 ) {
     let name = rule.name();
     match rule {
@@ -951,35 +888,6 @@ fn migrate_eslint_rule(
             }
         }
     }
-}
-
-fn to_biome_includes(
-    files: &[impl AsRef<str>],
-    ignores: &[impl AsRef<str>],
-) -> Vec<biome_glob::NormalizedGlob> {
-    let mut includes: Vec<biome_glob::NormalizedGlob> = Vec::new();
-    if !files.is_empty() {
-        includes.extend(files.iter().filter_map(|glob| glob.as_ref().parse().ok()));
-    }
-    if !ignores.is_empty() {
-        if includes.is_empty()
-            && let Ok(glob) = "**".parse()
-        {
-            includes.push(glob);
-        }
-        includes.extend(ignores.iter().filter_map(|glob| {
-            // ESLint supports negation: https://eslint.org/docs/latest/use/configure/ignore#unignoring-files-and-directories
-            if let Some(rest) = glob.as_ref().strip_prefix('!') {
-                rest.parse()
-            } else {
-                glob.as_ref()
-                    .parse()
-                    .map(|glob: biome_glob::NormalizedGlob| glob.negated())
-            }
-            .ok()
-        }));
-    }
-    includes
 }
 
 #[cfg(test)]
