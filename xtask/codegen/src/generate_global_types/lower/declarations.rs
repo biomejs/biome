@@ -32,7 +32,7 @@ impl LoweredDeclarations {
 /// No global IDs or runtime name registrations are allocated.
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
-/// global interface references, parentheses, unions, and nongeneric function types.
+/// global interface references, arrays, parentheses, unions, and nongeneric function types.
 /// Type aliases, type arguments, qualified references, object and template literal types,
 /// and type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
@@ -263,6 +263,13 @@ impl DeclarationLowerer<'_> {
             return Ok(self.register(data));
         }
         match ty {
+            AnyTsType::TsArrayType(array) => {
+                let element = self.lower_reference(&array.element_type()?)?;
+                Ok(self.register(LoweredTypeData::InstanceOf {
+                    ty: LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"),
+                    type_parameters: Box::new([element]),
+                }))
+            }
             AnyTsType::TsThisType(_) if self.class_scope.is_some() => {
                 Ok(self.register(LoweredTypeData::ThisKeyword))
             }
@@ -858,6 +865,76 @@ mod tests {
         collect::collect, emit::render_local_types, manifest::build_global_manifest,
         source::CanonicalPath,
     };
+
+    #[test]
+    fn array_types_preserve_elements_and_share_references() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for element in ["boolean", "string", "number", "T", "(boolean | T)"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "arrays.d.ts".to_owned(),
+                bytes: format!(
+                    "
+                    interface Owner<T> {{
+                        element: {element};
+                        values: {element}[];
+                        repeated: {element}[];
+                        nested: {element}[][];
+                        callback: (values: {element}[]) => {element}[][];
+                    }}
+                "
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types =
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+            let member_type = |name| class.member(name).unwrap().type_reference();
+            let local_index = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                *index
+            };
+            for (array, element) in [("values", "element"), ("nested", "values")] {
+                let index = local_index(member_type(array));
+                let LoweredTypeData::InstanceOf {
+                    ty,
+                    type_parameters,
+                } = &types[index]
+                else {
+                    panic!("expected array instance")
+                };
+                assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+                assert_eq!(
+                    type_parameters.as_ref(),
+                    std::slice::from_ref(member_type(element))
+                );
+                if let LoweredTypeReference::Local(element_index) = member_type(element) {
+                    assert!(*element_index < index);
+                }
+            }
+            assert_eq!(member_type("values"), member_type("repeated"));
+            let LoweredTypeData::Function(callback) = &types[local_index(member_type("callback"))]
+            else {
+                panic!("expected callback")
+            };
+            assert_eq!(
+                callback.parameters()[0].type_reference(),
+                member_type("values")
+            );
+            assert_eq!(callback.return_type(), member_type("nested"));
+        }
+        Ok(())
+    }
 
     #[test]
     fn repeated_local_types_share_references() -> Result<()> {
