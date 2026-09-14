@@ -69,6 +69,7 @@ fn generated_body(
 ) -> Result<String> {
     let migrated_ids = render_migrated_ids(lowered)?;
     let registrations = render_registrations(lowered)?;
+    let local_types = render_local_types(lowered.globals());
 
     Ok(format!(
         r#"// Generated from microsoft/TypeScript {typescript_tag} (git commit {typescript_sha}).
@@ -80,10 +81,42 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 /// Registers all generated global type data into the resolver builder.
 pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
 {registrations}}}
+
+{local_types}
 "#,
         typescript_tag = pin.tag(),
         typescript_sha = pin.sha(),
     ))
+}
+
+pub(super) fn render_local_types(globals: &[LoweredGlobal]) -> String {
+    let mut arrays = String::new();
+    let mut arms = String::new();
+    for global in globals
+        .iter()
+        .filter(|global| !global.local_types().is_empty())
+    {
+        let id = global.id_constant();
+        let name = format!("{}_LOCAL_TYPES", id.trim_end_matches("_ID_GLOBAL_TYPE_ID"));
+        let count = global.local_types().len();
+        let types = global
+            .local_types()
+            .iter()
+            .map(render_type_data)
+            .collect::<Vec<_>>()
+            .join(",\n");
+        arrays.push_str(&format!(
+            "pub(crate) static {name}: std::sync::LazyLock<[crate::TypeData; {count}]> = std::sync::LazyLock::new(|| [{types}]);\n"
+        ));
+        arms.push_str(&format!("crate::globals::{id} => &*{name},\n"));
+    }
+    format!(
+        "{arrays}
+        /// Supporting types in dependency order, indexed relative to their owning global.
+        pub(crate) fn generated_local_types(owner: crate::globals::GlobalTypeId) -> &'static [crate::TypeData] {{
+            match owner {{ {arms} _ => &[] }}
+        }}"
+    )
 }
 
 /// Builds the migrated ID slice body.
@@ -158,6 +191,11 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
+        LoweredTypeData::GenericParameter(name) => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: crate::TypeReference::unknown(), default: crate::TypeReference::unknown() }})",
+            rust_string_literal(name.text()),
+        ),
+        LoweredTypeData::ThisKeyword => "crate::TypeData::ThisKeyword".to_string(),
         LoweredTypeData::UnknownKeyword => "crate::TypeData::UnknownKeyword".to_string(),
     }
 }

@@ -26,10 +26,6 @@ const MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
 ];
 const SET_TYPE_PARAMETERS: &[LoweredTypeReference] =
     &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
-const WEAK_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] = &[
-    LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-    LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-];
 const DATE_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
 
 #[derive(Clone, Copy)]
@@ -182,12 +178,6 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     )?;
     assert_memberless_class_shape(lowered, "Map", "MAP_ID_GLOBAL_TYPE_ID", MAP_TYPE_PARAMETERS)?;
     assert_memberless_class_shape(lowered, "Set", "SET_ID_GLOBAL_TYPE_ID", SET_TYPE_PARAMETERS)?;
-    assert_memberless_class_shape(
-        lowered,
-        "WeakMap",
-        "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-        WEAK_MAP_TYPE_PARAMETERS,
-    )?;
     assert_disposable_shape(
         lowered,
         DisposableShape {

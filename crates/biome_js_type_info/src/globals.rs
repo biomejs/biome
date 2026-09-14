@@ -4,12 +4,12 @@ use biome_rowan::Text;
 
 use crate::{
     Class, Function, FunctionParameter, GenericTypeParameter, Literal, PatternFunctionParameter,
-    RawTypeId, ReturnType, TypeData, TypeId, TypeInstance, TypeReference, TypeReferenceQualifier,
+    RawTypeId, ReturnType, TypeData, TypeInstance, TypeReference, TypeReferenceQualifier,
     TypeStore, Union, interned_types::TypeData as InferredTypeData,
 };
 
 use super::globals_builder::GlobalsResolverBuilder;
-use crate::generated::global_types::set_generated_global_type_data;
+use crate::generated::global_types::{generated_local_types, set_generated_global_type_data};
 
 pub use super::globals_ids::*;
 
@@ -229,17 +229,14 @@ pub fn global_type_id_for_value(name: &str) -> Option<GlobalTypeId> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
+#[derive(Clone, Copy)]
 pub struct GlobalTypes<'db> {
-    types: Box<[InferredTypeData<'db>]>,
+    db: &'db dyn crate::TypeDb,
 }
 
 impl<'db> GlobalTypes<'db> {
     pub fn get(&self, id: GlobalTypeId) -> InferredTypeData<'db> {
-        self.types
-            .get(id.index())
-            .copied()
-            .unwrap_or(InferredTypeData::Unknown)
+        resolve_global_type(self.db, GlobalTypeInput::new(self.db, id, None))
     }
 
     pub fn typeof_literal(&self, value: &str) -> InferredTypeData<'db> {
@@ -262,50 +259,62 @@ impl<'db> GlobalTypes<'db> {
     }
 }
 
-#[salsa::tracked(returns(ref))]
-pub fn global_types<'db>(db: &'db dyn crate::TypeDb) -> GlobalTypes<'db> {
-    let mut types: Box<[InferredTypeData<'db>]> = (0..NUM_PREDEFINED_TYPES)
-        .map(|index| {
-            let id = GlobalTypeId::new(TypeId::new(index));
-            InferredTypeData::from_raw_with_resolver(
-                db,
-                raw_global_type(id),
-                true,
-                &mut |reference| match reference {
-                    TypeReference::Resolved(RawTypeId::Global(id)) => {
-                        InferredTypeData::GlobalType(*id)
-                    }
-                    TypeReference::Resolved(RawTypeId::Local(_))
-                    | TypeReference::Qualifier(_)
-                    | TypeReference::Import(_) => InferredTypeData::Unknown,
-                },
-            )
-        })
-        .collect();
-    let typeof_types = [
-        BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        NUMBER_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        OBJECT_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        STRING_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        SYMBOL_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-        UNDEFINED_STRING_LITERAL_ID_GLOBAL_TYPE_ID,
-    ]
-    .into_iter()
-    .map(|id| {
-        types
-            .get(id.index())
-            .copied()
-            .unwrap_or(InferredTypeData::Unknown)
+/// Provides memoized access to individual globals without resolving unrelated types.
+pub fn global_types(db: &dyn crate::TypeDb) -> GlobalTypes<'_> {
+    GlobalTypes { db }
+}
+
+/// A predefined global or a local entry scoped to that global's supporting-type table.
+#[salsa::interned(no_lifetime)]
+struct GlobalTypeInput {
+    owner: GlobalTypeId,
+    local: Option<crate::TypeId>,
+}
+
+#[salsa::tracked]
+fn resolve_global_type<'db>(
+    db: &'db dyn crate::TypeDb,
+    input: GlobalTypeInput,
+) -> InferredTypeData<'db> {
+    let owner = input.owner(db);
+    let local = input.local(db);
+    let raw = match local {
+        None => raw_global_type(owner),
+        Some(id) => {
+            let raw = generated_local_types(owner).get(id.index());
+            debug_assert!(
+                raw.is_some(),
+                "generated local references must index their owner's supporting-type table"
+            );
+            let Some(raw) = raw else {
+                return InferredTypeData::Unknown;
+            };
+            raw
+        }
+    };
+    InferredTypeData::from_raw_with_resolver(db, raw, true, &mut |reference| {
+        match reference {
+            TypeReference::Resolved(RawTypeId::Global(target)) => {
+                // The typeof result contains literal values rather than deferred global handles.
+                if local.is_none() && owner == TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID {
+                    global_types(db).get(*target)
+                } else {
+                    InferredTypeData::GlobalType(*target)
+                }
+            }
+            TypeReference::Resolved(RawTypeId::Local(target)) => {
+                if let Some(source) = local {
+                    // Dependency order prevents recursive queries from cycling.
+                    debug_assert!(
+                        target.index() < source.index(),
+                        "generated local types must be in dependency order"
+                    );
+                }
+                resolve_global_type(db, GlobalTypeInput::new(db, owner, Some(*target)))
+            }
+            TypeReference::Qualifier(_) | TypeReference::Import(_) => InferredTypeData::Unknown,
+        }
     })
-    .collect();
-    if let Some(typeof_union) =
-        types.get_mut(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID.index())
-    {
-        *typeof_union = InferredTypeData::union_from_types(db, typeof_types);
-    }
-    GlobalTypes { types }
 }
 
 #[cfg(test)]
@@ -335,6 +344,52 @@ mod tests {
     impl crate::TypeDb for TestDb {}
 
     #[test]
+    fn local_query_keys_distinguish_owners() {
+        let db = TestDb::default();
+        let local = Some(crate::TypeId::new(0));
+        let weak_map = GlobalTypeInput::new(&db, WEAK_MAP_ID_GLOBAL_TYPE_ID, local);
+        let map = GlobalTypeInput::new(&db, MAP_ID_GLOBAL_TYPE_ID, local);
+        assert!(weak_map != map);
+        assert!(weak_map == GlobalTypeInput::new(&db, WEAK_MAP_ID_GLOBAL_TYPE_ID, local));
+    }
+
+    #[test]
+    fn global_lookup_defers_unrelated_classes_and_reuses_results() {
+        let events = biome_db::testing::Events::default();
+        let db = TestDb {
+            storage: salsa::Storage::new(Some(Box::new({
+                let events = events.clone();
+                move |event| events.0.lock().unwrap().push(event)
+            }))),
+        };
+        let globals = global_types(&db);
+        let promise = globals.get(PROMISE_ID_GLOBAL_TYPE_ID);
+        assert!(matches!(promise, InferredTypeData::Class(_)));
+        events.0.lock().unwrap().clear();
+
+        let weak_map = globals.get(WEAK_MAP_ID_GLOBAL_TYPE_ID);
+        assert!(matches!(weak_map, InferredTypeData::Class(_)));
+        assert!(
+            events.0.lock().unwrap().iter().any(|event| {
+                let salsa::EventKind::DidInternValue { key, .. } = event.kind else {
+                    return false;
+                };
+                salsa::Database::ingredient_debug_name(&db, key.ingredient_index())
+                    == "InternedClass"
+            }),
+            "Promise lookup must not precompute WeakMap"
+        );
+        events.0.lock().unwrap().clear();
+
+        assert_eq!(globals.get(PROMISE_ID_GLOBAL_TYPE_ID), promise);
+        assert_eq!(globals.get(WEAK_MAP_ID_GLOBAL_TYPE_ID), weak_map);
+        assert!(!events.0.lock().unwrap().iter().any(|event| matches!(
+            event.kind,
+            salsa::EventKind::WillExecute { .. } | salsa::EventKind::DidInternValue { .. }
+        )));
+    }
+
+    #[test]
     fn typeof_literals_use_canonical_global_entries() {
         let db = TestDb::default();
         let globals = global_types(&db);
@@ -345,6 +400,15 @@ mod tests {
         assert_eq!(
             globals.typeof_return_union(),
             globals.get(TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
+        );
+        let InferredTypeData::Union(union) = globals.typeof_return_union() else {
+            panic!("typeof must return a union");
+        };
+        assert!(
+            union
+                .types(&db)
+                .iter()
+                .all(|ty| matches!(ty, InferredTypeData::Literal(_)))
         );
     }
 
@@ -380,23 +444,6 @@ mod tests {
             assert_eq!(member.ty, InferredTypeData::GlobalType(global_type_id));
             assert_eq!(globals.get(global_type_id), InferredTypeData::Symbol);
         }
-    }
-
-    #[test]
-    fn generated_weak_map_global_keeps_type_parameters() {
-        let db = TestDb::default();
-        let InferredTypeData::Class(weak_map) = global_types(&db).get(WEAK_MAP_ID_GLOBAL_TYPE_ID)
-        else {
-            panic!("WeakMap must be a class");
-        };
-        assert_eq!(
-            weak_map.type_parameters(&db).as_ref(),
-            &[
-                InferredTypeData::GlobalType(T_ID_GLOBAL_TYPE_ID),
-                InferredTypeData::GlobalType(U_ID_GLOBAL_TYPE_ID),
-            ]
-        );
-        assert!(weak_map.members(&db).is_empty());
     }
 
     #[test]
