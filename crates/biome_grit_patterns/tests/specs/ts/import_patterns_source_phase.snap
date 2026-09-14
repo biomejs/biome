@@ -1,17 +1,11 @@
 ---
 source: crates/biome_grit_patterns/tests/spec_tests.rs
-expression: import_patterns
+expression: import_patterns_source_phase
 ---
 SnapshotResult {
     messages: [],
     matched_ranges: [
-        "2:1-2:27",
-        "4:1-4:21",
-        "5:1-5:26",
-        "6:1-6:30",
-        "7:1-7:28",
-        "8:1-8:33",
-        "9:1-9:33",
+        "1:1-1:28",
     ],
     rewritten_files: [],
     created_files: [],
