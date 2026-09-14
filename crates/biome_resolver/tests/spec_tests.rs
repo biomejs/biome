@@ -1,5 +1,5 @@
-use biome_fs::OsFileSystem;
-use biome_package::{CompilerOptions, TsConfigJson};
+use biome_fs::{MemoryFileSystem, OsFileSystem};
+use biome_package::{CompilerOptions, Manifest, TsConfigJson};
 use biome_resolver::*;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -460,6 +460,114 @@ fn test_resolve_typescript_path_aliases2() {
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/vendor/jquery/dist/index.js"
         )))
+    );
+}
+
+#[test]
+fn test_resolve_typescript_path_alias_from_project_reference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/tsconfig.json".into(),
+        r#"{"references":[{"path":"./configs/app.json"}]}"#,
+    );
+    fs.insert(
+        "/configs/app.json".into(),
+        r#"{"references":[{"path":"./bad"},{"path":"./lib"},{"path":"../tsconfig.json"}]}"#,
+    );
+    fs.insert(
+        "/configs/bad/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"@/*":["../../src"]}}}"#,
+    );
+    fs.insert(
+        "/configs/lib/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"@/*":["../../src/*"],"ab*bc":["../../src/*"]}}}"#,
+    );
+    fs.insert("/src/utils.js".into(), "export {};");
+
+    let options = ResolveOptions {
+        extensions: &["js"],
+        ..Default::default()
+    };
+    let resolution = resolve_with_metadata("@/utils", Utf8Path::new("/src"), &fs, &options)
+        .expect("path alias should resolve through project references");
+
+    assert_eq!(
+        resolution.kind(),
+        ResolutionKind::TsConfigPathMapping {
+            can_add_extension: true
+        }
+    );
+    assert_eq!(resolution.into_path(), Utf8Path::new("/src/utils.js"));
+
+    let (Some(mut root_config), _) =
+        TsConfigJson::read_manifest(&fs, "/tsconfig.json".as_ref()).consume()
+    else {
+        panic!("root config should deserialize");
+    };
+    root_config.path.clear();
+    let explicit_options = options
+        .clone()
+        .with_tsconfig(DiscoverableManifest::Explicit {
+            package_path: "/tsconfig.json".into(),
+            manifest: &root_config,
+        });
+    assert_eq!(
+        resolve("@/utils", Utf8Path::new("/src"), &fs, &explicit_options),
+        Ok(Utf8PathBuf::from("/src/utils.js"))
+    );
+
+    assert_eq!(
+        resolve("missing", Utf8Path::new("/src"), &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+    assert_eq!(
+        resolve("abc", Utf8Path::new("/src"), &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_failed_typescript_path_alias_uses_package_fallback() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"exact":["./exact.js"],"fallback":["./missing"]}}}"#,
+    );
+    fs.insert("/exact.js".into(), "export {};");
+    fs.insert("/node_modules/fallback/index.js".into(), "export {};");
+
+    let resolution = resolve_with_metadata(
+        "fallback",
+        Utf8Path::new("/src"),
+        &fs,
+        &ResolveOptions {
+            default_files: &["index"],
+            extensions: &["js"],
+            ..Default::default()
+        },
+    )
+    .expect("package fallback should resolve");
+
+    assert_eq!(resolution.kind(), ResolutionKind::Other);
+    assert_eq!(
+        resolution.into_path(),
+        Utf8Path::new("/node_modules/fallback/index.js")
+    );
+
+    let exact_resolution = resolve_with_metadata(
+        "exact",
+        Utf8Path::new("/src"),
+        &fs,
+        &ResolveOptions::default(),
+    )
+    .expect("exact path alias should resolve");
+    assert_eq!(
+        exact_resolution.kind(),
+        ResolutionKind::TsConfigPathMapping {
+            can_add_extension: false
+        }
     );
 }
 

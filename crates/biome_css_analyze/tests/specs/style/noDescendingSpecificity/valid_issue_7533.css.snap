@@ -1,0 +1,22 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_issue_7533.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@layer one, two;
+
+@layer one {
+    b a {
+        color: green;
+    }
+}
+
+@layer two {
+    a {
+        color: blue;
+    }
+}
+
+```

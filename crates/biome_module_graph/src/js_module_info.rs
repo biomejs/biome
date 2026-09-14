@@ -13,7 +13,7 @@ use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, RawTypeId, TypeId, TypeReference, resolved::InferredLocalTypeId,
 };
-use biome_resolver::ResolvedPath;
+use biome_resolver::{ResolutionKind, ResolvedPath};
 use biome_rowan::{Text, TextRange};
 use camino::Utf8Path;
 use indexmap::IndexMap;
@@ -344,11 +344,16 @@ pub struct JsImportPath {
     pub resolved_path: ResolvedPath,
     pub phase: JsImportPhase,
     pub kind: JsImportKind,
+    resolution_kind: ResolutionKind,
 }
 
 impl JsImportPath {
     pub fn as_path(&self) -> Option<&Utf8Path> {
         self.resolved_path.as_path()
+    }
+
+    pub const fn resolution_kind(&self) -> ResolutionKind {
+        self.resolution_kind
     }
 }
 

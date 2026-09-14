@@ -49,9 +49,16 @@ impl ResolverFsProxy for ModuleGraphFsProxy<'_> {
             .ok_or(ResolveError::ErrorLoadingManifest)
     }
 
-    fn read_tsconfig_json(&self, path: &Utf8Path) -> Result<TsConfigJson, ResolveError> {
+    fn read_tsconfig_json_in_directory(
+        &self,
+        dir_path: &Utf8Path,
+    ) -> Result<TsConfigJson, ResolveError> {
         self.project_layout
-            .get_tsconfig_json_for_package(path.parent().expect("path should have a parent"))
+            .get_tsconfig_json_for_package(dir_path)
             .ok_or(ResolveError::ErrorLoadingManifest)
+    }
+
+    fn read_tsconfig_json(&self, path: &Utf8Path) -> Result<TsConfigJson, ResolveError> {
+        self.fs.read_tsconfig_json(path)
     }
 }

@@ -13,6 +13,7 @@ use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
     TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
+use biome_resolver::ResolutionKind;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
@@ -343,12 +344,14 @@ impl JsModuleInfoCollector {
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        resolution_kind: ResolutionKind,
         phase: JsImportPhase,
     ) {
         let import_path = JsImportPath {
             resolved_path,
             phase,
             kind: JsImportKind::Static,
+            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
@@ -358,12 +361,14 @@ impl JsModuleInfoCollector {
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        resolution_kind: ResolutionKind,
         phase: JsImportPhase,
     ) {
         let import_path = JsImportPath {
             resolved_path,
             phase,
             kind: JsImportKind::Dynamic,
+            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
