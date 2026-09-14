@@ -1838,13 +1838,19 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15
                 constraint: crate::TypeReference::unknown(),
                 default: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             }),
-            crate::TypeData::from(crate::Tuple(Box::new([]))),
-            crate::TypeData::from(crate::Tuple(Box::new([crate::TupleElementType {
-                ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
-                name: None,
-                is_optional: false,
-                is_rest: false,
-            }]))),
+            crate::TypeData::from(crate::Tuple {
+                elements: Box::new([]),
+                is_inferred_array: false,
+            }),
+            crate::TypeData::from(crate::Tuple {
+                elements: Box::new([crate::TupleElementType {
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                    name: None,
+                    is_optional: false,
+                    is_rest: false,
+                }]),
+                is_inferred_array: false,
+            }),
             crate::TypeData::Union(Box::new(crate::Union(Box::new([
                 crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                 crate::RawTypeId::Local(crate::TypeId::new(6)).into(),

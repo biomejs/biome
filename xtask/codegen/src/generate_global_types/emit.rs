@@ -202,7 +202,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::Union(Box::new(crate::Union({})))",
             render_type_references(types),
         ),
-        LoweredTypeData::Tuple(elements) => format!("crate::TypeData::from(crate::Tuple(Box::new([{}])))", elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(",")),
+        LoweredTypeData::Tuple(elements) => format!(
+            "crate::TypeData::from(crate::Tuple {{ elements: Box::new([{}]), is_inferred_array: false }})",
+            elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(","),
+        ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
