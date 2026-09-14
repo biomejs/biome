@@ -1,0 +1,21 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div class="bg-primary text-muted-foreground border-brand-500"></div>
+<div class="bg-transparent text-current border-inherit fill-none font-black"></div>
+<div class="bg-[#ff00aa] bg-(--brand) [color:red]"></div>
+<div class="w-red-500 bg-red-550 custom-pink-500"></div>
+<div title="bg-pink-500"></div>
+<div class="[&.bg-red-500]:p-4"></div>
+<div class="bg-black hover:text-black dark:border-black! fill-black stroke-black"></div>
+<div class="bg-white hover:text-white dark:border-white! fill-white stroke-white"></div>
+<div class="bg-transparent hover:text-transparent dark:border-transparent! fill-transparent stroke-transparent"></div>
+<div class="bg-current hover:text-current dark:border-current! fill-current stroke-current"></div>
+<div class="bg-inherit hover:text-inherit dark:border-inherit! fill-inherit stroke-inherit"></div>
+<div class="hover:bg-black/50 text-white/80! ring-offset-black mask-linear-from-white"></div>
+
+```
