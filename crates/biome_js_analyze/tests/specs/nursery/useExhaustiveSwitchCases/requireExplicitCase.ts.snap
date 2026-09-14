@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: requireExplicitCase.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type Letter = "A" | "B" | "C";
+const getLetter = (): Letter => Math.random() > 0.5 ? "A" : "B";
+
+function trulyExhaustive(): number {
+	switch (getLetter()) {
+		case "A":
+			return 1;
+		case "B":
+			return 1;
+		case "C":
+			return 1;
+		default:
+			throw new Error("bruh");
+	}
+}
+
+function fakeNewsExhaustive(): number {
+	switch (getLetter()) {
+		case "A":
+			return 1;
+		case "B":
+			return 1;
+		default:
+			throw new Error("bruh");
+	}
+}
+
+trulyExhaustive();
+fakeNewsExhaustive();
+
+```
+
+# Diagnostics
+```
+requireExplicitCase.ts:20:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    19 │ function fakeNewsExhaustive(): number {
+  > 20 │ 	switch (getLetter()) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+  > 21 │ 		case "A":
+        ...
+  > 26 │ 			throw new Error("bruh");
+  > 27 │ 	}
+       │ 	^
+    28 │ }
+    29 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "C"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    23 23 │       case "B":
+    24 24 │         return 1;
+    25    │ - → → default:
+       25 │ + → → case·"C":·throw·new·Error("TODO:·Not·implemented·yet");
+       26 │ + → → default:
+    26 27 │         throw new Error("bruh");
+    27 28 │     }
+  
+
+```

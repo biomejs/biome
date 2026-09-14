@@ -26,8 +26,9 @@ declare_lint_rule! {
     /// However, if the union type changes, it's easy to forget to modify the cases to account for
     /// any new types.
     ///
-    /// This rule reports when a switch statement over a value typed as a union of literals lacks
+    /// By default, this rule reports when a switch statement over a value typed as a union of literals lacks
     /// a case for any of those literal types and does not have a default clause.
+    /// Set `requireExplicitCase` to `true` to check for missing cases even when the switch has a `default` clause.
     ///
     /// ## Examples
     ///
@@ -93,6 +94,44 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### requireExplicitCase
+    ///
+    /// Default: `false`.
+    ///
+    /// A `default` clause handles any value that does not match a `case`.
+    /// By default, the rule accepts this as covering all remaining values in a union.
+    /// This means that adding a value to the union will not produce a diagnostic if the switch has a `default` clause.
+    ///
+    /// Set `requireExplicitCase` to `true` to require a `case` for each value in the union.
+    /// You can still keep `default` as a fallback for unexpected values at runtime.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "requireExplicitCase": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With this option enabled, the switch below passes because `"A"`, `"B"`, and `"C"` each have a case.
+    /// The `default` clause stays as a runtime fallback. Removing `case "C"` would produce a diagnostic,
+    /// even though the fallback would handle that value.
+    ///
+    /// ```ts,use_options,file=explicit-case-valid.ts
+    /// type Letter = "A" | "B" | "C";
+    /// declare const letter: Letter;
+    /// switch (letter) {
+    ///     case "A":
+    ///     case "B":
+    ///     case "C":
+    ///         break;
+    ///     default:
+    ///         throw new Error("Unexpected letter");
+    /// }
+    /// ```
+    ///
     pub UseExhaustiveSwitchCases {
         version: "2.0.0",
         name: "useExhaustiveSwitchCases",
@@ -119,7 +158,7 @@ impl Rule for UseExhaustiveSwitchCases {
         let has_default_case = cases
             .iter()
             .any(|case| matches!(case, AnyJsSwitchClause::JsDefaultClause(_)));
-        if has_default_case {
+        if has_default_case && !ctx.options().require_explicit_case.unwrap_or_default() {
             return None;
         }
 
@@ -235,10 +274,25 @@ impl Rule for UseExhaustiveSwitchCases {
 
         let case_list = stmt.cases();
         let mut clauses = case_list.iter().collect::<Vec<_>>();
+        let insertion_index = clauses
+            .iter()
+            .position(|clause| matches!(clause, AnyJsSwitchClause::JsDefaultClause(_)))
+            .unwrap_or(clauses.len());
+        let trailing_clauses = clauses.split_off(insertion_index);
+        let has_default = !trailing_clauses.is_empty();
 
         let leading_trivia = case_list
             .last()
-            .and_then(|case| case.syntax().first_leading_trivia());
+            .and_then(|case| case.syntax().first_leading_trivia())
+            .map(|trivia| {
+                let mut pieces = trivia
+                    .pieces()
+                    .rev()
+                    .take_while(|piece| piece.is_newline() || piece.is_whitespace())
+                    .collect::<Vec<_>>();
+                pieces.reverse();
+                pieces
+            });
 
         let throw_stmt: AnyJsStatement = make::js_throw_statement(
             make::token(T![throw]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -253,7 +307,7 @@ impl Rule for UseExhaustiveSwitchCases {
                 make::token(T![case]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
 
             if let Some(leading_trivia) = &leading_trivia {
-                case_token = case_token.with_leading_trivia_pieces(leading_trivia.pieces());
+                case_token = case_token.with_leading_trivia_pieces(leading_trivia.iter().cloned());
             } else {
                 case_token = case_token.with_leading_trivia([
                     (TriviaPieceKind::Newline, "\n"),
@@ -265,13 +319,18 @@ impl Rule for UseExhaustiveSwitchCases {
                 case_token,
                 missing_case_to_expression(ty)?,
                 make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                make::js_statement_list([throw_stmt.clone()]),
+                make::js_statement_list((!has_default).then(|| throw_stmt.clone())),
             ));
 
             clauses.push(clause);
         }
 
-        mutation.replace_node(case_list, make::js_switch_case_list(clauses));
+        if !has_default {
+            mutation.replace_node(case_list, make::js_switch_case_list(clauses));
+        } else {
+            clauses.extend(trailing_clauses);
+            mutation.replace_node_discard_trivia(case_list, make::js_switch_case_list(clauses));
+        }
 
         let message = markup! { "Add the missing cases to the switch statement." };
 

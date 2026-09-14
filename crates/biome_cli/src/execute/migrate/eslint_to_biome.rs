@@ -930,6 +930,21 @@ fn migrate_eslint_rule(
                 results.add(&name, RuleMigrationResult::Migrated);
             }
         }
+        eslint_eslint::Rule::TypeScriptSwitchExhaustivenessCheck(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_exhaustive_switch_cases =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::UnicornNumericSeparatorsStyle(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
