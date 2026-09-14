@@ -265,7 +265,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         if let Some(id) = global_type_id_for_qualifier(qualifier) {
-            return super::globals::global_type(self.db, id);
+            return self.apply_qualifier_type_parameters(
+                super::globals::global_type(self.db, id),
+                qualifier,
+            );
         }
 
         InferredTypeData::Unknown
@@ -433,19 +436,36 @@ impl<'db> ResolutionCtx<'db, '_> {
             .iter()
             .map(|parameter| self.resolve(parameter))
             .collect::<Vec<_>>();
-        let merged_parameters = declared_parameters
-            .iter()
-            .enumerate()
-            .map(|(index, parameter)| {
-                incoming_parameters
-                    .get(index)
-                    .copied()
-                    .unwrap_or(*parameter)
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice();
+        let mut merged_parameters = Vec::new();
+        let mut substitutions = Vec::new();
+        for (index, parameter) in declared_parameters.iter().copied().enumerate() {
+            let argument = if let Some(argument) = incoming_parameters.get(index) {
+                *argument
+            } else {
+                let resolved = self.resolve_inferred_type(parameter);
+                let generic = if let InferredTypeData::Generic(generic) = resolved {
+                    Some(generic)
+                } else if let InferredTypeData::InstanceOf(instance) = resolved
+                    && let InferredTypeData::Generic(generic) = instance.ty(self.db)
+                {
+                    Some(generic)
+                } else {
+                    None
+                };
+                generic
+                    .and_then(|generic| generic.default(self.db))
+                    .map_or(parameter, |default| {
+                        super::lookup::apply_substitutions(self.db, default, &substitutions)
+                    })
+            };
+            substitutions.push(biome_js_type_info::interned_types::TypeSubstitution {
+                generic: parameter,
+                replacement: argument,
+            });
+            merged_parameters.push(argument);
+        }
 
-        InferredTypeData::instance_of(self.db, target, merged_parameters)
+        InferredTypeData::instance_of(self.db, target, merged_parameters.into_boxed_slice())
     }
 
     fn declared_type_parameters(
