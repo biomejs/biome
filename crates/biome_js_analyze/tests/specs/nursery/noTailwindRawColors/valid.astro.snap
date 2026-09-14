@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+---
+
+{hidden && <div class={clsx("bg-primary", active && "text-white")} />}
+{active ? <div class="bg-black" /> : <span class="text-current" />}
+{items.map(item => <div class={["border-transparent", item.active && "stroke-inherit"]} />)}
+{hidden && <><div class={{ "bg-primary": active }} /><span class="bg-[#ff00aa]" /></>}
+{hidden && <div title="bg-pink-500"><span class={"bg-pink-500" === state ? "bg-primary" : "text-white"} /></div>}
+
+```

@@ -2615,6 +2615,11 @@ See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
+	* Disallow Tailwind CSS utility classes that use raw palette colors.
+See https://biomejs.dev/linter/rules/no-tailwind-raw-colors 
+	 */
+	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
+	/**
 	* Disallow this outside of classes.
 See https://biomejs.dev/linter/rules/no-this-outside-of-class 
 	 */
@@ -4984,6 +4989,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindRawColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindRawColorsOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -7003,6 +7011,10 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
 }
+export interface RuleWithNoTailwindRawColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindRawColorsOptions;
+}
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
@@ -8853,6 +8865,12 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	allowReassign?: boolean;
 }
 export type NoTailwindArbitraryValueOptions = {};
+export interface NoTailwindRawColorsOptions {
+	/**
+	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
+	 */
+	allowedColors?: string[];
+}
 export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
@@ -10373,6 +10391,7 @@ export type Category =
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
