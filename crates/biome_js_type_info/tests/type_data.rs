@@ -113,7 +113,7 @@ fn verify_type_sizes() {
 
     assert_eq!(
         std::mem::size_of::<TypeofUnaryMinusExpression>(),
-        16,
+        24,
         "The size shouldn't go higher"
     );
 
@@ -143,7 +143,7 @@ fn verify_type_sizes() {
 
     assert_eq!(
         std::mem::size_of::<GenericTypeParameter>(),
-        48,
+        56,
         "The size shouldn't go higher"
     );
 

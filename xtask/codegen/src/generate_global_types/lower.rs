@@ -95,11 +95,13 @@ pub enum LoweredTypeData {
     UnknownKeyword,
     ThisKeyword,
     GenericParameter {
+        is_const: bool,
         name: Text,
         constraint: Option<LoweredTypeReference>,
         default: Option<LoweredTypeReference>,
     },
     Tuple(Box<[LoweredTypeReference]>),
+    Readonly(LoweredTypeReference),
     InstanceOf {
         ty: LoweredTypeReference,
         type_parameters: Box<[LoweredTypeReference]>,
