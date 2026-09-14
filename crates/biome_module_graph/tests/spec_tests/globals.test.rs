@@ -155,6 +155,46 @@ fn test_infer_module_types_resolves_builtin_global_identities_on_build() {
 }
 
 #[test]
+fn builtin_class_calls_infer_declared_returns() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const anonymous = Symbol();
+        export const described = Symbol("entry");
+        export const numbered = Symbol(42);
+        const create = Symbol;
+        export const aliased = create("alias");
+        export const errorMessage = Error("failure").message;
+        declare const boxed: Symbol;
+        export const invalidBoxCall = boxed();
+        export const invalidInstanceCall = new Error("failure")();
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for name in ["anonymous", "described", "numbered", "aliased"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        assert_eq!(
+            inferred.resolve_type(&db, ty),
+            InferredTypeData::Symbol,
+            "{name}"
+        );
+    }
+    let message = inferred_binding_ty_by_name(&db, module, inferred, "errorMessage").unwrap();
+    assert!(is_inferred_string(&db, inferred.resolve_type(&db, message)));
+    for name in ["invalidBoxCall", "invalidInstanceCall"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        assert_eq!(
+            inferred.resolve_type(&db, ty),
+            InferredTypeData::Unknown,
+            "{name}"
+        );
+    }
+}
+
+#[test]
 fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
     let fs = MemoryFileSystem::default();
     fs.insert(
