@@ -6774,6 +6774,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUndeclaredDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUndeclaredDirectivesOptions" }
+			]
+		},
+		"NoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"globals": {
+					"description": "Names of directives registered globally with `app.directive(...)`,\nwritten in kebab-case without the `v-` prefix, such as\n`click-outside` for `v-click-outside`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7294,6 +7311,13 @@
 					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUndeclaredDirectives": {
+					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11486,6 +11510,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUndeclaredDirectivesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
