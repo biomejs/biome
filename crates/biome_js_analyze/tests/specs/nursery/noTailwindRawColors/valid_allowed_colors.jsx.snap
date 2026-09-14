@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_allowed_colors.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+<div className="bg-pink-500 hover:text-white/80 dark:border-black!" />;
+<div className="ring-pink-500/50 mask-linear-from-black bg-[#ff00aa]" />;
+
+```
