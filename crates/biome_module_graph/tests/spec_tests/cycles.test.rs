@@ -1,6 +1,7 @@
 use super::*;
 use biome_module_graph::{
-    BindingTypeInput, LocalTypeInput, find_member_type, infer_binding_type, infer_local_type,
+    BindingTypeInput, ExpressionTypeInput, LocalTypeInput, find_member_type, infer_binding_type,
+    infer_expression_type, infer_local_type,
 };
 
 fn unwrap_typeof_values<'db>(
@@ -829,4 +830,106 @@ fn test_binding_query_is_invalidated_when_import_cycle_is_broken() {
     assert!(is_inferred_number(&db, unwrap_typeof_values(&db, ty)));
     let events = db.take_salsa_events();
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
+}
+
+fn expression_range_by_source(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    source: &str,
+    expected: &str,
+) -> TextRange {
+    let ModuleInfoKind::Js(js_info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    js_info
+        .raw_expressions
+        .keys()
+        .find(|range| source_snippet(source, **range) == expected)
+        .copied()
+        .unwrap_or_else(|| panic!("{expected} expression must exist"))
+}
+
+#[test]
+fn test_expression_query_resolves_a_namespace_reexport_member_in_its_own_import_cycle() {
+    const CONSUMER_SOURCE: &str = r#"
+        import { values } from "./a.ts";
+        export interface Marker {}
+        values.stable;
+    "#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+            export * as values from "./b.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"
+            import type { Marker } from "./consumer.ts";
+            export const stable = 1;
+            export type BMarker = Marker;
+        "#,
+    );
+    fs.insert("/src/consumer.ts".into(), CONSUMER_SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts", "/src/consumer.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/consumer.ts"))
+        .expect("consumer module must exist");
+    let input = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, CONSUMER_SOURCE, "values.stable"),
+    );
+
+    let ty = infer_expression_type(&db, input).expect("expression must be inferred");
+    let ty = unwrap_typeof_values(&db, ty);
+    assert!(
+        is_inferred_number(&db, ty),
+        "namespace member reached through the consumer's own import cycle must be numeric, got {ty:?}"
+    );
+}
+
+#[test]
+fn test_expression_query_resolves_a_namespace_reexport_member_behind_a_foreign_import_cycle() {
+    const INDEX_SOURCE: &str = r#"
+        import { values } from "./a.ts";
+        values.stable;
+    "#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+            export * as values from "./b.ts";
+        "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"
+            import { values } from "./a.ts";
+            export const stable = 1;
+            export const selected = values.stable;
+        "#,
+    );
+    fs.insert("/src/index.ts".into(), INDEX_SOURCE);
+
+    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts", "/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let input = ExpressionTypeInput::new(
+        &db,
+        module,
+        expression_range_by_source(&db, module, INDEX_SOURCE, "values.stable"),
+    );
+
+    let ty = infer_expression_type(&db, input).expect("expression must be inferred");
+    let ty = unwrap_typeof_values(&db, ty);
+    assert!(
+        is_inferred_number(&db, ty),
+        "namespace member behind a foreign import cycle must be numeric, got {ty:?}"
+    );
 }
