@@ -372,7 +372,15 @@ impl Format<JsFormatContext> for FormatBinaryLikeOperatorAndRight<'_> {
     fn fmt(&self, f: &mut JsFormatter) -> FormatResult<()> {
         let right = self.expression.right()?;
         let operator_token = self.expression.operator_token()?;
-        let should_inline = self.expression.should_inline_logical_expression();
+        // Retain the break before a commented final operand so its comment keeps
+        // the same attachment when a unary argument is formatted again.
+        let should_inline = self.expression.should_inline_logical_expression()
+            && !(self
+                .expression
+                .syntax()
+                .parent()
+                .is_some_and(|parent| JsUnaryExpression::can_cast(parent.kind()))
+                && f.comments().has_trailing_line_comment(right.syntax()));
         let options: &JsFormatOptions = f.options();
         let op_linebreak = options.operator_linebreak();
 

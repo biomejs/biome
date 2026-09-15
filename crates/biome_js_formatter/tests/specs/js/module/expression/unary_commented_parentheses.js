@@ -52,3 +52,102 @@ a);
     || qux
   )
 );
+
+!(
+  cond1 || // force this to be multi line
+  cond3 // comment
+);
+
+!(
+  // leading
+  a || // first
+  b || // second
+  c // trailing
+);
+
+!(
+  a || b
+  // trailing own line
+);
+
+!(/* leading */
+  a || // first
+  b /* trailing */
+);
+
+!(a || // first
+  (firstLongOperand && secondLongOperand && thirdLongOperand && fourthLongOperand && fifthLongOperand) // trailing
+);
+
+!(a || // first
+  b /* block */ // line
+);
+
+!(`first
+second` || value // trailing
+);
+
+!("first\
+second" || value // trailing
+);
+
+!(a ||
+  [1] // trailing
+);
+
+!(a ||
+  { value: 1 } // trailing
+);
+
+!(a   ||
+  b // biome-ignore format: preserve expression
+);
+
+!(
+  a || // first
+  (b && c) // trailing
+);
+
+~(
+  a + // first
+  b // trailing
+);
+
+typeof (
+  a instanceof // operator
+  B // trailing
+);
+
+!(
+  a in // operator
+  b // trailing
+);
+
+// biome-ignore format: preserve expression
+!(
+  a   ||   b // trailing
+);
+
+!(a ||
+  b // trailing
+);
+
+!(firstLongOperand || secondLongOperand || thirdLongOperand || fourthLongOperand || fifthLongOperand // trailing
+);
+
+!(
+  a || // first
+  (b && // nested
+   c) // trailing
+);
+
+!(
+  a || // first
+  b /* multiline
+       trailing */
+);
+
+!(
+  a || // first
+  b /* trailing */
+);

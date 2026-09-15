@@ -2,12 +2,12 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsxAttribute;
 use biome_js_syntax::JsxAttributeInitializerClause;
 use biome_js_syntax::JsxAttributeList;
 use biome_js_syntax::JsxElement;
 use biome_js_syntax::JsxExpressionAttributeValue;
-use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
@@ -18,7 +18,8 @@ declare_lint_rule! {
     /// Enforce that anchors have content and that the content is accessible to screen readers.
     ///
     /// Accessible means the content is not hidden using the `aria-hidden` attribute.
-    /// Refer to the references to learn about why this is important.
+    /// Anchor tags should have text content that describes the link destination for screen reader users.
+    /// An `aria-label`, `aria-labelledby`, or `title` attribute alone doesn't satisfy this rule.
     ///
     /// ## Examples
     ///
