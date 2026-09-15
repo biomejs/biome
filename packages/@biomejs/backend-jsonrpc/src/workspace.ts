@@ -2625,6 +2625,11 @@ See https://biomejs.dev/linter/rules/no-tailwind-raw-colors
 	 */
 	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
+	* Disallow Tailwind utilities that restyle components at their call sites.
+See https://biomejs.dev/linter/rules/no-tailwind-restyled-components 
+	 */
+	noTailwindRestyledComponents?: NoTailwindRestyledComponentsConfiguration;
+	/**
 	* Disallow this outside of classes.
 See https://biomejs.dev/linter/rules/no-this-outside-of-class 
 	 */
@@ -5005,6 +5010,9 @@ export type NoTailwindArbitraryValueConfiguration =
 export type NoTailwindRawColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRawColorsOptions;
+export type NoTailwindRestyledComponentsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindRestyledComponentsOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -7036,6 +7044,10 @@ export interface RuleWithNoTailwindRawColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindRawColorsOptions;
 }
+export interface RuleWithNoTailwindRestyledComponentsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindRestyledComponentsOptions;
+}
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
@@ -8897,6 +8909,12 @@ export interface NoTailwindRawColorsOptions {
 	 */
 	allowedColors?: string[];
 }
+export interface NoTailwindRestyledComponentsOptions {
+	/**
+	 * Additional component-specific exceptions. Defaults to an empty list.
+	 */
+	allow?: TailwindComponentAllowance[];
+}
 export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
 /**
@@ -9896,6 +9914,20 @@ Example: `"ensure"` or `"__defineGetter__"`.
 	 */
 	property?: string;
 }
+export interface TailwindComponentAllowance {
+	/**
+	 * Categories allowed on the matching components. Defaults to an empty list.
+	 */
+	categories?: TailwindAppearanceCategory[];
+	/**
+	 * Exact classes, including variants and modifiers. Defaults to an empty list.
+	 */
+	classes?: string[];
+	/**
+	 * An exact component name, an array of names, or `"*"` for all components.
+	 */
+	components: TailwindAllowedComponents;
+}
 /**
 	* The Baseline availability level to target.
 
@@ -9991,6 +10023,14 @@ export type VueDirectiveStyle = "shorthand" | "longhand";
 export type VueDirectiveStyle2 = "shorthand" | "longhand";
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
+export type TailwindAppearanceCategory =
+	| "color"
+	| "typography"
+	| "spacing"
+	| "shape"
+	| "effects"
+	| "motion";
+export type TailwindAllowedComponents = string | string[];
 /**
  * Named Baseline availability tiers.
  */
@@ -10426,6 +10466,7 @@ export type Category =
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindRawColors"
+	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"

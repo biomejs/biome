@@ -1,0 +1,102 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: arbitrary_shorthands.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<my-button class="shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]"></my-button>
+<my-button class="[border:solid_1px_red]"></my-button>
+<my-button class="[border:none] [outline:dashed]"></my-button>
+
+```
+
+# Diagnostics
+```
+arbitrary_shorthands.html:2:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]"></my-button>
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <my-button class="[border:solid_1px_red]"></my-button>
+    4 │ <my-button class="[border:none] [outline:dashed]"></my-button>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+arbitrary_shorthands.html:3:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <my-button class="shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]"></my-button>
+  > 3 │ <my-button class="[border:solid_1px_red]"></my-button>
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <my-button class="[border:none] [outline:dashed]"></my-button>
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+arbitrary_shorthands.html:4:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <my-button class="shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]"></my-button>
+    3 │ <my-button class="[border:solid_1px_red]"></my-button>
+  > 4 │ <my-button class="[border:none] [outline:dashed]"></my-button>
+      │                   ^^^^^^^^^^^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+arbitrary_shorthands.html:4:33 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <my-button class="shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]"></my-button>
+    3 │ <my-button class="[border:solid_1px_red]"></my-button>
+  > 4 │ <my-button class="[border:none] [outline:dashed]"></my-button>
+      │                                 ^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
