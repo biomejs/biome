@@ -1,4 +1,4 @@
-use crate::generate_nodes::get_field_predicate;
+use crate::generate_nodes::token_kind_to_code;
 use crate::js_kinds_src::{AstSrc, Field, JS_KINDS_SRC, TokenKind};
 use crate::language_kind::LanguageKind;
 use crate::update;
@@ -38,11 +38,9 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
 
 fn generate_rust(ast: &AstSrc) -> Result<String> {
     validate_bindings(ast)?;
-    let mut prototype_arms = Vec::new();
     let mut kind_name_arms = Vec::new();
-    let mut token_field_arms = Vec::new();
-    let mut node_registrations = Vec::new();
-    let mut update_methods = Vec::new();
+    let mut field_arms = Vec::new();
+    let mut field_tables = Vec::new();
 
     for name in ast
         .nodes
@@ -56,257 +54,82 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
         kind_name_arms.push(quote! { #kind_name => JsSyntaxKind::#node_kind });
     }
 
+    // Every node kind shares the same native getter and update functions, defined in
+    // `crate::ast`. The generated code only describes the fields of each node kind.
     for node in &ast.nodes {
         if node.fields.is_empty() {
             continue;
         }
-        let node_type = format_ident!("{}", node.name);
-        let node_kind = format_ident!("{}", Case::Constant.convert(&node.name));
-        let node_name = Case::Snake.convert(&node.name);
-        let registration_name = format_ident!("register_{node_name}");
-        let mut prototype_fields = Vec::new();
-        let mut prototype_methods = Vec::new();
-        let mut token_fields = Vec::new();
-        let slot_count = node.fields.len();
+        let node_type = node.name.as_str();
+        let kind_name = Case::Constant.convert(&node.name);
+        let node_kind = format_ident!("{kind_name}");
+        let table_name = format_ident!("{kind_name}_FIELDS");
 
-        for (index, field) in node.fields.iter().enumerate() {
-            let method_name = rust_method_name(field);
+        let fields = node.fields.iter().map(|field| {
             let property_name = property_name(field);
-            let updater_name = format_ident!("with_{}", field.method_name(LanguageKind::Js));
-            let update_method = format_ident!("{node_name}_{updater_name}");
-            let public_updater_name = updater_name_for_field(field);
-            let predicate = get_field_predicate(field, LanguageKind::Js);
-            let is_list = matches!(field, Field::Node { ty, .. } if ast.is_list(ty));
-            let update_context =
-                format!("{node_type}.{public_updater_name}() for field {property_name}");
-            let replacement_type = match field {
-                Field::Token { .. } => "JsAstToken".to_owned(),
-                Field::Node { ty, .. } if is_list => format!("{ty}Node"),
-                Field::Node { ty, .. } => ty.clone(),
-            };
-            let mut arity_error = format!(
-                "{update_context} requires exactly one argument. Call node.{public_updater_name}(value) with a {replacement_type} value."
-            );
-            if field.is_optional() {
-                arity_error.push_str(&format!(
-                    " To remove this optional field, call node.{public_updater_name}(undefined)."
-                ));
-            }
-            let invalid_receiver_error = format!(
-                "{update_context} was called without a Biome node. Call node.{public_updater_name}(value) on a Biome {node_type} node, not as a standalone function or on a plain object."
-            );
-            let wrong_node_error = format!(
-                "{update_context} was called on the wrong node type. Call node.{public_updater_name}(value) on a Biome {node_type} node."
-            );
-            let malformed_node_error = format!(
-                "{update_context} cannot update this node because its fields are malformed. Check the source syntax or skip this update."
-            );
-            let malformed_field_error = format!(
-                "Field {node_type}.{property_name} is malformed and cannot be read or updated with {public_updater_name}(). Check the source syntax or skip this update."
-            );
-            let old_value = if is_list {
-                quote! { Some(node.#method_name()) }
-            } else if field.is_optional() {
-                quote! { node.#method_name() }
-            } else {
-                quote! { node.#method_name().ok() }
-            };
-            let old_pattern = if is_list || field.is_optional() {
-                quote! { Some }
-            } else {
-                quote! { Ok }
-            };
-            let old_update_value = if is_list {
-                quote! { Some(node.#method_name()) }
-            } else {
-                quote! { node.#method_name() }
-            };
-            // Typed getters panic on occupied slots of the wrong type and on missing lists.
-            let check_slot = if is_list {
-                let message = format!(
-                    "{update_context} cannot update this node because its {property_name} list field is unavailable. Check the source syntax or skip this update."
-                );
-                quote! {
-                    let element = node.syntax().slots().nth(#index)
-                        .and_then(|slot| slot.into_syntax_element())
-                        .ok_or_else(|| JsNativeError::typ().with_message(#message))?;
-                    if !(#predicate) {
-                        return Err(JsNativeError::typ()
-                            .with_message(#malformed_field_error)
-                            .into());
-                    }
-                }
-            } else {
-                quote! {
-                    if let Some(element) = node.syntax().slots().nth(#index)
-                        .and_then(|slot| slot.into_syntax_element())
-                        && !(#predicate)
-                    {
-                        return Err(JsNativeError::typ()
-                            .with_message(#malformed_field_error)
-                            .into());
-                    }
-                }
-            };
-            let accessor_value = match field {
-                Field::Token { .. } => {
-                    token_fields.push(quote! {
-                        (#property_name, #index)
-                    });
-                    quote! { Self::wrap_token(#old_value) }
-                }
-                Field::Node { ty, .. } if ast.is_list(ty) => {
-                    let list = if ast
-                        .lists
-                        .get(ty)
-                        .is_some_and(|list| list.separator.is_some())
-                    {
-                        quote! { node.#method_name().into_iter().flatten() }
-                    } else {
-                        quote! { node.#method_name() }
-                    };
-
-                    quote! { Self::wrap_node_list(#list, context) }
-                }
-                Field::Node { .. } => {
-                    quote! { Self::wrap_optional_node(#old_value, context) }
-                }
-            };
-
-            prototype_fields.push(quote! {
-                (#property_name, |node, context| #accessor_value)
-            });
-
-            let replacement = match field {
+            let updater_name = updater_name_for_field(field);
+            let optional = field.is_optional();
+            let value = match field {
                 Field::Token { kind, .. } => {
-                    let expected = match kind {
-                        TokenKind::Single(kind) => format!("{kind:?}"),
-                        TokenKind::Many(kinds) => kinds
-                            .iter()
-                            .map(|kind| format!("{kind:?}"))
-                            .collect::<Vec<_>>()
-                            .join(", "),
+                    let (kinds, expected) = match kind {
+                        TokenKind::Single(kind) => (
+                            vec![token_kind_to_code(kind, LanguageKind::Js)],
+                            format!("{kind:?}"),
+                        ),
+                        TokenKind::Many(kinds) => (
+                            kinds
+                                .iter()
+                                .map(|kind| token_kind_to_code(kind, LanguageKind::Js))
+                                .collect(),
+                            kinds
+                                .iter()
+                                .map(|kind| format!("{kind:?}"))
+                                .collect::<Vec<_>>()
+                                .join(", "),
+                        ),
                     };
-                    let invalid_token_error = format!(
-                        "{update_context} requires a JsAstToken, but the argument is not a Biome token. Pass a token returned by node.token(\"{property_name}\") or factory.token(), not a string or plain object."
-                    );
-                    let wrong_token_error = format!(
-                        "{update_context} received a token that does not match the allowed token choices: {expected}. Pass a matching JsAstToken from node.token(\"{property_name}\") or factory.token()."
-                    );
                     quote! {
-                        let element = JsAstToken::from_value(value)
-                            .ok_or_else(|| JsNativeError::typ()
-                                .with_message(#invalid_token_error))?.token;
-                        if !(#predicate) {
-                            return Err(JsNativeError::typ()
-                                .with_message(#wrong_token_error)
-                                .into());
-                        }
-                        if let #old_pattern(old) = #old_update_value {
-                            element
-                                .with_leading_trivia_pieces(old.leading_trivia().pieces())
-                                .with_trailing_trivia_pieces(old.trailing_trivia().pieces())
-                        } else {
-                            element
+                        JsAstFieldValue::Token {
+                            kinds: &[#(#kinds),*],
+                            expected: #expected,
                         }
                     }
                 }
                 Field::Node { ty, .. } => {
-                    let invalid_node_error = format!(
-                        "{update_context} requires a {replacement_type}, but the argument is not a Biome node. Pass a matching node from a node field or node.children(), not a plain object or array."
-                    );
-                    let wrong_type_error = format!(
-                        "{update_context} received a node that does not match the required type {ty}. Pass a {replacement_type} from a node field or node.children()."
-                    );
-                    let ty = format_ident!("{ty}");
+                    let variant = if ast.is_list(ty) {
+                        quote! { List }
+                    } else {
+                        quote! { Node }
+                    };
+                    let ty_ident = format_ident!("{ty}");
                     quote! {
-                        let replacement = Self::from_value(value)
-                            .ok_or_else(|| JsNativeError::typ()
-                                .with_message(#invalid_node_error))?;
-                        let mut element = #ty::cast(replacement.node)
-                            .ok_or_else(|| JsNativeError::typ()
-                                .with_message(#wrong_type_error))?;
-                        if let #old_pattern(old) = #old_update_value {
-                            if let Some(first) = old.syntax().first_token()
-                                && let Some(updated) = element.clone()
-                                    .with_leading_trivia_pieces(first.leading_trivia().pieces())
-                            {
-                                element = updated;
-                            }
-                            if let Some(last) = old.syntax().last_token()
-                                && let Some(updated) = element.clone()
-                                    .with_trailing_trivia_pieces(last.trailing_trivia().pieces())
-                            {
-                                element = updated;
-                            }
+                        JsAstFieldValue::#variant {
+                            ty: #ty,
+                            can_cast: #ty_ident::can_cast,
                         }
-                        element
                     }
                 }
             };
-            let replacement = if field.is_optional() {
-                quote! {
-                    if value.is_undefined() { None } else { Some({ #replacement }) }
+            quote! {
+                JsAstField {
+                    property: #property_name,
+                    updater: #updater_name,
+                    optional: #optional,
+                    value: #value,
                 }
-            } else {
-                quote! { { #replacement } }
-            };
-            prototype_methods.push(quote! {
-                prototype.function(
-                    NativeFunction::from_fn_ptr(Self::#update_method),
-                    js_string!(#public_updater_name),
-                    1,
-                );
-            });
-            update_methods.push(quote! {
-                fn #update_method(
-                    this: &JsValue,
-                    args: &[JsValue],
-                    context: &mut Context,
-                ) -> JsResult<JsValue> {
-                        let [value] = args else {
-                            return Err(JsNativeError::typ()
-                                .with_message(#arity_error)
-                                .into());
-                        };
-                        let receiver = Self::from_value(this)
-                            .ok_or_else(|| JsNativeError::typ()
-                                .with_message(#invalid_receiver_error))?;
-                        let node = #node_type::cast(receiver.node)
-                            .ok_or_else(|| JsNativeError::typ()
-                                .with_message(#wrong_node_error))?;
-                        if node.syntax().slots().len() != #slot_count {
-                            return Err(JsNativeError::typ()
-                                .with_message(#malformed_node_error)
-                                .into());
-                        }
-                        #check_slot
-                        let replacement = #replacement;
-                        let updated = node.#updater_name(replacement);
-                        Ok(Self::from_node(updated.into_syntax(), context))
-                }
-            });
-        }
-
-        prototype_arms.push(quote! {
-            JsSyntaxKind::#node_kind => Self::#registration_name(&mut prototype)
-        });
-        node_registrations.push(quote! {
-            fn #registration_name(prototype: &mut ObjectInitializer<'_>) {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::#node_kind,
-                    #node_type,
-                    #(#prototype_fields,)*
-                );
-                #(#prototype_methods)*
             }
         });
-        if !token_fields.is_empty() {
-            token_field_arms.push(quote! {
-                JsSyntaxKind::#node_kind => &[#(#token_fields,)*]
-            });
-        }
+
+        field_tables.push(quote! {
+            static #table_name: JsAstNodeFields = JsAstNodeFields {
+                kind: JsSyntaxKind::#node_kind,
+                name: #node_type,
+                fields: &[#(#fields),*],
+            };
+        });
+        field_arms.push(quote! {
+            JsSyntaxKind::#node_kind => &#table_name
+        });
     }
 
     let token_kind_arms = token_kind_names().into_iter().map(|name| {
@@ -314,46 +137,17 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
         quote! { #name => JsSyntaxKind::#kind }
     });
     let tokens = quote! {
-        use crate::ast::{JsAstNode, register_js_ast_fields, cast_js_ast_node};
-        use crate::token::JsAstToken;
+        use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
         use biome_js_syntax::{*, JsSyntaxKind::*};
         use biome_rowan::AstNode;
-        use boa_engine::builtins::object::OrdinaryObject;
-        use boa_engine::object::{JsObject, ObjectInitializer};
-        use boa_engine::property::Attribute;
-        use boa_engine::{Context, JsNativeError, JsResult, JsValue, NativeFunction, js_string};
 
         impl JsAstNode {
-            pub(crate) fn token_fields(kind: JsSyntaxKind) -> &'static [(&'static str, usize)] {
-                match kind {
-                    #(#token_field_arms,)*
-                    _ => &[],
-                }
-            }
-
             /// Resolves a constructible token kind by its exact native enum name.
             pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
                 Some(match name {
                     #(#token_kind_arms,)*
                     _ => return None,
                 })
-            }
-
-            pub(crate) fn create_generated_prototype(
-                kind: JsSyntaxKind,
-                base_prototype: JsObject,
-                context: &mut Context,
-            ) -> JsObject {
-                let mut prototype = ObjectInitializer::with_native_data_and_proto(
-                    OrdinaryObject,
-                    base_prototype,
-                    context,
-                );
-                match kind {
-                    #(#prototype_arms,)*
-                    _ => {}
-                }
-                prototype.build()
             }
 
             /// Resolves a syntax kind from the name used in the plugin API type definitions,
@@ -365,9 +159,17 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                 })
             }
 
-            #(#node_registrations)*
-            #(#update_methods)*
+            /// Returns the plugin API fields of `kind`, one per slot in slot order.
+            /// Node kinds without fields, lists, and bogus nodes have no descriptor.
+            pub(crate) fn node_fields(kind: JsSyntaxKind) -> Option<&'static JsAstNodeFields> {
+                Some(match kind {
+                    #(#field_arms,)*
+                    _ => return None,
+                })
+            }
         }
+
+        #(#field_tables)*
     };
 
     // Establish line breaks before rustfmt, which can leave oversized expressions unchanged.
