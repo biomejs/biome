@@ -70,12 +70,12 @@ impl ClassStringOptions for NoTailwindArbitraryValueOptions {
 }
 
 impl TailwindClassStringHost for AnyClassStringLike {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString> {
         match self {
-            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(),
-            Self::JsxString(node) => node.tailwind_class_string(),
-            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(),
-            Self::JsLiteralMemberName(node) => node.tailwind_class_string(),
+            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsxString(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsLiteralMemberName(node) => node.tailwind_class_string(is_class_attribute),
         }
     }
 }
