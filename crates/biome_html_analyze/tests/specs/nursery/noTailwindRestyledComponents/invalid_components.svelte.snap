@@ -1,0 +1,198 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_components.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<Card.Root class="font-bold hover:shadow-lg" />
+<Other.Root class="rounded-none" />
+<CardRoot class="rounded-none" />
+<Root class="rounded-none" />
+<UI.Card.Root class="rounded-none" />
+<Button.Root class="p-4" />
+<Panel.Other class="p-4" />
+
+```
+
+# Diagnostics
+```
+invalid_components.svelte:2:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <Card.Root class="font-bold hover:shadow-lg" />
+      │                   ^^^^^^^^^
+    3 │ <Other.Root class="rounded-none" />
+    4 │ <CardRoot class="rounded-none" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:2:29 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <Card.Root class="font-bold hover:shadow-lg" />
+      │                             ^^^^^^^^^^^^^^^
+    3 │ <Other.Root class="rounded-none" />
+    4 │ <CardRoot class="rounded-none" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:3:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <Card.Root class="font-bold hover:shadow-lg" />
+  > 3 │ <Other.Root class="rounded-none" />
+      │                    ^^^^^^^^^^^^
+    4 │ <CardRoot class="rounded-none" />
+    5 │ <Root class="rounded-none" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:4:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    2 │ <Card.Root class="font-bold hover:shadow-lg" />
+    3 │ <Other.Root class="rounded-none" />
+  > 4 │ <CardRoot class="rounded-none" />
+      │                  ^^^^^^^^^^^^
+    5 │ <Root class="rounded-none" />
+    6 │ <UI.Card.Root class="rounded-none" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:5:14 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    3 │ <Other.Root class="rounded-none" />
+    4 │ <CardRoot class="rounded-none" />
+  > 5 │ <Root class="rounded-none" />
+      │              ^^^^^^^^^^^^
+    6 │ <UI.Card.Root class="rounded-none" />
+    7 │ <Button.Root class="p-4" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:6:22 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    4 │ <CardRoot class="rounded-none" />
+    5 │ <Root class="rounded-none" />
+  > 6 │ <UI.Card.Root class="rounded-none" />
+      │                      ^^^^^^^^^^^^
+    7 │ <Button.Root class="p-4" />
+    8 │ <Panel.Other class="p-4" />
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:7:21 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    5 │ <Root class="rounded-none" />
+    6 │ <UI.Card.Root class="rounded-none" />
+  > 7 │ <Button.Root class="p-4" />
+      │                     ^^^
+    8 │ <Panel.Other class="p-4" />
+    9 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_components.svelte:8:21 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    6 │ <UI.Card.Root class="rounded-none" />
+    7 │ <Button.Root class="p-4" />
+  > 8 │ <Panel.Other class="p-4" />
+      │                     ^^^
+    9 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

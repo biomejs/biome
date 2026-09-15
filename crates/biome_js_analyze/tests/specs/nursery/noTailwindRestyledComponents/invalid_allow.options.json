@@ -1,0 +1,77 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noTailwindRestyledComponents": {
+          "level": "error",
+          "options": {
+            "allow": [
+              {
+                "components": "Button",
+                "categories": [
+                  "shape"
+                ]
+              },
+              {
+                "components": [
+                  "Card",
+                  "UI.Button",
+                  "my-button"
+                ],
+                "classes": [
+                  "shadow-lg",
+                  "hover:rounded-none"
+                ]
+              },
+              {
+                "components": "*",
+                "categories": [
+                  "motion"
+                ]
+              },
+              {
+                "components": "Button",
+                "classes": [
+                  "font-bold"
+                ]
+              },
+              {
+                "components": "Text",
+                "categories": [
+                  "typography"
+                ]
+              },
+              {
+                "components": "Panel",
+                "categories": [
+                  "effects"
+                ]
+              },
+              {
+                "components": [],
+                "categories": [
+                  "shape"
+                ]
+              },
+              {
+                "components": "Empty"
+              },
+              {
+                "components": "Spacing",
+                "categories": [
+                  "spacing"
+                ]
+              },
+              {
+                "components": "Color",
+                "categories": [
+                  "color"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
