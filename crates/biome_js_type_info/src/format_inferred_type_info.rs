@@ -152,6 +152,16 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                 ]]
             ),
             Self::Literal(literal) => write!(f, [literal]),
+            Self::IndexedAccess(access) => write!(
+                f,
+                [
+                    token("("),
+                    access.object(db),
+                    token(")["),
+                    access.index(db),
+                    token("]")
+                ]
+            ),
             Self::InstanceOf(instance) => {
                 write!(f, [&format_args![token("instanceof"), space(), instance]])
             }

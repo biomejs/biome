@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_type_info/tests/utils.rs
-assertion_line: 50
 expression: content
 ---
 ## Input
@@ -21,7 +20,8 @@ Call Local TypeId(0)(Local TypeId(1))
 ```
 Module TypeId(0) => instanceof unresolved reference "first" (scope ID: 0)<string>
 
-Module TypeId(1) => Tuple(
-    [],
-)
+Module TypeId(1) => Tuple {
+    elements: [],
+    is_inferred_array: true,
+}
 ```

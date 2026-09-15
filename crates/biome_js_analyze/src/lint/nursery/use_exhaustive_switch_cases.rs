@@ -133,9 +133,14 @@ impl Rule for UseExhaustiveSwitchCases {
             };
             let ty = ctx.type_of_expression(&test)?;
             let variants = ty.try_switch_case_variants().ok()?;
-            if let [variant] = variants.as_slice()
-                && *variant != InferredSwitchCase::UnsupportedLiteral
-            {
+            if variants.iter().any(|variant| match variant {
+                InferredSwitchCase::String(value) => value.text().contains('\\'),
+                InferredSwitchCase::UnsupportedLiteral => true,
+                _ => false,
+            }) {
+                return None;
+            }
+            if let [variant] = variants.as_slice() {
                 found_cases.push(variant.clone());
             }
         }
@@ -160,6 +165,9 @@ impl Rule for UseExhaustiveSwitchCases {
             .type_of_expression(&discriminant)?
             .try_switch_case_variants()
             .ok()?;
+        if variants.contains(&InferredSwitchCase::UnsupportedLiteral) {
+            return None;
+        }
 
         for variant in variants {
             if variant == InferredSwitchCase::Boolean {

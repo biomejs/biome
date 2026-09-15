@@ -913,6 +913,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 | InferredTypeData::Intersection(_)
                 | InferredTypeData::Union(_)
                 | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofType(_)

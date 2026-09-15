@@ -168,6 +168,9 @@ pub enum TypeData {
     /// Type derived from another through a built-in operator.
     TypeOperator(Box<TypeOperatorType>),
 
+    /// A type such as `T[K]`, kept unevaluated until `T` and `K` can be resolved.
+    IndexedAccess(Box<IndexedAccessType>),
+
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
@@ -473,6 +476,7 @@ impl TypeData {
             // class, stripping the instance would change its meaning.
             | Self::Reference(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofExpression(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
@@ -976,24 +980,39 @@ pub struct AssertsReturnType {
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct Tuple(pub(super) Box<[TupleElementType]>);
+pub struct Tuple {
+    pub(super) elements: Box<[TupleElementType]>,
+    /// Whether the elements describe an ordinary mutable array expression.
+    ///
+    /// For example, `mutable` sets this flag, while `fixed` does not:
+    ///
+    /// ```ts
+    /// const mutable = ["A", "B"];
+    /// const fixed = ["A", "B"] as const;
+    /// ```
+    ///
+    /// The initial values of `mutable` do not describe every value it can hold.
+    /// A tuple annotation such as `["A", "B"]` also leaves this flag unset.
+    pub is_inferred_array: bool,
+}
 
 impl Tuple {
     pub fn elements(&self) -> &[TupleElementType] {
-        &self.0
+        &self.elements
     }
 
     /// Returns the element at the given index.
     pub fn get_element(&self, index: usize) -> Option<&TupleElementType> {
-        self.0
+        self.elements
             .get(index)
-            .or_else(|| self.0.last().filter(|last| last.is_rest))
+            .or_else(|| self.elements.last().filter(|last| last.is_rest))
     }
 
     /// Returns a new tuple starting at the given index.
     pub fn slice_from(&self, index: usize) -> Self {
-        Self(
-            self.0
+        Self {
+            elements: self
+                .elements
                 .iter()
                 .skip(index)
                 .map(|element| TupleElementType {
@@ -1002,7 +1021,8 @@ impl Tuple {
                     ..*element
                 })
                 .collect(),
-        )
+            is_inferred_array: self.is_inferred_array,
+        }
     }
 }
 
@@ -1495,6 +1515,21 @@ pub struct TypeofUnaryMinusExpression {
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
     pub ty: TypeReference,
+}
+
+/// Stores the two types used by a TypeScript indexed access.
+///
+/// In this example, `object` refers to `typeof values` and `index` refers to
+/// `number`. Both are kept as references until inference can resolve them:
+///
+/// ```ts
+/// const values = ["A", "B", "C"] as const;
+/// type Letter = (typeof values)[number];
+/// ```
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct IndexedAccessType {
+    pub object: TypeReference,
+    pub index: TypeReference,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

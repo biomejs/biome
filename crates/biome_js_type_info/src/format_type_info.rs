@@ -107,6 +107,7 @@ impl Format<FormatTypeContext> for TypeData {
             Self::Intersection(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
             Self::Union(union) => write!(f, [&union.as_ref()]),
             Self::TypeOperator(ty) => write!(f, [FmtVerbatim(&ty.as_ref())]),
+            Self::IndexedAccess(ty) => write!(f, [FmtVerbatim(ty.as_ref())]),
             Self::Literal(ty) => write!(f, [&ty.as_ref()]),
             Self::InstanceOf(ty) => write!(
                 f,
