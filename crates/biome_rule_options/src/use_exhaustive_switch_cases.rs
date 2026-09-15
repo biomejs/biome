@@ -9,3 +9,12 @@ pub struct UseExhaustiveSwitchCasesOptions {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub require_explicit_case: Option<bool>,
 }
+
+impl UseExhaustiveSwitchCasesOptions {
+    pub const DEFAULT_EXPLICIT_CASE: bool = false;
+
+    pub fn require_explicit_case(&self) -> bool {
+        self.require_explicit_case
+            .unwrap_or(Self::DEFAULT_EXPLICIT_CASE)
+    }
+}

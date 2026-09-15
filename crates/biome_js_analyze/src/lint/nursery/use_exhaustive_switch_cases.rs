@@ -158,7 +158,7 @@ impl Rule for UseExhaustiveSwitchCases {
         let has_default_case = cases
             .iter()
             .any(|case| matches!(case, AnyJsSwitchClause::JsDefaultClause(_)));
-        if has_default_case && !ctx.options().require_explicit_case.unwrap_or_default() {
+        if has_default_case && !ctx.options().require_explicit_case() {
             return None;
         }
 
@@ -235,10 +235,7 @@ impl Rule for UseExhaustiveSwitchCases {
                 markup! { "The switch statement is not exhaustive." },
             )
             .note("Some variants of the union type are not handled here.")
-            .footer_list(
-                "These cases are missing:",
-                state,
-            ),
+            .footer_list("These cases are missing:", state),
         )
     }
 
@@ -373,26 +370,26 @@ impl Display for MissingCase {
 
 fn missing_case_to_expression(case: &MissingCase) -> Option<AnyJsExpression> {
     match case {
-        MissingCase(InferredSwitchCase::BooleanLiteral(value)) => Some(
-            AnyJsExpression::AnyJsLiteralExpression(
-            make::js_boolean_literal_expression(make::token(match value {
-                true => T![true],
-                false => T![false],
-            }))
-            .into(),
-            ),
-        ),
-        MissingCase(InferredSwitchCase::Number(number)) => Some(
-            AnyJsExpression::AnyJsLiteralExpression(
+        MissingCase(InferredSwitchCase::BooleanLiteral(value)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
+                make::js_boolean_literal_expression(make::token(match value {
+                    true => T![true],
+                    false => T![false],
+                }))
+                .into(),
+            ))
+        }
+        MissingCase(InferredSwitchCase::Number(number)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
                 make::js_number_literal_expression(make::js_number_literal(number.text())).into(),
-            ),
-        ),
+            ))
+        }
         MissingCase(InferredSwitchCase::BigInt(_)) => None,
-        MissingCase(InferredSwitchCase::String(string)) => Some(
-            AnyJsExpression::AnyJsLiteralExpression(
+        MissingCase(InferredSwitchCase::String(string)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
                 make::js_string_literal_expression(make::js_string_literal(string.text())).into(),
-            ),
-        ),
+            ))
+        }
         MissingCase(InferredSwitchCase::Null) => Some(AnyJsExpression::AnyJsLiteralExpression(
             make::js_null_literal_expression(make::token(T![null])).into(),
         )),
