@@ -450,7 +450,6 @@ mod tests {
             panic!("Symbol must be a class");
         };
         let members = symbol.members(&db);
-        assert_eq!(members.len(), 2);
 
         for (name, global_type_id) in [
             ("dispose", SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID),

@@ -565,6 +565,108 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
     }
 }
 
+/// Lowers selected constructor-interface members as static members of a class.
+/// The caller selects members and supplies predefined identities for unique symbols.
+/// Other unique symbols use the runtime's symbol type. Function signatures use
+/// the same translation as instance methods.
+pub(super) fn lower_constructor_static_members(
+    manifest: &GlobalManifest,
+    source_files: &[DiscoveredFile],
+    records: &[DeclarationRecord],
+    class: &mut LoweredClass,
+    class_reference: &'static str,
+    select_member: fn(&AnyTsTypeMember) -> Result<bool>,
+    predefined_symbols: &[(&str, &'static str)],
+) -> Result<Box<[LoweredTypeData]>> {
+    let mut lowerer = DeclarationLowerer {
+        manifest,
+        sources: ParsedSourceCache::new(source_files),
+        interfaces: BTreeMap::new(),
+        pending: Vec::new(),
+        types: Vec::new(),
+        class_scope: Some(ClassScope {
+            name: class.name.clone(),
+            reference: class_reference,
+            parameters: BTreeMap::new(),
+        }),
+        declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
+        predefined_declarations: false,
+    };
+    let mut members = Vec::new();
+    for record in records {
+        let declaration = lowerer
+            .sources
+            .find_interface_declaration(record)?
+            .context("missing constructor interface")?;
+        if declaration.extends_clause().is_some() || declaration.type_parameters().is_some() {
+            bail!(
+                "constructor bases and type parameters are not supported for {}",
+                class.name()
+            );
+        }
+        for member in declaration.members() {
+            if !select_member(&member)? {
+                continue;
+            }
+            let mut member = match member {
+                AnyTsTypeMember::TsPropertySignatureTypeMember(property)
+                    if is_unique_symbol_property(&property)? =>
+                {
+                    let name = lower_object_member_name(property.name()?)?;
+                    let type_reference = predefined_symbols
+                        .iter()
+                        .find(|(member_name, _)| *member_name == name.text())
+                        .map_or_else(
+                            || lowerer.register(LoweredTypeData::Symbol),
+                            |(_, reference)| LoweredTypeReference::Predefined(reference),
+                        );
+                    LoweredTypeMember {
+                        name,
+                        kind: LoweredMemberKind::Named {
+                            optional: property.optional_token().is_some(),
+                        },
+                        type_reference,
+                    }
+                }
+                member => lowerer.lower_member(member).with_context(|| {
+                    format!(
+                        "in {} statics from {}",
+                        class.name(),
+                        record.file_repo_relative
+                    )
+                })?,
+            };
+            // NamedStatic cannot represent an optional member without losing undefined.
+            if member.kind != (LoweredMemberKind::Named { optional: false }) {
+                bail!(
+                    "optional static member {}.{} is not supported",
+                    class.name(),
+                    member.name
+                );
+            }
+            member.kind = LoweredMemberKind::NamedStatic;
+            if members
+                .iter()
+                .any(|previous: &LoweredTypeMember| previous.name == member.name)
+            {
+                bail!(
+                    "duplicate static member {}.{} cannot be represented by one member",
+                    class.name(),
+                    member.name
+                );
+            }
+            members.push(member);
+        }
+    }
+    class.members = members.into_boxed_slice();
+    lowerer
+        .types
+        .into_iter()
+        .collect::<Option<Box<[_]>>>()
+        .context("unfilled static member type")
+}
+
 fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
     for name in method
         .syntax()
@@ -723,6 +825,100 @@ mod tests {
         collect::collect, emit::render_local_types, manifest::build_global_manifest,
         source::CanonicalPath,
     };
+
+    #[test]
+    fn constructor_statics_translate_without_symbol_selection() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for (owner, constructor, method, scalar, expected) in [
+            (
+                "First",
+                "Factory",
+                "create",
+                "boolean",
+                LoweredTypeData::Boolean,
+            ),
+            (
+                "Second",
+                "Registry",
+                "lookup",
+                "bigint",
+                LoweredTypeData::BigInt,
+            ),
+        ] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "statics.d.ts".to_owned(),
+                bytes: format!(
+                    "
+                    declare var {owner}: {constructor};
+                    interface {constructor} {{ readonly key: unique symbol; }}
+                    interface {constructor} {{
+                        readonly stableKey: unique symbol;
+                        {method}(input?: {scalar}): {scalar};
+                    }}
+                "
+                )
+                .into_bytes(),
+            };
+            let files = [file];
+            let manifest = build_global_manifest(collect(&files[0]).records);
+            let mut cache = ParsedSourceCache::new(&files);
+            let constructor = resolve_constructor_name(
+                owner,
+                manifest.global_group(owner).unwrap().declarations(),
+                &mut cache,
+            )?;
+            let mut class = LoweredClass {
+                name: Text::from(owner),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types = lower_constructor_static_members(
+                &manifest,
+                cache.source_files,
+                manifest
+                    .global_group(constructor.text())
+                    .unwrap()
+                    .declarations(),
+                &mut class,
+                "GLOBAL_TEST_OWNER_ID",
+                |_| Ok(true),
+                &[("stableKey", "GLOBAL_TEST_KEY_ID")],
+            )?;
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            assert!(
+                class
+                    .members()
+                    .iter()
+                    .all(|member| member.kind() == &LoweredMemberKind::NamedStatic)
+            );
+            assert_eq!(
+                local(class.member("key").unwrap().type_reference()),
+                &LoweredTypeData::Symbol
+            );
+            assert_eq!(
+                class.member("stableKey").unwrap().type_reference(),
+                &LoweredTypeReference::Predefined("GLOBAL_TEST_KEY_ID")
+            );
+            let LoweredTypeData::Function(function) =
+                local(class.member(method).unwrap().type_reference())
+            else {
+                panic!("expected function")
+            };
+            assert!(function.parameters()[0].is_optional());
+            assert_eq!(local(function.parameters()[0].type_reference()), &expected);
+            assert_eq!(local(function.return_type()), &expected);
+        }
+        Ok(())
+    }
 
     #[test]
     fn supporting_arrays_are_scoped_to_each_declaration() -> Result<()> {

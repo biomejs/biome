@@ -1317,7 +1317,6 @@ mod tests {
             async_dispose.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
         );
-        assert_eq!(symbol_class.members().len(), 2);
 
         let dispose_helper = lowered
             .global("Symbol.dispose")
@@ -1422,10 +1421,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_wrong_symbol_constructor_reference() -> Result<()> {
+    fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
-            "declare var Symbol must reference SymbolConstructor",
+            "SymbolConstructor is missing dispose",
         )
     }
 
