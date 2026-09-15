@@ -130,6 +130,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "noTailwindRestyledComponents"),
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
     ]
 });

@@ -1,0 +1,293 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_allow.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<my-other class="rounded-none shadow-lg"></my-other>
+<custom-button class="text-sm"></custom-button>
+<my-card class="rounded-none hover:shadow-lg"></my-card>
+<custom-button class="hover:font-bold"></custom-button>
+<my-empty class="rounded-none"></my-empty>
+<my-card class="!shadow-lg"></my-card>
+<my-spacing class="bg-red-500"></my-spacing>
+<my-color class="p-4"></my-color>
+<my-color class="stroke-2"></my-color>
+<custom-button class="stroke-none"></custom-button>
+
+```
+
+# Diagnostics
+```
+invalid_allow.html:2:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-other class="rounded-none shadow-lg"></my-other>
+      │                  ^^^^^^^^^^^^
+    3 │ <custom-button class="text-sm"></custom-button>
+    4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:2:31 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-other class="rounded-none shadow-lg"></my-other>
+      │                               ^^^^^^^^^
+    3 │ <custom-button class="text-sm"></custom-button>
+    4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:3:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <my-other class="rounded-none shadow-lg"></my-other>
+  > 3 │ <custom-button class="text-sm"></custom-button>
+      │                       ^^^^^^^
+    4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+    5 │ <custom-button class="hover:font-bold"></custom-button>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:4:17 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    2 │ <my-other class="rounded-none shadow-lg"></my-other>
+    3 │ <custom-button class="text-sm"></custom-button>
+  > 4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+      │                 ^^^^^^^^^^^^
+    5 │ <custom-button class="hover:font-bold"></custom-button>
+    6 │ <my-empty class="rounded-none"></my-empty>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:4:30 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    2 │ <my-other class="rounded-none shadow-lg"></my-other>
+    3 │ <custom-button class="text-sm"></custom-button>
+  > 4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+      │                              ^^^^^^^^^^^^^^^
+    5 │ <custom-button class="hover:font-bold"></custom-button>
+    6 │ <my-empty class="rounded-none"></my-empty>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:5:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    3 │ <custom-button class="text-sm"></custom-button>
+    4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+  > 5 │ <custom-button class="hover:font-bold"></custom-button>
+      │                       ^^^^^^^^^^^^^^^
+    6 │ <my-empty class="rounded-none"></my-empty>
+    7 │ <my-card class="!shadow-lg"></my-card>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:6:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    4 │ <my-card class="rounded-none hover:shadow-lg"></my-card>
+    5 │ <custom-button class="hover:font-bold"></custom-button>
+  > 6 │ <my-empty class="rounded-none"></my-empty>
+      │                  ^^^^^^^^^^^^
+    7 │ <my-card class="!shadow-lg"></my-card>
+    8 │ <my-spacing class="bg-red-500"></my-spacing>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:7:17 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+    5 │ <custom-button class="hover:font-bold"></custom-button>
+    6 │ <my-empty class="rounded-none"></my-empty>
+  > 7 │ <my-card class="!shadow-lg"></my-card>
+      │                 ^^^^^^^^^^
+    8 │ <my-spacing class="bg-red-500"></my-spacing>
+    9 │ <my-color class="p-4"></my-color>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:8:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+     6 │ <my-empty class="rounded-none"></my-empty>
+     7 │ <my-card class="!shadow-lg"></my-card>
+   > 8 │ <my-spacing class="bg-red-500"></my-spacing>
+       │                    ^^^^^^^^^^
+     9 │ <my-color class="p-4"></my-color>
+    10 │ <my-color class="stroke-2"></my-color>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:9:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+     7 │ <my-card class="!shadow-lg"></my-card>
+     8 │ <my-spacing class="bg-red-500"></my-spacing>
+   > 9 │ <my-color class="p-4"></my-color>
+       │                  ^^^
+    10 │ <my-color class="stroke-2"></my-color>
+    11 │ <custom-button class="stroke-none"></custom-button>
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:10:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+     8 │ <my-spacing class="bg-red-500"></my-spacing>
+     9 │ <my-color class="p-4"></my-color>
+  > 10 │ <my-color class="stroke-2"></my-color>
+       │                  ^^^^^^^^
+    11 │ <custom-button class="stroke-none"></custom-button>
+    12 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.html:11:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This Tailwind utility restyles a component.
+  
+     9 │ <my-color class="p-4"></my-color>
+    10 │ <my-color class="stroke-2"></my-color>
+  > 11 │ <custom-button class="stroke-none"></custom-button>
+       │                       ^^^^^^^^^^^
+    12 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1233,6 +1233,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions,
         >(),
     ));
+    result.push(("nursery", "noTailwindRestyledComponents", TypeId::of::<biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions>()));
     result.push(("suspicious", "noTemplateCurlyInString", TypeId::of::<biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions>()));
     result.push((
         "style",
