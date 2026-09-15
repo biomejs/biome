@@ -8,7 +8,7 @@ use biome_deserialize::{
 use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_json_value::JsonValue;
+use biome_json_value::{JsonObject, JsonValue};
 use biome_rowan::AstNodeList;
 use biome_text_size::TextRange;
 use biome_yaml_parser::parse_yaml;
@@ -40,12 +40,11 @@ pub struct PackageJson {
     pub dev_dependencies: Dependencies,
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
-    /// Optional pnpm workspace catalogs (`catalog:` and `catalogs:`) resolved from
-    /// a `pnpm-workspace.yaml`. When present, dependency versions declared as
+    /// Optional workspace catalogs resolved from `pnpm-workspace.yaml` or Bun's
+    /// `package.json`. When present, dependency versions declared as
     /// `catalog:` or `catalog:<name>` are looked up via `Catalogs`; when `None`,
-    /// no catalog resolution is applied and literal versions are used. This field
-    /// is typically populated by parsing the workspace file rather than
-    /// directly from `package.json`.
+    /// no catalog resolution is applied and literal versions are used. The
+    /// workspace service populates this field when catalog resolution is enabled.
     pub catalog: Option<Catalogs>,
     pub bundle_dependencies: BundleDependencies,
     pub bundled_dependencies: BundleDependencies,
@@ -182,9 +181,69 @@ impl PackageJson {
             Some(catalogs)
         }
     }
+
+    /// Extracts Bun catalogs from top-level `catalog` / `catalogs` fields or
+    /// their equivalents inside `workspaces`. Nested catalogs take precedence
+    /// over top-level catalogs. Bun's `catalog` and `catalogs.default` entries
+    /// are combined and exposed under both default catalog aliases.
+    /// Manifests without `workspaces` and invalid JSON return `None`;
+    /// unsupported value shapes and non-string dependency versions are ignored.
+    pub fn parse_bun_workspace_catalog(source: &str) -> Option<Catalogs> {
+        let (value, errors) = deserialize_from_json_str::<JsonValue>(
+            source,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .consume();
+        if !errors.is_empty() {
+            return None;
+        }
+        let value = value?;
+        let root = value.as_object()?;
+        let workspaces = root.get("workspaces")?;
+        let mapping = workspaces
+            .as_object()
+            .filter(|object| object.contains_key("catalog") || object.contains_key("catalogs"))
+            .unwrap_or(root);
+        let default = mapping
+            .get("catalog")
+            .and_then(JsonValue::as_object)
+            .map(collect_json_catalog_dependencies)
+            .filter(|deps| !deps.is_empty());
+        let named = mapping
+            .get("catalogs")
+            .and_then(JsonValue::as_object)
+            .into_iter()
+            .flat_map(|catalogs| catalogs.iter())
+            .filter_map(|(name, value)| {
+                let deps = collect_json_catalog_dependencies(value.as_object()?);
+                (!deps.is_empty()).then(|| (name.as_str().into(), deps))
+            })
+            .collect();
+        let mut catalogs = Catalogs {
+            default,
+            named,
+            trim_catalog_names: true,
+        };
+        for name in ["", "default"] {
+            if let Some(named_default) = catalogs.named.remove(name) {
+                let default = catalogs.default.get_or_insert_default();
+                default.0 = default
+                    .0
+                    .iter()
+                    .chain(named_default.0.iter())
+                    .cloned()
+                    .collect();
+            }
+        }
+        if let Some(default) = &catalogs.default {
+            catalogs.named.insert("default".into(), default.clone());
+        }
+        (!catalogs.is_empty()).then_some(catalogs)
+    }
 }
 
-/// Parsed catalogs from `pnpm-workspace.yaml`.
+/// Parsed pnpm or Bun workspace catalogs.
 ///
 /// Mapping from YAML to this type:
 /// ```yaml
@@ -199,7 +258,7 @@ impl PackageJson {
 ///
 #[derive(Debug, Default, Clone)]
 pub struct Catalogs {
-    /// Dependency map declared under the top-level `catalog:` key.
+    /// Dependency map for the default catalog, including Bun's `catalogs.default` entries.
     ///
     /// Example:
     /// ```yaml
@@ -209,7 +268,7 @@ pub struct Catalogs {
     /// -> `default["react"] == "19.2.0"`.
     pub default: Option<Dependencies>,
 
-    /// Dependency maps declared under top-level `catalogs:`.
+    /// Dependency maps declared under `catalogs`, including Bun's default catalog alias.
     ///
     /// The key is the catalog name, and the value is its dependencies map.
     /// Example:
@@ -220,6 +279,8 @@ pub struct Catalogs {
     /// ```
     /// -> `named["react19"]["react"] == "19.2.0"`.
     pub named: FxHashMap<Box<str>, Dependencies>,
+    /// Bun trims whitespace from catalog references; pnpm names remain literal.
+    trim_catalog_names: bool,
 }
 
 impl Catalogs {
@@ -228,12 +289,32 @@ impl Catalogs {
     }
 
     fn lookup<'a>(&'a self, specifier: &str, catalog_name: Option<&str>) -> Option<&'a str> {
+        let catalog_name = if self.trim_catalog_names {
+            catalog_name
+                .map(|name| name.trim_matches([' ', '\t', '\n', '\r', '\x0b', '\x0c']))
+                .filter(|name| !name.is_empty())
+        } else {
+            catalog_name
+        };
         if let Some(name) = catalog_name {
             return self.named.get(name).and_then(|deps| deps.get(specifier));
         }
 
         self.default.as_ref().and_then(|deps| deps.get(specifier))
     }
+}
+
+fn collect_json_catalog_dependencies(mapping: &JsonObject) -> Dependencies {
+    Dependencies(
+        mapping
+            .iter()
+            .filter_map(|(name, value)| {
+                let version = value.as_string()?;
+                Some((name.as_str().into(), version.as_str().into()))
+            })
+            .collect::<Vec<_>>()
+            .into_boxed_slice(),
+    )
 }
 
 /// Parses a catalog mapping entry into a `(key, value node)` pair, keeping only
@@ -388,7 +469,7 @@ fn normalize_catalog_scalar_text(value: &str) -> Option<Box<str>> {
     }
 }
 
-/// Checks if a manifest dependency satisfies a semver range, resolving pnpm
+/// Checks if a manifest dependency satisfies a semver range, resolving
 /// `catalog:` specifiers (default or named) through the provided `Catalogs`.
 fn dependency_satisfies(
     specifier: &str,
@@ -401,7 +482,7 @@ fn dependency_satisfies(
     Version::from(resolved_version).satisfies(range)
 }
 
-/// Resolves a dependency version, expanding pnpm `catalog:` references (default
+/// Resolves a dependency version, expanding `catalog:` references (default
 /// or named) using the provided `Catalogs`. Falls back to the literal version
 /// string if no catalog match is found.
 fn resolve_dependency_version<'a>(
@@ -872,6 +953,7 @@ mod tests {
             catalog: Some(Catalogs {
                 default: Some(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
                 named: FxHashMap::default(),
+                ..Default::default()
             }),
             ..Default::default()
         };
@@ -889,11 +971,141 @@ mod tests {
                     "react19".into(),
                     Dependencies(Box::new([("react".into(), "19.0.0".into())])),
                 )]),
+                ..Default::default()
             }),
             ..Default::default()
         };
 
         assert!(package_json.matches_dependency("react", ">=19.0.0"));
+    }
+
+    #[test]
+    fn parse_bun_workspace_catalogs() {
+        for source in [
+            r#"{"workspaces":{"packages":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"legacy":{"react":"18.3.1"}}}}"#,
+            r#"{"workspaces":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"legacy":{"react":"18.3.1"}}}"#,
+        ] {
+            let catalogs = PackageJson::parse_bun_workspace_catalog(source).unwrap();
+            for (version, range) in [
+                ("catalog:", ">=19.0.0"),
+                ("catalog:default", ">=19.0.0"),
+                ("catalog:legacy", "^18.0.0"),
+                ("catalog: \tlegacy\r\n ", "^18.0.0"),
+            ] {
+                let dependencies = Dependencies(Box::new([("react".into(), version.into())]));
+                for manifest in [
+                    PackageJson {
+                        dependencies: dependencies.clone(),
+                        catalog: Some(catalogs.clone()),
+                        ..Default::default()
+                    },
+                    PackageJson {
+                        dev_dependencies: dependencies.clone(),
+                        catalog: Some(catalogs.clone()),
+                        ..Default::default()
+                    },
+                    PackageJson {
+                        peer_dependencies: dependencies,
+                        catalog: Some(catalogs.clone()),
+                        ..Default::default()
+                    },
+                ] {
+                    assert!(manifest.matches_dependency("react", range), "{source}");
+                }
+            }
+            assert_eq!(
+                resolve_dependency_version("missing", "catalog:", Some(&catalogs)),
+                "catalog:"
+            );
+            assert_eq!(
+                resolve_dependency_version("react", "catalog:unknown", Some(&catalogs)),
+                "catalog:unknown"
+            );
+            assert_eq!(
+                resolve_dependency_version("react", "17.0.0", Some(&catalogs)),
+                "17.0.0"
+            );
+        }
+    }
+
+    #[test]
+    fn parse_bun_workspace_catalog_default_aliases() {
+        for source in [
+            r#"{"workspaces":[],"catalog":{"react":"19.0.0"}}"#,
+            r#"{"workspaces":[],"catalogs":{"default":{"react":"19.0.0"}}}"#,
+            r#"{"workspaces":[],"catalogs":{"":{"react":"19.0.0"}}}"#,
+            r#"{"workspaces":[],"catalog":{"react":"19.0.0"},"catalogs":{"default":{"react-dom":"19.0.0"}}}"#,
+        ] {
+            let catalogs = PackageJson::parse_bun_workspace_catalog(source).unwrap();
+            for version in [
+                "catalog:",
+                "catalog:default",
+                "catalog: ",
+                "catalog: \t\n\r\x0b\x0cdefault\r\n\t ",
+            ] {
+                assert_eq!(
+                    resolve_dependency_version("react", version, Some(&catalogs)),
+                    "19.0.0",
+                    "{source}: {version}"
+                );
+                if source.contains("react-dom") {
+                    assert_eq!(
+                        resolve_dependency_version("react-dom", version, Some(&catalogs)),
+                        "19.0.0",
+                        "{source}: {version}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn parse_bun_workspace_catalog_prefers_workspaces() {
+        let catalogs = PackageJson::parse_bun_workspace_catalog(
+            r#"{
+            "workspaces": {"catalog": {"react": "19.0.0"}},
+            "catalog": {"react": "18.3.1"},
+            "catalogs": {"legacy": {"react": "18.3.1"}}
+        }"#,
+        )
+        .unwrap();
+        assert_eq!(catalogs.default.unwrap().get("react"), Some("19.0.0"));
+        assert_eq!(catalogs.named["default"].get("react"), Some("19.0.0"));
+        assert!(!catalogs.named.contains_key("legacy"));
+    }
+
+    #[test]
+    fn parse_bun_workspace_catalog_ignores_unsupported_values() {
+        for source in [
+            "{",
+            "[]",
+            "{}",
+            r#"{"workspaces":[]}"#,
+            r#"{"workspaces":[],"catalog":true,"catalogs":{"invalid":123}}"#,
+            r#"{"catalog":{"react":"19.0.0"}}"#,
+            r#"{"workspaces":{"catalog":{},"catalogs":{"empty":{}}}}"#,
+        ] {
+            assert!(
+                PackageJson::parse_bun_workspace_catalog(source).is_none(),
+                "{source}"
+            );
+        }
+        let catalogs = PackageJson::parse_bun_workspace_catalog(r#"{
+            "unknown": {"catalog": {"wrong": "1.0.0"}},
+            "workspaces": {
+                "catalog": {"react": "19.0.0", "number": 19, "array": [], "object": {}, "null": null},
+                "catalogs": {"invalid": false, "legacy": {"react": "18.3.1", "invalid": true}}
+            }
+        }"#).unwrap();
+        assert_eq!(
+            catalogs.default.unwrap().0.as_ref(),
+            &[("react".into(), "19.0.0".into())]
+        );
+        assert!(!catalogs.named.contains_key("invalid"));
+        assert_eq!(
+            catalogs.named["legacy"].0.as_ref(),
+            &[("react".into(), "18.3.1".into())]
+        );
     }
 
     #[test]
@@ -1013,6 +1225,7 @@ catalogs:
                 "legacy".into(),
                 Dependencies(Box::new([("react".into(), "18.3.1".into())])),
             )]),
+            ..Default::default()
         };
 
         let resolved_default =
@@ -1022,6 +1235,12 @@ catalogs:
         let resolved_named =
             super::resolve_dependency_version("react", "catalog:legacy", Some(&catalog));
         assert_eq!(resolved_named, "18.3.1");
+        for version in ["catalog: ", "catalog: legacy "] {
+            assert_eq!(
+                super::resolve_dependency_version("react", version, Some(&catalog)),
+                version
+            );
+        }
     }
 
     #[test]

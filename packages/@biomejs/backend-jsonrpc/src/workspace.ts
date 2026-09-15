@@ -915,6 +915,20 @@ These decorators belong to an old proposal, and they are subject to change.
  */
 export interface JsResolverConfiguration {
 	/**
+	* Enables Bun catalog resolution for JavaScript package manifests.
+
+Resolves `catalog:` and `catalog:<name>` versions in `dependencies`,
+`devDependencies`, and `peerDependencies` from an ancestor `package.json`.
+Catalogs may be declared under `workspaces` or at the top level of a
+manifest with a `workspaces` field. Nested catalogs take precedence.
+Unknown keys and non-string entries are ignored. Missing, unreadable,
+or invalid manifests leave dependency versions unresolved.
+
+If both catalog options are enabled, pnpm catalogs take precedence.
+Defaults to `false`.
+	 */
+	experimentalBunCatalogs?: Bool;
+	/**
 	* Enables pnpm workspace catalog resolution for JavaScript package manifests.
 
 Opt-in:

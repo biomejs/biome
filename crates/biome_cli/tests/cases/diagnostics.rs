@@ -1,5 +1,5 @@
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
-use crate::{UNFORMATTED, run_cli};
+use crate::{UNFORMATTED, run_cli, run_cli_with_server_workspace};
 use biome_console::{BufferConsole, LogLevel};
 use biome_fs::MemoryFileSystem;
 use bpaf::Args;
@@ -348,4 +348,71 @@ fn max_diagnostics_are_lifted() {
                 content.contains(&errors)
             })
     );
+}
+
+#[test]
+fn reads_bun_workspace_catalogs_for_react_compiler() {
+    const RULE: &str = "nursery/useReactCompiler";
+    const SOURCE: &str = r#"import { useState } from "react";
+export function Component(props) {
+    if (props.enabled) { useState(0); }
+    return <div />;
+}"#;
+    for root_manifest in [
+        r#"{"workspaces":{"packages":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"react19":{"react":"19.0.0"}}}}"#,
+        r#"{"workspaces":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"react19":{"react":"19.0.0"}}}"#,
+        r#"{"workspaces":["packages/*"],"catalogs":{"default":{"react":"19.0.0"},"react19":{"react":"19.0.0"}}}"#,
+    ] {
+        for (version, enabled, expected) in [
+            ("catalog:", true, true),
+            ("catalog:default", true, true),
+            ("catalog: ", true, true),
+            ("catalog: react19 ", true, true),
+            ("catalog:react19", true, true),
+            ("catalog:", false, false),
+            ("catalog:missing", true, false),
+        ] {
+            let fs = MemoryFileSystem::default();
+            let mut console = BufferConsole::default();
+            fs.insert("package.json".into(), root_manifest.as_bytes());
+            fs.insert(
+                "packages/app/package.json".into(),
+                serde_json::json!({
+                    "dependencies": {"react": version}
+                })
+                .to_string()
+                .as_bytes(),
+            );
+            fs.insert("biome.json".into(), serde_json::json!({
+                "linter": {"domains": {"project": "all"}, "rules": {"nursery": {"useReactCompiler": "error"}}},
+                "javascript": {"resolver": {"experimentalBunCatalogs": enabled}}
+            }).to_string().as_bytes());
+            fs.insert("packages/app/input.jsx".into(), SOURCE.as_bytes());
+            let only = format!("--only={RULE}");
+            let (_, result) = run_cli_with_server_workspace(
+                fs,
+                &mut console,
+                Args::from(
+                    [
+                        "lint",
+                        "--error-on-warnings",
+                        only.as_str(),
+                        "packages/app/input.jsx",
+                    ]
+                    .as_slice(),
+                ),
+            );
+            let output = console
+                .out_buffer
+                .iter()
+                .map(|message| format!("{:?}", message.content))
+                .collect::<String>();
+            assert_eq!(
+                output.contains(RULE),
+                expected,
+                "{version}, enabled={enabled}: {output}"
+            );
+            assert_eq!(result.is_err(), expected, "{result:?}: {output}");
+        }
+    }
 }

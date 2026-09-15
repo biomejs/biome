@@ -9,6 +9,7 @@ use std::str::FromStr;
 
 pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
 pub type ExperimentalPnpmCatalogsEnabled = Bool<false>;
+pub type ExperimentalBunCatalogsEnabled = Bool<false>;
 
 /// A set of options applied to the JavaScript files
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
@@ -91,6 +92,21 @@ pub struct JsResolverConfiguration {
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
+
+    /// Enables Bun catalog resolution for JavaScript package manifests.
+    ///
+    /// Resolves `catalog:` and `catalog:<name>` versions in `dependencies`,
+    /// `devDependencies`, and `peerDependencies` from an ancestor `package.json`.
+    /// Catalogs may be declared under `workspaces` or at the top level of a
+    /// manifest with a `workspaces` field. Nested catalogs take precedence.
+    /// Unknown keys and non-string entries are ignored. Missing, unreadable,
+    /// or invalid manifests leave dependency versions unresolved.
+    ///
+    /// If both catalog options are enabled, pnpm catalogs take precedence.
+    /// Defaults to `false`.
+    #[cfg_attr(feature = "cli", bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub experimental_bun_catalogs: Option<ExperimentalBunCatalogsEnabled>,
 }
 
 pub type UnsafeParameterDecoratorsEnabled = Bool<false>;

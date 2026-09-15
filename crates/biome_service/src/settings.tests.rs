@@ -151,6 +151,7 @@ fn javascript_resolver_experimental_pnpm_catalogs_is_opt_in() {
         javascript: Some(JsConfiguration {
             resolver: Some(JsResolverConfiguration {
                 experimental_pnpm_catalogs: Some(true.into()),
+                ..Default::default()
             }),
             ..Default::default()
         }),
@@ -469,4 +470,30 @@ fn assert_no_parse_diagnostics(source: &str, options: HtmlParserOptions) {
         "expected parsing to succeed, got diagnostics: {:?}",
         parse.diagnostics()
     );
+}
+
+#[test]
+fn javascript_resolver_experimental_bun_catalogs_is_opt_in() {
+    let mut settings = Settings::default();
+    assert!(!settings.use_bun_workspace_catalogs());
+    for enabled in [true, false] {
+        settings
+            .merge_with_configuration(
+                Configuration {
+                    javascript: Some(JsConfiguration {
+                        resolver: Some(JsResolverConfiguration {
+                            experimental_bun_catalogs: Some(enabled.into()),
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                None,
+                vec![],
+            )
+            .unwrap();
+        assert_eq!(settings.use_bun_workspace_catalogs(), enabled);
+        assert!(!settings.use_pnpm_workspace_catalogs());
+    }
 }

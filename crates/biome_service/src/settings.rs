@@ -23,7 +23,8 @@ use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::html::{ExperimentalFullSupportEnabled, HtmlConfiguration};
 #[cfg(feature = "lang_js")]
 use biome_configuration::javascript::{
-    ExperimentalEmbeddedSnippetsEnabled, ExperimentalPnpmCatalogsEnabled, JsxRuntime,
+    ExperimentalBunCatalogsEnabled, ExperimentalEmbeddedSnippetsEnabled,
+    ExperimentalPnpmCatalogsEnabled, JsxRuntime,
 };
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::vcs::{VcsClientKind, VcsConfiguration, VcsEnabled, VcsUseIgnoreFile};
@@ -130,6 +131,9 @@ pub struct Settings {
     // TODO: remove once pnpm workspace catalogs support is stable
     #[cfg(feature = "lang_js")]
     pub experimental_pnpm_catalogs_enabled: Option<ExperimentalPnpmCatalogsEnabled>,
+
+    #[cfg(feature = "lang_js")]
+    pub experimental_bun_catalogs_enabled: Option<ExperimentalBunCatalogsEnabled>,
 }
 
 impl Settings {
@@ -307,6 +311,10 @@ impl Settings {
                 .resolver
                 .as_ref()
                 .and_then(|resolver| resolver.experimental_pnpm_catalogs);
+            self.experimental_bun_catalogs_enabled = javascript
+                .resolver
+                .as_ref()
+                .and_then(|resolver| resolver.experimental_bun_catalogs);
             self.languages.javascript = javascript.into()
         }
         // json settings
@@ -384,6 +392,19 @@ impl Settings {
         #[cfg(feature = "lang_js")]
         {
             self.experimental_pnpm_catalogs_enabled
+                .unwrap_or_default()
+                .value()
+        }
+        #[cfg(not(feature = "lang_js"))]
+        {
+            false
+        }
+    }
+
+    pub fn use_bun_workspace_catalogs(&self) -> bool {
+        #[cfg(feature = "lang_js")]
+        {
+            self.experimental_bun_catalogs_enabled
                 .unwrap_or_default()
                 .value()
         }
