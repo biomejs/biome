@@ -171,6 +171,8 @@ pub enum RuleSource<'a> {
     EslintReactNamingConvention(&'a str),
     /// Rules from [Eslint Plugin Regexp](https://github.com/ota-meshi/eslint-plugin-regexp)
     EslintRegexp(&'a str),
+    /// Rules from [@shadcn/lint](https://github.com/shadcn-ui/lint).
+    EslintShadcn(&'a str),
     /// Rules from [Eslint Plugin Solid](https://github.com/solidjs-community/eslint-plugin-solid)
     EslintSolid(&'a str),
     /// Rules from [Eslint Plugin Svelte](https://github.com/sveltejs/eslint-plugin-svelte)
@@ -266,6 +268,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
                 write!(f, "eslint-plugin-react-naming-convention")
             }
             Self::EslintRegexp(_) => write!(f, "eslint-plugin-regexp"),
+            Self::EslintShadcn(_) => write!(f, "@shadcn/lint"),
             Self::EslintSolid(_) => write!(f, "eslint-plugin-solid"),
             Self::EslintSvelte(_) => write!(f, "eslint-plugin-svelte"),
             Self::EslintSonarJs(_) => write!(f, "eslint-plugin-sonarjs"),
@@ -358,6 +361,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintReactRsc(rule_name)
             | Self::EslintReactNamingConvention(rule_name)
             | Self::EslintRegexp(rule_name)
+            | Self::EslintShadcn(rule_name)
             | Self::EslintSolid(rule_name)
             | Self::EslintSvelte(rule_name)
             | Self::EslintSonarJs(rule_name)
@@ -425,6 +429,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(_) => "react-rsc",
             Self::EslintReactNamingConvention(_) => "react-naming-convention",
             Self::EslintRegexp(_) => "regexp",
+            Self::EslintShadcn(_) => "shadcn",
             Self::EslintSolid(_) => "solid",
             Self::EslintSvelte(_) => "svelte",
             Self::EslintSonarJs(_) => "sonarjs",
@@ -495,6 +500,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintReactRsc(rule_name) => format!("https://eslint-react.xyz/docs/rules/rsc-{rule_name}"),
             Self::EslintReactNamingConvention(rule_name) => format!("https://eslint-react.xyz/docs/rules/naming-convention-{rule_name}"),
             Self::EslintRegexp(rule_name) => format!("https://ota-meshi.github.io/eslint-plugin-regexp/rules/{rule_name}.html"),
+            Self::EslintShadcn(rule_name) => format!("https://github.com/shadcn-ui/lint/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintSolid(rule_name) => format!("https://github.com/solidjs-community/eslint-plugin-solid/blob/main/packages/eslint-plugin-solid/docs/{rule_name}.md"),
             Self::EslintSvelte(rule_name) => format!("https://sveltejs.github.io/eslint-plugin-svelte/rules/{rule_name}/"),
             Self::EslintSonarJs(rule_name) => format!("https://github.com/SonarSource/eslint-plugin-sonarjs/blob/HEAD/docs/rules/{rule_name}.md"),
