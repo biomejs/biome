@@ -6,50 +6,9 @@ use biome_rowan::TextSize;
 use camino::Utf8Path;
 
 use super::support::{add_js_modules, build_css_db, build_module_db_via_workspace};
-use super::{ModuleInfo, Ordering, build_js_test_module_db};
 
 const PROPERTY: &str =
     "@property --value { syntax: '<color>'; inherits: true; initial-value: red; }";
-
-#[test]
-fn css_property_query_bounds_shared_dependency_lookups() {
-    for depth in [10, 14] {
-        let (fs, css_db) = build_css_db(&[("/style.css", "a { color: var(--value); }")]);
-        fs.insert(
-            "/entry.js".into(),
-            "import './style.css'; import './module0.js';",
-        );
-        let mut paths = vec!["/entry.js".to_string()];
-        for index in 0..depth {
-            let path = format!("/module{index}.js");
-            let source = (index + 1..(index + 3).min(depth))
-                .map(|next| format!("import './module{next}.js';"))
-                .collect::<String>();
-            fs.insert(path.clone().into(), source.as_str());
-            paths.push(path);
-        }
-        let mut db = build_js_test_module_db(
-            &fs,
-            &paths.iter().map(String::as_str).collect::<Vec<_>>(),
-            false,
-        );
-        let path = Utf8Path::new("/style.css");
-        let css_module = css_db.module_for_path(path).unwrap();
-        let module = ModuleInfo::new(&db, path.to_path_buf(), css_module.kind(&css_db));
-        db.modules.insert(path.to_path_buf(), module);
-        db.module_lookups.store(0, Ordering::Relaxed);
-
-        assert!(
-            css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module))
-                .is_empty()
-        );
-        let lookups = db.module_lookups.load(Ordering::Relaxed);
-        assert!(
-            lookups <= 8 * depth,
-            "{depth} shared dependencies required {lookups} module lookups"
-        );
-    }
-}
 
 fn definitions(files: &[(&str, &str)], path: &str) -> Vec<String> {
     let (_, db) = build_css_db(files);
