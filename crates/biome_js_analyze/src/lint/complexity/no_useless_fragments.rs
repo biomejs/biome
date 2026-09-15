@@ -14,11 +14,14 @@ use biome_js_syntax::{
     JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxExpressionChild, JsxFragment,
     JsxOpeningElement, JsxTagExpression, JsxText, T,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
+    ///
+    /// In Astro templates, fragments with props are allowed, for example `<Fragment slot="name">`.
     ///
     /// ## Examples
     ///
@@ -148,6 +151,17 @@ impl Rule for NoUselessFragments {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+
+        if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_astro_template()
+            && let NoUselessFragmentsQuery::JsxElement(element) = node
+            && !element.opening_element().ok()?.attributes().is_empty()
+        {
+            return None;
+        }
+
         let model = ctx.model();
 
         let mut in_jsx_attr_expr = false;
