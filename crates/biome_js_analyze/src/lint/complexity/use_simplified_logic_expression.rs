@@ -5,7 +5,8 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBooleanLiteralExpression, JsLogicalExpression,
-    JsUnaryExpression, JsUnaryOperator, T,
+    JsLogicalOperator, JsParenthesizedExpression, JsSyntaxNode, JsUnaryExpression,
+    JsUnaryOperator, T, is_in_boolean_context,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt};
 use biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpressionOptions;
@@ -16,9 +17,11 @@ declare_lint_rule! {
     /// The rule applies the [De Morgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws) rule to simplify logical expressions.
     /// This means that some simplified expressions that are fixed by the rule might seem less intuitive to read, but they are more efficient to evaluate.
     ///
-    /// A boolean literal on the right side of `||` or `&&`, such as `value || false`, is not reported.
-    /// These operators return one of their operands rather than a boolean, so the literal can change
-    /// the result when `value` is not a boolean, and removing it would change the behavior of the code.
+    /// `value || false` and `value && true` are only reported in a boolean context, such as an `if`
+    /// condition or the operand of `!`, where only the truthiness of the result matters. Elsewhere,
+    /// removing the literal changes the result when `value` is not a boolean.
+    /// `value || true` and `value && false` are never reported, since the literal alone would skip
+    /// evaluating `value`.
     ///
     /// ## Examples
     ///
@@ -32,6 +35,13 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// const boolExp2 = true;
     /// const r2 = false || boolExp2;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const boolExp3 = true;
+    /// if (boolExp3 || false) {
+    ///     doSomething();
+    /// }
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -80,11 +90,10 @@ impl Rule for UseSimplifiedLogicExpression {
         let node = ctx.query();
         let left = node.left().ok()?;
         let right = node.right().ok()?;
-        // Only a boolean literal on the left side is simplified. `||` and `&&`
-        // return one of their operands rather than a boolean, so `x || false`
-        // evaluates to `false` when `x` is `undefined`, while `x` alone does
-        // not. Removing a right-side literal can change the value of the
-        // expression.
+        // `x || false` is `false` when `x` is `undefined`, so a right-side
+        // literal is only dropped where just the truthiness matters, and only
+        // for `|| false` / `&& true`: dropping `x` from `x || true` would skip
+        // its evaluation.
         match node.operator().ok()? {
             biome_js_syntax::JsLogicalOperator::NullishCoalescing
                 if matches!(
@@ -104,6 +113,15 @@ impl Rule for UseSimplifiedLogicExpression {
                     return simplify_or_expression(literal, right).map(|expr| (false, expr));
                 }
 
+                if let AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+                ) = right
+                    && literal_value(&literal) == Some(false)
+                    && is_in_truthiness_context(node.syntax())
+                {
+                    return Some((false, left));
+                }
+
                 if could_apply_de_morgan(node).unwrap_or(false) {
                     return simplify_de_morgan(node)
                         .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
@@ -115,6 +133,15 @@ impl Rule for UseSimplifiedLogicExpression {
                 ) = left
                 {
                     return simplify_and_expression(literal, right).map(|expr| (false, expr));
+                }
+
+                if let AnyJsExpression::AnyJsLiteralExpression(
+                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
+                ) = right
+                    && literal_value(&literal) == Some(true)
+                    && is_in_truthiness_context(node.syntax())
+                {
+                    return Some((false, left));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
@@ -166,6 +193,33 @@ impl Rule for UseSimplifiedLogicExpression {
     }
 }
 
+/// Returns `true` when only the truthiness of `node` is observed: it is the
+/// test of an `if`, `while`, `do...while`, `for`, or conditional expression,
+/// or the operand of `!`, possibly through parentheses and enclosing `&&` /
+/// `||` expressions.
+fn is_in_truthiness_context(node: &JsSyntaxNode) -> bool {
+    let mut current = node.clone();
+    loop {
+        if is_in_boolean_context(&current).unwrap_or(false) {
+            return true;
+        }
+        let Some(parent) = current.parent() else {
+            return false;
+        };
+        let climbs_to_parent = JsParenthesizedExpression::can_cast(parent.kind())
+            || JsLogicalExpression::cast_ref(&parent).is_some_and(|logical| {
+                matches!(
+                    logical.operator(),
+                    Ok(JsLogicalOperator::LogicalOr | JsLogicalOperator::LogicalAnd)
+                )
+            });
+        if !climbs_to_parent {
+            return false;
+        }
+        current = parent;
+    }
+}
+
 /// https://en.wikipedia.org/wiki/De_Morgan%27s_laws
 fn could_apply_de_morgan(node: &JsLogicalExpression) -> Option<bool> {
     let left = node.left().ok()?;
@@ -205,17 +259,20 @@ fn keep_expression_if_literal(
     expression: AnyJsExpression,
     expected_value: bool,
 ) -> Option<AnyJsExpression> {
-    let eval_value = match literal.value_token().ok()?.kind() {
-        T![true] => true,
-        T![false] => false,
-        _ => return None,
-    };
-    if eval_value == expected_value {
+    if literal_value(&literal)? == expected_value {
         Some(expression)
     } else {
         Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
         ))
+    }
+}
+
+fn literal_value(literal: &JsBooleanLiteralExpression) -> Option<bool> {
+    match literal.value_token().ok()?.kind() {
+        T![true] => Some(true),
+        T![false] => Some(false),
+        _ => None,
     }
 }
 

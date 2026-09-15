@@ -12,12 +12,19 @@ const boolExpr5 = true;
 const boolExpr6 = false;
 const r6 = !!boolExpr1 || !!boolExpr2;
 !!x;
-// Boolean literals on the right side are not simplified: `||` and `&&`
-// return one of their operands, so removing the literal can change the result.
+// Boolean literals on the right side are not simplified outside a boolean
+// context: `||` and `&&` return one of their operands, so removing the literal
+// can change the value of the expression.
 const r7 = x || false;
 const r8 = x || true;
 const r9 = x && true;
 const r10 = x && false;
 const r11 = obj?.prop || false;
+foo(x || false);
+const r12 = [x && true];
+// A literal that decides the result on its own is never removed, because
+// the left operand would no longer be evaluated.
+if (effect() || true) {}
+while (effect() && false) {}
 
 ```

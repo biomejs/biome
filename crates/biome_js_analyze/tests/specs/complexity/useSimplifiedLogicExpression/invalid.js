@@ -11,3 +11,12 @@ if (
 ) {
     console.log();
 }
+
+if (x || false) {}
+while (x && true) {}
+do {} while (x && true);
+for (; x || false; ) {}
+const t = x || false ? 1 : 2;
+const n = !(x && true);
+if (a && (x || false)) {}
+if ((x || false)) {}
