@@ -1,6 +1,8 @@
-use super::semantic::SemanticServices;
 use biome_analyze::QueryMatch;
-use biome_analyze::{AddVisitor, Phases, Queryable, ServiceBag, Visitor, VisitorContext};
+use biome_analyze::{
+    AddVisitor, FromServices, Phase, Phases, Queryable, RuleKey, RuleMetadata, ServiceBag,
+    ServicesDiagnostic, Visitor, VisitorContext,
+};
 use biome_db::AnyParsedSource;
 use biome_js_control_flow::{control_flow_model, js_control_flow_model};
 use biome_js_syntax::AnyJsRoot;
@@ -18,6 +20,25 @@ pub struct ControlFlowGraph {
     pub graph: JsControlFlowGraph,
 }
 
+/// Schedules CFG consumers in the semantic phase without requiring a binding model.
+pub struct ControlFlowServices;
+
+impl FromServices for ControlFlowServices {
+    fn from_services(
+        _: &RuleKey,
+        _: &RuleMetadata,
+        _: &ServiceBag,
+    ) -> Result<Self, ServicesDiagnostic> {
+        Ok(Self)
+    }
+}
+
+impl Phase for ControlFlowServices {
+    fn phase() -> Phases {
+        Phases::Semantic
+    }
+}
+
 impl QueryMatch for ControlFlowGraph {
     fn text_range(&self) -> TextRange {
         self.graph.node.text_trimmed_range()
@@ -29,7 +50,7 @@ impl Queryable for ControlFlowGraph {
     type Output = JsControlFlowGraph;
 
     type Language = JsLanguage;
-    type Services = SemanticServices;
+    type Services = ControlFlowServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
         analyzer.add_visitor(Phases::Semantic, || ControlFlowGraphVisitor);

@@ -1,3 +1,4 @@
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
@@ -136,6 +137,7 @@ where
     type Services = SemanticClassServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Syntax, || SyntaxClassMemberReferencesVisitor {});
         analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }

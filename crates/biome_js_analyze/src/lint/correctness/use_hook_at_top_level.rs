@@ -1,5 +1,5 @@
 use crate::react::hooks::{is_react_hook_call, is_react_hook_name};
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
@@ -657,6 +657,7 @@ impl Queryable for FunctionCall {
         analyzer: &mut impl AddVisitor<Self::Language>,
         _: &<Self::Language as Language>::Root,
     ) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Syntax, EarlyReturnDetectionVisitor::default);
         analyzer.add_visitor(Phases::Semantic, FunctionCallVisitor::default);
     }

@@ -104,6 +104,48 @@ fn analyze(
 }
 
 #[test]
+fn cfg_only_analysis_reports_unreachable_code() {
+    let parse = parsed("function example() { return; neverCalled(); }");
+    let root = parse.tree();
+    let db = TestDb::default();
+    let source = ParsedSource::new(&db, "/file.js".into(), parse.into(), 0, vec![]);
+    let db = Rc::new(db);
+
+    for services in [
+        JsAnalyzerServices::default(),
+        JsAnalyzerServices::default()
+            .with_language_db(db.clone())
+            .with_parsed_source(source.into()),
+    ] {
+        let mut ranges = Vec::new();
+        let (_, errors) = biome_js_analyze::analyze(
+            &root,
+            AnalysisFilter {
+                enabled_rules: Some(&[RuleFilter::Rule("correctness", "noUnreachable")]),
+                ..AnalysisFilter::default()
+            },
+            &AnalyzerOptions::default().with_file_path("/file.js"),
+            &[],
+            services,
+            |signal| {
+                if let Some(diagnostic) = signal.diagnostic() {
+                    ranges.push(diagnostic.get_span().unwrap());
+                }
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+        assert!(errors.is_empty(), "{errors:?}");
+        assert_eq!(ranges, [TextRange::new(29.into(), 43.into())]);
+        assert_function_query_was_not_run(
+            db.as_ref(),
+            semantic_model_from_source,
+            source,
+            &db.take_events(),
+        );
+    }
+}
+
+#[test]
 fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
     let original = parsed("function f() { return; unreachable(); }");
     let original_root = original.tree();
@@ -197,7 +239,7 @@ fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
             .map(|range| range + TextSize::from(1))
             .collect::<Vec<_>>()
     );
-    assert_function_query_was_not_run(
+    assert_function_query_was_run(
         db.as_ref(),
         semantic_model_from_source,
         source,
@@ -239,7 +281,7 @@ fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
     let ranges = analyze(&db, &second_root, Some(second.into()), "noUnreachable");
     assert_eq!(ranges.len(), 1);
     let events = db.take_events();
-    assert_function_query_was_run(db.as_ref(), semantic_model_from_snippet, second, &events);
+    assert_function_query_was_not_run(db.as_ref(), semantic_model_from_snippet, second, &events);
     assert_function_query_was_not_run(db.as_ref(), semantic_model_from_snippet, first, &events);
     assert_function_query_was_run(
         db.as_ref(),

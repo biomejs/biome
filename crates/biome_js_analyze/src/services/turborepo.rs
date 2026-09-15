@@ -6,6 +6,7 @@
 
 use std::sync::Arc;
 
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, SyntaxVisitor,
@@ -102,6 +103,7 @@ where
     type Services = TurborepoServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
