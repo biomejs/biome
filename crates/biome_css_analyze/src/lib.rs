@@ -13,15 +13,16 @@ mod syntax;
 mod utils;
 
 pub use crate::registry::visit_registry;
-use crate::services::semantic::model_for_root;
+use crate::services::semantic::SemanticModelBuilderVisitor;
 pub use crate::suppression::CssSuppression;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
-    RuleAction, RuleRegistry,
+    AddVisitor, AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal,
+    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_css_syntax::CssLanguage;
+use biome_db::AnyParsedSource;
 use biome_diagnostics::Error;
 use biome_languages::{CssFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
@@ -41,6 +42,8 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 #[derive(Clone, Default)]
 pub struct CssAnalyzerServices {
     pub language_db: Option<Rc<dyn LanguageDb>>,
+    /// The source of the analyzed root in the supplied database, absent for transient roots.
+    pub parsed_source: Option<AnyParsedSource>,
     pub file_source: CssFileSource,
     pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
@@ -63,6 +66,13 @@ impl CssAnalyzerServices {
 
     pub fn with_language_db(mut self, db: Rc<dyn LanguageDb>) -> Self {
         self.language_db = Some(db);
+        self
+    }
+
+    /// Associates the analyzed root with its source in the supplied database.
+    /// Omit this for transient roots, including roots changed by a fix pass.
+    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+        self.parsed_source = Some(source);
         self
     }
 
@@ -135,7 +145,20 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+
+    let css_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::Css)
+        .cloned()
+        .collect();
+    if filter.match_plugins()
+        && css_plugins.iter().any(|plugin| {
+            plugin.requires_semantic_model() && plugin.applies_to_file(&options.file_path)
+        })
+    {
+        visitors.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+    }
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -151,17 +174,12 @@ where
     );
 
     services.insert_service(css_services.file_source);
-    services.insert_lazy_service({
-        let root = root.clone();
-        let path = options.file_path.clone();
-        let db = css_services.language_db.clone().or_else(|| {
-            css_services
-                .module_db
-                .clone()
-                .map(|db| -> Rc<dyn LanguageDb> { db })
-        });
-        move || model_for_root(db.as_deref(), &root, &path)
-    });
+    if let Some(db) = css_services.language_db {
+        services.insert_service(db);
+    }
+    if let Some(source) = css_services.parsed_source {
+        services.insert_service(source);
+    }
     if let Some(module_db) = css_services.module_db {
         services.insert_service(module_db);
     }
@@ -172,12 +190,6 @@ where
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
-
-    let css_plugins: Vec<_> = plugins
-        .iter()
-        .filter(|p| p.language() == PluginTargetLanguage::Css)
-        .cloned()
-        .collect();
 
     if filter.match_plugins() && !css_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target CSS above.

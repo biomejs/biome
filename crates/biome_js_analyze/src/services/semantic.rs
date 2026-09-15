@@ -1,13 +1,14 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
+    VisitorStartContext,
 };
 use biome_db::AnyParsedSource;
 use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::AstNode;
-use camino::Utf8Path;
+use std::rc::Rc;
 
 /// ## Warning
 ///
@@ -57,6 +58,7 @@ impl Queryable for SemanticServices {
     type Services = Self;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, || SemanticModelVisitor);
     }
 
@@ -83,6 +85,7 @@ where
     type Services = SemanticServices;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -94,42 +97,41 @@ where
         N::unwrap_cast(node.clone())
     }
 }
-pub(super) fn matching_source(
-    db: &dyn biome_db::Db,
-    root: &AnyJsRoot,
-    path: &Utf8Path,
-) -> Option<AnyParsedSource> {
-    let syntax = root.syntax().as_send()?;
-    let source = db.parsed_source_for_path(path)?;
-    if source.parsed(db).as_send_node().as_ref() == Some(&syntax) {
-        return Some(source.into());
-    }
-    source
-        .snippets(db)
-        .iter()
-        .find(|snippet| snippet.parsed(db).as_send_node().as_ref() == Some(&syntax))
-        .map(Into::into)
-}
 
-pub(crate) fn model_for_root(
-    db: Option<&dyn LanguageDb>,
-    root: &AnyJsRoot,
-    path: &Utf8Path,
-    source_type: JsFileSource,
-) -> SemanticModel {
-    if let Some(db) = db
-        && let Some(source) = matching_source(db, root, path)
-    {
-        let model = js_semantic_model(db, &source);
-        // Semantic equality excludes locations, but analyzer consumers need the
-        // current syntax and the embedding flavor of the analyzed source.
-        if model.root().syntax().as_send() == root.syntax().as_send()
-            && model.flavor() == (&source_type).into()
-        {
-            return model.clone();
+pub(crate) struct SemanticModelBuilderVisitor;
+
+impl Visitor for SemanticModelBuilderVisitor {
+    type Language = JsLanguage;
+
+    fn start(&mut self, ctx: VisitorStartContext<JsLanguage>) {
+        if ctx.services.get_service::<SemanticModel>().is_some() {
+            return;
         }
+        let source_type = ctx
+            .services
+            .get_service::<JsFileSource>()
+            .copied()
+            .unwrap_or_default();
+        if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
+            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+        {
+            let model = js_semantic_model(db.as_ref(), source);
+            // Semantic equality excludes locations, but analyzer consumers need the
+            // current syntax and the embedding flavor of the analyzed source.
+            if model.root().syntax().as_send() == ctx.root.syntax().as_send()
+                && model.flavor() == (&source_type).into()
+            {
+                ctx.services.insert_service(model.clone());
+                return;
+            }
+        }
+        ctx.services.insert_service(semantic_model(
+            ctx.root,
+            SemanticModelOptions::from(&source_type),
+        ));
     }
-    semantic_model(root, SemanticModelOptions::from(&source_type))
+
+    fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
 }
 
 pub struct SemanticModelVisitor;

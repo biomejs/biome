@@ -3,9 +3,6 @@ use biome_console::markup;
 use biome_diagnostics::{Diagnostic, MessageAndDescription, Result};
 use rustc_hash::FxHashMap;
 use std::any::{Any, TypeId};
-use std::cell::LazyCell;
-
-type LazyService<T> = LazyCell<T, Box<dyn FnOnce() -> T>>;
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "internalError/io", tags(INTERNAL))]
@@ -48,20 +45,10 @@ impl ServiceBag {
         self.services.insert(id, Box::new(service));
     }
 
-    /// Registers a service that is resolved on first access and reused for the
-    /// lifetime of this bag. Replacing it discards its previous value or resolver.
-    pub fn insert_lazy_service<T: 'static>(&mut self, resolve: impl FnOnce() -> T + 'static) {
-        let service = LazyService::new(Box::new(resolve));
-        self.services.insert(TypeId::of::<T>(), Box::new(service));
-    }
-
     pub fn get_service<T: 'static>(&self) -> Option<&T> {
         let id = TypeId::of::<T>();
         let svc = self.services.get(&id)?;
-        svc.downcast_ref().or_else(|| {
-            svc.downcast_ref::<LazyService<T>>()
-                .map(|service| &**service)
-        })
+        svc.downcast_ref()
     }
 }
 

@@ -56,6 +56,7 @@ pub struct AnalyzerJsPlugin {
     /// Extracted once at load time, since `query()` can be called from threads
     /// that haven't loaded the plugin yet.
     kinds: Vec<RawSyntaxKind>,
+    requires_semantic_model: bool,
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
@@ -95,6 +96,7 @@ impl AnalyzerJsPlugin {
             path: path.to_owned(),
             loaded: ThreadLocalCell::new(),
             kinds,
+            requires_semantic_model: plugin.rules.iter().any(|rule| rule.requires_semantic),
             includes: includes.map(Into::into),
         })
     }
@@ -116,6 +118,10 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
 
     fn query(&self) -> Vec<RawSyntaxKind> {
         self.kinds.clone()
+    }
+
+    fn requires_semantic_model(&self) -> bool {
+        self.requires_semantic_model
     }
 
     fn evaluate(

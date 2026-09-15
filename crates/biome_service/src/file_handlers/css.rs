@@ -718,6 +718,10 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let css_services = CssAnalyzerServices {
         language_db: Some(params.workspace_db.rc_language_db()),
+        parsed_source: match &params.parsed_source {
+            super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+            super::ParsedOrigin::Interned { .. } => None,
+        },
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -807,6 +811,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
         language_db: Some(workspace_db.rc_language_db()),
+        parsed_source: Some(parsed_source),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -867,6 +872,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// Applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyCssRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut parsed_source = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+        super::ParsedOrigin::Interned { .. } => None,
+    };
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
         return Ok(None);
@@ -906,6 +915,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         loop {
             let css_services = CssAnalyzerServices {
                 language_db: Some(params.workspace_db.rc_language_db()),
+                parsed_source: parsed_source.clone(),
                 file_source,
                 module_db: {
                     #[cfg(feature = "module_graph")]
@@ -942,6 +952,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     Some(tree) => tree,
                     None => return None,
                 };
+                parsed_source = None;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -964,6 +975,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     loop {
         let css_services = CssAnalyzerServices {
             language_db: Some(params.workspace_db.rc_language_db()),
+            parsed_source: parsed_source.clone(),
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]
@@ -1003,6 +1015,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 Some(tree) => tree,
                 None => return None,
             };
+            parsed_source = None;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1019,6 +1032,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     );
                     let parse = biome_css_parser::parse_css(&new_text, file_source, options);
                     tree = parse.tree();
+                    parsed_source = None;
                     continue;
                 }
             }
@@ -1031,6 +1045,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if params.collect_final_diagnostics {
         let css_services = CssAnalyzerServices {
             language_db: Some(params.workspace_db.rc_language_db()),
+            parsed_source,
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]

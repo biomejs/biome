@@ -222,6 +222,7 @@ impl AnalyzerServicesBuilder {
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
+        .with_parsed_source(parsed_source.into())
     }
 
     pub fn build_for_html_parse(

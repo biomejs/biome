@@ -1170,6 +1170,7 @@ fn debug_semantic_model(
 
 fn js_analyzer_services(
     root: &AnyJsRoot,
+    parsed_source: Option<&AnyParsedSource>,
     workspace_db: &WorkspaceDb,
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
@@ -1185,16 +1186,22 @@ fn js_analyzer_services(
         .with_project_layout(project_layout)
         .with_source_type(source_type);
 
-    services.with_language_db(workspace_db.rc_language_db())
+    let services = services.with_language_db(workspace_db.rc_language_db());
+    match parsed_source {
+        Some(source) => services.with_parsed_source(source.clone()),
+        None => services,
+    }
 }
 
 fn js_analyzer_services_for_fix(
     root: &AnyJsRoot,
+    parsed_source: Option<&AnyParsedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
+        parsed_source,
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
@@ -1249,6 +1256,10 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
 
     let services = js_analyzer_services(
         &tree,
+        match &params.parsed_source {
+            super::ParsedOrigin::Workspace(source) => Some(source),
+            super::ParsedOrigin::Interned { .. } => None,
+        },
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
@@ -1337,6 +1348,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = js_analyzer_services(
         &tree,
+        Some(&parsed_source),
         &workspace_db,
         #[cfg(feature = "module_graph")]
         workspace_db.rc_module_db(),
@@ -1394,6 +1406,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut parsed_source = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => Some(source),
+        super::ParsedOrigin::Interned { .. } => None,
+    };
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1438,7 +1454,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let services = js_analyzer_services_for_fix(&tree, &params, file_source);
+            let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
             let mut pending_actions = Vec::new();
 
@@ -1462,6 +1478,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     Some(tree) => tree,
                     None => return None,
                 };
+                parsed_source = None;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -1483,7 +1500,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let services = js_analyzer_services_for_fix(&tree, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
         let mut pending_actions = Vec::new();
 
@@ -1510,6 +1527,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 Some(tree) => tree,
                 None => return None,
             };
+            parsed_source = None;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1526,6 +1544,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     );
                     let parse = biome_js_parser::parse(&new_text, file_source, options);
                     tree = parse.tree();
+                    parsed_source = None;
                     continue;
                 }
             }
@@ -1536,7 +1555,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let services = js_analyzer_services_for_fix(&tree, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
         let (_, _) = analyze(
             &tree,
@@ -1808,6 +1827,7 @@ pub(crate) fn pull_diagnostics_and_actions(
     };
     let services = js_analyzer_services(
         &tree,
+        Some(&parsed_source),
         &workspace_db,
         #[cfg(feature = "module_graph")]
         workspace_db.rc_module_db(),

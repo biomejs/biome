@@ -53,6 +53,11 @@ pub trait AnalyzerPlugin: Debug + Send + Sync {
 
     fn query(&self) -> Vec<RawSyntaxKind>;
 
+    /// Whether evaluation requires the target language's semantic model service.
+    fn requires_semantic_model(&self) -> bool {
+        false
+    }
+
     fn evaluate(
         &self,
         node: AnySyntaxNode,

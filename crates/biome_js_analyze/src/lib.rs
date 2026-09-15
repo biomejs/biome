@@ -9,16 +9,17 @@ pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
-use crate::services::semantic::model_for_root;
+use crate::services::semantic::SemanticModelBuilderVisitor;
 use crate::services::typed::TypedModule;
 pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
+    AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, BatchPluginVisitor, ControlFlow, InspectMatcher, LanguageRoot,
     MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_aria::AriaRoles;
+use biome_db::AnyParsedSource;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_embeds::EmbeddedData;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
@@ -60,6 +61,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct JsAnalyzerServices {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
+    parsed_source: Option<AnyParsedSource>,
     embedded_data: Option<Arc<EmbeddedData>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
@@ -76,6 +78,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
         Self {
             module_db: Some(module_db),
             language_db: None,
+            parsed_source: None,
             embedded_data: None,
             project_layout,
             source_type,
@@ -88,6 +91,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
         Self {
             module_db: None,
             language_db: None,
+            parsed_source: None,
             embedded_data: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
@@ -108,6 +112,11 @@ impl JsAnalyzerServices {
 
     pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
         self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+        self.parsed_source = Some(source);
         self
     }
 
@@ -148,12 +157,26 @@ where
     let JsAnalyzerServices {
         module_db,
         language_db: embedded_db,
+        parsed_source,
         embedded_data,
         project_layout,
         source_type,
     } = services;
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+
+    let plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
+        .cloned()
+        .collect();
+    if filter.match_plugins()
+        && plugins.iter().any(|plugin| {
+            plugin.requires_semantic_model() && plugin.applies_to_file(&options.file_path)
+        })
+    {
+        visitors.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+    }
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -172,18 +195,12 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    let js_plugins: Vec<_> = plugins
-        .iter()
-        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
-        .cloned()
-        .collect();
-
-    if filter.match_plugins() && !js_plugins.is_empty() {
+    if filter.match_plugins() && !plugins.is_empty() {
         // SAFETY: All plugins have been verified to target JavaScript above.
         unsafe {
             analyzer.add_visitor(
                 Phases::Syntax,
-                Box::new(BatchPluginVisitor::new_unchecked(&js_plugins)),
+                Box::new(BatchPluginVisitor::new_unchecked(&plugins)),
             );
         }
     }
@@ -202,14 +219,9 @@ where
             .map(|module| TypedModule::new(db.clone(), module))
     });
 
-    services.insert_lazy_service({
-        let root = root.clone();
-        let path = file_path.clone();
-        let db = embedded_db
-            .clone()
-            .or_else(|| module_db.clone().map(|db| -> Rc<dyn LanguageDb> { db }));
-        move || model_for_root(db.as_deref(), &root, &path, source_type)
-    });
+    if let Some(parsed_source) = parsed_source {
+        services.insert_service(parsed_source);
+    }
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(TwSyntaxService::default());
