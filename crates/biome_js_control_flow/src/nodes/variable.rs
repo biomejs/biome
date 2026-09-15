@@ -1,12 +1,12 @@
 use biome_js_syntax::JsVariableStatement;
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct VariableVisitor;
+pub(crate) struct VariableVisitor;
 
 impl NodeVisitor for VariableVisitor {
     type Node = JsVariableStatement;

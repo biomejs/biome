@@ -202,7 +202,7 @@ fn semantic_results_match_the_native_model() {
 }
 
 #[test]
-fn semantic_rules_use_the_supplied_model_and_syntax_rules_keep_their_context() {
+fn semantic_rules_resolve_the_model_and_syntax_rules_keep_their_context() {
     let plugin_source = r#"import { ast, createMutation, defineRule, factory, semantic, registerDiagnostic } from "@biomejs/runtime/plugin";
         export const aSyntax = defineRule({
             query: ast("JS_REFERENCE_IDENTIFIER"),
@@ -241,9 +241,7 @@ fn semantic_rules_use_the_supplied_model_and_syntax_rules_keep_their_context() {
         },
         &options,
         &plugins,
-        JsAnalyzerServices::default()
-            .with_source_type(source_type)
-            .with_semantic_model(&model),
+        JsAnalyzerServices::default().with_source_type(source_type),
         |signal| {
             if let Some(diagnostic) = signal.diagnostic() {
                 messages.push(PrintDescription(&diagnostic).to_string());
@@ -320,7 +318,6 @@ fn analysis_range_filters_plugin_diagnostics_not_queries() {
         source_type,
         JsParserOptions::default(),
     );
-    let model = semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type));
     let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> = vec![Arc::new(Box::new(plugin))];
     let declaration_range = TextRange::new(TextSize::from(4), TextSize::from(9));
     let mut emitted = Vec::new();
@@ -334,9 +331,7 @@ fn analysis_range_filters_plugin_diagnostics_not_queries() {
         },
         &AnalyzerOptions::default(),
         &plugins,
-        JsAnalyzerServices::default()
-            .with_source_type(source_type)
-            .with_semantic_model(&model),
+        JsAnalyzerServices::default().with_source_type(source_type),
         |signal| {
             if let Some(diagnostic) = signal.diagnostic() {
                 emitted.push((

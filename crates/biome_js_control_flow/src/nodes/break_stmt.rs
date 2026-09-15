@@ -3,7 +3,7 @@ use std::any::TypeId;
 use biome_js_syntax::JsBreakStatement;
 use biome_rowan::{AstNode, SyntaxError, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     nodes::{
         BlockVisitor, DoWhileVisitor, ForInVisitor, ForOfVisitor, ForVisitor, SwitchVisitor,
@@ -12,7 +12,7 @@ use crate::services::control_flow::{
     visitor::{FunctionVisitor, NodeVisitor, StatementStack, VisitorAdapter},
 };
 
-pub(in crate::services::control_flow) struct BreakVisitor;
+pub(crate) struct BreakVisitor;
 
 impl NodeVisitor for BreakVisitor {
     type Node = JsBreakStatement;

@@ -1,3 +1,4 @@
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
@@ -20,8 +21,6 @@ use biome_rowan::{
 };
 use rustc_hash::FxHashSet;
 use std::option::Option;
-
-use super::semantic::SemanticModelBuilderVisitor;
 
 #[derive(Clone)]
 pub struct SemanticClassServices {
@@ -137,8 +136,8 @@ where
     type Language = JsLanguage;
     type Services = SemanticClassServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Syntax, || SyntaxClassMemberReferencesVisitor {});
         analyzer.add_visitor(Phases::Semantic, || SemanticClassMemberReferencesVisitor {});
     }

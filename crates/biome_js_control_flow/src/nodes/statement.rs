@@ -1,16 +1,16 @@
 use biome_js_syntax::{JsDebuggerStatement, JsEmptyStatement, JsExpressionStatement};
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
 declare_node_union! {
-    pub(in crate::services::control_flow) JsSimpleStatement = JsDebuggerStatement | JsEmptyStatement | JsExpressionStatement
+    pub(crate) JsSimpleStatement = JsDebuggerStatement | JsEmptyStatement | JsExpressionStatement
 }
 
-pub(in crate::services::control_flow) struct StatementVisitor;
+pub(crate) struct StatementVisitor;
 
 impl NodeVisitor for StatementVisitor {
     type Node = JsSimpleStatement;

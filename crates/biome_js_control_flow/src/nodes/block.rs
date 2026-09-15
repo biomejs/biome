@@ -2,12 +2,12 @@ use biome_control_flow::builder::BlockId;
 use biome_js_syntax::{JsBlockStatement, JsLabeledStatement, JsSyntaxToken};
 use biome_rowan::{AstNode, SyntaxResult};
 
-use crate::services::control_flow::{
+use crate::{
     FunctionBuilder,
     visitor::{NodeVisitor, StatementStack},
 };
 
-pub(in crate::services::control_flow) struct BlockVisitor {
+pub(crate) struct BlockVisitor {
     /// If this block has a label, this contains the label token and the ID of
     /// the break block to use as a jump target in `BreakVisitor`
     pub(super) break_block: Option<(JsSyntaxToken, BlockId)>,
