@@ -351,9 +351,25 @@ pub fn lower_global_types(
         ("Date", "DATE_ID_GLOBAL_TYPE_ID", "GLOBAL_DATE_ID"),
         ("RegExp", "REGEXP_ID_GLOBAL_TYPE_ID", "GLOBAL_REGEXP_ID"),
     ] {
-        if manifest.global_group(name).is_none() {
+        let Some(group) = manifest.global_group(name) else {
             continue;
-        }
+        };
+        let constructors = if matches!(name, "Map" | "Set" | "WeakMap" | "Date")
+            && group.has_role(GlobalDeclarationRole::Value)
+        {
+            let constructor_name =
+                resolve_constructor_name(name, group.declarations(), &mut source_cache)?;
+            Some(
+                manifest
+                    .global_group(constructor_name.text())
+                    .with_context(|| {
+                        format!("{name} references missing constructor {constructor_name}")
+                    })?
+                    .declarations(),
+            )
+        } else {
+            None
+        };
         let index = if let Some(index) = globals.iter().position(|global| global.name() == name) {
             index
         } else {
@@ -372,8 +388,13 @@ pub fn lower_global_types(
         let LoweredTypeData::Class(class) = &mut globals[index].data else {
             bail!("expected class data for {name}");
         };
-        globals[index].local_types =
-            declarations::lower_class_members(manifest, source_files, class, reference)?;
+        globals[index].local_types = declarations::lower_class_members(
+            manifest,
+            source_files,
+            class,
+            reference,
+            constructors,
+        )?;
     }
 
     declarations::lower_iterator_globals(manifest, source_files, &mut globals)?;
@@ -1621,7 +1642,7 @@ impl SelectedSymbolMember {
     }
 }
 
-/// Lowers selected Symbol constructor members and the predefined disposable symbol helpers.
+/// Lowers selected Symbol constructor members and their predefined symbol identities.
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -1666,8 +1687,17 @@ fn lower_symbol_globals(
         &[
             ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
             ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+            ("iterator", "GLOBAL_SYMBOL_ITERATOR_ID"),
         ],
     )?;
+    if class.member("iterator").is_some() {
+        globals.push(LoweredGlobal {
+            local_types: Box::default(),
+            name: Text::from("Symbol.iterator"),
+            id_constant: "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
+            data: LoweredTypeData::Symbol,
+        });
+    }
     globals.push(LoweredGlobal {
         local_types,
         name: class.name.clone(),
@@ -2529,8 +2559,8 @@ struct ComputedMemberName {
     key_reference: LoweredTypeReference,
 }
 
-/// Lowers a `[Symbol.dispose]` / `[Symbol.asyncDispose]` computed member name into its display
-/// name and well-known-symbol key reference. Bails on any non-well-known or non-`Symbol` key.
+/// Resolves computed dispose, asyncDispose, and iterator keys to predefined symbol identities.
+/// Other computed expressions and Symbol properties return errors.
 fn lower_symbol_computed_member_name(name: AnyJsObjectMemberName) -> Result<ComputedMemberName> {
     let AnyJsObjectMemberName::JsComputedMemberName(name) = name else {
         bail!("expected computed symbol member name")
@@ -2557,6 +2587,10 @@ fn lower_symbol_computed_member_name(name: AnyJsObjectMemberName) -> Result<Comp
         "asyncDispose" => Ok(ComputedMemberName {
             name: Text::from("[Symbol.asyncDispose]"),
             key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+        }),
+        "iterator" => Ok(ComputedMemberName {
+            name: Text::from("[Symbol.iterator]"),
+            key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ITERATOR_ID"),
         }),
         name => bail!("unsupported Symbol computed member {name}"),
     }

@@ -327,7 +327,7 @@ fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
         file.bytes = format!(
             "interface WeakMap<{key} extends boolean, {value}> {{ {member_name}(key: {key}): {value} | undefined; }}
              interface WeakMap<{key} extends boolean, {value}> {{ extra?: boolean; chain(): this; readonly [Symbol.toStringTag]: Unsupported; }}
-             declare var WeakMap: UnsupportedConstructor;"
+             "
         ).into_bytes();
         let manifest = build_global_manifest(collect(&file).records);
         let lowered = lower_global_types(&manifest, &[file])?;
@@ -846,10 +846,6 @@ fn iterator_declarations_reject_unsupported_dependencies_and_shapes() -> Result<
         (
             "interface Iterator<T> { next(...[x]: [value?: T]): T; }",
             "tuple elements are not supported",
-        ),
-        (
-            "interface Iterator<T> { [Symbol.iterator](): T; }",
-            "unsupported computed",
         ),
         (
             "interface Iterator<T> {} interface Iterator<T> {}",
