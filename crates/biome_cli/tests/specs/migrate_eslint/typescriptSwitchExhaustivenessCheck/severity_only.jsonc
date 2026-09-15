@@ -1,0 +1,22 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/switch-exhaustiveness-check": "error"
+    },
+    "overrides": [
+      {
+        "files": ["*.test.ts"],
+        "rules": {
+          "@typescript-eslint/switch-exhaustiveness-check": ["warn"]
+        }
+      },
+      {
+        "files": ["*.js"],
+        "rules": {
+          "@typescript-eslint/switch-exhaustiveness-check": "off"
+        }
+      }
+    ]
+  }
+}

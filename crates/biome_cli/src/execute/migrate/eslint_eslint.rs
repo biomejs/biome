@@ -609,6 +609,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
                             }
                         }
+                        "@typescript-eslint/switch-exhaustiveness-check" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
+                            }
+                        }
                         "svelte/no-unnecessary-state-wrap" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
@@ -880,6 +885,9 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    TypeScriptSwitchExhaustivenessCheck(
+        RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
+    ),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
@@ -912,6 +920,9 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::TypeScriptSwitchExhaustivenessCheck(_) => {
+                Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
+            }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }

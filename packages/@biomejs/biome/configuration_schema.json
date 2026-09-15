@@ -16155,6 +16155,12 @@
 		},
 		"UseExhaustiveSwitchCasesOptions": {
 			"type": "object",
+			"properties": {
+				"requireExplicitCase": {
+					"description": "Require a `case` for each value in the union, even when the switch has a `default` clause.\nDefault: `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseExpectConfiguration": {
