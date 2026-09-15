@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// </template>
     /// ```
     pub NoVueUndeclaredDirectives {
-        version: "next",
+        version: "2.5.14",
         name: "noVueUndeclaredDirectives",
         language: "html",
         recommended: false,
