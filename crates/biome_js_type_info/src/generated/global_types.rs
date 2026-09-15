@@ -300,15 +300,15 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("global")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("ignoreCase")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("multiline")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("lastIndex")),
@@ -316,7 +316,7 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("compile")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
         ]),
     }));
@@ -341,71 +341,71 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::CallSignature,
-                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("for")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("keyFor")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "hasInstance",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "isConcatSpreadable",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("match")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("replace")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("search")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("species")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("split")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(16)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "toPrimitive",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(17)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "toStringTag",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(18)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "unscopables",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static(
                     "asyncIterator",
                 )),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(20)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("dispose")),
@@ -689,11 +689,11 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("set")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
@@ -726,7 +726,7 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("size")),
@@ -754,11 +754,11 @@ pub(crate) fn set_generated_global_type_data(
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("has")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("set")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
     }));
@@ -878,28 +878,28 @@ pub(crate) fn set_generated_global_type_data(
         type_parameters: Box::new([
             crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-            crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+            crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
         ]),
         extends: Box::default(),
         members: Box::new([
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("next")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedOptional(biome_rowan::Text::new_static("return")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
             },
             crate::TypeMember {
                 kind: crate::TypeMemberKind::NamedOptional(biome_rowan::Text::new_static("throw")),
-                ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
             },
         ]),
     }));
     builder.set_type_data(crate::globals::ITERATOR_ID_GLOBAL_TYPE_ID, data);
 }
 
-pub(crate) static REGEXP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
+pub(crate) static REGEXP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 4]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Boolean,
@@ -919,9 +919,6 @@ pub(crate) static REGEXP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> 
                     crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 ),
             })),
-            crate::TypeData::Boolean,
-            crate::TypeData::Boolean,
-            crate::TypeData::Boolean,
             crate::TypeData::ThisKeyword,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -942,12 +939,12 @@ pub(crate) static REGEXP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> 
                     }),
                 ]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
                 ),
             })),
         ]
     });
-pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 21]> =
+pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::Symbol,
@@ -955,7 +952,6 @@ pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 21]>
                 crate::globals::GLOBAL_STRING_ID.into(),
                 crate::globals::GLOBAL_NUMBER_ID.into(),
             ])))),
-            crate::TypeData::Symbol,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -969,10 +965,9 @@ pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 21]>
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 ),
             })),
-            crate::TypeData::Symbol,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -986,14 +981,13 @@ pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 21]>
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                 ),
             })),
-            crate::TypeData::Symbol,
             crate::TypeData::Undefined,
             crate::TypeData::Union(Box::new(crate::Union(Box::new([
                 crate::globals::GLOBAL_STRING_ID.into(),
-                crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
             ])))),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
@@ -1002,29 +996,18 @@ pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 21]>
                 parameters: Box::new([crate::FunctionParameter::Named(
                     crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("sym"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
                         is_optional: false,
                         is_rest: false,
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                 ),
             })),
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
-            crate::TypeData::Symbol,
         ]
     });
-pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12]> =
+pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::ObjectKeyword,
@@ -1076,7 +1059,6 @@ pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12
                     crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
                 ),
             })),
-            crate::TypeData::Boolean,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -1090,7 +1072,7 @@ pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
                 ),
             })),
             crate::TypeData::ThisKeyword,
@@ -1113,12 +1095,12 @@ pub(crate) static WEAK_MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12
                     }),
                 ]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
                 ),
             })),
         ]
     });
-pub(crate) static SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12]> =
+pub(crate) static SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -1218,7 +1200,6 @@ pub(crate) static SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12]> =
                 ]),
                 return_type: crate::ReturnType::Type(crate::globals::GLOBAL_VOID_ID.into()),
             })),
-            crate::TypeData::Boolean,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -1232,12 +1213,12 @@ pub(crate) static SET_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 12]> =
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
                 ),
             })),
         ]
     });
-pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]> =
+pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -1349,7 +1330,6 @@ pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]> =
                     crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
                 ),
             })),
-            crate::TypeData::Boolean,
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -1363,7 +1343,7 @@ pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]> =
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
                 ),
             })),
             crate::TypeData::ThisKeyword,
@@ -1386,7 +1366,7 @@ pub(crate) static MAP_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 16]> =
                     }),
                 ]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
                 ),
             })),
         ]
@@ -1968,7 +1948,7 @@ pub(crate) static ITERATOR_RESULT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeD
             ])))),
         ]
     });
-pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15]> =
+pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> =
     std::sync::LazyLock::new(|| {
         [
             crate::TypeData::from(crate::GenericTypeParameter {
@@ -1982,22 +1962,21 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15
                 constraint: crate::TypeReference::unknown(),
                 default: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             }),
-            crate::TypeData::AnyKeyword,
             crate::TypeData::from(crate::GenericTypeParameter {
                 name: biome_rowan::Text::new_static("TNext"),
                 constraint: crate::TypeReference::unknown(),
-                default: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+                default: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             }),
             crate::TypeData::from(crate::Tuple(Box::new([]))),
             crate::TypeData::from(crate::Tuple(Box::new([crate::TupleElementType {
-                ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
                 name: None,
                 is_optional: false,
                 is_rest: false,
             }]))),
             crate::TypeData::Union(Box::new(crate::Union(Box::new([
+                crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
                 crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
             ])))),
             crate::TypeData::instance_of(crate::TypeInstance {
                 ty: crate::globals::GLOBAL_ITERATOR_RESULT_ID.into(),
@@ -2013,22 +1992,15 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15
                 parameters: Box::new([crate::FunctionParameter::Pattern(
                     crate::PatternFunctionParameter {
                         bindings: Box::default(),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
                         is_optional: false,
                         is_rest: true,
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
                 ),
             })),
-            crate::TypeData::instance_of(crate::TypeInstance {
-                ty: crate::globals::GLOBAL_ITERATOR_RESULT_ID.into(),
-                type_parameters: Box::new([
-                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-                ]),
-            }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -2042,17 +2014,9 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
                 ),
             })),
-            crate::TypeData::AnyKeyword,
-            crate::TypeData::instance_of(crate::TypeInstance {
-                ty: crate::globals::GLOBAL_ITERATOR_RESULT_ID.into(),
-                type_parameters: Box::new([
-                    crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
-                ]),
-            }),
             crate::TypeData::Function(Box::new(crate::Function {
                 is_async: false,
                 type_parameters: Box::default(),
@@ -2060,13 +2024,13 @@ pub(crate) static ITERATOR_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 15
                 parameters: Box::new([crate::FunctionParameter::Named(
                     crate::NamedFunctionParameter {
                         name: biome_rowan::Text::new_static("e"),
-                        ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                         is_optional: true,
                         is_rest: false,
                     },
                 )]),
                 return_type: crate::ReturnType::Type(
-                    crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
                 ),
             })),
         ]

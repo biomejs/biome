@@ -136,7 +136,11 @@ impl DeclarationLowerer<'_> {
         Ok(LoweredTypeReference::Local(index))
     }
 
+    /// Reuses structurally equal entries without changing existing local indices.
     fn register(&mut self, data: LoweredTypeData) -> LoweredTypeReference {
+        if let Some(index) = self.types.iter().position(|ty| ty.as_ref() == Some(&data)) {
+            return LoweredTypeReference::Local(index);
+        }
         let index = self.types.len();
         self.types.push(Some(data));
         LoweredTypeReference::Local(index)
@@ -856,6 +860,77 @@ mod tests {
     };
 
     #[test]
+    fn repeated_local_types_share_references() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "repeated.d.ts".to_owned(),
+            bytes: b"
+                interface Node {
+                    first: symbol;
+                    second: symbol;
+                    maybe: symbol | undefined;
+                    again: symbol | undefined;
+                    callback: (value: symbol) => symbol | undefined;
+                    repeatedCallback: (value: symbol) => symbol | undefined;
+                    renamedParameter: (other: symbol) => symbol | undefined;
+                    next: Node;
+                }
+            "
+            .to_vec(),
+        };
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_interfaces(&manifest, &[file], &["Node"])?;
+        let node_reference = lowered.interface_reference("Node").unwrap();
+        let LoweredTypeReference::Local(index) = node_reference else {
+            panic!("expected local interface")
+        };
+        let LoweredTypeData::Interface(node) = &lowered.types()[index] else {
+            panic!("expected interface")
+        };
+        let member_type = |name| node.member(name).unwrap().type_reference();
+        for (first, repeated) in [
+            ("first", "second"),
+            ("maybe", "again"),
+            ("callback", "repeatedCallback"),
+        ] {
+            assert_eq!(member_type(first), member_type(repeated));
+        }
+        assert_ne!(member_type("callback"), member_type("renamedParameter"));
+        assert_eq!(member_type("next"), &node_reference);
+        let LoweredTypeReference::Local(callback_index) = member_type("callback") else {
+            panic!("expected local function")
+        };
+        let LoweredTypeData::Function(callback) = &lowered.types()[*callback_index] else {
+            panic!("expected function")
+        };
+        assert_eq!(
+            callback.parameters()[0].type_reference(),
+            member_type("first")
+        );
+        assert_eq!(callback.return_type(), member_type("maybe"));
+        for dependency in [
+            callback.parameters()[0].type_reference(),
+            callback.return_type(),
+        ] {
+            let LoweredTypeReference::Local(index) = dependency else {
+                panic!("expected local dependency")
+            };
+            assert!(index < callback_index);
+        }
+        for (index, ty) in lowered.types().iter().enumerate() {
+            assert!(
+                !lowered.types()[..index].contains(ty),
+                "duplicate type {ty:?}"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
     fn constructor_members_translate_without_symbol_selection() -> Result<()> {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
         for (owner, constructor, method, scalar, expected) in [
@@ -973,7 +1048,7 @@ mod tests {
         let file = DiscoveredFile {
             path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
             repo_relative: "owners.d.ts".to_owned(),
-            bytes: b"interface First { value: true; } interface Second { value: false; } interface Empty {}".to_vec(),
+            bytes: b"interface First { value: true; } interface Second { value: true; } interface Empty {}".to_vec(),
         };
         let manifest = build_global_manifest(collect(&file).records);
         let mut globals = Vec::new();
