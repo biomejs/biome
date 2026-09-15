@@ -1139,6 +1139,20 @@ impl<'db> ResolutionCtx<'db, '_> {
         let constructed_ty = constructor
             .and_then(|constructor| constructor.return_type(self.db))
             .unwrap_or(class_ty);
+        // Explicit class arguments replace the arguments of a declared self-instance return.
+        // Wrapping that return instead would treat its concrete arguments as generic parameters.
+        let constructed_ty = if !explicit_type_parameters.is_empty()
+            && let InferredTypeData::InstanceOf(instance) =
+                self.resolve_inferred_type(constructed_ty)
+            && self
+                .resolve_inferred_type(instance.ty(self.db))
+                .expand_canonical_global(self.db)
+                == class_ty
+        {
+            class_ty
+        } else {
+            constructed_ty
+        };
         let type_parameters = if !explicit_type_parameters.is_empty() {
             explicit_type_parameters
         } else if constructed_ty == class_ty {

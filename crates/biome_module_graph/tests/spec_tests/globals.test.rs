@@ -429,3 +429,70 @@ fn iterator_results_infer_yield_and_completion_values() {
     let ty = inferred_binding_ty_by_name(&db, module, inferred, "dependentValue").unwrap();
     assert!(is_inferred_string(&db, inferred.resolve_type(&db, ty)));
 }
+
+#[test]
+fn iterable_annotations_resolve_declared_generic_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export function retain(values: Iterable<number, string>) { return values; }
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let value = inferred_function_return_ty_by_name(&db, module, inferred, "retain").unwrap();
+    let InferredTypeData::InstanceOf(instance) = value else {
+        panic!("expected Iterable instance, got {value:?}")
+    };
+    let InferredTypeData::Interface(interface) = instance.ty(&db) else {
+        panic!("expected declared interface")
+    };
+    assert_eq!(interface.name(&db).text(), "Iterable");
+    assert!(is_inferred_number(&db, instance.type_parameters(&db)[0]));
+    assert!(is_inferred_string(&db, instance.type_parameters(&db)[1]));
+}
+
+#[test]
+fn lowered_constructors_preserve_explicit_collection_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const mapValue = new Map<string, number>().get("key");
+        export const entryValue = new Map<string, number>([["key", 1]]).get("key");
+        const createMap = Map;
+        export const aliasedValue = new createMap<number, string>().get(1);
+        declare const key: object;
+        export const weakValue = new WeakMap<object, string>().get(key);
+        export const setHas = new Set<string>().has("key");
+        export const time = new Date(0).getTime();
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for name in ["mapValue", "entryValue"] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = inferred.resolve_type(&db, value);
+        assert!(
+            contains_inferred_number(&db, value),
+            "{name}: {}",
+            format_inferred_type(&db, value)
+        );
+    }
+    for name in ["aliasedValue", "weakValue"] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = inferred.resolve_type(&db, value);
+        assert!(
+            contains_inferred_string(&db, value),
+            "{name}: {}",
+            format_inferred_type(&db, value)
+        );
+    }
+    let time = inferred_binding_ty_by_name(&db, module, inferred, "time").unwrap();
+    assert!(is_inferred_number(&db, inferred.resolve_type(&db, time)));
+    let has = inferred_binding_ty_by_name(&db, module, inferred, "setHas").unwrap();
+    assert!(is_inferred_boolean(&db, inferred.resolve_type(&db, has)));
+}
