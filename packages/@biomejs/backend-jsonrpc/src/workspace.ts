@@ -10998,6 +10998,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 */
 				event_handler: boolean;
 				/**
+	* Whether this snippet is from a class-related attribute
+(e.g. :class="...") 
+	 */
+				is_class_attribute: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
@@ -11017,6 +11022,11 @@ extracts `<script>` content or treats the file as a standalone JS/TS
 module. 
 	 */
 				file_kind: SvelteFileKind;
+				/**
+	* Whether this snippet is from a class attribute
+(e.g. class={...}) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  };
 export type Language =

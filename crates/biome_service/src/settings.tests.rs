@@ -94,6 +94,7 @@ fn vue_template_expressions_get_instance_properties() {
 
     let settings = Settings::default();
     let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+        is_class_attribute: false,
         setup: false,
         is_source: false,
         event_handler: false,
@@ -114,6 +115,7 @@ fn vue_event_handlers_get_dollar_event() {
     let settings = Settings::default();
     let event_handler_source =
         JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: false,
             is_source: false,
             event_handler: true,

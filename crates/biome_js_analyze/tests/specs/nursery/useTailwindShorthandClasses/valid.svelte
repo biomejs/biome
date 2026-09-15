@@ -9,6 +9,4 @@
 <div class={["truncate", selected && "hover:size-6"]}></div>
 <div class={{ "mx-3": active }}></div>
 
-<!-- valid because this is unsupported -->
 <div class={`border ${extra}`}></div>
-<div class={`border-x border-y ${extra}`}></div>

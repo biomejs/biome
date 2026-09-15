@@ -538,6 +538,7 @@ mod tests {
     #[test]
     fn comment_only_template_expression_is_an_error_outside_astro() {
         let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: false,
             is_source: false,
             event_handler: false,

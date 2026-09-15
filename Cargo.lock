@@ -2048,6 +2048,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_html_syntax",
  "biome_js_syntax",
+ "biome_languages",
  "biome_parser",
  "biome_rowan",
  "biome_tailwind_factory",
