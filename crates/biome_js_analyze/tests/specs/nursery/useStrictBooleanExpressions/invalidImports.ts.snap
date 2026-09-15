@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImports.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import { readNumber, assert, type OptionalNumber } from "./exports";
+if (readNumber()) {}
+function check(value: OptionalNumber) {
+    if (value) {}
+    assert(value);
+}
+
+```
+
+# Diagnostics
+```
+invalidImports.ts:3:5 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    1 │ // should generate diagnostics
+    2 │ import { readNumber, assert, type OptionalNumber } from "./exports";
+  > 3 │ if (readNumber()) {}
+      │     ^^^^^^^^^^^^
+    4 │ function check(value: OptionalNumber) {
+    5 │     if (value) {}
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidImports.ts:5:9 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    3 │ if (readNumber()) {}
+    4 │ function check(value: OptionalNumber) {
+  > 5 │     if (value) {}
+      │         ^^^^^
+    6 │     assert(value);
+    7 │ }
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidImports.ts:6:12 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    4 │ function check(value: OptionalNumber) {
+    5 │     if (value) {}
+  > 6 │     assert(value);
+      │            ^^^^^
+    7 │ }
+    8 │ 
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

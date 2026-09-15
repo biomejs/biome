@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: controlFlow.ts
+---
+# Input
+```ts
+// should generate diagnostics
+function check(value: number | null) {
+    if (value !== null) {
+        if (value) {}
+    }
+}
+
+```
+
+# Diagnostics
+```
+controlFlow.ts:4:13 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This condition uses a nullable number.
+  
+    2 │ function check(value: number | null) {
+    3 │     if (value !== null) {
+  > 4 │         if (value) {}
+      │             ^^^^^
+    5 │     }
+    6 │ }
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
