@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoJsonUnsafeValues {
-        version: "next",
+        version: "2.5.14",
         name: "noJsonUnsafeValues",
         language: "json",
         recommended: true,

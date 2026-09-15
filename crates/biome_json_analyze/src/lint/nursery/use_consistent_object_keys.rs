@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentObjectKeys {
-        version: "next",
+        version: "2.5.14",
         name: "useConsistentObjectKeys",
         language: "json",
         recommended: true,

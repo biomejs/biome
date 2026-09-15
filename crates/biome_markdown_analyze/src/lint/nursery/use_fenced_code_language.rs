@@ -77,7 +77,7 @@ declare_lint_rule! {
     /// ````
     ///
     pub UseFencedCodeLanguage {
-        version: "next",
+        version: "2.5.14",
         name: "useFencedCodeLanguage",
         language: "md",
         sources: &[RuleSource::MarkdownLint("md040", "fenced-code-language").same()],
