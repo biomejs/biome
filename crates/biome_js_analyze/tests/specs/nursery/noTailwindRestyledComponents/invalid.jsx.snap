@@ -1,0 +1,482 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<Button className="rounded-none" />;
+<Button class="text-sm font-bold" />;
+<UI.Button className="hover:!rounded-none border-t-2" />;
+<Button className="dark:rounded-none!" ></Button>;
+<my-button className="font-bold shadow" />;
+<Button className={"font-bold"} />;
+<Button className={active ? "text-sm" : "text-lg"} />;
+<Button className={active && "opacity-50"} />;
+<Button className={cn("mt-4", active && "rounded-none")} />;
+<Button className={clsx({ "rounded-none": active, shadow: active })} />;
+<Button className={`mt-4 ${extra} text-sm`} />;
+<Button className="[font-size:14px] hover:[border-radius:0]" />;
+<Button className="[&>span]:bg-[url('a:b')]" />;
+<Button className="café rounded-none" />;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:2:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Button className="rounded-none" />;
+      │                    ^^^^^^^^^^^^
+    3 │ <Button class="text-sm font-bold" />;
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:16 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <Button className="rounded-none" />;
+  > 3 │ <Button class="text-sm font-bold" />;
+      │                ^^^^^^^
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:24 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <Button className="rounded-none" />;
+  > 3 │ <Button class="text-sm font-bold" />;
+      │                        ^^^^^^^^^
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className="rounded-none" />;
+    3 │ <Button class="text-sm font-bold" />;
+  > 4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+      │                       ^^^^^^^^^^^^^^^^^^^
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+    6 │ <my-button className="font-bold shadow" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:43 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className="rounded-none" />;
+    3 │ <Button class="text-sm font-bold" />;
+  > 4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+      │                                           ^^^^^^^^^^
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+    6 │ <my-button className="font-bold shadow" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    3 │ <Button class="text-sm font-bold" />;
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+  > 5 │ <Button className="dark:rounded-none!" ></Button>;
+      │                    ^^^^^^^^^^^^^^^^^^
+    6 │ <my-button className="font-bold shadow" />;
+    7 │ <Button className={"font-bold"} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+  > 6 │ <my-button className="font-bold shadow" />;
+      │                       ^^^^^^^^^
+    7 │ <Button className={"font-bold"} />;
+    8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:33 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    4 │ <UI.Button className="hover:!rounded-none border-t-2" />;
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+  > 6 │ <my-button className="font-bold shadow" />;
+      │                                 ^^^^^^
+    7 │ <Button className={"font-bold"} />;
+    8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:21 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    5 │ <Button className="dark:rounded-none!" ></Button>;
+    6 │ <my-button className="font-bold shadow" />;
+  > 7 │ <Button className={"font-bold"} />;
+      │                     ^^^^^^^^^
+    8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+    9 │ <Button className={active && "opacity-50"} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:30 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     6 │ <my-button className="font-bold shadow" />;
+     7 │ <Button className={"font-bold"} />;
+   > 8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+       │                              ^^^^^^^
+     9 │ <Button className={active && "opacity-50"} />;
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:42 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     6 │ <my-button className="font-bold shadow" />;
+     7 │ <Button className={"font-bold"} />;
+   > 8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+       │                                          ^^^^^^^
+     9 │ <Button className={active && "opacity-50"} />;
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:31 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     7 │ <Button className={"font-bold"} />;
+     8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+   > 9 │ <Button className={active && "opacity-50"} />;
+       │                               ^^^^^^^^^^
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+    11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:42 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     8 │ <Button className={active ? "text-sm" : "text-lg"} />;
+     9 │ <Button className={active && "opacity-50"} />;
+  > 10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+       │                                          ^^^^^^^^^^^^
+    11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:28 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     9 │ <Button className={active && "opacity-50"} />;
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+  > 11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+       │                            ^^^^^^^^^^^^
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+    13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:11:52 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     9 │ <Button className={active && "opacity-50"} />;
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+  > 11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+       │                                                    ^^^^^^
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+    13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:35 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    10 │ <Button className={cn("mt-4", active && "rounded-none")} />;
+    11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+  > 12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+       │                                   ^^^^^^^
+    13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+    14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+  > 13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+       │                    ^^^^^^^^^^^^^^^^
+    14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+    15 │ <Button className="café rounded-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:37 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    11 │ <Button className={clsx({ "rounded-none": active, shadow: active })} />;
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+  > 13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+       │                                     ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+    15 │ <Button className="café rounded-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    12 │ <Button className={`mt-4 ${extra} text-sm`} />;
+    13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+  > 14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <Button className="café rounded-none" />;
+    16 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:25 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    13 │ <Button className="[font-size:14px] hover:[border-radius:0]" />;
+    14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+  > 15 │ <Button className="café rounded-none" />;
+       │                         ^^^^^^^^^^^^
+    16 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

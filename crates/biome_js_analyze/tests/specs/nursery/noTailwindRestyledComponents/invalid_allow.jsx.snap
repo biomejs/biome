@@ -1,0 +1,293 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_allow.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<Other className="rounded-none shadow-lg" />;
+<Button className="text-sm" />;
+<Card className="rounded-none hover:shadow-lg" />;
+<Button className="hover:font-bold" />;
+<Empty className="rounded-none" />;
+<Card className="!shadow-lg" />;
+<Spacing className="bg-red-500" />;
+<Color className="p-4" />;
+<Color className="stroke-2" />;
+<Button className="stroke-none" />;
+
+```
+
+# Diagnostics
+```
+invalid_allow.jsx:2:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Other className="rounded-none shadow-lg" />;
+      │                   ^^^^^^^^^^^^
+    3 │ <Button className="text-sm" />;
+    4 │ <Card className="rounded-none hover:shadow-lg" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:2:32 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <Other className="rounded-none shadow-lg" />;
+      │                                ^^^^^^^^^
+    3 │ <Button className="text-sm" />;
+    4 │ <Card className="rounded-none hover:shadow-lg" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:3:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <Other className="rounded-none shadow-lg" />;
+  > 3 │ <Button className="text-sm" />;
+      │                    ^^^^^^^
+    4 │ <Card className="rounded-none hover:shadow-lg" />;
+    5 │ <Button className="hover:font-bold" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:4:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Other className="rounded-none shadow-lg" />;
+    3 │ <Button className="text-sm" />;
+  > 4 │ <Card className="rounded-none hover:shadow-lg" />;
+      │                  ^^^^^^^^^^^^
+    5 │ <Button className="hover:font-bold" />;
+    6 │ <Empty className="rounded-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:4:31 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Other className="rounded-none shadow-lg" />;
+    3 │ <Button className="text-sm" />;
+  > 4 │ <Card className="rounded-none hover:shadow-lg" />;
+      │                               ^^^^^^^^^^^^^^^
+    5 │ <Button className="hover:font-bold" />;
+    6 │ <Empty className="rounded-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:5:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    3 │ <Button className="text-sm" />;
+    4 │ <Card className="rounded-none hover:shadow-lg" />;
+  > 5 │ <Button className="hover:font-bold" />;
+      │                    ^^^^^^^^^^^^^^^
+    6 │ <Empty className="rounded-none" />;
+    7 │ <Card className="!shadow-lg" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:6:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    4 │ <Card className="rounded-none hover:shadow-lg" />;
+    5 │ <Button className="hover:font-bold" />;
+  > 6 │ <Empty className="rounded-none" />;
+      │                   ^^^^^^^^^^^^
+    7 │ <Card className="!shadow-lg" />;
+    8 │ <Spacing className="bg-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:7:18 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    5 │ <Button className="hover:font-bold" />;
+    6 │ <Empty className="rounded-none" />;
+  > 7 │ <Card className="!shadow-lg" />;
+      │                  ^^^^^^^^^^
+    8 │ <Spacing className="bg-red-500" />;
+    9 │ <Color className="p-4" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:8:21 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     6 │ <Empty className="rounded-none" />;
+     7 │ <Card className="!shadow-lg" />;
+   > 8 │ <Spacing className="bg-red-500" />;
+       │                     ^^^^^^^^^^
+     9 │ <Color className="p-4" />;
+    10 │ <Color className="stroke-2" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:9:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     7 │ <Card className="!shadow-lg" />;
+     8 │ <Spacing className="bg-red-500" />;
+   > 9 │ <Color className="p-4" />;
+       │                   ^^^
+    10 │ <Color className="stroke-2" />;
+    11 │ <Button className="stroke-none" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:10:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     8 │ <Spacing className="bg-red-500" />;
+     9 │ <Color className="p-4" />;
+  > 10 │ <Color className="stroke-2" />;
+       │                   ^^^^^^^^
+    11 │ <Button className="stroke-none" />;
+    12 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:11:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+     9 │ <Color className="p-4" />;
+    10 │ <Color className="stroke-2" />;
+  > 11 │ <Button className="stroke-none" />;
+       │                    ^^^^^^^^^^^
+    12 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
