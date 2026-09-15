@@ -5791,6 +5791,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoTailwindRestyledComponentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindRestyledComponentsOptions" }
+			]
+		},
+		"NoTailwindRestyledComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"allow": {
+					"description": "Additional component-specific exceptions. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/TailwindComponentAllowance" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7247,6 +7264,13 @@
 					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindRestyledComponents": {
+					"description": "Disallow Tailwind utilities that restyle components at their call sites.\nSee https://biomejs.dev/linter/rules/no-tailwind-restyled-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindRestyledComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10767,6 +10791,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindRestyledComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindRestyledComponentsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15409,6 +15442,37 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"TailwindAllowedComponents": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"TailwindAppearanceCategory": {
+			"type": "string",
+			"enum": ["color", "typography", "spacing", "shape", "effects", "motion"]
+		},
+		"TailwindComponentAllowance": {
+			"type": "object",
+			"properties": {
+				"categories": {
+					"description": "Categories allowed on the matching components. Defaults to an empty list.",
+					"type": "array",
+					"items": { "$ref": "#/$defs/TailwindAppearanceCategory" }
+				},
+				"classes": {
+					"description": "Exact classes, including variants and modifiers. Defaults to an empty list.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"components": {
+					"description": "An exact component name, an array of names, or `\"*\"` for all components.",
+					"$ref": "#/$defs/TailwindAllowedComponents"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["components"]
 		},
 		"TestFunctionKind": {
 			"description": "The function to use for tests",
