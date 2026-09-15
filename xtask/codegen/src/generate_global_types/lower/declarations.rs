@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::*;
 
@@ -48,6 +48,7 @@ pub fn lower_interfaces(
         types: Vec::new(),
         class_scope: None,
         declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
         predefined_declarations: false,
     };
     for name in names {
@@ -80,6 +81,9 @@ struct DeclarationLowerer<'a> {
     types: Vec<Option<LoweredTypeData>>,
     class_scope: Option<ClassScope>,
     declaration_parameters: BTreeMap<Text, LoweredTypeReference>,
+    // Local constraints must precede their users in the runtime table; unbound names
+    // must not fall through to global lookup while those constraints are lowered.
+    unbound_parameters: BTreeSet<Text>,
     predefined_declarations: bool,
 }
 
@@ -265,6 +269,23 @@ impl DeclarationLowerer<'_> {
                 };
                 let name = name.value_token()?;
                 let name = name.text_trimmed();
+                if self.unbound_parameters.contains(name) {
+                    bail!("type parameter {name} requires a forward or recursive local reference");
+                }
+                if name == "WeakKey"
+                    && reference.type_arguments().is_none()
+                    && !self.declaration_parameters.contains_key(name)
+                    && !self
+                        .class_scope
+                        .as_ref()
+                        .is_some_and(|scope| scope.parameters.contains_key(name))
+                    && (self.class_scope.is_some() || self.predefined_declarations)
+                {
+                    // TODO: Derive WeakKey from WeakKeyTypes[keyof WeakKeyTypes] in lib.es5.d.ts.
+                    // This requires alias dependencies, object, keyof, and indexed-access lowering,
+                    // including merged WeakKeyTypes members from the selected library profile.
+                    return Ok(self.register(LoweredTypeData::ObjectKeyword));
+                }
                 if let Some(scope) = &self.class_scope
                     && scope.name == name
                     && !scope.parameters.contains_key(name)
@@ -382,8 +403,10 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 }
 
 /// Lowers named instance properties and nongeneric methods with declaration-derived
-/// generic parameters. Constraints, defaults, value-side declarations, computed members,
-/// methods returning `MapIterator` or `SetIterator`, and methods referencing Intl types
+/// generic parameters. Constraints use supported member types and earlier type parameters;
+/// the first interface supplies constraints for merged declarations. Defaults,
+/// value-side declarations, computed members, methods returning `MapIterator` or
+/// `SetIterator`, and methods referencing Intl types
 /// are excluded. References to the
 /// enclosing class may carry type arguments. Other external references and unsupported
 /// member shapes are errors.
@@ -403,6 +426,7 @@ pub(super) fn lower_class_members(
         pending: Vec::new(),
         types: Vec::new(),
         declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
         predefined_declarations: false,
         class_scope: Some(ClassScope {
             name: class.name.clone(),
@@ -445,17 +469,35 @@ pub(super) fn lower_class_members(
             })
             .transpose()?
             .unwrap_or_default();
-        let references = class_parameters.get_or_insert_with(|| {
-            names
-                .iter()
-                .map(|name| {
-                    lowerer.register(LoweredTypeData::GenericParameter {
+        if class_parameters.is_none() {
+            lowerer.unbound_parameters = names.iter().cloned().collect();
+            let mut references = Vec::new();
+            if let Some(parameters) = declaration.type_parameters() {
+                for parameter in parameters.items() {
+                    let parameter = parameter?;
+                    let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
+                    let constraint = parameter
+                        .constraint()
+                        .map(|constraint| lowerer.lower_reference(&constraint.ty()?))
+                        .transpose()
+                        .with_context(|| format!("in constraint of {}.{name}", class.name()))?;
+                    let reference = lowerer.register(LoweredTypeData::GenericParameter {
                         name: name.clone(),
+                        constraint,
                         default: None,
-                    })
-                })
-                .collect::<Box<[_]>>()
-        });
+                    });
+                    lowerer.unbound_parameters.remove(&name);
+                    if let Some(scope) = &mut lowerer.class_scope {
+                        scope.parameters.insert(name, reference.clone());
+                    }
+                    references.push(reference);
+                }
+            }
+            class_parameters = Some(references.into_boxed_slice());
+        }
+        let references = class_parameters
+            .as_ref()
+            .context("missing class parameters")?;
         if names.len() != references.len() {
             bail!(
                 "inconsistent type parameter count across merged class {} declarations",
@@ -563,7 +605,8 @@ pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str,
 ];
 
 /// Lowers the synchronous iterator protocol, including its result dependencies.
-/// Generic constraints, merged declarations, and dependencies outside this selection are errors.
+/// Constraints use supported member types and earlier type parameters.
+/// Merged declarations and dependencies outside this selection are errors.
 /// Computed members are excluded. Tuples support required unnamed elements.
 pub(super) fn lower_iterator_globals(
     manifest: &GlobalManifest,
@@ -578,6 +621,7 @@ pub(super) fn lower_iterator_globals(
         types: Vec::new(),
         class_scope: None,
         declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
         predefined_declarations: true,
     };
     for &(name, id_constant, _) in ITERATOR_DECLARATIONS {
@@ -606,20 +650,36 @@ pub(super) fn lower_iterator_globals(
         lowerer.declaration_parameters.clear();
         let mut type_parameters = Vec::new();
         if let Some(parameters) = parameters {
+            lowerer.unbound_parameters = parameters
+                .items()
+                .into_iter()
+                .map(|parameter| {
+                    Ok(Text::from(
+                        parameter?.name()?.ident_token()?.token_text_trimmed(),
+                    ))
+                })
+                .collect::<Result<_>>()?;
             for parameter in parameters.items() {
                 let parameter = parameter?;
-                if parameter.constraint().is_some() || !parameter.modifiers().is_empty() {
-                    bail!("unsupported constrained or modified protocol type parameter");
+                if !parameter.modifiers().is_empty() {
+                    bail!("unsupported modified protocol type parameter");
                 }
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
+                let constraint = parameter
+                    .constraint()
+                    .map(|constraint| lowerer.lower_reference(&constraint.ty()?))
+                    .transpose()
+                    .with_context(|| format!("in constraint of {name}"))?;
                 let default = parameter
                     .default()
                     .map(|default| lowerer.lower_reference(&default.ty()?))
                     .transpose()?;
                 let reference = lowerer.register(LoweredTypeData::GenericParameter {
                     name: name.clone(),
+                    constraint,
                     default,
                 });
+                lowerer.unbound_parameters.remove(&name);
                 if lowerer
                     .declaration_parameters
                     .insert(name, reference.clone())

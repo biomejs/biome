@@ -353,6 +353,17 @@ mod tests {
     impl crate::TypeDb for TestDb {}
 
     #[test]
+    fn generated_weak_map_keys_are_non_nullish() {
+        let db = TestDb::default();
+        let InferredTypeData::Class(weak_map) = global_types(&db).get(WEAK_MAP_ID_GLOBAL_TYPE_ID)
+        else {
+            panic!("expected WeakMap class");
+        };
+        let key = weak_map.type_parameters(&db)[0];
+        assert!(crate::InferredType::new(&db, key).is_non_nullish());
+    }
+
+    #[test]
     fn local_query_keys_distinguish_owners() {
         let db = TestDb::default();
         let local = Some(crate::TypeId::new(0));
