@@ -12,9 +12,9 @@ use biome_console::markup;
 use biome_diagnostics::{Diagnostic, MessageAndDescription, panic::catch_unwind};
 use biome_html_syntax::HtmlAttribute;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArguments, JsCallExpression, JsLanguage, JsLiteralMemberName,
-    JsStaticMemberExpression, JsStringLiteralExpression, JsTemplateChunkElement,
-    JsTemplateExpression, JsxAttribute, JsxString,
+    AnyJsExpression, JsCallArguments, JsCallExpression, JsConditionalExpression, JsLanguage,
+    JsLiteralMemberName, JsStaticMemberExpression, JsStringLiteralExpression,
+    JsTemplateChunkElement, JsTemplateExpression, JsxAttribute, JsxString,
 };
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{
@@ -427,6 +427,17 @@ fn is_class_attribute_name(name: &str) -> bool {
 fn inspect_string_literal(node: &SyntaxNode<JsLanguage>) -> Option<bool> {
     let mut in_arguments = false;
     for ancestor in node.ancestors().skip(1) {
+        if let Some(conditional) = JsConditionalExpression::cast_ref(&ancestor)
+            && conditional
+                .test()
+                .ok()?
+                .syntax()
+                .text_range()
+                .contains_range(node.text_range())
+        {
+            return None;
+        }
+
         if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
             let Some(attribute_name) = get_jsx_attribute_name(&jsx_attribute) else {
                 continue;
@@ -512,6 +523,17 @@ impl TailwindClassStringHost for JsxString {
 impl TailwindClassStringHost for JsTemplateChunkElement {
     fn tailwind_class_string(&self) -> Option<TailwindClassString> {
         for ancestor in self.syntax().ancestors().skip(1) {
+            if let Some(conditional) = JsConditionalExpression::cast_ref(&ancestor)
+                && conditional
+                    .test()
+                    .ok()?
+                    .syntax()
+                    .text_range()
+                    .contains_range(self.syntax().text_range())
+            {
+                return None;
+            }
+
             if let Some(template_expression) = JsTemplateExpression::cast_ref(&ancestor) {
                 if let Some(AnyJsExpression::JsIdentifierExpression(tag)) =
                     template_expression.tag()
