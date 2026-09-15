@@ -16,6 +16,10 @@ declare_lint_rule! {
     /// The rule applies the [De Morgan's Law](https://en.wikipedia.org/wiki/De_Morgan%27s_laws) rule to simplify logical expressions.
     /// This means that some simplified expressions that are fixed by the rule might seem less intuitive to read, but they are more efficient to evaluate.
     ///
+    /// A boolean literal on the right side of `||` or `&&`, such as `value || false`, is not reported.
+    /// These operators return one of their operands rather than a boolean, so the literal can change
+    /// the result when `value` is not a boolean, and removing it would change the behavior of the code.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -27,7 +31,7 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const boolExp2 = true;
-    /// const r2 = boolExp || true;
+    /// const r2 = false || boolExp2;
     /// ```
     ///
     /// ```js,expect_diagnostic
@@ -48,6 +52,11 @@ declare_lint_rule! {
     /// const r5 = !(boolExpr1 && boolExpr2);
     /// const boolExpr5 = true;
     /// const boolExpr6 = false;
+    /// ```
+    ///
+    /// ```js
+    /// const value = undefined;
+    /// const r6 = value || false;
     /// ```
     ///
     pub UseSimplifiedLogicExpression {
@@ -71,6 +80,11 @@ impl Rule for UseSimplifiedLogicExpression {
         let node = ctx.query();
         let left = node.left().ok()?;
         let right = node.right().ok()?;
+        // Only a boolean literal on the left side is simplified. `||` and `&&`
+        // return one of their operands rather than a boolean, so `x || false`
+        // evaluates to `false` when `x` is `undefined`, while `x` alone does
+        // not. Removing a right-side literal can change the value of the
+        // expression.
         match node.operator().ok()? {
             biome_js_syntax::JsLogicalOperator::NullishCoalescing
                 if matches!(
@@ -90,13 +104,6 @@ impl Rule for UseSimplifiedLogicExpression {
                     return simplify_or_expression(literal, right).map(|expr| (false, expr));
                 }
 
-                if let AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
-                ) = right
-                {
-                    return simplify_or_expression(literal, left).map(|expr| (false, expr));
-                }
-
                 if could_apply_de_morgan(node).unwrap_or(false) {
                     return simplify_de_morgan(node)
                         .map(|expr| (true, AnyJsExpression::JsUnaryExpression(expr)));
@@ -108,13 +115,6 @@ impl Rule for UseSimplifiedLogicExpression {
                 ) = left
                 {
                     return simplify_and_expression(literal, right).map(|expr| (false, expr));
-                }
-
-                if let AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsBooleanLiteralExpression(literal),
-                ) = right
-                {
-                    return simplify_and_expression(literal, left).map(|expr| (false, expr));
                 }
 
                 if could_apply_de_morgan(node).unwrap_or(false) {
