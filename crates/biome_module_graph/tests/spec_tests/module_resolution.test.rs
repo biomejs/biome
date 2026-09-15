@@ -227,6 +227,34 @@ fn test_bun_builtin_imports_resolve_to_builtin_error() {
 }
 
 #[test]
+fn test_jsr_specifiers_resolve_to_jsr_package_error() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { assert } from 'jsr:@std/assert'; import { camelCase } from 'jsr:@luca/cases@^1';",
+    );
+    let db = build_js_db(
+        &fs,
+        &ProjectLayout::default(),
+        &[BiomePath::new("/src/index.ts")],
+        false,
+    );
+    let info = db
+        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
+        .unwrap();
+    for specifier in ["jsr:@std/assert", "jsr:@luca/cases@^1"] {
+        assert_eq!(
+            info.import_paths
+                .get(specifier)
+                .unwrap()
+                .resolved_path
+                .error(),
+            Some(&ResolveError::JsrPackage)
+        );
+    }
+}
+
+#[test]
 fn test_package_typings_field_resolution() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "import { Icon } from 'my-icons';");

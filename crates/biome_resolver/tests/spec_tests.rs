@@ -355,6 +355,47 @@ fn test_resolve_bun_builtins() {
 }
 
 #[test]
+fn test_resolve_jsr_specifiers() {
+    let fs = MemoryFileSystem::default();
+    let base_dir = Utf8Path::new("/");
+
+    for specifier in [
+        "jsr:@std/assert",
+        "jsr:@std/assert@1",
+        "jsr:@std/assert@^1.2.3",
+        "jsr:@std/assert@~1.2.3",
+        "jsr:@std/assert@1.0.0",
+        "jsr:@std/assert@2.0.0-rc.1",
+        "jsr:@std/http/file-server",
+        "jsr:@luca/cases@1.0.0/sub/path",
+    ] {
+        assert_eq!(
+            resolve(specifier, base_dir, &fs, &ResolveOptions::default()),
+            Err(ResolveError::JsrPackage),
+            "specifier: {specifier}"
+        );
+    }
+
+    for specifier in [
+        "jsr:",
+        "jsr:assert",
+        "jsr:@std",
+        "jsr:@std/",
+        "jsr:@std/assert@",
+        "jsr:@std/assert@latest",
+        "jsr:@std/assert@1.0.0/",
+        "jsr:@-std/assert",
+        "jsr:@Std/assert",
+    ] {
+        assert_eq!(
+            resolve(specifier, base_dir, &fs, &ResolveOptions::default()),
+            Err(ResolveError::InvalidPackageSpecifier),
+            "specifier: {specifier}"
+        );
+    }
+}
+
+#[test]
 fn test_resolve_shared_biome_config() {
     let base_dir = get_fixtures_path("resolver_cases_3");
     let fs = OsFileSystem::new(base_dir.clone());

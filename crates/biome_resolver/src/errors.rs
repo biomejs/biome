@@ -34,6 +34,12 @@ pub enum ResolveError {
     /// The specifier referenced a Bun built-in module instead of a path.
     BunBuiltIn,
 
+    /// The specifier referenced a JSR package instead of a path.
+    ///
+    /// JSR packages are downloaded on demand by runtimes such as Deno,
+    /// so they cannot be resolved to a path.
+    JsrPackage,
+
     /// The resolver did its best, but couldn't find what you were looking for.
     NotFound,
 }
@@ -51,6 +57,7 @@ impl Display for ResolveError {
             Self::ManifestNotFound => f.write_str("no package.json manifest found"),
             Self::NodeBuiltIn => f.write_str("resolved to a Node.js built-in"),
             Self::BunBuiltIn => f.write_str("resolved to a Bun built-in"),
+            Self::JsrPackage => f.write_str("resolved to a JSR package"),
             Self::NotFound => f.write_str("module not found"),
         }
     }

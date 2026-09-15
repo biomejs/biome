@@ -9,6 +9,11 @@ import foo from "./foo.js";
 import { bar } from "./bar";
 import { other } from "./nonExisting";
 
+// Malformed `jsr:` specifiers are not valid JSR packages.
+import { assert as missingScope } from "jsr:assert";
+import { assert as missingName } from "jsr:@std";
+import { assert as badVersion } from "jsr:@std/assert@notaversion";
+
 ```
 
 # Diagnostics
@@ -55,8 +60,58 @@ invalid.js:4:23 lint/correctness/noUnresolvedImports ━━━━━━━━━
   > 4 │ import { other } from "./nonExisting";
       │                       ^^^^^^^^^^^^^^^
     5 │ 
+    6 │ // Malformed `jsr:` specifiers are not valid JSR packages.
   
   i Make sure that the path exists and is readable.
+  
+
+```
+
+```
+invalid.js:7:40 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier jsr:assert cannot be resolved: invalid package name
+  
+    6 │ // Malformed `jsr:` specifiers are not valid JSR packages.
+  > 7 │ import { assert as missingScope } from "jsr:assert";
+      │                                        ^^^^^^^^^^^^
+    8 │ import { assert as missingName } from "jsr:@std";
+    9 │ import { assert as badVersion } from "jsr:@std/assert@notaversion";
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```
+invalid.js:8:39 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier jsr:@std cannot be resolved: invalid package name
+  
+     6 │ // Malformed `jsr:` specifiers are not valid JSR packages.
+     7 │ import { assert as missingScope } from "jsr:assert";
+   > 8 │ import { assert as missingName } from "jsr:@std";
+       │                                       ^^^^^^^^^^
+     9 │ import { assert as badVersion } from "jsr:@std/assert@notaversion";
+    10 │ 
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```
+invalid.js:9:38 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier jsr:@std/assert@notaversion cannot be resolved: invalid package name
+  
+     7 │ import { assert as missingScope } from "jsr:assert";
+     8 │ import { assert as missingName } from "jsr:@std";
+   > 9 │ import { assert as badVersion } from "jsr:@std/assert@notaversion";
+       │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+  
+  i Make sure the specifier is correct and your project is set up correctly.
   
 
 ```

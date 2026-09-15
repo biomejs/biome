@@ -114,10 +114,12 @@ impl Rule for NoUnresolvedImports {
         let resolved_path = match resolved_path.as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
-                // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) are valid
-                // imports — they simply cannot be resolved to a file path.
+                // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) and JSR
+                // packages (e.g. `jsr:@std/assert`) are valid imports — they
+                // simply cannot be resolved to a file path.
                 if *resolve_error == ResolveError::NodeBuiltIn
                     || *resolve_error == ResolveError::BunBuiltIn
+                    || *resolve_error == ResolveError::JsrPackage
                 {
                     return Vec::new();
                 }

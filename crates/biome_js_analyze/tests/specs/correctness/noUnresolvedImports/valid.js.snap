@@ -24,4 +24,9 @@ import { Database } from "bun:sqlite";
 import { test } from "bun:test";
 import { feature } from "bun:bundle";
 
+// JSR packages are downloaded on demand by Deno, so they must never be flagged.
+import { assert } from "jsr:@std/assert";
+import { camelCase } from "jsr:@luca/cases@^1";
+import { serve } from "jsr:@std/http@1.0.0/file-server";
+
 ```

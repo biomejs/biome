@@ -8,7 +8,7 @@ use std::{borrow::Cow, cmp::Ordering, collections::HashSet, ops::Deref, sync::Ar
 
 use biome_fs::normalize_path;
 use biome_json_value::{JsonObject, JsonValue};
-use biome_package::{PackageJson, TsConfigJson};
+use biome_package::{PackageJson, TsConfigJson, node_semver::Range};
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub use errors::*;
@@ -52,6 +52,14 @@ pub fn resolve_with_metadata(
 
     if options.resolve_bun_builtins && is_builtin_bun_module(specifier) {
         return Err(ResolveError::BunBuiltIn);
+    }
+
+    if specifier.starts_with("jsr:") {
+        return Err(if is_jsr_specifier(specifier) {
+            ResolveError::JsrPackage
+        } else {
+            ResolveError::InvalidPackageSpecifier
+        });
     }
 
     if specifier.starts_with('/') {
@@ -918,6 +926,66 @@ fn parse_package_specifier(specifier: &str) -> Result<(&str, &str), ResolveError
     let package_subpath =
         separator_index.map_or("", |separator_index| &specifier[separator_index + 1..]);
     Ok((package_name, package_subpath))
+}
+
+/// Returns `true` if `specifier` is a valid `jsr:` specifier.
+///
+/// `jsr:` specifiers take the form `jsr:@<scope>/<package>[@<version>][/<subpath>]`:
+///
+/// - `<scope>` and `<package>` are non-empty and may only contain lowercase
+///   ASCII letters, digits and hyphens, without a leading hyphen.
+/// - `<version>` is a SemVer range such as `1`, `^1.2.3` or `~1.2.3`.
+/// - `<subpath>` may not be empty.
+///
+/// See: <https://jsr.io/docs/native-imports>
+fn is_jsr_specifier(specifier: &str) -> bool {
+    let Some(package_req) = specifier.strip_prefix("jsr:@") else {
+        return false;
+    };
+
+    let Some((scope, rest)) = package_req.split_once('/') else {
+        return false;
+    };
+    if !is_valid_jsr_name(scope) {
+        return false;
+    }
+
+    let (name, rest) = match rest.find(['/', '@']) {
+        Some(index) => rest.split_at(index),
+        None => (rest, ""),
+    };
+    if !is_valid_jsr_name(name) {
+        return false;
+    }
+
+    let subpath = match rest.strip_prefix('@') {
+        // `rest` = `@<version>[/<subpath>]`
+        Some(version_and_subpath) => {
+            let (version, subpath) = match version_and_subpath.split_once('/') {
+                Some((version, subpath)) => (version, Some(subpath)),
+                None => (version_and_subpath, None),
+            };
+            if version.is_empty() || version.parse::<Range>().is_err() {
+                return false;
+            }
+            subpath
+        }
+        // `rest` is either `/<subpath>` or empty.
+        None => rest.strip_prefix('/'),
+    };
+
+    subpath.is_none_or(|subpath| !subpath.is_empty())
+}
+
+/// Returns `true` if `name` is a valid JSR scope or package name.
+///
+/// See: <https://jsr.io/docs/scopes> and <https://jsr.io/docs/packages>
+fn is_valid_jsr_name(name: &str) -> bool {
+    !name.is_empty()
+        && !name.starts_with('-')
+        && name
+            .bytes()
+            .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
 }
 
 fn strip_query_and_fragment(specifier: &str) -> &str {
