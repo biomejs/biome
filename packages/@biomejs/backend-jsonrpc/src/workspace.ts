@@ -925,7 +925,7 @@ Unknown keys and non-string entries are ignored. Missing, unreadable,
 or invalid manifests leave dependency versions unresolved.
 
 If both catalog options are enabled, pnpm catalogs take precedence.
-Defaults to `false`.
+Defaults to `false`. 
 	 */
 	experimentalBunCatalogs?: Bool;
 	/**
