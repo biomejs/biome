@@ -25,6 +25,7 @@ use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
+use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_service::db::WorkspaceDb;
@@ -192,14 +193,23 @@ impl AnalyzerServicesBuilder {
         parse: Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
     ) -> JsAnalyzerServices<'_> {
-        let root = parse.tree();
+        self.build_for_js_any_parse(path, parse.into(), file_source)
+    }
+
+    pub fn build_for_js_any_parse(
+        &mut self,
+        path: Utf8PathBuf,
+        any_parse: AnyParse,
+        file_source: JsFileSource,
+    ) -> JsAnalyzerServices<'_> {
+        let root: biome_js_parser::AnyJsRoot = any_parse.tree();
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
         let parsed_source = ParsedSource::new(
             &self.module_db,
             path.clone(),
-            parse.into(),
+            any_parse,
             source_index,
             vec![],
         );

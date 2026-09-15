@@ -25,10 +25,18 @@ declare_lint_rule! {
     /// <input type="image" src="image.png" />
     /// ```
     ///
+    /// ```astro,expect_diagnostic
+    /// {show && <img src="image.png" />}
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```jsx
     /// <img src="image.png" alt="image alt" />
+    /// ```
+    ///
+    /// ```astro
+    /// {show && <img src="image.png" alt="image alt" />}
     /// ```
     ///
     /// ```jsx
