@@ -82,6 +82,7 @@ impl SvelteFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind: SvelteEmbeddingKind::Source,
                         }),

@@ -296,6 +296,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    is_class_attribute: false,
                     setup: true,
                     is_source: true,
                     event_handler: false,
@@ -305,6 +306,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    is_class_attribute: false,
                     setup: false,
                     is_source: false,
                     event_handler: true,
@@ -314,6 +316,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::SourceModule,
                     embedding_kind: SvelteEmbeddingKind::Source,
                 }),
@@ -321,6 +324,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Expression,
                 }),
@@ -328,6 +332,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::SnippetSignature,
                 }),
@@ -335,6 +340,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::LegacyConst,
                 }),
@@ -342,6 +348,7 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Declaration,
                 }),

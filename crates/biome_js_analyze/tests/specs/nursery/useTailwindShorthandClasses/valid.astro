@@ -9,3 +9,9 @@ const templateClasses = tw.div`truncate`;
 <div class={["truncate", selected && "hover:size-6"]}></div>
 <div class={{ "mx-3": active }}></div>
 <div class:list={["border", condition && "dark:focus:size-[2rem]"]}></div>
+
+<div class={{ 'size-4': 'w-4 h-4' }}></div>
+<div class:list={['w-4 h-4' === state ? 'size-4' : 'p-2']}></div>
+<div class={lookup(`w-4 h-4`)}></div>
+<div set:html={'w-4 h-4'}></div>
+<div define:vars={{ 'w-4 h-4': active }}></div>
