@@ -78,6 +78,7 @@ pub mod no_duplicate_font_names;
 pub mod no_duplicate_graphql_operation_name;
 pub mod no_duplicate_input_field_names;
 pub mod no_duplicate_jsx_props;
+pub mod no_duplicate_map_keys;
 pub mod no_duplicate_object_keys;
 pub mod no_duplicate_parameters;
 pub mod no_duplicate_properties;

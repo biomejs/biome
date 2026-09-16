@@ -1,0 +1,6 @@
+# should not generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  nameA: Jane Doe
+  NAME: John Smith
