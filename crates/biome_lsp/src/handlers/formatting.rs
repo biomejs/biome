@@ -3,6 +3,7 @@ use crate::session::Session;
 use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
+use biome_line_index::LineIndex;
 use biome_lsp_converters::from_proto;
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_service::Workspace;
@@ -99,7 +100,8 @@ pub(crate) fn format(
 
     let indels = biome_text_edit::TextEdit::from_unicode_words(input.as_str(), output.as_str());
     let position_encoding = session.position_encoding();
-    let edits = text_edit(&doc.line_index, indels, position_encoding, None)?;
+    let line_index = LineIndex::new(&input);
+    let edits = text_edit(&line_index, indels, position_encoding, None)?;
 
     Ok(Some(edits))
 }
@@ -149,20 +151,23 @@ pub(crate) fn format_range(
         return Ok(None);
     }
 
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+
+    let line_index = LineIndex::new(&content);
+
     let position_encoding = session.position_encoding();
-    let format_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
+    let format_range = from_proto::text_range(&line_index, params.range, position_encoding)
         .with_context(|| {
             format!(
                 "failed to convert range {:?} in document {}",
                 params.range.end,
                 url.as_str()
             )
-        })?;
-    let content = session
-        .workspace_for_request()
-        .get_file_content(GetFileContentParams {
-            project_key: doc.project_key,
-            path: path.clone(),
         })?;
 
     let offset = match path.extension() {
@@ -202,7 +207,7 @@ pub(crate) fn format_range(
     );
     let position_encoding = session.position_encoding();
     let edits = text_edit(
-        &doc.line_index,
+        &line_index,
         indels,
         position_encoding,
         Some(formatted_range.start().into()),
@@ -257,9 +262,18 @@ pub(crate) fn format_on_type(
         return Ok(None);
     }
 
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+
+    let line_index = LineIndex::new(&content);
+
     let position_encoding = session.position_encoding();
     let offset =
-        from_proto::offset(&doc.line_index, position, position_encoding).with_context(|| {
+        from_proto::offset(&line_index, position, position_encoding).with_context(|| {
             format!(
                 "failed to access position {position:?} in document {}",
                 url.as_str()
@@ -275,13 +289,6 @@ pub(crate) fn format_on_type(
             inline_config: session.inline_config(),
         })?;
 
-    let content = session
-        .workspace_for_request()
-        .get_file_content(GetFileContentParams {
-            project_key: doc.project_key,
-            path: path.clone(),
-        })?;
-
     let formatted_range = formatted
         .range()
         .unwrap_or_else(|| TextRange::up_to(content.text_len()));
@@ -290,7 +297,7 @@ pub(crate) fn format_on_type(
         formatted.as_code(),
     );
     let edits = text_edit(
-        &doc.line_index,
+        &line_index,
         indels,
         position_encoding,
         Some(formatted_range.start().into()),

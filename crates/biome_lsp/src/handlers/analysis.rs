@@ -154,13 +154,13 @@ pub(crate) fn code_actions(
         _ => None,
     };
 
-    let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
+    let line_index = LineIndex::new(&content);
+    let cursor_range = from_proto::text_range(&line_index, params.range, position_encoding)
         .with_context(|| {
             format!(
-                "failed to access range {:?} in document {} {:?}",
+                "failed to access range {:?} in document {} {line_index:?}",
                 params.range,
                 url.as_str(),
-                doc.line_index,
             )
         })?;
     let cursor_range = if let Some(offset) = offset {
@@ -239,7 +239,7 @@ pub(crate) fn code_actions(
                 session,
                 &url,
                 path,
-                &doc.line_index,
+                &line_index,
                 &diagnostics,
                 None,
                 has_organize_imports,
@@ -323,14 +323,9 @@ pub(crate) fn code_actions(
                 None
             };
 
-            let mut lsp_action = utils::code_fix_to_lsp(
-                &url,
-                &doc.line_index,
-                position_encoding,
-                &diagnostics,
-                action,
-            )
-            .ok()??;
+            let mut lsp_action =
+                utils::code_fix_to_lsp(&url, &line_index, position_encoding, &diagnostics, action)
+                    .ok()??;
 
             if let Some(data) = resolve_data {
                 lsp_action.data = serde_json::to_value(data).ok();
@@ -420,13 +415,22 @@ pub(crate) fn code_action_resolve(
     };
     let position_encoding = session.position_encoding();
 
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+
+    let line_index = LineIndex::new(&content);
+
     // Handle fix_all resolve
     if matches!(resolve_data.kind, CodeActionResolveKind::FixAll) {
         let result = fix_all(
             session,
             &url,
             path,
-            &doc.line_index,
+            &line_index,
             &[],
             None,
             true, // include_organize_imports
@@ -493,7 +497,7 @@ pub(crate) fn code_action_resolve(
         .context("Expected a valid suggestion, but none was found. This is an internal error, please report it.")?;
     let offset = action.offset.map(u32::from);
     let edits = text_edit(
-        &doc.line_index,
+        &line_index,
         suggestion.suggestion,
         position_encoding,
         offset,

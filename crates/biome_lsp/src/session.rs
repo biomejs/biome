@@ -9,7 +9,7 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
-use biome_line_index::WideEncoding;
+use biome_line_index::{LineIndex, WideEncoding};
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
 use biome_service::WorkspaceError;
 use biome_service::configuration::{
@@ -661,6 +661,12 @@ impl Session {
                 enforce_assist: false,
             })?;
 
+            let content = self.workspace().get_file_content(GetFileContentParams {
+                project_key: doc.project_key,
+                path: biome_path.clone(),
+            })?;
+            let line_index = LineIndex::new(&content);
+
             let offset = if file_features.supports_full_html_support() {
                 None
             } else {
@@ -670,16 +676,7 @@ impl Session {
                     Some("svelte") => Some(SvelteFileHandler::start),
                     _ => None,
                 };
-                get_start.and_then(|f| {
-                    let content = self
-                        .workspace()
-                        .get_file_content(GetFileContentParams {
-                            project_key: doc.project_key,
-                            path: biome_path.clone(),
-                        })
-                        .ok()?;
-                    f(content.as_str())
-                })
+                get_start.and_then(|f| f(content.as_str()))
             };
 
             result
@@ -689,7 +686,7 @@ impl Session {
                     match utils::diagnostic_to_lsp(
                         d,
                         &url,
-                        &doc.line_index,
+                        &line_index,
                         self.position_encoding(),
                         offset,
                     ) {

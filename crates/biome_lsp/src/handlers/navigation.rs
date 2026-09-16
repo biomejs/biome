@@ -21,9 +21,17 @@ pub(crate) fn goto_definition(
         return Ok(None);
     };
 
+    let content = session.workspace_for_request().get_file_content(
+        biome_service::workspace::GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        },
+    )?;
+    let line_index = LineIndex::new(&content);
+
     let position_encoding = session.position_encoding();
     let cursor_offset = from_proto::offset(
-        &doc.line_index,
+        &line_index,
         params.text_document_position_params.position,
         position_encoding,
     )
@@ -71,21 +79,13 @@ pub(crate) fn goto_definition(
                     range,
                     &doc,
                     position_encoding,
-                    &path,
                 )?))
             } else {
                 let locations: Vec<_> = definition
                     .matches
                     .iter()
                     .map(|(definition_path, range)| {
-                        to_location(
-                            session,
-                            definition_path,
-                            range,
-                            &doc,
-                            position_encoding,
-                            &path,
-                        )
+                        to_location(session, definition_path, range, &doc, position_encoding)
                     })
                     .collect::<Result<Vec<_>, _>>()?;
 
@@ -104,24 +104,17 @@ fn to_location(
     definition_range: &TextRange,
     doc: &Document,
     position_encoding: PositionEncoding,
-    original_path: &BiomePath,
 ) -> Result<Location, LspError> {
     let target_uri = uri_from_path(definition_path)?;
 
-    // For same-file definitions, reuse the existing LineIndex.
-    // For cross-file definitions, read the target and build a LineIndex.
-    let target_range = if definition_path == original_path {
-        to_proto::range(&doc.line_index, *definition_range, position_encoding)?
-    } else {
-        let content = session.workspace_for_request().get_file_content(
-            biome_service::workspace::GetFileContentParams {
-                project_key: doc.project_key,
-                path: definition_path.clone(),
-            },
-        )?;
-        let target_line_index = LineIndex::new(&content);
-        to_proto::range(&target_line_index, *definition_range, position_encoding)?
-    };
+    let content = session.workspace_for_request().get_file_content(
+        biome_service::workspace::GetFileContentParams {
+            project_key: doc.project_key,
+            path: definition_path.clone(),
+        },
+    )?;
+    let target_line_index = LineIndex::new(&content);
+    let target_range = to_proto::range(&target_line_index, *definition_range, position_encoding)?;
 
     Ok(Location {
         uri: target_uri,

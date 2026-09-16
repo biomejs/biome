@@ -58,7 +58,7 @@ pub(crate) async fn did_open(
         return Ok(());
     }
 
-    let doc = Document::new(project_key, version, &content);
+    let doc = Document::new(project_key, version);
 
     session.workspace().open_file(OpenFileParams {
         project_key,
@@ -222,7 +222,7 @@ pub(crate) async fn did_change(
         params.content_changes,
     );
 
-    session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
+    session.insert_document(url.clone(), Document::new(doc.project_key, version));
 
     session.workspace().change_file(ChangeFileParams {
         project_key: doc.project_key,
@@ -263,10 +263,7 @@ pub(crate) async fn did_save(
             editor_features: None,
         })?;
 
-        session.insert_document(
-            url.clone(),
-            Document::new(doc.project_key, doc.version, &text),
-        );
+        session.insert_document(url.clone(), Document::new(doc.project_key, doc.version));
 
         // Update diagnostics with fresh content
         if let Err(err) = session.update_diagnostics(url).await {

@@ -417,6 +417,83 @@ async fn document_no_extension() -> Result<()> {
 }
 
 #[tokio::test]
+async fn document_formatting_with_two_clients() -> Result<()> {
+    const FIRST_CLIENT_CONTENT: &str = "a;\nb;\nc;\nd;\ne;\n";
+    const SECOND_CLIENT_CONTENT: &str = "if(a){\nb();\n}\n";
+    const FORMATTED: &str = "if (a) {\n\tb();\n}\n";
+
+    let factory = ServerFactory::default();
+    let (first_service, first_client) = factory.create().into_inner();
+    let (second_service, second_client) = factory.create().into_inner();
+    let mut first = Server::new(first_service);
+    let mut second = Server::new(second_service);
+
+    let (first_stream, first_sink) = first_client.split();
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let first_reader = tokio::spawn(client_handler(first_stream, first_sink, sender));
+
+    let (second_stream, second_sink) = second_client.split();
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let second_reader = tokio::spawn(client_handler(second_stream, second_sink, sender));
+
+    first.initialize().await?;
+    first.initialized().await?;
+    second.initialize().await?;
+    second.initialized().await?;
+
+    first.open_document(FIRST_CLIENT_CONTENT).await?;
+    second.open_document(SECOND_CLIENT_CONTENT).await?;
+
+    let res: Option<Vec<TextEdit>> = first
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                options: FormattingOptions {
+                    tab_size: 4,
+                    insert_spaces: false,
+                    properties: HashMap::default(),
+                    trim_trailing_whitespace: None,
+                    insert_final_newline: None,
+                    trim_final_newlines: None,
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned None")?;
+    let edits = res.context("formatting did not return an edit list")?;
+
+    let changes = edits
+        .into_iter()
+        .rev()
+        .map(|edit| TextDocumentContentChangeEvent {
+            range: Some(edit.range),
+            range_length: None,
+            text: edit.new_text,
+        })
+        .collect();
+    let output = crate::utils::apply_document_changes(
+        biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+        String::from(SECOND_CLIENT_CONTENT),
+        changes,
+    );
+    assert_eq!(output, FORMATTED);
+
+    first.shutdown().await?;
+    first_reader.abort();
+    second.shutdown().await?;
+    second_reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn document_range_formatting() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
