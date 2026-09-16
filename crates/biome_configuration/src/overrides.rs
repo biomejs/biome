@@ -1104,6 +1104,7 @@ mod tests {
         let base_markdown = MarkdownConfiguration {
             parser: Some(MarkdownParserConfiguration {
                 frontmatter: Some(false.into()),
+                gfm: None,
             }),
             linter: Some(MarkdownLinterConfiguration {
                 enabled: Some(true.into()),
@@ -1123,6 +1124,7 @@ mod tests {
             markdown: Some(MarkdownConfiguration {
                 parser: Some(MarkdownParserConfiguration {
                     frontmatter: Some(true.into()),
+                    gfm: None,
                 }),
                 linter: Some(MarkdownLinterConfiguration {
                     enabled: Some(false.into()),
