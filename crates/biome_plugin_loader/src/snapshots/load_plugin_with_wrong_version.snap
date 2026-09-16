@@ -9,7 +9,10 @@ expression: content
 ```jsonc
 {
     "version": 2,
-    "rules": ["rules/1.grit"]
+    "plugins": {
+        "rules": [{ "one": "rules/1.grit" }],
+        "presets": { "recommended": ["one"] }
+    }
 }
 ```
 
@@ -22,8 +25,8 @@ No input was analyzed.
 ```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Cannot load plugin manifest /my-plugin/biome-manifest.jsonc
-
+  × Cannot load Biome manifest /my-plugin/biome-manifest.jsonc.
+    
     Caused by:
-      version must be 1
+      version must be 1.
 ```

@@ -7,7 +7,12 @@ expression: content
 ## `biome-manifest.jsonc`
 
 ```jsonc
-{}
+{
+            "plugins": {
+                "rules": [{ "one": "rules/1.grit" }],
+                "presets": { "recommended": ["one"] }
+            }
+        }
 ```
 
 # Input
@@ -20,7 +25,13 @@ No input was analyzed.
 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The key `version` is missing.
-
-  > 1 │ {}
-      │ ^^
+  
+  > 1 │ {
+      │ ^
+  > 2 │             "plugins": {
+  > 3 │                 "rules": [{ "one": "rules/1.grit" }],
+  > 4 │                 "presets": { "recommended": ["one"] }
+  > 5 │             }
+  > 6 │         }
+      │         ^
 ```
