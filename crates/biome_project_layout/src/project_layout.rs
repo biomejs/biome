@@ -1,4 +1,6 @@
-use biome_package::{NodeJsPackage, Package, PackageJson, TsConfigJson, TurboJson};
+use biome_package::{
+    Catalogs, NodeJsPackage, Package, PackageJson, PnpmWorkspace, TsConfigJson, TurboJson,
+};
 use biome_rowan::SendNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -23,7 +25,17 @@ use std::sync::Arc;
 /// approach makes it very easy for us to invalidate part of the layout when
 /// there are file system changes.
 #[derive(Debug, Default)]
-pub struct ProjectLayout(HashMap<Utf8PathBuf, PackageData, FxBuildHasher>);
+pub struct ProjectLayout {
+    packages: HashMap<Utf8PathBuf, PackageData, FxBuildHasher>,
+    pnpm_workspaces: HashMap<Utf8PathBuf, PnpmWorkspace, FxBuildHasher>,
+    catalog_settings: HashMap<Utf8PathBuf, CatalogSettings, FxBuildHasher>,
+}
+
+#[derive(Debug)]
+struct CatalogSettings {
+    pnpm: bool,
+    bun: bool,
+}
 
 /// The information tracked for each package.
 ///
@@ -38,6 +50,71 @@ pub struct PackageData {
 }
 
 impl ProjectLayout {
+    pub fn set_catalog_settings(&self, package_path: Utf8PathBuf, pnpm: bool, bun: bool) {
+        self.catalog_settings
+            .pin()
+            .insert(package_path, CatalogSettings { pnpm, bun });
+    }
+
+    fn resolve_workspace_catalogs(
+        &self,
+        path: &Utf8Path,
+        mut manifest: PackageJson,
+    ) -> PackageJson {
+        if let Some(settings) = self.catalog_settings.pin().get(path) {
+            manifest.catalog = self.find_workspace_catalogs(path, settings.pnpm, settings.bun);
+        }
+        manifest
+    }
+
+    pub fn insert_pnpm_workspace(&self, path: Utf8PathBuf, manifest: PnpmWorkspace) {
+        self.pnpm_workspaces.pin().insert(path, manifest);
+    }
+
+    pub fn remove_pnpm_workspace(&self, path: &Utf8Path) {
+        self.pnpm_workspaces.pin().remove(path);
+    }
+
+    /// Resolves catalogs from indexed workspace manifests. pnpm takes precedence
+    /// when both resolvers are enabled. Bun uses the outermost workspace manifest
+    /// among the package's ancestors, even if that manifest contains no catalogs.
+    fn find_workspace_catalogs(
+        &self,
+        package_path: &Utf8Path,
+        pnpm: bool,
+        bun: bool,
+    ) -> Option<Catalogs> {
+        if pnpm {
+            let workspaces = self.pnpm_workspaces.pin();
+            if let Some(catalogs) = package_path.ancestors().find_map(|path| {
+                workspaces
+                    .get(path)
+                    .and_then(|workspace| workspace.catalogs.as_ref())
+            }) {
+                return Some(catalogs.clone());
+            }
+        }
+        if !bun
+            || package_path
+                .components()
+                .any(|component| component.as_str() == "node_modules")
+        {
+            return None;
+        }
+        let packages = self.packages.pin();
+        package_path
+            .ancestors()
+            .filter_map(|path| {
+                packages
+                    .get(path)
+                    .and_then(|data| data.node_package.as_ref())
+                    .and_then(|package| package.manifest.as_ref())
+                    .filter(|manifest| manifest.has_workspaces)
+            })
+            .last()
+            .and_then(|manifest| manifest.bun_catalogs.clone())
+    }
+
     /// Returns the `package.json` that should be used for the given `path`,
     /// together with the absolute path of the package in which it was found.
     ///
@@ -47,13 +124,18 @@ impl ProjectLayout {
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, PackageJson)> {
-        let packages = self.0.pin();
+        let packages = self.packages.pin();
         path.ancestors().find_map(|package_path| {
             packages
                 .get(package_path)
                 .and_then(|data| data.node_package.as_ref())
                 .and_then(|node_package| node_package.manifest.as_ref())
-                .map(|manifest| (package_path.to_path_buf(), manifest.clone()))
+                .map(|manifest| {
+                    (
+                        package_path.to_path_buf(),
+                        self.resolve_workspace_catalogs(package_path, manifest.clone()),
+                    )
+                })
         })
     }
 
@@ -63,12 +145,13 @@ impl ProjectLayout {
     /// hierarchy, but only returns the one that is stored in the layout for
     /// the given `package_path`.
     pub fn get_node_manifest_for_package(&self, package_path: &Utf8Path) -> Option<PackageJson> {
-        self.0
+        self.packages
             .pin()
             .get(package_path)
             .and_then(|data| data.node_package.as_ref())
             .and_then(|node_package| node_package.manifest.as_ref())
             .cloned()
+            .map(|manifest| self.resolve_workspace_catalogs(package_path, manifest))
     }
 
     /// Returns the `package.json` for a dependency by name, walking ancestor
@@ -101,7 +184,7 @@ impl ProjectLayout {
     /// hierarchy, but only returns the one that is stored in the layout for
     /// the given `package_path`.
     pub fn get_tsconfig_json_for_package(&self, package_path: &Utf8Path) -> Option<TsConfigJson> {
-        self.0
+        self.packages
             .pin()
             .get(package_path)
             .and_then(|data| data.node_package.as_ref())
@@ -118,7 +201,7 @@ impl ProjectLayout {
         &self,
         path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, Arc<TurboJson>)> {
-        let packages = self.0.pin();
+        let packages = self.packages.pin();
         path.ancestors().find_map(|package_path| {
             packages
                 .get(package_path)
@@ -137,7 +220,7 @@ impl ProjectLayout {
     /// This function returns all turbo.json files found in the ancestors of
     /// the given path, ordered from closest (package-level) to furthest (root).
     pub fn find_all_turbo_json_for_path(&self, path: &Utf8Path) -> Vec<Arc<TurboJson>> {
-        let packages = self.0.pin();
+        let packages = self.packages.pin();
         path.ancestors()
             .filter_map(|package_path| {
                 packages
@@ -155,7 +238,7 @@ impl ProjectLayout {
     /// hierarchy, but only returns the one that is stored in the layout for
     /// the given `package_path`.
     pub fn get_turbo_json_for_package(&self, package_path: &Utf8Path) -> Option<Arc<TurboJson>> {
-        self.0
+        self.packages
             .pin()
             .get(package_path)
             .and_then(|data| data.node_package.as_ref())
@@ -168,7 +251,7 @@ impl ProjectLayout {
     /// `path` refers to the package directory, not the `package.json` file
     /// itself.
     pub fn insert_node_manifest(&self, path: Utf8PathBuf, manifest: PackageJson) {
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path,
             |data| {
                 let node_js_package = NodeJsPackage {
@@ -206,7 +289,7 @@ impl ProjectLayout {
     /// `path` refers to the package directory, not the `package.json` file
     /// itself.
     pub fn insert_tsconfig(&self, path: Utf8PathBuf, tsconfig: TsConfigJson) {
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path,
             |data| {
                 let node_js_package = NodeJsPackage {
@@ -245,7 +328,7 @@ impl ProjectLayout {
     /// itself.
     pub fn insert_turbo_json(&self, path: Utf8PathBuf, turbo_json: TurboJson) {
         let turbo_json = Arc::new(turbo_json);
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path,
             |data| {
                 let node_js_package = NodeJsPackage {
@@ -283,7 +366,7 @@ impl ProjectLayout {
     ///
     /// See also [Self::insert_node_manifest()].
     pub fn insert_serialized_node_manifest(&self, path: Utf8PathBuf, manifest: &SendNode) {
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path.clone(),
             |data| {
                 let mut node_js_package = NodeJsPackage {
@@ -324,7 +407,7 @@ impl ProjectLayout {
     /// Inserts a `tsconfig.json` manifest for the package at the given `path`,
     /// parsing the manifest on demand.
     pub fn insert_serialized_tsconfig(&self, path: Utf8PathBuf, manifest: &SendNode) {
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path.clone(),
             |data| {
                 let mut node_js_package = NodeJsPackage {
@@ -372,7 +455,7 @@ impl ProjectLayout {
         manifest: &SendNode,
         filename: &str,
     ) {
-        self.0.pin().update_or_insert_with(
+        self.packages.pin().update_or_insert_with(
             path.clone(),
             |data| {
                 let mut node_js_package = NodeJsPackage {
@@ -413,11 +496,16 @@ impl ProjectLayout {
     /// Returns whether the manifest with the given `path` is indexed in the
     /// project layout.
     ///
-    /// Only returns `true` for `package.json`, `tsconfig.json`, and `turbo.json` manifests.
+    /// Returns `true` for indexed Node.js manifests and `pnpm-workspace.yaml`.
     pub fn is_indexed(&self, path: &Utf8Path) -> bool {
+        if path.file_name() == Some("pnpm-workspace.yaml") {
+            return path
+                .parent()
+                .is_some_and(|path| self.pnpm_workspaces.pin().contains_key(path));
+        }
         path.parent()
             .and_then(|package_path| {
-                self.0
+                self.packages
                     .pin()
                     .get(package_path)
                     .and_then(|data| data.node_package.as_ref())
@@ -433,7 +521,7 @@ impl ProjectLayout {
 
     /// Returns all package paths currently tracked in the layout.
     pub fn package_paths(&self) -> Vec<Utf8PathBuf> {
-        self.0.pin().keys().cloned().collect()
+        self.packages.pin().keys().cloned().collect()
     }
 
     /// Searches for the `tsconfig.json` file nearest to `path` and calls
@@ -445,7 +533,7 @@ impl ProjectLayout {
         F: Fn(&TsConfigJson) -> R,
     {
         let query = &query;
-        let packages = self.0.pin();
+        let packages = self.packages.pin();
         path.ancestors().find_map(|package_path| {
             packages
                 .get(package_path)
@@ -458,12 +546,14 @@ impl ProjectLayout {
     /// Removes a `tsconfig.json` manifest from the package with the given
     /// `path`.
     pub fn remove_tsconfig_from_package(&self, path: &Utf8Path) {
-        self.0.pin().update(path.to_path_buf(), |data| PackageData {
-            node_package: data
-                .node_package
-                .as_ref()
-                .map(NodeJsPackage::without_tsconfig),
-        });
+        self.packages
+            .pin()
+            .update(path.to_path_buf(), |data| PackageData {
+                node_package: data
+                    .node_package
+                    .as_ref()
+                    .map(NodeJsPackage::without_tsconfig),
+            });
     }
 
     /// Searches for the `turbo.json` file nearest to `path` and calls
@@ -475,7 +565,7 @@ impl ProjectLayout {
         F: Fn(&TurboJson) -> R,
     {
         let query = &query;
-        let packages = self.0.pin();
+        let packages = self.packages.pin();
         path.ancestors().find_map(|package_path| {
             packages
                 .get(package_path)
@@ -488,22 +578,37 @@ impl ProjectLayout {
     /// Removes a `turbo.json` manifest from the package with the given
     /// `path`.
     pub fn remove_turbo_json_from_package(&self, path: &Utf8Path) {
-        self.0.pin().update(path.to_path_buf(), |data| PackageData {
-            node_package: data
-                .node_package
-                .as_ref()
-                .map(NodeJsPackage::without_turbo_json),
-        });
+        self.packages
+            .pin()
+            .update(path.to_path_buf(), |data| PackageData {
+                node_package: data
+                    .node_package
+                    .as_ref()
+                    .map(NodeJsPackage::without_turbo_json),
+            });
     }
 
     /// Removes a package and its metadata from the project layout.
     pub fn remove_package(&self, path: &Utf8Path) {
-        self.0.pin().remove(path);
+        self.catalog_settings.pin().remove(path);
+        self.packages.pin().remove(path);
     }
 
     /// Unloads all paths from the graph within the given `path`.
     pub fn unload_folder(&self, path: &Utf8Path) {
-        let packages = self.0.pin();
+        let settings = self.catalog_settings.pin();
+        for package_path in settings.keys() {
+            if package_path.starts_with(path) {
+                settings.remove(package_path);
+            }
+        }
+        let workspaces = self.pnpm_workspaces.pin();
+        for workspace_path in workspaces.keys() {
+            if workspace_path.starts_with(path) {
+                workspaces.remove(workspace_path);
+            }
+        }
+        let packages = self.packages.pin();
         for package_path in packages.keys() {
             if package_path.starts_with(path) {
                 packages.remove(package_path);

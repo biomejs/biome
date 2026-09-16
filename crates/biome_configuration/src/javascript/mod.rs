@@ -96,11 +96,11 @@ pub struct JsResolverConfiguration {
     /// Enables Bun catalog resolution for JavaScript package manifests.
     ///
     /// Resolves `catalog:` and `catalog:<name>` versions in `dependencies`,
-    /// `devDependencies`, and `peerDependencies` from an ancestor `package.json`.
+    /// `devDependencies`, and `peerDependencies` from the workspace root `package.json`.
     /// Catalogs may be declared under `workspaces` or at the top level of a
     /// manifest with a `workspaces` field. Nested catalogs take precedence.
-    /// Unknown keys and non-string entries are ignored. Missing, unreadable,
-    /// or invalid manifests leave dependency versions unresolved.
+    /// Unknown keys and non-string entries are ignored. Missing catalogs leave
+    /// dependency versions unresolved.
     ///
     /// If both catalog options are enabled, pnpm catalogs take precedence.
     /// Defaults to `false`.

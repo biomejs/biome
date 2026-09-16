@@ -1802,6 +1802,7 @@ impl Hash for ManifestDependencies {
             return;
         };
         true.hash(state);
+        catalog.kind.hash(state);
         catalog.default.as_ref().map(|items| &items.0).hash(state);
 
         let mut named = catalog.named.iter().collect::<Vec<_>>();
@@ -1829,7 +1830,8 @@ fn catalogs_equal(
                 (Some(left), Some(right)) if dependencies_equal(left, right) => {}
                 _ => return false,
             }
-            left.named.len() == right.named.len()
+            left.kind == right.kind
+                && left.named.len() == right.named.len()
                 && left.named.iter().all(|(name, dependencies)| {
                     right
                         .named
@@ -2554,6 +2556,30 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn manifest_dependencies_distinguish_catalog_kinds() {
+        use biome_package::{CatalogKind, Catalogs};
+        let pnpm = ManifestDependencies(PackageJson {
+            dependencies: Dependencies(Box::new([("react".into(), "catalog: react19 ".into())])),
+            catalog: Some(Catalogs {
+                named: [(
+                    "react19".into(),
+                    Dependencies(Box::new([("react".into(), "19.0.0".into())])),
+                )]
+                .into_iter()
+                .collect(),
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+        let mut bun = pnpm.clone();
+        bun.0.catalog.as_mut().unwrap().kind = CatalogKind::Bun;
+        assert_ne!(pnpm, bun);
+        assert!(!pnpm.matches_dependency("react", ">=19.0.0"));
+        assert!(bun.matches_dependency("react", ">=19.0.0"));
+    }
 
     #[cfg(feature = "lang_js")]
     #[test]

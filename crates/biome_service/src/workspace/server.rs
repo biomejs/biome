@@ -84,7 +84,7 @@ use biome_languages::javascript::{JsEmbeddingKind, LanguageVariant, ModuleKind};
 use biome_languages::{DocumentFileSource, JsonFileSource, LanguageDb};
 #[cfg(feature = "lang_js")]
 use biome_package::PackageType;
-use biome_package::{Catalogs, PackageJson};
+use biome_package::{Manifest, PackageJson, PnpmWorkspace};
 use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
@@ -778,9 +778,8 @@ impl WorkspaceServerWithDb<'_> {
                 && path
                     .file_name()
                     .is_some_and(|filename| filename == "pnpm-workspace.yaml")
-                && let Some(workspace_root) = path.parent()
             {
-                self.refresh_workspace_catalogs_for_scope(project_key, workspace_root);
+                self.update_pnpm_workspace(&path);
             }
             return Ok(Default::default());
         }
@@ -1030,14 +1029,12 @@ impl WorkspaceServerWithDb<'_> {
                 });
             }
 
-            // pnpm-workspace.yaml is not a parsed manifest, but updates still need to
-            // re-apply catalogs to indexed package.json manifests in the same scope.
+            // pnpm manifests must also be indexed when YAML support is disabled.
             if path
                 .file_name()
                 .is_some_and(|filename| filename == "pnpm-workspace.yaml")
-                && let Some(workspace_root) = path.parent()
             {
-                self.refresh_workspace_catalogs_for_scope(project_key, workspace_root);
+                self.update_pnpm_workspace(&path);
             }
         }
 
@@ -1962,79 +1959,77 @@ impl WorkspaceServerWithDb<'_> {
         Ok(is_ignored)
     }
 
-    /// Attempts to load pnpm workspace catalogs by searching for a
-    /// `pnpm-workspace.yaml` starting from the given path and walking up its
-    /// ancestors.
-    fn load_pnpm_workspace_catalog(&self, start_dir: &Utf8Path) -> Option<Catalogs> {
-        for dir in start_dir.ancestors() {
-            let workspace_file = dir.join("pnpm-workspace.yaml");
-            if !self.fs.path_is_file(&workspace_file) {
-                continue;
-            }
-
-            if let Ok(content) = self.fs.read_file_from_path(&workspace_file)
-                && let Some(catalog) = PackageJson::parse_pnpm_workspace_catalog(&content)
-            {
-                return Some(catalog);
+    fn update_pnpm_workspace(&self, path: &Utf8Path) {
+        if let Some(workspace_root) = path.parent() {
+            if self.fs.path_is_file(path) {
+                let manifest = PnpmWorkspace::read_manifest(self.fs.as_ref(), path)
+                    .into_deserialized()
+                    .unwrap_or_default();
+                self.project_layout
+                    .insert_pnpm_workspace(workspace_root.to_path_buf(), manifest);
+            } else {
+                self.project_layout.remove_pnpm_workspace(workspace_root);
             }
         }
-
-        None
     }
 
-    fn load_bun_workspace_catalog(&self, start_dir: &Utf8Path) -> Option<Catalogs> {
-        for dir in start_dir.ancestors() {
-            let manifest_path = dir.join("package.json");
-            if !self.fs.path_is_file(&manifest_path) {
-                continue;
-            }
-            let content = self
-                .documents
-                .pin()
-                .get(&manifest_path)
-                .map(|document| document.content.clone())
-                .or_else(|| self.fs.read_file_from_path(&manifest_path).ok());
-            if let Some(content) = content
-                && let Some(catalog) = PackageJson::parse_bun_workspace_catalog(&content)
-            {
-                return Some(catalog);
+    fn update_catalog_settings_for_package(
+        &self,
+        project_key: ProjectKey,
+        package_path: &Utf8Path,
+    ) {
+        let Some(settings) = self.project_get_settings_for_path(project_key, package_path) else {
+            return;
+        };
+        let Some(project_path) = self.project_get_path(project_key) else {
+            return;
+        };
+        if settings.use_pnpm_workspace_catalogs() {
+            for dir in package_path.ancestors() {
+                let path = dir.join("pnpm-workspace.yaml");
+                self.update_pnpm_workspace(&path);
             }
         }
-        None
-    }
-
-    /// Applies (or clears) workspace catalogs for the `package.json`
-    /// manifest stored at `package_path`, based on the current project settings.
-    fn apply_workspace_catalog_to_package(&self, project_key: ProjectKey, package_path: &Utf8Path) {
-        let settings = self.project_get_settings_for_path(project_key, package_path);
-
-        if let Some(mut manifest) = self
-            .project_layout
-            .get_node_manifest_for_package(package_path)
+        if settings.use_bun_workspace_catalogs()
+            && !package_path
+                .components()
+                .any(|component| component.as_str() == "node_modules")
         {
-            manifest.catalog = settings.as_ref().and_then(|settings| {
-                let pnpm_catalog = settings
-                    .use_pnpm_workspace_catalogs()
-                    .then(|| self.load_pnpm_workspace_catalog(package_path))
-                    .flatten();
-                pnpm_catalog.or_else(|| {
-                    settings
-                        .use_bun_workspace_catalogs()
-                        .then(|| self.load_bun_workspace_catalog(package_path))
-                        .flatten()
-                })
-            });
-
-            self.project_layout
-                .insert_node_manifest(package_path.to_path_buf(), manifest);
+            for dir in package_path.ancestors().skip(1) {
+                let path = dir.join("package.json");
+                if self
+                    .documents
+                    .pin()
+                    .get(&path)
+                    .is_some_and(|document| document.version.is_some())
+                {
+                    continue;
+                }
+                // Ancestor manifests outside the project are not refreshed by its scanner.
+                if !dir.starts_with(&project_path) || !self.project_layout.is_indexed(&path) {
+                    if self.fs.path_is_file(&path) {
+                        let manifest = PackageJson::read_manifest(self.fs.as_ref(), &path)
+                            .into_deserialized()
+                            .unwrap_or_default();
+                        self.project_layout
+                            .insert_node_manifest(dir.to_path_buf(), manifest);
+                    } else if self.project_layout.is_indexed(&path) {
+                        self.project_layout.remove_package(dir);
+                    }
+                }
+            }
         }
+        self.project_layout.set_catalog_settings(
+            package_path.to_path_buf(),
+            settings.use_pnpm_workspace_catalogs(),
+            settings.use_bun_workspace_catalogs(),
+        );
     }
 
-    /// Re-applies workspace catalogs to all packages under `scope_root`.
-    fn refresh_workspace_catalogs_for_scope(&self, project_key: ProjectKey, scope_root: &Utf8Path) {
+    fn update_catalog_settings_for_scope(&self, project_key: ProjectKey, scope_root: &Utf8Path) {
         for package_path in self.project_layout.package_paths() {
             if package_path.starts_with(scope_root) {
-                self.apply_workspace_catalog_to_package(project_key, &package_path);
+                self.update_catalog_settings_for_package(project_key, &package_path);
             }
         }
     }
@@ -2062,17 +2057,11 @@ impl WorkspaceServerWithDb<'_> {
                     };
                     self.project_layout
                         .insert_serialized_node_manifest(package_path.clone(), &send_node);
-                    self.apply_workspace_catalog_to_package(project_key, &package_path);
+                    self.update_catalog_settings_for_package(project_key, &package_path);
                 }
                 UpdateKind::Removed => {
                     self.project_layout.remove_package(&package_path);
                 }
-            }
-            if !matches!(
-                update_kind,
-                UpdateKind::AddedOrChanged(OpenFileReason::Index(IndexTrigger::InitialScan), _)
-            ) {
-                self.refresh_workspace_catalogs_for_scope(project_key, &package_path);
             }
         } else if filename.is_some_and(|filename| filename == "tsconfig.json") {
             let package_path = path
@@ -2120,18 +2109,7 @@ impl WorkspaceServerWithDb<'_> {
                 }
             }
         } else if filename.is_some_and(|filename| filename == "pnpm-workspace.yaml") {
-            let workspace_root = path
-                .parent()
-                .map(|parent| parent.to_path_buf())
-                .unwrap_or_default();
-
-            for package_path in self.project_layout.package_paths() {
-                if !package_path.starts_with(&workspace_root) {
-                    continue;
-                }
-
-                self.apply_workspace_catalog_to_package(project_key, &package_path);
-            }
+            self.update_pnpm_workspace(path);
         }
 
         Ok(())
@@ -2783,6 +2761,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             configuration
         };
 
+        #[cfg(feature = "lang_js")]
+        {
+            settings.experimental_bun_catalogs_enabled = None;
+        }
         settings.merge_with_configuration(
             configuration,
             workspace_directory.clone(),
@@ -2823,7 +2805,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 nested_workspace_directory.clone(),
                 settings.clone(),
             );
-            self.refresh_workspace_catalogs_for_scope(
+            self.update_catalog_settings_for_scope(
                 project_key,
                 nested_workspace_directory.as_path(),
             );
@@ -2880,7 +2862,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
             self.project_set_root_settings(project_key, settings);
             if let Some(project_path) = self.project_get_path(project_key) {
-                self.refresh_workspace_catalogs_for_scope(project_key, project_path.as_path());
+                self.update_catalog_settings_for_scope(project_key, project_path.as_path());
             }
         }
 
@@ -4244,15 +4226,13 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     #[inline]
     fn is_indexed(&self, path: &Utf8Path) -> bool {
         match path.file_name() {
-            Some("package.json" | "tsconfig.json" | "turbo.json" | "turbo.jsonc") => {
-                self.project_layout.is_indexed(path)
-            }
-            Some("pnpm-workspace.yaml") => path.parent().is_some_and(|workspace_root| {
-                self.project_layout
-                    .package_paths()
-                    .into_iter()
-                    .any(|package_path| package_path.starts_with(workspace_root))
-            }),
+            Some(
+                "package.json"
+                | "tsconfig.json"
+                | "turbo.json"
+                | "turbo.jsonc"
+                | "pnpm-workspace.yaml",
+            ) => self.project_layout.is_indexed(path),
             _ => {
                 #[cfg(feature = "module_graph")]
                 {

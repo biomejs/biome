@@ -2641,7 +2641,7 @@
 			"type": "object",
 			"properties": {
 				"experimentalBunCatalogs": {
-					"description": "Enables Bun catalog resolution for JavaScript package manifests.\n\nResolves `catalog:` and `catalog:<name>` versions in `dependencies`,\n`devDependencies`, and `peerDependencies` from an ancestor `package.json`.\nCatalogs may be declared under `workspaces` or at the top level of a\nmanifest with a `workspaces` field. Nested catalogs take precedence.\nUnknown keys and non-string entries are ignored. Missing, unreadable,\nor invalid manifests leave dependency versions unresolved.\n\nIf both catalog options are enabled, pnpm catalogs take precedence.\nDefaults to `false`.",
+					"description": "Enables Bun catalog resolution for JavaScript package manifests.\n\nResolves `catalog:` and `catalog:<name>` versions in `dependencies`,\n`devDependencies`, and `peerDependencies` from the workspace root `package.json`.\nCatalogs may be declared under `workspaces` or at the top level of a\nmanifest with a `workspaces` field. Nested catalogs take precedence.\nUnknown keys and non-string entries are ignored. Missing catalogs leave\ndependency versions unresolved.\n\nIf both catalog options are enabled, pnpm catalogs take precedence.\nDefaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"experimentalPnpmCatalogs": {

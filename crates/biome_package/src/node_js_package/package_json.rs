@@ -8,13 +8,13 @@ use biome_deserialize::{
 use biome_diagnostics::Error;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_json_value::{JsonObject, JsonValue};
+use biome_json_value::JsonValue;
 use biome_rowan::AstNodeList;
 use biome_text_size::TextRange;
 use biome_yaml_parser::parse_yaml;
 use biome_yaml_syntax::{
     AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlJsonContent,
-    AnyYamlMappingImplicitKey, YamlBlockMapping,
+    AnyYamlMappingImplicitKey, YamlBlockMapping, YamlLanguage, YamlRoot,
 };
 use camino::Utf8Path;
 use rustc_hash::FxHashMap;
@@ -44,8 +44,11 @@ pub struct PackageJson {
     /// `package.json`. When present, dependency versions declared as
     /// `catalog:` or `catalog:<name>` are looked up via `Catalogs`; when `None`,
     /// no catalog resolution is applied and literal versions are used. The
-    /// workspace service populates this field when catalog resolution is enabled.
+    /// project layout populates this field when catalog resolution is enabled.
     pub catalog: Option<Catalogs>,
+    /// Catalog definitions declared in this manifest, before workspace resolution.
+    pub bun_catalogs: Option<Catalogs>,
+    pub has_workspaces: bool,
     pub bundle_dependencies: BundleDependencies,
     pub bundled_dependencies: BundleDependencies,
     pub license: Option<(Box<str>, TextRange)>,
@@ -130,116 +133,97 @@ impl PackageJson {
             return None;
         }
 
-        let mut catalogs = Catalogs::default();
-        let root = parsed.tree();
-        let document = root
-            .documents()
-            .into_iter()
-            .find_map(|doc| doc.as_yaml_document().cloned())?;
-        let top_node = document.node()?;
-        let mapping = as_catalog_block_mapping(&top_node)?;
+        parse_pnpm_catalogs(&parsed.tree())
+    }
+}
 
-        for entry in mapping.entries() {
-            let Some((key, value_node)) = parse_catalog_mapping_entry(entry) else {
-                continue;
-            };
+/// Deserialized catalog definitions from `pnpm-workspace.yaml`.
+#[derive(Debug, Default, Clone)]
+pub struct PnpmWorkspace {
+    pub catalogs: Option<Catalogs>,
+}
 
-            match key.as_ref() {
-                "catalog" => {
-                    if let Some(deps_map) = as_catalog_block_mapping(&value_node) {
-                        let deps = collect_catalog_dependencies(&deps_map);
-                        if !deps.is_empty() {
-                            catalogs.default = Some(deps);
-                        }
+impl Manifest for PnpmWorkspace {
+    type Language = YamlLanguage;
+
+    fn deserialize_manifest(root: &YamlRoot, _path: &Utf8Path) -> Deserialized<Self> {
+        Deserialized::new(
+            Some(Self {
+                catalogs: parse_pnpm_catalogs(root),
+            }),
+            vec![],
+        )
+    }
+
+    fn read_manifest(fs: &dyn biome_fs::FileSystem, path: &Utf8Path) -> Deserialized<Self> {
+        match fs.read_file_from_path(path) {
+            Ok(content) => {
+                let parsed = parse_yaml(&content);
+                let manifest = (!parsed.has_errors()).then(|| Self {
+                    catalogs: parse_pnpm_catalogs(&parsed.tree()),
+                });
+                Deserialized::new(
+                    manifest,
+                    parsed
+                        .into_diagnostics()
+                        .into_iter()
+                        .map(Error::from)
+                        .collect(),
+                )
+            }
+            Err(error) => Deserialized::new(None, vec![Error::from(error)]),
+        }
+    }
+}
+
+fn parse_pnpm_catalogs(root: &YamlRoot) -> Option<Catalogs> {
+    let mut catalogs = Catalogs::default();
+    let document = root
+        .documents()
+        .into_iter()
+        .find_map(|doc| doc.as_yaml_document().cloned())?;
+    let top_node = document.node()?;
+    let mapping = as_catalog_block_mapping(&top_node)?;
+
+    for entry in mapping.entries() {
+        let Some((key, value_node)) = parse_catalog_mapping_entry(entry) else {
+            continue;
+        };
+
+        match key.as_ref() {
+            "catalog" => {
+                if let Some(deps_map) = as_catalog_block_mapping(&value_node) {
+                    let deps = collect_catalog_dependencies(&deps_map);
+                    if !deps.is_empty() {
+                        catalogs.default = Some(deps);
                     }
                 }
-                "catalogs" => {
-                    if let Some(named_map) = as_catalog_block_mapping(&value_node) {
-                        for catalog_entry in named_map.entries() {
-                            let Some((name, catalog_node)) =
-                                parse_catalog_mapping_entry(catalog_entry)
-                            else {
-                                continue;
-                            };
+            }
+            "catalogs" => {
+                if let Some(named_map) = as_catalog_block_mapping(&value_node) {
+                    for catalog_entry in named_map.entries() {
+                        let Some((name, catalog_node)) = parse_catalog_mapping_entry(catalog_entry)
+                        else {
+                            continue;
+                        };
 
-                            if let Some(deps_map) = as_catalog_block_mapping(&catalog_node) {
-                                let deps = collect_catalog_dependencies(&deps_map);
-                                if !deps.is_empty() {
-                                    catalogs.named.insert(name, deps);
-                                }
+                        if let Some(deps_map) = as_catalog_block_mapping(&catalog_node) {
+                            let deps = collect_catalog_dependencies(&deps_map);
+                            if !deps.is_empty() {
+                                catalogs.named.insert(name, deps);
                             }
                         }
                     }
                 }
-                _ => {}
             }
-        }
-
-        if catalogs.is_empty() {
-            None
-        } else {
-            Some(catalogs)
+            _ => {}
         }
     }
 
-    /// Extracts Bun catalogs from top-level `catalog` / `catalogs` fields or
-    /// their equivalents inside `workspaces`. Nested catalogs take precedence
-    /// over top-level catalogs. Bun's `catalog` and `catalogs.default` entries
-    /// are combined and exposed under both default catalog aliases.
-    /// Manifests without `workspaces` and invalid JSON return `None`;
-    /// unsupported value shapes and non-string dependency versions are ignored.
-    pub fn parse_bun_workspace_catalog(source: &str) -> Option<Catalogs> {
-        let (value, errors) = deserialize_from_json_str::<JsonValue>(
-            source,
-            JsonParserOptions::default(),
-            "package.json",
-        )
-        .consume();
-        if !errors.is_empty() {
-            return None;
-        }
-        let value = value?;
-        let root = value.as_object()?;
-        let workspaces = root.get("workspaces")?;
-        let mapping = workspaces
-            .as_object()
-            .filter(|object| object.contains_key("catalog") || object.contains_key("catalogs"))
-            .unwrap_or(root);
-        let default = mapping
-            .get("catalog")
-            .and_then(JsonValue::as_object)
-            .map(collect_json_catalog_dependencies)
-            .filter(|deps| !deps.is_empty());
-        let named = mapping
-            .get("catalogs")
-            .and_then(JsonValue::as_object)
-            .into_iter()
-            .flat_map(|catalogs| catalogs.iter())
-            .filter_map(|(name, value)| {
-                let deps = collect_json_catalog_dependencies(value.as_object()?);
-                (!deps.is_empty()).then(|| (name.as_str().into(), deps))
-            })
-            .collect();
-        let mut catalogs = Catalogs {
-            default,
-            named,
-            trim_catalog_names: true,
-        };
-        for name in ["", "default"] {
-            if let Some(named_default) = catalogs.named.remove(name) {
-                let default = catalogs.default.get_or_insert_default();
-                default.0 = default
-                    .0
-                    .iter()
-                    .chain(named_default.0.iter())
-                    .cloned()
-                    .collect();
-            }
-        }
-        if let Some(default) = &catalogs.default {
-            catalogs.named.insert("default".into(), default.clone());
-        }
-        (!catalogs.is_empty()).then_some(catalogs)
+    if catalogs.is_empty() {
+        None
+    } else {
+        Some(catalogs)
     }
 }
 
@@ -258,7 +242,7 @@ impl PackageJson {
 ///
 #[derive(Debug, Default, Clone)]
 pub struct Catalogs {
-    /// Dependency map for the default catalog, including Bun's `catalogs.default` entries.
+    /// Dependency map declared under the top-level `catalog` key.
     ///
     /// Example:
     /// ```yaml
@@ -268,7 +252,7 @@ pub struct Catalogs {
     /// -> `default["react"] == "19.2.0"`.
     pub default: Option<Dependencies>,
 
-    /// Dependency maps declared under `catalogs`, including Bun's default catalog alias.
+    /// Dependency maps declared under the top-level `catalogs` key.
     ///
     /// The key is the catalog name, and the value is its dependencies map.
     /// Example:
@@ -279,8 +263,7 @@ pub struct Catalogs {
     /// ```
     /// -> `named["react19"]["react"] == "19.2.0"`.
     pub named: FxHashMap<Box<str>, Dependencies>,
-    /// Bun trims whitespace from catalog references; pnpm names remain literal.
-    trim_catalog_names: bool,
+    pub kind: CatalogKind,
 }
 
 impl Catalogs {
@@ -289,10 +272,10 @@ impl Catalogs {
     }
 
     fn lookup<'a>(&'a self, specifier: &str, catalog_name: Option<&str>) -> Option<&'a str> {
-        let catalog_name = if self.trim_catalog_names {
+        let catalog_name = if self.kind == CatalogKind::Bun {
             catalog_name
                 .map(|name| name.trim_matches([' ', '\t', '\n', '\r', '\x0b', '\x0c']))
-                .filter(|name| !name.is_empty())
+                .filter(|name| !name.is_empty() && *name != "default")
         } else {
             catalog_name
         };
@@ -304,17 +287,94 @@ impl Catalogs {
     }
 }
 
-fn collect_json_catalog_dependencies(mapping: &JsonObject) -> Dependencies {
-    Dependencies(
-        mapping
-            .iter()
-            .filter_map(|(name, value)| {
-                let version = value.as_string()?;
-                Some((name.as_str().into(), version.as_str().into()))
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice(),
-    )
+/// Catalog reference semantics for the package manager that owns the workspace.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum CatalogKind {
+    /// Catalog names are literal; named catalogs are separate from the default.
+    #[default]
+    Pnpm,
+    /// Reference names trim ASCII whitespace. Empty names and `default` alias
+    /// the default catalog, which combines `catalog` and `catalogs.default`.
+    Bun,
+}
+
+#[derive(Debug, Default, Clone)]
+struct PackageWorkspaces {
+    catalogs: Option<Catalogs>,
+}
+
+impl Deserializable for PackageWorkspaces {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = PackageWorkspaces;
+            const EXPECTED_TYPE: DeserializableTypes =
+                DeserializableTypes::MAP.union(DeserializableTypes::ARRAY);
+
+            fn visit_array(
+                self,
+                ctx: &mut dyn DeserializationContext,
+                items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+                _range: TextRange,
+                name: &str,
+            ) -> Option<Self::Output> {
+                for item in items.flatten() {
+                    let _ = Box::<str>::deserialize(ctx, &item, name);
+                }
+                Some(PackageWorkspaces::default())
+            }
+
+            fn visit_map(
+                self,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut MapMembers<'_>,
+                _range: TextRange,
+                _name: &str,
+            ) -> Option<Self::Output> {
+                let mut catalogs = None;
+                for (key, value) in members.flatten() {
+                    let key = Text::deserialize(ctx, &key, "")?;
+                    match key.text() {
+                        "catalog" => {
+                            catalogs.get_or_insert_with(Catalogs::default).default =
+                                Dependencies::deserialize(ctx, &value, &key);
+                        }
+                        "catalogs" => {
+                            catalogs.get_or_insert_with(Catalogs::default).named =
+                                Deserializable::deserialize(ctx, &value, &key).unwrap_or_default();
+                        }
+                        _ => {}
+                    }
+                }
+                Some(PackageWorkspaces { catalogs })
+            }
+        }
+        value.deserialize(ctx, Visitor, name)
+    }
+}
+
+impl Catalogs {
+    fn into_bun(mut self) -> Option<Self> {
+        self.kind = CatalogKind::Bun;
+        self.default = self.default.filter(|deps| !deps.is_empty());
+        self.named.retain(|_, deps| !deps.is_empty());
+        for name in ["", "default"] {
+            if let Some(named_default) = self.named.remove(name) {
+                let default = self.default.get_or_insert_default();
+                default.0 = default
+                    .0
+                    .iter()
+                    .chain(named_default.0.iter())
+                    .cloned()
+                    .collect();
+            }
+        }
+        (!self.is_empty()).then_some(self)
+    }
 }
 
 /// Parses a catalog mapping entry into a `(key, value node)` pair, keeping only
@@ -718,11 +778,23 @@ impl DeserializationVisitor for PackageJsonVisitor {
     ) -> Option<Self::Output> {
         let mut result = Self::Output::default();
         let mut seen_types_field = false;
+        let mut catalogs = Catalogs::default();
+        let mut workspaces: Option<PackageWorkspaces> = None;
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
+                "catalog" => {
+                    catalogs.default = Deserializable::deserialize(ctx, &value, &key_text);
+                }
+                "catalogs" => {
+                    catalogs.named =
+                        Deserializable::deserialize(ctx, &value, &key_text).unwrap_or_default();
+                }
+                "workspaces" => {
+                    workspaces = Deserializable::deserialize(ctx, &value, &key_text);
+                }
                 "version" => {
                     result.version = Deserializable::deserialize(ctx, &value, &key_text);
                 }
@@ -805,6 +877,10 @@ impl DeserializationVisitor for PackageJsonVisitor {
                 }
                 _ => {}
             }
+        }
+        result.has_workspaces = workspaces.is_some();
+        if let Some(workspaces) = workspaces {
+            result.bun_catalogs = workspaces.catalogs.unwrap_or(catalogs).into_bun();
         }
         Some(result)
     }
@@ -979,13 +1055,23 @@ mod tests {
         assert!(package_json.matches_dependency("react", ">=19.0.0"));
     }
 
+    fn parse_bun_catalogs(source: &str) -> Option<Catalogs> {
+        deserialize_from_json_str::<PackageJson>(
+            source,
+            JsonParserOptions::default(),
+            "package.json",
+        )
+        .into_deserialized()?
+        .bun_catalogs
+    }
+
     #[test]
     fn parse_bun_workspace_catalogs() {
         for source in [
             r#"{"workspaces":{"packages":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"legacy":{"react":"18.3.1"}}}}"#,
             r#"{"workspaces":["packages/*"],"catalog":{"react":"19.0.0"},"catalogs":{"legacy":{"react":"18.3.1"}}}"#,
         ] {
-            let catalogs = PackageJson::parse_bun_workspace_catalog(source).unwrap();
+            let catalogs = parse_bun_catalogs(source).unwrap();
             for (version, range) in [
                 ("catalog:", ">=19.0.0"),
                 ("catalog:default", ">=19.0.0"),
@@ -1036,7 +1122,7 @@ mod tests {
             r#"{"workspaces":[],"catalogs":{"":{"react":"19.0.0"}}}"#,
             r#"{"workspaces":[],"catalog":{"react":"19.0.0"},"catalogs":{"default":{"react-dom":"19.0.0"}}}"#,
         ] {
-            let catalogs = PackageJson::parse_bun_workspace_catalog(source).unwrap();
+            let catalogs = parse_bun_catalogs(source).unwrap();
             for version in [
                 "catalog:",
                 "catalog:default",
@@ -1061,7 +1147,7 @@ mod tests {
 
     #[test]
     fn parse_bun_workspace_catalog_prefers_workspaces() {
-        let catalogs = PackageJson::parse_bun_workspace_catalog(
+        let catalogs = parse_bun_catalogs(
             r#"{
             "workspaces": {"catalog": {"react": "19.0.0"}},
             "catalog": {"react": "18.3.1"},
@@ -1069,9 +1155,27 @@ mod tests {
         }"#,
         )
         .unwrap();
-        assert_eq!(catalogs.default.unwrap().get("react"), Some("19.0.0"));
-        assert_eq!(catalogs.named["default"].get("react"), Some("19.0.0"));
+        assert_eq!(catalogs.lookup("react", None), Some("19.0.0"));
+        assert_eq!(catalogs.lookup("react", Some("default")), Some("19.0.0"));
         assert!(!catalogs.named.contains_key("legacy"));
+    }
+
+    #[test]
+    fn bun_catalog_fields_report_deserialization_errors() {
+        for source in [
+            r#"{"workspaces":[],"catalog":{"react":19}}"#,
+            r#"{"workspaces":[],"catalogs":{"legacy":false}}"#,
+            r#"{"workspaces":{"catalogs":{"legacy":{"react":null}}}}"#,
+            r#"{"workspaces":false,"catalog":{"react":"19.0.0"}}"#,
+        ] {
+            let (_, errors) = deserialize_from_json_str::<PackageJson>(
+                source,
+                JsonParserOptions::default(),
+                "package.json",
+            )
+            .consume();
+            assert!(!errors.is_empty(), "{source}");
+        }
     }
 
     #[test]
@@ -1085,12 +1189,9 @@ mod tests {
             r#"{"catalog":{"react":"19.0.0"}}"#,
             r#"{"workspaces":{"catalog":{},"catalogs":{"empty":{}}}}"#,
         ] {
-            assert!(
-                PackageJson::parse_bun_workspace_catalog(source).is_none(),
-                "{source}"
-            );
+            assert!(parse_bun_catalogs(source).is_none(), "{source}");
         }
-        let catalogs = PackageJson::parse_bun_workspace_catalog(r#"{
+        let catalogs = parse_bun_catalogs(r#"{
             "unknown": {"catalog": {"wrong": "1.0.0"}},
             "workspaces": {
                 "catalog": {"react": "19.0.0", "number": 19, "array": [], "object": {}, "null": null},
