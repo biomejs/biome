@@ -791,10 +791,16 @@ mod test {
     #[test]
     fn resolve_plugin_rejects_missing_direct_and_selected_files() {
         let fs = MemoryFileSystem::default();
+        let root = Utf8Path::new(std::path::MAIN_SEPARATOR_STR);
         let error = resolve_plugin(&fs, "./missing.grit", Utf8Path::new("/"), None)
             .expect_err("direct plugin files must exist");
         assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
-        assert!(error.to_string().contains("/missing.grit"));
+        assert!(
+            error
+                .to_string()
+                .contains(root.join("missing.grit").as_str()),
+            "{error}"
+        );
 
         fs.insert(
             "/my-plugin/biome-manifest.json".into(),
@@ -815,7 +821,12 @@ mod test {
             )
             .expect_err("selected plugin files must exist");
             assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
-            assert!(error.to_string().contains("/my-plugin/missing.grit"));
+            assert!(
+                error
+                    .to_string()
+                    .contains(root.join("my-plugin").join("missing.grit").as_str()),
+                "{error}"
+            );
         }
 
         fs.insert("/my-plugin/missing.grit/child".into(), "");
