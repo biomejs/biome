@@ -54,6 +54,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+biome.json:3:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+     2 │   "html": { "experimentalFullSupportEnabled": true },
+   > 3 │   "linter": {
+       │             ^
+   > 4 │     "rules": {
+        ...
+   > 8 │       "nursery": { "noAstroSetHtmlDirective": "error" }
+   > 9 │     }
+  > 10 │   }
+       │   ^
+    11 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 file.astro:7:13 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
