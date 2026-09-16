@@ -234,6 +234,62 @@ fn bench_cyclic_declaration_promise_lookup(bencher: Bencher) {
         });
 }
 
+const RECURSIVE_ALIAS_CASES: &[(&str, &str, &str)] = &[
+    // A recursive alias whose branches collapse to a self-instantiation with
+    // `infer` parameters, as in react-hook-form's `FieldPathValue`.
+    // See https://github.com/biomejs/biome/issues/11810.
+    (
+        "path_value",
+        r#"
+        type PathValue<T, P extends string> = P extends `${infer K}.${infer R}`
+            ? K extends keyof T
+                ? PathValue<T[K], R>
+                : T extends ReadonlyArray<infer V>
+                    ? PathValue<V, R>
+                    : never
+            : P extends keyof T
+                ? T[P]
+                : never;
+        declare function useController<T, N extends string>(props: {
+            name: N;
+        }): { field: { value: PathValue<T, N> } };
+        const { field } = useController<{ items: string[] }, "items">({ name: "items" });
+        field.value.length;
+        "#,
+        "field.value.length",
+    ),
+    // A recursive alias that re-instantiates itself with its own arguments,
+    // as in zustand's `Mutate<StoreApi<T>, []>`.
+    // See https://github.com/biomejs/biome/issues/11813.
+    (
+        "self_instantiation",
+        r#"
+        interface Api { get(): number }
+        type Rec<T, L> = L extends [] ? T : Rec<T, []>;
+        declare const api: Rec<Api, []>;
+        api.get();
+        "#,
+        "api.get()",
+    ),
+];
+
+fn recursive_alias_cases() -> impl Iterator<Item = &'static str> {
+    RECURSIVE_ALIAS_CASES.iter().map(|(name, _, _)| *name)
+}
+
+#[divan::bench(name = "bench_recursive_alias_member_lookup", args = recursive_alias_cases())]
+fn bench_recursive_alias_member_lookup(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| recursive_alias_member_lookup_input(name))
+        .bench_local_values(|(db, module, range)| {
+            let input = ExpressionTypeInput::new(&db, module, range);
+            let ty = infer_expression_type(&db, input).expect("member access must have a type");
+            let input = NormalizeTypeInput::new(&db, module, ty);
+            divan::black_box(normalize_type(&db, input));
+            db
+        });
+}
+
 #[divan::bench(name = "bench_distinct_local_type_lookup_queries")]
 fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
@@ -653,6 +709,27 @@ fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRa
         })
         .expect("Promise chain must be collected");
     (db, consumer, range)
+}
+
+fn recursive_alias_member_lookup_input(name: &str) -> (WorkspaceDb, ModuleInfo, TextRange) {
+    let (_, source, expression) = RECURSIVE_ALIAS_CASES
+        .iter()
+        .find(|(case_name, _, _)| *case_name == name)
+        .expect("cannot find test case");
+
+    let (db, module) = build_source_db("recursive_alias.ts", source);
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let range = info
+        .raw_expressions
+        .keys()
+        .copied()
+        .find(|range| {
+            source.get(usize::from(range.start())..usize::from(range.end())) == Some(*expression)
+        })
+        .expect("member access must be collected");
+    (db, module, range)
 }
 
 fn expression_query_inputs(count: usize) -> (WorkspaceDb, ModuleInfo, Vec<TextRange>) {
