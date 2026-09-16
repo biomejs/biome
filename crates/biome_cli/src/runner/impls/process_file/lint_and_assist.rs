@@ -5,6 +5,7 @@ use crate::runner::diagnostics::{ResultExt, SkippedDiagnostic};
 use crate::runner::execution::AnalyzerSelectors;
 use crate::runner::process_file::{
     FileStatus, Message, ProcessFile, ProcessStdinFilePayload, WorkspaceFile,
+    print_stdin_diagnostics,
 };
 use biome_analyze::RuleCategoriesBuilder;
 use biome_console::{ConsoleExt, markup};
@@ -198,9 +199,7 @@ impl ProcessFile for LintAssistProcessFile {
             enabled_rules: vec![],
             fix_file_mode,
             suppression_reason,
-            format: execution.is_check()
-                && execution.requires_write_access()
-                && file_features.supports_format(),
+            format: execution.is_check() && file_features.supports_format(),
             write: execution.requires_write_access(),
             include_code_fix: true,
             max_diagnostics: Some(execution.get_max_diagnostics(cli_options)),
@@ -208,11 +207,41 @@ impl ProcessFile for LintAssistProcessFile {
             enforce_assist: execution.should_enforce_assist(),
             skip_parse_errors: execution.should_skip_parse_errors(),
         })?;
-        let source = result.output.as_deref().unwrap_or(content);
+        let write = execution.requires_write_access();
+        let source = if write {
+            result.output.as_deref().unwrap_or(content)
+        } else {
+            content
+        };
         console.append_raw(source);
+        if result.parse_errors > 0 && execution.should_skip_parse_errors() {
+            return Ok(());
+        }
+        print_stdin_diagnostics(
+            console,
+            cli_options,
+            biome_path,
+            source,
+            result.diagnostics
+        );
 
-        if result.output.is_none() && !execution.requires_write_access() {
+        let category = execution.as_diagnostic_category();
+        if result.format_with_errors_disabled {
+            Err(WorkspaceError::format_with_errors_disabled().into())
+        } else if result.errors > 0 {
+            if write {
+                Err(CliDiagnostic::apply_error(category))
+            } else {
+                Err(CliDiagnostic::check_error(category))
+            }
+        } else if result.output.is_some() && !write {
             Err(StdinDiagnostic::new_not_formatted().into())
+        } else if result.warnings > 0 && cli_options.error_on_warnings {
+            if write {
+                Err(CliDiagnostic::apply_warnings(category))
+            } else {
+                Err(CliDiagnostic::check_warnings(category))
+            }
         } else {
             Ok(())
         }

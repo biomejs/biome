@@ -15,6 +15,17 @@ var foo: string = "";
 <div></div>
 ```
 
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -27,4 +38,78 @@ something();
 var foo: string = "";
 ---
 <div></div>
+```
+
+```block
+file.astro:5:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    3 │ import { a } from "mod";
+    4 │ 
+  > 5 │ debugger;
+      │ ^^^^^^^^^
+    6 │ something();
+    7 │ var foo: string = "";
+  
+  i Unsafe fix: Remove debugger statement
+  
+    2 2 │   import { something } from "file.astro";
+    3 3 │   import { a } from "mod";
+    4   │ - 
+    5   │ - debugger;
+    6 4 │   something();
+    7 5 │   var foo: string = "";
+  
+
+```
+
+```block
+file.astro:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ ---
+    2 │ import { something } from "file.astro";
+  > 3 │ import { a } from "mod";
+      │        ^^^^^
+    4 │ 
+    5 │ debugger;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   
+    2 2 │   import { something } from "file.astro";
+    3   │ - import·{·a·}·from·"mod";
+    4 3 │   
+    5 4 │   debugger;
+  
+
+```
+
+```block
+file.astro:7:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+    5 │ debugger;
+    6 │ something();
+  > 7 │ var foo: string = "";
+      │     ^^^
+    8 │ ---
+    9 │ <div></div>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    5 5 │   debugger;
+    6 6 │   something();
+    7   │ - var·foo:·string·=·"";
+      7 │ + var·_foo:·string·=·"";
+    8 8 │   
+  
+
 ```

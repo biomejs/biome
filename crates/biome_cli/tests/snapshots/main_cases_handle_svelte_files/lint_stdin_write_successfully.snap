@@ -19,3 +19,25 @@ var foo: string = "";
 </script>
 <div></div>
 ```
+
+```block
+file.svelte:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+    1 │ <script context="module" lang="ts">
+  > 2 │ var foo: string = "";
+      │     ^^^
+    3 │ </script>
+    4 │ <div></div>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    1   │ - var·foo:·string·=·"";
+      1 │ + var·_foo:·string·=·"";
+    2 2 │   
+  
+
+```

@@ -18,9 +18,9 @@ var foo: string = "";
 # Termination Message
 
 ```block
-stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The contents aren't fixed. Use the `--write` flag to fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -37,4 +37,160 @@ statement ( ) ;
 var foo: string = "";
 </script>
 <div></div>
+```
+
+```block
+file.svelte:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some imports or exports are not organized.
+  
+    1 │ <script context="module" lang="ts">
+  > 2 │ import { Form as   Form }     from './components/Form.svelte' ;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ import     Button     from "./components/Button.svelte";
+  > 4 │ debugger;
+      │ ^^^^^^^^^
+    5 │ statement ( ) ;
+    6 │ var foo: string = "";
+  
+  i Sort these imports.
+  
+    1 │ <script context="module" lang="ts">
+  > 2 │ import { Form as   Form }     from './components/Form.svelte' ;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ import     Button     from "./components/Button.svelte";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ debugger;
+    5 │ statement ( ) ;
+  
+  i This statement must be preceded by a blank line. Add a newline before this statement.
+  
+    2 │ import { Form as   Form }     from './components/Form.svelte' ;
+    3 │ import     Button     from "./components/Button.svelte";
+  > 4 │ debugger;
+      │ ^^^^^^^^^
+    5 │ statement ( ) ;
+    6 │ var foo: string = "";
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - import·{·Form·as···Form·}·····from·'./components/Form.svelte'·;
+    2   │ - import·····Button·····from·"./components/Button.svelte";
+      1 │ + import·····Button·····from·"./components/Button.svelte";
+      2 │ + import·{·Form·as···Form·}·····from·'./components/Form.svelte'·;
+      3 │ + 
+    3 4 │   debugger;
+    4 5 │   statement ( ) ;
+  
+
+```
+
+```block
+file.svelte:2:10 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless rename.
+  
+    1 │ <script context="module" lang="ts">
+  > 2 │ import { Form as   Form }     from './components/Form.svelte' ;
+      │          ^^^^^^^^^^^^^^
+    3 │ import     Button     from "./components/Button.svelte";
+    4 │ debugger;
+  
+  i Safe fix: Remove the renaming.
+  
+    1 │ import·{·Form·as···Form·}·····from·'./components/Form.svelte'·;
+      │               ----------                                       
+
+```
+
+```block
+file.svelte:4:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+    2 │ import { Form as   Form }     from './components/Form.svelte' ;
+    3 │ import     Button     from "./components/Button.svelte";
+  > 4 │ debugger;
+      │ ^^^^^^^^^
+    5 │ statement ( ) ;
+    6 │ var foo: string = "";
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1 1 │   import { Form as   Form }     from './components/Form.svelte' ;
+    2 2 │   import     Button     from "./components/Button.svelte";
+    3   │ - debugger;
+    4 3 │   statement ( ) ;
+    5 4 │   var foo: string = "";
+  
+
+```
+
+```block
+file.svelte:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script context="module" lang="ts">
+  > 2 │ import { Form as   Form }     from './components/Form.svelte' ;
+      │        ^^^^^^^^^^^^^^^^^^
+    3 │ import     Button     from "./components/Button.svelte";
+    4 │ debugger;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·Form·as···Form·}·····from·'./components/Form.svelte'·;
+      │ ---------------------------------------------------------------
+
+```
+
+```block
+file.svelte:3:12 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script context="module" lang="ts">
+    2 │ import { Form as   Form }     from './components/Form.svelte' ;
+  > 3 │ import     Button     from "./components/Button.svelte";
+      │            ^^^^^^
+    4 │ debugger;
+    5 │ statement ( ) ;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import { Form as   Form }     from './components/Form.svelte' ;
+    2   │ - import·····Button·····from·"./components/Button.svelte";
+    3 2 │   debugger;
+    4 3 │   statement ( ) ;
+  
+
+```
+
+```block
+file.svelte:6:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+    4 │ debugger;
+    5 │ statement ( ) ;
+  > 6 │ var foo: string = "";
+      │     ^^^
+    7 │ </script>
+    8 │ <div></div>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    3 3 │   debugger;
+    4 4 │   statement ( ) ;
+    5   │ - var·foo:·string·=·"";
+      5 │ + var·_foo:·string·=·"";
+    6 6 │   
+  
+
 ```

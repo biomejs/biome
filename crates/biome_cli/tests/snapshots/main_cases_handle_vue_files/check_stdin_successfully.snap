@@ -17,9 +17,9 @@ delete a.c;
 # Termination Message
 
 ```block
-stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The contents aren't fixed. Use the `--write` flag to fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -35,4 +35,91 @@ import *     as         vueUse  from  "vue-use"   ;
 delete a.c;
 </script>
 <template></template>
+```
+
+```block
+file.vue:2:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Sort these imports.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ import {      Button  as Button  }   from  "./components/Button.vue"   ;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ import *     as         vueUse  from  "vue-use"   ;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ delete a.c;
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+    2   │ - import·*·····as·········vueUse··from··"vue-use"···;
+      1 │ + import·*·····as·········vueUse··from··"vue-use"···;
+      2 │ + import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+    3 3 │   
+    4 4 │   delete a.c;
+  
+
+```
+
+```block
+file.vue:2:15 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless rename.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ import {      Button  as Button  }   from  "./components/Button.vue"   ;
+      │               ^^^^^^^^^^^^^^^^^
+    3 │ import *     as         vueUse  from  "vue-use"   ;
+    4 │ 
+  
+  i Safe fix: Remove the renaming.
+  
+    1 │ import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+      │                       -----------                                       
+
+```
+
+```block
+file.vue:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ import {      Button  as Button  }   from  "./components/Button.vue"   ;
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import *     as         vueUse  from  "vue-use"   ;
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{······Button··as·Button··}···from··"./components/Button.vue"···;
+      │ ------------------------------------------------------------------------
+
+```
+
+```block
+file.vue:3:25 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script setup lang="ts">
+    2 │ import {      Button  as Button  }   from  "./components/Button.vue"   ;
+  > 3 │ import *     as         vueUse  from  "vue-use"   ;
+      │                         ^^^^^^
+    4 │ 
+    5 │ delete a.c;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import {      Button  as Button  }   from  "./components/Button.vue"   ;
+    2   │ - import·*·····as·········vueUse··from··"vue-use"···;
+    3 2 │   
+    4 3 │   delete a.c;
+  
+
 ```
