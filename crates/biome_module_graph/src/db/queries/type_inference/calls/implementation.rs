@@ -97,6 +97,13 @@ fn infer_function_call_type<'db>(
         InferredTypeData::Function(function) => infer_function_return_type(db, function, args),
         InferredTypeData::InstanceOf(instance) => {
             let target = instance.ty(db);
+            // A class's call signatures belong to its constructor value.
+            if matches!(
+                target.expand_canonical_global(db),
+                InferredTypeData::Class(_)
+            ) {
+                return None;
+            }
             let substitutions =
                 substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
             let target = apply_substitutions_to_root_body(db, target, &substitutions);
@@ -106,6 +113,8 @@ fn infer_function_call_type<'db>(
             select_call_signature(db, interface.members(db), args)
                 .and_then(|function| infer_function_return_type(db, function, args))
         }
+        InferredTypeData::Class(class) => select_call_signature(db, class.members(db), args)
+            .and_then(|function| infer_function_return_type(db, function, args)),
         InferredTypeData::Object(object) => select_call_signature(db, object.members(db), args)
             .and_then(|function| infer_function_return_type(db, function, args)),
         InferredTypeData::Union(union) => collected_type_result(
@@ -140,7 +149,7 @@ fn select_call_signature<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db));
+        .filter_map(|member| member.ty.expand_canonical_global(db).callable_function(db));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return Some(first);

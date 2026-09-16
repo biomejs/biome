@@ -29,9 +29,9 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 ///
 /// The callee and final return type are normalized in `input.module`. The
 /// query accepts plain positional arguments and supports functions, callable
-/// interfaces and objects, and unions of callable types. Overloads are tested
-/// in declaration order. If no supported signature matches, the result is
-/// `Unknown`.
+/// interfaces, classes, objects, and unions of callable types. Overloads are
+/// tested in declaration order. If no supported signature matches, the result
+/// is `Unknown`.
 ///
 /// In this example, the inferred type of `result` is `number`.
 ///

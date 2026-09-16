@@ -260,6 +260,73 @@ fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
 }
 
 #[test]
+fn class_call_signatures_select_declared_returns() {
+    use biome_js_type_info::interned_types::InternedClass;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Signatures {
+            (): string;
+            (value: number): boolean;
+            new(): number;
+        }
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let signatures = inferred
+        .types
+        .iter()
+        .find_map(|ty| match ty {
+            InferredTypeData::Interface(interface)
+                if interface.name(&db).text() == "Signatures" =>
+            {
+                Some(interface.members(&db).clone())
+            }
+            _ => None,
+        })
+        .expect("expected controlled signatures");
+    let class = |members| {
+        InferredTypeData::Class(InternedClass::new(
+            &db,
+            Box::default(),
+            None,
+            Box::default(),
+            members,
+            Some(Text::from("Callable")),
+            false,
+        ))
+    };
+    let callable = class(signatures.clone());
+    assert!(is_inferred_string(
+        &db,
+        infer_call_expression_type(&db, module, callable, Vec::new())
+    ));
+    assert!(is_inferred_boolean(
+        &db,
+        infer_call_expression_type(&db, module, callable, vec![InferredTypeData::Number])
+    ));
+    let instance = InferredTypeData::instance_of(&db, callable, Box::default());
+    assert_eq!(
+        infer_call_expression_type(&db, module, instance, Vec::new()),
+        InferredTypeData::Unknown
+    );
+    let constructor_only = class(
+        signatures
+            .into_iter()
+            .filter(|member| !member.kind.is_call_signature())
+            .collect(),
+    );
+    assert_eq!(
+        infer_call_expression_type(&db, module, constructor_only, Vec::new()),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_resolves_callable_interface_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
