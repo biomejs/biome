@@ -23,6 +23,8 @@ biome_json_syntax      = { workspace = true }
 biome_markdown_analyze = { workspace = true }
 biome_markdown_syntax  = { workspace = true }
 biome_ruledoc_utils    = { workspace = true }
+biome_yaml_analyze     = { workspace = true }
+biome_yaml_syntax      = { workspace = true }
 pulldown-cmark         = "0.13.3"
 
 [lints]

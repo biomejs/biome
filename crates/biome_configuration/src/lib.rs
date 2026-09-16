@@ -60,6 +60,10 @@ use crate::max_size::MaxSize;
 use crate::vcs::VcsConfiguration;
 #[cfg(feature = "cli")]
 use crate::vcs::vcs_configuration;
+#[cfg(feature = "lang_yaml")]
+pub use crate::yaml::YamlConfiguration;
+#[cfg(all(feature = "cli", feature = "lang_yaml"))]
+pub use crate::yaml::yaml_configuration;
 #[cfg(feature = "cli")]
 pub use analyzer::linter_configuration;
 pub use analyzer::{
@@ -212,13 +216,10 @@ pub struct Configuration {
     pub markdown: Option<MarkdownConfiguration>,
 
     /// Configuration specific to YAML.
-    #[cfg_attr(
-        feature = "cli",
-        bpaf(external(crate::yaml::yaml_configuration), optional)
-    )]
+    #[cfg_attr(feature = "cli", bpaf(external(yaml_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg(feature = "lang_yaml")]
-    pub yaml: Option<crate::yaml::YamlConfiguration>,
+    pub yaml: Option<YamlConfiguration>,
 
     /// Configuration specific to GraphQL.
     #[cfg(feature = "lang_graphql")]

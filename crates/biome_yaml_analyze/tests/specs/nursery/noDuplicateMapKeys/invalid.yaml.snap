@@ -1,0 +1,41 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalid.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+```
+
+# Diagnostics
+```
+invalid.yaml:3:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    1 │ # should generate diagnostics
+    2 │ person:
+  > 3 │   name: John Doe
+      │   ^^^^
+    4 │   age: 50
+    5 │   name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    3 │   name: John Doe
+    4 │   age: 50
+  > 5 │   name: Jane Doe
+      │   ^^^^
+    6 │ 
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

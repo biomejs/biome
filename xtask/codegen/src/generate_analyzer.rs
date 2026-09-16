@@ -144,6 +144,11 @@ pub fn generate_analyzer() -> Result<()> {
         &["lint", "assist"],
         update_markdown_registry_builder,
     )?;
+    generate_analyzer_crate(
+        "biome_yaml_analyze",
+        &["lint", "assist"],
+        update_yaml_registry_builder,
+    )?;
     Ok(())
 }
 
@@ -353,6 +358,25 @@ fn update_markdown_registry_builder(analyzers: BTreeMap<&'static str, TokenStrea
         use biome_markdown_syntax::MarkdownLanguage;
 
         pub fn visit_registry<V: RegistryVisitor<MarkdownLanguage>>(registry: &mut V) {
+            #( #categories )*
+        }
+    })?;
+
+    fs2::write(path, tokens)?;
+
+    Ok(())
+}
+
+fn update_yaml_registry_builder(analyzers: BTreeMap<&'static str, TokenStream>) -> Result<()> {
+    let path = project_root().join("crates/biome_yaml_analyze/src/registry.rs");
+
+    let categories = analyzers.into_values();
+
+    let tokens = reformat(quote! {
+        use biome_analyze::RegistryVisitor;
+        use biome_yaml_syntax::YamlLanguage;
+
+        pub fn visit_registry<V: RegistryVisitor<YamlLanguage>>(registry: &mut V) {
             #( #categories )*
         }
     })?;

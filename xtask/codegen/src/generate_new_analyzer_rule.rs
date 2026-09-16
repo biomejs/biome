@@ -12,6 +12,7 @@ pub enum LanguageKind {
     Html,
     HtmlVue,
     Markdown,
+    Yaml,
 }
 
 impl LanguageKind {
@@ -24,6 +25,7 @@ impl LanguageKind {
             Self::Html => "html",
             Self::HtmlVue => "html",
             Self::Markdown => "markdown",
+            Self::Yaml => "yaml",
         }
     }
 }
@@ -39,6 +41,7 @@ impl FromStr for LanguageKind {
             "html" => Ok(Self::Html),
             "html-vue" => Ok(Self::HtmlVue),
             "markdown" => Ok(Self::Markdown),
+            "yaml" => Ok(Self::Yaml),
             _ => Err("Unsupported value"),
         }
     }
@@ -638,6 +641,86 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
+        LanguageKind::Yaml => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_yaml_syntax::YamlRoot;
+use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
+
+{macro_name}! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```yaml,expect_diagnostic
+    /// person:
+    ///   name: john doe
+    ///   name: jane doe
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```yaml
+    /// person:
+    ///   name: john doe
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "yaml",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<YamlRoot>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = {rule_name_upper_camel}Options;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
     }
 }
 
@@ -659,6 +742,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should not generate diagnostics -->\n<div>ok</div>"
         }
+        LanguageKind::Yaml => "# should not generate diagnostics\nperson:\n  name: john doe",
         _ => "/* should not generate diagnostics */\n// var a = 1;",
     };
     let invalid_contents = match kind {
@@ -668,6 +752,9 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Markdown => "<!-- should generate diagnostics -->\n# Heading-1\n# Heading-1",
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should generate diagnostics -->\n<div></div>"
+        }
+        LanguageKind::Yaml => {
+            "# should not generate diagnostics\nperson:\n  name: john doe\n  name: jane doe"
         }
         _ => "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;",
     };
