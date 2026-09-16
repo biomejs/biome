@@ -83,7 +83,7 @@ impl ConfigurationKey {
         };
         if !matches!(
             language.as_str(),
-            "javascript" | "json" | "css" | "graphql" | "grit" | "html" | "markdown"
+            "javascript" | "json" | "css" | "graphql" | "grit" | "html" | "markdown" | "yaml"
         ) || !matches!(
             (section.as_str(), property.as_str()),
             ("formatter", _) | ("linter" | "assist", "enabled")
