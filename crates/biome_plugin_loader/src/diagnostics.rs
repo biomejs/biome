@@ -236,13 +236,16 @@ pub struct NotLoaded {
 
 #[cfg(test)]
 mod test {
+    use crate::test_utils::snapshot_content;
+
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_diagnostics::{Error, print_diagnostic_to_string};
     use biome_json_parser::JsonParserOptions;
     use biome_manifest::BiomeManifest;
 
-    fn snap_diagnostic(test_name: &str, diagnostic: Error) {
+    fn snap_diagnostic(test_name: &str, plugin_sources: &[(&str, &str)], diagnostic: Error) {
         let content = print_diagnostic_to_string(&diagnostic);
+        let content = snapshot_content(plugin_sources, &[], &content);
 
         insta::with_settings!({
             prepend_module_to_snapshot => false,
@@ -264,7 +267,11 @@ mod test {
 
         assert!(result.has_errors());
         for diagnostic in result.into_diagnostics() {
-            snap_diagnostic("deserialization_error", diagnostic)
+            snap_diagnostic(
+                "deserialization_error",
+                &[("biome-manifest.jsonc", content)],
+                diagnostic,
+            )
         }
     }
 

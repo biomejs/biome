@@ -161,10 +161,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
             } else {
                 let root = parse.tree();
                 let options = code_block.create_analyzer_options::<CssLanguage>(configuration)?;
-                let semantic_model = biome_css_semantic::semantic_model(&root);
-                let services = CssAnalyzerServices::default()
-                    .with_file_source(file_source)
-                    .with_semantic_model(&semantic_model);
+                let services = CssAnalyzerServices::default().with_file_source(file_source);
                 let result =
                     biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
                         process_signal(signal, code, &file_path, writer)
@@ -218,6 +215,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                     &options,
                     file_source,
                     services,
+                    None,
                     |signal| process_signal(signal, code, &file_path, writer),
                 );
                 propagate_break(result)?;

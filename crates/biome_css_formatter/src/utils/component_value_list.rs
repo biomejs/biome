@@ -408,10 +408,7 @@ where
         .any(|element| CssGenericDelimiter::can_cast(element.syntax().kind()))
 }
 
-/// Returns the layout to use when printing the provided CssComponentValueList.
-/// Until the parser supports comma-separated lists, this will always return
-/// [ValueListLayout::Fill], since all space-separated lists are intentionally
-/// printed compactly.
+/// Chooses grid, single-value, and grouped layouts before width-based wrapping.
 pub(crate) fn get_value_list_layout<N, I>(
     list: &N,
     comments: &CssComments,
@@ -424,22 +421,17 @@ where
     let parent_property = list.parent::<CssGenericProperty>();
     let scss_parent_property = find_scss_parent_property(list);
     let css_property = parent_property.as_ref().and_then(property_name);
-    let is_grid_property = parent_property
-        .as_ref()
-        .or(scss_parent_property.as_ref())
-        .and_then(property_name)
-        .as_ref()
-        .is_some_and(is_grid_template_property_name);
-
-    let text_size: TextSize = list
-        .iter()
-        .filter(|x| x.range().len() > TextSize::from(1))
-        .map(|x| x.range().len())
-        .sum();
-    let value_count = list
-        .iter()
-        .filter(|x| x.range().len() > TextSize::from(1))
-        .count();
+    let is_grid_property = if parent_property.is_some() {
+        css_property
+            .as_ref()
+            .is_some_and(is_grid_template_property_name)
+    } else {
+        scss_parent_property
+            .as_ref()
+            .and_then(property_name)
+            .as_ref()
+            .is_some_and(is_grid_template_property_name)
+    };
 
     let is_comma_separated = list
         .iter()
@@ -471,11 +463,25 @@ where
         } else {
             ValueListLayout::OneGroupPerLine
         }
-    } else if is_comma_separated
-        && text_size >= TextSize::from(f.options().line_width().value() as u32)
-        && (value_count > 12 || is_call_argument_list(list))
-    {
-        ValueListLayout::OnePerLine
+    } else if is_comma_separated {
+        // Trimmed ranges walk to edge tokens; compute them only for this layout.
+        let mut text_size = TextSize::default();
+        let mut value_count = 0usize;
+        for value in list.iter() {
+            let length = value.range().len();
+            if length > TextSize::from(1) {
+                text_size += length;
+                value_count += 1;
+            }
+        }
+
+        if text_size >= TextSize::from(f.options().line_width().value() as u32)
+            && (value_count > 12 || is_call_argument_list(list))
+        {
+            ValueListLayout::OnePerLine
+        } else {
+            ValueListLayout::Fill
+        }
     } else {
         ValueListLayout::Fill
     }

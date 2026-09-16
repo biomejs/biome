@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value_range_layout/layouts.scss
+---
+
+# Input
+
+```scss
+$tone:  /* theme */rebeccapurple ;
+.single{color:  $tone   ;width:calc(100% - #{$gutter});}
+
+.grid{grid-template-columns:[full-start] minmax($gutter,1fr)
+ [main-start] minmax(20ch, $content-width) [main-end];
+grid-template-areas: // rows
+ "#{$header} #{$header}"
+ "sidebar #{$content}";}
+
+.groups{box-shadow:$x   $y 3px $tone,$spread 5px 6px black;
+background:url($first-image) center/cover no-repeat,url($second-image) right/contain repeat-x;}
+
+.comments{box-shadow:$x/* horizontal */$y 3px $tone,/* layer */$spread 5px 6px black;
+margin:$top // vertical spacing
+ $right  $bottom  $left;}
+
+.fill{animation:$exceptionally-long-animation-name 1200ms cubic-bezier(0.125,0.875,0.625,1) 250ms infinite alternate both running;
+font:italic small-caps 700 condensed #{$size}/#{$line-height} "A Very Long Font Family Name",sans-serif;}
+
+```
+
+
+# Formatted
+
+```scss
+$tone: /* theme */ rebeccapurple;
+.single {
+	color: $tone;
+	width: calc(100% - #{$gutter});
+}
+
+.grid {
+	grid-template-columns:
+		[full-start] minmax($gutter, 1fr)
+		[main-start] minmax(20ch, $content-width) [main-end];
+	grid-template-areas: // rows
+		"#{$header} #{$header}"
+		"sidebar #{$content}";
+}
+
+.groups {
+	box-shadow: $x $y 3px $tone, $spread 5px 6px black;
+	background:
+		url($first-image) center / cover no-repeat,
+		url($second-image) right / contain repeat-x;
+}
+
+.comments {
+	box-shadow:
+		$x /* horizontal */ $y 3px $tone,
+		/* layer */ $spread 5px 6px black;
+	margin: $top // vertical spacing
+		$right $bottom $left;
+}
+
+.fill {
+	animation: $exceptionally-long-animation-name 1200ms
+		cubic-bezier(0.125, 0.875, 0.625, 1) 250ms infinite alternate both running;
+	font:
+		italic small-caps 700 condensed #{$size} / #{$line-height}
+			"A Very Long Font Family Name",
+		sans-serif;
+}
+
+```

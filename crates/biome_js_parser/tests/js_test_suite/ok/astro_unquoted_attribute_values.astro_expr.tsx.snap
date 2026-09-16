@@ -78,7 +78,7 @@ JsExpressionTemplateRoot {
                     ],
                     r_angle_token: R_ANGLE@57..58 ">" [] [],
                 },
-                children: JsxChildList [
+                elements: JsxChildList [
                     JsxText {
                         value_token: JSX_TEXT_LITERAL@58..60 "go" [] [],
                     },

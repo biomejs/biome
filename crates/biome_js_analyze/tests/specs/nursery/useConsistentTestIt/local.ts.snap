@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: local.ts
+---
+# Input
+```ts
+function test() {}
+test();
+function suite(test) { test.skip(); }
+
+```

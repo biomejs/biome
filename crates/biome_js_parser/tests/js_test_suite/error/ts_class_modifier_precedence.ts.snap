@@ -19,7 +19,7 @@ abstract class Test extends Base {
     override static base2: string;
     // Accessor
     readonly accessor e: string;
-    override accessor f: string;
+    accessor override f: string;
     // abstract
     override abstract base3: string;
     // override
@@ -281,11 +281,11 @@ JsModule {
                 JsBogusMember {
                     items: [
                         JsPropertyModifierList [
-                            TsOverrideModifier {
-                                modifier_token: OVERRIDE_KW@383..397 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
-                            },
                             JsAccessorModifier {
-                                modifier_token: ACCESSOR_KW@397..406 "accessor" [] [Whitespace(" ")],
+                                modifier_token: ACCESSOR_KW@383..397 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            TsOverrideModifier {
+                                modifier_token: OVERRIDE_KW@397..406 "override" [] [Whitespace(" ")],
                             },
                         ],
                         JsLiteralMemberName {
@@ -518,10 +518,10 @@ JsModule {
           3: SEMICOLON@382..383 ";" [] []
         8: JS_BOGUS_MEMBER@383..416
           0: JS_PROPERTY_MODIFIER_LIST@383..406
-            0: TS_OVERRIDE_MODIFIER@383..397
-              0: OVERRIDE_KW@383..397 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
-            1: JS_ACCESSOR_MODIFIER@397..406
-              0: ACCESSOR_KW@397..406 "accessor" [] [Whitespace(" ")]
+            0: JS_ACCESSOR_MODIFIER@383..397
+              0: ACCESSOR_KW@383..397 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_OVERRIDE_MODIFIER@397..406
+              0: OVERRIDE_KW@397..406 "override" [] [Whitespace(" ")]
           1: JS_LITERAL_MEMBER_NAME@406..407
             0: IDENT@406..407 "f" [] []
           2: TS_TYPE_ANNOTATION@407..415
@@ -768,58 +768,58 @@ ts_class_modifier_precedence.ts:11:14 parse ━━━━━━━━━━━━
   
 ts_class_modifier_precedence.ts:13:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'accessor' must precede 'readonly'
+  × 'accessor' cannot be used with 'readonly' modifier.
   
     11 │     override static base2: string;
     12 │     // Accessor
   > 13 │     readonly accessor e: string;
        │              ^^^^^^^^
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   
-  i move this modifier
+  i 'accessor' modifier
   
     11 │     override static base2: string;
     12 │     // Accessor
   > 13 │     readonly accessor e: string;
        │              ^^^^^^^^
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   
-  i before this modifier
+  i 'readonly' modifier
   
     11 │     override static base2: string;
     12 │     // Accessor
   > 13 │     readonly accessor e: string;
        │     ^^^^^^^^
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   
 ts_class_modifier_precedence.ts:14:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'accessor' cannot be used with 'override' modifier.
+  × 'override' must precede 'accessor'
   
     12 │     // Accessor
     13 │     readonly accessor e: string;
-  > 14 │     override accessor f: string;
+  > 14 │     accessor override f: string;
        │              ^^^^^^^^
     15 │     // abstract
     16 │     override abstract base3: string;
   
-  i 'accessor' modifier
+  i move this modifier
   
     12 │     // Accessor
     13 │     readonly accessor e: string;
-  > 14 │     override accessor f: string;
+  > 14 │     accessor override f: string;
        │              ^^^^^^^^
     15 │     // abstract
     16 │     override abstract base3: string;
   
-  i 'override' modifier
+  i before this modifier
   
     12 │     // Accessor
     13 │     readonly accessor e: string;
-  > 14 │     override accessor f: string;
+  > 14 │     accessor override f: string;
        │     ^^^^^^^^
     15 │     // abstract
     16 │     override abstract base3: string;
@@ -828,7 +828,7 @@ ts_class_modifier_precedence.ts:16:14 parse ━━━━━━━━━━━━
 
   × 'abstract' must precede 'override'
   
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   > 16 │     override abstract base3: string;
        │              ^^^^^^^^
@@ -837,7 +837,7 @@ ts_class_modifier_precedence.ts:16:14 parse ━━━━━━━━━━━━
   
   i move this modifier
   
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   > 16 │     override abstract base3: string;
        │              ^^^^^^^^
@@ -846,7 +846,7 @@ ts_class_modifier_precedence.ts:16:14 parse ━━━━━━━━━━━━
   
   i before this modifier
   
-    14 │     override accessor f: string;
+    14 │     accessor override f: string;
     15 │     // abstract
   > 16 │     override abstract base3: string;
        │     ^^^^^^^^

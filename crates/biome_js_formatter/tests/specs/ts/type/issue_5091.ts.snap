@@ -30,7 +30,8 @@ declare const Namespace: {
 		// a comment
 		{
 			children: unknown;
-		}>;
+		}
+	>;
 };
 
 ```

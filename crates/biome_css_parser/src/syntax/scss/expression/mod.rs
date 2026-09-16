@@ -18,10 +18,11 @@ pub(crate) use interpolation::{
     parse_scss_selector_interpolation,
 };
 pub(crate) use list::{
-    complete_empty_scss_expression, parse_required_scss_value_until, parse_scss_expression,
-    parse_scss_expression_from_head, parse_scss_expression_in_args_until,
-    parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
-    parse_scss_inner_expression_in_string_until, parse_scss_optional_value_until,
+    complete_empty_scss_expression, complete_scss_expression_from_item,
+    parse_required_scss_value_until, parse_scss_expression, parse_scss_expression_from_head,
+    parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
+    parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
+    parse_scss_optional_value_until,
 };
 pub(crate) use precedence::{SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator};
 
@@ -56,7 +57,7 @@ impl ScssExpressionOptions {
 
     pub(super) fn optional_value(end_ts: TokenSet<CssSyntaxKind>) -> Self {
         Self {
-            function_call_context: FunctionCallContext::LooseRecovery,
+            function_call_context: FunctionCallContext::SourceTight,
             end_ts,
             allows_empty_value: true,
             allows_keyword_arguments: false,
@@ -80,7 +81,7 @@ impl ScssExpressionOptions {
 
     pub(super) fn variable_value(end_ts: TokenSet<CssSyntaxKind>) -> Self {
         Self {
-            function_call_context: FunctionCallContext::LooseRecovery,
+            function_call_context: FunctionCallContext::SourceTight,
             end_ts,
             allows_empty_value: false,
             allows_keyword_arguments: false,

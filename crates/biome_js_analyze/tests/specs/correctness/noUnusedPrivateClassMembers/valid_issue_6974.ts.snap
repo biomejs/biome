@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_issue_6974.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export class Example {
+	constructor(private something: string) {}
+
+	example() {
+		const { something } = this;
+		return something;
+	}
+}
+
+```

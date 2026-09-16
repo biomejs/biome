@@ -17,7 +17,6 @@ expression: invalid.vue
 	<span role="scrollbar" aria-controls="123"></span>
 	<span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
 	<span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>
-	<span role="separator"></span>
 	<span role="slider" aria-valuemin="0"></span>
 	<span role="slider" aria-valuemax="100"></span>
 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
@@ -217,7 +216,7 @@ invalid.vue:12:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
   > 12 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
        │ 	      ^^^^^^^^^^^^^^^^
     13 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>
-    14 │ 	<span role="separator"></span>
+    14 │ 	<span role="slider" aria-valuemin="0"></span>
   
   i Missing ARIA prop(s):
   
@@ -235,8 +234,8 @@ invalid.vue:13:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
     12 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
   > 13 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>
        │ 	      ^^^^^^^^^^^^^^^^
-    14 │ 	<span role="separator"></span>
-    15 │ 	<span role="slider" aria-valuemin="0"></span>
+    14 │ 	<span role="slider" aria-valuemin="0"></span>
+    15 │ 	<span role="slider" aria-valuemax="100"></span>
   
   i Missing ARIA prop(s):
   
@@ -249,14 +248,14 @@ invalid.vue:13:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 ```
 invalid.vue:14:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the separator ARIA role does not have the required ARIA attributes.
+  × The element with the slider ARIA role does not have the required ARIA attributes.
   
     12 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
     13 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>
-  > 14 │ 	<span role="separator"></span>
-       │ 	      ^^^^^^^^^^^^^^^^
-    15 │ 	<span role="slider" aria-valuemin="0"></span>
-    16 │ 	<span role="slider" aria-valuemax="100"></span>
+  > 14 │ 	<span role="slider" aria-valuemin="0"></span>
+       │ 	      ^^^^^^^^^^^^^
+    15 │ 	<span role="slider" aria-valuemax="100"></span>
+    16 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
   
   i Missing ARIA prop(s):
   
@@ -271,11 +270,11 @@ invalid.vue:15:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
     13 │ 	<span role="scrollbar" aria-valuemin="0" aria-valuemax="100" aria-orientation="horizontal"></span>
-    14 │ 	<span role="separator"></span>
-  > 15 │ 	<span role="slider" aria-valuemin="0"></span>
+    14 │ 	<span role="slider" aria-valuemin="0"></span>
+  > 15 │ 	<span role="slider" aria-valuemax="100"></span>
        │ 	      ^^^^^^^^^^^^^
-    16 │ 	<span role="slider" aria-valuemax="100"></span>
-    17 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    16 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    17 │ 	<span role="switch"></span>
   
   i Missing ARIA prop(s):
   
@@ -289,12 +288,12 @@ invalid.vue:16:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the slider ARIA role does not have the required ARIA attributes.
   
-    14 │ 	<span role="separator"></span>
-    15 │ 	<span role="slider" aria-valuemin="0"></span>
-  > 16 │ 	<span role="slider" aria-valuemax="100"></span>
+    14 │ 	<span role="slider" aria-valuemin="0"></span>
+    15 │ 	<span role="slider" aria-valuemax="100"></span>
+  > 16 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
        │ 	      ^^^^^^^^^^^^^
-    17 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
-    18 │ 	<span role="switch"></span>
+    17 │ 	<span role="switch"></span>
+    18 │ 
   
   i Missing ARIA prop(s):
   
@@ -306,33 +305,32 @@ invalid.vue:16:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 ```
 invalid.vue:17:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the slider ARIA role does not have the required ARIA attributes.
+  × The element with the switch ARIA role does not have the required ARIA attributes.
   
-    15 │ 	<span role="slider" aria-valuemin="0"></span>
-    16 │ 	<span role="slider" aria-valuemax="100"></span>
-  > 17 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+    15 │ 	<span role="slider" aria-valuemax="100"></span>
+    16 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
+  > 17 │ 	<span role="switch"></span>
        │ 	      ^^^^^^^^^^^^^
-    18 │ 	<span role="switch"></span>
-    19 │ 
+    18 │ 
+    19 │ 	<!-- :role="'checkbox'" requires aria-checked -->
   
   i Missing ARIA prop(s):
   
-  - aria-valuenow
+  - aria-checked
   
 
 ```
 
 ```
-invalid.vue:18:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:20:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The element with the switch ARIA role does not have the required ARIA attributes.
+  × The element with the checkbox ARIA role does not have the required ARIA attributes.
   
-    16 │ 	<span role="slider" aria-valuemax="100"></span>
-    17 │ 	<span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
-  > 18 │ 	<span role="switch"></span>
-       │ 	      ^^^^^^^^^^^^^
-    19 │ 
-    20 │ 	<!-- :role="'checkbox'" requires aria-checked -->
+    19 │ 	<!-- :role="'checkbox'" requires aria-checked -->
+  > 20 │ 	<span :role="'checkbox'"></span>
+       │ 	      ^^^^^^^^^^^^^^^^^^
+    21 │ 	<span v-bind:role="'checkbox'"></span>
+    22 │ 	<!-- :role="'heading'" requires aria-level -->
   
   i Missing ARIA prop(s):
   
@@ -346,30 +344,12 @@ invalid.vue:21:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 
   × The element with the checkbox ARIA role does not have the required ARIA attributes.
   
-    20 │ 	<!-- :role="'checkbox'" requires aria-checked -->
-  > 21 │ 	<span :role="'checkbox'"></span>
-       │ 	      ^^^^^^^^^^^^^^^^^^
-    22 │ 	<span v-bind:role="'checkbox'"></span>
-    23 │ 	<!-- :role="'heading'" requires aria-level -->
-  
-  i Missing ARIA prop(s):
-  
-  - aria-checked
-  
-
-```
-
-```
-invalid.vue:22:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The element with the checkbox ARIA role does not have the required ARIA attributes.
-  
-    20 │ 	<!-- :role="'checkbox'" requires aria-checked -->
-    21 │ 	<span :role="'checkbox'"></span>
-  > 22 │ 	<span v-bind:role="'checkbox'"></span>
+    19 │ 	<!-- :role="'checkbox'" requires aria-checked -->
+    20 │ 	<span :role="'checkbox'"></span>
+  > 21 │ 	<span v-bind:role="'checkbox'"></span>
        │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ 	<!-- :role="'heading'" requires aria-level -->
-    24 │ 	<div :role="'heading'"></div>
+    22 │ 	<!-- :role="'heading'" requires aria-level -->
+    23 │ 	<div :role="'heading'"></div>
   
   i Missing ARIA prop(s):
   
@@ -379,16 +359,16 @@ invalid.vue:22:8 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:24:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:23:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The element with the heading ARIA role does not have the required ARIA attributes.
   
-    22 │ 	<span v-bind:role="'checkbox'"></span>
-    23 │ 	<!-- :role="'heading'" requires aria-level -->
-  > 24 │ 	<div :role="'heading'"></div>
+    21 │ 	<span v-bind:role="'checkbox'"></span>
+    22 │ 	<!-- :role="'heading'" requires aria-level -->
+  > 23 │ 	<div :role="'heading'"></div>
        │ 	     ^^^^^^^^^^^^^^^^^
-    25 │ 	<!-- :role="'option'" requires aria-selected -->
-    26 │ 	<span :role="'option'"></span>
+    24 │ 	<!-- :role="'option'" requires aria-selected -->
+    25 │ 	<span :role="'option'"></span>
   
   i Missing ARIA prop(s):
   

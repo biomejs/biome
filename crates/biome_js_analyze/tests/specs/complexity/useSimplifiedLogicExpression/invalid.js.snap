@@ -13,6 +13,13 @@ const boolExpr1 = true;
 const boolExpr2 = false;
 const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/ 
 
+if (
+    !showThinking && // while it's thinking there is hope to get suggestions
+    !comments?.length
+) {
+    console.log();
+}
+
 ```
 
 # Diagnostics
@@ -76,19 +83,48 @@ invalid.js:8:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
 
   i Logical expression contains unnecessary complexity.
   
-    6 │ const boolExpr1 = true;
-    7 │ const boolExpr2 = false;
-  > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
-      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     6 │ const boolExpr1 = true;
+     7 │ const boolExpr2 = false;
+   > 8 │ const r4 = /*1*/ !boolExpr1 /*2*/  || /*3*/ !boolExpr2 /*4*/·
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ if (
   
   i Safe fix: Reduce the complexity of the logical expression.
   
-    6 6 │   const boolExpr1 = true;
-    7 7 │   const boolExpr2 = false;
-    8   │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
-      8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
-    9 9 │   
+     6  6 │   const boolExpr1 = true;
+     7  7 │   const boolExpr2 = false;
+     8    │ - const·r4·=·/*1*/·!boolExpr1·/*2*/··||·/*3*/·!boolExpr2·/*4*/·
+        8 │ + const·r4·=·/*1*/·!(boolExpr1·/*2*/··&&·/*3*/·boolExpr2·/*4*/·)·/*4*/·
+     9  9 │   
+    10 10 │   if (
+  
+
+```
+
+```
+invalid.js:11:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Logical expression contains unnecessary complexity.
+  
+    10 │ if (
+  > 11 │     !showThinking && // while it's thinking there is hope to get suggestions
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 12 │     !comments?.length
+       │     ^^^^^^^^^^^^^^^^^
+    13 │ ) {
+    14 │     console.log();
+  
+  i Safe fix: Reduce the complexity of the logical expression.
+  
+     9  9 │   
+    10 10 │   if (
+    11    │ - ····!showThinking·&&·//·while·it's·thinking·there·is·hope·to·get·suggestions
+    12    │ - ····!comments?.length
+       11 │ + ····!(showThinking·||·//·while·it's·thinking·there·is·hope·to·get·suggestions
+       12 │ + ····comments?.length)
+    13 13 │   ) {
+    14 14 │       console.log();
   
 
 ```

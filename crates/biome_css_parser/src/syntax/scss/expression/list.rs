@@ -216,7 +216,7 @@ fn parse_scss_expression_from_item(
 
     let first_element = complete_scss_list_expression_element(p, first_expression);
     let list_expression = parse_scss_list_expression(p, first_element, options);
-    Present(complete_scss_expression_from_list(p, list_expression))
+    Present(complete_scss_expression_from_item(p, list_expression))
 }
 
 /// Parses the remaining items in a space-separated SCSS expression sequence.
@@ -408,14 +408,13 @@ pub(super) fn parse_scss_list_expression(
         .complete(p, SCSS_LIST_EXPRESSION)
 }
 
+/// Wraps a parsed expression item without consuming additional tokens.
 #[inline]
-fn complete_scss_expression_from_list(
+pub(crate) fn complete_scss_expression_from_item(
     p: &mut CssParser,
-    list_expression: CompletedMarker,
+    item: CompletedMarker,
 ) -> CompletedMarker {
-    let expression_items = list_expression
-        .precede(p)
-        .complete(p, SCSS_EXPRESSION_ITEM_LIST);
+    let expression_items = item.precede(p).complete(p, SCSS_EXPRESSION_ITEM_LIST);
     expression_items.precede(p).complete(p, SCSS_EXPRESSION)
 }
 

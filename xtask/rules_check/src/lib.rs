@@ -10,7 +10,7 @@ use std::str::FromStr;
 use anyhow::bail;
 use biome_analyze::{
     GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleDomain, RuleGroup,
-    RuleMetadata,
+    RuleMetadata, RuleSource,
 };
 use biome_configuration::Configuration;
 use biome_css_syntax::CssLanguage;
@@ -75,6 +75,28 @@ pub fn check_rules() -> anyhow::Result<()> {
             {
                 self.errors.push(Errors::new(format!(
                     "The rule '{rule_name}' has an issue number set to '{issue_number}'. The presence of an issue number indicates that the rule is not yet completed. Rules that have an issue number must belong to the 'nursery' group. Change the group of the rule to 'nursery' or remove the issue number."
+                )));
+            }
+
+            // The umbrella `@eslint-react/eslint-plugin` (`EslintReactXyz`) re-exports the
+            // rules of its subset plugins (react-x, react-dom, react-jsx, react-rsc,
+            // react-naming-convention). A rule that cites one side of this relationship
+            // must also cite the other side.
+            let has_umbrella = R::METADATA
+                .sources
+                .iter()
+                .any(|source| matches!(source.source, RuleSource::EslintReactXyz(_)));
+            let has_subset = R::METADATA
+                .sources
+                .iter()
+                .any(|source| source.source.is_eslint_react_xyz_subset());
+            if has_umbrella && !has_subset {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' declares the umbrella source `EslintReactXyz` but no eslint-react.xyz subset source (react-x, react-dom, react-jsx, react-rsc, or react-naming-convention). Add the corresponding subset source."
+                )));
+            } else if has_subset && !has_umbrella {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' declares an eslint-react.xyz subset source but no matching umbrella source `EslintReactXyz`. Add the umbrella source."
                 )));
             }
 

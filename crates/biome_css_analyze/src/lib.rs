@@ -7,23 +7,26 @@ mod lint;
 mod order;
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
 mod syntax;
 mod utils;
 
 pub use crate::registry::visit_registry;
+use crate::services::semantic::SemanticModelBuilderVisitor;
+pub use crate::suppression::CssSuppression;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
+    AddVisitor, AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal,
     BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    PluginTargetLanguage, RuleAction, RuleRegistry,
 };
-use biome_css_syntax::{CssLanguage, TextRange};
+use biome_css_syntax::CssLanguage;
+use biome_db::AnyParsedSource;
 use biome_diagnostics::Error;
-use biome_languages::CssFileSource;
+use biome_languages::{CssFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -37,14 +40,16 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 });
 
 #[derive(Clone, Default)]
-pub struct CssAnalyzerServices<'a> {
-    pub semantic_model: Option<&'a biome_css_semantic::model::SemanticModel>,
+pub struct CssAnalyzerServices {
+    pub language_db: Option<Rc<dyn LanguageDb>>,
+    /// The source of the analyzed root in the supplied database, absent for transient roots.
+    pub parsed_source: Option<AnyParsedSource>,
     pub file_source: CssFileSource,
     pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
-impl std::fmt::Debug for CssAnalyzerServices<'_> {
+impl std::fmt::Debug for CssAnalyzerServices {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CssAnalyzerServices")
             .field("file_source", &self.file_source)
@@ -53,17 +58,21 @@ impl std::fmt::Debug for CssAnalyzerServices<'_> {
     }
 }
 
-impl<'a> CssAnalyzerServices<'a> {
+impl CssAnalyzerServices {
     pub fn with_file_source(mut self, file_source: CssFileSource) -> Self {
         self.file_source = file_source;
         self
     }
 
-    pub fn with_semantic_model(
-        mut self,
-        semantic_model: &'a biome_css_semantic::model::SemanticModel,
-    ) -> Self {
-        self.semantic_model = Some(semantic_model);
+    pub fn with_language_db(mut self, db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(db);
+        self
+    }
+
+    /// Associates the analyzed root with its source in the supplied database.
+    /// Omit this for transient roots, including roots changed by a fix pass.
+    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+        self.parsed_source = Some(source);
         self
     }
 
@@ -94,11 +103,15 @@ where
     B: 'a,
 {
     let module_db = services.module_db.clone();
+    let language_db = services.language_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
         move |_| {
             if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+            if let Some(db) = language_db.as_ref() {
                 db.unwind_if_revision_cancelled();
             }
         },
@@ -129,36 +142,23 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+
+    let css_plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::Css)
+        .cloned()
+        .collect();
+    if filter.match_plugins()
+        && css_plugins.iter().any(|plugin| {
+            plugin.requires_semantic_model() && plugin.applies_to_file(&options.file_path)
+        })
+    {
+        visitors.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+    }
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -168,14 +168,17 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(CssSuppression),
         Box::new(CssSuppressionAction),
         &mut emit_signal,
     );
 
     services.insert_service(css_services.file_source);
-    if let Some(semantic_model) = css_services.semantic_model {
-        services.insert_service(semantic_model.clone());
+    if let Some(db) = css_services.language_db {
+        services.insert_service(db);
+    }
+    if let Some(source) = css_services.parsed_source {
+        services.insert_service(source);
     }
     if let Some(module_db) = css_services.module_db {
         services.insert_service(module_db);
@@ -187,12 +190,6 @@ where
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
-
-    let css_plugins: Vec<_> = plugins
-        .iter()
-        .filter(|p| p.language() == PluginTargetLanguage::Css)
-        .cloned()
-        .collect();
 
     if filter.match_plugins() && !css_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target CSS above.
@@ -222,7 +219,6 @@ mod tests {
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{Markup, markup};
     use biome_css_parser::{CssParserOptions, parse_css};
-    use biome_css_semantic::semantic_model;
     use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{
@@ -269,7 +265,6 @@ mod tests {
         let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
         let options = AnalyzerOptions::default();
         let css_services = CssAnalyzerServices {
-            semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
             ..CssAnalyzerServices::default()
         };
@@ -328,7 +323,6 @@ mod tests {
 
         let options = AnalyzerOptions::default();
         let css_services = CssAnalyzerServices {
-            semantic_model: None,
             file_source: CssFileSource::css(),
             ..CssAnalyzerServices::default()
         };
@@ -384,7 +378,6 @@ a {
 
         let options = AnalyzerOptions::default();
         let css_services = CssAnalyzerServices {
-            semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
             ..CssAnalyzerServices::default()
         };
@@ -436,7 +429,6 @@ a {
 
         let options = AnalyzerOptions::default();
         let css_services = CssAnalyzerServices {
-            semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
             ..CssAnalyzerServices::default()
         };
@@ -479,7 +471,6 @@ a {
 
         let options = AnalyzerOptions::default();
         let css_services = CssAnalyzerServices {
-            semantic_model: Some(&semantic_model(&parsed.tree())),
             file_source: CssFileSource::css(),
             ..CssAnalyzerServices::default()
         };

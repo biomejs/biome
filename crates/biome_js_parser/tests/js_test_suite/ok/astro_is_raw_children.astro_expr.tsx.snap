@@ -39,7 +39,7 @@ JsExpressionTemplateRoot {
                     ],
                     r_angle_token: R_ANGLE@16..17 ">" [] [],
                 },
-                children: JsxChildList [
+                elements: JsxChildList [
                     JsxText {
                         value_token: JSX_TEXT_LITERAL@17..34 "{not js} < & text" [] [],
                     },

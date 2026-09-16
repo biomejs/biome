@@ -20,6 +20,11 @@ declare_lint_rule! {
     /// This can be a possible source of error if you are used to writing plain HTML.
     /// Only `data-*` and `aria-*` attributes are allowed to use hyphens and lowercase letters in JSX.
     ///
+    /// Fullscreen event handlers (`onFullscreenChange`, `onFullscreenError`, and their capture variants),
+    /// `credentialless`, and `maskType` require a React dependency range in `package.json` that allows React 19.3 or later.
+    /// Without that dependency, these properties are reported as unknown.
+    /// `credentialless` is only allowed on `<iframe>`, and `maskType` is only allowed on `<mask>`.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -166,6 +171,17 @@ impl Rule for NoUnknownAttribute {
             return None;
         }
 
+        if REACT_19_3_PROPS
+            .iter()
+            .any(|prop| prop.eq_ignore_ascii_case(name))
+            && !ctx
+                .manifest
+                .as_ref()
+                .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.3.0"))
+        {
+            return Some(NoUnknownAttributeState::UnknownProp { name: node_name });
+        }
+
         if let Some((&name, &allowed_tags)) = ATTRIBUTE_TAGS_LOOKUP.get_key_value(name) {
             if !allowed_tags.contains(&tag_name.trim()) {
                 return Some(NoUnknownAttributeState::InvalidPropOnTag {
@@ -266,6 +282,16 @@ const POPOVER_API_PROPS_LOWERCASE: &[&str] = &[
     "popovertarget",
     "popovertargetaction",
 ];
+
+const REACT_19_3_PROPS: &[&str] = &[
+    "credentialless",
+    "maskType",
+    "onFullscreenChange",
+    "onFullscreenChangeCapture",
+    "onFullscreenError",
+    "onFullscreenErrorCapture",
+];
+
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("abbr", &["th", "td"]),
     (
@@ -283,6 +309,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("closedby", &["dialog"]),
     ("controls", &["audio", "video"]),
     ("controlsList", &["audio", "video"]),
+    ("credentialless", &["iframe"]),
     (
         "crossOrigin",
         &["script", "img", "video", "audio", "link", "image"],
@@ -323,6 +350,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("imageSizes", &["link"]),
     ("imageSrcSet", &["link"]),
     ("loop", &["audio", "video"]),
+    ("maskType", &["mask"]),
     ("mozAllowFullScreen", &["iframe", "video"]),
     ("muted", &["audio", "video"]),
     ("noModule", &["script"]),
@@ -1193,6 +1221,7 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
 
     DOM_PROPERTY_NAMES
         .iter()
+        .chain(REACT_19_3_PROPS)
         .find(|&&element| element.eq_ignore_ascii_case(name))
         .copied()
 }

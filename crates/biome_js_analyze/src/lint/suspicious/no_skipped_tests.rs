@@ -66,7 +66,7 @@ declare_lint_rule! {
     }
 }
 
-const FUNCTION_NAMES: [&str; 5] = ["skip", "fixme", "xdescribe", "xit", "xtest"];
+const FUNCTION_NAMES: [&str; 6] = ["skip", "fixme", "xdescribe", "xit", "xtest", "xsuite"];
 
 impl Rule for NoSkippedTests {
     type Query = Ast<JsCallExpression>;
@@ -148,6 +148,10 @@ impl Rule for NoSkippedTests {
                     replaced_function = make::ident("test");
                     mutation.replace_token(function_name, replaced_function);
                 }
+                "xsuite" => {
+                    replaced_function = make::ident("suite");
+                    mutation.replace_token(function_name, replaced_function);
+                }
                 _ => {}
             }
         } else {
@@ -187,25 +191,25 @@ fn detect_bare_skip_call(
 
     // Determine if this is a skip/fixme pattern
     let (annotation, name_range) = match names.as_slice() {
-        // test.skip() / it.skip() / describe.skip() / test.fixme() / it.fixme() / describe.fixme()
+        // test.skip() / it.skip() / describe.skip() / suite.skip() / test.fixme() / it.fixme() / describe.fixme() / suite.fixme()
         [(_, _root), (range, name)]
-            if matches!(_root.text(), "test" | "it" | "describe")
+            if matches!(_root.text(), "test" | "it" | "describe" | "suite")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
             (annotation_for(name.text()), *range)
         }
-        // test.describe.skip() / test.describe.fixme() / test.step.skip() / test.step.fixme()
+        // test.describe.skip() / test.describe.fixme() / test.suite.skip() / test.suite.fixme() / test.step.skip() / test.step.fixme()
         [(_, root), (_, middle), (range, name)]
             if root.text() == "test"
-                && (middle.text() == "describe" || middle.text() == "step")
+                && (middle.text() == "describe" || middle.text() == "suite" || middle.text() == "step")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
             (annotation_for(name.text()), *range)
         }
-        // test.describe.parallel.skip() / test.describe.serial.skip() / etc.
+        // test.describe.parallel.skip() / test.describe.serial.skip() / test.suite.parallel.skip() / etc.
         [(_, root), (_, desc), (_, mode), (range, name)]
             if root.text() == "test"
-                && desc.text() == "describe"
+                && (desc.text() == "describe" || desc.text() == "suite")
                 && (mode.text() == "parallel" || mode.text() == "serial")
                 && (name.text() == "skip" || name.text() == "fixme") =>
         {
@@ -264,8 +268,8 @@ fn detect_bare_skip_call(
             // Standard static member: handled by Path 1
             return None;
         }
-        if root_name == "describe" {
-            // describe.skip("name", fn) handled by Path 1 (unless bracket notation)
+        if root_name == "describe" || root_name == "suite" {
+            // describe.skip("name", fn) / suite.skip("name", fn) handled by Path 1 (unless bracket notation)
             if arg_count >= 1 && has_string_first_arg(call_expr) && !is_computed {
                 return None;
             }

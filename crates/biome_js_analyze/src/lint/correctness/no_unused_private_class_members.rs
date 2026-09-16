@@ -11,8 +11,9 @@ use biome_diagnostics::Severity;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
-    AnyJsFormalParameter, AnyJsName, JsAssignmentExpression, JsClassDeclaration, JsSyntaxKind,
-    JsSyntaxNode, TsAccessibilityModifier, TsPropertyParameter,
+    AnyJsFormalParameter, AnyJsName, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
+    JsAssignmentOperator, JsClassDeclaration, JsObjectBindingPattern, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarator, TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
@@ -64,6 +65,21 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Compound assignments read the current value and therefore count as usage:
+    ///
+    /// ```js
+    /// class UsedMember {
+    ///   #usedMember;
+    ///
+    ///   method() {
+    ///     this.#usedMember ??= getValue();
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// Unlike ESLint's rule, this rule considers a compound assignment to use the
+    /// member even when the assignment's result is discarded.
+    ///
     /// ## Caveats
     ///
     /// The rule currently considers that all TypeScript private members are used if it encounters a computed access.
@@ -83,7 +99,7 @@ declare_lint_rule! {
         version: "1.3.3",
         name: "noUnusedPrivateClassMembers",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unused-private-class-members").same()],
+        sources: &[RuleSource::Eslint("no-unused-private-class-members").inspired()],
         recommended: true,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
@@ -284,6 +300,47 @@ fn traverse_members_usage(
                 }
             }
             Err(node) => {
+                if let Some(binding) = JsObjectBindingPattern::cast(node.clone())
+                    && let Some(declarator) =
+                        binding.syntax().parent().and_then(JsVariableDeclarator::cast)
+                    && let Some(initializer) = declarator.initializer()
+                    && let Ok(AnyJsExpression::JsThisExpression(_)) = initializer.expression()
+                {
+                    for property in binding.properties() {
+                        let Ok(property) = property else {
+                            continue;
+                        };
+                        let name = match property {
+                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
+                                property,
+                            ) => property.member().ok().and_then(|member| member.name()),
+                            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                                property,
+                            ) => property.identifier().ok().and_then(|identifier| {
+                                identifier
+                                    .as_js_identifier_binding()?
+                                    .name_token()
+                                    .ok()
+                                    .map(|token| token.token_text_trimmed())
+                            }),
+                            AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                            | AnyJsObjectBindingPatternMember::JsMetavariable(_)
+                            | AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(_) => None,
+                        };
+                        let Some(name) = name else {
+                            continue;
+                        };
+                        private_members.retain(|private_member| {
+                            let member_being_used = !private_member.is_private_sharp()
+                                && private_member.match_name(name.text()) == Some(true);
+                            if member_being_used {
+                                ts_private_count -= 1;
+                            }
+                            !member_being_used
+                        });
+                    }
+                }
+
                 if ts_private_count != 0
                     && let Some(computed_member) = AnyJsComputedMember::cast(node)
                     && matches!(
@@ -374,29 +431,14 @@ fn get_constructor_params(
         })
 }
 
-/// Check whether the provided `AnyJsName` is part of a potentially write-only assignment expression.
-/// This function inspects the syntax tree around the given `AnyJsName` to check whether it is involved in an assignment operation and whether that assignment can be write-only.
+/// Checks whether `js_name` is the target of a standalone plain assignment.
 ///
 /// # Returns
 ///
-/// - `Some(true)`: If the `js_name` is in a write-only assignment.
-/// - `Some(false)`: If the `js_name` is in a assignments that also reads like shorthand operators
-/// - `None`: If the parent is not present or grand parent is not a JsAssignmentExpression
-///
-/// # Examples of write only expressions
-///
-/// ```js
-/// this.usedOnlyInWrite = 2;
-/// this.usedOnlyInWrite = this.usedOnlyInWrite;
-/// ```
-///
-/// # Examples of expressions that are NOT write-only
-///
-/// ```js
-/// return this.#val++;   // increment expression used as return value
-/// return this.#val = 1; // assignment used as expression
-/// ```
-///
+/// - `Some(true)` if `js_name` is the target of a discarded `=` assignment.
+/// - `Some(false)` if the assignment result is consumed, the name is not the target,
+///   or a compound assignment reads the target's current value.
+/// - `None` if `js_name` is not inside an assignment expression.
 fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let parent = js_name.syntax().parent()?;
     let grand_parent = parent.parent()?;
@@ -404,6 +446,10 @@ fn is_write_only(js_name: &AnyJsName) -> Option<bool> {
     let left = assignment_expression.left().ok()?;
 
     if !is_node_equal(left.syntax(), &parent) {
+        return Some(false);
+    }
+
+    if assignment_expression.operator().ok()? != JsAssignmentOperator::Assign {
         return Some(false);
     }
 
@@ -522,21 +568,26 @@ impl AnyMember {
 
     fn match_js_name(&self, js_name: &AnyJsName) -> Option<bool> {
         let value_token = js_name.value_token().ok()?;
-        let token = value_token.text_trimmed();
+        self.match_name(value_token.text_trimmed())
+    }
 
+    fn match_name(&self, name: &str) -> Option<bool> {
         match self {
             Self::AnyJsClassMember(member) => match member {
                 AnyJsClassMember::JsGetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsMethodClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsPropertyClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 AnyJsClassMember::JsSetterClassMember(member) => {
-                    Some(member.name().ok()?.name()?.text() == token)
+                    Some(member.name().ok()?.name()?.text() == name)
+                }
+                AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                    Some(member.name().ok()?.name()?.text() == name)
                 }
                 _ => None,
             },
@@ -552,7 +603,7 @@ impl AnyMember {
                         .name_token()
                         .ok()?
                         .text_trimmed()
-                        == token,
+                        == name,
                 ),
             },
         }

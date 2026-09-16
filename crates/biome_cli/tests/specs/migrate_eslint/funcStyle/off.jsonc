@@ -1,0 +1,15 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "func-style": [
+        "off",
+        "declaration",
+        {
+          "allowArrowFunctions": false,
+          "allowTypeAnnotation": false
+        }
+      ]
+    }
+  }
+}

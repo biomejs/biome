@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexedAccessInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+const letters = ["A", "B", "C"] as const;
+type Letter = (typeof letters)[number];
+
+function check(letter: Letter) {
+	if (letter) {}
+	return letter ?? "A";
+}
+
+function unreachable(letter: Letter) {
+	switch (letter) {
+		case "D": break;
+	}
+}
+
+const values = { A: 1, B: 2, C: 3 } as const;
+function checkKey(key: keyof typeof values) {
+	if (key) {}
+}
+
+```
+
+# Diagnostics
+```
+indexedAccessInvalid.ts:7:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    6 │ function check(letter: Letter) {
+  > 7 │ 	if (letter) {}
+      │ 	    ^^^^^^
+    8 │ 	return letter ?? "A";
+    9 │ }
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:8:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     6 │ function check(letter: Letter) {
+     7 │ 	if (letter) {}
+   > 8 │ 	return letter ?? "A";
+       │ 	       ^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+     6 │ function check(letter: Letter) {
+     7 │ 	if (letter) {}
+   > 8 │ 	return letter ?? "A";
+       │ 	              ^^
+     9 │ }
+    10 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:13:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This case is unreachable.
+  
+    11 │ function unreachable(letter: Letter) {
+    12 │ 	switch (letter) {
+  > 13 │ 		case "D": break;
+       │ 		     ^^^
+    14 │ 	}
+    15 │ }
+  
+  i The value passed to switch can never equal this value.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:19:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    17 │ const values = { A: 1, B: 2, C: 3 } as const;
+    18 │ function checkKey(key: keyof typeof values) {
+  > 19 │ 	if (key) {}
+       │ 	    ^^^
+    20 │ }
+    21 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

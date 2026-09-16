@@ -41,7 +41,7 @@ class Foo {
 class Foo {
 	#usedOnlyInWriteStatement = 5;
 	method() {
-			this.#usedOnlyInWriteStatement += 42;
+			this.#usedOnlyInWriteStatement = 42;
 	}
 }
 

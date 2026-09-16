@@ -1,0 +1,62 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+
+		const updated = statement.withSemicolonToken(undefined);
+		const mutation = createMutation(root);
+		mutation.replaceNode(statement, updated);
+		registerDiagnostic(root, "warning", "Updated field", {
+			mutation,
+			message: "Apply edit",
+			kind: "safe",
+		});
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(/* keep */1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Updated field
+  
+  > 1 │ call(/* keep */1,2);
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Safe fix: Apply edit
+  
+    1 │ call(/*·keep·*/1,2);
+      │                    -
+```

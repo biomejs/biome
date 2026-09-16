@@ -719,6 +719,8 @@ fn classify_expression(
                         | TypeofExpression::Await(_)
                         | TypeofExpression::BitwiseNot(_)
                         | TypeofExpression::Call(_)
+                        | TypeofExpression::CallArgument(_)
+                        | TypeofExpression::Parameter(_)
                         | TypeofExpression::Conditional(_)
                         | TypeofExpression::Destructure(_)
                         | TypeofExpression::Index(_)
@@ -953,6 +955,7 @@ fn classify_expression(
                     | RawTypeData::Intersection(_)
                     | RawTypeData::Union(_)
                     | RawTypeData::TypeOperator(_)
+                    | RawTypeData::IndexedAccess(_)
                     | RawTypeData::MergedReference(_)
                     | RawTypeData::AnyKeyword
                     | RawTypeData::UnknownKeyword => return Indeterminate,

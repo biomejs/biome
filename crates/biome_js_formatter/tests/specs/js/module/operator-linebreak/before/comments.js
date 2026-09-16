@@ -1,0 +1,80 @@
+!(
+  (
+    // blah 1
+    foo
+    // blah 2
+    || bar
+    || baz
+    // blah 3
+    || qux
+  )
+);
+
+foo
+// logical
+&& bar;
+
+foo
+// arithmetic
++ bar
+// multiplication
+* baz;
+
+foo
+// membership
+in bar;
+
+foo
+// instance
+instanceof Bar;
+
+foo
+// fallback
+?? bar;
+
+foo // trailing
+|| bar;
+
+foo
+/* own line block */
+|| bar;
+
+foo || /* inline block */ bar;
+
+foo
+// object
+|| { /* inner */ };
+
+foo
+// array
++ [ /* inner */ ];
+
+foo
+// class
+|| class { /* inner */ };
+
+foo
+// biome-ignore format: preserve operand spacing
+|| call(  a,b );
+
+foo
+// first
+// second
+|| bar; // last
+
+foo
+// biome-ignore format: preserve parenthesized operand
+|| (
+  // inside parentheses
+  call(  a,b )
+);
+
+foo
+// biome-ignore format: preserve parentheses
+|| ((((((((((call(  a,b ))))))))))) // keep
+|| baz;
+
+((((foo))));
+a
+// biome-ignore format: preserve operand
+|| bar /*x*/ || baz;

@@ -52,6 +52,18 @@ const x = 5;
 <div>{/* a note */}</div>
 <div class={/* a note */}>{x}</div>"#;
 
+const ASTRO_SUPPRESSION_CONFIG: &str = r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "a11y": { "noAccessKey": "error" },
+      "suspicious": { "noDebugger": "error" },
+      "nursery": { "noAstroSetHtmlDirective": "error" }
+    }
+  }
+}"#;
+
 const ASTRO_RETURN_IN_TEMPLATE: &str = r#"---
 const x = 5;
 ---
@@ -255,6 +267,248 @@ fn lint_astro_files() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_astro_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+// Runs lint, formatting with `check --write`, and lint again on the same file.
+// This verifies that Astro suppressions do not produce spurious JavaScript
+// warnings and remain effective when formatting wraps the target tag's attributes.
+#[test]
+fn astro_template_suppressions_have_one_owner() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        br#"{/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted constants */}
+<script is:inline type="application/ld+json" set:html={JSON.stringify({ name: "Example" })} />
+<!-- biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content -->
+<div
+  set:html={content}
+></div>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<a accesskey="w">WebAIM</a>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--write",
+                "--error-on-warnings",
+                "--html-formatter-enabled=true",
+                "file.astro",
+            ]
+            .as_slice(),
+        ),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_have_one_owner",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_allow_leading_trivia() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        concat!(
+            "{\n/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n\n",
+            "{\n  /* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n\n",
+            "{\r\n\t/* biome-ignore lint/nursery/noAstroSetHtmlDirective: trusted content */}\n",
+            "<div set:html={content} />\n",
+        )
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_allow_leading_trivia",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_survive_host_fixes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        br#"<div accesskey="a"></div>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<div accesskey="b"></div>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", "file.astro"].as_slice()),
+    );
+
+    assert_file_contents(
+        &fs,
+        Utf8Path::new("file.astro"),
+        "<div ></div>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n",
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_survive_host_fixes",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_survive_guest_fixes() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        br#"<script>debugger;</script>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<div accesskey="b"></div>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", "--unsafe", "file.astro"].as_slice()),
+    );
+
+    assert_file_contents(
+        &fs,
+        Utf8Path::new("file.astro"),
+        "<script></script>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n",
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_survive_guest_fixes",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_preserve_guest_boundaries() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    fs.insert(
+        "file.astro".into(),
+        br#"---
+// biome-ignore lint/suspicious/noDebugger: frontmatter
+debugger;
+---
+{/* biome-ignore lint/a11y/noAccessKey: shared text */}
+<div accesskey="a"></div>
+<div title={/* biome-ignore lint/a11y/noAccessKey: shared text */}></div>
+{(() => {
+  // biome-ignore lint/suspicious/noDebugger: executable expression
+  debugger;
+  return 0;
+})()}
+<script>
+// biome-ignore lint/suspicious/noDebugger: script
+debugger;
+</script>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
+    );
+
+    assert!(result.is_err());
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_preserve_guest_boundaries",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn astro_template_suppressions_work_on_stdin() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert("biome.json".into(), ASTRO_SUPPRESSION_CONFIG.as_bytes());
+    console.in_buffer.push(
+        "<div accesskey=\"a\"></div>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n".to_string(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--stdin-file-path",
+                "file.astro",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let output = &console.out_buffer.first().unwrap().content;
+    assert_eq!(
+        markup_to_string(markup! {{output}}),
+        "<div ></div>\n{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}\n<div accesskey=\"b\"></div>\n",
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_template_suppressions_work_on_stdin",
         fs,
         console,
         result,

@@ -4,6 +4,30 @@ use crate::{
     ScssWhileAtRule,
 };
 use biome_rowan::{AstNode, AstNodeList};
+use std::iter;
+
+impl AnyScssExpression {
+    /// Returns the innermost expression beneath grouping parentheses.
+    ///
+    /// Handles single-item [`ScssExpression`] wrappers while retaining the final
+    /// expression container, list, or map. Stops if the inner expression is missing.
+    pub fn omit_parentheses(self) -> Self {
+        let inner_expression = |expression: &Self| {
+            expression
+                .as_scss_parenthesized_expression()
+                .cloned()
+                .or_else(|| {
+                    unwrap_single_expression_item(expression)
+                        .and_then(|item| item.as_scss_parenthesized_expression().cloned())
+                })
+                .and_then(|node| node.expression().ok())
+        };
+
+        iter::successors(inner_expression(&self), inner_expression)
+            .last()
+            .unwrap_or(self)
+    }
+}
 
 /// Returns `$arg: value` from a CSS expression that wraps an SCSS expression.
 pub fn scss_keyword_argument_from_css_expression(
@@ -206,4 +230,123 @@ fn is_parenthesized_control_condition_expression(expression: &ScssExpression) ->
 
     is_direct_control_condition(&parent_expression)
         || is_parenthesized_control_condition_expression(&parent_expression)
+}
+
+#[cfg(test)]
+mod tests {
+    use biome_css_factory::{
+        make,
+        syntax::{
+            AnyScssExpression, AnyScssExpressionItem, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+            ScssParenthesizedExpression, T as CssT,
+        },
+    };
+    use biome_rowan::AstNode;
+
+    fn token(kind: CssSyntaxKind, text: &str) -> CssSyntaxToken {
+        CssSyntaxToken::new_detached(kind, text, [], [])
+    }
+
+    fn value(text: &str) -> AnyScssExpression {
+        AnyScssExpression::AnyCssValue(make::css_identifier(token(CssT![ident], text)).into())
+    }
+
+    fn item(text: &str) -> AnyScssExpressionItem {
+        AnyScssExpressionItem::AnyCssValue(make::css_identifier(token(CssT![ident], text)).into())
+    }
+
+    fn sequence(items: Vec<AnyScssExpressionItem>) -> AnyScssExpression {
+        make::scss_expression(make::scss_expression_item_list(items)).into()
+    }
+
+    fn parenthesized(value: AnyScssExpression) -> ScssParenthesizedExpression {
+        make::scss_parenthesized_expression(token(CssT!['('], "("), value, token(CssT![')'], ")"))
+    }
+
+    #[test]
+    fn omit_parentheses_traverses_direct_and_wrapped_layers() {
+        let inner = sequence(vec![item("a")]);
+        let direct: AnyScssExpression = parenthesized(parenthesized(inner.clone()).into()).into();
+        let unwrapped = direct.omit_parentheses();
+        assert_eq!(unwrapped.syntax().kind(), CssSyntaxKind::SCSS_EXPRESSION);
+        assert_eq!(unwrapped.syntax().to_string(), "a");
+
+        let nested = sequence(vec![parenthesized(inner).into()]);
+        let wrapped = sequence(vec![parenthesized(nested).into()]);
+        let unwrapped = wrapped.clone().omit_parentheses();
+        assert_eq!(unwrapped.syntax().kind(), CssSyntaxKind::SCSS_EXPRESSION);
+        assert_eq!(unwrapped.syntax().to_string(), "a");
+        assert_eq!(wrapped.syntax().to_string(), "((a))");
+    }
+
+    #[test]
+    fn omit_parentheses_preserves_non_parenthesized_payloads() {
+        let list = make::scss_list_expression(make::scss_list_expression_element_list(
+            [make::scss_list_expression_element(value("a"))],
+            [token(CssT![,], ",")],
+        ));
+        let map = make::scss_map_expression(
+            token(CssT!['('], "("),
+            make::scss_map_expression_pair_list(
+                [make::scss_map_expression_pair(
+                    value("a"),
+                    token(CssT![:], ":"),
+                    value("b"),
+                )],
+                [],
+            ),
+            token(CssT![')'], ")"),
+        );
+        for inner in [
+            value("a"),
+            sequence(vec![]),
+            sequence(vec![item("a")]),
+            sequence(vec![parenthesized(value("a")).into(), item("b")]),
+            list.into(),
+            map.clone().into(),
+            sequence(vec![map.into()]),
+        ] {
+            assert_eq!(inner.clone().omit_parentheses(), inner);
+            let grouped = parenthesized(inner);
+            let expected = grouped.expression().unwrap();
+            assert_eq!(
+                AnyScssExpression::from(grouped).omit_parentheses(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn omit_parentheses_stops_at_missing_contents() {
+        let missing = ScssParenthesizedExpression::unwrap_cast(CssSyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION,
+            [
+                Some(token(CssT!['('], "(").into()),
+                None,
+                Some(token(CssT![')'], ")").into()),
+            ],
+        ));
+        let wrapped = sequence(vec![missing.clone().into()]);
+        assert_eq!(wrapped.clone().omit_parentheses(), wrapped);
+
+        let outer = parenthesized(missing.into());
+        let expected = outer.expression().unwrap();
+        assert_eq!(AnyScssExpression::from(outer).omit_parentheses(), expected);
+    }
+
+    #[test]
+    fn omit_parentheses_uses_contents_without_a_closing_token() {
+        let inner = sequence(vec![item("a")]);
+        let missing_close = ScssParenthesizedExpression::unwrap_cast(CssSyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_PARENTHESIZED_EXPRESSION,
+            [
+                Some(token(CssT!['('], "(").into()),
+                Some(inner.into_syntax().into()),
+                None,
+            ],
+        ));
+        let expected = missing_close.expression().unwrap();
+        let expression: AnyScssExpression = missing_close.into();
+        assert_eq!(expression.omit_parentheses(), expected);
+    }
 }

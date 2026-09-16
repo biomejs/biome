@@ -20,7 +20,7 @@ declare_lint_rule! {
     /// This rule aims to flag concatenation of string or template literals when they could be combined into a single literal.
     /// Notably, this also includes concatenating a string with a number (unlike the derivative ESLint rule).
     ///
-    /// Concatenation of multiple strings is allowed for multi-line strings (such as ones used to prevent exceeding the maximum line width).
+    /// Concatenations split across multiple lines are allowed (such as ones used to prevent exceeding the maximum line width).
     ///
     /// ## Examples
     ///
@@ -314,29 +314,12 @@ fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<Tex
 /// meaning either the operator or RHS have a leading newline.
 /// Assumes the expression is known to be a valid concatenation that will otherwise trigger the rule.
 fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
-    // TODO: Review desired rule behavior if the first operand is a number
     let has_newline_in_operator = binary_expression
         .operator_token()
         .is_ok_and(|operator| operator.has_leading_newline());
-    let has_newline_in_right = binary_expression.right().is_ok_and(|right| {
-        match (
-            right.as_any_js_literal_expression(),
-            right.as_js_template_expression(),
-        ) {
-            (Some(literal_expression), _) => literal_expression
-                .as_js_string_literal_expression()
-                .is_some_and(|string_literal_expression| {
-                    string_literal_expression
-                        .as_fields()
-                        .value_token
-                        .is_ok_and(|token| token.has_leading_newline())
-                }),
-            (_, Some(template_expression)) => template_expression
-                .l_tick_token()
-                .is_ok_and(|token| token.has_leading_newline()),
-            _ => false,
-        }
-    });
+    let has_newline_in_right = binary_expression
+        .right()
+        .is_ok_and(|right| right.syntax().has_leading_newline());
 
     has_newline_in_operator || has_newline_in_right
 }

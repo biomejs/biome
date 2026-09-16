@@ -34,7 +34,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnsafeIframeSandbox {
-        version: "next",
+        version: "2.5.13",
         name: "noUnsafeIframeSandbox",
         language: "js",
         recommended: true,

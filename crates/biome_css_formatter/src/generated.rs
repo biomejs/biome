@@ -8659,6 +8659,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedString {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssInterpolatedSubSelector>
+    for crate::scss::selectors::interpolated_sub_selector::FormatScssInterpolatedSubSelector
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssInterpolatedSubSelector,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssInterpolatedSubSelector>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedSubSelector {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssInterpolatedSubSelector,
+        crate::scss::selectors::interpolated_sub_selector::FormatScssInterpolatedSubSelector,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: selectors :: interpolated_sub_selector :: FormatScssInterpolatedSubSelector :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssInterpolatedSubSelector {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssInterpolatedSubSelector,
+        crate::scss::selectors::interpolated_sub_selector::FormatScssInterpolatedSubSelector,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: selectors :: interpolated_sub_selector :: FormatScssInterpolatedSubSelector :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::ScssInterpolatedUrlValue>
     for crate::scss::auxiliary::interpolated_url_value::FormatScssInterpolatedUrlValue
 {

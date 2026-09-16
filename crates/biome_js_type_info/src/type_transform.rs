@@ -5,7 +5,9 @@
 //! the nested types have been transformed. The traversal remains private;
 //! callers use semantic operations such as generic substitution.
 
+use crate::TypeOperator;
 use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
+use crate::type_operations::{indexed_access, keyof};
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
@@ -377,6 +379,12 @@ where
             }
             TypeData::TypeofType(value) => value.ty(db),
             TypeData::TypeofValue(value) => value.ty(db),
+            TypeData::TypeOperator(operator) if operator.operator(db) == TypeOperator::Keyof => {
+                keyof(db, operator.ty(db)).unwrap_or(TypeData::Unknown)
+            }
+            TypeData::IndexedAccess(access) => {
+                indexed_access(db, access.object(db), access.index(db)).unwrap_or(TypeData::Unknown)
+            }
             ty => ty,
         }
     }

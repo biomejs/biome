@@ -1,12 +1,27 @@
 use crate::prelude::*;
 
 use biome_formatter::{format_args, write};
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::parentheses::NeedsParentheses;
-use biome_js_syntax::{AnyJsExpression, JsUnaryExpression};
+use biome_js_syntax::{AnyJsExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression};
 use biome_js_syntax::{JsUnaryExpressionFields, JsUnaryOperator};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsUnaryExpression;
+
+impl FormatJsUnaryExpression {
+    pub(crate) fn can_omit_argument_parentheses(argument: &JsSyntaxNode, f: &JsFormatter) -> bool {
+        AnyJsBinaryLikeExpression::can_cast(argument.kind())
+            && argument
+                .parent()
+                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_UNARY_EXPRESSION)
+            && f.comments()
+                .leading_comments(argument)
+                .iter()
+                .any(|comment| comment.kind().is_line())
+            && !f.comments().is_suppressed(argument)
+    }
+}
 
 impl FormatNodeRule<JsUnaryExpression> for FormatJsUnaryExpression {
     fn fmt_fields(&self, node: &JsUnaryExpression, f: &mut JsFormatter) -> FormatResult<()> {

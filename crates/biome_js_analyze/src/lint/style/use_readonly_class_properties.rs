@@ -11,6 +11,7 @@ use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, AnyJsClassMemberName, AnyJsConstructorParameter,
     AnyJsPropertyModifier, AnyTsPropertyParameterModifier, JsClassMemberList, JsSyntaxKind,
     JsSyntaxToken, TextRange, TsAccessibilityModifier, TsPropertyParameter, TsReadonlyModifier,
+    numbers::parse_js_number,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -20,7 +21,8 @@ use biome_rule_options::use_readonly_class_properties::UseReadonlyClassPropertie
 use std::iter::once;
 
 declare_lint_rule! {
-    /// Enforce marking members as `readonly` if they are never modified outside the constructor.
+    /// Enforce marking instance properties as `readonly` if they are never modified outside the
+    /// constructor, and static properties as `readonly` if they are never reassigned.
     ///
     /// This rule ensures that class properties, especially private ones, are marked as `readonly` if their values
     /// remain constant after being initialized. This helps improve code readability, maintainability, and ensures
@@ -138,7 +140,13 @@ impl Rule for UseReadonlyClassProperties {
         let root = ctx.query();
         let members = root.members();
 
-        let ClassMemberReferences { writes, .. } = ctx.model.class_member_references(&members);
+        let ClassMemberReferences {
+            writes,
+            static_writes,
+            ..
+        } = ctx
+            .model
+            .class_member_references(root, ctx.semantic_model());
 
         let private_only = !ctx.options().check_all_properties();
         let constructor_params: Vec<_> =
@@ -157,14 +165,25 @@ impl Rule for UseReadonlyClassProperties {
                 }),
             )
             .filter_map(|prop_or_param| {
-                if writes
-                    .clone()
-                    .into_iter()
+                let member_writes = if is_static_property_member(&prop_or_param) {
+                    &static_writes
+                } else {
+                    &writes
+                };
+                if member_writes
+                    .iter()
                     .any(|ClassMemberReference { name, .. }| {
                         if let Some(TextAndRange { text, .. }) =
                             extract_property_or_param_range_and_text(&prop_or_param.clone())
                         {
-                            return name.eq(&text);
+                            return name.eq(&text)
+                                || matches!(
+                                    (
+                                        parse_js_number(name.text()),
+                                        parse_js_number(text.text()),
+                                    ),
+                                    (Some(left), Some(right)) if left == right
+                                );
                         }
 
                         false
@@ -278,7 +297,7 @@ struct TextAndRange {
     range: TextRange,
 }
 
-/// Collects mutable (not being `readonly`) class properties (excluding `static` and `accessor`),
+/// Collects mutable (not being `readonly`) class properties, excluding accessors.
 /// If `private_only` is true, only private properties are included.
 /// This is used to identify class properties that are candidates for being marked as `readonly`.
 /// e.g. all properties in `class Container { private onlyModifiedInConstructor = 1; public paramTwo: number; }`
@@ -296,7 +315,6 @@ fn collect_non_readonly_class_member_properties(
 
         if property_class_member.modifiers().iter().any(|modifier| {
             modifier.as_ts_readonly_modifier().is_some()
-                || modifier.as_js_static_modifier().is_some()
                 || modifier.as_js_accessor_modifier().is_some()
         }) || is_js_computed_name
         {
@@ -324,6 +342,16 @@ fn collect_non_readonly_class_member_properties(
         }
         None
     })
+}
+
+fn is_static_property_member(member: &AnyPropertyMember) -> bool {
+    match member {
+        AnyPropertyMember::JsPropertyClassMember(member) => member
+            .modifiers()
+            .iter()
+            .any(|modifier| modifier.as_js_static_modifier().is_some()),
+        AnyPropertyMember::TsPropertyParameter(_) => false,
+    }
 }
 
 /// Collects all all mutable (non-readonly) constructor parameters from a given class member list. If private_only is true, it only includes parameters with private visibility.
@@ -403,8 +431,12 @@ fn extract_property_or_param_range_and_text(
         AnyPropertyMember::cast(property_or_param.clone().into())
     {
         if let Ok(member_name) = member.name() {
+            let text = match &member_name {
+                AnyJsClassMemberName::JsLiteralMemberName(name) => name.name().ok()?.into(),
+                _ => member_name.to_trimmed_text(),
+            };
             return Some(TextAndRange {
-                text: member_name.to_trimmed_text(),
+                text,
                 range: member_name.range(),
             });
         }

@@ -29,7 +29,7 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@biomejs/aria-data",
-    "@biomejs/plugin-api",
+    "@biomejs/runtime",
     "tailwindcss-config-analyzer",
     "@biomejs/prettier-compare"
   ]

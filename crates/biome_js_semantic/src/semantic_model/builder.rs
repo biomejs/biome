@@ -1,7 +1,8 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
-    TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
+    JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
@@ -152,7 +153,12 @@ impl SemanticModelBuilder {
 
     #[inline]
     pub fn push_global(&mut self, name: impl Into<String>) {
-        self.globals_by_name.insert(name.into(), None);
+        let name = name.into();
+        let decoded = match unescape_js_identifier(&name) {
+            std::borrow::Cow::Borrowed(_) => None,
+            std::borrow::Cow::Owned(decoded) => Some(decoded),
+        };
+        self.globals_by_name.insert(decoded.unwrap_or(name), None);
     }
 
     #[inline]
@@ -226,11 +232,17 @@ impl SemanticModelBuilder {
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                        node.ident_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else {
                         None
                     };
@@ -369,9 +381,14 @@ impl SemanticModelBuilder {
                 };
 
                 let node = &self.binding_node_by_start[&range.start()];
-                let unresolved_name = node.text_trimmed().to_string();
+                let unresolved_name = AnyJsIdentifierReference::cast_ref(node)
+                    .and_then(|reference| reference.value_token().ok())
+                    .map_or_else(
+                        || node.text_trimmed().to_string().into(),
+                        |token| crate::identifier_name(token.token_text_trimmed()),
+                    );
 
-                if let Some(global_name) = self.resolve_global_name(&unresolved_name) {
+                if let Some(global_name) = self.resolve_global_name(unresolved_name.text()) {
                     self.global_references_by_start.insert(range.start());
                     if let Some(index) = self.globals_by_name[global_name] {
                         self.globals[index as usize].references.push(
@@ -483,8 +500,9 @@ impl SemanticModelBuilder {
         let Ok(reference_name) = identifier_assignment.name_token() else {
             return false;
         };
+        let reference_name = crate::identifier_name(reference_name.token_text_trimmed());
         self.flavor
-            .store_reference_name(reference_name.text_trimmed())
+            .store_reference_name(reference_name.text())
             .is_some()
     }
 }

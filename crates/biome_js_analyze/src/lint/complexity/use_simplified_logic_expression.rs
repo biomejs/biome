@@ -225,6 +225,14 @@ fn simplify_de_morgan(node: &JsLogicalExpression) -> Option<JsUnaryExpression> {
     let operator_token = node.operator_token().ok()?;
     match (left, right) {
         (AnyJsExpression::JsUnaryExpression(left), AnyJsExpression::JsUnaryExpression(right)) => {
+            let right_operator_token = right.operator_token().ok()?;
+            let mut right_operator_trivia: Vec<_> =
+                right_operator_token.leading_trivia().pieces().collect();
+            right_operator_trivia.extend(right_operator_token.trailing_trivia().pieces());
+            let right_argument = right
+                .argument()
+                .ok()?
+                .prepend_trivia_pieces(right_operator_trivia)?;
             let mut next_logic_expression = match operator_token.kind() {
                 T![||] => node
                     .clone()
@@ -235,7 +243,7 @@ fn simplify_de_morgan(node: &JsLogicalExpression) -> Option<JsUnaryExpression> {
                 _ => return None,
             }?;
             next_logic_expression = next_logic_expression.with_left(left.argument().ok()?);
-            next_logic_expression = next_logic_expression.with_right(right.argument().ok()?);
+            next_logic_expression = next_logic_expression.with_right(right_argument);
             Some(make::js_unary_expression(
                 make::token(T![!]),
                 AnyJsExpression::JsParenthesizedExpression(make::parenthesized(

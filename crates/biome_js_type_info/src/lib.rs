@@ -22,6 +22,7 @@ pub mod resolved;
 mod return_type_relation;
 mod stringification;
 mod type_data;
+mod type_operations;
 mod type_store;
 mod type_transform;
 mod type_traversal;

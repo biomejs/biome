@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/unary_commented_parentheses.ts
+---
+
+# Input
+
+```ts
+!(// leading
+a as boolean || b);
+!(// leading
+a satisfies boolean || b);
+!(// leading
+<boolean>a || b);
+
+```
+
+
+# Formatted
+
+```ts
+!(
+	// leading
+	(a as boolean) || b
+);
+!(
+	// leading
+	(a satisfies boolean) || b
+);
+!(
+	// leading
+	<boolean>a || b
+);
+
+```

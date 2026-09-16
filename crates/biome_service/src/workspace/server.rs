@@ -1415,7 +1415,10 @@ impl WorkspaceServerWithDb<'_> {
         let mut skipped_suggested_fixes = 0;
 
         if let Some(update_snippets) = capabilities.analyzer.update_snippets {
-            let embedded_snippets: Vec<_> = state.iter_snippets().collect();
+            let embedded_snippets: Vec<_> = state
+                .iter_snippets()
+                .for_analysis(&state.parsed, state.file_source, &state.db)
+                .collect();
             let mut new_snippets = Vec::new();
             for embedded_snippet in embedded_snippets {
                 let Some(document_file_source) = embedded_snippet.file_source(&state.db) else {
@@ -1518,7 +1521,27 @@ impl WorkspaceServerWithDb<'_> {
             if !new_snippets.is_empty() {
                 let new_root =
                     update_snippets(state.parsed.clone(), state.db.clone(), new_snippets)?;
-                state.parsed = AnyParse::from(new_root).into();
+                let parse = AnyParse::from(new_root);
+                let snippets = self.parse_embedded_language_snippets(
+                    &path,
+                    &state.file_source,
+                    &parse,
+                    &mut NodeCache::default(),
+                    &settings,
+                )?;
+                state.parsed = ParsedOrigin::interned_document(
+                    parse,
+                    snippets
+                        .into_iter()
+                        .map(
+                            |(parse, content, file_source)| ParsedSnippetOrigin::Interned {
+                                parse,
+                                content,
+                                file_source,
+                            },
+                        )
+                        .collect(),
+                );
             }
         }
 
@@ -1690,7 +1713,11 @@ impl WorkspaceServerWithDb<'_> {
                 mut infos,
             } = results;
 
-            for embedded_node in state.iter_snippets() {
+            for embedded_node in
+                state
+                    .iter_snippets()
+                    .for_analysis(&state.parsed, state.file_source, &state.db)
+            {
                 let Some(file_source) = embedded_node.file_source(&state.db) else {
                     continue;
                 };
@@ -3567,7 +3594,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 working_directory: Some(working_directory.as_path()),
             });
 
-            for embedded_node in embedded_snippets {
+            for embedded_node in SnippetsIterator::Workspace(embedded_snippets.iter()).for_analysis(
+                &parse.into(),
+                language,
+                &workspace_db,
+            ) {
+                let ParsedSnippetOrigin::Workspace(embedded_node) = embedded_node else {
+                    continue;
+                };
                 let Some(file_source) = workspace_db
                     .source_from_index(embedded_node.document_source_index(&*workspace_db))
                 else {
@@ -3651,6 +3685,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         let (parsed_source, parsed_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
 
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.as_ref().source_path().unwrap_or_default().as_path(),
+                        &settings.as_ref().get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
+        };
+
         let mut result = code_actions(CodeActionsParams {
             parsed_source: parsed_source.into(),
             range,
@@ -3663,13 +3712,32 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             skip: &skip,
             suppression_reason: None,
             enabled_rules: &enabled_rules,
-            plugins: Vec::new(),
+            plugins: plugins.clone(),
             categories,
             working_directory: Some(working_directory.as_path()),
             compute_actions,
         });
 
-        for embedded_snippet in &parsed_snippets {
+        // TODO: remove this once legacy HTML-ish support is removed
+        if let Some(offset) = self
+            .documents
+            .pin()
+            .get(path.as_path())
+            .and_then(|document| Self::legacy_diagnostic_offset(&path, language, &document.content))
+        {
+            for action in &mut result.actions {
+                action.offset.get_or_insert(TextSize::from(offset));
+            }
+        }
+
+        for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
+            &parsed_source.into(),
+            language,
+            &workspace_db,
+        ) {
+            let ParsedSnippetOrigin::Workspace(embedded_snippet) = embedded_snippet else {
+                continue;
+            };
             let Some(file_source) = workspace_db
                 .source_from_index(embedded_snippet.document_source_index(&*workspace_db))
             else {
@@ -3692,7 +3760,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 suppression_reason: None,
                 enabled_rules: &enabled_rules,
-                plugins: Vec::new(),
+                plugins: plugins.clone(),
                 categories,
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,
@@ -3868,10 +3936,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             should_format = display(&params.should_format),
         )
     )]
-    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+    fn fix_file(&self, mut params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.clone();
-        let should_format = params.should_format;
         let documents = self.documents.pin();
         let source = &documents
             .get(path.as_path())
@@ -3881,6 +3948,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let (_, settings, query) = self
             .project_get_settings_query(&state.db, project_key, &path, params.inline_config.clone())
             .ok_or_else(WorkspaceError::no_project)?;
+        let format_with_errors = query.inline_settings().map_or_else(
+            || settings.format_with_errors_enabled_for_this_file_path(&path),
+            |settings| {
+                settings
+                    .as_ref()
+                    .format_with_errors_enabled_for_this_file_path(&path)
+            },
+        );
+        let should_format = params.should_format && (format_with_errors || !state.has_errors());
+        params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);
         #[cfg(feature = "module_graph")]

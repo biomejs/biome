@@ -19,7 +19,7 @@ declare_lint_rule! {
     /// This rule ensures that every line in a JSDoc block, except the opening one, starts with exactly one asterisk (`*`).
     /// Extra asterisks are unnecessary in JSDoc comments and are often introduced by mistake.
     ///
-    /// Double asterisks (`**`) are still allowed, because they mark the start of bold text.
+    /// Asterisks that are part of the comment content, such as bold or italic text, are still allowed.
     ///
     /// ## Examples
     ///
@@ -57,6 +57,12 @@ declare_lint_rule! {
     /// ```js
     /// /**
     ///  * **Bold** text
+    ///  */
+    /// ```
+    ///
+    /// ```js
+    /// /**
+    ///  * *Italic* text
     ///  */
     /// ```
     ///
@@ -220,11 +226,10 @@ fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
 
             let mut invalid_asterisk_index = None;
 
-            let mut byte_it = bytes.iter().skip(1).enumerate().peekable();
-            while let Some((char_index, &b)) = byte_it.next() {
+            let byte_it = bytes.iter().skip(1).enumerate().peekable();
+            for (char_index, &b) in byte_it {
                 if b == b'*' {
-                    // double asterisk is valid
-                    if byte_it.peek().is_some_and(|&(_, &next_b)| next_b == b'*') {
+                    if asterisk_is_part_of_comment_content(bytes, char_index + 1) {
                         return invalid_asterisk_index.map(|_| (line_index, char_index));
                     }
 
@@ -248,6 +253,18 @@ fn get_invalid_jsdoc_line_start(text: &str) -> Option<InvalidJsDocLineIndexes> {
         char_start: start,
         char_end: start + invalid_line_char_end,
     })
+}
+
+fn asterisk_is_part_of_comment_content(bytes: &[u8], asterisk_index: usize) -> bool {
+    let Some(content) = bytes.get(asterisk_index + 1..) else {
+        return false;
+    };
+
+    content.first() == Some(&b'*')
+        || content.first().is_some_and(|&b| !char_is_whitespace(b))
+            && content
+                .windows(2)
+                .any(|pair| !char_is_whitespace(pair[0]) && pair[1] == b'*')
 }
 
 fn get_invalid_jsdoc_last_line(text: &str) -> Option<InvalidJsDocLineIndexes> {

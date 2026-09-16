@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11730Invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import type { Player } from "./issue11730Player.js";
+
+class GameController {
+	players: Player[];
+
+	updatePlayers() {
+		for (const player of this.players) {
+			switch (player.state) {
+				case "running":
+					break;
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+issue11730Invalid.ts:9:4 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     7 │ 	updatePlayers() {
+     8 │ 		for (const player of this.players) {
+   > 9 │ 			switch (player.state) {
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │ 				case "running":
+  > 11 │ 					break;
+  > 12 │ 			}
+       │ 			^
+    13 │ 		}
+    14 │ 	}
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "jumping"
+  - "ducking"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     9  9 │         switch (player.state) {
+    10 10 │           case "running":
+    11    │ - → → → → → break;
+       11 │ + → → → → → break;
+       12 │ + → → → → case·"jumping":·throw·new·Error("TODO:·Not·implemented·yet");
+       13 │ + → → → → case·"ducking":·throw·new·Error("TODO:·Not·implemented·yet");
+    12 14 │         }
+    13 15 │       }
+  
+
+```

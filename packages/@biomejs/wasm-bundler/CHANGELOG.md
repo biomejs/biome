@@ -1,5 +1,11 @@
 # @biomejs/wasm-bundler
 
+## 2.5.14
+
+No changes in this release.
+
+## 2.5.13
+
 ## 2.5.12
 
 ## 2.5.11

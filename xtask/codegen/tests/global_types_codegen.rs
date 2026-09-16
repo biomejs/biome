@@ -743,6 +743,7 @@ mod tests {
             "//! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.",
             "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
             "pub(crate) fn set_generated_global_type_data(",
+            "pub(crate) fn generated_local_types(",
         ] {
             assert!(
                 content.contains(needle),
@@ -1316,7 +1317,6 @@ mod tests {
             async_dispose.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
         );
-        assert_eq!(symbol_class.members().len(), 2);
 
         let dispose_helper = lowered
             .global("Symbol.dispose")
@@ -1354,13 +1354,6 @@ mod tests {
             bail!("WeakMap should lower to class data");
         };
         assert_eq!(weak_map_class.name(), "WeakMap");
-        assert_eq!(
-            weak_map_class.type_parameters(),
-            &[
-                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-            ]
-        );
         assert!(weak_map_class.members().is_empty());
 
         Ok(())
@@ -1377,7 +1370,7 @@ mod tests {
         };
         assert_eq!(date_class.name(), "Date");
         assert!(date_class.type_parameters().is_empty());
-        assert!(date_class.members().is_empty());
+        assert!(!date_class.members().is_empty());
 
         Ok(())
     }
@@ -1386,23 +1379,28 @@ mod tests {
     fn lowerer_rejects_date_extends_clause() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.date-extends.d.ts"),
-            "Date interface extends clauses are not supported",
+            "unsupported extends clause on class Date",
         )
     }
 
     #[test]
-    fn lowerer_rejects_date_type_parameters() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.date-type-parameters.d.ts"),
-            "Date interface has 1 type parameters, expected 0",
-        )
+    fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
+        let LoweredTypeData::Class(class) = lowered.global("Date").unwrap().data() else {
+            bail!("expected class");
+        };
+        assert_eq!(
+            class.member("value").unwrap().type_reference(),
+            &class.type_parameters()[0]
+        );
+        Ok(())
     }
 
     #[test]
-    fn lowerer_rejects_wrong_weak_map_type_parameter_count() -> Result<()> {
+    fn lowerer_rejects_inconsistent_weak_map_type_parameter_count() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts"),
-            "WeakMap interface has 1 type parameters, expected 2",
+            "inconsistent type parameter count across merged class WeakMap declarations",
         )
     }
 
@@ -1423,10 +1421,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_wrong_symbol_constructor_reference() -> Result<()> {
+    fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
-            "declare var Symbol must reference SymbolConstructor",
+            "SymbolConstructor is missing dispose",
         )
     }
 

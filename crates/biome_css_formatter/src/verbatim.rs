@@ -10,7 +10,9 @@ use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
     FormatWithRule, LINE_TERMINATORS, normalize_newlines,
 };
-use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, TextSize};
+#[cfg(debug_assertions)]
+use biome_rowan::SyntaxElement;
+use biome_rowan::{AstNode, Direction, TextRange, TextSize};
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -82,6 +84,7 @@ where
 {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         debug_assert!(self.node.text_trimmed_range().contains_range(self.range));
+        #[cfg(debug_assertions)]
         mark_css_verbatim_subtree(self.node, f);
 
         let mut last_end = self.range.start();
@@ -137,6 +140,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 
         let preserve_outer_trivia = self.node.parent().is_none();
 
+        #[cfg(debug_assertions)]
         for element in self.node.descendants_with_tokens(Direction::Next) {
             match element {
                 SyntaxElement::Token(token) => f.state_mut().track_token(&token),
@@ -256,6 +260,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
 ///
 /// Use this when a formatter writes verbatim source for a node and its child
 /// formatters do not run, such as string interpolation `#{ get($map) }`.
+#[cfg(debug_assertions)]
 fn mark_css_verbatim_subtree(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
     mark_css_verbatim_node(node, f);
 
@@ -268,6 +273,7 @@ fn mark_css_verbatim_subtree(node: &CssSyntaxNode, f: &Formatter<CssFormatContex
     }
 }
 
+#[cfg(debug_assertions)]
 fn mark_css_verbatim_node(node: &CssSyntaxNode, f: &Formatter<CssFormatContext>) {
     let comments = f.context().comments();
     comments.mark_suppression_checked(node);

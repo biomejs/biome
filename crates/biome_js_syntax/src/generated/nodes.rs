@@ -35,10 +35,10 @@ impl AstroImplicitFragment {
     }
     pub fn as_fields(&self) -> AstroImplicitFragmentFields {
         AstroImplicitFragmentFields {
-            children: self.children(),
+            elements: self.elements(),
         }
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -52,7 +52,7 @@ impl Serialize for AstroImplicitFragment {
 }
 #[derive(Serialize)]
 pub struct AstroImplicitFragmentFields {
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
@@ -7565,14 +7565,14 @@ impl JsxElement {
     pub fn as_fields(&self) -> JsxElementFields {
         JsxElementFields {
             opening_element: self.opening_element(),
-            children: self.children(),
+            elements: self.elements(),
             closing_element: self.closing_element(),
         }
     }
     pub fn opening_element(&self) -> SyntaxResult<JsxOpeningElement> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_element(&self) -> SyntaxResult<JsxClosingElement> {
@@ -7590,7 +7590,7 @@ impl Serialize for JsxElement {
 #[derive(Serialize)]
 pub struct JsxElementFields {
     pub opening_element: SyntaxResult<JsxOpeningElement>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_element: SyntaxResult<JsxClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7700,14 +7700,14 @@ impl JsxFragment {
     pub fn as_fields(&self) -> JsxFragmentFields {
         JsxFragmentFields {
             opening_fragment: self.opening_fragment(),
-            children: self.children(),
+            elements: self.elements(),
             closing_fragment: self.closing_fragment(),
         }
     }
     pub fn opening_fragment(&self) -> SyntaxResult<JsxOpeningFragment> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_fragment(&self) -> SyntaxResult<JsxClosingFragment> {
@@ -7725,7 +7725,7 @@ impl Serialize for JsxFragment {
 #[derive(Serialize)]
 pub struct JsxFragmentFields {
     pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_fragment: SyntaxResult<JsxClosingFragment>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -16619,6 +16619,7 @@ impl AnyTsType {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeMember {
     JsBogusMember(JsBogusMember),
+    JsMetavariable(JsMetavariable),
     TsCallSignatureTypeMember(TsCallSignatureTypeMember),
     TsConstructSignatureTypeMember(TsConstructSignatureTypeMember),
     TsGetterSignatureTypeMember(TsGetterSignatureTypeMember),
@@ -16631,6 +16632,12 @@ impl AnyTsTypeMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
             Self::JsBogusMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -16769,7 +16776,7 @@ impl std::fmt::Debug for AstroImplicitFragment {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("AstroImplicitFragment")
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .finish()
         } else {
             f.debug_struct("AstroImplicitFragment").finish()
@@ -25589,7 +25596,7 @@ impl std::fmt::Debug for JsxElement {
                     "opening_element",
                     &support::DebugSyntaxResult(self.opening_element()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_element",
                     &support::DebugSyntaxResult(self.closing_element()),
@@ -25757,7 +25764,7 @@ impl std::fmt::Debug for JsxFragment {
                     "opening_fragment",
                     &support::DebugSyntaxResult(self.opening_fragment()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_fragment",
                     &support::DebugSyntaxResult(self.closing_fragment()),
@@ -40415,6 +40422,11 @@ impl From<JsBogusMember> for AnyTsTypeMember {
         Self::JsBogusMember(node)
     }
 }
+impl From<JsMetavariable> for AnyTsTypeMember {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
 impl From<TsCallSignatureTypeMember> for AnyTsTypeMember {
     fn from(node: TsCallSignatureTypeMember) -> Self {
         Self::TsCallSignatureTypeMember(node)
@@ -40453,6 +40465,7 @@ impl From<TsSetterSignatureTypeMember> for AnyTsTypeMember {
 impl AstNode for AnyTsTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusMember::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(TsCallSignatureTypeMember::KIND_SET)
         .union(TsConstructSignatureTypeMember::KIND_SET)
         .union(TsGetterSignatureTypeMember::KIND_SET)
@@ -40464,6 +40477,7 @@ impl AstNode for AnyTsTypeMember {
         matches!(
             kind,
             JS_BOGUS_MEMBER
+                | JS_METAVARIABLE
                 | TS_CALL_SIGNATURE_TYPE_MEMBER
                 | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
                 | TS_GETTER_SIGNATURE_TYPE_MEMBER
@@ -40476,6 +40490,7 @@ impl AstNode for AnyTsTypeMember {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             TS_CALL_SIGNATURE_TYPE_MEMBER => {
                 Self::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
             }
@@ -40504,6 +40519,7 @@ impl AstNode for AnyTsTypeMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.syntax(),
+            Self::JsMetavariable(it) => it.syntax(),
             Self::TsCallSignatureTypeMember(it) => it.syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.syntax(),
@@ -40516,6 +40532,7 @@ impl AstNode for AnyTsTypeMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.into_syntax(),
+            Self::JsMetavariable(it) => it.into_syntax(),
             Self::TsCallSignatureTypeMember(it) => it.into_syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -40530,6 +40547,7 @@ impl std::fmt::Debug for AnyTsTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
@@ -40544,6 +40562,7 @@ impl From<AnyTsTypeMember> for SyntaxNode {
     fn from(n: AnyTsTypeMember) -> Self {
         match n {
             AnyTsTypeMember::JsBogusMember(it) => it.into_syntax(),
+            AnyTsTypeMember::JsMetavariable(it) => it.into_syntax(),
             AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsGetterSignatureTypeMember(it) => it.into_syntax(),

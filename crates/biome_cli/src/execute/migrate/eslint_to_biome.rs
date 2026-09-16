@@ -681,6 +681,30 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::FuncStyle(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                let options = match conf {
+                    eslint_eslint::RuleConf::Option(_, style) => {
+                        eslint_eslint::FuncStyleOptions::default().into_biome_options(style)
+                    }
+                    eslint_eslint::RuleConf::Options(_, style, options) => {
+                        options.into_biome_options(style)
+                    }
+                    _ => return,
+                };
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_function_style =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options,
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.nursery.get_or_insert_with(Default::default);
@@ -904,6 +928,21 @@ fn migrate_eslint_rule(
                     ));
                 }
                 results.add(&name, RuleMigrationResult::Migrated);
+            }
+        }
+        eslint_eslint::Rule::TypeScriptSwitchExhaustivenessCheck(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_exhaustive_switch_cases =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: conf.severity().into(),
+                                fix: None,
+                                options: conf.option_or_default().into(),
+                            },
+                        ));
+                }
             }
         }
         eslint_eslint::Rule::UnicornNumericSeparatorsStyle(conf) => {

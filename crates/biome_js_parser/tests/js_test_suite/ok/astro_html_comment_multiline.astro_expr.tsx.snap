@@ -34,7 +34,7 @@ JsExpressionTemplateRoot {
                     attributes: JsxAttributeList [],
                     r_angle_token: R_ANGLE@9..43 ">" [] [Comments("<!-- line one\nline tw ..."), Comments("<!---->")],
                 },
-                children: JsxChildList [],
+                elements: JsxChildList [],
                 closing_element: JsxClosingElement {
                     l_angle_token: L_ANGLE@43..44 "<" [] [],
                     slash_token: SLASH@44..45 "/" [] [],

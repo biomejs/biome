@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/release-final-statement-boundaries.css
+---
+
+# Input
+
+```css
+@import "theme.css";
+.a { @extend .base; color:red; }
+.b { @foo bar; width:1px; }
+@foo bar;
+
+```
+
+
+# Formatted
+
+```css
+@import "theme.css";
+.a {
+	@extend .base;
+	color: red;
+}
+.b {
+	@foo bar;
+	width: 1px;
+}
+@foo bar;
+
+```

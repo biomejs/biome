@@ -10,6 +10,7 @@ use biome_formatter::{
     write,
 };
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
@@ -18,7 +19,7 @@ use biome_js_syntax::{
     JsVariableDeclarator, JsWhileStatement, JsxElement, JsxFragment, JsxText, TsFunctionType,
     TsInterfaceDeclaration, TsMappedType,
 };
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
+use biome_rowan::{AstNode, Direction, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_text_size::TextSize;
 
@@ -114,6 +115,7 @@ impl CommentStyle for JsCommentStyle {
             CommentTextPosition::EndOfLine => handle_global_suppression(comment)
                 .or_else(handle_jsx_closing_tag_comment)
                 .or_else(handle_typecast_comment)
+                .or_else(handle_last_binary_operand_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
@@ -794,6 +796,74 @@ fn handle_conditional_comment(
 
     if is_after_operator {
         return CommentPlacement::leading(following.clone(), comment);
+    }
+
+    CommentPlacement::Default(comment)
+}
+
+fn handle_last_binary_operand_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    if comment.enclosing_node().kind() != JsSyntaxKind::JS_UNARY_EXPRESSION
+        || comment.following_node().is_some()
+        || !comment.kind().is_line()
+        || comment.lines_before() > 0
+        || JsCommentStyle::is_suppression(comment.piece().text())
+        || JsCommentStyle::is_global_suppression(comment.piece().text())
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(binary) = comment
+        .preceding_node()
+        .and_then(AnyJsBinaryLikeExpression::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let Ok(right) = binary.right() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // Crossing another comment would reorder comments. A newline can also belong
+    // to a removed closing parenthesis, whose comment must stay outside.
+    let follows_right = right.syntax().last_trailing_trivia().is_some_and(|trivia| {
+        trivia
+            .pieces()
+            .find(|piece| !piece.is_whitespace())
+            .is_some_and(|piece| piece.text_range() == comment.piece().text_range())
+    });
+    if !follows_right {
+        return CommentPlacement::Default(comment);
+    }
+
+    let binary_start = binary.syntax().text_trimmed_range().start();
+    let right_start = right.syntax().text_trimmed_range().start();
+    let is_multiline = binary
+        .syntax()
+        .descendants_tokens(Direction::Next)
+        .take_while(|token| token.text_trimmed_range().start() <= right_start)
+        .any(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .chain(token.trailing_trivia().pieces())
+                .any(|piece| {
+                    piece.is_newline()
+                        && piece.text_range().start() >= binary_start
+                        && piece.text_range().end() <= right_start
+                })
+                || (token.text_trimmed_range().start() < right_start
+                    && matches!(
+                        token.kind(),
+                        JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::TEMPLATE_CHUNK
+                    )
+                    && (token.text_trimmed().contains('\n') || token.text_trimmed().contains('\r')))
+        });
+
+    // Keep a last-operand comment inside the precedence parentheses of a multiline
+    // unary argument instead of attaching it to the whole binary expression.
+    if is_multiline {
+        return CommentPlacement::trailing(right.into_syntax(), comment);
     }
 
     CommentPlacement::Default(comment)

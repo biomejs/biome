@@ -54,3 +54,12 @@
 
 <!-- Hidden input is not accessible -->
 <a><input type="hidden" /></a>
+
+<!-- Labels alone do not provide anchor content -->
+<a aria-label="Navigate to home page"></a>
+<a title="Go to homepage"></a>
+<a aria-label="Home" title="Navigate home"></a>
+<a aria-labelledby="home-label"></a>
+<a aria-label="Home" />
+<a title="Home">    </a>
+<a aria-label="Home"><span aria-hidden="true">Home</span></a>

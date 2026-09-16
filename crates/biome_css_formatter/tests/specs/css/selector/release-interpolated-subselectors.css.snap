@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selector/release-interpolated-subselectors.css
+---
+
+# Input
+
+```css
+.card:not( .disabled )#id{color:red}
+.card[ data-state ]#id{color:blue}
+.card:not(.disabled)   #id{color:red}
+
+```
+
+
+# Formatted
+
+```css
+.card:not(.disabled)#id {
+	color: red;
+}
+.card[data-state]#id {
+	color: blue;
+}
+.card:not(.disabled) #id {
+	color: red;
+}
+
+```
