@@ -1,0 +1,857 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+Math.log(x) * Math.LOG10E;
+Math.LOG10E * Math.log(x);
+Math.log(x) / Math.LN10;
+Math.log(x) * Math.LOG2E;
+Math.LOG2E * Math.log(x);
+Math.log(x) / Math.LN2;
+Math.log(((0, x))) * Math.LOG10E;
+Math.LOG10E * Math.log(((0, x)));
+Math.log(((0, x))) / Math.LN10;
+
+function logarithm(x) {
+    return Math.log(x) / Math.LN10;
+}
+
+Math.sqrt(a * a + b * b);
+Math.sqrt(a ** 2 + b ** 2);
+Math.sqrt(a * a + b ** 2);
+Math.sqrt(a * a + b * b + c * c);
+Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+Math.sqrt(a * a);
+Math.sqrt(a ** 2);
+Math.sqrt(a * a,);
+Math.sqrt(a ** 2,);
+Math.sqrt((a, b) ** 2);
+Math.sqrt((++a) ** 2);
+Math.sqrt(a * a + b * b,);
+Math.sqrt(a ** 2 + b ** 2,);
+Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+Math.sqrt(0x2 * 2);
+Math.sqrt("x" * 'x');
+
+class Vector {
+    #x;
+
+    magnitude() {
+        return Math.sqrt(this.#x * this.#x);
+    }
+}
+
+/* leading logarithm comment */ Math.log(x) * Math.LOG10E; /* trailing logarithm comment */
+/* leading square root comment */ Math.sqrt(a * a + b * b); /* trailing square root comment */
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ Math.log(x) * Math.LOG10E;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ Math.LOG10E * Math.log(x);
+    5 │ Math.log(x) / Math.LN10;
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   
+     3    │ - Math.log(x)·*·Math.LOG10E;
+        3 │ + Math.log10(x);
+     4  4 │   Math.LOG10E * Math.log(x);
+     5  5 │   Math.log(x) / Math.LN10;
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    3 │ Math.log(x) * Math.LOG10E;
+  > 4 │ Math.LOG10E * Math.log(x);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Math.log(x) / Math.LN10;
+    6 │ Math.log(x) * Math.LOG2E;
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     2  2 │   
+     3  3 │   Math.log(x) * Math.LOG10E;
+     4    │ - Math.LOG10E·*·Math.log(x);
+        4 │ + Math.log10(x);
+     5  5 │   Math.log(x) / Math.LN10;
+     6  6 │   Math.log(x) * Math.LOG2E;
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    3 │ Math.log(x) * Math.LOG10E;
+    4 │ Math.LOG10E * Math.log(x);
+  > 5 │ Math.log(x) / Math.LN10;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ Math.log(x) * Math.LOG2E;
+    7 │ Math.LOG2E * Math.log(x);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     3  3 │   Math.log(x) * Math.LOG10E;
+     4  4 │   Math.LOG10E * Math.log(x);
+     5    │ - Math.log(x)·/·Math.LN10;
+        5 │ + Math.log10(x);
+     6  6 │   Math.log(x) * Math.LOG2E;
+     7  7 │   Math.LOG2E * Math.log(x);
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    4 │ Math.LOG10E * Math.log(x);
+    5 │ Math.log(x) / Math.LN10;
+  > 6 │ Math.log(x) * Math.LOG2E;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ Math.LOG2E * Math.log(x);
+    8 │ Math.log(x) / Math.LN2;
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log2() instead.
+  
+     4  4 │   Math.LOG10E * Math.log(x);
+     5  5 │   Math.log(x) / Math.LN10;
+     6    │ - Math.log(x)·*·Math.LOG2E;
+        6 │ + Math.log2(x);
+     7  7 │   Math.LOG2E * Math.log(x);
+     8  8 │   Math.log(x) / Math.LN2;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    5 │ Math.log(x) / Math.LN10;
+    6 │ Math.log(x) * Math.LOG2E;
+  > 7 │ Math.LOG2E * Math.log(x);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ Math.log(x) / Math.LN2;
+    9 │ Math.log(((0, x))) * Math.LOG10E;
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log2() instead.
+  
+     5  5 │   Math.log(x) / Math.LN10;
+     6  6 │   Math.log(x) * Math.LOG2E;
+     7    │ - Math.LOG2E·*·Math.log(x);
+        7 │ + Math.log2(x);
+     8  8 │   Math.log(x) / Math.LN2;
+     9  9 │   Math.log(((0, x))) * Math.LOG10E;
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+     6 │ Math.log(x) * Math.LOG2E;
+     7 │ Math.LOG2E * Math.log(x);
+   > 8 │ Math.log(x) / Math.LN2;
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ Math.log(((0, x))) * Math.LOG10E;
+    10 │ Math.LOG10E * Math.log(((0, x)));
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log2() instead.
+  
+     6  6 │   Math.log(x) * Math.LOG2E;
+     7  7 │   Math.LOG2E * Math.log(x);
+     8    │ - Math.log(x)·/·Math.LN2;
+        8 │ + Math.log2(x);
+     9  9 │   Math.log(((0, x))) * Math.LOG10E;
+    10 10 │   Math.LOG10E * Math.log(((0, x)));
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+     7 │ Math.LOG2E * Math.log(x);
+     8 │ Math.log(x) / Math.LN2;
+   > 9 │ Math.log(((0, x))) * Math.LOG10E;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ Math.LOG10E * Math.log(((0, x)));
+    11 │ Math.log(((0, x))) / Math.LN10;
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     7  7 │   Math.LOG2E * Math.log(x);
+     8  8 │   Math.log(x) / Math.LN2;
+     9    │ - Math.log(((0,·x)))·*·Math.LOG10E;
+        9 │ + Math.log10(((0,·x)));
+    10 10 │   Math.LOG10E * Math.log(((0, x)));
+    11 11 │   Math.log(((0, x))) / Math.LN10;
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+     8 │ Math.log(x) / Math.LN2;
+     9 │ Math.log(((0, x))) * Math.LOG10E;
+  > 10 │ Math.LOG10E * Math.log(((0, x)));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ Math.log(((0, x))) / Math.LN10;
+    12 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     8  8 │   Math.log(x) / Math.LN2;
+     9  9 │   Math.log(((0, x))) * Math.LOG10E;
+    10    │ - Math.LOG10E·*·Math.log(((0,·x)));
+       10 │ + Math.log10(((0,·x)));
+    11 11 │   Math.log(((0, x))) / Math.LN10;
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+     9 │ Math.log(((0, x))) * Math.LOG10E;
+    10 │ Math.LOG10E * Math.log(((0, x)));
+  > 11 │ Math.log(((0, x))) / Math.LN10;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ function logarithm(x) {
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+     9  9 │   Math.log(((0, x))) * Math.LOG10E;
+    10 10 │   Math.LOG10E * Math.log(((0, x)));
+    11    │ - Math.log(((0,·x)))·/·Math.LN10;
+       11 │ + Math.log10(((0,·x)));
+    12 12 │   
+    13 13 │   function logarithm(x) {
+  
+
+```
+
+```
+invalid.js:14:12 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    13 │ function logarithm(x) {
+  > 14 │     return Math.log(x) / Math.LN10;
+       │            ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+    12 12 │   
+    13 13 │   function logarithm(x) {
+    14    │ - ····return·Math.log(x)·/·Math.LN10;
+       14 │ + ····return·Math.log10(x);
+    15 15 │   }
+    16 16 │   
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    15 │ }
+    16 │ 
+  > 17 │ Math.sqrt(a * a + b * b);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ Math.sqrt(a ** 2 + b ** 2);
+    19 │ Math.sqrt(a * a + b ** 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    15 15 │   }
+    16 16 │   
+    17    │ - Math.sqrt(a·*·a·+·b·*·b);
+       17 │ + Math.hypot(a·,·b);
+    18 18 │   Math.sqrt(a ** 2 + b ** 2);
+    19 19 │   Math.sqrt(a * a + b ** 2);
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    17 │ Math.sqrt(a * a + b * b);
+  > 18 │ Math.sqrt(a ** 2 + b ** 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ Math.sqrt(a * a + b ** 2);
+    20 │ Math.sqrt(a * a + b * b + c * c);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    16 16 │   
+    17 17 │   Math.sqrt(a * a + b * b);
+    18    │ - Math.sqrt(a·**·2·+·b·**·2);
+       18 │ + Math.hypot(a·,·b);
+    19 19 │   Math.sqrt(a * a + b ** 2);
+    20 20 │   Math.sqrt(a * a + b * b + c * c);
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    17 │ Math.sqrt(a * a + b * b);
+    18 │ Math.sqrt(a ** 2 + b ** 2);
+  > 19 │ Math.sqrt(a * a + b ** 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ Math.sqrt(a * a + b * b + c * c);
+    21 │ Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    17 17 │   Math.sqrt(a * a + b * b);
+    18 18 │   Math.sqrt(a ** 2 + b ** 2);
+    19    │ - Math.sqrt(a·*·a·+·b·**·2);
+       19 │ + Math.hypot(a·,·b);
+    20 20 │   Math.sqrt(a * a + b * b + c * c);
+    21 21 │   Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    18 │ Math.sqrt(a ** 2 + b ** 2);
+    19 │ Math.sqrt(a * a + b ** 2);
+  > 20 │ Math.sqrt(a * a + b * b + c * c);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+    22 │ Math.sqrt(a * a);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    18 18 │   Math.sqrt(a ** 2 + b ** 2);
+    19 19 │   Math.sqrt(a * a + b ** 2);
+    20    │ - Math.sqrt(a·*·a·+·b·*·b·+·c·*·c);
+       20 │ + Math.hypot(a·,·b·,·c);
+    21 21 │   Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+    22 22 │   Math.sqrt(a * a);
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    19 │ Math.sqrt(a * a + b ** 2);
+    20 │ Math.sqrt(a * a + b * b + c * c);
+  > 21 │ Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ Math.sqrt(a * a);
+    23 │ Math.sqrt(a ** 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    19 19 │   Math.sqrt(a * a + b ** 2);
+    20 20 │   Math.sqrt(a * a + b * b + c * c);
+    21    │ - Math.sqrt(a·**·2·+·b·**·2·+·c·**·2);
+       21 │ + Math.hypot(a·,·b·,·c);
+    22 22 │   Math.sqrt(a * a);
+    23 23 │   Math.sqrt(a ** 2);
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    20 │ Math.sqrt(a * a + b * b + c * c);
+    21 │ Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+  > 22 │ Math.sqrt(a * a);
+       │ ^^^^^^^^^^^^^^^^
+    23 │ Math.sqrt(a ** 2);
+    24 │ Math.sqrt(a * a,);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    20 20 │   Math.sqrt(a * a + b * b + c * c);
+    21 21 │   Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+    22    │ - Math.sqrt(a·*·a);
+       22 │ + Math.abs(a);
+    23 23 │   Math.sqrt(a ** 2);
+    24 24 │   Math.sqrt(a * a,);
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    21 │ Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+    22 │ Math.sqrt(a * a);
+  > 23 │ Math.sqrt(a ** 2);
+       │ ^^^^^^^^^^^^^^^^^
+    24 │ Math.sqrt(a * a,);
+    25 │ Math.sqrt(a ** 2,);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    21 21 │   Math.sqrt(a ** 2 + b ** 2 + c ** 2);
+    22 22 │   Math.sqrt(a * a);
+    23    │ - Math.sqrt(a·**·2);
+       23 │ + Math.abs(a);
+    24 24 │   Math.sqrt(a * a,);
+    25 25 │   Math.sqrt(a ** 2,);
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    22 │ Math.sqrt(a * a);
+    23 │ Math.sqrt(a ** 2);
+  > 24 │ Math.sqrt(a * a,);
+       │ ^^^^^^^^^^^^^^^^^
+    25 │ Math.sqrt(a ** 2,);
+    26 │ Math.sqrt((a, b) ** 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    22 22 │   Math.sqrt(a * a);
+    23 23 │   Math.sqrt(a ** 2);
+    24    │ - Math.sqrt(a·*·a,);
+       24 │ + Math.abs(a);
+    25 25 │   Math.sqrt(a ** 2,);
+    26 26 │   Math.sqrt((a, b) ** 2);
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    23 │ Math.sqrt(a ** 2);
+    24 │ Math.sqrt(a * a,);
+  > 25 │ Math.sqrt(a ** 2,);
+       │ ^^^^^^^^^^^^^^^^^^
+    26 │ Math.sqrt((a, b) ** 2);
+    27 │ Math.sqrt((++a) ** 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    23 23 │   Math.sqrt(a ** 2);
+    24 24 │   Math.sqrt(a * a,);
+    25    │ - Math.sqrt(a·**·2,);
+       25 │ + Math.abs(a);
+    26 26 │   Math.sqrt((a, b) ** 2);
+    27 27 │   Math.sqrt((++a) ** 2);
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    24 │ Math.sqrt(a * a,);
+    25 │ Math.sqrt(a ** 2,);
+  > 26 │ Math.sqrt((a, b) ** 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    27 │ Math.sqrt((++a) ** 2);
+    28 │ Math.sqrt(a * a + b * b,);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    24 24 │   Math.sqrt(a * a,);
+    25 25 │   Math.sqrt(a ** 2,);
+    26    │ - Math.sqrt((a,·b)·**·2);
+       26 │ + Math.abs((a,·b));
+    27 27 │   Math.sqrt((++a) ** 2);
+    28 28 │   Math.sqrt(a * a + b * b,);
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    25 │ Math.sqrt(a ** 2,);
+    26 │ Math.sqrt((a, b) ** 2);
+  > 27 │ Math.sqrt((++a) ** 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    28 │ Math.sqrt(a * a + b * b,);
+    29 │ Math.sqrt(a ** 2 + b ** 2,);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    25 25 │   Math.sqrt(a ** 2,);
+    26 26 │   Math.sqrt((a, b) ** 2);
+    27    │ - Math.sqrt((++a)·**·2);
+       27 │ + Math.abs((++a));
+    28 28 │   Math.sqrt(a * a + b * b,);
+    29 29 │   Math.sqrt(a ** 2 + b ** 2,);
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    26 │ Math.sqrt((a, b) ** 2);
+    27 │ Math.sqrt((++a) ** 2);
+  > 28 │ Math.sqrt(a * a + b * b,);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ Math.sqrt(a ** 2 + b ** 2,);
+    30 │ Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    26 26 │   Math.sqrt((a, b) ** 2);
+    27 27 │   Math.sqrt((++a) ** 2);
+    28    │ - Math.sqrt(a·*·a·+·b·*·b,);
+       28 │ + Math.hypot(a·,·b,);
+    29 29 │   Math.sqrt(a ** 2 + b ** 2,);
+    30 30 │   Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    27 │ Math.sqrt((++a) ** 2);
+    28 │ Math.sqrt(a * a + b * b,);
+  > 29 │ Math.sqrt(a ** 2 + b ** 2,);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+    31 │ Math.sqrt(0x2 * 2);
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    27 27 │   Math.sqrt((++a) ** 2);
+    28 28 │   Math.sqrt(a * a + b * b,);
+    29    │ - Math.sqrt(a·**·2·+·b·**·2,);
+       29 │ + Math.hypot(a·,·b,);
+    30 30 │   Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+    31 31 │   Math.sqrt(0x2 * 2);
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    28 │ Math.sqrt(a * a + b * b,);
+    29 │ Math.sqrt(a ** 2 + b ** 2,);
+  > 30 │ Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ Math.sqrt(0x2 * 2);
+    32 │ Math.sqrt("x" * 'x');
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    28 28 │   Math.sqrt(a * a + b * b,);
+    29 29 │   Math.sqrt(a ** 2 + b ** 2,);
+    30    │ - Math.sqrt(((a·**·2))·+·((b·**·2·+·c·**·2))·+·((d))·*·((d))·+·((e))·**·((2)));
+       30 │ + Math.hypot(a·,·b·,·c·,·((d))·,·((e)));
+    31 31 │   Math.sqrt(0x2 * 2);
+    32 32 │   Math.sqrt("x" * 'x');
+  
+
+```
+
+```
+invalid.js:31:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    29 │ Math.sqrt(a ** 2 + b ** 2,);
+    30 │ Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+  > 31 │ Math.sqrt(0x2 * 2);
+       │ ^^^^^^^^^^^^^^^^^^
+    32 │ Math.sqrt("x" * 'x');
+    33 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    29 29 │   Math.sqrt(a ** 2 + b ** 2,);
+    30 30 │   Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+    31    │ - Math.sqrt(0x2·*·2);
+       31 │ + Math.abs(0x2);
+    32 32 │   Math.sqrt("x" * 'x');
+    33 33 │   
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    30 │ Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+    31 │ Math.sqrt(0x2 * 2);
+  > 32 │ Math.sqrt("x" * 'x');
+       │ ^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ class Vector {
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    30 30 │   Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
+    31 31 │   Math.sqrt(0x2 * 2);
+    32    │ - Math.sqrt("x"·*·'x');
+       32 │ + Math.abs("x");
+    33 33 │   
+    34 34 │   class Vector {
+  
+
+```
+
+```
+invalid.js:38:16 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes an absolute value.
+  
+    37 │     magnitude() {
+  > 38 │         return Math.sqrt(this.#x * this.#x);
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │     }
+    40 │ }
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.abs() instead.
+  
+    36 36 │   
+    37 37 │       magnitude() {
+    38    │ - ········return·Math.sqrt(this.#x·*·this.#x);
+       38 │ + ········return·Math.abs(this.#x);
+    39 39 │       }
+    40 40 │   }
+  
+
+```
+
+```
+invalid.js:42:33 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually converts a natural logarithm.
+  
+    40 │ }
+    41 │ 
+  > 42 │ /* leading logarithm comment */ Math.log(x) * Math.LOG10E; /* trailing logarithm comment */
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ /* leading square root comment */ Math.sqrt(a * a + b * b); /* trailing square root comment */
+    44 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.log10() instead.
+  
+    40 40 │   }
+    41 41 │   
+    42    │ - /*·leading·logarithm·comment·*/·Math.log(x)·*·Math.LOG10E;·/*·trailing·logarithm·comment·*/
+       42 │ + /*·leading·logarithm·comment·*/·Math.log10(x);·/*·trailing·logarithm·comment·*/
+    43 43 │   /* leading square root comment */ Math.sqrt(a * a + b * b); /* trailing square root comment */
+    44 44 │   
+  
+
+```
+
+```
+invalid.js:43:35 lint/nursery/useModernMathApis  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This expression manually computes the square root of a sum of squares.
+  
+    42 │ /* leading logarithm comment */ Math.log(x) * Math.LOG10E; /* trailing logarithm comment */
+  > 43 │ /* leading square root comment */ Math.sqrt(a * a + b * b); /* trailing square root comment */
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+  
+  i The dedicated Math API expresses the operation directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use Math.hypot() instead.
+  
+    41 41 │   
+    42 42 │   /* leading logarithm comment */ Math.log(x) * Math.LOG10E; /* trailing logarithm comment */
+    43    │ - /*·leading·square·root·comment·*/·Math.sqrt(a·*·a·+·b·*·b);·/*·trailing·square·root·comment·*/
+       43 │ + /*·leading·square·root·comment·*/·Math.hypot(a·,·b);·/*·trailing·square·root·comment·*/
+    44 44 │   
+  
+
+```

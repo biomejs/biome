@@ -22,6 +22,10 @@ __bold__
 
 + item after dash thematic break
 
+-   
+
+1.   
+
 ```
 
 
@@ -42,5 +46,9 @@ __bold__
 + ---
 
 * item after dash thematic break
+
+-
+
+1.
 
 ```

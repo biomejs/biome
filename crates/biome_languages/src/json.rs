@@ -1,3 +1,4 @@
+use biome_fs::ConfigName;
 use biome_rowan::FileSourceError;
 use biome_string_case::StrLikeExtension;
 use camino::Utf8Path;
@@ -16,6 +17,31 @@ pub struct JsonFileSource {
     allow_trailing_commas: bool,
     allow_comments: bool,
     variant: JsonFileVariant,
+    kind: JsonSourceKind,
+}
+
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Copy, Default, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub enum JsonSourceKind {
+    #[default]
+    Regular,
+    BiomeJson,
+    PackageJson,
+}
+
+impl JsonSourceKind {
+    pub const fn is_regular(&self) -> bool {
+        matches!(self, Self::Regular)
+    }
+    pub const fn is_biome_json(&self) -> bool {
+        matches!(self, Self::BiomeJson)
+    }
+    pub const fn is_package_json(&self) -> bool {
+        matches!(self, Self::PackageJson)
+    }
 }
 
 /// It represents the extension of the file
@@ -189,6 +215,7 @@ impl JsonFileSource {
             allow_comments: false,
             allow_trailing_commas: false,
             variant: JsonFileVariant::Standard,
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -197,6 +224,7 @@ impl JsonFileSource {
             allow_comments: true,
             allow_trailing_commas: false,
             variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -205,6 +233,7 @@ impl JsonFileSource {
             allow_comments: true,
             allow_trailing_commas: true,
             variant: JsonFileVariant::from_str(extension).unwrap_or_default(),
+            kind: JsonSourceKind::Regular,
         }
     }
 
@@ -225,12 +254,34 @@ impl JsonFileSource {
         self
     }
 
+    #[must_use]
+    pub fn with_kind(mut self, kind: JsonSourceKind) -> Self {
+        self.kind = kind;
+        self
+    }
+
     pub fn allow_comments(&self) -> bool {
         self.allow_comments
     }
 
     pub fn variant(&self) -> JsonFileVariant {
         self.variant
+    }
+
+    pub fn kind(&self) -> JsonSourceKind {
+        self.kind
+    }
+
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        match self.variant {
+            JsonFileVariant::Standard => "json",
+            JsonFileVariant::Jsonc => "jsonc",
+        }
     }
 
     pub fn is_well_known_json_file(file_name: &str) -> bool {
@@ -265,28 +316,37 @@ impl JsonFileSource {
     /// Try to return the JSON file source corresponding to this file name from well-known files
     pub fn try_from_well_known(path: &Utf8Path) -> Result<Self, FileSourceError> {
         let file_name = path.file_name().ok_or(FileSourceError::MissingFileName)?;
-        let Some(extension) = path.extension() else {
-            return Err(FileSourceError::MissingFileExtension);
-        };
+        let normalized_file_name = file_name.to_ascii_lowercase_cow();
+        let extension = path
+            .extension()
+            .ok_or(FileSourceError::MissingFileExtension)?
+            .to_ascii_lowercase_cow();
+        if ConfigName::matches_file_name(&normalized_file_name) {
+            return Self::try_from_extension(&extension)
+                .map(|source| source.with_kind(JsonSourceKind::BiomeJson));
+        } else if normalized_file_name == "package.json" {
+            return Ok(JsonFileSource::json().with_kind(JsonSourceKind::PackageJson));
+        }
+
         if Self::is_well_known_json_allow_comments_and_trailing_commas_file(file_name) {
-            return Ok(Self::json_allow_comments_and_trailing_commas(extension));
+            return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
         if Self::is_well_known_json_allow_comments_file(file_name) {
-            return Ok(Self::json_allow_comments(extension));
+            return Ok(Self::json_allow_comments(&extension));
         }
 
         if let Some(camino::Utf8Component::Normal(parent_dir)) = path.components().rev().nth(1)
             && Self::is_well_known_json_allow_comments_and_trailing_commas_directory(parent_dir)
             && file_name.ends_with(".json")
         {
-            return Ok(Self::json_allow_comments_and_trailing_commas(extension));
+            return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
 
         if zed_global_directory().is_some_and(|dir| path.starts_with(&dir))
             || vscode_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
             || cursor_global_directory().is_some_and(|dir| path.starts_with(dir.config_dir()))
         {
-            return Ok(Self::json_allow_comments_and_trailing_commas(extension));
+            return Ok(Self::json_allow_comments_and_trailing_commas(&extension));
         }
 
         if Self::is_well_known_json_file(file_name) {
@@ -396,6 +456,33 @@ mod tests {
         {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
+    }
+
+    #[test]
+    fn biome_config_sources_preserve_json_variant() {
+        for path in ["biome.json", ".biome.json"] {
+            let source = JsonFileSource::try_from_well_known(Utf8Path::new(path)).unwrap();
+            assert!(source.kind().is_biome_json());
+            assert!(!source.allow_comments());
+            assert!(!source.allow_trailing_commas());
+            assert_eq!(source.variant(), JsonFileVariant::Standard);
+        }
+
+        for path in ["biome.jsonc", ".biome.jsonc"] {
+            let source = JsonFileSource::try_from_well_known(Utf8Path::new(path)).unwrap();
+            assert!(source.kind().is_biome_json());
+            assert!(source.allow_comments());
+            assert!(source.allow_trailing_commas());
+            assert_eq!(source.variant(), JsonFileVariant::Jsonc);
+        }
+    }
+
+    #[test]
+    fn package_json_source_has_package_kind() {
+        let source = JsonFileSource::try_from_well_known(Utf8Path::new("package.json")).unwrap();
+        assert!(source.kind().is_package_json());
+        assert!(!source.allow_comments());
+        assert!(!source.allow_trailing_commas());
     }
 
     #[test]

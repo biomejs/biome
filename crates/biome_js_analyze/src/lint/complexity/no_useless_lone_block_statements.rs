@@ -188,7 +188,5 @@ fn in_control_structure(block: &JsBlockStatement) -> bool {
 
 fn is_not_var_declaration(variable: &JsVariableStatement) -> bool {
     variable
-        .declaration()
-        .ok()
-        .is_some_and(|decl| !decl.is_var())
+        .declaration().is_ok_and(|decl| !decl.is_var())
 }

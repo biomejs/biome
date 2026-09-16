@@ -4,17 +4,6 @@
 //! is based on the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#baseProtocol),
 //! a simplified derivative of the HTTP protocol
 
-use std::{
-    any::type_name,
-    borrow::Cow,
-    io,
-    ops::Deref,
-    panic::RefUnwindSafe,
-    str::{FromStr, from_utf8},
-    sync::{Arc, Mutex},
-    time::Duration,
-};
-
 use anyhow::{Context, Error, bail, ensure};
 use biome_service::{
     TransportError,
@@ -25,6 +14,16 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use serde_json::{
     Value, from_slice, from_str, to_vec,
     value::{RawValue, to_raw_value},
+};
+use std::{
+    any::type_name,
+    borrow::Cow,
+    io,
+    ops::Deref,
+    panic::RefUnwindSafe,
+    str::{FromStr, from_utf8},
+    sync::{Arc, Mutex},
+    time::Duration,
 };
 use tokio::{
     io::{

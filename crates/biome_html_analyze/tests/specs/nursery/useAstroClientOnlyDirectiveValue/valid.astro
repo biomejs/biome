@@ -1,0 +1,8 @@
+<!-- should not generate diagnostics -->
+<ReactComponent client:only="react" />
+<ReactComponent client:only="" />
+<DynamicComponent client:only={renderer} />
+<ReactComponent client:load />
+<ReactComponent client:idle />
+<ReactComponent client:visible />
+<ReactComponent client:media="(max-width: 50em)" />

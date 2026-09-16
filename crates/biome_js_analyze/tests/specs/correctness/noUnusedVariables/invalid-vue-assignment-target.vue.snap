@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-assignment-target.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const isNewSheetOpen = defineModel<boolean>("isNewSheetOpen");
+const actuallyUnused = true;
+</script>
+
+<template>
+	<button @click="() => (isNewSheetOpen = true)">button</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-assignment-target.vue:4:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable actuallyUnused is unused.
+  
+    2 │ <script setup lang="ts">
+    3 │ const isNewSheetOpen = defineModel<boolean>("isNewSheetOpen");
+  > 4 │ const actuallyUnused = true;
+      │       ^^^^^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend actuallyUnused with an underscore.
+  
+    1 1 │   
+    2 2 │   const isNewSheetOpen = defineModel<boolean>("isNewSheetOpen");
+    3   │ - const·actuallyUnused·=·true;
+      3 │ + const·_actuallyUnused·=·true;
+    4 4 │   
+  
+
+```

@@ -147,7 +147,13 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         };
 
         let binding = if files.len() == 1 {
-            ResolvedPattern::from_file_pointer(*files.last().unwrap())
+            let Some(&file_ptr) = files.first() else {
+                return Ok(false);
+            };
+            if !self.load_file(&GritFile::Ptr(file_ptr), state, logs)? {
+                return Ok(false);
+            }
+            ResolvedPattern::from_file_pointer(file_ptr)
         } else {
             // Load all files into memory and collect successful file pointers
             files.retain(|file_ptr| {
@@ -277,18 +283,22 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
                 // TODO: Verify the workspace's maximum file size.
 
-                let file = file_owner_from_matches(
+                let Some(file) = file_owner_from_matches(
                     file.path.as_path(),
                     &file.parse,
                     None,
                     FileOrigin::Fresh,
                     &self.lang,
                     logs,
-                )?;
-                if let Some(file) = file {
-                    self.files.push(file);
-                    state.files.load_file(ptr, self.files.last().unwrap());
-                }
+                )?
+                else {
+                    return Ok(false);
+                };
+                self.files.push(file);
+                let Some(file) = self.files.last() else {
+                    return Ok(false);
+                };
+                state.files.load_file(ptr, file);
             }
         }
         Ok(true)

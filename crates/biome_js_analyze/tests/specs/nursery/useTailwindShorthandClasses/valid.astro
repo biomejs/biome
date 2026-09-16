@@ -1,0 +1,11 @@
+---
+// should not generate diagnostics
+
+const staticClasses = clsx("size-4");
+const templateClasses = tw.div`truncate`;
+---
+
+<div class={clsx("size-4", active && "p-2")}></div>
+<div class={["truncate", selected && "hover:size-6"]}></div>
+<div class={{ "mx-3": active }}></div>
+<div class:list={["border", condition && "dark:focus:size-[2rem]"]}></div>

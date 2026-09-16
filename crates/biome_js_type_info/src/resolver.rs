@@ -7,7 +7,9 @@ use biome_rowan::Text;
 use crate::{
     GLOBAL_UNKNOWN_ID, Literal, NUM_PREDEFINED_TYPES, Object, ScopeId, TypeData, TypeId,
     TypeImportQualifier, TypeInstance, TypeMember, TypeMemberKind, TypeReference,
-    TypeReferenceQualifier, TypeofValue, Union,
+    TypeReferenceQualifier,
+    TypeResolverLevel::Import,
+    TypeofExpression, TypeofStaticMemberExpression, TypeofValue, Union,
     globals::{GLOBAL_RESOLVER_ID, GLOBAL_UNDEFINED_ID, UNKNOWN_ID, global_type_name},
 };
 
@@ -359,7 +361,9 @@ impl<'a> ResolvedTypeData<'a> {
 
     /// Returns a reference to the raw data.
     ///
-    /// **Be careful:** If you intend to invoke the resolver on the data, it may
+    /// ## Warning
+    ///
+    /// If you intend to invoke the resolver on the data, it may
     /// not be aware of the context in which the data was resolved, and further
     /// references may be resolved from the wrong context. If you wish to call
     /// the resolver on the data, use [`Self::to_data()`] instead.
@@ -816,6 +820,30 @@ impl Resolvable for TypeReference {
             Self::Qualifier(qualifier) => {
                 let resolved_id = resolver.resolve_qualifier(qualifier);
                 match resolved_id {
+                    // Qualified access on an imported symbol, e.g. `Types.Result`
+                    // where `Types` is a default namespace import. Resolve each
+                    // remaining path segment as a static member of the previous
+                    // one so members are looked up on the namespace itself rather
+                    // than collapsing to the imported symbol's own type.
+                    Some(resolved_id)
+                        if resolved_id.level() == Import && qualifier.path.len() > 1 =>
+                    {
+                        Some(qualifier.path.iter().skip(1).fold(
+                            Self::Resolved(resolved_id),
+                            |object, member| {
+                                resolver
+                                    .register_and_resolve(TypeData::TypeofExpression(Box::new(
+                                        TypeofExpression::StaticMember(
+                                            TypeofStaticMemberExpression {
+                                                object,
+                                                member: member.clone(),
+                                            },
+                                        ),
+                                    )))
+                                    .into()
+                            },
+                        ))
+                    }
                     Some(resolved_id) => Some(Self::Resolved(resolved_id)),
                     None if qualifier.has_known_type_parameters() => Some({
                         // Handle Record<K, V> by synthesizing an object type
@@ -832,6 +860,7 @@ impl Resolvable for TypeReference {
                                         ty: value_type,
                                     }]
                                     .into(),
+                                    has_unknown_members: false,
                                 })));
                             Self::Resolved(resolved_id)
                         } else if (qualifier.is_pick() || qualifier.is_omit())
@@ -887,6 +916,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)
@@ -955,6 +985,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)
@@ -995,6 +1026,7 @@ impl Resolvable for TypeReference {
                                     TypeData::Object(Box::new(Object {
                                         prototype: None,
                                         members: members.into(),
+                                        has_unknown_members: false,
                                     })),
                                 );
                                 Self::Resolved(resolved_id)

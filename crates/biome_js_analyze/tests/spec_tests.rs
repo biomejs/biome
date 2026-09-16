@@ -7,7 +7,6 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
@@ -27,6 +26,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 use std::{fs::read_to_string, slice};
 
+// Spec cases are discovered from the filesystem during macro expansion.
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
@@ -61,7 +61,7 @@ fn embedded_db(
     parsed: &AnyJsRoot,
     path: impl Into<Utf8PathBuf>,
     source_type: &JsFileSource,
-) -> Rc<dyn LanguageDb> {
+) -> (Rc<dyn LanguageDb>, ParsedSource) {
     let mut db = TestDb::default();
     let parsed = ParsedSource::new(
         &db,
@@ -72,7 +72,7 @@ fn embedded_db(
     );
     db.parsed = Some(parsed);
     db.source_type = Some(DocumentFileSource::from(*source_type));
-    Rc::new(db)
+    (Rc::new(db), parsed)
 }
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
@@ -254,13 +254,13 @@ pub(crate) fn analyze_and_snap(
     }
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
-    let semantic_model = semantic_model(&root, SemanticModelOptions::from(&source_type));
 
+    let (language_db, parsed_source) = embedded_db(&root, input_file, &source_type);
     let mut services = JsAnalyzerServices::default()
         .with_source_type(source_type)
-        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout.clone())
-        .with_language_db(embedded_db(&root, input_file, &source_type));
+        .with_language_db(language_db)
+        .with_parsed_source(parsed_source.into());
     if needs_module_graph {
         let module_db = module_graph_for_test_file(input_file, &project_layout);
         services = services.with_module_db(module_db.rc_module_db());

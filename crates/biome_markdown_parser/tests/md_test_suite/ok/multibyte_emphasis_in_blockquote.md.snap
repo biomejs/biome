@@ -14,8 +14,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -64,9 +65,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..168
+0: MD_ROOT@0..168
   0: (empty)
-  1: MD_BLOCK_LIST@0..168
+  1: (empty)
+  2: MD_BLOCK_LIST@0..168
     0: MD_QUOTE@0..168
       0: MD_QUOTE_PREFIX@0..1
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -93,6 +95,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@113..167 "と同様のアプローチを採用しています。" [] []
             3: MD_TEXTUAL@167..168
               0: MD_TEXTUAL_LITERAL@167..168 "\n" [] []
-  2: EOF@168..168 "" [] []
+  3: EOF@168..168 "" [] []
 
 ```

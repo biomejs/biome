@@ -20,7 +20,9 @@ impl FormatNodeRule<CssFontFeatureValuesAtRule> for FormatCssFontFeatureValuesAt
         write!(
             f,
             [
-                font_feature_values_token.format(),
+                font_feature_values_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
                 space(),
                 names.format(),
                 space(),

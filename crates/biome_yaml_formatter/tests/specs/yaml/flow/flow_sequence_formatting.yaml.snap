@@ -8,14 +8,19 @@ info: yaml/flow/flow_sequence_formatting.yaml
 ```yaml
 formatted: [1, 'abc', "xyz", plain]
 unformatted: [  1  ,  'abc',"xyz"  , plain ]
-emptyLineFormatted: [
-  a,
-
-  b,
-]
-emptyLineUnformatted: [ a,
+emptyLineCollapsedFormatted: [a, b]
+emptyLineCollapsedUnformatted: [ a,
 
 b ]
+emptyLineKeptFormatted:
+  [
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  ]
+emptyLineKeptUnformatted: [ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ]
 
 ```
 
@@ -23,17 +28,21 @@ b ]
 # Formatted
 
 ```yaml
-formatted: [1, 'abc', "xyz", plain]
-unformatted: [1, 'abc', "xyz", plain]
-emptyLineFormatted: [
-  a,
+formatted: [1, "abc", "xyz", plain]
+unformatted: [1, "abc", "xyz", plain]
+emptyLineCollapsedFormatted: [a, b]
+emptyLineCollapsedUnformatted: [a, b]
+emptyLineKeptFormatted:
+  [
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
 
-  b,
-]
-emptyLineUnformatted: [
-  a,
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  ]
+emptyLineKeptUnformatted:
+  [
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
 
-  b,
-]
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  ]
 
 ```

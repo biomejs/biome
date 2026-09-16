@@ -126,3 +126,5 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
 @function --test-fn() {
   result: 1;
 }
+
+@custom-media --mobile (max-width: 768px);

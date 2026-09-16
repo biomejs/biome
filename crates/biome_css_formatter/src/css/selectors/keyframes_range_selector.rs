@@ -12,6 +12,13 @@ impl FormatNodeRule<CssKeyframesRangeSelector> for FormatCssKeyframesRangeSelect
     ) -> FormatResult<()> {
         let CssKeyframesRangeSelectorFields { name, percentage } = node.as_fields();
 
-        write!(f, [name.format(), space(), percentage.format()])
+        write!(
+            f,
+            [
+                name.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                percentage.format()
+            ]
+        )
     }
 }

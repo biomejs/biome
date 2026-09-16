@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
-use crate::{NUM_PREDEFINED_TYPES, TypeData, TypeStore};
+use crate::{TypeData, TypeStore, globals_ids::NUM_PREDEFINED_TYPES};
 
-use super::{globals::GlobalsResolver, globals_ids::GlobalTypeId};
+use super::{globals::RawGlobalTypes, globals_ids::GlobalTypeId};
 
-/// Tracks predefined manifest slots before producing a [`GlobalsResolver`].
+/// Tracks predefined manifest slots before producing the raw global table.
 pub(crate) struct GlobalsResolverBuilder {
     /// `None` reserves a manifest row until its `TypeData` is written.
     types: Vec<Option<TypeData>>,
@@ -48,8 +46,8 @@ impl GlobalsResolverBuilder {
         }
     }
 
-    /// Consumes the builder and produces the immutable [`GlobalsResolver`].
-    pub(crate) fn build(self) -> GlobalsResolver {
+    /// Consumes the builder and produces the immutable raw global table.
+    pub(crate) fn build(self) -> RawGlobalTypes {
         for (index, slot) in self.types.iter().enumerate() {
             debug_assert!(
                 slot.is_some(),
@@ -57,13 +55,13 @@ impl GlobalsResolverBuilder {
             );
         }
 
-        let types: Vec<Arc<TypeData>> = self
+        let types: Vec<TypeData> = self
             .types
             .into_iter()
-            .map(|slot| Arc::new(slot.unwrap_or(TypeData::Unknown)))
+            .map(|slot| slot.unwrap_or(TypeData::Unknown))
             .collect();
 
-        GlobalsResolver {
+        RawGlobalTypes {
             types: TypeStore::from_types(types),
         }
     }

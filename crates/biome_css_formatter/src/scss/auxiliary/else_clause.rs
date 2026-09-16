@@ -17,7 +17,7 @@ impl FormatNodeRule<ScssElseClause> for FormatScssElseClause {
             f,
             [
                 at_token.format(),
-                else_token.format(),
+                else_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 body.format()
             ]

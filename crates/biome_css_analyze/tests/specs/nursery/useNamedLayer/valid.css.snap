@@ -1,0 +1,22 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+@import url(foo.css) layer(reset);
+
+@layer reset {
+	.test {
+		color: red;
+	}
+}
+
+@layer reset.text {
+	.test {
+		color: red;
+	}
+}
+
+```

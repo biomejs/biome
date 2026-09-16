@@ -1,11 +1,10 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::{Binding, BindingExtensions};
-use biome_js_syntax::{AnyJsIdentifierUsage, JsSyntaxToken};
-use biome_rowan::AstNode;
+use biome_js_semantic::Binding;
+use biome_js_syntax::{AnyJsIdentifierReference, JsSyntaxToken};
 use biome_rule_options::no_restricted_globals::NoRestrictedGlobalsOptions;
 use rustc_hash::FxHashMap;
 
@@ -63,48 +62,27 @@ declare_lint_rule! {
 const RESTRICTED_GLOBALS: [&str; 2] = ["event", "error"];
 
 impl Rule for NoRestrictedGlobals {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierReference>;
     type State = JsSyntaxToken;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoRestrictedGlobalsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
+        let reference = ctx.query();
         let options = ctx.options();
 
-        let unresolved_reference_nodes = model
-            .all_unresolved_references()
-            .map(|reference| reference.syntax().clone());
-        let global_references_nodes = model
-            .all_global_references()
-            .map(|reference| reference.syntax().clone());
-
-        unresolved_reference_nodes
-            .chain(global_references_nodes)
-            .filter_map(|node| {
-                let node = AnyJsIdentifierUsage::unwrap_cast(node);
-                let (token, binding) = match node {
-                    AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
-                        (node.value_token(), node.binding(model))
-                    }
-                    AnyJsIdentifierUsage::JsxReferenceIdentifier(node) => {
-                        (node.value_token(), node.binding(model))
-                    }
-                    AnyJsIdentifierUsage::JsIdentifierAssignment(node) => {
-                        (node.name_token(), node.binding(model))
-                    }
-                };
-                let token = token.ok()?;
-                let text = token.text_trimmed();
-
-                if is_restricted(text, &binding, options.denied_globals.as_ref()) {
-                    Some(token)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice()
+        if !model.is_unresolved_reference(reference) && !model.is_global_reference(reference) {
+            return None;
+        }
+        let token = reference.value_token().ok()?;
+        let binding = model.binding(reference);
+        is_restricted(
+            token.text_trimmed(),
+            &binding,
+            options.denied_globals.as_ref(),
+        )
+        .then_some(token)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {

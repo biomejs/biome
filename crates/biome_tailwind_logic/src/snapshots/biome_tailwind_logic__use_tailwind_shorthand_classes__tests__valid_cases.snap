@@ -1,0 +1,111 @@
+---
+source: crates/biome_tailwind_logic/src/use_tailwind_shorthand_classes.rs
+expression: snapshot
+---
+## Input
+
+```text
+mx-2 -my-2
+```
+
+Violations: 0
+Fixed: `mx-2 -my-2`
+
+## Input
+
+```text
+p-2 pl-4
+```
+
+Violations: 0
+Fixed: `p-2 pl-4`
+
+## Input
+
+```text
+hover:size-4
+```
+
+Violations: 0
+Fixed: `hover:size-4`
+
+## Input
+
+```text
+border
+```
+
+Violations: 0
+Fixed: `border`
+
+## Input
+
+```text
+truncate
+```
+
+Violations: 0
+Fixed: `truncate`
+
+## Input
+
+```text
+ml-2 mr-3
+```
+
+Violations: 0
+Fixed: `ml-2 mr-3`
+
+## Input
+
+```text
+hover:ml-2 focus:mr-2
+```
+
+Violations: 0
+Fixed: `hover:ml-2 focus:mr-2`
+
+## Input
+
+```text
+mx-2 mr-2
+```
+
+Violations: 0
+Fixed: `mx-2 mr-2`
+
+## Input
+
+```text
+pt-2 mr-3
+```
+
+Violations: 0
+Fixed: `pt-2 mr-3`
+
+## Input
+
+```text
+focus:w-4 hover:h-4
+```
+
+Violations: 0
+Fixed: `focus:w-4 hover:h-4`
+
+## Input
+
+```text
+w-[10px] h-[20px]
+```
+
+Violations: 0
+Fixed: `w-[10px] h-[20px]`
+
+## Input
+
+```text
+w-screen h-screen
+```
+
+Violations: 0
+Fixed: `w-screen h-screen`

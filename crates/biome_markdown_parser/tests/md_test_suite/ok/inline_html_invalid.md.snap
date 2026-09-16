@@ -34,8 +34,9 @@ Starts with arrow <!---> should be text.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -76,7 +77,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@86..88 "##" [] [],
+                    hash_token: HASH@86..87 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@87..88 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -126,7 +130,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..199 "##" [] [],
+                    hash_token: HASH@197..198 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@198..199 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -236,7 +243,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@507..509 "##" [] [],
+                    hash_token: HASH@507..508 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@508..509 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -257,17 +267,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@527..541 "Invalid start " [] [],
                 },
                 MdInlineHtml {
-                    value: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@541..542 "<" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@542..545 "!--" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@545..546 ">" [] [],
-                        },
-                    ],
+                    value_token: MD_HTML_LITERAL@541..546 "<!-->" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@546..562 " should be text." [] [],
@@ -279,17 +279,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@563..575 "Double dash " [] [],
                 },
                 MdInlineHtml {
-                    value: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@575..576 "<" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@576..593 "!-- foo -- bar --" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@593..594 ">" [] [],
-                        },
-                    ],
+                    value_token: MD_HTML_LITERAL@575..594 "<!-- foo -- bar -->" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@594..616 " should be text maybe." [] [],
@@ -301,17 +291,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@617..635 "Starts with arrow " [] [],
                 },
                 MdInlineHtml {
-                    value: MdInlineItemList [
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@635..636 "<" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@636..640 "!---" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@640..641 ">" [] [],
-                        },
-                    ],
+                    value_token: MD_HTML_LITERAL@635..641 "<!--->" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@641..657 " should be text." [] [],
@@ -329,9 +309,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..658
+0: MD_ROOT@0..658
   0: (empty)
-  1: MD_BLOCK_LIST@0..658
+  1: (empty)
+  2: MD_BLOCK_LIST@0..658
     0: MD_HEADER@0..27
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -357,8 +338,10 @@ MdDocument {
     5: MD_HEADER@86..107
       0: MD_INDENT_TOKEN_LIST@86..86
       1: MD_HASH_LIST@86..88
-        0: MD_HASH@86..88
-          0: HASH@86..88 "##" [] []
+        0: MD_HASH@86..87
+          0: HASH@86..87 "#" [] []
+        1: MD_HASH@87..88
+          0: HASH@87..88 "#" [] []
       2: MD_PARAGRAPH@88..107
         0: MD_INLINE_ITEM_LIST@88..107
           0: MD_TEXTUAL@88..107
@@ -389,8 +372,10 @@ MdDocument {
     9: MD_HEADER@197..213
       0: MD_INDENT_TOKEN_LIST@197..197
       1: MD_HASH_LIST@197..199
-        0: MD_HASH@197..199
-          0: HASH@197..199 "##" [] []
+        0: MD_HASH@197..198
+          0: HASH@197..198 "#" [] []
+        1: MD_HASH@198..199
+          0: HASH@198..199 "#" [] []
       2: MD_PARAGRAPH@199..213
         0: MD_INLINE_ITEM_LIST@199..213
           0: MD_TEXTUAL@199..213
@@ -461,8 +446,10 @@ MdDocument {
     13: MD_HEADER@507..526
       0: MD_INDENT_TOKEN_LIST@507..507
       1: MD_HASH_LIST@507..509
-        0: MD_HASH@507..509
-          0: HASH@507..509 "##" [] []
+        0: MD_HASH@507..508
+          0: HASH@507..508 "#" [] []
+        1: MD_HASH@508..509
+          0: HASH@508..509 "#" [] []
       2: MD_PARAGRAPH@509..526
         0: MD_INLINE_ITEM_LIST@509..526
           0: MD_TEXTUAL@509..526
@@ -475,13 +462,7 @@ MdDocument {
         0: MD_TEXTUAL@527..541
           0: MD_TEXTUAL_LITERAL@527..541 "Invalid start " [] []
         1: MD_INLINE_HTML@541..546
-          0: MD_INLINE_ITEM_LIST@541..546
-            0: MD_TEXTUAL@541..542
-              0: MD_TEXTUAL_LITERAL@541..542 "<" [] []
-            1: MD_TEXTUAL@542..545
-              0: MD_TEXTUAL_LITERAL@542..545 "!--" [] []
-            2: MD_TEXTUAL@545..546
-              0: MD_TEXTUAL_LITERAL@545..546 ">" [] []
+          0: MD_HTML_LITERAL@541..546 "<!-->" [] []
         2: MD_TEXTUAL@546..562
           0: MD_TEXTUAL_LITERAL@546..562 " should be text." [] []
         3: MD_TEXTUAL@562..563
@@ -489,13 +470,7 @@ MdDocument {
         4: MD_TEXTUAL@563..575
           0: MD_TEXTUAL_LITERAL@563..575 "Double dash " [] []
         5: MD_INLINE_HTML@575..594
-          0: MD_INLINE_ITEM_LIST@575..594
-            0: MD_TEXTUAL@575..576
-              0: MD_TEXTUAL_LITERAL@575..576 "<" [] []
-            1: MD_TEXTUAL@576..593
-              0: MD_TEXTUAL_LITERAL@576..593 "!-- foo -- bar --" [] []
-            2: MD_TEXTUAL@593..594
-              0: MD_TEXTUAL_LITERAL@593..594 ">" [] []
+          0: MD_HTML_LITERAL@575..594 "<!-- foo -- bar -->" [] []
         6: MD_TEXTUAL@594..616
           0: MD_TEXTUAL_LITERAL@594..616 " should be text maybe." [] []
         7: MD_TEXTUAL@616..617
@@ -503,17 +478,11 @@ MdDocument {
         8: MD_TEXTUAL@617..635
           0: MD_TEXTUAL_LITERAL@617..635 "Starts with arrow " [] []
         9: MD_INLINE_HTML@635..641
-          0: MD_INLINE_ITEM_LIST@635..641
-            0: MD_TEXTUAL@635..636
-              0: MD_TEXTUAL_LITERAL@635..636 "<" [] []
-            1: MD_TEXTUAL@636..640
-              0: MD_TEXTUAL_LITERAL@636..640 "!---" [] []
-            2: MD_TEXTUAL@640..641
-              0: MD_TEXTUAL_LITERAL@640..641 ">" [] []
+          0: MD_HTML_LITERAL@635..641 "<!--->" [] []
         10: MD_TEXTUAL@641..657
           0: MD_TEXTUAL_LITERAL@641..657 " should be text." [] []
         11: MD_TEXTUAL@657..658
           0: MD_TEXTUAL_LITERAL@657..658 "\n" [] []
-  2: EOF@658..658 "" [] []
+  3: EOF@658..658 "" [] []
 
 ```

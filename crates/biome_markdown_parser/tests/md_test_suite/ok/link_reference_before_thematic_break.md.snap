@@ -15,8 +15,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdLinkReferenceDefinition {
             indent: MdIndentTokenList [],
@@ -81,9 +82,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..32
+0: MD_ROOT@0..32
   0: (empty)
-  1: MD_BLOCK_LIST@0..32
+  1: (empty)
+  2: MD_BLOCK_LIST@0..32
     0: MD_LINK_REFERENCE_DEFINITION@0..27
       0: MD_INDENT_TOKEN_LIST@0..0
       1: L_BRACK@0..1 "[" [] []
@@ -119,6 +121,6 @@ MdDocument {
           0: MINUS@30..31 "-" [] []
     4: MD_NEWLINE@31..32
       0: NEWLINE@31..32 "\n" [] []
-  2: EOF@32..32 "" [] []
+  3: EOF@32..32 "" [] []
 
 ```

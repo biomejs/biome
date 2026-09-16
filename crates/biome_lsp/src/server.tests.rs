@@ -1085,6 +1085,106 @@ async fn pull_quick_fixes() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_suppressions_when_query_and_signal_ranges_are_disjoint() -> Result<()> {
+    let factory = ServerFactory::default();
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_document("import * as foo from \"foo\";\nconst key = \"bar\";\nfoo[key];")
+        .await?;
+
+    let diagnostic = Diagnostic {
+        range: Range {
+            start: Position {
+                line: 2,
+                character: 0,
+            },
+            end: Position {
+                line: 2,
+                character: 8,
+            },
+        },
+        severity: Some(DiagnosticSeverity::WARNING),
+        code: Some(NumberOrString::String(String::from(
+            "lint/performance/noDynamicNamespaceImportAccess",
+        ))),
+        source: Some(String::from("biome")),
+        message: String::from("Avoid accessing namespace imports dynamically."),
+        ..Default::default()
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                    end: Position {
+                        line: 2,
+                        character: 4,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let action_kinds: Vec<_> = res
+        .iter()
+        .map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) => {
+                assert_eq!(
+                    action.diagnostics.as_deref(),
+                    Some(std::slice::from_ref(&diagnostic))
+                );
+                assert!(action.edit.is_some());
+                action.kind.clone().unwrap()
+            }
+            CodeActionOrCommand::Command(_) => panic!("expected code action"),
+        })
+        .collect();
+    assert_eq!(
+        action_kinds,
+        [
+            CodeActionKind::new("quickfix.suppressRule.inline.biome"),
+            CodeActionKind::new("quickfix.suppressRule.topLevel.biome"),
+        ]
+    );
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_quick_fixes_with_resolve() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
@@ -1675,6 +1775,198 @@ async fn plugin_rewrite_pull_diagnostics() -> Result<()> {
     } else {
         panic!("Expected PublishDiagnostics, got {notification:?}");
     }
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_plugin_code_action_at_diagnostic_start() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "plugins": ["useConsoleInfo.grit"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+    let plugin = br#"language js
+
+`console.log($msg)` as $call where {
+    register_diagnostic(
+        span = $call,
+        message = "Use console.info instead of console.log.",
+        severity = "warn"
+    ),
+    $call => `console.info($msg)`
+}"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("useConsoleInfo.grit")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document("console.log(\"hello\");", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected plugin diagnostics");
+    };
+    let [diagnostic] = params.diagnostics.as_slice() else {
+        panic!("expected one plugin diagnostic: {params:?}");
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+        panic!("expected one plugin code action: {res:?}");
+    };
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("quickfix.biome.plugin"))
+    );
+    assert_eq!(action.title, "Rewrite suggested by plugin `useConsoleInfo`");
+    assert!(action.edit.is_some());
+
+    server.close_document().await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn pull_js_plugin_code_action_when_query_and_diagnostic_ranges_are_disjoint() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "plugins": ["renameReference.js"],
+        "linter": {
+            "rules": { "recommended": false }
+        }
+    }"#;
+    let plugin = br#"import { createMutation, defineRule, factory, registerDiagnostic, semantic } from "@biomejs/runtime/plugin";
+
+export const renameReference = defineRule({
+    query: semantic("JS_REFERENCE_IDENTIFIER"),
+    run(node, { model }) {
+        const binding = model.binding(node);
+        if (!binding) return;
+
+        const mutation = createMutation(binding.syntax());
+        mutation.replaceToken(node.token("valueToken"), factory.token("IDENT", "renamed"));
+        registerDiagnostic(binding.syntax(), "warning", "Rename the reference.", {
+            mutation,
+            message: "Rename reference",
+            kind: "safe",
+        });
+    },
+});"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+    fs.insert(to_utf8_file_path_buf(uri!("renameReference.js")), plugin);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document("let value = 1;\nvalue;", uri!("document.js"), "javascript")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+    let Some(ServerNotification::PublishDiagnostics(params)) = notification else {
+        panic!("expected plugin diagnostics");
+    };
+    let [diagnostic] = params.diagnostics.as_slice() else {
+        panic!("expected one plugin diagnostic: {params:?}");
+    };
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: uri!("document.js"),
+                },
+                range: diagnostic.range,
+                context: CodeActionContext {
+                    diagnostics: vec![diagnostic.clone()],
+                    only: Some(vec![CodeActionKind::QUICKFIX]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+        panic!("expected one JavaScript plugin code action: {res:?}");
+    };
+    assert_eq!(
+        action.kind,
+        Some(CodeActionKind::new("quickfix.biome.plugin"))
+    );
+    assert_eq!(action.title, "Rename reference");
+    assert!(action.edit.is_some());
 
     server.close_document().await?;
     server.shutdown().await?;
@@ -2400,6 +2692,131 @@ export { describe, test, z };
 }
 
 #[tokio::test]
+async fn organize_imports_embedded_offsets_issue_8177() -> Result<()> {
+    let imports = "import { ref } from 'vue'
+import { useMagicKeys } from '@vueuse/core'
+import { useRemoteModel } from '~/models/remote-model'
+import { useLogModel } from '~/models/log-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    let sorted = "import { useMagicKeys } from '@vueuse/core'
+import { ref } from 'vue'
+import { useLogModel } from '~/models/log-model'
+import { useRemoteModel } from '~/models/remote-model'
+import { useUiModel } from '~/models/ui-model'
+";
+    for (uri, language, prefix, suffix) in [
+        (
+            uri!("document.vue"),
+            "vue",
+            "<template>\n    <v-app-bar>\n        \n    </v-app-bar>\n</template>\n\n<script setup lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (
+            uri!("document.svelte"),
+            "svelte",
+            "<div>é</div>\n<script lang=\"ts\">\n",
+            "</script>\n",
+        ),
+        (uri!("document.astro"), "astro", "---\n", "---\n<div />\n"),
+    ] {
+        for full_support in [false, true] {
+            for resolve in [false, true] {
+                let fs = MemoryFileSystem::default();
+                fs.insert(
+                    to_utf8_file_path_buf(uri!("biome.json")),
+                    serde_json::json!({
+                        "linter": { "enabled": false },
+                        "html": { "experimentalFullSupportEnabled": full_support }
+                    })
+                    .to_string(),
+                );
+                let factory = ServerFactory::new_with_fs(Arc::new(fs));
+                let (service, client) = factory.create().into_inner();
+                let (stream, sink) = client.split();
+                let mut server = Server::new(service);
+                let (sender, _receiver) = channel(CHANNEL_BUFFER_SIZE);
+                let reader = tokio::spawn(client_handler(stream, sink, sender));
+                if resolve {
+                    server.initialize_with_resolve_support().await?;
+                } else {
+                    server.initialize().await?;
+                }
+                server.initialized().await?;
+                let input = format!("{prefix}{imports}{suffix}");
+                server
+                    .open_named_document(&input, uri.clone(), language)
+                    .await?;
+                let actions: CodeActionResponse = server
+                    .request(
+                        "textDocument/codeAction",
+                        "code_actions",
+                        CodeActionParams {
+                            text_document: TextDocumentIdentifier { uri: uri.clone() },
+                            range: Range::new(
+                                Position::default(),
+                                Position::new(input.lines().count() as u32, 0),
+                            ),
+                            context: CodeActionContext {
+                                diagnostics: vec![],
+                                only: Some(vec![CodeActionKind::new(
+                                    "source.organizeImports.biome",
+                                )]),
+                                trigger_kind: None,
+                            },
+                            work_done_progress_params: Default::default(),
+                            partial_result_params: Default::default(),
+                        },
+                    )
+                    .await?
+                    .context("codeAction returned None")?;
+                assert_eq!(
+                    actions.len(),
+                    1,
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                let CodeActionOrCommand::CodeAction(mut action) =
+                    actions.into_iter().next().unwrap()
+                else {
+                    panic!("Expected a code action");
+                };
+                if resolve {
+                    assert!(action.edit.is_none());
+                    action = server
+                        .request("codeAction/resolve", "resolve_code_action", action)
+                        .await?
+                        .context("codeAction/resolve returned None")?;
+                }
+                let edits = action.edit.unwrap().changes.unwrap().remove(&uri).unwrap();
+                assert!(!edits.is_empty());
+                let changes = edits
+                    .into_iter()
+                    .rev()
+                    .map(|edit| TextDocumentContentChangeEvent {
+                        range: Some(edit.range),
+                        range_length: None,
+                        text: edit.new_text,
+                    })
+                    .collect();
+                let output = crate::utils::apply_document_changes(
+                    biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+                    input,
+                    changes,
+                );
+                assert_eq!(
+                    output,
+                    format!("{prefix}{sorted}{suffix}"),
+                    "{language}, full={full_support}, resolve={resolve}"
+                );
+                server.shutdown().await?;
+                reader.abort();
+            }
+        }
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
@@ -2713,6 +3130,145 @@ async fn pull_fix_all() -> Result<()> {
     server.shutdown().await?;
     reader.abort();
 
+    Ok(())
+}
+
+async fn fix_all_edit(
+    config: &str,
+    document: &str,
+    document_uri: Uri,
+    language: &str,
+) -> Result<String> {
+    let fs = MemoryFileSystem::default();
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server.load_configuration().await?;
+    server
+        .open_named_document(document, document_uri.clone(), language)
+        .await?;
+
+    let res: CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: document_uri.clone(),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 0,
+                    },
+                },
+                context: CodeActionContext {
+                    diagnostics: vec![],
+                    only: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+        panic!("expected one fix-all action: {res:?}");
+    };
+    let edit = action.edit.as_ref().context("expected edit")?;
+    let changes = edit.changes.as_ref().context("expected changes")?;
+    let edits = changes
+        .get(&document_uri)
+        .context("expected edits for document")?;
+    let [edit] = edits.as_slice() else {
+        panic!("expected one full-document edit: {edits:?}");
+    };
+    let new_text = edit.new_text.clone();
+
+    server
+        .notify(
+            "textDocument/didClose",
+            DidCloseTextDocumentParams {
+                text_document: TextDocumentIdentifier { uri: document_uri },
+            },
+        )
+        .await?;
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(new_text)
+}
+
+#[tokio::test]
+async fn fix_all_respects_format_with_errors() -> Result<()> {
+    let config = r#"{
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "let a = 1; this is not valid javascript",
+        uri!("document.js"),
+        "javascript",
+    )
+    .await?;
+
+    assert_eq!(new_text, "const a = 1; this is not valid javascript");
+    Ok(())
+}
+
+#[tokio::test]
+async fn fix_all_does_not_format_embedded_code_with_errors() -> Result<()> {
+    let config = r#"{
+        "html": {
+            "experimentalFullSupportEnabled": true,
+            "formatter": { "enabled": true },
+            "linter": { "enabled": true }
+        },
+        "formatter": { "formatWithErrors": false },
+        "linter": {
+            "rules": {
+                "recommended": false,
+                "style": { "useConst": "on" }
+            }
+        }
+    }"#;
+    let new_text = fix_all_edit(
+        config,
+        "<script>let a = 1; this is not valid javascript</script>",
+        uri!("document.html"),
+        "html",
+    )
+    .await?;
+
+    assert_eq!(
+        new_text,
+        "<script>const a = 1; this is not valid javascript</script>"
+    );
     Ok(())
 }
 

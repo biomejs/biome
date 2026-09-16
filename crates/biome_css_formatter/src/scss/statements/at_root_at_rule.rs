@@ -16,7 +16,10 @@ impl FormatNodeRule<ScssAtRootAtRule> for FormatScssAtRootAtRule {
             block,
         } = node.as_fields();
 
-        write!(f, [at_root_token.format()])?;
+        write!(
+            f,
+            [at_root_token.format()?.with_text_case(CssCase::Lowercase)]
+        )?;
 
         if let Some(query) = query {
             write!(f, [space(), query.format()])?;

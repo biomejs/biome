@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/attribute-several-bracket-no-new-line.svelte
+---
+
+# Input
+
+```svelte
+<div
+    id="x"
+    class="y"
+    title="A really long title"
+    hidden
+    on:click={do_something}
+    draggable="false"
+    data-my-prop>
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,5 +5,4 @@
+     hidden
+     on:click={do_something}
+     draggable="false"
+-    data-my-prop>
+-</div>
++    data-my-prop></div>
+```
+
+# Output
+
+```svelte
+<div
+    id="x"
+    class="y"
+    title="A really long title"
+    hidden
+    on:click={do_something}
+    draggable="false"
+    data-my-prop></div>
+```

@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/preserve-blank-lines/comments.html
+---
+
+# Input
+
+```html
+<div>
+  <!-- adjacent first -->
+  <!-- adjacent second -->
+</div>
+<div>
+  <!-- first group -->
+
+  <!-- second group -->
+</div>
+<div>
+  <!-- first group -->
+
+
+
+  <!-- second group -->
+</div>
+<div>
+  <!-- before content -->
+
+  <!-- content group -->
+  text content
+</div>
+
+<div><!-- adjacent first --><!-- adjacent second --></div>
+<div><!-- first group -->
+
+<!-- second group --></div>
+<div><!-- first group -->
+
+
+
+<!-- second group --></div>
+<div>
+<!-- before content -->
+
+<!-- content group -->text content</div>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	<!-- adjacent first -->
+	<!-- adjacent second -->
+</div>
+<div>
+	<!-- first group -->
+
+	<!-- second group -->
+</div>
+<div>
+	<!-- first group -->
+
+	<!-- second group -->
+</div>
+<div>
+	<!-- before content -->
+
+	<!-- content group -->
+	text content
+</div>
+
+<div><!-- adjacent first --><!-- adjacent second --></div>
+<div>
+	<!-- first group -->
+
+	<!-- second group -->
+</div>
+<div>
+	<!-- first group -->
+
+	<!-- second group -->
+</div>
+<div>
+	<!-- before content -->
+
+	<!-- content group -->text content
+</div>
+
+```

@@ -5,6 +5,7 @@ use biome_parser::{
     parse_lists::ParseNodeList,
     prelude::{ParseDiagnostic, TokenSource, Trivia},
 };
+use biome_rowan::TextRange;
 use biome_yaml_syntax::YamlSyntaxKind::{self, *};
 use document::DocumentList;
 
@@ -19,6 +20,7 @@ mod property;
 pub(crate) struct YamlParser<'source> {
     context: ParserContext<YamlSyntaxKind>,
     source: YamlTokenSource<'source>,
+    tag_handles: Vec<TextRange>,
 }
 
 impl<'source> YamlParser<'source> {
@@ -26,7 +28,23 @@ impl<'source> YamlParser<'source> {
         Self {
             context: ParserContext::default(),
             source: YamlTokenSource::from_str(source),
+            tag_handles: Vec::new(),
         }
+    }
+
+    pub(crate) fn clear_tag_handles(&mut self) {
+        self.tag_handles.clear();
+    }
+
+    pub(crate) fn declare_tag_handle(&mut self, range: TextRange) {
+        self.tag_handles.push(range);
+    }
+
+    pub(crate) fn is_tag_handle_declared(&self, handle: &str) -> bool {
+        self.tag_handles.iter().any(|range| {
+            let range: std::ops::Range<usize> = (*range).into();
+            self.source.text().get(range) == Some(handle)
+        })
     }
 
     pub fn finish(

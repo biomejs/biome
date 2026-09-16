@@ -2,6 +2,7 @@ mod charset;
 mod color_profile;
 pub(crate) mod container;
 mod counter_style;
+mod custom_media;
 mod document;
 pub(crate) mod error;
 pub(crate) mod feature;
@@ -37,6 +38,7 @@ use crate::syntax::at_rule::container::{
 use crate::syntax::at_rule::counter_style::{
     parse_counter_style_at_rule, parse_counter_style_at_rule_declarator,
 };
+use crate::syntax::at_rule::custom_media::parse_custom_media_at_rule;
 use crate::syntax::at_rule::document::parse_document_at_rule;
 use crate::syntax::at_rule::font_face::{
     parse_font_face_at_rule, parse_font_face_at_rule_declarator,
@@ -143,6 +145,7 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
                 parse_function_at_rule(p)
             }
         }
+        T![custom_media] => parse_custom_media_at_rule(p),
         T![media] => parse_media_at_rule(p),
         T![keyframes] => parse_keyframes_at_rule(p),
         T![page] => parse_page_at_rule(p),

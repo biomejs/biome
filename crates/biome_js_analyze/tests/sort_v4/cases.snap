@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/sort_v4_test.rs
-assertion_line: 25
 expression: rendered
 input_file: crates/biome_js_analyze/tests/sort_v4/cases.jsonc
 ---
@@ -14,10 +13,19 @@ input:  sr-only block flex absolute relative
 sorted: sr-only absolute relative block flex
 ---
 input:  pointer-events-none collapse static visible
-sorted: pointer-events-none visible collapse static
+sorted: pointer-events-none collapse visible static
 ---
 input:  flex
 sorted: flex
+---
+input:  inline flex block hidden grid table contents
+sorted: block contents flex grid hidden inline table
+---
+input:  visible collapse invisible
+sorted: collapse invisible visible
+---
+input:  sticky static relative fixed absolute
+sorted: absolute fixed relative static sticky
 ---
 input:  bg-red-500 flex p-4
 sorted: flex bg-red-500 p-4
@@ -29,7 +37,7 @@ input:  text-lg bg-red-500 p-4
 sorted: bg-red-500 p-4 text-lg
 ---
 input:  p-4 p-2
-sorted: p-4 p-2
+sorted: p-2 p-4
 ---
 input:  origin-top flex p-4
 sorted: flex origin-top p-4
@@ -53,10 +61,10 @@ input:  w-1/2 flex p-4
 sorted: flex w-1/2 p-4
 ---
 input:  w-full flex p-4
-sorted: w-full flex p-4
+sorted: flex w-full p-4
 ---
 input:  w-screen w-10 w-full
-sorted: w-screen w-full w-10
+sorted: w-10 w-full w-screen
 ---
 input:  aspect-square flex
 sorted: flex aspect-square
@@ -88,6 +96,126 @@ sorted: -z-10 flex p-4
 input:  flex p-4 -flex
 sorted: -flex flex p-4
 ---
+input:  w-px w-full w-screen w-10 w-4 w-auto
+sorted: w-4 w-10 w-auto w-full w-px w-screen
+---
+input:  m-auto m-4 m-px m-2
+sorted: m-2 m-4 m-auto m-px
+---
+input:  h-full h-4 h-screen
+sorted: h-4 h-full h-screen
+---
+input:  flex-none flex-1 flex-auto
+sorted: flex-1 flex-auto flex-none
+---
+input:  justify-center items-center flex
+sorted: flex items-center justify-center
+---
+input:  table-caption inline-block flow-root block
+sorted: block flow-root inline-block table-caption
+---
+input:  inline-flex inline-grid inline-table inline
+sorted: inline inline-flex inline-grid inline-table
+---
+input:  truncate text-clip text-ellipsis
+sorted: truncate text-clip text-ellipsis
+---
+input:  col-span-full col-span-2 col-auto
+sorted: col-auto col-span-2 col-span-full
+---
+input:  grid-cols-subgrid grid-cols-2
+sorted: grid-cols-2 grid-cols-subgrid
+---
+input:  order-none order-first order-2 order-1 order-last
+sorted: order-1 order-2 order-first order-last order-none
+---
+input:  overflow-x-hidden overflow-hidden overflow-auto
+sorted: overflow-auto overflow-hidden overflow-x-hidden
+---
+input:  aspect-video aspect-square aspect-auto aspect-9/16
+sorted: aspect-9/16 aspect-auto aspect-square aspect-video
+---
+input:  -m-px m-px -m-4 m-4
+sorted: -m-4 -m-px m-4 m-px
+---
+input:  -w-full flex
+sorted: -w-full flex
+---
+input:  w-full! w-full w-10
+sorted: w-10 w-full w-full!
+---
+input:  w-full/50 w-full w-10
+sorted: w-full/50 w-10 w-full
+---
+input:  size-full size-4 w-4 h-4
+sorted: size-4 size-full h-4 w-4
+---
+input:  container flex p-4
+sorted: container flex p-4
+---
+input:  container mx-auto px-4
+sorted: container mx-auto px-4
+---
+input:  font-medium text-sm whitespace-nowrap transition-all outline-none
+sorted: text-sm font-medium whitespace-nowrap transition-all outline-none
+---
+input:  font-medium font-sans text-sm
+sorted: font-sans text-sm font-medium
+---
+input:  sr-only not-sr-only absolute
+sorted: sr-only not-sr-only absolute
+---
+input:  truncate text-clip overflow-hidden
+sorted: truncate overflow-hidden text-clip
+---
+input:  group peer flex p-4
+sorted: group peer flex p-4
+---
+input:  border border-4 border-x border-x-4 flex
+sorted: flex border border-4 border-x border-x-4
+---
+input:  ring ring-2 ring-inset shadow
+sorted: shadow ring ring-2 ring-inset
+---
+input:  shadow shadow-lg shadow-none rounded
+sorted: rounded shadow shadow-lg shadow-none
+---
+input:  rounded rounded-lg rounded-none border
+sorted: rounded rounded-lg rounded-none border
+---
+input:  transition transition-all transition-none grow
+sorted: grow transition transition-all transition-none
+---
+input:  grow grow-0 shrink shrink-0
+sorted: shrink shrink-0 grow grow-0
+---
+input:  outline outline-2 outline-none border-t
+sorted: border-t outline outline-2 outline-none
+---
+input:  blur blur-sm grayscale invert
+sorted: blur blur-sm grayscale invert
+---
+input:  @container flex pointer-events-none visible container
+sorted: @container pointer-events-none visible container flex
+---
+input:  @container/sidebar @container flex
+sorted: @container/sidebar @container flex
+---
+input:  @container! @container flex
+sorted: @container @container! flex
+---
+input:  shadow/50 shadow shadow-lg
+sorted: shadow/50 shadow shadow-lg
+---
+input:  drop-shadow/50 drop-shadow blur
+sorted: blur drop-shadow/50 drop-shadow
+---
+input:  flex/50 flex
+sorted: flex/50 flex
+---
+input:  group/item peer/tab flex
+sorted: group/item peer/tab flex
+---
 input:  p-4 foo flex
 sorted: foo flex p-4
 ---
@@ -118,11 +246,59 @@ sorted: flex w-1/2 w-1/3
 input:  flex bg-red-500/50
 sorted: flex bg-red-500/50
 ---
+input:  flex bg-red-500/[0.5]
+sorted: flex bg-red-500/[0.5]
+---
+input:  flex bg-current/50
+sorted: flex bg-current/50
+---
 input:  flex text-lg/8
 sorted: flex text-lg/8
 ---
+input:  flex text-lg/loose
+sorted: flex text-lg/loose
+---
 input:  flex w-1/foo
-sorted: flex w-1/foo
+sorted: w-1/foo flex
+---
+input:  flex bg-red-500/foo
+sorted: bg-red-500/foo flex
+---
+input:  flex bg-red-500/50%
+sorted: bg-red-500/50% flex
+---
+input:  flex text-lg/foo
+sorted: text-lg/foo flex
+---
+input:  flex p-4/2
+sorted: p-4/2 flex
+---
+input:  flex text-red-500/loose
+sorted: text-red-500/loose flex
+---
+input:  flex bg-[#fff]/50
+sorted: flex bg-[#fff]/50
+---
+input:  flex bg-[#fff]/(--x)
+sorted: flex bg-[#fff]/(--x)
+---
+input:  flex text-[20px]/8
+sorted: flex text-[20px]/8
+---
+input:  flex p-[4px]/2
+sorted: p-[4px]/2 flex
+---
+input:  flex w-[1px]/foo
+sorted: w-[1px]/foo flex
+---
+input:  flex bg-[#fff]/foo
+sorted: bg-[#fff]/foo flex
+---
+input:  flex [color:red]/foo
+sorted: [color:red]/foo flex
+---
+input:  flex [padding:1px]/2
+sorted: flex [padding:1px]/2
 ---
 input:  p-[10px] flex some-unknown
 sorted: some-unknown flex p-[10px]
@@ -130,11 +306,23 @@ sorted: some-unknown flex p-[10px]
 input:  flex [color:red]
 sorted: flex [color:red]
 ---
-input:  flex [--my-var:1]
-sorted: [--my-var:1] flex
----
 input:  flex [color:red]/50
 sorted: flex [color:red]/50
+---
+input:  flex [--my-var:1]
+sorted: flex [--my-var:1]
+---
+input:  [display:block] flex [color:red] [--my-var:1]
+sorted: [display:block] flex [color:red] [--my-var:1]
+---
+input:  [--my-var:2] [--my-var:1] flex
+sorted: flex [--my-var:1] [--my-var:2]
+---
+input:  [foobar:1] [display:block] flex [color:red]
+sorted: [display:block] flex [color:red] [foobar:1]
+---
+input:  [--tw-x:1] [-my-var:1] [--my-var:1] [foobar:1]
+sorted: [--my-var:1] [--tw-x:1] [-my-var:1] [foobar:1]
 ---
 input:  bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]
 sorted: bg-[#fff] bg-[url('/a.png')] bg-[cover] bg-[50%]
@@ -143,13 +331,13 @@ input:  border-[#f00] border-[2px]
 sorted: border-[2px] border-[#f00]
 ---
 input:  text-[#fff] text-[larger] text-[20px]
-sorted: text-[larger] text-[20px] text-[#fff]
+sorted: text-[20px] text-[larger] text-[#fff]
 ---
 input:  bg-[#fff] bg-[COVER] border-[THIN] text-[LARGER] flex
 sorted: flex border-[THIN] bg-[#fff] bg-[COVER] text-[LARGER]
 ---
 input:  ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex
-sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] shadow-[#000] ring-[4px]
+sorted: flex border-[2px] bg-[url('/hero.png')] from-[20%] bg-[cover] [mask-type:luminance] p-[calc(100%-1rem)] text-[20px] ring-[4px] shadow-[#000]
 ---
 input:  ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50
 sorted: flex border-[#f00]/50 bg-[#fff]/50 text-[20px]/8 ring-[#000]/50
@@ -175,6 +363,57 @@ sorted: m-2 bg-linear-to-r from-blue-500 to-purple-500 p-4
 input:  mask-linear-to-75% mask-linear-from-25%
 sorted: mask-linear-from-25% mask-linear-to-75%
 ---
+input:  p-10 p-2 p-4
+sorted: p-2 p-4 p-10
+---
+input:  p-2.5 p-2 p-10
+sorted: p-2 p-2.5 p-10
+---
+input:  duration-700 duration-75
+sorted: duration-75 duration-700
+---
+input:  bg-red-500 bg-red-50 bg-red-100
+sorted: bg-red-50 bg-red-100 bg-red-500
+---
+input:  bg-red-500 bg-blue-500
+sorted: bg-blue-500 bg-red-500
+---
+input:  text-lg text-sm text-2xl text-xs
+sorted: text-2xl text-lg text-sm text-xs
+---
+input:  w-2/5 w-1/2
+sorted: w-1/2 w-2/5
+---
+input:  leading-6 leading-none leading-3
+sorted: leading-3 leading-6 leading-none
+---
+input:  -m-4 -m-2 m-1
+sorted: -m-2 -m-4 m-1
+---
+input:  bg-red-500/50 bg-red-500/25
+sorted: bg-red-500/25 bg-red-500/50
+---
+input:  text-lg/8 text-sm/6
+sorted: text-lg/8 text-sm/6
+---
+input:  mt-2 mt-[10px]
+sorted: mt-2 mt-[10px]
+---
+input:  w-[1px] w-4
+sorted: w-4 w-[1px]
+---
+input:  w-[2px] w-[10rem] w-[13px]
+sorted: w-[2px] w-[10rem] w-[13px]
+---
+input:  ease-in ease-out ease-in-out
+sorted: ease-in ease-in-out ease-out
+---
+input:  [display:flex] [display:block]
+sorted: [display:block] [display:flex]
+---
+input:  p-4! p-2
+sorted: p-2 p-4!
+---
 input:  px-2! flex p-4
 sorted: flex p-4 px-2!
 ---
@@ -199,14 +438,152 @@ sorted: block flex!
 input:  [display:block]! [color:red]
 sorted: [display:block]! [color:red]
 ---
+input:  flex! !flex flex
+sorted: !flex flex flex!
+---
+input:  block !flex flex
+sorted: !flex block flex
+---
+input:  p-4 !p-2 p-2! !p-4
+sorted: !p-2 !p-4 p-2! p-4
+---
+input:  hover:flex hover:!p-4 !flex md:p-4 md:!flex
+sorted: !flex hover:flex hover:!p-4 md:!flex md:p-4
+---
+input:  !-m-4 -m-4 !m-4 m-4
+sorted: !-m-4 !m-4 -m-4 m-4
+---
+input:  !bg-red-500/50 bg-red-500/50 ![color:red] [color:red]
+sorted: !bg-red-500/50 bg-red-500/50 ![color:red] [color:red]
+---
+input:  !flex! flex !hover:flex
+sorted: !flex! !hover:flex flex
+---
 input:  mt-4 -mt-2!
 sorted: -mt-2! mt-4
 ---
 input:  not-a-class! flex
 sorted: not-a-class! flex
 ---
+input:  hover:flex flex
+sorted: flex hover:flex
+---
+input:  focus:flex hover:flex flex
+sorted: flex hover:flex focus:flex
+---
+input:  hover:flex [&:hover]:flex flex
+sorted: flex hover:flex [&:hover]:flex
+---
+input:  data-[state=open]:flex aria-checked:flex flex
+sorted: flex aria-checked:flex data-[state=open]:flex
+---
+input:  nth-last-3:flex nth-2:flex flex
+sorted: flex nth-2:flex nth-last-3:flex
+---
+input:  peer-focus:flex group-hover:flex flex
+sorted: flex group-hover:flex peer-focus:flex
+---
+input:  has-[:checked]:flex not-hover:flex flex
+sorted: flex not-hover:flex has-[:checked]:flex
+---
+input:  dark:flex hover:flex flex
+sorted: flex hover:flex dark:flex
+---
+input:  md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex
+sorted: flex max-lg:flex max-sm:flex sm:flex md:flex min-lg:flex
+---
+input:  md:hover:flex hover:flex flex md:flex
+sorted: flex hover:flex md:flex md:hover:flex
+---
+input:  sm:hover:block hover:sm:flex
+sorted: hover:sm:flex sm:hover:block
+---
+input:  hover:sm:p-4 sm:hover:p-2
+sorted: hover:sm:p-4 sm:hover:p-2
+---
+input:  @sm:block @sm/main:flex
+sorted: @sm/main:flex @sm:block
+---
+input:  flex sm:flex @sm:flex @md:flex @max-lg:flex
+sorted: flex sm:flex @max-lg:flex @sm:flex @md:flex
+---
+input:  @lg:flex @sm:flex @md:flex flex
+sorted: flex @sm:flex @md:flex @lg:flex
+---
+input:  flex *:flex **:flex hover:flex
+sorted: flex *:flex **:flex hover:flex
+---
+input:  @container:flex flex @sm:flex
+sorted: @container:flex flex @sm:flex
+---
+input:  @:flex flex
+sorted: @:flex flex
+---
+input:  group-hover/menu:flex group-hover:flex flex
+sorted: flex group-hover:flex group-hover/menu:flex
+---
+input:  group-hover/b:flex group-hover/a:flex group-hover/[.5]:flex flex
+sorted: flex group-hover/[.5]:flex group-hover/a:flex group-hover/b:flex
+---
+input:  peer-checked/foo:flex peer-checked:flex flex
+sorted: flex peer-checked:flex peer-checked/foo:flex
+---
+input:  @sm/main:flex @sm:flex @sm/apple:flex flex
+sorted: flex @sm/apple:flex @sm/main:flex @sm:flex
+---
+input:  hover/foo:flex flex
+sorted: hover/foo:flex flex
+---
+input:  has-hover/5:flex not-hover/5:flex flex
+sorted: has-hover/5:flex not-hover/5:flex flex
+---
+input:  min-[600px]/5:flex max-lg/5:flex flex
+sorted: min-[600px]/5:flex max-lg/5:flex flex
+---
+input:  @[400px]:flex @sm:flex flex
+sorted: flex @[400px]:flex @sm:flex
+---
+input:  @[400px]/name:flex @[400px]:flex flex
+sorted: flex @[400px]/name:flex @[400px]:flex
+---
+input:  @min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex flex
+sorted: flex @min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex
+---
+input:  @max-[100px]:flex @max-lg:flex @max-[900px]:flex flex
+sorted: flex @max-[900px]:flex @max-[100px]:flex @max-lg:flex
+---
+input:  @min-[24rem]:flex @sm:flex flex
+sorted: flex @min-[24rem]:flex @sm:flex
+---
+input:  min-[40rem]:flex sm:flex flex
+sorted: flex min-[40rem]:flex sm:flex
+---
+input:  min-sm:flex sm:flex flex
+sorted: flex min-sm:flex sm:flex
+---
+input:  min-[100px]:flex min-[900px]:flex sm:flex flex
+sorted: flex min-[100px]:flex min-[900px]:flex sm:flex
+---
+input:  min-abc:flex max-abc:flex @max-abc:flex flex
+sorted: min-abc:flex max-abc:flex @max-abc:flex flex
+---
+input:  [&>*]:flex [&_p]:flex [&.a]:flex flex
+sorted: flex [&_p]:flex [&.a]:flex [&>*]:flex
+---
+input:  p-2! flex!
+sorted: flex! p-2!
+---
+input:  p-2! hover:flex! flex!
+sorted: flex! p-2! hover:flex!
+---
+input:  w-full! flex! p-4!
+sorted: flex! w-full! p-4!
+---
+input:  flex [color:red]!
+sorted: flex [color:red]!
+---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
-sorted: text-card-foreground border bg-card flex-col flex gap-6 rounded-xl py-6 shadow-sm
+sorted: text-card-foreground bg-card flex flex-col gap-6 rounded-xl border py-6 shadow-sm
 ---
 input:  bg-accent animate-pulse rounded-md
 sorted: bg-accent animate-pulse rounded-md
@@ -215,10 +592,10 @@ input:  text-primary-foreground bg-primary hover:bg-primary/90
 sorted: text-primary-foreground bg-primary hover:bg-primary/90
 ---
 input:  px-4 has-[>svg]:px-3 h-9 py-2
-sorted: has-[>svg]:px-3 h-9 py-2 px-4
+sorted: h-9 px-4 py-2 has-[>svg]:px-3
 ---
 input:  hover:text-accent-foreground border bg-background shadow-xs hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50
-sorted: hover:text-accent-foreground border bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 shadow-xs
+sorted: hover:text-accent-foreground bg-background hover:bg-accent dark:border-input dark:bg-input/30 dark:hover:bg-input/50 border shadow-xs
 ---
 input:  items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 gap-2 focus-visible:border-ring justify-center rounded-md text-sm shrink-0 transition-all font-medium outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0
-sorted: items-center [&_svg]:pointer-events-none inline-flex disabled:opacity-50 focus-visible:border-ring justify-center outline-none whitespace-nowrap focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:shrink-0 shrink-0 gap-2 rounded-md text-sm transition-all font-medium
+sorted: focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0

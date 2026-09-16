@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+
+declare const promise: Promise<number>[][number];
+await promise;
+
+declare const thenable: [{ then(resolve: (value: number) => void): void }][number];
+await thenable;
+
+declare const unknown: [unknown][number];
+await unknown;

@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIgnore.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+// Ignored builtin should not trigger the rule.
+Array.prototype.x = 1;
+
+```

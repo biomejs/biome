@@ -1,6 +1,6 @@
 use crate::{
     CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector,
-    CssPseudoClassFunctionSelectorList,
+    CssPseudoClassFunctionSelectorList, decode_css_identifier,
 };
 use biome_rowan::declare_node_union;
 
@@ -55,7 +55,9 @@ impl AnyCssPseudoClassFunctionSelector {
         };
         name.ok()
             .and_then(|name| name.value_token().ok())
-            .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("global"))
+            .is_some_and(|token| {
+                decode_css_identifier(token.text_trimmed()).eq_ignore_ascii_case("global")
+            })
     }
 }
 

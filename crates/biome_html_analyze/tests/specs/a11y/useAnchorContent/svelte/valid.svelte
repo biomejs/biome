@@ -6,6 +6,7 @@
 
 <!-- Native anchors with accessible content -->
 <a>content</a>
+<a>{ stringVariable }</a>
 <a><span>content</span></a>
 <a><span aria-hidden="true"></span>content</a>
 <a><div aria-hidden="true"></div>content</a>
@@ -14,9 +15,9 @@
 <a><img alt="description" /></a>
 <a title="Home">Home</a>
 
-<!-- Accessible via aria-label or title alone -->
-<a aria-label="Navigate to dashboard"></a>
-<a title="Go to settings page"></a>
+<!-- Labels supplement accessible content -->
+<a aria-label="Navigate to dashboard">Dashboard</a>
+<a title="Go to settings page">Settings</a>
 
 <!-- Custom components may render accessible content -->
 <a><Image alt="description" /></a>

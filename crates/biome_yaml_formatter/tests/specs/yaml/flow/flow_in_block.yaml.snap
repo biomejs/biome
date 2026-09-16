@@ -16,12 +16,6 @@ other: {a: b}
 
 ```yaml
 key: [1, 2, 3]
-other: {a: b}
+other: { a: b }
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" {a: b" => 21..27

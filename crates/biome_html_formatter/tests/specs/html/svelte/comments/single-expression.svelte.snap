@@ -19,4 +19,5 @@ info: svelte/comments/single-expression.svelte
 <!-- 1 -->
 {"test"}
 <!-- 2 -->
+
 ```

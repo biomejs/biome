@@ -26,7 +26,7 @@ impl ParseNodeList for CssGenericComponentValueList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![']'])
+        p.at(T![']']) || is_at_class_separator(p)
     }
 
     fn recover(
@@ -36,7 +36,10 @@ impl ParseNodeList for CssGenericComponentValueList {
     ) -> biome_parser::parse_recovery::RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, token_set![T![']'], EOF]),
+            &ParseRecoveryTokenSet::new(
+                CSS_BOGUS_PROPERTY_VALUE,
+                token_set![T![']'], WHITESPACE, EOF],
+            ),
             crate::syntax::parse_error::expected_value,
         )
     }
@@ -269,7 +272,7 @@ impl ParseSeparatedList for ParameterList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(token_set![T![')'], T![']']])
+        p.at_ts(token_set![T![')'], T![']']]) || is_at_class_separator(p)
     }
 
     fn recover(
@@ -281,7 +284,7 @@ impl ParseSeparatedList for ParameterList {
             p,
             &ParseRecoveryTokenSet::new(
                 CSS_BOGUS_PROPERTY_VALUE,
-                token_set![T![,], T![')'], T![']']],
+                token_set![T![,], T![')'], T![']'], WHITESPACE],
             ),
             crate::syntax::parse_error::expected_value,
         )
@@ -330,7 +333,7 @@ fn parse_any_expression(p: &mut TailwindParser) -> ParsedSyntax {
 const BINARY_OPERATION_TOKEN: TokenSet<TailwindSyntaxKind> = token_set![T![+], T![-], T![*], T![/]];
 const UNARY_OPERATION_TOKEN: TokenSet<TailwindSyntaxKind> = token_set![T![+], T![-], T![*]];
 const COMPONENT_VALUE_EXPRESSION_RECOVERY_SET: TokenSet<TailwindSyntaxKind> =
-    token_set![T![')'], T![,], T![']']].union(BINARY_OPERATION_TOKEN);
+    token_set![T![')'], T![,], T![']'], WHITESPACE].union(BINARY_OPERATION_TOKEN);
 
 #[inline]
 fn is_at_binary_operator(p: &mut TailwindParser) -> bool {
@@ -402,6 +405,7 @@ impl ParseNodeList for ComponentValueExpressionList {
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at_ts(BINARY_OPERATION_TOKEN.union(token_set![T![,], T![')'], T![']']]))
+            || is_at_class_separator(p)
     }
 
     fn recover(
@@ -437,6 +441,10 @@ fn is_at_any_value(p: &mut TailwindParser) -> bool {
             CSS_COLOR_LITERAL,
             T!['(']
         ])
+}
+
+fn is_at_class_separator(p: &mut TailwindParser) -> bool {
+    p.at(WHITESPACE)
 }
 
 #[inline]

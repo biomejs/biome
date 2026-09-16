@@ -35,3 +35,15 @@ a { font-size-adjust: 0.545; font: Verdana; }
 a { padding-left: 10px; padding: 20px; border-width: 20px; border: 1px solid black; }
 
 a { padding-left: 10px; padding-right: 10px; padding: 20px; }
+
+@keyframes fade { from { margin-left: 1px; margin: 0; } }
+
+@page { margin-left: 1cm; margin: 2cm; }
+
+body { padding-left: 1px; @media (color) { color: blue; } padding: 2px; }
+
+@function --spacing() { margin-left: 1px; margin: 0; }
+
+body { font-size: var(--foo); @supports (font: -apple-system-body) {} font: sans-serif; }
+
+body { .child { padding-left: 1px; padding: 2px; } }

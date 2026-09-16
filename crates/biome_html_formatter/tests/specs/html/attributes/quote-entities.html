@@ -1,0 +1,18 @@
+<!-- The delimiter is whichever quote needs the fewest escapes, and only that
+     one stays escaped. -->
+<div a="&apos;"></div>
+<div a='&quot;'></div>
+<div a='&apos;&quot;'></div>
+<div a="&apos;&apos;&quot;"></div>
+<div a='&quot;&quot;&apos;'></div>
+
+<!-- A literal quote counts the same as its entity. -->
+<div a='" &apos;'></div>
+<div a='" " &apos;'></div>
+
+<!-- Entities that are not quotes are left exactly as written. -->
+<div a="&amp; &lt; &gt; &#39; &#x27;"></div>
+
+<!-- Nothing to requote. -->
+<div a=""></div>
+<div a=bare></div>

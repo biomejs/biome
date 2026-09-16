@@ -1,5 +1,5 @@
 {
-	"root": false,
+	"root": true,
 	"files": {
 		"includes": ["**", "!file.js"]
 	},

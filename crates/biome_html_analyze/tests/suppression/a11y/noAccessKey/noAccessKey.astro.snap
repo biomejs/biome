@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: noAccessKey.astro
+---
+# Input
+```astro
+{/* biome-ignore lint/a11y/noAccessKey: test */}
+<a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+
+<!-- biome-ignore lint/a11y/noAccessKey: test -->
+<a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+
+```

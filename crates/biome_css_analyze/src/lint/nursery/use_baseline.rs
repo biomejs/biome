@@ -1,8 +1,8 @@
-use crate::keywords::NAMED_COLORS;
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::{MarkupBuf, markup};
+use biome_css_syntax::keywords::COLOR_KEYWORDS;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, CssAtRule, CssFunction, CssGenericProperty,
     CssPseudoClassIdentifier, CssPseudoElementIdentifier, CssQueryFeaturePlain, CssSupportsAtRule,
@@ -433,8 +433,8 @@ fn is_allowed_property_value(
     })
 }
 
-fn is_named_color(name: &str) -> bool {
-    NAMED_COLORS.binary_search(&name).is_ok()
+fn is_color_keyword(name: &str) -> bool {
+    COLOR_KEYWORDS.binary_search(&name).is_ok()
 }
 
 fn check_property(
@@ -490,7 +490,7 @@ fn check_property(
             let val_text = tok.token_text_trimmed();
 
             // Skip named colors
-            if is_named_color(&val_text.to_ascii_lowercase_cow()) {
+            if is_color_keyword(&val_text.to_ascii_lowercase_cow()) {
                 continue;
             }
 
@@ -612,6 +612,7 @@ fn at_rule_name(rule: &AnyCssAtRule) -> Option<&'static str> {
         AnyCssAtRule::CssSupportsAtRule(_) => Some("supports"),
         AnyCssAtRule::CssViewTransitionAtRule(_) => Some("view-transition"),
         AnyCssAtRule::CssFunctionAtRule(_) => Some("function"),
+        AnyCssAtRule::CssCustomMediaAtRule(_) => Some("custom-media"),
         // Internal/framework at-rules, not CSS spec
         AnyCssAtRule::CssBogusAtRule(_)
         | AnyCssAtRule::CssUnknownBlockAtRule(_)

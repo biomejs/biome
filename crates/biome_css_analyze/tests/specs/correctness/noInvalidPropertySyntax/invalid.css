@@ -1,0 +1,50 @@
+/* should generate diagnostics */
+
+@property --missing {
+  inherits: false;
+}
+
+@property --empty {
+  syntax: "";
+  inherits: false;
+}
+
+@property --expected-component {
+  syntax: "auto |";
+  inherits: false;
+}
+
+@property --expected-string {
+  syntax: color;
+  inherits: false;
+}
+
+@property --expected-pipe {
+  syntax: "auto none";
+  inherits: false;
+}
+
+@property --unsupported-type {
+  syntax: "<unknown>";
+  inherits: false;
+}
+
+@property --invalid-custom-identifier {
+  syntax: "initial";
+  inherits: false;
+}
+
+@property --invalid-universal {
+  syntax: "* | auto";
+  inherits: false;
+}
+
+@property --multiplied-transform-list {
+  syntax: "<transform-list>+";
+  inherits: false;
+}
+
+@property --unexpected-whitespace {
+  syntax: "< color>";
+  inherits: false;
+}

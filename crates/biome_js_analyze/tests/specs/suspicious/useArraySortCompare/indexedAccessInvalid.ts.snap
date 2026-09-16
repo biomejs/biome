@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexedAccessInvalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+type Row = number[][][number];
+declare const row: Row;
+row.sort();
+row.toSorted();
+
+declare const tuple: [number[]][number];
+tuple.sort();
+
+```
+
+# Diagnostics
+```
+indexedAccessInvalid.ts:5:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    3 │ type Row = number[][][number];
+    4 │ declare const row: Row;
+  > 5 │ row.sort();
+      │ ^^^^^^^^^^
+    6 │ row.toSorted();
+    7 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:6:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    4 │ declare const row: Row;
+    5 │ row.sort();
+  > 6 │ row.toSorted();
+      │ ^^^^^^^^^^^^^^
+    7 │ 
+    8 │ declare const tuple: [number[]][number];
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+indexedAccessInvalid.ts:9:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+     8 │ declare const tuple: [number[]][number];
+   > 9 │ tuple.sort();
+       │ ^^^^^^^^^^^^
+    10 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```

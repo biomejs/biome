@@ -642,3 +642,50 @@ fn test_deeply_nested_ampersand() {
     assert_eq!(c_rule.selectors.len(), 1);
     assert_eq!(c_rule.selectors[0].resolved().to_string(), ".a .b.c");
 }
+
+fn resolved_deepest_scss_selector(source: &str, depth: usize) -> String {
+    let parse = parse_css(source, CssFileSource::scss(), CssParserOptions::default());
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let mut rule = model
+        .rules()
+        .into_iter()
+        .next()
+        .expect("expected a root style rule");
+
+    for _ in 0..depth {
+        let child_id = rule
+            .child_ids
+            .first()
+            .expect("expected a nested style rule");
+        rule = model
+            .get_rule_by_id(child_id)
+            .expect("expected the nested rule in the semantic model");
+    }
+
+    rule.selectors
+        .first()
+        .expect("expected the nested rule selector")
+        .resolved()
+        .to_string()
+}
+
+#[test]
+fn test_resolve_scss_partial_combinator_with_left_selector() {
+    let resolved = resolved_deepest_scss_selector(".sidebar > { .error {} }", 1);
+    assert_eq!(resolved, ".sidebar > .error");
+}
+
+#[test]
+fn test_resolve_scss_partial_combinator_without_left_selector() {
+    let resolved = resolved_deepest_scss_selector(".card { + { .media {} } }", 2);
+    assert_eq!(resolved, ".card + .media");
+}
+
+#[test]
+fn test_resolve_scss_partial_combinator_with_nesting_selector() {
+    let resolved = resolved_deepest_scss_selector(".navbar { & ~ { .container {} } }", 2);
+    assert_eq!(resolved, ".navbar ~ .container");
+}

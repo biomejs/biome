@@ -1,9 +1,9 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierUsage, JsClassDeclaration,
+    AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierReference, JsClassDeclaration,
     JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
     JsStaticInitializationBlockClassMember, JsVariableDeclarationClause, TsDeclareStatement,
@@ -89,7 +89,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoInvalidUseBeforeDeclaration {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierBinding>;
     type State = InvalidUseBeforeDeclaration;
     type Signals = Box<[Self::State]>;
     type Options = NoInvalidUseBeforeDeclarationOptions;
@@ -104,49 +104,49 @@ impl Rule for NoInvalidUseBeforeDeclaration {
         if is_declaration_file {
             return Box::default();
         }
-        for binding in model.all_bindings() {
-            let id = binding.tree();
-            if matches!(
-                id,
-                AnyJsIdentifierBinding::TsIdentifierBinding(_)
-                    | AnyJsIdentifierBinding::TsTypeParameterName(_)
-            ) {
-                // Ignore type declarations (interfaces, type-aliases, ...)
-                continue;
-            };
-            let Some(declaration) = id.declaration() else {
-                continue;
-            };
-            let Ok(declaration_kind) = DeclarationKind::try_from(&declaration) else {
-                continue;
-            };
-            let declaration_end = if matches!(
-                declaration_kind,
-                DeclarationKind::Class | DeclarationKind::Enum
-            ) {
-                // A class can be instantiated by its properties.
-                // Enum members can be qualified by the enum name.
-                id.range().end()
-            } else {
-                declaration.range().end()
-            };
-            let declaration_scope = declaration
-                .syntax()
-                .ancestors()
-                .skip(1)
-                .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
-            for reference in binding.all_references() {
-                if reference.range_start() < declaration_end {
-                    let reference_syntax = reference.syntax();
-                    // References that are exports, such as `export { a }` are always valid,
-                    // even when they appear before the declaration.
-                    // For example:
-                    //
-                    // ```js
-                    // export { X };
-                    // const X = 0;
-                    // ```
-                    if reference_syntax
+        let id = ctx.query();
+        if matches!(
+            id,
+            AnyJsIdentifierBinding::TsIdentifierBinding(_)
+                | AnyJsIdentifierBinding::TsTypeParameterName(_)
+        ) {
+            // Ignore type declarations (interfaces, type-aliases, ...)
+            return Box::default();
+        };
+        let Some(declaration) = id.declaration() else {
+            return Box::default();
+        };
+        let Ok(declaration_kind) = DeclarationKind::try_from(&declaration) else {
+            return Box::default();
+        };
+        let declaration_end = if matches!(
+            declaration_kind,
+            DeclarationKind::Class | DeclarationKind::Enum
+        ) {
+            // A class can be instantiated by its properties.
+            // Enum members can be qualified by the enum name.
+            id.range().end()
+        } else {
+            declaration.range().end()
+        };
+        let declaration_scope = declaration
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
+        let binding = model.as_binding(id);
+        for reference in binding.all_references() {
+            if reference.range_start() < declaration_end {
+                let reference_syntax = reference.syntax();
+                // References that are exports, such as `export { a }` are always valid,
+                // even when they appear before the declaration.
+                // For example:
+                //
+                // ```js
+                // export { X };
+                // const X = 0;
+                // ```
+                if reference_syntax
                         .parent()
                         .kind().as_ref().is_none_or(|parent_kind| !AnyJsExportNamedSpecifier::can_cast(*parent_kind))
                         // Don't report variables used in another control flow root (function, classes, ...)
@@ -168,15 +168,14 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                         // type Y = typeof X;
                         // const X = 0;
                         // ```
-                        && !AnyJsIdentifierUsage::cast_ref(&reference_syntax)
-                            .is_some_and(|usage| usage.is_only_type())
-                    {
-                        result.push(InvalidUseBeforeDeclaration {
-                            declaration_kind,
-                            reference_range: reference_syntax.text_trimmed_range(),
-                            binding_range: id.range(),
-                        });
-                    }
+                    && !AnyJsIdentifierReference::cast_ref(&reference_syntax)
+                        .is_some_and(|reference| reference.is_only_type())
+                {
+                    result.push(InvalidUseBeforeDeclaration {
+                        declaration_kind,
+                        reference_range: reference_syntax.text_trimmed_range(),
+                        binding_range: id.range(),
+                    });
                 }
             }
         }

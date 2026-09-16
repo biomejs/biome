@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: library.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export interface FormValues<T> {
+	ounces: T;
+	pounds: T;
+}
+
+```

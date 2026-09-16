@@ -1,0 +1,624 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: selfClosing.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<acronym />;
+<applet />;
+<basefont />;
+<bgsound />;
+<big />;
+<blink />;
+<center />;
+<dir />;
+<font />;
+<frame />;
+<frameset />;
+<isindex />;
+<keygen />;
+<listing />;
+<marquee />;
+<menuitem />;
+<multicol />;
+<nextid />;
+<nobr />;
+<noembed />;
+<noframes />;
+<plaintext />;
+<rb />;
+<rtc />;
+<spacer />;
+<strike />;
+<tt />;
+<xmp />;
+
+```
+
+# Diagnostics
+```
+selfClosing.jsx:2:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The acronym element is obsolete.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <acronym />;
+      │  ^^^^^^^
+    3 │ <applet />;
+    4 │ <basefont />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:3:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The applet element is obsolete.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <acronym />;
+  > 3 │ <applet />;
+      │  ^^^^^^
+    4 │ <basefont />;
+    5 │ <bgsound />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:4:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The basefont element is obsolete.
+  
+    2 │ <acronym />;
+    3 │ <applet />;
+  > 4 │ <basefont />;
+      │  ^^^^^^^^
+    5 │ <bgsound />;
+    6 │ <big />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:5:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgsound element is obsolete.
+  
+    3 │ <applet />;
+    4 │ <basefont />;
+  > 5 │ <bgsound />;
+      │  ^^^^^^^
+    6 │ <big />;
+    7 │ <blink />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:6:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The big element is obsolete.
+  
+    4 │ <basefont />;
+    5 │ <bgsound />;
+  > 6 │ <big />;
+      │  ^^^
+    7 │ <blink />;
+    8 │ <center />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:7:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The blink element is obsolete.
+  
+    5 │ <bgsound />;
+    6 │ <big />;
+  > 7 │ <blink />;
+      │  ^^^^^
+    8 │ <center />;
+    9 │ <dir />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:8:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The center element is obsolete.
+  
+     6 │ <big />;
+     7 │ <blink />;
+   > 8 │ <center />;
+       │  ^^^^^^
+     9 │ <dir />;
+    10 │ <font />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:9:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The dir element is obsolete.
+  
+     7 │ <blink />;
+     8 │ <center />;
+   > 9 │ <dir />;
+       │  ^^^
+    10 │ <font />;
+    11 │ <frame />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:10:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The font element is obsolete.
+  
+     8 │ <center />;
+     9 │ <dir />;
+  > 10 │ <font />;
+       │  ^^^^
+    11 │ <frame />;
+    12 │ <frameset />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:11:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The frame element is obsolete.
+  
+     9 │ <dir />;
+    10 │ <font />;
+  > 11 │ <frame />;
+       │  ^^^^^
+    12 │ <frameset />;
+    13 │ <isindex />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:12:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The frameset element is obsolete.
+  
+    10 │ <font />;
+    11 │ <frame />;
+  > 12 │ <frameset />;
+       │  ^^^^^^^^
+    13 │ <isindex />;
+    14 │ <keygen />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:13:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The isindex element is obsolete.
+  
+    11 │ <frame />;
+    12 │ <frameset />;
+  > 13 │ <isindex />;
+       │  ^^^^^^^
+    14 │ <keygen />;
+    15 │ <listing />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:14:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The keygen element is obsolete.
+  
+    12 │ <frameset />;
+    13 │ <isindex />;
+  > 14 │ <keygen />;
+       │  ^^^^^^
+    15 │ <listing />;
+    16 │ <marquee />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:15:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The listing element is obsolete.
+  
+    13 │ <isindex />;
+    14 │ <keygen />;
+  > 15 │ <listing />;
+       │  ^^^^^^^
+    16 │ <marquee />;
+    17 │ <menuitem />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:16:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The marquee element is obsolete.
+  
+    14 │ <keygen />;
+    15 │ <listing />;
+  > 16 │ <marquee />;
+       │  ^^^^^^^
+    17 │ <menuitem />;
+    18 │ <multicol />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:17:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The menuitem element is obsolete.
+  
+    15 │ <listing />;
+    16 │ <marquee />;
+  > 17 │ <menuitem />;
+       │  ^^^^^^^^
+    18 │ <multicol />;
+    19 │ <nextid />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:18:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The multicol element is obsolete.
+  
+    16 │ <marquee />;
+    17 │ <menuitem />;
+  > 18 │ <multicol />;
+       │  ^^^^^^^^
+    19 │ <nextid />;
+    20 │ <nobr />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:19:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The nextid element is obsolete.
+  
+    17 │ <menuitem />;
+    18 │ <multicol />;
+  > 19 │ <nextid />;
+       │  ^^^^^^
+    20 │ <nobr />;
+    21 │ <noembed />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:20:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The nobr element is obsolete.
+  
+    18 │ <multicol />;
+    19 │ <nextid />;
+  > 20 │ <nobr />;
+       │  ^^^^
+    21 │ <noembed />;
+    22 │ <noframes />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:21:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The noembed element is obsolete.
+  
+    19 │ <nextid />;
+    20 │ <nobr />;
+  > 21 │ <noembed />;
+       │  ^^^^^^^
+    22 │ <noframes />;
+    23 │ <plaintext />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:22:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The noframes element is obsolete.
+  
+    20 │ <nobr />;
+    21 │ <noembed />;
+  > 22 │ <noframes />;
+       │  ^^^^^^^^
+    23 │ <plaintext />;
+    24 │ <rb />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:23:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The plaintext element is obsolete.
+  
+    21 │ <noembed />;
+    22 │ <noframes />;
+  > 23 │ <plaintext />;
+       │  ^^^^^^^^^
+    24 │ <rb />;
+    25 │ <rtc />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:24:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rb element is obsolete.
+  
+    22 │ <noframes />;
+    23 │ <plaintext />;
+  > 24 │ <rb />;
+       │  ^^
+    25 │ <rtc />;
+    26 │ <spacer />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:25:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The rtc element is obsolete.
+  
+    23 │ <plaintext />;
+    24 │ <rb />;
+  > 25 │ <rtc />;
+       │  ^^^
+    26 │ <spacer />;
+    27 │ <strike />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:26:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The spacer element is obsolete.
+  
+    24 │ <rb />;
+    25 │ <rtc />;
+  > 26 │ <spacer />;
+       │  ^^^^^^
+    27 │ <strike />;
+    28 │ <tt />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:27:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The strike element is obsolete.
+  
+    25 │ <rtc />;
+    26 │ <spacer />;
+  > 27 │ <strike />;
+       │  ^^^^^^
+    28 │ <tt />;
+    29 │ <xmp />;
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:28:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The tt element is obsolete.
+  
+    26 │ <spacer />;
+    27 │ <strike />;
+  > 28 │ <tt />;
+       │  ^^
+    29 │ <xmp />;
+    30 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+selfClosing.jsx:29:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The xmp element is obsolete.
+  
+    27 │ <strike />;
+    28 │ <tt />;
+  > 29 │ <xmp />;
+       │  ^^^
+    30 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

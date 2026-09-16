@@ -20,8 +20,9 @@ Nested backticks: `` foo`bar ``
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -54,19 +55,7 @@ MdDocument {
                     l_tick_token: BACKTICK@64..66 "``" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@66..67 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@67..68 "`" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@68..72 "code" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@72..73 "`" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@73..74 " " [] [],
+                            value_token: MD_TEXTUAL_LITERAL@66..74 " `code` " [] [],
                         },
                     ],
                     r_tick_token: BACKTICK@74..76 "``" [] [],
@@ -88,19 +77,7 @@ MdDocument {
                     l_tick_token: BACKTICK@102..105 "```" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@105..106 " " [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@106..108 "``" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@108..112 "code" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@112..114 "``" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@114..115 " " [] [],
+                            value_token: MD_TEXTUAL_LITERAL@105..115 " ``code`` " [] [],
                         },
                     ],
                     r_tick_token: BACKTICK@115..118 "```" [] [],
@@ -122,13 +99,7 @@ MdDocument {
                     l_tick_token: BACKTICK@138..140 "``" [] [],
                     content: MdInlineItemList [
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@140..144 " foo" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@144..145 "`" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@145..149 "bar " [] [],
+                            value_token: MD_TEXTUAL_LITERAL@140..149 " foo`bar " [] [],
                         },
                     ],
                     r_tick_token: BACKTICK@149..151 "``" [] [],
@@ -146,9 +117,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..152
+0: MD_ROOT@0..152
   0: (empty)
-  1: MD_BLOCK_LIST@0..152
+  1: (empty)
+  2: MD_BLOCK_LIST@0..152
     0: MD_PARAGRAPH@0..24
       0: MD_INLINE_ITEM_LIST@0..24
         0: MD_TEXTUAL@0..17
@@ -170,16 +142,8 @@ MdDocument {
         1: MD_INLINE_CODE@64..76
           0: BACKTICK@64..66 "``" [] []
           1: MD_INLINE_ITEM_LIST@66..74
-            0: MD_TEXTUAL@66..67
-              0: MD_TEXTUAL_LITERAL@66..67 " " [] []
-            1: MD_TEXTUAL@67..68
-              0: MD_TEXTUAL_LITERAL@67..68 "`" [] []
-            2: MD_TEXTUAL@68..72
-              0: MD_TEXTUAL_LITERAL@68..72 "code" [] []
-            3: MD_TEXTUAL@72..73
-              0: MD_TEXTUAL_LITERAL@72..73 "`" [] []
-            4: MD_TEXTUAL@73..74
-              0: MD_TEXTUAL_LITERAL@73..74 " " [] []
+            0: MD_TEXTUAL@66..74
+              0: MD_TEXTUAL_LITERAL@66..74 " `code` " [] []
           2: BACKTICK@74..76 "``" [] []
         2: MD_TEXTUAL@76..77
           0: MD_TEXTUAL_LITERAL@76..77 "\n" [] []
@@ -192,16 +156,8 @@ MdDocument {
         1: MD_INLINE_CODE@102..118
           0: BACKTICK@102..105 "```" [] []
           1: MD_INLINE_ITEM_LIST@105..115
-            0: MD_TEXTUAL@105..106
-              0: MD_TEXTUAL_LITERAL@105..106 " " [] []
-            1: MD_TEXTUAL@106..108
-              0: MD_TEXTUAL_LITERAL@106..108 "``" [] []
-            2: MD_TEXTUAL@108..112
-              0: MD_TEXTUAL_LITERAL@108..112 "code" [] []
-            3: MD_TEXTUAL@112..114
-              0: MD_TEXTUAL_LITERAL@112..114 "``" [] []
-            4: MD_TEXTUAL@114..115
-              0: MD_TEXTUAL_LITERAL@114..115 " " [] []
+            0: MD_TEXTUAL@105..115
+              0: MD_TEXTUAL_LITERAL@105..115 " ``code`` " [] []
           2: BACKTICK@115..118 "```" [] []
         2: MD_TEXTUAL@118..119
           0: MD_TEXTUAL_LITERAL@118..119 "\n" [] []
@@ -214,15 +170,11 @@ MdDocument {
         1: MD_INLINE_CODE@138..151
           0: BACKTICK@138..140 "``" [] []
           1: MD_INLINE_ITEM_LIST@140..149
-            0: MD_TEXTUAL@140..144
-              0: MD_TEXTUAL_LITERAL@140..144 " foo" [] []
-            1: MD_TEXTUAL@144..145
-              0: MD_TEXTUAL_LITERAL@144..145 "`" [] []
-            2: MD_TEXTUAL@145..149
-              0: MD_TEXTUAL_LITERAL@145..149 "bar " [] []
+            0: MD_TEXTUAL@140..149
+              0: MD_TEXTUAL_LITERAL@140..149 " foo`bar " [] []
           2: BACKTICK@149..151 "``" [] []
         2: MD_TEXTUAL@151..152
           0: MD_TEXTUAL_LITERAL@151..152 "\n" [] []
-  2: EOF@152..152 "" [] []
+  3: EOF@152..152 "" [] []
 
 ```

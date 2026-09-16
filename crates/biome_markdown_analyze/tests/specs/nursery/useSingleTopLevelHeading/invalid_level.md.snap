@@ -1,0 +1,32 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalid_level.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+###### One
+
+###### Two
+
+```
+
+# Diagnostics
+```
+invalid_level.options:8:22 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The heading level must be between 1 and 6.
+  
+     6 │         "useSingleTopLevelHeading": {
+     7 │           "level": "error",
+   > 8 │           "options": {
+       │                      ^
+   > 9 │             "level": 7
+  > 10 │           }
+       │           ^
+    11 │         }
+    12 │       }
+  
+
+```

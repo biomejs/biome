@@ -1,0 +1,15 @@
+outer:
+  inner:
+    literal: |
+      deep content
+        extra indented line
+    folded: >-
+      folded deep
+items:
+  - entry: |
+      scalar in a sequence mapping
+  - |
+    scalar as sequence item
+explicit:
+  - |2
+     indicator under nesting

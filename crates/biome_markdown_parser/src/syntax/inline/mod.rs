@@ -39,10 +39,10 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
-use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax;
+use biome_parser::{Parser, SyntaxFeature};
 
-use crate::MarkdownParser;
+use crate::{MarkdownParser, MarkdownSyntaxFeatures};
 
 mod code_span;
 mod emphasis;
@@ -76,7 +76,7 @@ fn parse_inline_item_list_until_impl(
         // Per CommonMark, link text can span lines, but blank lines end the link.
         // Check for blank line (NEWLINE followed by NEWLINE or EOF after optional whitespace)
         if p.at(NEWLINE) {
-            if p.at_blank_line() {
+            if p.is_at_blank_line() {
                 break; // Blank line ends link text
             }
             // Single newline inside link text - consume and continue
@@ -222,7 +222,7 @@ fn parse_any_inline_no_links(p: &mut MarkdownParser) -> ParsedSyntax {
     }
 
     if p.at(BANG) && p.nth_at(1, L_BRACK) {
-        return links::parse_inline_image(p);
+        return links::parse_image_or_reference(p);
     }
 
     parse_any_inline(p)
@@ -258,6 +258,13 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         // This handles cases like `**foo*` where opener is at offset 1.
         p.force_relex_emphasis_inline();
         super::parse_textual(p)
+    } else if p.at(DOUBLE_TILDE) && MarkdownSyntaxFeatures::Gfm.is_supported(p) {
+        let result = emphasis::parse_inline_strikethrough(p);
+        if result.is_absent() {
+            super::parse_textual(p)
+        } else {
+            result
+        }
     } else if p.at(T![*]) || p.at(UNDERSCORE) {
         // Try italic, fall back to literal text if flanking rules fail
         let result = emphasis::parse_inline_italic(p);
@@ -268,7 +275,7 @@ pub(crate) fn parse_any_inline(p: &mut MarkdownParser) -> ParsedSyntax {
         }
     } else if p.at(BANG) && p.nth_at(1, L_BRACK) {
         // Try image, fall back to literal text if parsing fails
-        let result = links::parse_inline_image(p);
+        let result = links::parse_image_or_reference(p);
         if result.is_absent() {
             super::parse_textual(p)
         } else {

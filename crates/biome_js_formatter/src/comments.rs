@@ -10,14 +10,16 @@ use biome_formatter::{
     write,
 };
 use biome_js_syntax::JsSyntaxKind::JS_EXPORT;
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsClass, AnyJsName, AnyJsRoot, AnyJsStatement, JsArrayHole, JsArrowFunctionExpression,
     JsBlockStatement, JsCallArguments, JsCatchClause, JsEmptyStatement, JsFinallyClause,
     JsFormalParameter, JsFunctionBody, JsIdentifierBinding, JsIdentifierExpression, JsIfStatement,
     JsLanguage, JsNamedImportSpecifiers, JsParameters, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, JsWhileStatement, TsFunctionType, TsInterfaceDeclaration, TsMappedType,
+    JsVariableDeclarator, JsWhileStatement, JsxElement, JsxFragment, JsxText, TsFunctionType,
+    TsInterfaceDeclaration, TsMappedType,
 };
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
+use biome_rowan::{AstNode, Direction, SyntaxNodeOptionExt, SyntaxTriviaPieceComments, TextLen};
 use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use biome_text_size::TextSize;
 
@@ -111,7 +113,9 @@ impl CommentStyle for JsCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         match comment.text_position() {
             CommentTextPosition::EndOfLine => handle_global_suppression(comment)
+                .or_else(handle_jsx_closing_tag_comment)
                 .or_else(handle_typecast_comment)
+                .or_else(handle_last_binary_operand_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_conditional_comment)
                 .or_else(handle_if_statement_comment)
@@ -133,6 +137,7 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_named_clause_comments)
                 .or_else(handle_array_expression),
             CommentTextPosition::OwnLine => handle_global_suppression(comment)
+                .or_else(handle_jsx_closing_tag_comment)
                 .or_else(handle_member_expression_comment)
                 .or_else(handle_function_comment)
                 .or_else(handle_if_statement_comment)
@@ -151,7 +156,8 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_export_specifier_comment)
                 .or_else(handle_class_method_comment)
                 .or_else(handle_import_named_clause_comments),
-            CommentTextPosition::SameLine => handle_if_statement_comment(comment)
+            CommentTextPosition::SameLine => handle_jsx_closing_tag_comment(comment)
+                .or_else(handle_if_statement_comment)
                 .or_else(handle_while_comment)
                 .or_else(handle_for_comment)
                 .or_else(handle_root_comments)
@@ -164,6 +170,58 @@ impl CommentStyle for JsCommentStyle {
                 .or_else(handle_import_named_clause_comments),
         }
     }
+}
+
+/// An Astro `<!-- -->` between the last child and the closing tag leads the
+/// closing tag; as a trailing line suffix it would flush inside `</name >`.
+/// One attached to whitespace-only [`JsxText`] must move too, because the
+/// child list elides such text without ever formatting it.
+fn handle_jsx_closing_tag_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    if let Some(following) = comment.following_node()
+        && matches!(
+            following.kind(),
+            JsSyntaxKind::JSX_CLOSING_ELEMENT | JsSyntaxKind::JSX_CLOSING_FRAGMENT
+        )
+    {
+        return CommentPlacement::leading(following.clone(), comment);
+    }
+
+    let is_elided_text = |node: &JsSyntaxNode| {
+        JsxText::cast_ref(node)
+            .and_then(|text| text.value_token().ok())
+            .is_some_and(|token| token.text_trimmed().trim().is_empty())
+    };
+
+    let is_stranded = comment.preceding_node().is_some_and(is_elided_text)
+        || comment.following_node().is_some_and(is_elided_text)
+        || is_elided_text(comment.enclosing_node());
+    if is_stranded {
+        let mut target = comment.following_node().cloned();
+        while let Some(node) = &target
+            && is_elided_text(node)
+        {
+            target = node.next_sibling();
+        }
+        if let Some(node) = target {
+            return CommentPlacement::leading(node, comment);
+        }
+        let closing = comment.enclosing_node().ancestors().find_map(|node| {
+            if let Some(element) = JsxElement::cast_ref(&node) {
+                element.closing_element().ok().map(AstNode::into_syntax)
+            } else if let Some(fragment) = JsxFragment::cast_ref(&node) {
+                fragment.closing_fragment().ok().map(AstNode::into_syntax)
+            } else {
+                None
+            }
+        });
+        if let Some(closing) = closing {
+            return CommentPlacement::leading(closing, comment);
+        }
+    }
+
+    CommentPlacement::Default(comment)
 }
 
 /// Force end of line type cast comments to remain leading comments of the next node, if any
@@ -622,6 +680,7 @@ fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
         let is_blank = match &root {
             AnyJsRoot::JsExpressionSnippet(_) => false,
             AnyJsRoot::JsExpressionTemplateRoot(_) => false,
+            AnyJsRoot::JsSvelteDeclarationRoot(_) => false,
             AnyJsRoot::JsSvelteSnippetRoot(_) => false,
             AnyJsRoot::JsModule(module) => {
                 module.directives().is_empty() && module.items().is_empty()
@@ -742,6 +801,74 @@ fn handle_conditional_comment(
     CommentPlacement::Default(comment)
 }
 
+fn handle_last_binary_operand_comment(
+    comment: DecoratedComment<JsLanguage>,
+) -> CommentPlacement<JsLanguage> {
+    if comment.enclosing_node().kind() != JsSyntaxKind::JS_UNARY_EXPRESSION
+        || comment.following_node().is_some()
+        || !comment.kind().is_line()
+        || comment.lines_before() > 0
+        || JsCommentStyle::is_suppression(comment.piece().text())
+        || JsCommentStyle::is_global_suppression(comment.piece().text())
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(binary) = comment
+        .preceding_node()
+        .and_then(AnyJsBinaryLikeExpression::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let Ok(right) = binary.right() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    // Crossing another comment would reorder comments. A newline can also belong
+    // to a removed closing parenthesis, whose comment must stay outside.
+    let follows_right = right.syntax().last_trailing_trivia().is_some_and(|trivia| {
+        trivia
+            .pieces()
+            .find(|piece| !piece.is_whitespace())
+            .is_some_and(|piece| piece.text_range() == comment.piece().text_range())
+    });
+    if !follows_right {
+        return CommentPlacement::Default(comment);
+    }
+
+    let binary_start = binary.syntax().text_trimmed_range().start();
+    let right_start = right.syntax().text_trimmed_range().start();
+    let is_multiline = binary
+        .syntax()
+        .descendants_tokens(Direction::Next)
+        .take_while(|token| token.text_trimmed_range().start() <= right_start)
+        .any(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .chain(token.trailing_trivia().pieces())
+                .any(|piece| {
+                    piece.is_newline()
+                        && piece.text_range().start() >= binary_start
+                        && piece.text_range().end() <= right_start
+                })
+                || (token.text_trimmed_range().start() < right_start
+                    && matches!(
+                        token.kind(),
+                        JsSyntaxKind::JS_STRING_LITERAL | JsSyntaxKind::TEMPLATE_CHUNK
+                    )
+                    && (token.text_trimmed().contains('\n') || token.text_trimmed().contains('\r')))
+        });
+
+    // Keep a last-operand comment inside the precedence parentheses of a multiline
+    // unary argument instead of attaching it to the whole binary expression.
+    if is_multiline {
+        return CommentPlacement::trailing(right.into_syntax(), comment);
+    }
+
+    CommentPlacement::Default(comment)
+}
+
 fn handle_if_statement_comment(
     comment: DecoratedComment<JsLanguage>,
 ) -> CommentPlacement<JsLanguage> {
@@ -851,8 +978,11 @@ fn handle_if_statement_comment(
             // ```javascript
             // if (cond1)  /* test */ if (other) { a }
             // ```
-            if let Some(if_statement) = JsIfStatement::cast_ref(following)
-                && let Ok(nested_consequent) = if_statement.consequent()
+            if let Some(nested_if) = JsIfStatement::cast_ref(following)
+                && if_statement
+                    .consequent()
+                    .is_ok_and(|consequent| consequent.syntax() == following)
+                && let Ok(nested_consequent) = nested_if.consequent()
             {
                 return place_leading_statement_comment(nested_consequent, comment);
             }

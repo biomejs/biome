@@ -1,9 +1,12 @@
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Merge,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
+use biome_rule_options::use_consistent_function_style::{
+    FunctionStyle, UseConsistentFunctionStyleOptions,
+};
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -129,7 +132,7 @@ impl AsRef<str> for IgnorePattern {
 }
 impl biome_deserialize::Deserializable for IgnorePattern {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -182,7 +185,7 @@ impl GlobalConf {
 }
 impl Deserializable for GlobalConf {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -247,7 +250,7 @@ impl<T> IntoIterator for ShorthandVec<T> {
 }
 impl<T: Deserializable> Deserializable for ShorthandVec<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -288,7 +291,7 @@ impl<T> From<Vec<T>> for NestableVec<T> {
 }
 impl<T: Deserializable> Deserializable for NestableVec<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -311,8 +314,8 @@ impl<T: Deserializable> DeserializationVisitor for NestableVecVisitor<T> {
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
     fn visit_array(
         self,
-        ctx: &mut impl DeserializationContext,
-        items: impl Iterator<Item = Option<impl DeserializableValue>>,
+        ctx: &mut dyn DeserializationContext,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
         _range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
@@ -369,7 +372,7 @@ impl<T: Default, U: Default> RuleConf<T, U> {
 }
 impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable for RuleConf<T, U> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -381,8 +384,8 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut impl DeserializationContext,
-                values: impl Iterator<Item = Option<impl DeserializableValue>>,
+                ctx: &mut dyn DeserializationContext,
+                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
                 range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -480,7 +483,7 @@ enum NumberOrString {
 }
 impl Deserializable for NumberOrString {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -507,7 +510,7 @@ impl Deref for Rules {
 }
 impl Deserializable for Rules {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -517,13 +520,8 @@ impl Deserializable for Rules {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
-                    Item = Option<(
-                        impl biome_deserialize::DeserializableValue,
-                        impl biome_deserialize::DeserializableValue,
-                    )>,
-                >,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut MapMembers<'_>,
                 _range: biome_rowan::TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -545,6 +543,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
                             }
                         }
+                        "func-style" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::FuncStyle(conf));
+                            }
+                        }
                         "max-nested-callbacks" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
@@ -553,6 +556,11 @@ impl Deserializable for Rules {
                         "no-console" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
+                            }
+                        }
+                        "no-restricted-properties" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::NoRestrictedProperties(conf));
                             }
                         }
                         "no-restricted-globals" => {
@@ -601,6 +609,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
                             }
                         }
+                        "@typescript-eslint/switch-exhaustiveness-check" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
+                            }
+                        }
                         "svelte/no-unnecessary-state-wrap" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
@@ -647,6 +660,24 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     }
 }
 
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct FuncStyleOptions {
+    allow_arrow_functions: Option<bool>,
+}
+
+impl FuncStyleOptions {
+    pub(crate) fn into_biome_options(
+        self,
+        style: FunctionStyle,
+    ) -> UseConsistentFunctionStyleOptions {
+        UseConsistentFunctionStyleOptions {
+            style: Some(style),
+            allow_arrow_functions: self.allow_arrow_functions,
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct MaxNestedCallbacksOptions {
     max: Option<u8>,
@@ -658,7 +689,7 @@ impl MaxNestedCallbacksOptions {
 
 impl Deserializable for MaxNestedCallbacksOptions {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -790,7 +821,7 @@ impl NoRestrictedGlobal {
 }
 impl Deserializable for NoRestrictedGlobal {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -807,6 +838,29 @@ pub(crate) struct GlobalWithMessage {
     message: String,
 }
 
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct NoRestrictedPropertyOption {
+    object: Option<Box<str>>,
+    property: Option<Box<str>>,
+    message: Option<Box<str>>,
+    allow_objects: Box<[Box<str>]>,
+    allow_properties: Box<[Box<str>]>,
+}
+
+impl From<NoRestrictedPropertyOption>
+    for biome_rule_options::no_js_restricted_properties::RestrictedPropertyEntry
+{
+    fn from(value: NoRestrictedPropertyOption) -> Self {
+        Self {
+            object: value.object,
+            property: value.property,
+            message: value.message,
+            allow_objects: value.allow_objects,
+            allow_properties: value.allow_properties,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum Rule {
     /// Any rule without its options.
@@ -815,8 +869,10 @@ pub(crate) enum Rule {
     // We use this to configure equivalent Bione's rules.
     ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
+    FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
+    NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
@@ -829,6 +885,9 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    TypeScriptSwitchExhaustivenessCheck(
+        RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
+    ),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
@@ -840,8 +899,10 @@ impl Rule {
             Self::Any(name, _) => name.clone(),
             Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
+            Self::FuncStyle(_) => Cow::Borrowed("func-style"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
+            Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
@@ -859,6 +920,9 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::TypeScriptSwitchExhaustivenessCheck(_) => {
+                Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
+            }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }

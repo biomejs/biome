@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/do-not-add-whitespace-between-inline-elements.svelte
+---
+
+# Input
+
+```svelte
+<p><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i>Kiwi</i></p>
+
+<p>asd<i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i>Kiwi</i></p>
+
+<p><b>Apples</b><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i>Kiwi</i></p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,7 +5,6 @@
+ </p>
+ 
+ <p>
+-    <b>Apples</b><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i
+-        >Kiwi</i
+-    >
++    <b>Apples</b><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b
++    ><i>Kiwi</i>
+ </p>
+```
+
+# Output
+
+```svelte
+<p><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i>Kiwi</i></p>
+
+<p>
+    asd<i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b><i>Kiwi</i>
+</p>
+
+<p>
+    <b>Apples</b><i>Orange</i><b>Bananas</b><i>Pineapples</i><b>Grapefruit</b
+    ><i>Kiwi</i>
+</p>
+```

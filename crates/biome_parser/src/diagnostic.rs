@@ -156,6 +156,10 @@ impl ParseDiagnostic {
         }
     }
 
+    pub fn span(&self) -> Option<TextRange> {
+        self.span
+    }
+
     /// Updates the location of this diagnostic and its advices
     pub fn set_location_offset(&mut self, offset: TextSize) {
         self.advice_offset = Some(offset);

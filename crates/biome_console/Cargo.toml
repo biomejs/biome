@@ -9,9 +9,14 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE", "README.md", "src/**/*"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bench]]
+harness = false
+name    = "console"
 
 [dependencies]
 biome_markup         = { workspace = true }
@@ -23,7 +28,8 @@ unicode-segmentation = "1.13.2"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
-trybuild = "=1.0.116"
+criterion = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+trybuild  = "=1.0.116"
 
 [features]
 schema = ["biome_text_size/schema", "dep:schemars", "serde"]

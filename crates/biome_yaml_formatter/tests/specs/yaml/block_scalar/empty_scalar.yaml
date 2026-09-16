@@ -1,0 +1,7 @@
+empty-literal: |
+empty-folded: >
+empty-keep: |+
+empty-strip: |-
+empty-with-comment: | # comment
+after: value
+empty-at-end: >

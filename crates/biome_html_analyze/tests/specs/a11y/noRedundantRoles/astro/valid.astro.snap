@@ -4,10 +4,10 @@ expression: valid.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 // Astro frontmatter
 ---
+<!-- should not generate diagnostics -->
 
 <!-- Custom components should not trigger the rule -->
 <Button role="button"></Button>

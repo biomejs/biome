@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/block_scalar/multi_document.yaml
+---
+
+# Input
+
+```yaml
+--- |+
+first document keep
+
+---
+second: |
+  second document
+...
+
+```
+
+
+# Formatted
+
+```yaml
+---
+|+
+  first document keep
+
+---
+second: |
+  second document
+...
+
+```

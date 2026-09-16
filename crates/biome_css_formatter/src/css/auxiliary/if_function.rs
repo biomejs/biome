@@ -19,7 +19,7 @@ impl FormatNodeRule<CssIfFunction> for FormatCssIfFunction {
         write!(
             f,
             [
-                if_token.format(),
+                if_token.format()?.with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(

@@ -174,7 +174,7 @@ impl Rule for NoPrivateImports {
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
-            .and_then(|specifier| module_info.static_import_paths.get(specifier.text()))
+            .and_then(|specifier| module_info.import_paths.get(specifier.text()))
             .and_then(JsImportPath::as_path)
             .filter(|path| !BiomePath::new(path).is_dependency())
         else {

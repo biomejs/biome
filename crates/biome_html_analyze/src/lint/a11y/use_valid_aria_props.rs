@@ -7,7 +7,7 @@ use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rowan::{BatchMutationExt, TokenText};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -109,8 +109,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
             AnyVueDirective::VueVBindShorthandDirective(d) => Some(
                 d.arg()
                     .ok()?
-                    .arg()
-                    .ok()?
+                    .arg()?
                     .as_vue_static_argument()?
                     .name_token()
                     .ok()?
@@ -122,8 +121,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
                 }
                 Some(
                     d.arg()?
-                        .arg()
-                        .ok()?
+                        .arg()?
                         .as_vue_static_argument()?
                         .name_token()
                         .ok()?

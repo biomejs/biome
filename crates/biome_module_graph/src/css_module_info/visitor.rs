@@ -91,9 +91,10 @@ impl<'a> CssModuleVisitor<'a> {
         let resolved_path = self.resolved_path_from_specifier(&specifier);
 
         let text: Text = specifier.into();
-        imports.insert(
+        imports.push(
             text.clone(),
             CssImport {
+                range: node.range(),
                 specifier: text,
                 resolved_path,
             },

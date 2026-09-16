@@ -1,0 +1,122 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+---
+title: Biome
+# ---
+description: |
+  ---
+	---
+quoted: "---"
+---
+# Heading
+
+---
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: MdFrontmatter {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: MdFrontmatterContent {
+            value_token: MD_FRONTMATTER_LITERAL@3..63 "\ntitle: Biome\n# ---\ndescription: |\n  ---\n\t---\nquoted: \"---\"\n" [] [],
+        },
+        r_fence_token: FENCE@63..66 "---" [] [],
+    },
+    value: MdBlockList [
+        MdNewline {
+            value_token: NEWLINE@66..67 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@67..68 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@68..76 " Heading" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@76..77 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@77..78 "\n" [] [],
+        },
+        MdThematicBreakBlock {
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: MINUS@78..79 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@79..80 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@80..81 "-" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@81..82 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@82..82 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..82
+  0: (empty)
+  1: MD_FRONTMATTER@0..66
+    0: FENCE@0..3 "---" [] []
+    1: MD_FRONTMATTER_CONTENT@3..63
+      0: MD_FRONTMATTER_LITERAL@3..63 "\ntitle: Biome\n# ---\ndescription: |\n  ---\n\t---\nquoted: \"---\"\n" [] []
+    2: FENCE@63..66 "---" [] []
+  2: MD_BLOCK_LIST@66..82
+    0: MD_NEWLINE@66..67
+      0: NEWLINE@66..67 "\n" [] []
+    1: MD_HEADER@67..76
+      0: MD_INDENT_TOKEN_LIST@67..67
+      1: MD_HASH_LIST@67..68
+        0: MD_HASH@67..68
+          0: HASH@67..68 "#" [] []
+      2: MD_PARAGRAPH@68..76
+        0: MD_INLINE_ITEM_LIST@68..76
+          0: MD_TEXTUAL@68..76
+            0: MD_TEXTUAL_LITERAL@68..76 " Heading" [] []
+      3: MD_HASH_LIST@76..76
+    2: MD_NEWLINE@76..77
+      0: NEWLINE@76..77 "\n" [] []
+    3: MD_NEWLINE@77..78
+      0: NEWLINE@77..78 "\n" [] []
+    4: MD_THEMATIC_BREAK_BLOCK@78..81
+      0: MD_THEMATIC_BREAK_PART_LIST@78..81
+        0: MD_THEMATIC_BREAK_CHAR@78..79
+          0: MINUS@78..79 "-" [] []
+        1: MD_THEMATIC_BREAK_CHAR@79..80
+          0: MINUS@79..80 "-" [] []
+        2: MD_THEMATIC_BREAK_CHAR@80..81
+          0: MINUS@80..81 "-" [] []
+    5: MD_NEWLINE@81..82
+      0: NEWLINE@81..82 "\n" [] []
+  3: EOF@82..82 "" [] []
+
+```

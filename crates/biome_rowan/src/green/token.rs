@@ -9,12 +9,13 @@ use crate::green::trivia::GreenTrivia;
 use crate::{
     TextSize,
     arc::{Arc, HeaderSlice, ThinArc},
-    green::RawSyntaxKind,
+    green::{GreenElementFlags, RawSyntaxKind},
 };
 
 #[derive(PartialEq, Eq, Hash)]
 struct GreenTokenHead {
     kind: RawSyntaxKind,
+    flags: GreenElementFlags,
     leading: GreenTrivia,
     trailing: GreenTrivia,
     #[cfg(feature = "countme")]
@@ -143,6 +144,11 @@ impl GreenTokenData {
     pub fn trailing_trivia(&self) -> &GreenTrivia {
         &self.data.header.trailing
     }
+
+    #[inline]
+    pub(crate) fn flags(&self) -> GreenElementFlags {
+        self.data.header.flags
+    }
 }
 
 impl GreenToken {
@@ -161,8 +167,21 @@ impl GreenToken {
         leading: GreenTrivia,
         trailing: GreenTrivia,
     ) -> Self {
+        let flags = leading.flags().union(trailing.flags());
+        Self::with_trivia_and_flags(kind, text, leading, trailing, flags)
+    }
+
+    #[inline]
+    pub(crate) fn with_trivia_and_flags(
+        kind: RawSyntaxKind,
+        text: &str,
+        leading: GreenTrivia,
+        trailing: GreenTrivia,
+        flags: GreenElementFlags,
+    ) -> Self {
         let head = GreenTokenHead {
             kind,
+            flags,
             leading,
             trailing,
             #[cfg(feature = "countme")]

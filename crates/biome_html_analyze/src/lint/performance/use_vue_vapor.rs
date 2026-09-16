@@ -5,14 +5,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_factory::make;
 use biome_html_syntax::{
-    AnyHtmlAttribute, HtmlAttributeList, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken,
+    AnyHtmlAttribute, HtmlAttributeList, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken, T,
     element_ext::AnyHtmlTagElement,
 };
-use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
 use biome_rule_options::use_vue_vapor::UseVueVaporOptions;
-
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce opting in to Vue Vapor mode in `<script setup>` blocks.
@@ -64,13 +61,8 @@ impl Rule for UseVueVapor {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let opening = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(
-            &AnyHtmlTagElement::from(opening.clone()),
-            source_type,
-            "script",
-        ) {
+        if AnyHtmlTagElement::from(opening.clone()).tag_name_kind() != Some(T![script]) {
             return None;
         }
 

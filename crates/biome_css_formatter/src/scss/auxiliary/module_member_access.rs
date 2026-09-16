@@ -12,6 +12,13 @@ impl FormatNodeRule<ScssModuleMemberAccess> for FormatScssModuleMemberAccess {
             member,
         } = node.as_fields();
 
-        write!(f, [module.format(), dot_token.format(), member.format()])
+        write!(
+            f,
+            [
+                module?.format().with_text_case(CssCase::Preserve),
+                dot_token.format(),
+                member?.format().with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

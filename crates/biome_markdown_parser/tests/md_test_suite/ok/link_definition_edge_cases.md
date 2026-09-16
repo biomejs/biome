@@ -31,3 +31,6 @@ Another paragraph
 [invalid-trailing]: /url invalid
 
 [angle-trailing]: </url> invalid
+
+[invalid-next-line-title]: /url
+  "title" trailing

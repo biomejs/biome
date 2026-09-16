@@ -8,6 +8,13 @@ impl FormatNodeRule<CssSupportsNotCondition> for FormatCssSupportsNotCondition {
     fn fmt_fields(&self, node: &CssSupportsNotCondition, f: &mut CssFormatter) -> FormatResult<()> {
         let CssSupportsNotConditionFields { not_token, query } = node.as_fields();
 
-        write!(f, [not_token.format(), space(), query.format()])
+        write!(
+            f,
+            [
+                not_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                query?.format().with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

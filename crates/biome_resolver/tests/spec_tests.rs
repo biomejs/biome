@@ -1,5 +1,5 @@
-use biome_fs::OsFileSystem;
-use biome_package::{CompilerOptions, TsConfigJson};
+use biome_fs::{MemoryFileSystem, OsFileSystem};
+use biome_package::{CompilerOptions, Manifest, TsConfigJson};
 use biome_resolver::*;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -334,6 +334,27 @@ fn test_resolve_node_builtins() {
 }
 
 #[test]
+fn test_resolve_bun_builtins() {
+    let base_dir = get_fixtures_path("resolver_cases_3");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "bun:sqlite",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                default_files: &["index"],
+                extensions: &["js"],
+                resolve_bun_builtins: true,
+                ..Default::default()
+            }
+        ),
+        Err(ResolveError::BunBuiltIn)
+    );
+}
+
+#[test]
 fn test_resolve_shared_biome_config() {
     let base_dir = get_fixtures_path("resolver_cases_3");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -443,6 +464,135 @@ fn test_resolve_typescript_path_aliases2() {
 }
 
 #[test]
+fn test_resolve_typescript_path_alias_from_project_reference() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/tsconfig.json".into(),
+        r#"{"references":[{"path":"./configs/app.json"}]}"#,
+    );
+    fs.insert(
+        "/configs/app.json".into(),
+        r#"{"references":[{"path":"./bad"},{"path":"./lib"},{"path":"../tsconfig.json"}]}"#,
+    );
+    fs.insert(
+        "/configs/bad/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"@/*":["../../src"]}}}"#,
+    );
+    fs.insert(
+        "/configs/lib/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"@/*":["../../src/*"],"ab*bc":["../../src/*"]}}}"#,
+    );
+    fs.insert("/src/utils.js".into(), "export {};");
+
+    let options = ResolveOptions {
+        extensions: &["js"],
+        ..Default::default()
+    };
+    let resolution = resolve_with_metadata("@/utils", Utf8Path::new("/src"), &fs, &options)
+        .expect("path alias should resolve through project references");
+
+    assert_eq!(
+        resolution.kind(),
+        ResolutionKind::TsConfigPathMapping {
+            can_add_extension: true
+        }
+    );
+    assert_eq!(resolution.into_path(), Utf8Path::new("/src/utils.js"));
+
+    let (Some(mut root_config), _) =
+        TsConfigJson::read_manifest(&fs, "/tsconfig.json".as_ref()).consume()
+    else {
+        panic!("root config should deserialize");
+    };
+    root_config.path.clear();
+    let explicit_options = options
+        .clone()
+        .with_tsconfig(DiscoverableManifest::Explicit {
+            package_path: "/tsconfig.json".into(),
+            manifest: &root_config,
+        });
+    assert_eq!(
+        resolve("@/utils", Utf8Path::new("/src"), &fs, &explicit_options),
+        Ok(Utf8PathBuf::from("/src/utils.js"))
+    );
+
+    assert_eq!(
+        resolve("missing", Utf8Path::new("/src"), &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+    assert_eq!(
+        resolve("abc", Utf8Path::new("/src"), &fs, &options),
+        Err(ResolveError::NotFound)
+    );
+}
+
+#[test]
+fn test_failed_typescript_path_alias_uses_package_fallback() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/package.json".into(), "{}");
+    fs.insert(
+        "/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"exact":["./exact.js"],"fallback":["./missing"]}}}"#,
+    );
+    fs.insert("/exact.js".into(), "export {};");
+    fs.insert("/node_modules/fallback/index.js".into(), "export {};");
+
+    let resolution = resolve_with_metadata(
+        "fallback",
+        Utf8Path::new("/src"),
+        &fs,
+        &ResolveOptions {
+            default_files: &["index"],
+            extensions: &["js"],
+            ..Default::default()
+        },
+    )
+    .expect("package fallback should resolve");
+
+    assert_eq!(resolution.kind(), ResolutionKind::Other);
+    assert_eq!(
+        resolution.into_path(),
+        Utf8Path::new("/node_modules/fallback/index.js")
+    );
+
+    let exact_resolution = resolve_with_metadata(
+        "exact",
+        Utf8Path::new("/src"),
+        &fs,
+        &ResolveOptions::default(),
+    )
+    .expect("exact path alias should resolve");
+    assert_eq!(
+        exact_resolution.kind(),
+        ResolutionKind::TsConfigPathMapping {
+            can_add_extension: false
+        }
+    );
+}
+
+#[test]
+fn test_resolve_typescript_path_alias_without_dot_prefix() {
+    let base_dir = get_fixtures_path("resolver_cases_9");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    assert_eq!(
+        resolve(
+            "@/styles/styles.css",
+            &base_dir,
+            &fs,
+            &ResolveOptions {
+                extensions: &["css"],
+                ..Default::default()
+            }
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/src/styles/styles.css"
+        )))
+    );
+}
+
+#[test]
 fn test_resolve_type_definitions() {
     let base_dir = get_fixtures_path("resolver_cases_5");
     let fs = OsFileSystem::new(base_dir.clone());
@@ -519,6 +669,72 @@ fn test_resolve_type_definitions_from_another_type_definition() {
         Ok(Utf8PathBuf::from(format!(
             "{base_dir}/node_modules/swr/dist/_internal/index.d.ts"
         )))
+    );
+}
+
+#[test]
+fn test_resolve_self_reference_without_exports_field() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve(
+            "next/dist/request",
+            Utf8Path::new(&format!("{base_dir}/node_modules/next")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/next/dist/request.d.ts"
+        )))
+    );
+}
+
+/// A package with an `exports` field may reference itself by name, but only
+/// through the subpaths listed in the `exports` map.
+#[test]
+fn test_resolve_self_reference_with_exports_field() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve(
+            "swr/_internal",
+            Utf8Path::new(&format!("{base_dir}/node_modules/swr/dist/index")),
+            &fs,
+            &options
+        ),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/swr/dist/_internal/index.d.mts"
+        )))
+    );
+
+    // A subpath that is not listed in the `exports` map must not fall back to
+    // the file on disk.
+    assert_eq!(
+        resolve(
+            "swr/dist/index/index.js",
+            Utf8Path::new(&format!("{base_dir}/node_modules/swr/dist/index")),
+            &fs,
+            &options
+        ),
+        Err(ResolveError::NotFound)
     );
 }
 

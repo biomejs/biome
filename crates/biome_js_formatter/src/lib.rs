@@ -165,6 +165,7 @@
 
 #![deny(clippy::use_self)]
 
+mod astro;
 mod cst;
 mod js;
 mod jsx;
@@ -200,6 +201,7 @@ use biome_rowan::{AstNode, SyntaxNode};
 use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
+use crate::js::expressions::unary_expression::FormatJsUnaryExpression;
 use crate::syntax_rewriter::transform;
 use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_or_verbatim, format_suppressed_node};
@@ -371,7 +373,10 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
-        let needs_parentheses = self.needs_parentheses(node);
+        // The unary rule wraps commented arguments, including their leading comments.
+        // That wrapper also satisfies the argument's precedence requirements.
+        let needs_parentheses = self.needs_parentheses(node)
+            && !FormatJsUnaryExpression::can_omit_argument_parentheses(node.syntax(), f);
 
         let should_insert_space = needs_parentheses && f.options().delimiter_spacing().value();
 
@@ -851,6 +856,249 @@ function() {
         )
     }
 
+    fn assert_range_formatting_preserves_leading_comments(input: &str, closing_paren: &str) {
+        let tree = parse_script(input, JsParserOptions::default());
+        let root = tree.syntax();
+        let offset =
+            TextSize::try_from(input.find(closing_paren).unwrap() + closing_paren.len()).unwrap();
+        let token = root.token_at_offset(offset).left_biased().unwrap();
+        let parent = token.parent().unwrap();
+        let printed = format_range(
+            JsFormatOptions::new(JsFileSource::js_script()).with_indent_style(IndentStyle::Tab),
+            &root,
+            parent.text_trimmed_range(),
+        )
+        .expect("range formatting failed");
+
+        let range = printed.range().unwrap();
+        let mut output = input.to_string();
+        output.replace_range(
+            usize::from(range.start())..usize::from(range.end()),
+            printed.as_code(),
+        );
+        assert_eq!(output, input);
+    }
+
+    #[test]
+    fn range_formatting_preserves_if_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// Add a new check
+	// TODO: try removing and re-adding closing paren
+	if (num < 0.5 && num < 0.4) {
+		console.log("Less than 0.5");
+	}
+}
+"#,
+            "num < 0.4)",
+        );
+    }
+
+    #[test]
+    fn range_formatting_preserves_while_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// A loop
+	while (num < 0.5) {
+		console.log("Less than 0.5");
+	}
+}
+"#,
+            "num < 0.5)",
+        );
+    }
+
+    #[test]
+    fn range_formatting_preserves_for_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// A loop
+	for (let index = 0; index < num; index++) {
+		console.log(index);
+	}
+}
+"#,
+            "index++)",
+        );
+    }
+
+    /// A leading comment of `continue` must not become a trailing comment.
+    #[test]
+    fn range_formatting_preserves_continue_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"while (true) {
+	// continue to the next iteration
+	continue;
+}
+"#,
+            "continue;",
+        );
+    }
+
+    #[test]
+    fn range_formatting_preserves_break_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"while (true) {
+	// stop the loop
+	break;
+}
+"#,
+            "break;",
+        );
+    }
+
+    /// A trailing comment whose placement rule resolves the loop around the
+    /// formatted statement must not be dropped.
+    #[test]
+    fn range_formatting_preserves_continue_trailing_comments_in_braceless_body() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"for (;;) continue; /* comment */
+"#,
+            "continue;",
+        );
+    }
+
+    /// The comment must not be dropped when the loop body has no braces.
+    #[test]
+    fn range_formatting_preserves_continue_leading_comments_in_braceless_body() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"for (;;)
+	// note
+	continue;
+"#,
+            "continue;",
+        );
+    }
+
+    /// An inline block comment before the `if` keyword must stay in place.
+    #[test]
+    fn range_formatting_preserves_if_statement_inline_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	/* check */ if (num < 0.5) {
+		console.log("Less than 0.5");
+	}
+}
+"#,
+            "num < 0.5)",
+        );
+    }
+
+    /// Simulates on-type formatting after typing `]`.
+    #[test]
+    fn range_formatting_preserves_variable_statement_leading_comments() {
+        assert_range_formatting_preserves_leading_comments(
+            r#"function test() {
+	const num = Math.random();
+
+	// the list
+	const x = [1, 2];
+}
+"#,
+            "[1, 2]",
+        );
+    }
+
+    /// Simulates on-type formatting after typing `}` of an import specifier.
+    #[test]
+    fn range_formatting_preserves_import_leading_comments() {
+        let input = r#"// external dependencies
+import { a } from "b";
+console.log(a);
+"#;
+        let source = JsFileSource::js_module();
+        let tree = parse(input, source, JsParserOptions::default());
+        let root = tree.syntax();
+        let offset = TextSize::try_from(input.find("{ a }").unwrap() + "{ a }".len()).unwrap();
+        let token = root.token_at_offset(offset).left_biased().unwrap();
+        let parent = token.parent().unwrap();
+        let printed = format_range(
+            JsFormatOptions::new(source).with_indent_style(IndentStyle::Tab),
+            &root,
+            parent.text_trimmed_range(),
+        )
+        .expect("range formatting failed");
+
+        let range = printed.range().unwrap();
+        let mut output = input.to_string();
+        output.replace_range(
+            usize::from(range.start())..usize::from(range.end()),
+            printed.as_code(),
+        );
+        assert_eq!(output, input);
+    }
+
+    /// Simulates formatting a selection that covers only the `if` header,
+    /// which makes the if statement itself the formatting root.
+    #[test]
+    fn range_formatting_preserves_leading_comments_of_selected_if_header() {
+        let input = r#"function test() {
+	const num = Math.random();
+
+	// Add a new check
+	if (num < 0.5 && num < 0.4) {
+		console.log("Less than 0.5");
+	}
+}
+"#;
+        let tree = parse_script(input, JsParserOptions::default());
+        let start = TextSize::try_from(input.find("if (").unwrap()).unwrap();
+        let end =
+            TextSize::try_from(input.find("num < 0.4)").unwrap() + "num < 0.4)".len()).unwrap();
+        let printed = format_range(
+            JsFormatOptions::new(JsFileSource::js_script()).with_indent_style(IndentStyle::Tab),
+            &tree.syntax(),
+            TextRange::new(start, end),
+        )
+        .expect("range formatting failed");
+
+        let range = printed.range().unwrap();
+        let mut output = input.to_string();
+        output.replace_range(
+            usize::from(range.start())..usize::from(range.end()),
+            printed.as_code(),
+        );
+        assert_eq!(output, input);
+    }
+
+    /// Selecting two sibling statements must preserve the leading comment of
+    /// the first one and the own-line and inline comments between them.
+    #[test]
+    fn range_formatting_preserves_comments_between_selected_statements() {
+        let input = r#"function test() {
+	// leading comment
+	first(); /* inline */
+	// own line
+	second();
+}
+"#;
+        let tree = parse_script(input, JsParserOptions::default());
+        let start = TextSize::try_from(input.find("first").unwrap()).unwrap();
+        let end = TextSize::try_from(input.find("second();").unwrap() + "second();".len()).unwrap();
+        let printed = format_range(
+            JsFormatOptions::new(JsFileSource::js_script()).with_indent_style(IndentStyle::Tab),
+            &tree.syntax(),
+            TextRange::new(start, end),
+        )
+        .expect("range formatting failed");
+
+        let range = printed.range().unwrap();
+        let mut output = input.to_string();
+        output.replace_range(
+            usize::from(range.start())..usize::from(range.end()),
+            printed.as_code(),
+        );
+        assert_eq!(output, input);
+    }
+
     #[test]
     fn format_range_out_of_bounds() {
         let src = "statement();";
@@ -865,5 +1113,144 @@ function() {
         );
 
         assert!(result.is_err());
+    }
+
+    fn format_astro_template(src: &str) -> String {
+        let syntax = JsFileSource::tsx().with_embedding_kind(
+            biome_languages::javascript::JsEmbeddingKind::Astro {
+                frontmatter: false,
+                is_class_attribute: false,
+            },
+        );
+        let tree = parse(src, syntax, JsParserOptions::default());
+        assert!(!tree.has_errors(), "{:?}", tree.diagnostics());
+        crate::format_node(
+            JsFormatOptions::new(syntax).with_indent_style(IndentStyle::Space),
+            &tree.syntax(),
+            Vec::new(),
+        )
+        .unwrap()
+        .print()
+        .unwrap()
+        .as_code()
+        .to_string()
+    }
+
+    #[test]
+    fn format_keeps_unquoted_astro_attribute_values_whole() {
+        // A single-character value must not panic on a `1..0` slice.
+        for (src, expected) in [
+            ("cond && <div class=foo />", "class=\"foo\""),
+            ("cond && <div a=b />", "a=\"b\""),
+            ("cond && <img src=/x.png />", "src=\"/x.png\""),
+        ] {
+            let output = format_astro_template(src);
+            assert!(
+                output.contains(expected),
+                "expected {expected:?} in {output:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn format_still_quotes_normal_astro_attribute_values() {
+        let output = format_astro_template("cond && <div class='a' />");
+
+        assert!(output.contains("class=\"a\""), "{output:?}");
+    }
+
+    #[test]
+    fn format_picks_a_quote_for_an_unquoted_astro_value_holding_one_quote_kind() {
+        for (src, expected) in [
+            ("cond && <div a=don't />", "a=\"don't\""),
+            ("cond && <div a=don\"t />", "a='don\"t'"),
+        ] {
+            let output = format_astro_template(src);
+            assert!(
+                output.contains(expected),
+                "expected {expected:?} in {output:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn format_leaves_an_unquoted_astro_value_holding_both_quotes_alone() {
+        let output = format_astro_template("cond && <div a=don't\"x />");
+
+        assert!(output.contains("a=don't\"x"), "{output:?}");
+        assert!(!output.contains('\\'), "value was escaped: {output:?}");
+    }
+
+    #[test]
+    fn format_keeps_comment_between_implicit_fragment_siblings() {
+        let output = format_astro_template("<p>a</p>\n/* c */ <div />");
+
+        assert!(
+            output.contains("/* c */"),
+            "comment was dropped: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() > output.find("<p>").unwrap(),
+            "comment was hoisted above the first sibling: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() < output.find("<div />").unwrap(),
+            "comment sank below the following sibling: {output:?}"
+        );
+    }
+
+    #[test]
+    fn format_keeps_comment_before_an_implicit_fragment_element() {
+        let output = format_astro_template("<div />\n/* c */ <p>a</p>");
+
+        assert!(
+            output.contains("/* c */"),
+            "comment was dropped: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() > output.find("<div />").unwrap(),
+            "comment was hoisted above the first sibling: {output:?}"
+        );
+        assert!(
+            output.find("/* c */").unwrap() < output.find("<p>a</p>").unwrap(),
+            "comment sank below the following sibling: {output:?}"
+        );
+    }
+
+    #[test]
+    fn format_does_not_add_delimiters_to_an_implicit_fragment() {
+        let output = format_astro_template("<p>a</p>\n<div />");
+
+        assert!(!output.contains("<>"), "delimiters were added: {output:?}");
+    }
+
+    #[test]
+    fn format_keeps_comment_before_a_nested_explicit_fragment() {
+        let output = format_astro_template("cond && <div />\n/* keep */ <></>");
+
+        assert!(
+            output.contains("/* keep */"),
+            "comment was dropped: {output:?}"
+        );
+    }
+
+    #[test]
+    fn format_keeps_explicit_fragment_delimiters() {
+        let syntax = JsFileSource::tsx();
+        let src = "<><p>a</p><div /></>";
+        let tree = parse(src, syntax, JsParserOptions::default());
+        let output = crate::format_node(
+            JsFormatOptions::new(syntax).with_indent_style(IndentStyle::Space),
+            &tree.syntax(),
+            Vec::new(),
+        )
+        .unwrap()
+        .print()
+        .unwrap()
+        .as_code()
+        .to_string();
+
+        assert!(output.contains("<>"), "delimiters were lost: {output:?}");
+        assert!(output.contains("</>"), "delimiters were lost: {output:?}");
     }
 }

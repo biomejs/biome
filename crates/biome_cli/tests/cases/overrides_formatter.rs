@@ -1095,6 +1095,9 @@ fn overrides_json_formatting_options() {
                         "overrides.json"
                     ],
                     "json": {
+                        "parser": {
+                            "allowTrailingCommas": true
+                        },
                         "formatter": {
                             "enabled": true,
                             "bracketSpacing": false,

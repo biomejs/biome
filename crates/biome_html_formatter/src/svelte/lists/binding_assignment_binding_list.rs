@@ -15,21 +15,27 @@ impl FormatRule<SvelteBindingAssignmentBindingList> for FormatSvelteBindingAssig
         let mut join = f.join_nodes_with_space();
 
         for binding_assignment in node.elements() {
-            let node = binding_assignment.node()?;
             let separator = binding_assignment.trailing_separator()?;
 
-            join.entry(
-                node.syntax(),
-                &format_with(|f| {
-                    write!(f, [node.format()])?;
+            match binding_assignment.node() {
+                Ok(node) => join.entry(
+                    node.syntax(),
+                    &format_with(|f| {
+                        write!(f, [node.format()])?;
 
-                    if let Some(separator) = separator {
-                        write!(f, [separator.format()])?;
-                    }
+                        if let Some(separator) = separator {
+                            write!(f, [separator.format()])?;
+                        }
 
-                    Ok(())
-                }),
-            )
+                        Ok(())
+                    }),
+                ),
+                Err(error) => {
+                    let separator = separator.ok_or(error)?;
+                    let parent = separator.parent().ok_or(error)?;
+                    join.entry(&parent, &separator.format());
+                }
+            }
         }
 
         join.finish()

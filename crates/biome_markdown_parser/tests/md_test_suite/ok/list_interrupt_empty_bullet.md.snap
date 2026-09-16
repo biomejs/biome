@@ -16,8 +16,9 @@ Paragraph followed by empty plus bullet.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -46,9 +47,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..44
+0: MD_ROOT@0..44
   0: (empty)
-  1: MD_BLOCK_LIST@0..44
+  1: (empty)
+  2: MD_BLOCK_LIST@0..44
     0: MD_PARAGRAPH@0..43
       0: MD_INLINE_ITEM_LIST@0..43
         0: MD_TEXTUAL@0..40
@@ -61,6 +63,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@42..43 "\n" [] []
     1: MD_NEWLINE@43..44
       0: NEWLINE@43..44 "\n" [] []
-  2: EOF@44..44 "" [] []
+  3: EOF@44..44 "" [] []
 
 ```

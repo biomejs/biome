@@ -7,7 +7,6 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::static_value::StaticValue;
-use biome_rowan::AstNode;
 use biome_rule_options::use_aria_props_for_role::UseAriaPropsForRoleOptions;
 
 declare_lint_rule! {
@@ -73,10 +72,15 @@ impl Rule for UseAriaPropsForRole {
 
         let role_attribute = node.find_attribute_or_vue_binding("role")?;
         let role_attribute_name = role_attribute.as_static_value()?;
-        let role = AriaRole::from_roles(role_attribute_name.text().trim());
+        let role = AriaRole::from_roles(role_attribute_name.text().trim())?;
+        if role == AriaRole::Separator
+            && node.find_attribute_or_vue_binding("tabindex").is_none()
+        {
+            return None;
+        }
         let missing_aria_props: Vec<_> = role
-            .into_iter()
-            .flat_map(|role| role.required_attributes().iter())
+            .required_attributes()
+            .iter()
             .filter_map(|attribute| {
                 let attribute_name = attribute.as_str();
                 node.find_attribute_or_vue_binding(attribute_name)

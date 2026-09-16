@@ -3,14 +3,13 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_number;
 use crate::syntax::parse_number;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation,
-    parse_scss_interpolation_inner_expression, parse_scss_interpolation_prefix,
+    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_with_context,
 };
 use crate::syntax::selector::{PSEUDO_CLASS_NTH_SIGN_SET, parse_pseudo_class_nth_dimension_value};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_BOGUS, CSS_DIMENSION_VALUE, CSS_NTH_OFFSET, CSS_NUMBER_LITERAL, CSS_PSEUDO_CLASS_NTH,
     CSS_PSEUDO_CLASS_NTH_NUMBER, SCSS_INTERPOLATED_NTH_VALUE,
-    SCSS_INTERPOLATED_NTH_VALUE_PART_LIST, SCSS_INTERPOLATION,
+    SCSS_INTERPOLATED_NTH_VALUE_PART_LIST,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -215,26 +214,11 @@ fn is_at_adjacent_scss_pseudo_class_nth_value_part(p: &mut CssParser) -> bool {
 #[inline]
 fn parse_scss_pseudo_class_nth_value_part(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolation(p) {
-        parse_scss_interpolation_in_nth(p)
+        // Pseudo-nth lexing keeps the trailing `n` separate in `#{$value}n`.
+        parse_scss_interpolation_with_context(p, CssLexContext::PseudoNthSelector)
     } else if p.at(CSS_DIMENSION_VALUE) {
         parse_pseudo_class_nth_dimension_value(p)
     } else {
         parse_number(p, CssLexContext::PseudoNthSelector)
     }
-}
-
-/// Parses one interpolation inside an nth selector argument.
-///
-/// The closing `}` returns to pseudo-nth lexing so `#{$value}n` keeps the `n`
-/// token separate from identifiers.
-#[inline]
-fn parse_scss_interpolation_in_nth(p: &mut CssParser) -> ParsedSyntax {
-    let Some(m) = parse_scss_interpolation_prefix(p) else {
-        return Absent;
-    };
-
-    parse_scss_interpolation_inner_expression(p);
-    p.expect_with_context(T!['}'], CssLexContext::PseudoNthSelector);
-
-    Present(m.complete(p, SCSS_INTERPOLATION))
 }

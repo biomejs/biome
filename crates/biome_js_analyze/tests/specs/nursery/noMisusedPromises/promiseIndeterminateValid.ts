@@ -1,0 +1,17 @@
+/* should not generate diagnostics */
+
+declare const unknownValue: unknown;
+declare const anyValue: any;
+declare const poisoned: boolean | unknown;
+
+interface Cycle extends Cycle {}
+declare const cycle: Cycle;
+
+if (unknownValue) {}
+if (anyValue) {}
+if (poisoned) {}
+if (cycle) {}
+
+declare function acceptsCallback(callback: () => void): void;
+declare const unknownCallback: () => unknown;
+acceptsCallback(unknownCallback);

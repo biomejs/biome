@@ -71,8 +71,9 @@ Outer loose, inner tight:
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -813,9 +814,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..655
+0: MD_ROOT@0..655
   0: (empty)
-  1: MD_BLOCK_LIST@0..655
+  1: (empty)
+  2: MD_BLOCK_LIST@0..655
     0: MD_HEADER@0..13
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -1280,6 +1282,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@647..654 "Inner B" [] []
                         1: MD_TEXTUAL@654..655
                           0: MD_TEXTUAL_LITERAL@654..655 "\n" [] []
-  2: EOF@655..655 "" [] []
+  3: EOF@655..655 "" [] []
 
 ```

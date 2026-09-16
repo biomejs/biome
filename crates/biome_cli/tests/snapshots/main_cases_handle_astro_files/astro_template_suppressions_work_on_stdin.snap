@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "a11y": { "noAccessKey": "error" },
+      "suspicious": { "noDebugger": "error" },
+      "nursery": { "noAstroSetHtmlDirective": "error" }
+    }
+  }
+}
+```
+
+# Input messages
+
+```block
+<div accesskey="a"></div>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<div accesskey="b"></div>
+
+```
+
+# Emitted Messages
+
+```block
+<div ></div>
+{/* biome-ignore lint/a11y/noAccessKey: intentional shortcut */}
+<div accesskey="b"></div>
+
+```

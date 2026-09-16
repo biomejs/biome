@@ -5,67 +5,72 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-Prints information for debugging.
+Prints a troubleshooting report with CLI, platform, environment, configuration, workspace, and
+daemon server information.
 
 Usage: rage [--daemon-logs] [--formatter] [--linter]
 
-Global options applied to all commands
-        --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
-                              text, "force" forces the formatting of markup using ANSI even if the
-                              console output is determined to be incompatible
-        --use-server          Connect to a running instance of the Biome daemon server.
-        --verbose             Print additional diagnostics, and some diagnostics show more
-                              information. Also, print out what files were processed and which ones
-                              were modified.
-        --config-path=PATH    Set the file path to the configuration file, or the directory path to
-                              find `biome.json` or `biome.jsonc`. If used, it disables the default
-                              configuration file resolution.
+These options are available to many commands and control general CLI behavior, diagnostics, and
+output.
+        --colors=<off|force>  Controls ANSI styling: `off` disables it, while `force` enables it
+                              even when the output does not appear to support ANSI escapes.
+        --use-server          Connects to a running instance of the Biome daemon server.
+        --verbose             Shows additional diagnostic details and lists the files that were
+                              processed or modified.
+        --config-path=PATH    Sets the path to the configuration file or the directory where Biome
+                              should search for `biome.json` or `biome.jsonc`. This option disables
+                              the default configuration file resolution.
                               [env:BIOME_CONFIG_PATH: N/A]
-        --max-diagnostics=<none|<NUMBER>>  Cap the amount of diagnostics displayed. When `none` is
-                              provided, the limit is lifted.
+        --max-diagnostics=<none|NUMBER>  Limits the number of diagnostics displayed. Use `none` to
+                              remove the limit.
                               [default: 20]
-        --skip-parse-errors   Skip over files containing syntax errors instead of emitting an error
+        --skip-parse-errors   Skips files containing syntax errors instead of emitting an error
                               diagnostic.
-        --no-errors-on-unmatched  Silence errors that would be emitted in case no files were
-                              processed during the execution of the command.
-        --error-on-warnings   Tell Biome to exit with an error code if some diagnostics emit
-                              warnings.
-  [--reporter=<default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
+        --no-errors-on-unmatched  Does not emit an error when no files are processed.
+        --error-on-warnings   Exits with an error status if any warning diagnostics are emitted.
+  [--reporter=<default|concise|summary|json|json-pretty|github|gitlab|junit|checkstyle|rdjson|sarif>
   ] [--reporter-file=PATH]
         --reporter=
-    <default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise>
-        --reporter-file=PATH
+    <default|concise|summary|json|json-pretty|github|gitlab|junit|checkstyle|rdjson|sarif>  Changes
+                              how diagnostics and the run summary are written.
+                              [default: default]
+        --reporter-file=PATH  Writes the associated reporter's output to `PATH`. Without
+                              `--reporter`, it writes the default reporter's output.
 
-        --diagnostic-level=<info|warn|error>  The level of diagnostics to show. In order, from the
-                              lowest to the most important: info, warn, error. Passing
-                              `--diagnostic-level=error` will cause Biome to print only diagnostics
-                              that contain only errors.
+        --diagnostic-level=<info|warn|error>  Sets the minimum diagnostic severity to display:
+                              `info`, `warn`, or `error`. For example, `--diagnostic-level=error`
+                              displays only error-level diagnostics.
                               [default: info]
 
-Options to control logging (CLI and Daemon)
-        --log-file=STRING     Optional path/file to redirect log messages to. This option is
-                              applicable only to the CLI.
-                              If omitted, logs are printed to stdout.
+Options that control internal CLI and daemon server logging.
+        --log-file=PATH       For file-processing commands, writes internal CLI logs to this file
+                              instead of standard output.
                               [env:BIOME_LOG_FILE: N/A]
-        --log-prefix-name=STRING  [env:BIOME_LOG_PREFIX_NAME: N/A]
+        --log-prefix-name=STRING  When starting the daemon server, sets the file name prefix used
+                              for rotated log files.
+                              [env:BIOME_LOG_PREFIX_NAME: N/A]
                               [default: server.log]
-        --log-path=PATH       Allows changing the folder where logs are stored. This option is
-                              applicable only to the daemon.
+        --log-path=PATH       When starting the daemon server, sets the directory where log files
+                              are stored.
                               [env:BIOME_LOG_PATH: N/A]
                               [default: <BIOME_DIR>/biome-logs]
-        --log-level=<none|debug|info|warn|error>  The level of logging. In order, from the most
-                              verbose to the least verbose: debug, info, warn, error.
-                              The value `none` won't show any logging.
+        --log-level=<none|tracing|debug|info|warn|error>  For file-processing commands, sets the
+                              internal CLI logging level to `tracing`, `debug`, `info`, `warn`,
+                              `error`, or `none`.
                               [env:BIOME_LOG_LEVEL: N/A]
                               [default: none]
-        --log-kind=<pretty|compact|json>  What the log should look like.
+        --log-kind=<pretty|compact|json>  For file-processing commands, selects the internal CLI log
+                              format: `pretty`, `compact`, or `json`.
                               [env:BIOME_LOG_KIND: N/A]
                               [default: pretty]
 
 Available options:
-        --daemon-logs         Prints the Biome daemon server logs
-        --formatter           Prints the formatter options applied
-        --linter              Prints the linter options applied
+        --daemon-logs         Includes the latest daemon server log. If the CLI is not connected to
+                              a daemon server, this flag also discovers running Biome daemon server
+                              instances.
+        --formatter           Includes the formatter settings loaded from the Biome configuration.
+        --linter              Includes the linter settings and enabled lint rules loaded from the
+                              Biome configuration.
     -h, --help                Prints help information
 
 ```

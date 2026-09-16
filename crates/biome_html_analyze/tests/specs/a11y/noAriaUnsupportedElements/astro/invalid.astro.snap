@@ -4,9 +4,9 @@ expression: invalid.astro
 ---
 # Input
 ```astro
+---
+---
 <!-- should generate diagnostics -->
----
----
 
 <meta charset="UTF-8" aria-hidden="false" />
 <meta charset="UTF-8" role="meta" />
@@ -23,7 +23,7 @@ invalid.astro:5:1 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━�
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    3 │ ---
+    3 │ <!-- should generate diagnostics -->
     4 │ 
   > 5 │ <meta charset="UTF-8" aria-hidden="false" />
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

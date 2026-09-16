@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/comment/dedented.yaml
+---
+
+# Input
+
+```yaml
+parent:
+  one: 1
+  # sibling of one
+valueless:
+  # in the value slot
+empty: # on the key line
+  # below it
+
+  # blank kept above
+seq:
+  - deep: 1
+    # sibling of deep
+  # sibling of the item
+last: 1
+
+```
+
+
+# Formatted
+
+```yaml
+parent:
+  one: 1
+  # sibling of one
+valueless:
+  # in the value slot
+empty: # on the key line
+  # below it
+
+  # blank kept above
+seq:
+  - deep: 1
+    # sibling of deep
+  # sibling of the item
+last: 1
+
+```

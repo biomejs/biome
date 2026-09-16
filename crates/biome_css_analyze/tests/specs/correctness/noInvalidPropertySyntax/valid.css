@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+
+@property --universal {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --components {
+  syntax: "<length> | auto";
+  inherits: true;
+  initial-value: 0px;
+}

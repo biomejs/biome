@@ -1,0 +1,39 @@
+.canonical {
+  background:
+        /////// foo
+        // bar
+
+    radial-gradient(circle, #000, transparent);
+}
+
+.ugly {
+    background:
+        /////// foo
+        // bar
+
+        radial-gradient(circle, #000, transparent);
+}
+
+.different-columns {
+  color:
+      // six spaces
+        // eight spaces
+      red;
+}
+
+.same-line {
+  color: // same line
+    red;
+}
+
+.mixed {
+  border: /* block */
+        // line
+      solid red;
+}
+
+.suppression {
+  color:
+        // biome-ignore format: reason
+      red;
+}

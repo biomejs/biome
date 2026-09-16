@@ -1,0 +1,13 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: headers_good.md
+---
+# Input
+```md
+# Heading 1
+
+## Heading 2
+
+## Heading 3
+
+```

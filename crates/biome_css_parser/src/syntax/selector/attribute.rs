@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
     expected_any_attribute_matcher_name, expected_any_attribute_modifier, expected_identifier,
@@ -5,8 +6,8 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::scss::{
     is_at_scss_interpolated_attribute_identifier, is_at_scss_interpolated_string,
-    parse_scss_interpolated_attribute_modifier, parse_scss_interpolated_identifier,
-    parse_scss_interpolated_string,
+    parse_scss_interpolated_attribute_modifier, parse_scss_interpolated_attribute_name,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_string,
 };
 use crate::syntax::selector::{is_nth_at_namespace, parse_namespace, selector_lex_context};
 use crate::syntax::{
@@ -93,7 +94,7 @@ fn parse_attribute_name_identifier(p: &mut CssParser) -> ParsedSyntax {
         // `[data-#{$name}=x]` needs an interpolated attribute name.
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
-            parse_scss_interpolated_identifier,
+            parse_scss_interpolated_attribute_name,
             |p, marker| {
                 scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p))
             },
@@ -210,9 +211,11 @@ fn parse_attribute_matcher_value(p: &mut CssParser) -> ParsedSyntax {
             .ok();
     } else if is_at_scss_interpolated_string(p) {
         CssSyntaxFeatures::Scss
-            .parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, marker| {
-                scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p))
-            })
+            .parse_exclusive_syntax(
+                p,
+                |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+                |p, marker| scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p)),
+            )
             .ok();
     } else if is_at_string(p) {
         parse_string(p).ok();

@@ -1,0 +1,303 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<math><semantics><annotation encoding="x">R^{2x}</annotation></semantics></math>
+<svg><g>{x}</g></svg>
+<div>{x}</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@1..5 "math" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@6..7 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_UNKNOWN_TAG@7..16 "semantics" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@16..17 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_UNKNOWN_TAG@18..29 "annotation" [] [Whitespace(" ")],
+                                },
+                                attributes: HtmlAttributeList [
+                                    HtmlAttribute {
+                                        name: HtmlAttributeName {
+                                            value_token: HTML_LITERAL@29..37 "encoding" [] [],
+                                        },
+                                        initializer: HtmlAttributeInitializerClause {
+                                            eq_token: EQ@37..38 "=" [] [],
+                                            value: HtmlString {
+                                                value_token: HTML_STRING_LITERAL@38..41 "\"x\"" [] [],
+                                            },
+                                        },
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@41..42 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@42..44 "R^" [] [],
+                                },
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@44..45 "{" [] [],
+                                },
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@45..48 "2x}" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@48..49 "<" [] [],
+                                slash_token: SLASH@49..50 "/" [] [],
+                                name: HtmlTagName {
+                                    value_token: HTML_UNKNOWN_TAG@50..60 "annotation" [] [],
+                                },
+                                r_angle_token: R_ANGLE@60..61 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@61..62 "<" [] [],
+                        slash_token: SLASH@62..63 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: HTML_UNKNOWN_TAG@63..72 "semantics" [] [],
+                        },
+                        r_angle_token: R_ANGLE@72..73 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@73..74 "<" [] [],
+                slash_token: SLASH@74..75 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@75..79 "math" [] [],
+                },
+                r_angle_token: R_ANGLE@79..80 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@80..82 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@82..85 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@85..86 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@86..87 "<" [] [],
+                        name: HtmlTagName {
+                            value_token: G_KW@87..88 "g" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@88..89 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@89..90 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@90..91 "x" [] [],
+                            },
+                            r_curly_token: R_CURLY@91..92 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@92..93 "<" [] [],
+                        slash_token: SLASH@93..94 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: G_KW@94..95 "g" [] [],
+                        },
+                        r_angle_token: R_ANGLE@95..96 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@96..97 "<" [] [],
+                slash_token: SLASH@97..98 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@98..101 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@101..102 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@102..104 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@104..107 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@107..108 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@108..109 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@109..110 "x" [] [],
+                    },
+                    r_curly_token: R_CURLY@110..111 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@111..112 "<" [] [],
+                slash_token: SLASH@112..113 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@113..116 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@116..117 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..118
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..117
+    0: HTML_ELEMENT@0..80
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_UNKNOWN_TAG@1..5 "math" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..73
+        0: HTML_ELEMENT@6..73
+          0: HTML_OPENING_ELEMENT@6..17
+            0: L_ANGLE@6..7 "<" [] []
+            1: HTML_TAG_NAME@7..16
+              0: HTML_UNKNOWN_TAG@7..16 "semantics" [] []
+            2: HTML_ATTRIBUTE_LIST@16..16
+            3: R_ANGLE@16..17 ">" [] []
+          1: HTML_ELEMENT_LIST@17..61
+            0: HTML_ELEMENT@17..61
+              0: HTML_OPENING_ELEMENT@17..42
+                0: L_ANGLE@17..18 "<" [] []
+                1: HTML_TAG_NAME@18..29
+                  0: HTML_UNKNOWN_TAG@18..29 "annotation" [] [Whitespace(" ")]
+                2: HTML_ATTRIBUTE_LIST@29..41
+                  0: HTML_ATTRIBUTE@29..41
+                    0: HTML_ATTRIBUTE_NAME@29..37
+                      0: HTML_LITERAL@29..37 "encoding" [] []
+                    1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@37..41
+                      0: EQ@37..38 "=" [] []
+                      1: HTML_STRING@38..41
+                        0: HTML_STRING_LITERAL@38..41 "\"x\"" [] []
+                3: R_ANGLE@41..42 ">" [] []
+              1: HTML_ELEMENT_LIST@42..48
+                0: HTML_CONTENT@42..44
+                  0: HTML_LITERAL@42..44 "R^" [] []
+                1: HTML_CONTENT@44..45
+                  0: HTML_LITERAL@44..45 "{" [] []
+                2: HTML_CONTENT@45..48
+                  0: HTML_LITERAL@45..48 "2x}" [] []
+              2: HTML_CLOSING_ELEMENT@48..61
+                0: L_ANGLE@48..49 "<" [] []
+                1: SLASH@49..50 "/" [] []
+                2: HTML_TAG_NAME@50..60
+                  0: HTML_UNKNOWN_TAG@50..60 "annotation" [] []
+                3: R_ANGLE@60..61 ">" [] []
+          2: HTML_CLOSING_ELEMENT@61..73
+            0: L_ANGLE@61..62 "<" [] []
+            1: SLASH@62..63 "/" [] []
+            2: HTML_TAG_NAME@63..72
+              0: HTML_UNKNOWN_TAG@63..72 "semantics" [] []
+            3: R_ANGLE@72..73 ">" [] []
+      2: HTML_CLOSING_ELEMENT@73..80
+        0: L_ANGLE@73..74 "<" [] []
+        1: SLASH@74..75 "/" [] []
+        2: HTML_TAG_NAME@75..79
+          0: HTML_UNKNOWN_TAG@75..79 "math" [] []
+        3: R_ANGLE@79..80 ">" [] []
+    1: HTML_ELEMENT@80..102
+      0: HTML_OPENING_ELEMENT@80..86
+        0: L_ANGLE@80..82 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@82..85
+          0: SVG_KW@82..85 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@85..85
+        3: R_ANGLE@85..86 ">" [] []
+      1: HTML_ELEMENT_LIST@86..96
+        0: HTML_ELEMENT@86..96
+          0: HTML_OPENING_ELEMENT@86..89
+            0: L_ANGLE@86..87 "<" [] []
+            1: HTML_TAG_NAME@87..88
+              0: G_KW@87..88 "g" [] []
+            2: HTML_ATTRIBUTE_LIST@88..88
+            3: R_ANGLE@88..89 ">" [] []
+          1: HTML_ELEMENT_LIST@89..92
+            0: HTML_SINGLE_TEXT_EXPRESSION@89..92
+              0: L_CURLY@89..90 "{" [] []
+              1: HTML_TEXT_EXPRESSION@90..91
+                0: HTML_LITERAL@90..91 "x" [] []
+              2: R_CURLY@91..92 "}" [] []
+          2: HTML_CLOSING_ELEMENT@92..96
+            0: L_ANGLE@92..93 "<" [] []
+            1: SLASH@93..94 "/" [] []
+            2: HTML_TAG_NAME@94..95
+              0: G_KW@94..95 "g" [] []
+            3: R_ANGLE@95..96 ">" [] []
+      2: HTML_CLOSING_ELEMENT@96..102
+        0: L_ANGLE@96..97 "<" [] []
+        1: SLASH@97..98 "/" [] []
+        2: HTML_TAG_NAME@98..101
+          0: SVG_KW@98..101 "svg" [] []
+        3: R_ANGLE@101..102 ">" [] []
+    2: HTML_ELEMENT@102..117
+      0: HTML_OPENING_ELEMENT@102..108
+        0: L_ANGLE@102..104 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@104..107
+          0: DIV_KW@104..107 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@107..107
+        3: R_ANGLE@107..108 ">" [] []
+      1: HTML_ELEMENT_LIST@108..111
+        0: HTML_SINGLE_TEXT_EXPRESSION@108..111
+          0: L_CURLY@108..109 "{" [] []
+          1: HTML_TEXT_EXPRESSION@109..110
+            0: HTML_LITERAL@109..110 "x" [] []
+          2: R_CURLY@110..111 "}" [] []
+      2: HTML_CLOSING_ELEMENT@111..117
+        0: L_ANGLE@111..112 "<" [] []
+        1: SLASH@112..113 "/" [] []
+        2: HTML_TAG_NAME@113..116
+          0: DIV_KW@113..116 "div" [] []
+        3: R_ANGLE@116..117 ">" [] []
+  5: EOF@117..118 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,20 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `test.jsx`
+
+```jsx
+<div>
+	text {/* first */}
+	{/* ok */}
+	tail {/* second */} more
+</div>;
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

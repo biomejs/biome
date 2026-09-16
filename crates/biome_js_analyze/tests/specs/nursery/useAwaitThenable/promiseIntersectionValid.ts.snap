@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promiseIntersectionValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+function intersectionPromise(): Promise<number> & { cancel: () => void } {
+    const promise = Promise.resolve(1) as Promise<number> & {
+        cancel: () => void;
+    };
+    promise.cancel = () => {};
+    return promise;
+}
+
+export async function probe(): Promise<number> {
+    return await intersectionPromise();
+}
+
+```

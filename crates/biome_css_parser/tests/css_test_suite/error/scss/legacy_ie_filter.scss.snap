@@ -1,0 +1,447 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.legacy {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    -ms-filter: alpha(opacity=40);
+}
+
+@supports (filter: alpha(opacity=40)) {
+    .legacy {
+        color: blue;
+    }
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..8 "legacy" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@8..9 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@9..20 "filter" [Newline("\n"), Whitespace("    ")] [],
+                                    },
+                                    COLON@20..22 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@22..28 "progid" [] [],
+                                                    },
+                                                    CssBogusPropertyValue {
+                                                        items: [
+                                                            COLON@28..29 ":" [] [],
+                                                            IDENT@29..45 "DXImageTransform" [] [],
+                                                            DOT@45..46 "." [] [],
+                                                            IDENT@46..55 "Microsoft" [] [],
+                                                            DOT@55..56 "." [] [],
+                                                            IDENT@56..61 "Alpha" [] [],
+                                                            L_PAREN@61..62 "(" [] [],
+                                                            IDENT@62..69 "Opacity" [] [],
+                                                            EQ@69..70 "=" [] [],
+                                                            CSS_NUMBER_LITERAL@70..72 "40" [] [],
+                                                            R_PAREN@72..73 ")" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@73..74 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@74..89 "-ms-filter" [Newline("\n"), Whitespace("    ")] [],
+                                    },
+                                    COLON@89..91 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssBogusSupportsCondition {
+                                                        items: [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@91..96 "alpha" [] [],
+                                                            },
+                                                            L_PAREN@96..97 "(" [] [],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    CssIdentifier {
+                                                                                        value_token: IDENT@97..104 "opacity" [] [],
+                                                                                    },
+                                                                                    CssBogusPropertyValue {
+                                                                                        items: [
+                                                                                            EQ@104..105 "=" [] [],
+                                                                                            CSS_NUMBER_LITERAL@105..107 "40" [] [],
+                                                                                        ],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            R_PAREN@107..108 ")" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@108..109 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@109..111 "}" [Newline("\n")] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@111..114 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@114..123 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsFeatureDeclaration {
+                        l_paren_token: L_PAREN@123..124 "(" [] [],
+                        declaration: CssDeclaration {
+                            property: CssBogusProperty {
+                                items: [
+                                    CssIdentifier {
+                                        value_token: IDENT@124..130 "filter" [] [],
+                                    },
+                                    COLON@130..132 ":" [] [Whitespace(" ")],
+                                    CssBogus {
+                                        items: [
+                                            CssBogus {
+                                                items: [
+                                                    CssBogusSupportsCondition {
+                                                        items: [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@132..137 "alpha" [] [],
+                                                            },
+                                                            L_PAREN@137..138 "(" [] [],
+                                                            CssBogus {
+                                                                items: [
+                                                                    CssBogus {
+                                                                        items: [
+                                                                            CssBogus {
+                                                                                items: [
+                                                                                    CssIdentifier {
+                                                                                        value_token: IDENT@138..145 "opacity" [] [],
+                                                                                    },
+                                                                                    CssBogusPropertyValue {
+                                                                                        items: [
+                                                                                            EQ@145..146 "=" [] [],
+                                                                                            CSS_NUMBER_LITERAL@146..148 "40" [] [],
+                                                                                        ],
+                                                                                    },
+                                                                                ],
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            R_PAREN@148..149 ")" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        r_paren_token: R_PAREN@149..151 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@151..152 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@152..158 "." [Newline("\n"), Whitespace("    ")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@158..165 "legacy" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@165..166 "{" [] [],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@166..180 "color" [Newline("\n"), Whitespace("        ")] [],
+                                                },
+                                                colon_token: COLON@180..182 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@182..186 "blue" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@186..187 ";" [] [],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@187..193 "}" [Newline("\n"), Whitespace("    ")] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@193..195 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@195..196 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..196
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..195
+    0: CSS_QUALIFIED_RULE@0..111
+      0: CSS_SELECTOR_LIST@0..8
+        0: CSS_COMPOUND_SELECTOR@0..8
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..8
+            0: CSS_CLASS_SELECTOR@0..8
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..8
+                0: IDENT@1..8 "legacy" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@8..111
+        0: L_CURLY@8..9 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@9..109
+          0: CSS_DECLARATION_WITH_SEMICOLON@9..74
+            0: CSS_DECLARATION@9..73
+              0: CSS_BOGUS_PROPERTY@9..73
+                0: CSS_IDENTIFIER@9..20
+                  0: IDENT@9..20 "filter" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@20..22 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@22..73
+                  0: CSS_BOGUS@22..73
+                    0: CSS_IDENTIFIER@22..28
+                      0: IDENT@22..28 "progid" [] []
+                    1: CSS_BOGUS_PROPERTY_VALUE@28..73
+                      0: COLON@28..29 ":" [] []
+                      1: IDENT@29..45 "DXImageTransform" [] []
+                      2: DOT@45..46 "." [] []
+                      3: IDENT@46..55 "Microsoft" [] []
+                      4: DOT@55..56 "." [] []
+                      5: IDENT@56..61 "Alpha" [] []
+                      6: L_PAREN@61..62 "(" [] []
+                      7: IDENT@62..69 "Opacity" [] []
+                      8: EQ@69..70 "=" [] []
+                      9: CSS_NUMBER_LITERAL@70..72 "40" [] []
+                      10: R_PAREN@72..73 ")" [] []
+              1: (empty)
+            1: SEMICOLON@73..74 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@74..109
+            0: CSS_DECLARATION@74..108
+              0: CSS_BOGUS_PROPERTY@74..108
+                0: CSS_IDENTIFIER@74..89
+                  0: IDENT@74..89 "-ms-filter" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@89..91 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@91..108
+                  0: CSS_BOGUS@91..108
+                    0: CSS_BOGUS_SUPPORTS_CONDITION@91..108
+                      0: CSS_IDENTIFIER@91..96
+                        0: IDENT@91..96 "alpha" [] []
+                      1: L_PAREN@96..97 "(" [] []
+                      2: CSS_BOGUS@97..107
+                        0: CSS_BOGUS@97..107
+                          0: CSS_BOGUS@97..107
+                            0: CSS_IDENTIFIER@97..104
+                              0: IDENT@97..104 "opacity" [] []
+                            1: CSS_BOGUS_PROPERTY_VALUE@104..107
+                              0: EQ@104..105 "=" [] []
+                              1: CSS_NUMBER_LITERAL@105..107 "40" [] []
+                      3: R_PAREN@107..108 ")" [] []
+              1: (empty)
+            1: SEMICOLON@108..109 ";" [] []
+        2: R_CURLY@109..111 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@111..195
+      0: AT@111..114 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@114..195
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@114..151
+          0: SUPPORTS_KW@114..123 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_FEATURE_DECLARATION@123..151
+            0: L_PAREN@123..124 "(" [] []
+            1: CSS_DECLARATION@124..149
+              0: CSS_BOGUS_PROPERTY@124..149
+                0: CSS_IDENTIFIER@124..130
+                  0: IDENT@124..130 "filter" [] []
+                1: COLON@130..132 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@132..149
+                  0: CSS_BOGUS@132..149
+                    0: CSS_BOGUS_SUPPORTS_CONDITION@132..149
+                      0: CSS_IDENTIFIER@132..137
+                        0: IDENT@132..137 "alpha" [] []
+                      1: L_PAREN@137..138 "(" [] []
+                      2: CSS_BOGUS@138..148
+                        0: CSS_BOGUS@138..148
+                          0: CSS_BOGUS@138..148
+                            0: CSS_IDENTIFIER@138..145
+                              0: IDENT@138..145 "opacity" [] []
+                            1: CSS_BOGUS_PROPERTY_VALUE@145..148
+                              0: EQ@145..146 "=" [] []
+                              1: CSS_NUMBER_LITERAL@146..148 "40" [] []
+                      3: R_PAREN@148..149 ")" [] []
+              1: (empty)
+            2: R_PAREN@149..151 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@151..195
+          0: L_CURLY@151..152 "{" [] []
+          1: CSS_RULE_LIST@152..193
+            0: CSS_QUALIFIED_RULE@152..193
+              0: CSS_SELECTOR_LIST@152..165
+                0: CSS_COMPOUND_SELECTOR@152..165
+                  0: CSS_NESTED_SELECTOR_LIST@152..152
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@152..165
+                    0: CSS_CLASS_SELECTOR@152..165
+                      0: DOT@152..158 "." [Newline("\n"), Whitespace("    ")] []
+                      1: CSS_CUSTOM_IDENTIFIER@158..165
+                        0: IDENT@158..165 "legacy" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@165..193
+                0: L_CURLY@165..166 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@166..187
+                  0: CSS_DECLARATION_WITH_SEMICOLON@166..187
+                    0: CSS_DECLARATION@166..186
+                      0: CSS_GENERIC_PROPERTY@166..186
+                        0: CSS_IDENTIFIER@166..180
+                          0: IDENT@166..180 "color" [Newline("\n"), Whitespace("        ")] []
+                        1: COLON@180..182 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@182..186
+                          0: SCSS_EXPRESSION_ITEM_LIST@182..186
+                            0: CSS_IDENTIFIER@182..186
+                              0: IDENT@182..186 "blue" [] []
+                      1: (empty)
+                    1: SEMICOLON@186..187 ";" [] []
+                2: R_CURLY@187..193 "}" [Newline("\n"), Whitespace("    ")] []
+          2: R_CURLY@193..195 "}" [Newline("\n")] []
+  2: EOF@195..196 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+legacy_ie_filter.scss:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found ':DXImageTransform.Microsoft.Alpha(Opacity=40)'.
+  
+    1 │ .legacy {
+  > 2 │     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │     -ms-filter: alpha(opacity=40);
+    4 │ }
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .legacy {
+  > 2 │     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │     -ms-filter: alpha(opacity=40);
+    4 │ }
+  
+legacy_ie_filter.scss:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '=40'.
+  
+    1 │ .legacy {
+    2 │     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  > 3 │     -ms-filter: alpha(opacity=40);
+      │                              ^^^
+    4 │ }
+    5 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .legacy {
+    2 │     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  > 3 │     -ms-filter: alpha(opacity=40);
+      │                              ^^^
+    4 │ }
+    5 │ 
+  
+legacy_ie_filter.scss:6:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '=40'.
+  
+    4 │ }
+    5 │ 
+  > 6 │ @supports (filter: alpha(opacity=40)) {
+      │                                 ^^^
+    7 │     .legacy {
+    8 │         color: blue;
+  
+  i Expected a SCSS expression here.
+  
+    4 │ }
+    5 │ 
+  > 6 │ @supports (filter: alpha(opacity=40)) {
+      │                                 ^^^
+    7 │     .legacy {
+    8 │         color: blue;
+  
+```

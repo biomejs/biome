@@ -94,7 +94,7 @@ pub struct Instruction<L: Language> {
 }
 
 /// The different types of supported [Instruction]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum InstructionKind {
     /// Indicates the [SyntaxNode] associated with this
     /// instruction is to be evaluated at this point in the program
@@ -116,13 +116,13 @@ pub enum InstructionKind {
     Return,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct ExceptionHandler {
     pub kind: ExceptionHandlerKind,
     pub target: BlockId,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum ExceptionHandlerKind {
     Catch,
     Finally,

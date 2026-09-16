@@ -23,7 +23,7 @@ jobs:
     if: ${{ github.actor != 'autofix-ci[bot]' }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
@@ -52,7 +52,7 @@ jobs:
         run: |
           cargo fmt --all
 
-      - uses: tombi-toml/setup-tombi@e23e1d4c5044e8c51c41ec19a5c607ab5a83cabd # v1.1.7
+      - uses: tombi-toml/setup-tombi@0ca8607861bce3508ba79339c7c47acb40a334e1 # v1.5.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -18,7 +18,7 @@ info: yaml/block_sequence/simple_block_sequence.yaml
 
 ```yaml
 - 10
-- '20'
+- "20"
 - "30"
 - hello
 

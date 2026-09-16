@@ -1,0 +1,6 @@
+@custom-media --all all;
+@custom-media --screen-and-color screen and (color);
+@custom-media --modern (color), (hover);
+@custom-media --mobile (max-width: 768px);
+@custom-media --true true;
+@custom-media --false false;

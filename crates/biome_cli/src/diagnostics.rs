@@ -296,7 +296,7 @@ impl CliAdvice {
 impl Advices for CliAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         let command_name = command_name();
-        let help_sub_command = format!("{} {} --help", command_name, &self.sub_command);
+        let help_sub_command = format!("{} {} --help", command_name, self.sub_command);
         visitor.record_log(
             LogCategory::Info,
             &markup! { "Type the following command for more information" },

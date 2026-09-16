@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-undeclared-global.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+</script>
+
+<template>
+  <button @click="window = {}">Break</button>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-undeclared-global.vue:6:19 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    5 │ <template>
+  > 6 │   <button @click="window = {}">Break</button>
+      │                   ^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```

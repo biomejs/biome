@@ -20,6 +20,13 @@ expression: snapshot
 
 .button-#{$state} {}
 
+.#{$block}--#{$modifier} {}
+.-#{$name} {}
+
+.component {
+  &--#{$state} {}
+}
+
 ```
 
 
@@ -374,17 +381,198 @@ CssRoot {
                 r_curly_token: R_CURLY@190..191 "}" [] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                DOT@191..194 "." [Newline("\n"), Newline("\n")] [],
+                                CssBogusSupportsCondition {
+                                    items: [
+                                        ScssInterpolatedIdentifierPartList [
+                                            ScssInterpolation {
+                                                hash_token: HASH@194..195 "#" [] [],
+                                                l_curly_token: L_CURLY@195..196 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@196..197 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@197..202 "block" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@202..203 "}" [] [],
+                                            },
+                                            ScssInterpolatedIdentifierHyphen {
+                                                minus_token: MINUS@203..204 "-" [] [],
+                                            },
+                                            ScssInterpolatedIdentifierHyphen {
+                                                minus_token: MINUS@204..205 "-" [] [],
+                                            },
+                                            ScssInterpolation {
+                                                hash_token: HASH@205..206 "#" [] [],
+                                                l_curly_token: L_CURLY@206..207 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@207..208 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@208..216 "modifier" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@216..218 "}" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@218..219 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@219..220 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssBogusSubSelector {
+                            items: [
+                                DOT@220..222 "." [Newline("\n")] [],
+                                CssBogusSupportsCondition {
+                                    items: [
+                                        ScssInterpolatedIdentifierPartList [
+                                            ScssInterpolatedIdentifierHyphen {
+                                                minus_token: MINUS@222..223 "-" [] [],
+                                            },
+                                            ScssInterpolation {
+                                                hash_token: HASH@223..224 "#" [] [],
+                                                l_curly_token: L_CURLY@224..225 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@225..226 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@226..230 "name" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                r_curly_token: R_CURLY@230..232 "}" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@232..233 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@233..234 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@234..237 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@237..247 "component" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@247..248 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssNestedQualifiedRule {
+                        prelude: CssRelativeSelectorList [
+                            CssRelativeSelector {
+                                combinator: missing (optional),
+                                selector: CssBogusSelector {
+                                    items: [
+                                        CssNestedSelectorList [
+                                            CssNestedSelector {
+                                                amp_token: AMP@248..252 "&" [Newline("\n"), Whitespace("  ")] [],
+                                            },
+                                        ],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        ScssInterpolatedIdentifierPartList [
+                                                            ScssInterpolatedIdentifierHyphen {
+                                                                minus_token: MINUS@252..253 "-" [] [],
+                                                            },
+                                                            ScssInterpolatedIdentifierHyphen {
+                                                                minus_token: MINUS@253..254 "-" [] [],
+                                                            },
+                                                            ScssInterpolation {
+                                                                hash_token: HASH@254..255 "#" [] [],
+                                                                l_curly_token: L_CURLY@255..256 "{" [] [],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        ScssVariable {
+                                                                            dollar_token: DOLLAR@256..257 "$" [] [],
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@257..262 "state" [] [],
+                                                                            },
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_curly_token: R_CURLY@262..264 "}" [] [Whitespace(" ")],
+                                                            },
+                                                        ],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        CssSubSelectorList [],
+                                    ],
+                                },
+                            },
+                        ],
+                        block: CssDeclarationOrRuleBlock {
+                            l_curly_token: L_CURLY@264..265 "{" [] [],
+                            items: CssDeclarationOrRuleList [],
+                            r_curly_token: R_CURLY@265..266 "}" [] [],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@266..268 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@191..192 "" [Newline("\n")] [],
+    eof_token: EOF@268..269 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..192
+0: CSS_ROOT@0..269
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..191
+  1: CSS_ROOT_ITEM_LIST@0..268
     0: CSS_QUALIFIED_RULE@0..36
       0: CSS_SELECTOR_LIST@0..34
         0: CSS_COMPOUND_SELECTOR@0..34
@@ -587,7 +775,115 @@ CssRoot {
         0: L_CURLY@189..190 "{" [] []
         1: CSS_DECLARATION_OR_RULE_LIST@190..190
         2: R_CURLY@190..191 "}" [] []
-  2: EOF@191..192 "" [Newline("\n")] []
+    7: CSS_QUALIFIED_RULE@191..220
+      0: CSS_SELECTOR_LIST@191..218
+        0: CSS_COMPOUND_SELECTOR@191..218
+          0: CSS_NESTED_SELECTOR_LIST@191..191
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@191..218
+            0: CSS_BOGUS_SUB_SELECTOR@191..218
+              0: DOT@191..194 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_BOGUS_SUPPORTS_CONDITION@194..218
+                0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@194..218
+                  0: SCSS_INTERPOLATION@194..203
+                    0: HASH@194..195 "#" [] []
+                    1: L_CURLY@195..196 "{" [] []
+                    2: SCSS_EXPRESSION@196..202
+                      0: SCSS_EXPRESSION_ITEM_LIST@196..202
+                        0: SCSS_VARIABLE@196..202
+                          0: DOLLAR@196..197 "$" [] []
+                          1: CSS_IDENTIFIER@197..202
+                            0: IDENT@197..202 "block" [] []
+                    3: R_CURLY@202..203 "}" [] []
+                  1: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@203..204
+                    0: MINUS@203..204 "-" [] []
+                  2: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@204..205
+                    0: MINUS@204..205 "-" [] []
+                  3: SCSS_INTERPOLATION@205..218
+                    0: HASH@205..206 "#" [] []
+                    1: L_CURLY@206..207 "{" [] []
+                    2: SCSS_EXPRESSION@207..216
+                      0: SCSS_EXPRESSION_ITEM_LIST@207..216
+                        0: SCSS_VARIABLE@207..216
+                          0: DOLLAR@207..208 "$" [] []
+                          1: CSS_IDENTIFIER@208..216
+                            0: IDENT@208..216 "modifier" [] []
+                    3: R_CURLY@216..218 "}" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@218..220
+        0: L_CURLY@218..219 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@219..219
+        2: R_CURLY@219..220 "}" [] []
+    8: CSS_QUALIFIED_RULE@220..234
+      0: CSS_SELECTOR_LIST@220..232
+        0: CSS_COMPOUND_SELECTOR@220..232
+          0: CSS_NESTED_SELECTOR_LIST@220..220
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@220..232
+            0: CSS_BOGUS_SUB_SELECTOR@220..232
+              0: DOT@220..222 "." [Newline("\n")] []
+              1: CSS_BOGUS_SUPPORTS_CONDITION@222..232
+                0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@222..232
+                  0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@222..223
+                    0: MINUS@222..223 "-" [] []
+                  1: SCSS_INTERPOLATION@223..232
+                    0: HASH@223..224 "#" [] []
+                    1: L_CURLY@224..225 "{" [] []
+                    2: SCSS_EXPRESSION@225..230
+                      0: SCSS_EXPRESSION_ITEM_LIST@225..230
+                        0: SCSS_VARIABLE@225..230
+                          0: DOLLAR@225..226 "$" [] []
+                          1: CSS_IDENTIFIER@226..230
+                            0: IDENT@226..230 "name" [] []
+                    3: R_CURLY@230..232 "}" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@232..234
+        0: L_CURLY@232..233 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@233..233
+        2: R_CURLY@233..234 "}" [] []
+    9: CSS_QUALIFIED_RULE@234..268
+      0: CSS_SELECTOR_LIST@234..247
+        0: CSS_COMPOUND_SELECTOR@234..247
+          0: CSS_NESTED_SELECTOR_LIST@234..234
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@234..247
+            0: CSS_CLASS_SELECTOR@234..247
+              0: DOT@234..237 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@237..247
+                0: IDENT@237..247 "component" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@247..268
+        0: L_CURLY@247..248 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@248..266
+          0: CSS_NESTED_QUALIFIED_RULE@248..266
+            0: CSS_RELATIVE_SELECTOR_LIST@248..264
+              0: CSS_RELATIVE_SELECTOR@248..264
+                0: (empty)
+                1: CSS_BOGUS_SELECTOR@248..264
+                  0: CSS_NESTED_SELECTOR_LIST@248..252
+                    0: CSS_NESTED_SELECTOR@248..252
+                      0: AMP@248..252 "&" [Newline("\n"), Whitespace("  ")] []
+                  1: CSS_BOGUS@252..264
+                    0: CSS_BOGUS_SUPPORTS_CONDITION@252..264
+                      0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@252..264
+                        0: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@252..253
+                          0: MINUS@252..253 "-" [] []
+                        1: SCSS_INTERPOLATED_IDENTIFIER_HYPHEN@253..254
+                          0: MINUS@253..254 "-" [] []
+                        2: SCSS_INTERPOLATION@254..264
+                          0: HASH@254..255 "#" [] []
+                          1: L_CURLY@255..256 "{" [] []
+                          2: SCSS_EXPRESSION@256..262
+                            0: SCSS_EXPRESSION_ITEM_LIST@256..262
+                              0: SCSS_VARIABLE@256..262
+                                0: DOLLAR@256..257 "$" [] []
+                                1: CSS_IDENTIFIER@257..262
+                                  0: IDENT@257..262 "state" [] []
+                          3: R_CURLY@262..264 "}" [] [Whitespace(" ")]
+                  2: CSS_SUB_SELECTOR_LIST@264..264
+            1: CSS_DECLARATION_OR_RULE_BLOCK@264..266
+              0: L_CURLY@264..265 "{" [] []
+              1: CSS_DECLARATION_OR_RULE_LIST@265..265
+              2: R_CURLY@265..266 "}" [] []
+        2: R_CURLY@266..268 "}" [Newline("\n")] []
+  2: EOF@268..269 "" [Newline("\n")] []
 
 ```
 
@@ -667,5 +963,37 @@ scss_exclusive_values.css:13:2 parse ━━━━━━━━━━━━━━�
   > 13 │ .button-#{$state} {}
        │  ^^^^^^^^^^^^^^^^
     14 │ 
+    15 │ .#{$block}--#{$modifier} {}
+  
+scss_exclusive_values.css:15:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS interpolated selector names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    13 │ .button-#{$state} {}
+    14 │ 
+  > 15 │ .#{$block}--#{$modifier} {}
+       │  ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ .-#{$name} {}
+    17 │ 
+  
+scss_exclusive_values.css:16:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS interpolated selector names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    15 │ .#{$block}--#{$modifier} {}
+  > 16 │ .-#{$name} {}
+       │  ^^^^^^^^^
+    17 │ 
+    18 │ .component {
+  
+scss_exclusive_values.css:19:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS interpolated selector names are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    18 │ .component {
+  > 19 │   &--#{$state} {}
+       │    ^^^^^^^^^^^
+    20 │ }
+    21 │ 
   
 ```

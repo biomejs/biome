@@ -252,11 +252,10 @@ impl Collector for DefaultCollector {
                         }
 
                         let should_collect = self.should_collect();
-
-                        let diag = diag
-                            .with_file_path(file_path.as_str())
-                            .with_file_source_code(&content);
                         if should_collect || execution.is_ci() {
+                            let diag = diag
+                                .with_file_path(file_path.as_str())
+                                .with_file_source_code(content.as_str());
                             self.push_diagnostic(diag);
                         }
                     }
@@ -302,7 +301,7 @@ impl Collector for DefaultCollector {
                                         },
                                     }
                                     .with_severity(severity)
-                                    .with_file_source_code(old.clone())
+                                    .with_file_source_code(old.as_str())
                                     .with_file_path(file_path.clone())
                                 } else {
                                     FormatDiffDiagnostic {
@@ -312,7 +311,7 @@ impl Collector for DefaultCollector {
                                         },
                                     }
                                     .with_severity(severity)
-                                    .with_file_source_code(old.clone())
+                                    .with_file_source_code(old.as_str())
                                     .with_file_path(file_path.clone())
                                 };
                                 if should_collect || execution.is_ci() {

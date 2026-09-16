@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
 use crate::syntax::scss::{
@@ -102,7 +103,7 @@ fn parse_pseudo_value(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolated_string(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
-            parse_scss_interpolated_string,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
             |p, marker| scss_only_syntax_error(p, "SCSS interpolated strings", marker.range(p)),
         )
     } else if is_at_string(p) {

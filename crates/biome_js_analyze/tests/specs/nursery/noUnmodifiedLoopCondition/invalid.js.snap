@@ -1,0 +1,515 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+// should generate diagnostics
+
+let node = getNode();
+while (node) {
+    process(node);
+}
+node = getOtherNode();
+
+for (let index = 0; index < 5;) {
+    process(index);
+}
+
+let ready = true;
+do {
+    process();
+} while (ready);
+
+let left = 0;
+let right = 1;
+while (left !== right) {
+    process(left, right);
+}
+
+let select = true;
+let whenTrue = 1;
+let whenFalse = 2;
+while (select ? whenTrue : whenFalse) {
+    process();
+}
+
+let first = true;
+let second = true;
+while (first && second) {
+    first = false;
+}
+
+let nestedLeft = 0;
+let nestedRight = 0;
+let sharedLimit = 10;
+while (nestedLeft < sharedLimit && nestedRight < sharedLimit) {
+    nestedLeft++;
+}
+
+let interpolation = "";
+while (`${interpolation}`) {
+    process(interpolation);
+}
+
+let specifier = "./module.js";
+while (import(specifier)) {
+    process();
+}
+
+let initializedOnly = 0;
+for (initializedOnly = 1; initializedOnly < 5;) {
+    process(initializedOnly);
+}
+
+for (var initializedVarOnly = 0; initializedVarOnly < 5;) {
+    process(initializedVarOnly);
+}
+
+let shadowed = true;
+while (shadowed) {
+    let shadowed = false;
+    process(shadowed);
+}
+
+let changedByUnusedFunction = true;
+function updateUnused() {
+    changedByUnusedFunction = false;
+}
+while (changedByUnusedFunction) {
+    process();
+}
+
+let changedByInitializerFunction = true;
+function updateInInitializer() {
+    changedByInitializerFunction = false;
+}
+for (updateInInitializer(); changedByInitializerFunction;) {
+    process();
+}
+
+let objectMethodGroup = 0;
+while (objectMethodGroup < { method() { check(); } }) {
+    process();
+}
+
+let computedMethodName = "method";
+while ({ [computedMethodName]() {} }) {
+    process();
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    3 │ let node = getNode();
+  > 4 │ while (node) {
+      │        ^^^^
+    5 │     process(node);
+    6 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:21 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+     7 │ node = getOtherNode();
+     8 │ 
+   > 9 │ for (let index = 0; index < 5;) {
+       │                     ^^^^^
+    10 │     process(index);
+    11 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:10 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    14 │ do {
+    15 │     process();
+  > 16 │ } while (ready);
+       │          ^^^^^
+    17 │ 
+    18 │ let left = 0;
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    18 │ let left = 0;
+    19 │ let right = 1;
+  > 20 │ while (left !== right) {
+       │        ^^^^
+    21 │     process(left, right);
+    22 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:17 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    18 │ let left = 0;
+    19 │ let right = 1;
+  > 20 │ while (left !== right) {
+       │                 ^^^^^
+    21 │     process(left, right);
+    22 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    25 │ let whenTrue = 1;
+    26 │ let whenFalse = 2;
+  > 27 │ while (select ? whenTrue : whenFalse) {
+       │        ^^^^^^
+    28 │     process();
+    29 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:17 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    25 │ let whenTrue = 1;
+    26 │ let whenFalse = 2;
+  > 27 │ while (select ? whenTrue : whenFalse) {
+       │                 ^^^^^^^^
+    28 │     process();
+    29 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:28 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    25 │ let whenTrue = 1;
+    26 │ let whenFalse = 2;
+  > 27 │ while (select ? whenTrue : whenFalse) {
+       │                            ^^^^^^^^^
+    28 │     process();
+    29 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:17 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    31 │ let first = true;
+    32 │ let second = true;
+  > 33 │ while (first && second) {
+       │                 ^^^^^^
+    34 │     first = false;
+    35 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:36 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    38 │ let nestedRight = 0;
+    39 │ let sharedLimit = 10;
+  > 40 │ while (nestedLeft < sharedLimit && nestedRight < sharedLimit) {
+       │                                    ^^^^^^^^^^^
+    41 │     nestedLeft++;
+    42 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:50 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    38 │ let nestedRight = 0;
+    39 │ let sharedLimit = 10;
+  > 40 │ while (nestedLeft < sharedLimit && nestedRight < sharedLimit) {
+       │                                                  ^^^^^^^^^^^
+    41 │     nestedLeft++;
+    42 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:11 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    44 │ let interpolation = "";
+  > 45 │ while (`${interpolation}`) {
+       │           ^^^^^^^^^^^^^
+    46 │     process(interpolation);
+    47 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:50:15 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    49 │ let specifier = "./module.js";
+  > 50 │ while (import(specifier)) {
+       │               ^^^^^^^^^
+    51 │     process();
+    52 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:27 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    54 │ let initializedOnly = 0;
+  > 55 │ for (initializedOnly = 1; initializedOnly < 5;) {
+       │                           ^^^^^^^^^^^^^^^
+    56 │     process(initializedOnly);
+    57 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:34 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    57 │ }
+    58 │ 
+  > 59 │ for (var initializedVarOnly = 0; initializedVarOnly < 5;) {
+       │                                  ^^^^^^^^^^^^^^^^^^
+    60 │     process(initializedVarOnly);
+    61 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    63 │ let shadowed = true;
+  > 64 │ while (shadowed) {
+       │        ^^^^^^^^
+    65 │     let shadowed = false;
+    66 │     process(shadowed);
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    71 │     changedByUnusedFunction = false;
+    72 │ }
+  > 73 │ while (changedByUnusedFunction) {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^
+    74 │     process();
+    75 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:81:29 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    79 │     changedByInitializerFunction = false;
+    80 │ }
+  > 81 │ for (updateInInitializer(); changedByInitializerFunction;) {
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │     process();
+    83 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:86:8 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    85 │ let objectMethodGroup = 0;
+  > 86 │ while (objectMethodGroup < { method() { check(); } }) {
+       │        ^^^^^^^^^^^^^^^^^
+    87 │     process();
+    88 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:91:11 lint/nursery/noUnmodifiedLoopCondition ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This loop condition variable is not modified in the loop.
+  
+    90 │ let computedMethodName = "method";
+  > 91 │ while ({ [computedMethodName]() {} }) {
+       │           ^^^^^^^^^^^^^^^^^^
+    92 │     process();
+    93 │ }
+  
+  i An unchanged condition can make the loop run forever or prevent it from behaving as intended.
+  
+  i Update the variable during each iteration, or use a condition whose value can change.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

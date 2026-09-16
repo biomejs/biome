@@ -365,3 +365,10 @@ getReqP().p;
 
 declare function getReadonlyP(): Readonly<{p: Promise<void>}>;
 getReadonlyP().p;
+
+type AsyncCallback<T> = () => Promise<T>;
+declare const aliasedCallback: AsyncCallback<void>;
+aliasedCallback();
+
+declare const explicitArray: Array<number>;
+explicitArray.map(async value => value);

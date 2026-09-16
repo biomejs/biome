@@ -44,8 +44,9 @@ code block
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -390,9 +391,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..545
+0: MD_ROOT@0..545
   0: (empty)
-  1: MD_BLOCK_LIST@0..545
+  1: (empty)
+  2: MD_BLOCK_LIST@0..545
     0: MD_QUOTE@0..40
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -609,6 +611,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@514..544 "This is an indented code block" [] []
             4: MD_TEXTUAL@544..545
               0: MD_TEXTUAL_LITERAL@544..545 "\n" [] []
-  2: EOF@545..545 "" [] []
+  3: EOF@545..545 "" [] []
 
 ```

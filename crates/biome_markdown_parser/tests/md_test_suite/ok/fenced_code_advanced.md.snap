@@ -51,8 +51,9 @@ Indented opening (stripped from content):
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -267,9 +268,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..360
+0: MD_ROOT@0..360
   0: (empty)
-  1: MD_BLOCK_LIST@0..360
+  1: (empty)
+  2: MD_BLOCK_LIST@0..360
     0: MD_PARAGRAPH@0..21
       0: MD_INLINE_ITEM_LIST@0..21
         0: MD_TEXTUAL@0..20
@@ -407,6 +409,6 @@ MdDocument {
       5: TRIPLE_BACKTICK@356..359 "```" [] []
     26: MD_NEWLINE@359..360
       0: NEWLINE@359..360 "\n" [] []
-  2: EOF@360..360 "" [] []
+  3: EOF@360..360 "" [] []
 
 ```

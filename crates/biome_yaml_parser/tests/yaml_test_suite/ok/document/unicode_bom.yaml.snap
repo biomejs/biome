@@ -1,0 +1,56 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+﻿value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: UNICODE_BOM@0..3 "\u{feff}" [] [],
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@3..3 "" [] [],
+                flow: YamlFlowYamlNode {
+                    properties: YamlPropertyList [],
+                    content: YamlPlainScalar {
+                        value_token: PLAIN_LITERAL@3..9 "value\n" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@9..9 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@9..9 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..9
+  0: YAML_DOCUMENT_LIST@0..9
+    0: YAML_DOCUMENT@0..9
+      0: UNICODE_BOM@0..3 "\u{feff}" [] []
+      1: YAML_DIRECTIVE_LIST@3..3
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@3..9
+        0: FLOW_START@3..3 "" [] []
+        1: YAML_FLOW_YAML_NODE@3..9
+          0: YAML_PROPERTY_LIST@3..3
+          1: YAML_PLAIN_SCALAR@3..9
+            0: PLAIN_LITERAL@3..9 "value\n" [] []
+        2: FLOW_END@9..9 "" [] []
+      4: (empty)
+  1: EOF@9..9 "" [] []
+
+```

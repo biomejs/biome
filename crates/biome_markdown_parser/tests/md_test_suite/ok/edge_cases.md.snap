@@ -43,8 +43,9 @@ still the same paragraph
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -91,10 +92,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@69..76 "inline " [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@76..79 "~~~" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@79..100 " tilde is not a fence" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@76..100 "~~~ tilde is not a fence" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@100..101 "\n" [] [],
@@ -158,7 +156,10 @@ MdDocument {
             indent: MdIndentTokenList [],
             before: MdHashList [
                 MdHash {
-                    hash_token: HASH@197..199 "##" [] [],
+                    hash_token: HASH@197..198 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@198..199 "#" [] [],
                 },
             ],
             content: MdParagraph {
@@ -306,9 +307,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..505
+0: MD_ROOT@0..505
   0: (empty)
-  1: MD_BLOCK_LIST@0..505
+  1: (empty)
+  2: MD_BLOCK_LIST@0..505
     0: MD_PARAGRAPH@0..16
       0: MD_INLINE_ITEM_LIST@0..16
         0: MD_TEXTUAL@0..15
@@ -337,11 +339,9 @@ MdDocument {
       0: MD_INLINE_ITEM_LIST@69..101
         0: MD_TEXTUAL@69..76
           0: MD_TEXTUAL_LITERAL@69..76 "inline " [] []
-        1: MD_TEXTUAL@76..79
-          0: MD_TEXTUAL_LITERAL@76..79 "~~~" [] []
-        2: MD_TEXTUAL@79..100
-          0: MD_TEXTUAL_LITERAL@79..100 " tilde is not a fence" [] []
-        3: MD_TEXTUAL@100..101
+        1: MD_TEXTUAL@76..100
+          0: MD_TEXTUAL_LITERAL@76..100 "~~~ tilde is not a fence" [] []
+        2: MD_TEXTUAL@100..101
           0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
     7: MD_NEWLINE@101..102
       0: NEWLINE@101..102 "\n" [] []
@@ -380,8 +380,10 @@ MdDocument {
     13: MD_HEADER@197..224
       0: MD_INDENT_TOKEN_LIST@197..197
       1: MD_HASH_LIST@197..199
-        0: MD_HASH@197..199
-          0: HASH@197..199 "##" [] []
+        0: MD_HASH@197..198
+          0: HASH@197..198 "#" [] []
+        1: MD_HASH@198..199
+          0: HASH@198..199 "#" [] []
       2: MD_PARAGRAPH@199..224
         0: MD_INLINE_ITEM_LIST@199..224
           0: MD_TEXTUAL@199..224
@@ -469,6 +471,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] []
         6: MD_TEXTUAL@504..505
           0: MD_TEXTUAL_LITERAL@504..505 "\n" [] []
-  2: EOF@505..505 "" [] []
+  3: EOF@505..505 "" [] []
 
 ```

@@ -41,8 +41,9 @@ lazy continuation line
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -183,8 +184,8 @@ MdDocument {
                 MdBullet {
                     prefix: MdListMarkerPrefix {
                         pre_marker_indent: MdIndentTokenList [],
-                        marker: MINUS@153..155 "- " [] [],
-                        post_marker_space_token: missing (optional),
+                        marker: MINUS@153..154 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@154..155 " " [] [],
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
@@ -415,9 +416,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..507
+0: MD_ROOT@0..507
   0: (empty)
-  1: MD_BLOCK_LIST@0..507
+  1: (empty)
+  2: MD_BLOCK_LIST@0..507
     0: MD_HEADER@0..43
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -509,8 +511,8 @@ MdDocument {
         0: MD_BULLET@153..156
           0: MD_LIST_MARKER_PREFIX@153..155
             0: MD_INDENT_TOKEN_LIST@153..153
-            1: MINUS@153..155 "- " [] []
-            2: (empty)
+            1: MINUS@153..154 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@154..155 " " [] []
             3: MD_INDENT_TOKEN_LIST@155..155
           1: MD_BLOCK_LIST@155..156
             0: MD_NEWLINE@155..156
@@ -650,6 +652,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@497..506 "next item" [] []
                 1: MD_TEXTUAL@506..507
                   0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
-  2: EOF@507..507 "" [] []
+  3: EOF@507..507 "" [] []
 
 ```

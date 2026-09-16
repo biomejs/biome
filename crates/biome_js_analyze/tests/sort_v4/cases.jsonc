@@ -1,13 +1,21 @@
 [
 	// ─── static utilities ──────────────────────────────────────────
 	// STATIC_UTILITIES exact-match keywords. Sorted by property_idx,
-	// then property_count desc, then registration_idx.
+	// then property_count desc, then name.
 
 	"flex block absolute",
 	"static visible flex",                         // already sorted
 	"sr-only block flex absolute relative",        // sr-only multi-prop floats up
-	"pointer-events-none collapse static visible", // visibility group tie-broken by reg_idx
+	"pointer-events-none collapse static visible", // visibility bucket ordered by name
 	"flex",                                        // single-token passthrough
+
+	// distinct static utilities inside one property bucket order by
+	// name, the way Tailwind emits them — not by utility registration
+	// order. Expected order cross-checked against
+	// prettier-plugin-tailwindcss 0.8.0.
+	"inline flex block hidden grid table contents", // display bucket, name order
+	"visible collapse invisible",                   // visibility bucket, name order
+	"sticky static relative fixed absolute",        // position bucket, name order
 
 	// ─── functional + named value ──────────────────────────────────
 	// Named (theme namespace), NamedKeyword (hardcoded keyword pool),
@@ -16,7 +24,7 @@
 	"bg-red-500 flex p-4",   // ThemeNamespace::Color
 	"p-4 m-2 flex",          // NamedTyped(Number)
 	"text-lg bg-red-500 p-4",
-	"p-4 p-2",               // same basename, stable input order
+	"p-4 p-2",               // same basename, ordered by value (p-2 first)
 	"origin-top flex p-4",   // NamedKeyword pool
 	"flex-1 flex p-4",       // STATIC `flex` wins over functional `flex` basename
 
@@ -27,11 +35,12 @@
 	"font-medium font-sans p-4",
 
 	// w basename — Named(Spacing) for `--spacing-*` keys,
-	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions.
+	// NamedTyped(Number) for bare integers, NamedTyped(Ratio) for fractions,
+	// and whole-name static registrations for the named values.
 	"w-10 flex p-4",         // NamedTyped(Number)
 	"w-1/2 flex p-4",        // NamedTyped(Ratio)
-	"w-full flex p-4",       // Named(Spacing) — `--spacing-full` theme key
-	"w-screen w-10 w-full",  // multi-value same basename, stable order
+	"w-full flex p-4",       // `w-full` is a static registration for the whole name
+	"w-screen w-10 w-full",  // statics join the width bucket and order by name
 
 	// aspect basename — NamedKeyword pool (auto/square),
 	// Named(Aspect) (theme keys like `video`), NamedTyped(Ratio).
@@ -41,21 +50,92 @@
 
 	// ─── negative-prefixed functional utilities ────────────────────
 	// Parser splits `-` off; classify routes through `entry.negative`
-	// to pick the correct (registration_idx, branches) slot.
+	// to pick the correct branch slot, and the sign joins the name so
+	// negatives group before positives inside a bucket (`-` precedes
+	// every letter in code-point order).
 
 	"p-4 flex -mt-2",            // SameBranches: -mt reuses mt's branches
-	"flex mt-3 -mt-2",           // negative + positive of same basename, distinct reg_idx
-	"flex -mt-2 -inset-2",       // two SameBranches negatives sorted by their own reg_idx
+	"flex mt-3 -mt-2",           // negative + positive of same basename, sign orders first
+	"flex -mt-2 -inset-2",       // two negatives in distinct property buckets
 	"flex -bg-red-500 p-4",      // -bg has no negative entry → Unknown → floats to front
 	"p-4 flex -z-auto",          // -z drops NamedKeyword(auto) → resolve fails → Unknown
 	"p-4 flex -z-10",            // Distinct: -z keeps NamedTyped(Number), routes to z-index
 
 	// negative static utilities. The parser strips the leading `-` and
-	// hands us a TwStaticCandidate; classify uses
-	// `negative_registration_idx` to pick the matching slot, falling
-	// back to Unknown when it's `None` (Tailwind doesn't register a
-	// negative form).
-	"flex p-4 -flex",            // -flex: negative_registration_idx is None → Unknown
+	// hands us a TwStaticCandidate; classify keeps the entry only when
+	// Tailwind registers a negative form (`has_negative`), falling back
+	// to Unknown otherwise.
+	"flex p-4 -flex",            // -flex: has_negative is false → Unknown
+
+	// ─── statics that parse as functional candidates ───────────────
+	// The grammar splits any dashed name into base and value, but
+	// Tailwind registers many such names as static utilities; the whole
+	// name resolves through the static table before functional roots and
+	// orders by name inside its property bucket. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"w-px w-full w-screen w-10 w-4 w-auto",         // statics interleave with functional widths by name
+	"m-auto m-4 m-px m-2",                          // margin family
+	"h-full h-4 h-screen",                          // height family
+	"flex-none flex-1 flex-auto",                   // statics + functional flex
+	"justify-center items-center flex",             // pure-static families keep bucket order
+	"table-caption inline-block flow-root block",   // display statics, none with a functional base
+	"inline-flex inline-grid inline-table inline",  // shared prefix, bare name first
+	"truncate text-clip text-ellipsis",             // truncate's own bucket precedes text-overflow
+	"col-span-full col-span-2 col-auto",            // static, functional, and keyword forms in one bucket
+	"grid-cols-subgrid grid-cols-2",                // keyword branch and functional value order by name
+	"order-none order-first order-2 order-1 order-last", // digits precede letters
+	"overflow-x-hidden overflow-hidden overflow-auto",   // overflow buckets, then name
+	"aspect-video aspect-square aspect-auto aspect-9/16", // theme, keyword, and ratio forms in one bucket
+	"-m-px m-px -m-4 m-4",   // negative statics carry the sign in the name
+	"-w-full flex",          // Tailwind registers no -w-full → Unknown floats front
+	"w-full! w-full w-10",   // important static twin sorts plain-first
+	"w-full/50 w-full w-10", // statics take no modifier → w-full/50 is Unknown
+
+	// ─── property signatures ───────────────────────────────────────
+	// A candidate's primary sort key is the ascending property-order
+	// index list of everything it declares; the first differing index
+	// decides, and the longer list wins a shared prefix. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"size-full size-4 w-4 h-4",       // size = height+width precedes h, then w
+	"container flex p-4",             // container's sentinel property precedes display
+	"container mx-auto px-4",         // classic container header combo
+	"font-medium text-sm whitespace-nowrap transition-all outline-none", // font-weight rides its own signature
+	"font-medium font-sans text-sm",  // font-family, font-size, font-weight buckets
+	"sr-only not-sr-only absolute",   // both sr signatures extend position's
+	"truncate text-clip overflow-hidden", // truncate leads its overflow prefix group
+	"group peer flex p-4",            // group/peer are no utilities — unknown-front parity
+
+	// ─── bare functional defaults ──────────────────────────────────
+	// Utilities with a default compile bare without a static
+	// registration (`border` = 1px, `ring` = 1px, `shadow` = the theme
+	// default); the bare placement supplies their signature. Expected
+	// order cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"border border-4 border-x border-x-4 flex",       // bare, valued, and dashed-bare forms
+	"ring ring-2 ring-inset shadow",                  // shadow's signature precedes ring's
+	"shadow shadow-lg shadow-none rounded",           // border-radius precedes the shadow family
+	"rounded rounded-lg rounded-none border",         // radius family, then bare border
+	"transition transition-all transition-none grow", // flex-grow precedes transition
+	"grow grow-0 shrink shrink-0",                    // flex-shrink precedes flex-grow
+	"outline outline-2 outline-none border-t",        // border-top before the outline family
+	"blur blur-sm grayscale invert",                  // filter utilities in signature order
+
+	// ─── bare utilities with modifiers ─────────────────────────────
+	// A handful of utilities compile bare with a modifier:
+	// `@container/sidebar` names the container, `shadow/50` and
+	// `drop-shadow/50` set the shadow color opacity. Statics take no
+	// modifier, so `flex/50` stays one unknown class. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"@container flex pointer-events-none visible container", // container-type leads the property order
+	"@container/sidebar @container flex",   // the name adds a declaration, so the named form leads
+	"@container! @container flex",
+	"shadow/50 shadow shadow-lg",
+	"drop-shadow/50 drop-shadow blur",
+	"flex/50 flex",
+	"group/item peer/tab flex",             // group/peer scopes are no utilities — unknown-front parity
 
 	// ─── unknown classes ───────────────────────────────────────────
 	// Tokens that resolve to no branch float to the front and keep
@@ -75,17 +155,57 @@
 
 	"from-50% flex",              // TwPercentageValue → gradient-stop
 	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
-	"flex w-1/2 w-1/3",           // two ratios share the same w branch, stable input order
-	"flex bg-red-500/50",         // color modifier — base named color sort key
-	"flex text-lg/8",             // line-height modifier — base named text-size sort key
-	"flex w-1/foo",               // non-fraction modifier — base number sort key
+	"flex w-1/2 w-1/3",           // two ratios share the same w branch, ordered by value text
+
+	// ─── modifiers ─────────────────────────────────────────────────
+	// A `/modifier` is valid only where the utility accepts one: a color
+	// takes an opacity modifier (number / arbitrary / CSS variable), a
+	// font-size takes a line-height modifier (those plus a `--leading-*`
+	// keyword). A modifier anywhere else — or an ill-formed one — makes the
+	// candidate invalid, so it floats to the front like any unknown.
+	// Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+	"flex bg-red-500/50",         // color + numeric opacity → valid
+	"flex bg-red-500/[0.5]",      // color + arbitrary opacity → valid
+	"flex bg-current/50",         // keyword color + opacity → valid
+	"flex text-lg/8",             // font-size + numeric line-height → valid
+	"flex text-lg/loose",         // font-size + `--leading-loose` keyword → valid
+	"flex w-1/foo",               // number takes no modifier → invalid, floats front
+	"flex bg-red-500/foo",        // bare word is not an opacity value → invalid
+	"flex bg-red-500/50%",        // percentage is not an opacity value → invalid
+	"flex text-lg/foo",           // bare word is not a line-height → invalid
+	"flex p-4/2",                 // padding takes no modifier → invalid
+	"flex text-red-500/loose",    // leading keyword is not an opacity value → invalid
+
+	// Arbitrary values and arbitrary properties gate the modifier the same
+	// way: a color/font-size arbitrary takes a numeric opacity/line-height
+	// modifier, other arbitrary values take none, and an arbitrary property
+	// takes a numeric modifier regardless of the property.
+	"flex bg-[#fff]/50",          // arbitrary color + numeric opacity → valid
+	"flex bg-[#fff]/(--x)",       // arbitrary color + CSS-variable opacity → valid
+	"flex text-[20px]/8",         // arbitrary font-size + numeric line-height → valid
+	"flex p-[4px]/2",             // padding arbitrary takes no modifier → invalid
+	"flex w-[1px]/foo",           // width arbitrary takes no modifier → invalid
+	"flex bg-[#fff]/foo",         // bare word is not an opacity value → invalid
+	"flex [color:red]/foo",       // arbitrary property + bare word → invalid
+	"flex [padding:1px]/2",       // arbitrary property + numeric modifier → valid
 
 	// ─── sort_class_list edge cases ────────────────────────────────
 
 	"p-[10px] flex some-unknown",
 	"flex [color:red]",
-	"flex [--my-var:1]",
 	"flex [color:red]/50",
+
+	// ─── arbitrary-property placement ──────────────────────────────
+	// Every arbitrary-property candidate is placed. A property in the
+	// known order sorts by its index; a custom property (`--my-var`) or
+	// an unknown property name has an empty Tailwind order and sorts
+	// after every real property, ordered among themselves by candidate
+	// text. Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+	"flex [--my-var:1]",                              // custom prop sorts after `flex`
+	"[display:block] flex [color:red] [--my-var:1]",  // custom prop last, behind real props
+	"[--my-var:2] [--my-var:1] flex",                 // same property, ordered by value text
+	"[foobar:1] [display:block] flex [color:red]",    // unknown property also sorts last
+	"[--tw-x:1] [-my-var:1] [--my-var:1] [foobar:1]", // empty-order group ordered by text
 	"bg-[50%] bg-[url('/a.png')] bg-[cover] bg-[#fff]",
 	"border-[#f00] border-[2px]",
 	"text-[#fff] text-[larger] text-[20px]",
@@ -93,9 +213,9 @@
 	"ring-[4px] p-[calc(100%-1rem)] bg-[cover] shadow-[#000] [mask-type:luminance] text-[20px] from-[20%] bg-[url('/hero.png')] border-[2px] flex",
 
 	// ─── arbitrary value modifiers ─────────────────────────────────
-	// Modifiers do not contribute to the sort key for arbitrary values;
-	// the base utility and arbitrary value still determine the property
-	// bucket.
+	// Modifiers ride along in the candidate name; the base utility and
+	// arbitrary value still determine the property bucket, which decides
+	// each of these cases.
 
 	"ring-[#000]/50 text-[20px]/8 border-[#f00]/50 flex bg-[#fff]/50",
 	"text-[#fff]/50 text-[20px]/8 flex",
@@ -112,10 +232,34 @@
 	"p-4 bg-linear-to-r from-blue-500 to-purple-500 m-2",         // linear gradient with surrounding spacing
 	"mask-linear-to-75% mask-linear-from-25%",                    // mask gradient stops
 
+	// ─── value ordering within a utility ───────────────────────────
+	// Candidates sharing a property bucket order by natural comparison
+	// of their name (digit runs compare numerically), which for one
+	// basename is the value text, then the modifier. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"p-10 p-2 p-4",                     // numeric, not lexicographic
+	"p-2.5 p-2 p-10",                   // decimal segments compare piecewise
+	"duration-700 duration-75",         // digit runs compare from their start
+	"bg-red-500 bg-red-50 bg-red-100",  // scale steps within one color
+	"bg-red-500 bg-blue-500",           // colors order by text, not theme order
+	"text-lg text-sm text-2xl text-xs", // digit-led values first, then alphabetical
+	"w-2/5 w-1/2",                      // fractions by text, not numeric value
+	"leading-6 leading-none leading-3", // digits precede letters
+	"-m-4 -m-2 m-1",                    // negatives keep their bucket, values still order
+	"bg-red-500/50 bg-red-500/25",      // modifier breaks a value tie
+	"text-lg/8 text-sm/6",              // value ordering beats the modifier
+	"mt-2 mt-[10px]",                   // concrete number before arbitrary value
+	"w-[1px] w-4",                      // bracket text compares as written
+	"w-[2px] w-[10rem] w-[13px]",       // numeric inside brackets, across units
+	"ease-in ease-out ease-in-out",     // keyword-pool values order by text
+	"[display:flex] [display:block]",   // arbitrary properties compare their values
+	"p-4! p-2",                         // value order dominates the important suffix
+
 	// ─── important suffix ──────────────────────────────────────────
 	// `flex!` sorts exactly where `flex` does; an exact-key tie breaks
 	// plain-first. Expected order cross-checked against
-	// prettier-plugin-tailwindcss.
+	// prettier-plugin-tailwindcss 0.8.0.
 
 	"px-2! flex p-4",               // position-neutral: sorts as px-2
 	"underline flex!",              // jumps ahead with its utility
@@ -125,8 +269,98 @@
 	"bg-red-500! flex p-4",         // theme value + important
 	"flex! block",                  // static bucket + important
 	"[display:block]! [color:red]", // arbitrary candidate + important
+
+	// The legacy leading `!` (`!flex`) still parses as important and,
+	// like everything else in a bucket, orders by the whole text — so
+	// `!` (0x21) puts it ahead of its plain twin and of every letter.
+	// Expected order cross-checked against tailwindcss 4.3.3.
+	"flex! !flex flex",                  // `!flex flex flex!`
+	"block !flex flex",                  // `!flex block flex`
+	"p-4 !p-2 p-2! !p-4",                // `!p-2 !p-4 p-2! p-4`
+	"hover:flex hover:!p-4 !flex md:p-4 md:!flex",
+	"!-m-4 -m-4 !m-4 m-4",               // sign after the `!`
+	"!bg-red-500/50 bg-red-500/50 ![color:red] [color:red]",
+	"!flex! flex !hover:flex",           // both `!`s or `!` before variants: unknown, front
 	"mt-4 -mt-2!",                  // negative + important
 	"not-a-class! flex",            // unknown base stays front even with `!`
+	// ─── variants ──────────────────────────────────────────────────
+	// Variant weight sorts before the existing utility dimensions;
+	// variants group in Tailwind's canonical order. Expected order
+	// cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"hover:flex flex",
+	"focus:flex hover:flex flex",
+	"hover:flex [&:hover]:flex flex",
+	"data-[state=open]:flex aria-checked:flex flex",
+	"nth-last-3:flex nth-2:flex flex",
+	"peer-focus:flex group-hover:flex flex",
+	"has-[:checked]:flex not-hover:flex flex",
+	"dark:flex hover:flex flex",                          // dark mode
+	"md:flex sm:flex flex max-lg:flex max-sm:flex min-lg:flex", // responsive, min/max
+	"md:hover:flex hover:flex flex md:flex",              // compound
+
+	// Variant stacks that weigh the same tie on the whole candidate
+	// text, so the variant spelling decides before the utility name.
+	// Expected order cross-checked against tailwindcss 4.3.3.
+	"sm:hover:block hover:sm:flex",     // `h` < `s` beats `block` < `flex`
+	"hover:sm:p-4 sm:hover:p-2",
+	"@sm:block @sm/main:flex",          // `/` < `:` beats `block` < `flex`
+
+	// ─── container-query and child variants ────────────────────────
+	// `@sm`/`@md` glue the container root to a size; `@max-*` descend,
+	// `*`/`**` are the child / descendant variants. Cross-checked
+	// against prettier-plugin-tailwindcss 0.8.0.
+	"flex sm:flex @sm:flex @md:flex @max-lg:flex",        // breakpoints then containers
+	"@lg:flex @sm:flex @md:flex flex",                    // container sizes ascending
+	"flex *:flex **:flex hover:flex",                     // child / descendant variants
+	"@container:flex flex @sm:flex",                      // bare `@container` is not sortable
+	"@:flex flex",                                        // `@` without a size is not sortable
+
+	// ─── variant modifiers ─────────────────────────────────────────
+	// Only group/peer compounds and container queries accept a
+	// `/modifier`; a bare variant sorts before its modified forms and
+	// container sizes ignore the modifier, tying with the bare form on
+	// candidate text. A modifier anywhere else invalidates the class.
+	// Cross-checked against prettier-plugin-tailwindcss 0.8.0.
+
+	"group-hover/menu:flex group-hover:flex flex",
+	"group-hover/b:flex group-hover/a:flex group-hover/[.5]:flex flex",
+	"peer-checked/foo:flex peer-checked:flex flex",
+	"@sm/main:flex @sm:flex @sm/apple:flex flex",
+	"hover/foo:flex flex",                    // modifier invalid on plain variants
+	"has-hover/5:flex not-hover/5:flex flex", // invalid on has-/not- compounds
+	"min-[600px]/5:flex max-lg/5:flex flex",  // invalid on breakpoints
+
+	// ─── breakpoint and container sizes ────────────────────────────
+	// Sizes compare by unit text first, then magnitude (descending for
+	// `max-*`), so arbitrary pixel sizes group before the rem-valued
+	// named sizes; equal lengths share a rank and the candidate text
+	// decides. A size that can't resolve to a length is invalid.
+
+	"@[400px]:flex @sm:flex flex",
+	"@[400px]/name:flex @[400px]:flex flex",
+	"@min-[100px]:flex @min-[900px]:flex @sm:flex @lg:flex flex",
+	"@max-[100px]:flex @max-lg:flex @max-[900px]:flex flex",
+	"@min-[24rem]:flex @sm:flex flex",        // 24rem = @sm, rank shared
+	"min-[40rem]:flex sm:flex flex",          // 40rem = sm, rank shared
+	"min-sm:flex sm:flex flex",
+	"min-[100px]:flex min-[900px]:flex sm:flex flex",
+	"min-abc:flex max-abc:flex @max-abc:flex flex",
+
+	// ─── arbitrary selector text ───────────────────────────────────
+	// Selectors compare with `_` decoded to a space, `\_` to a literal
+	// underscore.
+
+	"[&>*]:flex [&_p]:flex [&.a]:flex flex",
+
+	// ─── variants + important suffix ───────────────────────────────
+	// The important suffix reuses the underlying utility key, so it
+	// composes with variant weight.
+
+	"p-2! flex!",
+	"p-2! hover:flex! flex!",
+	"w-full! flex! p-4!",
+	"flex [color:red]!",
 
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.

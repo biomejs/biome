@@ -8,14 +8,23 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
+
+[[bench]]
+harness = false
+name    = "md_formatter"
 
 [dependencies]
-biome_formatter        = { workspace = true }
-biome_markdown_factory = { workspace = true }
-biome_markdown_syntax  = { workspace = true }
-biome_rowan            = { workspace = true }
-schemars               = { workspace = true, optional = true }
-serde                  = { workspace = true, features = ["derive"], optional = true }
+biome_deserialize        = { workspace = true }
+biome_deserialize_macros = { workspace = true }
+biome_formatter          = { workspace = true }
+biome_markdown_factory   = { workspace = true }
+biome_markdown_syntax    = { workspace = true }
+biome_rowan              = { workspace = true }
+schemars                 = { workspace = true, optional = true }
+serde                    = { workspace = true, features = ["derive"], optional = true }
+smallvec                 = { workspace = true }
+unicode-width            = { workspace = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }
@@ -27,8 +36,15 @@ biome_parser          = { path = "../biome_parser" }
 biome_service         = { path = "../biome_service", features = ["lang_md"] }
 camino                = { workspace = true }
 countme               = { workspace = true, features = ["enable"] }
+criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 similar-asserts       = { workspace = true }
 tests_macros          = { path = "../tests_macros" }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [features]
 schema = ["dep:schemars", "serde"]

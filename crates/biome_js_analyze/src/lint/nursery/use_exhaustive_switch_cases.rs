@@ -1,4 +1,4 @@
-use std::{io, ops::Deref};
+use std::io;
 
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
@@ -11,7 +11,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsStatement, AnyJsSwitchClause, JsSwitchStatement, T,
 };
-use biome_js_type_info::{Literal, Type, TypeData};
+use biome_js_type_info::InferredSwitchCase;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
 use biome_rule_options::use_exhaustive_switch_cases::UseExhaustiveSwitchCasesOptions;
 
@@ -26,8 +26,9 @@ declare_lint_rule! {
     /// However, if the union type changes, it's easy to forget to modify the cases to account for
     /// any new types.
     ///
-    /// This rule reports when a switch statement over a value typed as a union of literals lacks
+    /// By default, this rule reports when a switch statement over a value typed as a union of literals lacks
     /// a case for any of those literal types and does not have a default clause.
+    /// Set `requireExplicitCase` to `true` to check for missing cases even when the switch has a `default` clause.
     ///
     /// ## Examples
     ///
@@ -93,6 +94,44 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### requireExplicitCase
+    ///
+    /// Default: `false`.
+    ///
+    /// A `default` clause handles any value that does not match a `case`.
+    /// By default, the rule accepts this as covering all remaining values in a union.
+    /// This means that adding a value to the union will not produce a diagnostic if the switch has a `default` clause.
+    ///
+    /// Set `requireExplicitCase` to `true` to require a `case` for each value in the union.
+    /// You can still keep `default` as a fallback for unexpected values at runtime.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "requireExplicitCase": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With this option enabled, the switch below passes because `"A"`, `"B"`, and `"C"` each have a case.
+    /// The `default` clause stays as a runtime fallback. Removing `case "C"` would produce a diagnostic,
+    /// even though the fallback would handle that value.
+    ///
+    /// ```ts,use_options,file=explicit-case-valid.ts
+    /// type Letter = "A" | "B" | "C";
+    /// declare const letter: Letter;
+    /// switch (letter) {
+    ///     case "A":
+    ///     case "B":
+    ///     case "C":
+    ///         break;
+    ///     default:
+    ///         throw new Error("Unexpected letter");
+    /// }
+    /// ```
+    ///
     pub UseExhaustiveSwitchCases {
         version: "2.0.0",
         name: "useExhaustiveSwitchCases",
@@ -104,10 +143,7 @@ declare_lint_rule! {
     }
 }
 
-pub enum MissingCase {
-    Type(Type),
-    BooleanLiteral(bool),
-}
+pub struct MissingCase(InferredSwitchCase);
 
 impl Rule for UseExhaustiveSwitchCases {
     type Query = Typed<JsSwitchStatement>;
@@ -122,29 +158,38 @@ impl Rule for UseExhaustiveSwitchCases {
         let has_default_case = cases
             .iter()
             .any(|case| matches!(case, AnyJsSwitchClause::JsDefaultClause(_)));
-        if has_default_case {
+        if has_default_case && !ctx.options().require_explicit_case() {
             return None;
         }
 
-        let found_cases = cases
-            .iter()
-            .filter_map(|case| match case {
-                AnyJsSwitchClause::JsCaseClause(case) => {
-                    let test = case.test().ok()?;
-                    flatten_type(&ctx.type_of_expression(&test))
-                        .as_deref()
-                        .cloned()
-                }
-                _ => None,
-            })
-            .collect::<Vec<_>>();
+        let mut found_cases = Vec::new();
+        for case in cases.iter() {
+            let AnyJsSwitchClause::JsCaseClause(case) = case else {
+                continue;
+            };
+            let Ok(test) = case.test() else {
+                continue;
+            };
+            let ty = ctx.type_of_expression(&test)?;
+            let variants = ty.try_switch_case_variants().ok()?;
+            if variants.iter().any(|variant| match variant {
+                InferredSwitchCase::String(value) => value.text().contains('\\'),
+                InferredSwitchCase::UnsupportedLiteral => true,
+                _ => false,
+            }) {
+                return None;
+            }
+            if let [variant] = variants.as_slice() {
+                found_cases.push(variant.clone());
+            }
+        }
 
         let mut missing_cases = Vec::new();
 
         let discriminant = stmt.discriminant().ok()?;
 
         let is_switch_true_condition_group = is_true_literal_expression(&discriminant)
-            && found_cases.iter().any(|case| matches!(case, TypeData::Boolean));
+            && found_cases.contains(&InferredSwitchCase::Boolean);
         if is_switch_true_condition_group {
             return None;
         }
@@ -152,40 +197,33 @@ impl Rule for UseExhaustiveSwitchCases {
         let has_boolean_case = |value: bool| {
             found_cases
                 .iter()
-                .any(|case| is_boolean_literal_data_with_value(case, value))
+                .any(|case| *case == InferredSwitchCase::BooleanLiteral(value))
         };
 
-        let discriminant_ty = flatten_type(&ctx.type_of_expression(&discriminant))?;
+        let variants = ctx
+            .type_of_expression(&discriminant)?
+            .try_switch_case_variants()
+            .ok()?;
+        if variants.contains(&InferredSwitchCase::UnsupportedLiteral) {
+            return None;
+        }
 
-        let variants = match discriminant_ty.is_union() {
-            true => Type::normalized_boolean_union_variants(
-                discriminant_ty.flattened_union_variants().collect(),
-            ),
-            false => vec![discriminant_ty],
-        };
-
-        for intersection_part in variants {
-            let intersection_part = flatten_type(&intersection_part)?;
-
-            if matches!(intersection_part.deref(), TypeData::Boolean) {
+        for variant in variants {
+            if variant == InferredSwitchCase::Boolean {
                 if !has_boolean_case(true) {
-                    missing_cases.push(MissingCase::BooleanLiteral(true));
+                    missing_cases.push(MissingCase(InferredSwitchCase::BooleanLiteral(true)));
                 }
                 if !has_boolean_case(false) {
-                    missing_cases.push(MissingCase::BooleanLiteral(false));
+                    missing_cases.push(MissingCase(InferredSwitchCase::BooleanLiteral(false)));
                 }
                 continue;
             }
 
-            if !matches!(
-                intersection_part.deref(),
-                TypeData::Literal(_) | TypeData::Null | TypeData::Undefined | TypeData::Symbol
-            ) || found_cases.contains(&intersection_part)
-            {
+            if found_cases.contains(&variant) {
                 continue;
             }
 
-            missing_cases.push(MissingCase::Type(intersection_part));
+            missing_cases.push(MissingCase(variant));
         }
 
         if missing_cases.is_empty() {
@@ -205,10 +243,7 @@ impl Rule for UseExhaustiveSwitchCases {
                 markup! { "The switch statement is not exhaustive." },
             )
             .note("Some variants of the union type are not handled here.")
-            .footer_list(
-                "These cases are missing:",
-                state,
-            ),
+            .footer_list("These cases are missing:", state),
         )
     }
 
@@ -244,10 +279,25 @@ impl Rule for UseExhaustiveSwitchCases {
 
         let case_list = stmt.cases();
         let mut clauses = case_list.iter().collect::<Vec<_>>();
+        let insertion_index = clauses
+            .iter()
+            .position(|clause| matches!(clause, AnyJsSwitchClause::JsDefaultClause(_)))
+            .unwrap_or(clauses.len());
+        let trailing_clauses = clauses.split_off(insertion_index);
+        let has_default = !trailing_clauses.is_empty();
 
         let leading_trivia = case_list
             .last()
-            .and_then(|case| case.syntax().first_leading_trivia());
+            .and_then(|case| case.syntax().first_leading_trivia())
+            .map(|trivia| {
+                let mut pieces = trivia
+                    .pieces()
+                    .rev()
+                    .take_while(|piece| piece.is_newline() || piece.is_whitespace())
+                    .collect::<Vec<_>>();
+                pieces.reverse();
+                pieces
+            });
 
         let throw_stmt: AnyJsStatement = make::js_throw_statement(
             make::token(T![throw]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
@@ -262,7 +312,7 @@ impl Rule for UseExhaustiveSwitchCases {
                 make::token(T![case]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
 
             if let Some(leading_trivia) = &leading_trivia {
-                case_token = case_token.with_leading_trivia_pieces(leading_trivia.pieces());
+                case_token = case_token.with_leading_trivia_pieces(leading_trivia.iter().cloned());
             } else {
                 case_token = case_token.with_leading_trivia([
                     (TriviaPieceKind::Newline, "\n"),
@@ -274,13 +324,18 @@ impl Rule for UseExhaustiveSwitchCases {
                 case_token,
                 missing_case_to_expression(ty)?,
                 make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                make::js_statement_list([throw_stmt.clone()]),
+                make::js_statement_list((!has_default).then(|| throw_stmt.clone())),
             ));
 
             clauses.push(clause);
         }
 
-        mutation.replace_node(case_list, make::js_switch_case_list(clauses));
+        if !has_default {
+            mutation.replace_node(case_list, make::js_switch_case_list(clauses));
+        } else {
+            clauses.extend(trailing_clauses);
+            mutation.replace_node_discard_trivia(case_list, make::js_switch_case_list(clauses));
+        }
 
         let message = markup! { "Add the missing cases to the switch statement." };
 
@@ -293,17 +348,6 @@ impl Rule for UseExhaustiveSwitchCases {
     }
 }
 
-/// Unwraps [`TypeInner::InstanceOf`] and [`TypeInner::TypeofType`] to get the inner type.
-// TODO: I am not sure if this should be in the type flattening logic.
-fn flatten_type(ty: &Type) -> Option<Type> {
-    match ty.deref() {
-        TypeData::InstanceOf(instance) => ty.resolve(&instance.ty),
-        TypeData::Reference(reference) => ty.resolve(reference),
-        TypeData::TypeofType(inner) => ty.resolve(inner),
-        _ => Some(ty.clone()),
-    }
-}
-
 // A condition-group switch must use the literal `true`, not a boolean expression.
 fn is_true_literal_expression(expr: &AnyJsExpression) -> bool {
     expr.as_any_js_literal_expression()
@@ -312,84 +356,59 @@ fn is_true_literal_expression(expr: &AnyJsExpression) -> bool {
         .is_some_and(|token| token.kind() == T![true])
 }
 
-// Only boolean literal cases satisfy individual `true`/`false` variants.
-fn is_boolean_literal_data_with_value(ty: &TypeData, value: bool) -> bool {
-    matches!(
-        ty,
-        TypeData::Literal(lit)
-            if matches!(lit.as_ref(), Literal::Boolean(b) if b.as_bool() == value)
-    )
-}
-
 impl Display for MissingCase {
     fn fmt(&self, formatter: &mut Formatter) -> io::Result<()> {
-        match self {
-            Self::Type(case_type) => write_type(case_type, formatter),
-            Self::BooleanLiteral(value) => {
+        match &self.0 {
+            InferredSwitchCase::BooleanLiteral(value) => {
                 formatter.write_str(if *value { "true" } else { "false" })
             }
+            InferredSwitchCase::BigInt(bigint) => formatter.write_str(bigint.text()),
+            InferredSwitchCase::Number(number) => formatter.write_str(number.text()),
+            InferredSwitchCase::String(string) => {
+                formatter.write_fmt(format_args!("\"{}\"", string.text()))
+            }
+            InferredSwitchCase::Null => formatter.write_str("null"),
+            InferredSwitchCase::Undefined => formatter.write_str("undefined"),
+            InferredSwitchCase::Boolean
+            | InferredSwitchCase::Symbol
+            | InferredSwitchCase::UnsupportedLiteral => formatter.write_str("unknown"),
         }
-    }
-}
-
-// Render directly into the diagnostic formatter to avoid a temporary `String`.
-fn write_type(case_type: &Type, formatter: &mut Formatter) -> io::Result<()> {
-    match case_type.deref() {
-        TypeData::Literal(literal) => match literal.as_ref() {
-            Literal::Boolean(boolean) => {
-                formatter.write_str(if boolean.as_bool() { "true" } else { "false" })
-            }
-            Literal::Number(number) => formatter.write_str(number.as_str()),
-            Literal::String(string) => {
-                formatter.write_fmt(format_args!("\"{}\"", string.as_str()))
-            }
-            _ => formatter.write_str("unknown"),
-        },
-        TypeData::Null => formatter.write_str("null"),
-        TypeData::Undefined => formatter.write_str("undefined"),
-        _ => formatter.write_str("unknown"),
     }
 }
 
 fn missing_case_to_expression(case: &MissingCase) -> Option<AnyJsExpression> {
     match case {
-        MissingCase::Type(ty) => type_to_expression(ty),
-        MissingCase::BooleanLiteral(value) => Some(AnyJsExpression::AnyJsLiteralExpression(
-            make::js_boolean_literal_expression(make::token(match value {
-                true => T![true],
-                false => T![false],
-            }))
-            .into(),
-        )),
-    }
-}
-
-fn type_to_expression(ty: &Type) -> Option<AnyJsExpression> {
-    Some(match ty.deref() {
-        TypeData::Literal(lit) => AnyJsExpression::AnyJsLiteralExpression(match lit.as_ref() {
-            Literal::Boolean(b) => {
-                make::js_boolean_literal_expression(make::token(match b.as_bool() {
+        MissingCase(InferredSwitchCase::BooleanLiteral(value)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
+                make::js_boolean_literal_expression(make::token(match value {
                     true => T![true],
                     false => T![false],
                 }))
-                .into()
-            }
-            Literal::Number(n) => {
-                let text = n.text();
-                make::js_number_literal_expression(make::js_number_literal(text)).into()
-            }
-            Literal::String(s) => {
-                make::js_string_literal_expression(make::js_string_literal(s.as_str())).into()
-            }
-            _ => return None,
-        }),
-        TypeData::Null => AnyJsExpression::AnyJsLiteralExpression(
-            make::js_null_literal_expression(make::token(T![null])).into(),
-        ),
-        TypeData::Undefined => {
-            make::js_identifier_expression(make::js_reference_identifier(make::ident("undefined")))
-                .into()
+                .into(),
+            ))
         }
-        _ => return None,
-    })
+        MissingCase(InferredSwitchCase::Number(number)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
+                make::js_number_literal_expression(make::js_number_literal(number.text())).into(),
+            ))
+        }
+        MissingCase(InferredSwitchCase::BigInt(_)) => None,
+        MissingCase(InferredSwitchCase::String(string)) => {
+            Some(AnyJsExpression::AnyJsLiteralExpression(
+                make::js_string_literal_expression(make::js_string_literal(string.text())).into(),
+            ))
+        }
+        MissingCase(InferredSwitchCase::Null) => Some(AnyJsExpression::AnyJsLiteralExpression(
+            make::js_null_literal_expression(make::token(T![null])).into(),
+        )),
+        MissingCase(InferredSwitchCase::Undefined) => Some(
+            make::js_identifier_expression(make::js_reference_identifier(make::ident("undefined")))
+                .into(),
+        ),
+        MissingCase(
+            InferredSwitchCase::Boolean
+            | InferredSwitchCase::Symbol
+            | InferredSwitchCase::UnsupportedLiteral,
+        ) => None,
+    }
 }

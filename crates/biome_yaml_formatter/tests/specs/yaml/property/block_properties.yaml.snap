@@ -30,24 +30,20 @@ mapping:
 # Formatted
 
 ```yaml
-sequence:
-  !!seq
+sequence: !!seq
   - !!str a
   - !!map
     key: !!str value
 
-sequence:
-  !!seq
+sequence: !!seq
   - !!str a
   - !!map
     key: !!str value
 
-mapping:
-  !!map
+mapping: !!map
   key: !!str value
 
-mapping:
-  !!map
+mapping: !!map
   key: !!str value
 
 ```

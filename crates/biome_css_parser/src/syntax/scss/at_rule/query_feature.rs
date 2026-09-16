@@ -5,12 +5,10 @@ use crate::syntax::at_rule::feature::{
     parse_query_feature_range_comparison,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolated_identifier,
-    parse_scss_interpolation_or_identifier,
+    complete_scss_interpolated_identifier, is_at_scss_interpolation,
+    is_nth_at_scss_interpolated_identifier, parse_scss_interpolation_or_identifier,
 };
-use biome_css_syntax::CssSyntaxKind::{
-    SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST, SCSS_INTERPOLATION,
-};
+use biome_css_syntax::CssSyntaxKind::SCSS_INTERPOLATION;
 use biome_parser::CompletedMarker;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -56,10 +54,7 @@ pub(crate) fn parse_scss_interpolated_query_feature_from_head(
 
     // `#{$feature}: value` and `#{$feature} <= 10px`: the interpolation is the name.
     let name = if head.kind(p) == SCSS_INTERPOLATION {
-        let parts = head
-            .precede(p)
-            .complete(p, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST);
-        parts.precede(p).complete(p, SCSS_INTERPOLATED_IDENTIFIER)
+        complete_scss_interpolated_identifier(p, head)
     } else {
         head
     };
@@ -68,11 +63,22 @@ pub(crate) fn parse_scss_interpolated_query_feature_from_head(
     parse_query_feature_from_name(p, m)
 }
 
+/// Returns whether a comparison after interpolation is followed by a media
+/// feature name.
+///
+/// ```scss
+/// @media (#{$min} <= width <= #{$max}) {}
+/// ```
 #[inline]
 fn is_at_query_feature_name_after_comparison(p: &mut CssParser) -> bool {
     is_at_query_feature_range_comparison(p) && is_nth_at_scss_interpolated_identifier(p, 1)
 }
 
+/// Returns whether interpolation starts a media query feature.
+///
+/// ```scss
+/// @media (#{$feature}: #{$value}) {}
+/// ```
 #[inline]
 fn is_at_scss_interpolated_query_feature_start(p: &mut CssParser) -> bool {
     is_at_scss_interpolation(p)

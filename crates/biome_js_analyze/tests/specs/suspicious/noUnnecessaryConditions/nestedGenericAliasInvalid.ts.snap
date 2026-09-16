@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: nestedGenericAliasInvalid.ts
+---
+# Input
+```ts
+interface Box<U> {
+	value: U;
+}
+interface Wrapper<X> {
+	inner: X;
+}
+
+type Nested<T> = Box<Wrapper<T>>;
+declare const nested: Nested<number>;
+export const inner = nested.value.inner ?? 1;
+
+```
+
+# Diagnostics
+```
+nestedGenericAliasInvalid.ts:10:22 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     8 │ type Nested<T> = Box<Wrapper<T>>;
+     9 │ declare const nested: Nested<number>;
+  > 10 │ export const inner = nested.value.inner ?? 1;
+       │                      ^^^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+     8 │ type Nested<T> = Box<Wrapper<T>>;
+     9 │ declare const nested: Nested<number>;
+  > 10 │ export const inner = nested.value.inner ?? 1;
+       │                                         ^^
+    11 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```

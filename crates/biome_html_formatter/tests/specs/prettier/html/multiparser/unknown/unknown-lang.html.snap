@@ -49,36 +49,23 @@ prettier.is
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,4 @@
--<!doctype html>
-+<!DOCTYPE html>
- <html lang="en">
-   <head>
-     <meta charset="UTF-8" />
-@@ -7,28 +7,28 @@
-   </head>
+@@ -8,27 +8,24 @@
    <body>
      <style lang="unknown">
--      .prettier {
+       .prettier {
 -      content:
 -      "awesome"
 -                }
--    </style>
-+.prettier {
-+content:
-+"awesome"
-+          }
-+</style>
++        content: "awesome";
++      }
+     </style>
  
      <script lang="unknown">
 -      prettier.is
 -                        .awesome(
 -      )
--    </script>
-+prettier.is
-+                  .awesome(
-+)
-+</script>
++      prettier.is.awesome();
+     </script>
  
      <script type="unknown">
 -      prettier.is
@@ -106,7 +93,7 @@ prettier.is
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -115,17 +102,14 @@ prettier.is
   </head>
   <body>
     <style lang="unknown">
-.prettier {
-content:
-"awesome"
-          }
-</style>
+      .prettier {
+        content: "awesome";
+      }
+    </style>
 
     <script lang="unknown">
-prettier.is
-                  .awesome(
-)
-</script>
+      prettier.is.awesome();
+    </script>
 
     <script type="unknown">
 prettier.is

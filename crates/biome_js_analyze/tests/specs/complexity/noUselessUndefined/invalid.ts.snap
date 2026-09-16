@@ -1,0 +1,135 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function returnsUndefined(): undefined {
+	return undefined;
+}
+
+function returnsVoid(): void {
+	return undefined;
+}
+
+function returnsParenthesizedUndefined(): ((undefined)) {
+	return undefined;
+}
+
+function returnsParenthesizedVoid(): (void) {
+	return undefined;
+}
+
+function outer(): string {
+	function inner() {
+		return undefined;
+	}
+
+	return "";
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:9 lint/complexity/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function returnsUndefined(): undefined {
+  > 3 │ 	return undefined;
+      │ 	       ^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    3 │ → return·undefined;
+      │          --------- 
+
+```
+
+```
+invalid.ts:7:9 lint/complexity/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+    6 │ function returnsVoid(): void {
+  > 7 │ 	return undefined;
+      │ 	       ^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    7 │ → return·undefined;
+      │          --------- 
+
+```
+
+```
+invalid.ts:11:9 lint/complexity/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+    10 │ function returnsParenthesizedUndefined(): ((undefined)) {
+  > 11 │ 	return undefined;
+       │ 	       ^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    11 │ → return·undefined;
+       │          --------- 
+
+```
+
+```
+invalid.ts:15:9 lint/complexity/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+    14 │ function returnsParenthesizedVoid(): (void) {
+  > 15 │ 	return undefined;
+       │ 	       ^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    15 │ → return·undefined;
+       │          --------- 
+
+```
+
+```
+invalid.ts:20:10 lint/complexity/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use unnecessary undefined.
+  
+    18 │ function outer(): string {
+    19 │ 	function inner() {
+  > 20 │ 		return undefined;
+       │ 		       ^^^^^^^^^
+    21 │ 	}
+    22 │ 
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Safe fix: Remove the undefined.
+  
+    20 │ → → return·undefined;
+       │            --------- 
+
+```

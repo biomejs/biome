@@ -60,20 +60,6 @@ test.js:1:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━�
 ```
 
 ```block
-test.js:1:10 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The GLOBAL_VAR variable is undeclared.
-  
-  > 1 │ export { GLOBAL_VAR };
-      │          ^^^^^^^^^^
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
-```
-
-```block
 Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Found 1 error.
 ```

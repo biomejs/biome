@@ -7,29 +7,29 @@ use biome_formatter::{
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
-/// Options applied to CSS files
+/// Options applied to CSS files.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssConfiguration {
-    /// CSS parsing options
+    /// CSS parsing options.
     #[cfg_attr(feature = "cli", bpaf(external(css_parser_configuration), optional))]
     pub parser: Option<CssParserConfiguration>,
 
-    /// CSS formatter options
+    /// CSS formatter options.
     #[cfg_attr(feature = "cli", bpaf(external(css_formatter_configuration), optional))]
     pub formatter: Option<CssFormatterConfiguration>,
 
-    /// CSS linter options
+    /// CSS linter options.
     #[cfg_attr(feature = "cli", bpaf(external(css_linter_configuration), optional))]
     pub linter: Option<CssLinterConfiguration>,
 
-    /// CSS assist options
+    /// CSS assist options.
     #[cfg_attr(feature = "cli", bpaf(external(css_assist_configuration), optional))]
     pub assist: Option<CssAssistConfiguration>,
 
-    /// CSS globals
+    /// CSS globals.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,
@@ -39,18 +39,18 @@ pub type CssAllowWrongLineCommentsEnabled = Bool<false>;
 pub type CssModulesEnabled = Bool<false>;
 pub type CssTailwindDirectivesEnabled = Bool<false>;
 
-/// Options that changes how the CSS parser behaves
+/// Options that change how the CSS parser behaves.
 #[derive(Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssParserConfiguration {
-    /// Allow comments to appear on incorrect lines in `.css` files
+    /// Allows comments to appear on incorrect lines in `.css` files.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_wrong_line_comments: Option<CssAllowWrongLineCommentsEnabled>,
 
-    /// Enables parsing of CSS Modules specific features. Enable this feature only
+    /// Enables parsing of CSS Modules-specific features. Enable this feature only
     /// when your files don't end in `.module.css`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
@@ -69,13 +69,13 @@ pub struct CssParserConfiguration {
 
 pub type CssFormatterEnabled = Bool<true>;
 
-/// Options that changes how the CSS formatter behaves
+/// Options that change how the CSS formatter behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssFormatterConfiguration {
-    /// Control the formatter for CSS (and its super languages) files.
+    /// Controls the formatter for CSS and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-enabled"), argument("true|false"))
@@ -83,7 +83,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<CssFormatterEnabled>,
 
-    /// The indent style applied to CSS (and its super languages) files.
+    /// The indent style applied to CSS and languages that extend it. If unset, inherits the global
+    /// indentation style.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-indent-style"), argument("tab|space"))
@@ -91,7 +92,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
+    /// The indentation width applied to CSS and languages that extend it. If unset, inherits the
+    /// global indentation width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-indent-width"), argument("NUMBER"))
@@ -99,7 +101,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to CSS (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    /// The line ending applied to CSS and languages that extend it. If unset, inherits the global
+    /// line ending.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-line-ending"), argument("lf|crlf|cr|auto"))
@@ -107,7 +110,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line applied to CSS (and its super languages) files. Defaults to 80.
+    /// The maximum line width for CSS and languages that extend it. If unset, inherits the global
+    /// line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-line-width"), argument("NUMBER"))
@@ -115,7 +119,7 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in CSS code. Defaults to double.
+    /// The type of quotes used in CSS code. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-quote-style"), argument("double|single"))
@@ -123,10 +127,11 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 
-    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
-    /// closing delimiter). Only applies when the content fits on a single line, and empty
-    /// delimiters are not affected. For CSS, affects parentheses (e.g., `rgb( 0, 0, 0 )`) and
-    /// square brackets (e.g., `[ data-attr ]`). Defaults to false.
+    /// Controls spaces inside CSS parentheses and square brackets when their content fits on one
+    /// line. When enabled, `rgb(0, 0, 0)` becomes `rgb( 0, 0, 0 )` and `[data-attr]` becomes
+    /// `[ data-attr ]`. Empty delimiters are unchanged.
+    ///
+    /// If unset, inherits the global delimiter spacing setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-delimiter-spacing"), argument("true|false"))
@@ -134,16 +139,8 @@ pub struct CssFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of the file. If unset, inherits the global
+    /// trailing newline setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-formatter-trailing-newline"), argument("true|false"))
@@ -164,13 +161,13 @@ impl CssFormatterConfiguration {
 
 pub type CssLinterEnabled = Bool<true>;
 
-/// Options that changes how the CSS linter behaves
+/// Options that change how the CSS linter behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssLinterConfiguration {
-    /// Control the linter for CSS files.
+    /// Controls the linter for CSS files.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-linter-enabled"), argument("true|false"))
@@ -187,13 +184,13 @@ impl CssLinterConfiguration {
 
 pub type CssAssistEnabled = Bool<true>;
 
-/// Options that changes how the CSS assist behaves
+/// Options that change how CSS assist behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct CssAssistConfiguration {
-    /// Control the assist for CSS files.
+    /// Controls assist actions for CSS files.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("css-assist-enabled"), argument("true|false"))

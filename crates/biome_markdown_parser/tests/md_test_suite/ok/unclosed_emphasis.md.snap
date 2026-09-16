@@ -14,8 +14,9 @@ This has *unclosed emphasis
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -38,9 +39,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..28
+0: MD_ROOT@0..28
   0: (empty)
-  1: MD_BLOCK_LIST@0..28
+  1: (empty)
+  2: MD_BLOCK_LIST@0..28
     0: MD_PARAGRAPH@0..28
       0: MD_INLINE_ITEM_LIST@0..28
         0: MD_TEXTUAL@0..9
@@ -49,6 +51,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@9..27 "*unclosed emphasis" [] []
         2: MD_TEXTUAL@27..28
           0: MD_TEXTUAL_LITERAL@27..28 "\n" [] []
-  2: EOF@28..28 "" [] []
+  3: EOF@28..28 "" [] []
 
 ```

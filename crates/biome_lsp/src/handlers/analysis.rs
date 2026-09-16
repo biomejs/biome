@@ -160,7 +160,7 @@ pub(crate) fn code_actions(
                 "failed to access range {:?} in document {} {:?}",
                 params.range,
                 url.as_str(),
-                &doc.line_index,
+                doc.line_index,
             )
         })?;
     let cursor_range = if let Some(offset) = offset {

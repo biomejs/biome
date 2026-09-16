@@ -14,7 +14,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_non_css_wide_keyword_identifier,
+    expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
@@ -86,6 +86,11 @@ pub(crate) fn parse_root(p: &mut CssParser) {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
             m.complete(p, CSS_SNIPPET_ROOT);
+        }
+        CssEmbeddingKind::HtmlStyleAttribute => {
+            DeclarationList::new(EOF).parse_list(p);
+
+            m.complete(p, CSS_DECLARATION_SNIPPET_ROOT);
         }
         CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
@@ -164,7 +169,7 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
 }
 
 struct RuleListParseRecovery {
@@ -195,6 +200,14 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_variable_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_variable_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
@@ -214,7 +227,7 @@ impl ParseNodeList for RuleList {
         parsed_element.or_recover(
             p,
             &RuleListParseRecovery::new(self.end_kind),
-            expected_any_rule,
+            expected_any_rule_list_item,
         )
     }
 }
@@ -224,6 +237,17 @@ pub(crate) fn is_at_qualified_rule(p: &mut CssParser) -> bool {
     is_nth_at_selector(p, 0)
 }
 
+/// Parses a qualified rule.
+///
+/// Its selector list accepts a partial `>`, `+`, or `~` combinator only when
+/// parsing SCSS immediately before the rule's opening block. The nested rule
+/// supplies the required right selector:
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
 #[inline]
 pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_qualified_rule(p) {
@@ -232,7 +256,9 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    SelectorList::default().parse_list(p);
+    SelectorList::default()
+        .allow_partial_combinator_nesting()
+        .parse_list(p);
 
     parse_declaration_or_rule_list_block(p);
 
@@ -283,6 +309,22 @@ pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
     })
 }
 
+/// Parses a nested qualified rule with the requested selector recovery policy.
+///
+/// In SCSS style-rule blocks, both recovery policies accept a partial `>`, `+`,
+/// or `~` combinator immediately before the opening block. The nested rule
+/// supplies the required right selector:
+///
+/// ```scss
+/// .card {
+///   + {
+///     .media {}
+///   }
+/// }
+/// ```
+///
+/// When selector recovery is disabled, parsing succeeds only when the selector
+/// list reaches the opening block.
 #[inline]
 fn parse_nested_qualified_rule_with_selector_recovery(
     p: &mut CssParser,
@@ -296,6 +338,7 @@ fn parse_nested_qualified_rule_with_selector_recovery(
 
     if disable_selector_recovery {
         RelativeSelectorList::new(T!['{'])
+            .allow_partial_combinator_nesting()
             .disable_recovery()
             .parse_list(p);
 
@@ -305,7 +348,9 @@ fn parse_nested_qualified_rule_with_selector_recovery(
             return None;
         }
     } else {
-        RelativeSelectorList::new(T!['{']).parse_list(p);
+        RelativeSelectorList::new(T!['{'])
+            .allow_partial_combinator_nesting()
+            .parse_list(p);
     }
 
     let block = parse_declaration_or_rule_list_block(p);
@@ -588,7 +633,7 @@ fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
     } else if p.at(CSS_STRING_LITERAL) {
         parse_string(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_color(p) {
@@ -652,9 +697,11 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
         )
     } else if is_at_scss_interpolated_string(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_interpolated_string, |p, m| {
-            scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p))
-        })
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p)),
+        )
     } else {
         Absent
     }

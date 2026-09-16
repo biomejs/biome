@@ -15,7 +15,7 @@ impl FormatNodeRule<ScssHideClause> for FormatScssHideClause {
         write!(
             f,
             [group(&format_args![
-                hide_token.format(),
+                hide_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 members.format()
             ])]

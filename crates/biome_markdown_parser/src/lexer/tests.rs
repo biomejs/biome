@@ -180,7 +180,9 @@ fn multiple_hashes() {
     // Multiple hashes emitted as a single token - parser determines level from length
     assert_lex! {
         "###",
-        HASH:3,
+        HASH:1,
+        HASH:1,
+        HASH:1,
     }
 }
 
@@ -420,6 +422,39 @@ fn hard_line_break_many_trailing_spaces() {
 }
 
 #[test]
+fn textual_long_whitespace() {
+    let source = format!("left{}right", " ".repeat(4096));
+
+    assert_lex! {
+        source.as_str(),
+        MD_TEXTUAL_LITERAL:4105,
+    }
+}
+
+#[test]
+fn closing_hashes_after_mixed_whitespace() {
+    assert_lex! {
+        MarkdownLexContext::HeadingContent,
+        "heading \t ##\n",
+        MD_TEXTUAL_LITERAL:7,
+        MD_TEXTUAL_LITERAL:3,
+        HASH:1,
+        HASH:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn hard_line_break_after_tab() {
+    assert_lex! {
+        "text\t  \nmore",
+        MD_TEXTUAL_LITERAL:5,
+        MD_HARD_LINE_LITERAL:3,
+        MD_TEXTUAL_LITERAL:4,
+    }
+}
+
+#[test]
 fn hard_line_break_backslash_newline() {
     // Backslash followed by newline is a hard line break
     assert_lex! {
@@ -448,6 +483,19 @@ fn ordered_list_marker_dot() {
         "1. item",
         MD_ORDERED_LIST_MARKER:2, // "1."
         MD_TEXTUAL_LITERAL:5, // " item" (space + text)
+    }
+}
+
+#[test]
+fn ordered_list_marker_only_padding_is_split() {
+    // Marker-only padding belongs to the list prefix, not an inline hard break.
+    assert_lex! {
+        "1.   \n",
+        MD_ORDERED_LIST_MARKER:2,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
     }
 }
 
@@ -530,6 +578,23 @@ fn setext_underline_dashes() {
         NEWLINE:1,
     }
 
+    // Trailing whitespace is allowed for setext underlines, but it must remain
+    // separate so a single-dash line can still be parsed as an empty list item.
+    assert_lex! {
+        "-   \n",
+        MD_SETEXT_UNDERLINE_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        MD_TEXTUAL_LITERAL:1,
+        NEWLINE:1,
+    }
+
+    assert_lex! {
+        "--  \n",
+        MD_SETEXT_UNDERLINE_LITERAL:2,
+        MD_HARD_LINE_LITERAL:3,
+    }
+
     // Three+ dashes is a thematic break at lexer level
     // (parser will convert to setext if preceded by paragraph)
     assert_lex! {
@@ -537,6 +602,46 @@ fn setext_underline_dashes() {
         MD_THEMATIC_BREAK_LITERAL:3,
         NEWLINE:1,
     }
+}
+
+#[test]
+fn frontmatter_context_preserves_yaml_content() {
+    let source = "--- \r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n--- \t\r\n# Heading";
+    let mut lexer = MarkdownLexer::from_str(source);
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(lexer.has_frontmatter_closing_fence());
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        MD_FRONTMATTER_LITERAL
+    );
+    assert_eq!(
+        &source[lexer.current_range()],
+        "\r\n# ---\r\nvalue: |\r\n  ---\r\n\t---\r\n"
+    );
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Frontmatter),
+        FENCE
+    );
+    assert_eq!(&source[lexer.current_range()], "--- \t");
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), NEWLINE);
+    assert_eq!(lexer.next_token(MarkdownLexContext::Regular), HASH);
+}
+
+#[test]
+fn frontmatter_requires_closing_fence() {
+    let mut lexer = MarkdownLexer::from_str("---\nvalue");
+
+    assert_eq!(
+        lexer.next_token(MarkdownLexContext::Regular),
+        MD_THEMATIC_BREAK_LITERAL
+    );
+    assert!(!lexer.has_frontmatter_closing_fence());
 }
 
 #[test]
@@ -664,4 +769,60 @@ fn force_relex_at_line_start_produces_thematic_break() {
         "after force_relex_at_line_start, `---` should be MD_THEMATIC_BREAK_LITERAL"
     );
     assert_eq!(buffered.current(), MD_THEMATIC_BREAK_LITERAL);
+}
+
+#[test]
+fn table_context_separates_cell_edges() {
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "| left middle | right |\r\n",
+        PIPE:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:11,
+        WHITESPACE:1,
+        PIPE:1,
+        WHITESPACE:1,
+        MD_TEXTUAL_LITERAL:5,
+        WHITESPACE:1,
+        PIPE:1,
+        NEWLINE:2,
+    }
+
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "  left middle  \n",
+        WHITESPACE:2,
+        MD_TEXTUAL_LITERAL:11,
+        WHITESPACE:2,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn table_context_supports_all_line_endings() {
+    assert_lex! {
+        MarkdownLexContext::Table,
+        "|a|\r|b|\r\n|c|\n",
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:1,
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:2,
+        PIPE:1,
+        MD_TEXTUAL_LITERAL:1,
+        PIPE:1,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn table_context_does_not_change_regular_pipe_lexing() {
+    assert_lex! {
+        MarkdownLexContext::Regular,
+        "left | right",
+        MD_TEXTUAL_LITERAL:12,
+    }
 }

@@ -219,6 +219,7 @@ pub fn legacy_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
 pub fn native_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
     match node_name {
         // Native Biome AST patterns
+        "AstroImplicitFragment" => lang::AstroImplicitFragment::KIND_SET.iter().next(),
         "JsAccessorModifier" => lang::JsAccessorModifier::KIND_SET.iter().next(),
         "JsArrayAssignmentPattern" => lang::JsArrayAssignmentPattern::KIND_SET.iter().next(),
         "JsArrayAssignmentPatternElement" => lang::JsArrayAssignmentPatternElement::KIND_SET
@@ -398,6 +399,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
         "JsStaticModifier" => lang::JsStaticModifier::KIND_SET.iter().next(),
         "JsStringLiteralExpression" => lang::JsStringLiteralExpression::KIND_SET.iter().next(),
         "JsSuperExpression" => lang::JsSuperExpression::KIND_SET.iter().next(),
+        "JsSvelteDeclarationRoot" => lang::JsSvelteDeclarationRoot::KIND_SET.iter().next(),
         "JsSvelteSnippetRoot" => lang::JsSvelteSnippetRoot::KIND_SET.iter().next(),
         "JsSwitchStatement" => lang::JsSwitchStatement::KIND_SET.iter().next(),
         "JsTemplateChunkElement" => lang::JsTemplateChunkElement::KIND_SET.iter().next(),
@@ -611,6 +613,7 @@ pub fn kind_by_name(node_name: &str) -> Option<JsSyntaxKind> {
 /// Returns the native Biome slot mappings for a node name.
 pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] {
     match node_name {
+        "AstroImplicitFragment" => &[("elements", 0)],
         "JsArrayAssignmentPattern" => &[("elements", 1)],
         "JsArrayAssignmentPatternElement" => &[("pattern", 0), ("init", 1)],
         "JsArrayAssignmentPatternRestElement" => &[("pattern", 1)],
@@ -802,6 +805,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "JsStaticInitializationBlockClassMember" => &[("statements", 2)],
         "JsStaticMemberAssignment" => &[("object", 0), ("member", 2)],
         "JsStaticMemberExpression" => &[("object", 0), ("member", 2)],
+        "JsSvelteDeclarationRoot" => &[("declaration", 0)],
         "JsSvelteSnippetRoot" => &[("name", 0), ("parameters", 1)],
         "JsSwitchStatement" => &[("discriminant", 2), ("cases", 5)],
         "JsTemplateElement" => &[("expression", 1)],
@@ -823,14 +827,14 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "JsxClosingElement" => &[("name", 2)],
         "JsxElement" => &[
             ("opening_element", 0),
-            ("children", 1),
+            ("elements", 1),
             ("closing_element", 2),
         ],
         "JsxExpressionAttributeValue" => &[("expression", 1)],
         "JsxExpressionChild" => &[("expression", 1)],
         "JsxFragment" => &[
             ("opening_fragment", 0),
-            ("children", 1),
+            ("elements", 1),
             ("closing_fragment", 2),
         ],
         "JsxMemberName" => &[("object", 0), ("member", 2)],

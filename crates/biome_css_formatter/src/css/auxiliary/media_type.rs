@@ -8,6 +8,6 @@ impl FormatNodeRule<CssMediaType> for FormatCssMediaType {
     fn fmt_fields(&self, node: &CssMediaType, f: &mut CssFormatter) -> FormatResult<()> {
         let CssMediaTypeFields { value } = node.as_fields();
 
-        write!(f, [value.format()])
+        write!(f, [value?.format().with_text_case(CssCase::Preserve)])
     }
 }

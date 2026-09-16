@@ -18,8 +18,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -99,9 +100,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..32
+0: MD_ROOT@0..32
   0: (empty)
-  1: MD_BLOCK_LIST@0..32
+  1: (empty)
+  2: MD_BLOCK_LIST@0..32
     0: MD_BULLET_LIST_ITEM@0..32
       0: MD_BULLET_LIST@0..32
         0: MD_BULLET@0..24
@@ -146,6 +148,6 @@ MdDocument {
               0: MD_INLINE_ITEM_LIST@26..32
                 0: MD_TEXTUAL@26..32
                   0: MD_TEXTUAL_LITERAL@26..32 "simple" [] []
-  2: EOF@32..32 "" [] []
+  3: EOF@32..32 "" [] []
 
 ```

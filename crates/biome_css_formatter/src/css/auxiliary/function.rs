@@ -17,7 +17,7 @@ impl FormatNodeRule<CssFunction> for FormatCssFunction {
         write!(
             f,
             [
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(&items.format(), should_insert_space),

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
 expression: codeOptionsUnsorted.jsx
 ---
 # Input
@@ -476,6 +477,34 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
        27 │ + tw`foo·bar·p-4·px-2`;
     28 28 │   tw.div`px-2 foo p-4 bar`;
     29 29 │   notClassFunction("px-2 foo p-4 bar");
+  
+
+```
+
+```
+codeOptionsUnsorted.jsx:28:8 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    26 │ clsx("px-2 foo p-4 bar");
+    27 │ tw`px-2 foo p-4 bar`;
+  > 28 │ tw.div`px-2 foo p-4 bar`;
+       │        ^^^^^^^^^^^^^^^^
+    29 │ notClassFunction("px-2 foo p-4 bar");
+    30 │ notTemplateFunction`px-2 foo p-4 bar`;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    26 26 │   clsx("px-2 foo p-4 bar");
+    27 27 │   tw`px-2 foo p-4 bar`;
+    28    │ - tw.div`px-2·foo·p-4·bar`;
+       28 │ + tw.div`foo·bar·p-4·px-2`;
+    29 29 │   notClassFunction("px-2 foo p-4 bar");
+    30 30 │   notTemplateFunction`px-2 foo p-4 bar`;
   
 
 ```

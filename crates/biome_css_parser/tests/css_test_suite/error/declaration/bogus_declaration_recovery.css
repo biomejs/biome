@@ -1,0 +1,8 @@
+/* should generate diagnostics */
+
+@font-face {
+	9font-family: broken;
+	font-family: Valid;
+	123invalid;
+	42;
+}

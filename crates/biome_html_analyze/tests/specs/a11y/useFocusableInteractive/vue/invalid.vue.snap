@@ -4,29 +4,31 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
-<div>
-	<div role="button"></div>
-	<div role="tab"></div>
-	<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
-	<div :role="'button'"></div>
-	<div v-bind:role="'tab'"></div>
-</div>
+<template>
+	<!-- should generate diagnostics -->
+	<div>
+		<div role="button"></div>
+		<div role="tab"></div>
+		<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
+		<div :role="'button'"></div>
+		<div v-bind:role="'tab'"></div>
+	</div>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element with the interactive role button is not focusable.
   
-    1 │ <!-- should generate diagnostics -->
-    2 │ <div>
-  > 3 │ 	<div role="button"></div>
-      │ 	^^^^^^^^^^^^^^^^^^^
-    4 │ 	<div role="tab"></div>
-    5 │ 	<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
+    2 │ 	<!-- should generate diagnostics -->
+    3 │ 	<div>
+  > 4 │ 		<div role="button"></div>
+      │ 		^^^^^^^^^^^^^^^^^^^
+    5 │ 		<div role="tab"></div>
+    6 │ 		<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like button.
   
@@ -36,16 +38,16 @@ invalid.vue:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━
 ```
 
 ```
-invalid.vue:4:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element with the interactive role tab is not focusable.
   
-    2 │ <div>
-    3 │ 	<div role="button"></div>
-  > 4 │ 	<div role="tab"></div>
-      │ 	^^^^^^^^^^^^^^^^
-    5 │ 	<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
-    6 │ 	<div :role="'button'"></div>
+    3 │ 	<div>
+    4 │ 		<div role="button"></div>
+  > 5 │ 		<div role="tab"></div>
+      │ 		^^^^^^^^^^^^^^^^
+    6 │ 		<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
+    7 │ 		<div :role="'button'"></div>
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like tab.
   
@@ -55,16 +57,16 @@ invalid.vue:4:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━
 ```
 
 ```
-invalid.vue:6:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element with the interactive role button is not focusable.
   
-    4 │ 	<div role="tab"></div>
-    5 │ 	<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
-  > 6 │ 	<div :role="'button'"></div>
-      │ 	^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 	<div v-bind:role="'tab'"></div>
-    8 │ </div>
+    5 │ 		<div role="tab"></div>
+    6 │ 		<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
+  > 7 │ 		<div :role="'button'"></div>
+      │ 		^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 		<div v-bind:role="'tab'"></div>
+    9 │ 	</div>
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like button.
   
@@ -74,16 +76,16 @@ invalid.vue:6:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━
 ```
 
 ```
-invalid.vue:7:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:3 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The HTML element with the interactive role tab is not focusable.
   
-    5 │ 	<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
-    6 │ 	<div :role="'button'"></div>
-  > 7 │ 	<div v-bind:role="'tab'"></div>
-      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ </div>
-    9 │ 
+     6 │ 		<!-- static Vue role bindings with interactive roles but missing tabindex should also be flagged -->
+     7 │ 		<div :role="'button'"></div>
+   > 8 │ 		<div v-bind:role="'tab'"></div>
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	</div>
+    10 │ </template>
   
   i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like tab.
   

@@ -1,0 +1,42 @@
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import { type Ref, computed, ref, toRefs, useTemplateRef } from 'vue'
+
+const count = ref(0)
+let target
+target = count
+
+const assertedCount = ref(0) as Ref<number>
+assertedCount.value++
+const assertedAlias = count as Ref<number>
+consume(assertedAlias)
+if (count.value as unknown) {}
+
+const templateRef = useTemplateRef('element')
+consume(templateRef.value)
+
+const [defaultedModel = null, defaultedModifiers] = defineModel()
+consume(defaultedModel.value)
+if (defaultedModifiers) {}
+
+const countAlias = count
+consume(countAlias)
+
+const refs = toRefs({ value: 0 })
+const valueRef = refs.value
+consume(valueRef)
+target = (refs.value)
+
+const { ...restRefs } = refs
+restRefs.value.value++
+
+const { value: { value: nestedValue } } = refs
+nestedValue++
+
+const computedValue = computed(() => 1)
+consume(computedValue.effect)
+
+const [model, modifiers] = defineModel()
+if (modifiers) {}
+consume(model)
+</script>

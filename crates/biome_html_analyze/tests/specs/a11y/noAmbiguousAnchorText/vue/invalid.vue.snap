@@ -4,70 +4,72 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-/* should generate diagnostics */
+<template>
+	/* should generate diagnostics */
 
-<a>here</a>
+	<a>here</a>
 
-<a>HERE</a>
+	<a>HERE</a>
 
-<a>click here</a>
+	<a>click here</a>
 
-<a>learn more</a>
+	<a>learn more</a>
 
-<a>learn      more</a>
+	<a>learn      more</a>
 
-<a>learn more.</a>
+	<a>learn more.</a>
 
-<a>learn more?</a>
+	<a>learn more?</a>
 
-<a>learn more,</a>
+	<a>learn more,</a>
 
-<a>learn more!</a>
+	<a>learn more!</a>
 
-<a>learn more;</a>
+	<a>learn more;</a>
 
-<a>learn more:</a>
+	<a>learn more:</a>
 
-<a>link</a>
+	<a>link</a>
 
-<a>a link</a>
+	<a>a link</a>
 
-<a aria-label="click here">something</a>
+	<a aria-label="click here">something</a>
 
-<a> a link </a>
+	<a> a link </a>
 
-<a>a<i></i> link</a>
+	<a>a<i></i> link</a>
 
-<a><i></i>a link</a>
+	<a><i></i>a link</a>
 
-<a><span>click</span> here</a>
+	<a><span>click</span> here</a>
 
-<a><span> click </span> here</a>
+	<a><span> click </span> here</a>
 
-<a><span aria-hidden>more text</span>learn more</a>
+	<a><span aria-hidden>more text</span>learn more</a>
 
-<a><span aria-hidden="true">more text</span>learn more</a>
+	<a><span aria-hidden="true">more text</span>learn more</a>
 
-<a><img alt="click here" /></a>
+	<a><img alt="click here" /></a>
 
-<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+	<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
 
-<a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+	<a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:3:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    1 │ /* should generate diagnostics */
-    2 │ 
-  > 3 │ <a>here</a>
-      │ ^^^^^^^^^^^
-    4 │ 
-    5 │ <a>HERE</a>
+    2 │ 	/* should generate diagnostics */
+    3 │ 
+  > 4 │ 	<a>here</a>
+      │ 	^^^^^^^^^^^
+    5 │ 
+    6 │ 	<a>HERE</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -75,16 +77,16 @@ invalid.vue:3:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:5:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:6:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    3 │ <a>here</a>
-    4 │ 
-  > 5 │ <a>HERE</a>
-      │ ^^^^^^^^^^^
-    6 │ 
-    7 │ <a>click here</a>
+    4 │ 	<a>here</a>
+    5 │ 
+  > 6 │ 	<a>HERE</a>
+      │ 	^^^^^^^^^^^
+    7 │ 
+    8 │ 	<a>click here</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -92,16 +94,16 @@ invalid.vue:5:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:7:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    5 │ <a>HERE</a>
-    6 │ 
-  > 7 │ <a>click here</a>
-      │ ^^^^^^^^^^^^^^^^^
-    8 │ 
-    9 │ <a>learn more</a>
+     6 │ 	<a>HERE</a>
+     7 │ 
+   > 8 │ 	<a>click here</a>
+       │ 	^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ 	<a>learn more</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -109,16 +111,16 @@ invalid.vue:7:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:9:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:10:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-     7 │ <a>click here</a>
-     8 │ 
-   > 9 │ <a>learn more</a>
-       │ ^^^^^^^^^^^^^^^^^
-    10 │ 
-    11 │ <a>learn      more</a>
+     8 │ 	<a>click here</a>
+     9 │ 
+  > 10 │ 	<a>learn more</a>
+       │ 	^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ 	<a>learn      more</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -126,16 +128,16 @@ invalid.vue:9:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:11:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:12:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-     9 │ <a>learn more</a>
-    10 │ 
-  > 11 │ <a>learn      more</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 
-    13 │ <a>learn more.</a>
+    10 │ 	<a>learn more</a>
+    11 │ 
+  > 12 │ 	<a>learn      more</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ 	<a>learn more.</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -143,16 +145,16 @@ invalid.vue:11:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:13:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:14:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    11 │ <a>learn      more</a>
-    12 │ 
-  > 13 │ <a>learn more.</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ <a>learn more?</a>
+    12 │ 	<a>learn      more</a>
+    13 │ 
+  > 14 │ 	<a>learn more.</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ 	<a>learn more?</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -160,16 +162,16 @@ invalid.vue:13:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:15:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:16:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    13 │ <a>learn more.</a>
-    14 │ 
-  > 15 │ <a>learn more?</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ <a>learn more,</a>
+    14 │ 	<a>learn more.</a>
+    15 │ 
+  > 16 │ 	<a>learn more?</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ 	<a>learn more,</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -177,16 +179,16 @@ invalid.vue:15:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:17:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:18:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    15 │ <a>learn more?</a>
-    16 │ 
-  > 17 │ <a>learn more,</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ <a>learn more!</a>
+    16 │ 	<a>learn more?</a>
+    17 │ 
+  > 18 │ 	<a>learn more,</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ 	<a>learn more!</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -194,16 +196,16 @@ invalid.vue:17:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:19:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:20:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    17 │ <a>learn more,</a>
-    18 │ 
-  > 19 │ <a>learn more!</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    20 │ 
-    21 │ <a>learn more;</a>
+    18 │ 	<a>learn more,</a>
+    19 │ 
+  > 20 │ 	<a>learn more!</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ 	<a>learn more;</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -211,16 +213,16 @@ invalid.vue:19:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:21:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:22:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    19 │ <a>learn more!</a>
-    20 │ 
-  > 21 │ <a>learn more;</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    22 │ 
-    23 │ <a>learn more:</a>
+    20 │ 	<a>learn more!</a>
+    21 │ 
+  > 22 │ 	<a>learn more;</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ 	<a>learn more:</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -228,16 +230,16 @@ invalid.vue:21:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:23:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:24:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    21 │ <a>learn more;</a>
-    22 │ 
-  > 23 │ <a>learn more:</a>
-       │ ^^^^^^^^^^^^^^^^^^
-    24 │ 
-    25 │ <a>link</a>
+    22 │ 	<a>learn more;</a>
+    23 │ 
+  > 24 │ 	<a>learn more:</a>
+       │ 	^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ 	<a>link</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -245,16 +247,16 @@ invalid.vue:23:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:25:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:26:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    23 │ <a>learn more:</a>
-    24 │ 
-  > 25 │ <a>link</a>
-       │ ^^^^^^^^^^^
-    26 │ 
-    27 │ <a>a link</a>
+    24 │ 	<a>learn more:</a>
+    25 │ 
+  > 26 │ 	<a>link</a>
+       │ 	^^^^^^^^^^^
+    27 │ 
+    28 │ 	<a>a link</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -262,16 +264,16 @@ invalid.vue:25:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:27:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:28:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    25 │ <a>link</a>
-    26 │ 
-  > 27 │ <a>a link</a>
-       │ ^^^^^^^^^^^^^
-    28 │ 
-    29 │ <a aria-label="click here">something</a>
+    26 │ 	<a>link</a>
+    27 │ 
+  > 28 │ 	<a>a link</a>
+       │ 	^^^^^^^^^^^^^
+    29 │ 
+    30 │ 	<a aria-label="click here">something</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -279,16 +281,16 @@ invalid.vue:27:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:29:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:30:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    27 │ <a>a link</a>
-    28 │ 
-  > 29 │ <a aria-label="click here">something</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ 
-    31 │ <a> a link </a>
+    28 │ 	<a>a link</a>
+    29 │ 
+  > 30 │ 	<a aria-label="click here">something</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ 	<a> a link </a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -296,16 +298,16 @@ invalid.vue:29:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:31:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:32:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    29 │ <a aria-label="click here">something</a>
-    30 │ 
-  > 31 │ <a> a link </a>
-       │ ^^^^^^^^^^^^^^^
-    32 │ 
-    33 │ <a>a<i></i> link</a>
+    30 │ 	<a aria-label="click here">something</a>
+    31 │ 
+  > 32 │ 	<a> a link </a>
+       │ 	^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ 	<a>a<i></i> link</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -313,16 +315,16 @@ invalid.vue:31:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:33:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:34:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    31 │ <a> a link </a>
-    32 │ 
-  > 33 │ <a>a<i></i> link</a>
-       │ ^^^^^^^^^^^^^^^^^^^^
-    34 │ 
-    35 │ <a><i></i>a link</a>
+    32 │ 	<a> a link </a>
+    33 │ 
+  > 34 │ 	<a>a<i></i> link</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ 	<a><i></i>a link</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -330,16 +332,16 @@ invalid.vue:33:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:35:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:36:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    33 │ <a>a<i></i> link</a>
-    34 │ 
-  > 35 │ <a><i></i>a link</a>
-       │ ^^^^^^^^^^^^^^^^^^^^
-    36 │ 
-    37 │ <a><span>click</span> here</a>
+    34 │ 	<a>a<i></i> link</a>
+    35 │ 
+  > 36 │ 	<a><i></i>a link</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+    38 │ 	<a><span>click</span> here</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -347,16 +349,16 @@ invalid.vue:35:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:37:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:38:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    35 │ <a><i></i>a link</a>
-    36 │ 
-  > 37 │ <a><span>click</span> here</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    38 │ 
-    39 │ <a><span> click </span> here</a>
+    36 │ 	<a><i></i>a link</a>
+    37 │ 
+  > 38 │ 	<a><span>click</span> here</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ 	<a><span> click </span> here</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -364,16 +366,16 @@ invalid.vue:37:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:39:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:40:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    37 │ <a><span>click</span> here</a>
-    38 │ 
-  > 39 │ <a><span> click </span> here</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    40 │ 
-    41 │ <a><span aria-hidden>more text</span>learn more</a>
+    38 │ 	<a><span>click</span> here</a>
+    39 │ 
+  > 40 │ 	<a><span> click </span> here</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ 	<a><span aria-hidden>more text</span>learn more</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -381,16 +383,16 @@ invalid.vue:39:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:43:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:44:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    41 │ <a><span aria-hidden>more text</span>learn more</a>
-    42 │ 
-  > 43 │ <a><span aria-hidden="true">more text</span>learn more</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ 
-    45 │ <a><img alt="click here" /></a>
+    42 │ 	<a><span aria-hidden>more text</span>learn more</a>
+    43 │ 
+  > 44 │ 	<a><span aria-hidden="true">more text</span>learn more</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ 	<a><img alt="click here" /></a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -398,16 +400,16 @@ invalid.vue:43:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:45:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:46:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    43 │ <a><span aria-hidden="true">more text</span>learn more</a>
-    44 │ 
-  > 45 │ <a><img alt="click here" /></a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ 
-    47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+    44 │ 	<a><span aria-hidden="true">more text</span>learn more</a>
+    45 │ 
+  > 46 │ 	<a><img alt="click here" /></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ 	<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -415,16 +417,16 @@ invalid.vue:45:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:47:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:48:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    45 │ <a><img alt="click here" /></a>
-    46 │ 
-  > 47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    48 │ 
-    49 │ <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+    46 │ 	<a><img alt="click here" /></a>
+    47 │ 
+  > 48 │ 	<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │ 	<a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   
@@ -432,15 +434,16 @@ invalid.vue:47:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:49:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:50:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    47 │ <a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
-    48 │ 
-  > 49 │ <a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ 
+    48 │ 	<a alt="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+    49 │ 
+  > 50 │ 	<a><span alt="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ </template>
+    52 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   

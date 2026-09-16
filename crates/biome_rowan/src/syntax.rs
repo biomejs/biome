@@ -129,8 +129,8 @@ mod tests {
     use biome_text_size::TextRange;
 
     use crate::Direction;
-    use crate::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::syntax::TriviaPiece;
+    use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::syntax::{SyntaxNode, SyntaxToken, TriviaPiece, TriviaPieceKind};
 
     #[test]
     fn empty_list() {
@@ -361,6 +361,165 @@ mod tests {
     }
 
     #[test]
+    fn edge_tokens_stay_within_the_requested_tokenless_subtree() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "before");
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.finish_node();
+        builder.finish_node();
+        builder.token(RawLanguageKind::STRING_TOKEN, "after");
+        builder.finish_node();
+
+        let root = builder.finish();
+        let tokenless = root
+            .children_with_tokens()
+            .nth(1)
+            .and_then(|element| element.into_node())
+            .unwrap();
+
+        assert_eq!(tokenless.first_token(), None);
+        assert_eq!(tokenless.last_token(), None);
+    }
+
+    #[test]
+    fn edge_tokens_fall_back_across_empty_children_and_keep_zero_length_tokens() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.finish_node();
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "first");
+        builder.finish_node();
+        builder.token(RawLanguageKind::EOF, "");
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.finish_node();
+        builder.finish_node();
+        builder.finish_node();
+
+        let root = builder.finish();
+        let subtree = root.children().next().unwrap();
+
+        assert_eq!(subtree.first_token().unwrap().text(), "first");
+        assert_eq!(subtree.last_token().unwrap().text(), "");
+    }
+
+    #[test]
+    fn edge_tokens_keep_zero_length_first_token() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::BOGUS);
+        builder.token(RawLanguageKind::EOF, "");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token(RawLanguageKind::STRING_TOKEN, "after");
+        builder.finish_node();
+        builder.finish_node();
+        builder.finish_node();
+
+        let root = builder.finish();
+        let subtree = root.children().next().unwrap();
+        let zero_length = subtree
+            .children_with_tokens()
+            .next()
+            .and_then(|element| element.into_token())
+            .unwrap();
+        let first = subtree.first_token().unwrap();
+
+        assert_eq!(first.kind(), RawLanguageKind::EOF);
+        assert_eq!(first.text(), "");
+        assert_eq!(first, zero_length);
+    }
+
+    #[test]
+    fn edge_tokens_fall_back_across_multiple_empty_ancestors() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::BOGUS);
+        for _ in 0..3 {
+            builder.start_node(RawLanguageKind::BOGUS);
+        }
+        for _ in 0..3 {
+            builder.finish_node();
+        }
+        builder.token(RawLanguageKind::STRING_TOKEN, "first");
+        builder.token(RawLanguageKind::STRING_TOKEN, "last");
+        for _ in 0..3 {
+            builder.start_node(RawLanguageKind::BOGUS);
+        }
+        for _ in 0..3 {
+            builder.finish_node();
+        }
+        builder.finish_node();
+        builder.finish_node();
+
+        let root = builder.finish();
+        let subtree = root.children().next().unwrap();
+
+        assert_eq!(subtree.first_token().unwrap().text(), "first");
+        assert_eq!(subtree.last_token().unwrap().text(), "last");
+    }
+
+    #[test]
+    fn edge_tokens_skip_missing_slots() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::CONDITION);
+        builder.token(RawLanguageKind::L_PAREN_TOKEN, "(");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.finish_node();
+        builder.finish_node();
+        builder.token(RawLanguageKind::STRING_TOKEN, "outside");
+        builder.finish_node();
+
+        let root = builder.finish();
+        let condition = root.children().next().unwrap();
+
+        assert_eq!(condition.first_token().unwrap().text(), "(");
+        assert_eq!(condition.last_token().unwrap().text(), "(");
+    }
+
+    #[test]
+    fn edge_tokens_handle_deep_chains() {
+        const DEPTH: usize = 4_096;
+
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        for _ in 0..DEPTH {
+            builder.start_node(RawLanguageKind::BOGUS);
+        }
+        builder.token(RawLanguageKind::STRING_TOKEN, "edge");
+        for _ in 0..DEPTH {
+            builder.finish_node();
+        }
+        builder.finish_node();
+
+        let mut root = builder.finish();
+
+        // Keep cleanup iterative so this test isolates lookup stack usage.
+        let texts = [root.first_token(), root.last_token()].map(|token| {
+            let token = token?;
+            let text = token.text().to_owned();
+            let mut parent = token.parent();
+            drop(token);
+
+            while let Some(node) = parent {
+                parent = node.parent();
+            }
+
+            Some(text)
+        });
+
+        while let Some(child) = root.first_child() {
+            root = child.detach();
+        }
+
+        assert_eq!(texts[0].as_deref(), Some("edge"));
+        assert_eq!(texts[1].as_deref(), Some("edge"));
+    }
+
+    #[test]
     pub fn syntax_text_and_len() {
         let mut builder = RawSyntaxTreeBuilder::new();
         builder.start_node(RawLanguageKind::ROOT);
@@ -518,5 +677,36 @@ mod tests {
         assert_eq!(2, pieces_rev.len());
         assert_eq!("/**/", pieces_rev[0].text());
         assert_eq!("\n\t ", pieces_rev[1].text());
+    }
+
+    #[test]
+    fn replacing_trivia_clears_descendant_flags() {
+        let token = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::STRING_TOKEN,
+            "?value//",
+            [TriviaPiece::new(TriviaPieceKind::Skipped, 1)],
+            [TriviaPiece::single_line_comment(2)],
+        );
+        let root =
+            SyntaxNode::<RawLanguage>::new_detached(RawLanguageKind::ROOT, [Some(token.into())]);
+
+        assert!(root.has_comments_descendants());
+        assert!(root.has_skipped_descendants());
+
+        let token = root.first_token().unwrap();
+        let replacement = token.with_leading_trivia([]);
+        let root = root
+            .replace_child(token.into(), replacement.into())
+            .unwrap();
+        assert!(root.has_comments_descendants());
+        assert!(!root.has_skipped_descendants());
+
+        let token = root.first_token().unwrap();
+        let replacement = token.with_trailing_trivia([]);
+        let root = root
+            .replace_child(token.into(), replacement.into())
+            .unwrap();
+        assert!(!root.has_comments_descendants());
+        assert!(!root.has_skipped_descendants());
     }
 }

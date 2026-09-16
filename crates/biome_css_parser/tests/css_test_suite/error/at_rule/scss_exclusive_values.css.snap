@@ -1364,20 +1364,29 @@ CssRoot {
                     queries: CssMediaQueryList [
                         CssBogusMediaQuery {
                             items: [
-                                ScssInterpolation {
-                                    hash_token: HASH@1260..1261 "#" [] [],
-                                    l_curly_token: L_CURLY@1261..1262 "{" [] [],
-                                    value: ScssExpression {
-                                        items: ScssExpressionItemList [
-                                            ScssVariable {
-                                                dollar_token: DOLLAR@1262..1263 "$" [] [],
-                                                name: CssIdentifier {
-                                                    value_token: IDENT@1263..1268 "query" [] [],
+                                CssMediaTypeQuery {
+                                    modifier: missing (optional),
+                                    ty: CssMediaType {
+                                        value: ScssInterpolatedIdentifier {
+                                            items: ScssInterpolatedIdentifierPartList [
+                                                ScssInterpolation {
+                                                    hash_token: HASH@1260..1261 "#" [] [],
+                                                    l_curly_token: L_CURLY@1261..1262 "{" [] [],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssVariable {
+                                                                dollar_token: DOLLAR@1262..1263 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@1263..1268 "query" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    r_curly_token: R_CURLY@1268..1270 "}" [] [Whitespace(" ")],
                                                 },
-                                            },
-                                        ],
+                                            ],
+                                        },
                                     },
-                                    r_curly_token: R_CURLY@1268..1270 "}" [] [Whitespace(" ")],
                                 },
                             ],
                         },
@@ -2621,16 +2630,21 @@ CssRoot {
           0: MEDIA_KW@1254..1260 "media" [] [Whitespace(" ")]
           1: CSS_MEDIA_QUERY_LIST@1260..1270
             0: CSS_BOGUS_MEDIA_QUERY@1260..1270
-              0: SCSS_INTERPOLATION@1260..1270
-                0: HASH@1260..1261 "#" [] []
-                1: L_CURLY@1261..1262 "{" [] []
-                2: SCSS_EXPRESSION@1262..1268
-                  0: SCSS_EXPRESSION_ITEM_LIST@1262..1268
-                    0: SCSS_VARIABLE@1262..1268
-                      0: DOLLAR@1262..1263 "$" [] []
-                      1: CSS_IDENTIFIER@1263..1268
-                        0: IDENT@1263..1268 "query" [] []
-                3: R_CURLY@1268..1270 "}" [] [Whitespace(" ")]
+              0: CSS_MEDIA_TYPE_QUERY@1260..1270
+                0: (empty)
+                1: CSS_MEDIA_TYPE@1260..1270
+                  0: SCSS_INTERPOLATED_IDENTIFIER@1260..1270
+                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@1260..1270
+                      0: SCSS_INTERPOLATION@1260..1270
+                        0: HASH@1260..1261 "#" [] []
+                        1: L_CURLY@1261..1262 "{" [] []
+                        2: SCSS_EXPRESSION@1262..1268
+                          0: SCSS_EXPRESSION_ITEM_LIST@1262..1268
+                            0: SCSS_VARIABLE@1262..1268
+                              0: DOLLAR@1262..1263 "$" [] []
+                              1: CSS_IDENTIFIER@1263..1268
+                                0: IDENT@1263..1268 "query" [] []
+                        3: R_CURLY@1268..1270 "}" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@1270..1291
           0: L_CURLY@1270..1271 "{" [] []
           1: CSS_RULE_LIST@1271..1289

@@ -1,0 +1,23 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalid_level.options.json
+---
+# Input
+```md
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSingleTopLevelHeading": {
+          "level": "error",
+          "options": {
+            "level": 7
+          }
+        }
+      }
+    }
+  }
+}
+
+```

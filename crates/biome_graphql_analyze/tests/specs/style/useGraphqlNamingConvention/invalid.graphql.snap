@@ -5,22 +5,64 @@ expression: invalid.graphql
 # Input
 ```graphql
 enum Status {
+	"""
+	Some description
+	"""
 	Active
+	"Some more description"
+	Inactive
+	# Some comment
+	Some_underscore
 }
 
 ```
 
 # Diagnostics
 ```
-invalid.graphql:2:2 lint/style/useGraphqlNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:5:2 lint/style/useGraphqlNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Enum values should be in all caps.
   
-    1 │ enum Status {
-  > 2 │ 	Active
+    3 │ 	Some description
+    4 │ 	"""
+  > 5 │ 	Active
       │ 	^^^^^^
-    3 │ }
-    4 │ 
+    6 │ 	"Some more description"
+    7 │ 	Inactive
+  
+  i Change the enum value to be in all caps.
+  
+
+```
+
+```
+invalid.graphql:7:2 lint/style/useGraphqlNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Enum values should be in all caps.
+  
+    5 │ 	Active
+    6 │ 	"Some more description"
+  > 7 │ 	Inactive
+      │ 	^^^^^^^^
+    8 │ 	# Some comment
+    9 │ 	Some_underscore
+  
+  i Change the enum value to be in all caps.
+  
+
+```
+
+```
+invalid.graphql:9:2 lint/style/useGraphqlNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Enum values should be in all caps.
+  
+     7 │ 	Inactive
+     8 │ 	# Some comment
+   > 9 │ 	Some_underscore
+       │ 	^^^^^^^^^^^^^^^
+    10 │ }
+    11 │ 
   
   i Change the enum value to be in all caps.
   

@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/release-important-arguments.scss
+---
+
+# Input
+
+```scss
+$enabled :true;
+@function identity( $value ){ @return $value; }
+.enabled{color:red if( $enabled,/* before */!important/* after */,null );}
+.disabled { color :red if(false ,
+  /* disabled before */ !important /* disabled after */ ,null);}
+.ordinary {color:red identity(
+/* ordinary before */ !important /* ordinary after */
+);}
+.controls{ color:red!important; color:if(style(--enabled: true):red;else:blue)!important; }
+
+```
+
+
+# Formatted
+
+```scss
+$enabled: true;
+@function identity($value) {
+	@return $value;
+}
+.enabled {
+	color: red if($enabled, /* before */ !important /* after */, null);
+}
+.disabled {
+	color: red
+		if(false, /* disabled before */ !important /* disabled after */, null);
+}
+.ordinary {
+	color: red identity(/* ordinary before */ !important /* ordinary after */);
+}
+.controls {
+	color: red !important;
+	color: if(style(--enabled: true): red; else: blue) !important;
+}
+
+```

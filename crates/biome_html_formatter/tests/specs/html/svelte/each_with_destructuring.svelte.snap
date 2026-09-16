@@ -41,7 +41,7 @@ info: svelte/each_with_destructuring.svelte
 	<div>{i}: {name} ({email})</div>
 {/each}
 
-{#each products as [ id, title ]}
+{#each products as [id, title]}
 	<div>{id}: {title}</div>
 {/each}
 
@@ -49,7 +49,7 @@ info: svelte/each_with_destructuring.svelte
 	<div>{id}</div>
 {/each}
 
-{#each Object.entries(foo) as [ key, { a, b } ]}
+{#each Object.entries(foo) as [key, { a, b }]}
 	{a} {b}
 {/each}
 

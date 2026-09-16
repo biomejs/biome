@@ -26,7 +26,7 @@ impl biome_deserialize::Merge for NoForEachOptions {
 impl DeserializableValidator for NoForEachOptions {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {

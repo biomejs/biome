@@ -1,7 +1,9 @@
-<!-- should not generate diagnostics -->
-<label>
-	<span>
-		A label
-		<CustomInput />
-	</span>
-</label>
+<template>
+	<!-- should not generate diagnostics -->
+	<label>
+		<span>
+			A label
+			<CustomInput />
+		</span>
+	</label>
+</template>

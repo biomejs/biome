@@ -1,0 +1,270 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/data.ts`
+
+## Source
+
+```ts
+export interface Usage {
+	range: { startDate: string };
+}
+export interface LogEntry {
+	id: string;
+	createdAt: { toISOString(): string };
+}
+
+export declare function getUsage(): Promise<Usage | null>;
+export declare function getLogs(): Promise<LogEntry[]>;
+export declare function getRows(): Promise<string[] | null>;
+```
+
+## Inferred types
+
+```
+Binding Usage "Usage" => interface "Usage" {
+  extends: []
+  type_args: []
+  members: [
+    "range":
+      Object {
+        prototype: No prototype
+        members: ["startDate": string]
+      }
+  ]
+}
+
+Binding LogEntry "LogEntry" => interface "LogEntry" {
+  extends: []
+  type_args: []
+  members: [
+    "id": string,
+    "createdAt":
+      Object {
+        prototype: No prototype
+        members: [
+          "toISOString":
+            sync Function "toISOString" {
+              accepts: {
+                params: []
+                type_args: []
+              }
+              returns: string
+            }
+        ]
+      }
+  ]
+}
+
+Binding getUsage "getUsage" => sync Function "getUsage" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Usage | null>
+}
+
+Binding getLogs "getLogs" => sync Function "getLogs" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<instanceof LogEntry>>
+}
+
+Binding getRows "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
+}
+```
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+import { getLogs, getRows, getUsage } from "./data.ts";
+
+export async function read() {
+	const usage = await getUsage();
+	const startDate = usage?.range.startDate;
+
+	const logs = await getLogs();
+	const byIndex = logs[0]?.id;
+	const [first] = logs;
+	const byDestructuring = first?.createdAt.toISOString();
+
+	const rows = await getRows();
+	const byNullableIndex = rows?.[0];
+
+	return { startDate, byIndex, byDestructuring, byNullableIndex };
+}
+```
+
+## Inferred types
+
+```
+Binding getLogs "getLogs" => sync Function "getLogs" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<instanceof LogEntry>>
+}
+
+Binding getRows "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
+}
+
+Binding getUsage "getUsage" => sync Function "getUsage" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Usage | null>
+}
+
+Binding read "read" => async Function "read" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<Object {
+    prototype: No prototype
+    members: [
+      "startDate": typeof startDate,
+      "byIndex": typeof byIndex,
+      "byDestructuring": typeof byDestructuring,
+      "byNullableIndex": typeof byNullableIndex
+    ]
+  }>
+}
+
+Binding usage "usage" => instanceof Usage | null
+
+Expression "await getUsage()" => instanceof Usage | null
+
+Expression "getUsage" => sync Function "getUsage" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Usage | null>
+}
+
+Expression "getUsage()" => instanceof Promise<instanceof Usage | null>
+
+Binding startDate "startDate" => string | undefined
+
+Expression "usage" => instanceof Usage | null
+
+Expression "usage?.range" =>
+  Object {
+    prototype: No prototype
+    members: ["startDate": string]
+  }
+  | undefined
+
+Expression "usage?.range.startDate" => string | undefined
+
+Binding logs "logs" => instanceof Array<instanceof LogEntry>
+
+Expression "await getLogs()" => instanceof Array<instanceof LogEntry>
+
+Expression "getLogs" => sync Function "getLogs" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<instanceof LogEntry>>
+}
+
+Expression "getLogs()" => instanceof Promise<instanceof Array<instanceof LogEntry>>
+
+Binding byIndex "byIndex" => string | undefined
+
+Expression "logs" => instanceof Array<instanceof LogEntry>
+
+Expression "logs[0]" => instanceof LogEntry | undefined
+
+Expression "logs[0]?.id" => string | undefined
+
+Expression "0" => number: 0
+
+Binding first "first" => instanceof LogEntry | undefined
+
+Expression "logs" => instanceof Array<instanceof LogEntry>
+
+Binding byDestructuring "byDestructuring" => string | undefined
+
+Expression "first" => instanceof LogEntry | undefined
+
+Expression "first?.createdAt" =>
+  Object {
+    prototype: No prototype
+    members: [
+      "toISOString":
+        sync Function "toISOString" {
+          accepts: {
+            params: []
+            type_args: []
+          }
+          returns: string
+        }
+    ]
+  }
+  | undefined
+
+Expression "first?.createdAt.toISOString" =>
+  sync Function "toISOString" {
+    accepts: {
+      params: []
+      type_args: []
+    }
+    returns: string
+  }
+  | undefined
+
+Expression "first?.createdAt.toISOString()" => string | undefined
+
+Binding rows "rows" => instanceof Array<string> | null
+
+Expression "await getRows()" => instanceof Array<string> | null
+
+Expression "getRows" => sync Function "getRows" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<instanceof Array<string> | null>
+}
+
+Expression "getRows()" => instanceof Promise<instanceof Array<string> | null>
+
+Binding byNullableIndex "byNullableIndex" => string | undefined
+
+Expression "rows" => instanceof Array<string> | null
+
+Expression "rows?.[0]" => string | undefined
+
+Expression "0" => number: 0
+
+Expression "{ startDate, byIndex, byDestructuring, byNullableIndex }" => Object {
+  prototype: No prototype
+  members: [
+    "startDate": typeof startDate,
+    "byIndex": typeof byIndex,
+    "byDestructuring": typeof byDestructuring,
+    "byNullableIndex": typeof byNullableIndex
+  ]
+}
+```

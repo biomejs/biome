@@ -35,4 +35,5 @@ info: svelte/comments/each_one_liner.svelte
 <!-- 5 -->
 {/each}
 <!-- 6 -->
+
 ```

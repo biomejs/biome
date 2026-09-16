@@ -29,6 +29,7 @@ biome_languages          = { workspace = true, features = ["lang_js"] }
 biome_parser             = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
+biome_text_edit          = { workspace = true }
 biome_text_size          = { workspace = true }
 boa_engine               = { workspace = true, optional = true }
 camino                   = { workspace = true }
@@ -40,10 +41,13 @@ schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser = { path = "../biome_js_parser" }
-biome_languages = { path = "../biome_languages", features = ["lang_js"] }
-insta           = { workspace = true }
-serde_json      = { workspace = true }
+biome_js_analyze   = { path = "../biome_js_analyze" }
+biome_js_formatter = { path = "../biome_js_formatter" }
+biome_js_parser    = { path = "../biome_js_parser" }
+biome_js_semantic  = { path = "../biome_js_semantic" }
+biome_languages    = { path = "../biome_languages", features = ["lang_js"] }
+insta              = { workspace = true }
+serde_json         = { workspace = true }
 
 [target."cfg(unix)".dependencies]
 libc = { workspace = true, optional = true }

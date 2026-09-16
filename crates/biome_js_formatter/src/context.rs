@@ -150,7 +150,7 @@ impl CstFormatContext for JsFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct JsFormatOptions {
     /// The indent style.
     indent_style: IndentStyle,

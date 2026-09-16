@@ -1,6 +1,6 @@
 use biome_rowan::TextRange;
 
-use crate::{HtmlSyntaxKind, HtmlSyntaxToken};
+use crate::{HtmlSyntaxKind, HtmlSyntaxToken, unquote};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// static values defined in JavaScript's expressions
@@ -68,15 +68,7 @@ impl StaticValue {
                     text
                 };
                 // Also strip JS string literal quotes (e.g. Vue binding :attr="'value'" yields inner = 'value')
-                if inner.len() >= 2
-                    && ((inner.starts_with('"') && inner.ends_with('"'))
-                        || (inner.starts_with('\'') && inner.ends_with('\'')))
-                {
-                    // SAFETY: delimiter is a single ASCII character at both ends
-                    &inner[1..inner.len() - 1]
-                } else {
-                    inner
-                }
+                unquote(inner)
             }
             Self::EmptyString(_) => "",
         }

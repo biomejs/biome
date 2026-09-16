@@ -1,0 +1,5 @@
+$query: "and (color)";
+
+@media all #{$query} extra, print {}
+@media foo/* first */-/* second */bar {}
+@media print-#{$suffix {}

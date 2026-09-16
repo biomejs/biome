@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/event-binding/non-ascii-expression.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div @click="   我   " />
+  <div @click="   me   " />
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <template>
+-  <div @click="我" />
+-  <div @click="me" />
++  <div @click="   我   " />
++  <div @click="   me   " />
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <div @click="   我   " />
+  <div @click="   me   " />
+</template>
+```

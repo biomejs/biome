@@ -1,0 +1,8 @@
+- x
+     ```
+     code
+     ```  
+  after
+
+- ~~~
+outside

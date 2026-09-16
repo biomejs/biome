@@ -10,7 +10,7 @@ impl FormatRule<ScssInterpolatedIdentifierPartList> for FormatScssInterpolatedId
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         for item in node {
-            item.format().fmt(f)?;
+            item.format().with_text_case(CssCase::Preserve).fmt(f)?;
         }
 
         Ok(())

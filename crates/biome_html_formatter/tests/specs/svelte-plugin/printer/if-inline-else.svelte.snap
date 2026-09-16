@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/if-inline-else.svelte
+---
+
+# Input
+
+```svelte
+{#if foo}bar{:else}baz{/if}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1,5 @@
+-{#if foo}bar{:else}baz{/if}
++{#if foo}
++    bar
++{:else}
++    baz
++{/if}
+```
+
+# Output
+
+```svelte
+{#if foo}
+    bar
+{:else}
+    baz
+{/if}
+```

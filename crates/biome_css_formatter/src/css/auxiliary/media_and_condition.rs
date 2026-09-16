@@ -17,7 +17,7 @@ impl FormatNodeRule<CssMediaAndCondition> for FormatCssMediaAndCondition {
             [
                 left.format(),
                 space(),
-                and_token.format(),
+                and_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 right.format()
             ]

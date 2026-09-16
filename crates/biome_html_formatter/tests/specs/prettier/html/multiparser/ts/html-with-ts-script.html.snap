@@ -35,25 +35,23 @@ info: html/multiparser/ts/html-with-ts-script.html
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,12 +1,18 @@
--<!doctype html>
-+<!DOCTYPE html>
+@@ -2,11 +2,17 @@
  <html lang="en">
    <head>
      <script lang="ts">
 -      type X = { [K in keyof Y]: Partial<K> };
-+    type X = { [
++      type X = { [
 +        K in keyof Y
 +    ]: Partial < K >  } ;
 +
-+    class   Foo< T >{
++      class   Foo< T >{
 +
 +        constructor ( private foo: keyof Apple ){
-+
  
 -      class Foo<T> {
 -        constructor(private foo: keyof Apple) {}
 -      }
++
 +        }
 +    }
      </script>
@@ -64,15 +62,15 @@ info: html/multiparser/ts/html-with-ts-script.html
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <script lang="ts">
-    type X = { [
+      type X = { [
         K in keyof Y
     ]: Partial < K >  } ;
 
-    class   Foo< T >{
+      class   Foo< T >{
 
         constructor ( private foo: keyof Apple ){
 

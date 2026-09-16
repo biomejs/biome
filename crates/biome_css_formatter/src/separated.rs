@@ -1,10 +1,13 @@
 use crate::FormatCssSyntaxToken;
 use crate::prelude::*;
-use biome_css_syntax::{CssIdentifier, CssLanguage, CssSyntaxToken};
+use biome_css_syntax::{CssLanguage, CssSyntaxToken};
 use biome_formatter::separated::{
     FormatSeparatedElementRule, FormatSeparatedIter, TrailingSeparator,
 };
-use biome_formatter::{FormatRefWithRule, FormatRuleWithOptions};
+use biome_formatter::{
+    FormatRefWithRule, FormatScopedOptions, FormatScopedOptionsExt as _, FormatWithRule,
+    FormatWithScopedOptions,
+};
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListElementsIterator};
 use std::marker::PhantomData;
 
@@ -64,14 +67,14 @@ pub(crate) trait FormatAstSeparatedListExtension:
 
 impl<T> FormatAstSeparatedListExtension for T where T: AstSeparatedList<Language = CssLanguage> {}
 
-#[derive(Default, Debug, Clone, Copy)]
-pub(crate) struct CssFormatSeparatedElementRuleWithOptions<N, O> {
+#[derive(Debug, Clone)]
+pub(crate) struct CssFormatSeparatedElementRuleWithScopedOptions<N, O> {
     node: PhantomData<N>,
     options: O,
 }
 
-impl<N, O> CssFormatSeparatedElementRuleWithOptions<N, O> {
-    pub(crate) fn new(options: O) -> Self {
+impl<N, O> CssFormatSeparatedElementRuleWithScopedOptions<N, O> {
+    fn new(options: O) -> Self {
         Self {
             node: PhantomData,
             options,
@@ -79,20 +82,18 @@ impl<N, O> CssFormatSeparatedElementRuleWithOptions<N, O> {
     }
 }
 
-impl<N, O, R> FormatSeparatedElementRule<N> for CssFormatSeparatedElementRuleWithOptions<N, O>
+impl<N, O> FormatSeparatedElementRule<N> for CssFormatSeparatedElementRuleWithScopedOptions<N, O>
 where
-    O: Clone + Copy,
-    R: FormatNodeRule<N> + FormatRuleWithOptions<N, Context = CssFormatContext, Options = O>,
-    N: AstNode<Language = CssLanguage>
-        + for<'a> AsFormat<CssFormatContext, Format<'a> = FormatRefWithRule<'a, N, R>>
-        + 'static,
+    O: Clone + FormatScopedOptions<CssFormatContext, N>,
+    N: AstNode<Language = CssLanguage> + AsFormat<CssFormatContext> + 'static,
+    for<'a> N::Format<'a>: FormatWithRule<CssFormatContext, Item = N>,
 {
     type Context = CssFormatContext;
-    type FormatNode<'a> = FormatRefWithRule<'a, N, R>;
+    type FormatNode<'a> = FormatWithScopedOptions<N::Format<'a>, O>;
     type FormatSeparator<'a> = FormatRefWithRule<'a, CssSyntaxToken, FormatCssSyntaxToken>;
 
     fn format_node<'a>(&self, node: &'a N) -> Self::FormatNode<'a> {
-        node.format().with_options(self.options)
+        node.format().with_scoped_options(self.options.clone())
     }
 
     fn format_separator<'a>(&self, separator: &'a CssSyntaxToken) -> Self::FormatSeparator<'a> {
@@ -100,33 +101,32 @@ where
     }
 }
 
-type CssFormatSeparatedIterWithOptions<Node, Options, C> = FormatSeparatedIter<
+type CssFormatSeparatedIterWithScopedOptions<Node, Options, C> = FormatSeparatedIter<
     AstSeparatedListElementsIterator<CssLanguage, Node>,
     Node,
-    CssFormatSeparatedElementRuleWithOptions<Node, Options>,
+    CssFormatSeparatedElementRuleWithScopedOptions<Node, Options>,
     C,
 >;
 
-/// AST Separated list formatting extension methods with options
-#[expect(dead_code)]
-pub(crate) trait FormatAstSeparatedListWithOptionsExtension<O>:
+/// AST separated-list formatting with scoped options.
+pub(crate) trait FormatAstSeparatedListWithScopedOptionsExtension<O>:
     AstSeparatedList<Language = CssLanguage>
 {
-    /// Prints a separated list of nodes with options
+    /// Prints a separated list of nodes with scoped options.
     ///
     /// Trailing separators will be reused from the original list or created by
     /// calling the `separator_factory` function. The last trailing separator
     /// will not be printed by default. Use `with_trailing_separator` to add it
     /// in where necessary.
-    fn format_separated_with_options(
+    fn format_separated_with_scoped_options(
         &self,
         separator: &'static str,
         options: O,
-    ) -> CssFormatSeparatedIterWithOptions<Self::Node, O, CssFormatContext> {
+    ) -> CssFormatSeparatedIterWithScopedOptions<Self::Node, O, CssFormatContext> {
         FormatSeparatedIter::new(
             self.elements(),
             separator,
-            CssFormatSeparatedElementRuleWithOptions::new(options),
+            CssFormatSeparatedElementRuleWithScopedOptions::new(options),
             on_skipped,
             on_removed,
         )
@@ -134,7 +134,7 @@ pub(crate) trait FormatAstSeparatedListWithOptionsExtension<O>:
     }
 }
 
-impl<T, O> FormatAstSeparatedListWithOptionsExtension<O> for T where
-    T: AstSeparatedList<Language = CssLanguage, Node = CssIdentifier>
+impl<T, O> FormatAstSeparatedListWithScopedOptionsExtension<O> for T where
+    T: AstSeparatedList<Language = CssLanguage>
 {
 }

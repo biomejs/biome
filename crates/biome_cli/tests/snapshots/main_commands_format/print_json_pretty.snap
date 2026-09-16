@@ -22,7 +22,7 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-The --json option is unstable/experimental and its output might change between patches/minor releases.
+The `json` and `json-pretty` reporters are experimental and may change in patch releases.
 ```
 
 ```block

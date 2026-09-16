@@ -90,9 +90,9 @@ End of a line `code at end`.
 
 `single word`
 
-``double backtick``
+`double backtick`
 
-``` triple backtick ```
+`triple backtick`
 
 `code with spaces   inside`
 
@@ -124,7 +124,7 @@ This is a long paragraph with `some inline code` embedded in it to test that it 
 
 ``foo ` bar``
 
-`` foo ` bar ``
+``foo ` bar``
 
 `   `
 
@@ -148,7 +148,7 @@ This is a long paragraph with `some inline code` embedded in it to test that it 
 
 `one two  three   four    five`
 
-`` has  spaces  and ` backtick ``
+``has  spaces  and ` backtick``
 
 ` ```123``` `
 

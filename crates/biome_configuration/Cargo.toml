@@ -35,6 +35,7 @@ biome_html_syntax          = { workspace = true, optional = true }
 biome_js_formatter         = { workspace = true, features = ["serde"], optional = true }
 biome_json_formatter       = { workspace = true, features = ["serde"], optional = true }
 biome_json_syntax          = { workspace = true, optional = true }
+biome_markdown_formatter   = { workspace = true, features = ["serde"], optional = true }
 biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
@@ -49,7 +50,7 @@ serde                      = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
 biome_json_parser = { path = "../biome_json_parser" }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true }
 tests_macros      = { workspace = true }
 
@@ -66,7 +67,7 @@ lang_graphql = ["biome_configuration_macros/lang_graphql"]
 lang_html    = ["biome_configuration_macros/lang_html", "dep:biome_html_formatter", "dep:biome_html_syntax"]
 lang_js      = ["biome_configuration_macros/lang_js", "dep:biome_js_formatter"]
 lang_json    = ["biome_configuration_macros/lang_json", "dep:biome_json_formatter"]
-lang_md      = []
+lang_md      = ["biome_configuration_macros/lang_md", "dep:biome_markdown_formatter"]
 lang_yaml    = ["dep:biome_yaml_syntax"]
 plugins      = ["dep:biome_plugin_loader"]
 schema       = [
@@ -77,6 +78,7 @@ schema       = [
   "biome_js_formatter/schema",
   "biome_json_formatter/schema",
   "biome_json_syntax/schema",
+  "biome_markdown_formatter/schema",
   "biome_plugin_loader/schema",
   "biome_rule_options/schema",
   "biome_yaml_syntax/schema",

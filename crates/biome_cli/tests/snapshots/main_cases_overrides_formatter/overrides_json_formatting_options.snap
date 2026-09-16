@@ -25,6 +25,9 @@ expression: redactor(content)
     {
       "includes": ["overrides.json"],
       "json": {
+        "parser": {
+          "allowTrailingCommas": true
+        },
         "formatter": {
           "enabled": true,
           "bracketSpacing": false,

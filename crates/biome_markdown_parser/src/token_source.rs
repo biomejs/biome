@@ -1,7 +1,7 @@
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, WHITESPACE};
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
@@ -49,6 +49,16 @@ impl<'source> MarkdownTokenSource<'source> {
     pub fn from_str(source: &'source str) -> Self {
         let lexer = MarkdownLexer::from_str(source);
 
+        Self::from_lexer(lexer)
+    }
+
+    pub fn from_range(source: &'source str, range: TextRange) -> Option<Self> {
+        let lexer = MarkdownLexer::from_range(source, range)?;
+
+        Some(Self::from_lexer(lexer))
+    }
+
+    fn from_lexer(lexer: MarkdownLexer<'source>) -> Self {
         let buffered = BufferedLexer::new(lexer);
         let mut source = MarkdownTokenSource::new(buffered);
 
@@ -57,12 +67,28 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     fn next_non_trivia_token(&mut self, context: MarkdownLexContext, first_token: bool) {
+        match context {
+            MarkdownLexContext::Table => {
+                self.next_non_trivia_token_impl::<true>(context, first_token)
+            }
+            _ => self.next_non_trivia_token_impl::<false>(context, first_token),
+        }
+    }
+
+    fn next_non_trivia_token_impl<const TABLE: bool>(
+        &mut self,
+        context: MarkdownLexContext,
+        first_token: bool,
+    ) {
         let mut trailing = !first_token;
 
         loop {
             let kind = self.lexer.next_token(context);
-
-            let trivia_kind = TriviaPieceKind::try_from(kind);
+            let trivia_kind = if TABLE && kind == WHITESPACE {
+                Ok(TriviaPieceKind::Whitespace)
+            } else {
+                TriviaPieceKind::try_from(kind)
+            };
 
             match trivia_kind {
                 Err(_) => {
@@ -97,13 +123,18 @@ impl<'source> MarkdownTokenSource<'source> {
     pub fn source_after_current(&self) -> &str {
         let range = self.lexer.current_range();
         let start: usize = range.start().into();
+        let end = self.lexer.lexer().range_end();
         let source = self.lexer.source();
-        &source[start..]
+        &source[start..end]
     }
 
     /// Returns the full source text.
     pub fn source_text(&self) -> &str {
         self.lexer.source()
+    }
+
+    pub fn has_frontmatter_closing_fence(&self) -> bool {
+        self.lexer.lexer().has_frontmatter_closing_fence()
     }
 
     /// Count leading indentation on the current line, including whitespace

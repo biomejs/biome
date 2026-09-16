@@ -8,6 +8,9 @@ pub(crate) struct FormatCssNumberDeclarator;
 impl FormatNodeRule<CssNumberDeclarator> for FormatCssNumberDeclarator {
     fn fmt_fields(&self, node: &CssNumberDeclarator, f: &mut CssFormatter) -> FormatResult<()> {
         let CssNumberDeclaratorFields { number_token } = node.as_fields();
-        write!(f, [number_token.format()])
+        write!(
+            f,
+            [number_token.format()?.with_text_case(CssCase::Preserve)]
+        )
     }
 }

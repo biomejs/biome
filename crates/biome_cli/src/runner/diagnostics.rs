@@ -48,7 +48,7 @@ pub(crate) struct ContentDiffAdvice {
 
 impl Advices for ContentDiffAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
-        let diff = TextEdit::from_unicode_words(&self.old, &self.new);
+        let diff = TextEdit::from_unicode_words(self.old.as_str(), self.new.as_str());
         visitor.record_diff(&diff)
     }
 }

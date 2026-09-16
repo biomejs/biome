@@ -1,0 +1,124 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+# Heading
+
+---
+title: value
+---
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@1..9 " Heading" [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@9..10 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@10..11 "\n" [] [],
+        },
+        MdThematicBreakBlock {
+            parts: MdThematicBreakPartList [
+                MdThematicBreakChar {
+                    value: MINUS@11..12 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@12..13 "-" [] [],
+                },
+                MdThematicBreakChar {
+                    value: MINUS@13..14 "-" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@14..15 "\n" [] [],
+        },
+        MdSetextHeader {
+            content: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@15..27 "title: value" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..28 "\n" [] [],
+                },
+            ],
+            underline_token: MD_SETEXT_UNDERLINE_LITERAL@28..31 "---" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@31..32 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@32..32 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..32
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..32
+    0: MD_HEADER@0..9
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..1
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+      2: MD_PARAGRAPH@1..9
+        0: MD_INLINE_ITEM_LIST@1..9
+          0: MD_TEXTUAL@1..9
+            0: MD_TEXTUAL_LITERAL@1..9 " Heading" [] []
+      3: MD_HASH_LIST@9..9
+    1: MD_NEWLINE@9..10
+      0: NEWLINE@9..10 "\n" [] []
+    2: MD_NEWLINE@10..11
+      0: NEWLINE@10..11 "\n" [] []
+    3: MD_THEMATIC_BREAK_BLOCK@11..14
+      0: MD_THEMATIC_BREAK_PART_LIST@11..14
+        0: MD_THEMATIC_BREAK_CHAR@11..12
+          0: MINUS@11..12 "-" [] []
+        1: MD_THEMATIC_BREAK_CHAR@12..13
+          0: MINUS@12..13 "-" [] []
+        2: MD_THEMATIC_BREAK_CHAR@13..14
+          0: MINUS@13..14 "-" [] []
+    4: MD_NEWLINE@14..15
+      0: NEWLINE@14..15 "\n" [] []
+    5: MD_SETEXT_HEADER@15..31
+      0: MD_INLINE_ITEM_LIST@15..28
+        0: MD_TEXTUAL@15..27
+          0: MD_TEXTUAL_LITERAL@15..27 "title: value" [] []
+        1: MD_TEXTUAL@27..28
+          0: MD_TEXTUAL_LITERAL@27..28 "\n" [] []
+      1: MD_SETEXT_UNDERLINE_LITERAL@28..31 "---" [] []
+    6: MD_NEWLINE@31..32
+      0: NEWLINE@31..32 "\n" [] []
+  3: EOF@32..32 "" [] []
+
+```

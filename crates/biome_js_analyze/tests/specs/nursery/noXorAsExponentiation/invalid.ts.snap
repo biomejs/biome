@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+2 ^ 8;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:3 lint/nursery/noXorAsExponentiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This bitwise XOR operator ^ is used between two integer literals.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 2 ^ 8;
+      │   ^
+    3 │ 
+  
+  i In JavaScript, ^ is the bitwise XOR operator, not exponentiation. The exponentiation operator is **.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace ^ with **.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - 2·^·8;
+      2 │ + 2·**·8;
+    3 3 │   
+  
+
+```

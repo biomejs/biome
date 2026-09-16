@@ -1,0 +1,11 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: setext-heading-1.md
+---
+# Input
+```md
+<!-- should not generate diagnostics -->
+Top-level heading
+=================
+
+```

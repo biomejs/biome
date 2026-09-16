@@ -106,7 +106,7 @@ impl PluginConfiguration {
 
 impl Deserializable for PluginConfiguration {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {

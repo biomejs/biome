@@ -26,8 +26,9 @@ a
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdFencedCodeBlock {
             indent: MdIndentTokenList [
@@ -116,9 +117,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..59
+0: MD_ROOT@0..59
   0: (empty)
-  1: MD_BLOCK_LIST@0..59
+  1: (empty)
+  2: MD_BLOCK_LIST@0..59
     0: MD_FENCED_CODE_BLOCK@0..15
       0: MD_INDENT_TOKEN_LIST@0..1
         0: MD_INDENT_TOKEN@0..1
@@ -170,6 +172,6 @@ MdDocument {
       5: TRIPLE_BACKTICK@55..58 "```" [] []
     7: MD_NEWLINE@58..59
       0: NEWLINE@58..59 "\n" [] []
-  2: EOF@59..59 "" [] []
+  3: EOF@59..59 "" [] []
 
 ```

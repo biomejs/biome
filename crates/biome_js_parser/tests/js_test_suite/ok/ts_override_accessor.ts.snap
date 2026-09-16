@@ -1,0 +1,208 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+class Base {
+    accessor value = 0;
+}
+
+class Derived extends Base {
+    override accessor value = 1;
+}
+
+export { Derived };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..11 "Base" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@11..12 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [
+                        JsAccessorModifier {
+                            modifier_token: ACCESSOR_KW@12..26 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@26..32 "value" [] [Whitespace(" ")],
+                    },
+                    property_annotation: missing (optional),
+                    value: JsInitializerClause {
+                        eq_token: EQ@32..34 "=" [] [Whitespace(" ")],
+                        expression: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@34..35 "0" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@35..36 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@36..38 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@38..46 "class" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@46..54 "Derived" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: JsExtendsClause {
+                extends_token: EXTENDS_KW@54..62 "extends" [] [Whitespace(" ")],
+                super_class: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@62..67 "Base" [] [Whitespace(" ")],
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@67..68 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [
+                        TsOverrideModifier {
+                            modifier_token: OVERRIDE_KW@68..82 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        JsAccessorModifier {
+                            modifier_token: ACCESSOR_KW@82..91 "accessor" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@91..97 "value" [] [Whitespace(" ")],
+                    },
+                    property_annotation: missing (optional),
+                    value: JsInitializerClause {
+                        eq_token: EQ@97..99 "=" [] [Whitespace(" ")],
+                        expression: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@99..100 "1" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@100..101 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@101..103 "}" [Newline("\n")] [],
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@103..112 "export" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            export_clause: JsExportNamedClause {
+                type_token: missing (optional),
+                l_curly_token: L_CURLY@112..114 "{" [] [Whitespace(" ")],
+                specifiers: JsExportNamedSpecifierList [
+                    JsExportNamedShorthandSpecifier {
+                        type_token: missing (optional),
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@114..122 "Derived" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@122..123 "}" [] [],
+                semicolon_token: SEMICOLON@123..124 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@124..125 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..125
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..124
+    0: JS_CLASS_DECLARATION@0..38
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..11
+        0: IDENT@6..11 "Base" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@11..12 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@12..36
+        0: JS_PROPERTY_CLASS_MEMBER@12..36
+          0: JS_PROPERTY_MODIFIER_LIST@12..26
+            0: JS_ACCESSOR_MODIFIER@12..26
+              0: ACCESSOR_KW@12..26 "accessor" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@26..32
+            0: IDENT@26..32 "value" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_INITIALIZER_CLAUSE@32..35
+            0: EQ@32..34 "=" [] [Whitespace(" ")]
+            1: JS_NUMBER_LITERAL_EXPRESSION@34..35
+              0: JS_NUMBER_LITERAL@34..35 "0" [] []
+          4: SEMICOLON@35..36 ";" [] []
+      9: R_CURLY@36..38 "}" [Newline("\n")] []
+    1: JS_CLASS_DECLARATION@38..103
+      0: JS_DECORATOR_LIST@38..38
+      1: (empty)
+      2: CLASS_KW@38..46 "class" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@46..54
+        0: IDENT@46..54 "Derived" [] [Whitespace(" ")]
+      4: (empty)
+      5: JS_EXTENDS_CLAUSE@54..67
+        0: EXTENDS_KW@54..62 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@62..67
+          0: JS_REFERENCE_IDENTIFIER@62..67
+            0: IDENT@62..67 "Base" [] [Whitespace(" ")]
+        2: (empty)
+      6: (empty)
+      7: L_CURLY@67..68 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@68..101
+        0: JS_PROPERTY_CLASS_MEMBER@68..101
+          0: JS_PROPERTY_MODIFIER_LIST@68..91
+            0: TS_OVERRIDE_MODIFIER@68..82
+              0: OVERRIDE_KW@68..82 "override" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_ACCESSOR_MODIFIER@82..91
+              0: ACCESSOR_KW@82..91 "accessor" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@91..97
+            0: IDENT@91..97 "value" [] [Whitespace(" ")]
+          2: (empty)
+          3: JS_INITIALIZER_CLAUSE@97..100
+            0: EQ@97..99 "=" [] [Whitespace(" ")]
+            1: JS_NUMBER_LITERAL_EXPRESSION@99..100
+              0: JS_NUMBER_LITERAL@99..100 "1" [] []
+          4: SEMICOLON@100..101 ";" [] []
+      9: R_CURLY@101..103 "}" [Newline("\n")] []
+    2: JS_EXPORT@103..124
+      0: JS_DECORATOR_LIST@103..103
+      1: EXPORT_KW@103..112 "export" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: JS_EXPORT_NAMED_CLAUSE@112..124
+        0: (empty)
+        1: L_CURLY@112..114 "{" [] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_SPECIFIER_LIST@114..122
+          0: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@114..122
+            0: (empty)
+            1: JS_REFERENCE_IDENTIFIER@114..122
+              0: IDENT@114..122 "Derived" [] [Whitespace(" ")]
+        3: R_CURLY@122..123 "}" [] []
+        4: SEMICOLON@123..124 ";" [] []
+  4: EOF@124..125 "" [Newline("\n")] []
+
+```

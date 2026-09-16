@@ -66,6 +66,10 @@ class Example4 {
 	}
 }
 
+class ExampleStatic {
+	static prop = 42;
+}
+
 ```
 
 # Diagnostics
@@ -463,5 +467,25 @@ invalid_checkAllPropertiesTrue.ts:37:9 lint/style/useReadonlyClassProperties  FI
   
     37 │ → public·readonly·prop3:·number;
        │          +++++++++              
+
+```
+
+```
+invalid_checkAllPropertiesTrue.ts:64:9 lint/style/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━
+
+  i Member 'prop' is never reassigned.
+  
+    63 │ class ExampleStatic {
+  > 64 │ 	static prop = 42;
+       │ 	       ^^^^
+    65 │ }
+    66 │ 
+  
+  i Using readonly improves code safety, clarity, and helps prevent unintended mutations.
+  
+  i Unsafe fix: Add readonly decorator.
+  
+    64 │ → static·readonly·prop·=·42;
+       │          +++++++++          
 
 ```

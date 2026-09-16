@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// - `some`
     /// - `sort`
     /// - `toSorted`
-    /// — `from` (when called on `Array`)
+    /// - `from` (when called on `Array`)
     ///
     /// A return value is disallowed in the method `forEach`.
     ///
@@ -165,13 +165,12 @@ impl Rule for UseIterableCallbackReturn {
             if function.async_token().is_some() || function.star_token().is_some() {
                 return None;
             }
-        } else if let Some(function) = JsArrowFunctionExpression::cast_ref(&cfg.node) {
+        } else {
+            let function = JsArrowFunctionExpression::cast_ref(&cfg.node)?;
             // Async arrow callbacks are ignored.
             if function.async_token().is_some() {
                 return None;
             }
-        } else {
-            return None;
         }
 
         let parent_node = cfg.node.parent()?;

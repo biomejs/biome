@@ -1,0 +1,100 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/media-interpolated-fragments.scss
+---
+
+# Input
+
+```scss
+$query:"and (min-width: 40rem)";
+$modifier:only;
+$type:screen;
+$suffix:color;
+
+@media print-#{$suffix}{.tight{color:red}}
+@media all    #{$query}{.separated{color:red}}
+@media #{$modifier}    screen{.modifier{color:red}}
+@media #{$modifier}   #{$type}{.both{color:red}}
+@media #{$type} and (color){.logical{color:red}}
+@media #{"only screen"} and #{"(min-width: 700px)"} and #{"(max-width: "+"1920px)"}{.chain{color:red}}
+@media scr#{"een, pri"}nt    a#{"nd (max-width: 300px)"}{.generated{color:red}}
+@media all   /* fragment */   #{$query}{.commented{color:red}}
+@media only#{$type}{.tight-only{color:red}}
+@media not#{$type}{.tight-not{color:red}}
+@media screen and#{$suffix}{.tight-and{color:red}}
+@media screen or#{$suffix}{.tight-or{color:red}}
+
+```
+
+
+# Formatted
+
+```scss
+$query: "and (min-width: 40rem)";
+$modifier: only;
+$type: screen;
+$suffix: color;
+
+@media print-#{$suffix} {
+	.tight {
+		color: red;
+	}
+}
+@media all #{$query} {
+	.separated {
+		color: red;
+	}
+}
+@media #{$modifier} screen {
+	.modifier {
+		color: red;
+	}
+}
+@media #{$modifier} #{$type} {
+	.both {
+		color: red;
+	}
+}
+@media #{$type} and (color) {
+	.logical {
+		color: red;
+	}
+}
+@media #{"only screen"} and #{"(min-width: 700px)"} and #{"(max-width: " +
+		"1920px)"} {
+	.chain {
+		color: red;
+	}
+}
+@media scr#{"een, pri"}nt a#{"nd (max-width: 300px)"} {
+	.generated {
+		color: red;
+	}
+}
+@media all /* fragment */ #{$query} {
+	.commented {
+		color: red;
+	}
+}
+@media only#{$type} {
+	.tight-only {
+		color: red;
+	}
+}
+@media not#{$type} {
+	.tight-not {
+		color: red;
+	}
+}
+@media screen and#{$suffix} {
+	.tight-and {
+		color: red;
+	}
+}
+@media screen or#{$suffix} {
+	.tight-or {
+		color: red;
+	}
+}
+
+```

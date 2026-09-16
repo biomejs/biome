@@ -1,0 +1,129 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/each-await-block-destructuring.svelte
+---
+
+# Input
+
+```svelte
+{#each arr as {  a,b =''}}
+    {a}
+    {b}
+{/each}
+
+{#await promise then {  a,b =''}}
+    {a}
+    {b}
+{/await}
+
+{#await promise}
+    Loading
+{:then {  a,b =''}}
+    {a}
+    {b}
+{/await}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,16 @@
+-{#each arr as { a, b = '' }}
++{#each arr as {  a,b =''}}
+     {a}
+     {b}
+ {/each}
+ 
+-{#await promise then { a, b = '' }}
++{#await promise then {  a,b =''}}
+     {a}
+     {b}
+ {/await}
+ 
+ {#await promise}
+     Loading
+-{:then { a, b = '' }}
++{:then {  a,b =''}}
+     {a}
+     {b}
+ {/await}
+```
+
+# Output
+
+```svelte
+{#each arr as {  a,b =''}}
+    {a}
+    {b}
+{/each}
+
+{#await promise then {  a,b =''}}
+    {a}
+    {b}
+{/await}
+
+{#await promise}
+    Loading
+{:then {  a,b =''}}
+    {a}
+    {b}
+{/await}
+```
+
+# Errors
+```
+each-await-block-destructuring.svelte:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `=`
+  
+  > 1 │ {#each arr as {  a,b =''}}
+      │                      ^
+    2 │     {a}
+    3 │     {b}
+  
+  i Remove =
+  
+each-await-block-destructuring.svelte:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `{`
+  
+    1 │ {#each arr as {  a,b =''}}
+  > 2 │     {a}
+      │     ^
+    3 │     {b}
+    4 │ {/each}
+  
+  i Remove {
+  
+each-await-block-destructuring.svelte:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `{`
+  
+    1 │ {#each arr as {  a,b =''}}
+    2 │     {a}
+  > 3 │     {b}
+      │     ^
+    4 │ {/each}
+    5 │ 
+  
+  i Remove {
+  
+each-await-block-destructuring.svelte:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `{/`
+  
+    2 │     {a}
+    3 │     {b}
+  > 4 │ {/each}
+      │ ^^
+    5 │ 
+    6 │ {#await promise then {  a,b =''}}
+  
+  i Remove {/
+  
+
+```

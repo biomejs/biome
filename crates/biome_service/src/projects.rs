@@ -1,20 +1,17 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::{Settings, SettingsWithEditor, VcsIgnoredPatterns};
+use crate::settings::{Settings, SettingsIdentity, SettingsSelectionKey, SettingsWithEditor};
 use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
-use biome_configuration::vcs::VcsClientKind;
 use biome_fs::{ConfigName, FileSystem};
 use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
-use papaya::HashMap;
-use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::num::NonZeroUsize;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use tracing::{debug, instrument};
+use std::sync::atomic::AtomicUsize;
 
 pub struct GetFileFeaturesParams<'a> {
     pub fs: &'a dyn FileSystem,
@@ -28,25 +25,11 @@ pub struct GetFileFeaturesParams<'a> {
     pub not_requested_features: FeatureName,
 }
 
-/// The information tracked for each project.
-#[derive(Debug, Default)]
-struct ProjectData {
-    /// The root path of the project. This path should be **absolute**.
-    path: Utf8PathBuf,
-
-    /// The "root" settings of the project.
-    ///
-    /// Usually inferred from the **top-level** configuration file,
-    /// e.g. `biome.json`.
-    root_settings: Arc<Settings>,
-
-    /// Optional nested settings, usually populated in monorepo
-    /// projects.
-    nested_settings: BTreeMap<Utf8PathBuf, Arc<Settings>>,
-}
-
-/// Type that holds all the settings and information for different projects
+/// Type that holds all the settings and information for a project
 /// inside the workspace.
+///
+/// This type identifies a single project, while the map that tracks
+/// multiple projects resides in the salsa databse.
 ///
 /// ## Terminology
 ///
@@ -54,126 +37,128 @@ struct ProjectData {
 /// **top-level** `biome.json`. This means that if the `biome.json` is at the
 /// root of a monorepo, multiple packages (or "JavaScript projects") may reside
 /// within a single project.
-#[derive(Debug, Default)]
-pub struct Projects(HashMap<ProjectKey, ProjectData, FxBuildHasher>);
+#[salsa::input]
+pub struct ProjectInput {
+    #[returns(copy)]
+    project_key: ProjectKey,
 
-impl Projects {
-    /// Inserts a new project with the given root path.
+    /// The root path of the project. This path should be **absolute**.
+    #[returns(ref)]
+    pub(crate) path: Utf8PathBuf,
+
+    /// The "root" settings of the project.
     ///
-    /// Returns the key of the newly inserted project, or returns an existing
-    /// project key if a project with the given path already existed.
-    #[instrument(skip(self, path), fields(path))]
-    pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
-        debug!("Insert workspace folder {}", path.as_str());
+    /// Usually inferred from the **top-level** configuration file,
+    /// e.g. `biome.json`.
+    #[returns(clone)]
+    pub(crate) root_settings: SettingsIdentity,
 
-        let data = self.0.pin();
-        for (key, project_data) in data.iter() {
-            if project_data.path == path {
-                return *key;
+    /// Optional nested settings, usually populated in monorepo
+    /// projects.
+    #[returns(ref)]
+    pub(crate) nested_settings: BTreeMap<NestedPath, SettingsIdentity>,
+}
+
+#[salsa::db]
+pub trait ProjectDb: biome_db::Db {
+    fn get_project(&self, project_key: &ProjectKey) -> Option<ProjectInput>;
+
+    fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey>;
+
+    fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput));
+
+    fn get_settings_context_for_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<(
+        ProjectInput,
+        SettingsSelectionKey,
+        Utf8PathBuf,
+        SettingsIdentity,
+    )> {
+        let project = self.get_project(&project_key)?;
+
+        for (settings_path, settings) in project.nested_settings(self) {
+            if file_path.starts_with(settings_path.as_ref()) {
+                return Some((
+                    project,
+                    SettingsSelectionKey::Nested(settings_path.clone()),
+                    settings_path.as_ref().to_path_buf(),
+                    settings.clone(),
+                ));
             }
         }
 
-        let key = ProjectKey::new();
-        data.insert(
-            key,
-            ProjectData {
-                path,
-                root_settings: Arc::new(Settings::default()),
-                nested_settings: Default::default(),
-            },
-        );
-        key
+        Some((
+            project,
+            SettingsSelectionKey::Root,
+            project.path(self).to_path_buf(),
+            project.root_settings(self),
+        ))
     }
 
-    /// Removes the project with the given key.
-    pub fn remove_project(&self, project_key: ProjectKey) {
-        self.0.pin().remove(&project_key);
+    fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
+        Some(self.get_project(&project_key)?.path(self).to_path_buf())
     }
 
-    /// Retrieves the correct settings for the given project.
-    pub fn get_settings_based_on_path(
+    /// Retrieves the correct settings for the given path.
+    fn get_settings_based_on_path(
         &self,
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<Arc<Settings>> {
-        let projects = self.0.pin();
-        let data = projects.get(&project_key)?;
-
-        for (project_path, settings) in &data.nested_settings {
-            if file_path.starts_with(project_path) {
-                return Some(settings.clone());
-            }
-        }
-
-        Some(data.root_settings.clone())
+        self.get_settings_context_for_path(project_key, file_path)
+            .map(|(_, _, _, settings)| settings.clone_arc())
     }
 
     /// Retrieves the correct settings and working directory for the given project.
-    pub fn get_settings_and_wd_based_on_path(
+    fn get_settings_and_wd_based_on_path(
         &self,
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<(Utf8PathBuf, Arc<Settings>)> {
-        let projects = self.0.pin();
-        let data = projects.get(&project_key)?;
-
-        for (project_path, settings) in &data.nested_settings {
-            if file_path.starts_with(project_path) {
-                return Some((project_path.clone(), settings.clone()));
-            }
-        }
-
-        Some((data.path.clone(), data.root_settings.clone()))
+        self.get_settings_context_for_path(project_key, file_path)
+            .map(|(_, _, working_directory, settings)| (working_directory, settings.clone_arc()))
     }
 
     /// Retrieves the correct settings for the given project.
-    pub fn get_nested_settings(
+    fn get_nested_settings(
         &self,
         project_key: ProjectKey,
         file_path: &Utf8Path,
     ) -> Option<Arc<Settings>> {
-        let projects = self.0.pin();
-        let data = projects.get(&project_key)?;
+        let data = self.get_project(&project_key)?;
 
-        data.nested_settings
+        data.nested_settings(self)
             .iter()
             .find_map(|(project_path, settings)| {
                 file_path
-                    .starts_with(project_path)
-                    .then(|| settings.clone())
+                    .starts_with(project_path.as_ref())
+                    .then(|| settings.clone_arc())
             })
     }
 
     /// Whether the project has been registered
-    pub fn is_project_registered(&self, project_key: ProjectKey) -> bool {
-        self.0.pin().get(&project_key).is_some()
+    fn is_project_registered(&self, project_key: ProjectKey) -> bool {
+        self.get_project(&project_key).is_some()
     }
 
-    pub fn get_root_settings(&self, project_key: ProjectKey) -> Option<Arc<Settings>> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .map(|data| data.root_settings.clone())
-    }
-
-    /// Returns a dereferenced pointer to the root settings. This inefficient and shouldn't be used other than testing.
-    pub fn get_mut_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
-        self.0
-            .pin()
-            .get(&project_key)
-            .map(|data| (*data.root_settings).clone())
+    fn get_root_settings(&self, project_key: ProjectKey) -> Option<Arc<Settings>> {
+        self.get_project(&project_key)
+            .map(|data| data.root_settings(self).clone_arc())
     }
 
     /// Returns whether a path is force-ignored using a forced negation (`!!`)
     /// as part of `files.includes`.
-    pub fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
-        let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
+    fn is_force_ignored(&self, project_key: ProjectKey, path: &Utf8Path) -> bool {
+        let Some(project_data) = self.get_project(&project_key) else {
             return false;
         };
 
         // Deprecated: Check `experimentalScannerIgnores` too.
-        let ignore_entries = &project_data.root_settings.files.scanner_ignore_entries;
+        let root_settings = project_data.root_settings(self);
+        let ignore_entries = &root_settings.as_ref().files.scanner_ignore_entries;
         if path.components().any(|component| {
             ignore_entries
                 .iter()
@@ -182,34 +167,34 @@ impl Projects {
             return true;
         }
 
-        let includes = project_data
-            .nested_settings
+        let nested_settings = project_data.nested_settings(self);
+        let root_settings = project_data.root_settings(self);
+
+        let includes = nested_settings
             .iter()
-            .find(|(project_path, _)| path.starts_with(project_path))
-            .map_or(
-                &project_data.root_settings.files.includes,
-                |(_, settings)| &settings.files.includes,
-            );
+            .find(|(project_path, _)| path.starts_with(project_path.as_ref()))
+            .map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
+                &settings.as_ref().files.includes
+            });
         includes.is_force_ignored(path)
     }
 
-    pub fn is_ignored_by_top_level_config(
+    fn is_ignored_by_top_level_config(
         &self,
         project_key: ProjectKey,
         path: &Utf8Path,
         is_dir: bool,
         ignore_kind: IgnoreKind,
     ) -> bool {
-        match self.0.pin().get(&project_key) {
+        match self.get_project(&project_key) {
             Some(project_data) => {
-                is_ignored_by_top_level_config(project_data, path, is_dir, ignore_kind)
+                self.is_ignored_by_top_level_config_inner(&project_data, path, is_dir, ignore_kind)
             }
             None => false,
         }
     }
 
-    #[inline]
-    pub fn is_ignored(
+    fn is_ignored(
         &self,
         project_key: ProjectKey,
         path: &Utf8Path,
@@ -217,28 +202,28 @@ impl Projects {
         features: FeatureName,
         ignore_kind: IgnoreKind,
     ) -> bool {
-        let data = self.0.pin();
-        let Some(project_data) = data.get(&project_key) else {
+        let data = self.get_project(&project_key);
+        let Some(project_data) = data else {
             return false;
         };
 
         let is_ignored_by_top_level_config =
-            is_ignored_by_top_level_config(project_data, path, is_dir, ignore_kind);
+            self.is_ignored_by_top_level_config_inner(&project_data, path, is_dir, ignore_kind);
 
         // If there are specific features enabled, but all of them ignore the
         // path, then we treat the path as ignored too.
         let is_ignored_by_features = !features.is_empty()
             && features.iter().all(|feature| {
                 project_data
-                    .root_settings
+                    .root_settings(self)
+                    .as_ref()
                     .is_path_ignored_for_feature(path, feature)
             });
 
         is_ignored_by_top_level_config || is_ignored_by_features
     }
 
-    #[inline(always)]
-    pub fn get_file_features(
+    fn get_file_features(
         &self,
         GetFileFeaturesParams {
             fs: _,
@@ -252,9 +237,8 @@ impl Projects {
             not_requested_features: denied_features,
         }: GetFileFeaturesParams<'_>,
     ) -> Result<FileFeaturesResult, WorkspaceError> {
-        let data = self.0.pin();
-        let project_data = data
-            .get(&project_key)
+        let project_data = self
+            .get_project(&project_key)
             .ok_or_else(WorkspaceError::no_project)?;
         let settings = handle.as_ref();
         let mut file_features = FeaturesSupported::default()
@@ -268,13 +252,13 @@ impl Projects {
             file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc()
         }) && path
             .parent()
-            .is_some_and(|dir_path| dir_path == project_data.path)
+            .is_some_and(|dir_path| dir_path == project_data.path(self))
         {
             // Never ignore Biome's top-level config file
         } else if !skip_ignore_check {
             let is_ignored = {
-                let is_ignored_by_top_level_config = is_ignored_by_top_level_config(
-                    project_data,
+                let is_ignored_by_top_level_config = self.is_ignored_by_top_level_config_inner(
+                    &project_data,
                     path,
                     false,
                     IgnoreKind::Ancestors,
@@ -285,7 +269,8 @@ impl Projects {
                 let is_ignored_by_features = !requested_features.is_empty()
                     && requested_features.iter().all(|feature| {
                         project_data
-                            .root_settings
+                            .root_settings(self)
+                            .as_ref()
                             .is_path_ignored_for_feature(path, feature)
                     });
 
@@ -297,7 +282,8 @@ impl Projects {
             } else {
                 for feature in requested_features.iter() {
                     if project_data
-                        .root_settings
+                        .root_settings(self)
+                        .as_ref()
                         .is_path_ignored_for_feature(path, feature)
                         || settings.is_path_ignored_for_feature(path, feature)
                     {
@@ -306,8 +292,6 @@ impl Projects {
                 }
             }
         }
-
-        drop(data);
 
         // If the file is not ignored by at least one feature, then check that
         // the file is not protected.
@@ -322,159 +306,127 @@ impl Projects {
         })
     }
 
-    /// Sets the root settings for the given project.
-    ///
-    /// Does nothing if the project doesn't exist.
-    pub fn set_root_settings(&self, project_key: ProjectKey, settings: Settings) {
-        self.0.pin().update(project_key, |data| ProjectData {
-            path: data.path.clone(),
-            root_settings: Arc::new(settings.clone()),
-            nested_settings: data.nested_settings.clone(),
-        });
-    }
-
-    pub fn store_nested_ignore_patterns(
+    fn is_ignored_by_top_level_config_inner(
         &self,
-        project_key: ProjectKey,
-        payload: Vec<(Utf8PathBuf, Vec<String>)>,
-    ) -> Result<(), WorkspaceError> {
-        let root_settings = self
-            .get_root_settings(project_key)
-            .ok_or_else(WorkspaceError::no_project)?;
-
-        let git_ignores = match root_settings.vcs_settings.client_kind {
-            Some(VcsClientKind::Git) => payload
-                .iter()
-                .map(|(path, patterns)| {
-                    let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
-                    VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
-                })
-                .collect::<Result<Vec<_>, _>>()?,
-            None => Vec::new(),
+        project_data: &ProjectInput,
+        path: &Utf8Path,
+        is_dir: bool,
+        ignore_kind: IgnoreKind,
+    ) -> bool {
+        // First check if the path is ignored by the `files.includes` setting
+        // relevant to the given `path`.
+        let nested_settings = project_data.nested_settings(self);
+        let root_settings = project_data.root_settings(self);
+        let includes = nested_settings
+            .iter()
+            .find(|(project_path, _)| path.starts_with(project_path.as_ref()))
+            .map_or(&root_settings.as_ref().files.includes, |(_, settings)| {
+                &settings.as_ref().files.includes
+            });
+        let mut is_included = if is_dir {
+            includes.is_dir_included(path)
+        } else {
+            includes.is_file_included(path)
         };
 
-        self.0.pin().update(project_key, |data| {
-            let mut root_settings = data.root_settings.clone();
-            let settings = Arc::make_mut(&mut root_settings);
-            if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
-                for git_ignore in &git_ignores {
-                    ignore_matches.insert_git_match(git_ignore.clone());
+        // If necessary, check all the ancestors too.
+        if ignore_kind == IgnoreKind::Ancestors {
+            for ancestor in path.ancestors().skip(1) {
+                if !is_included || ancestor == project_data.path(self) {
+                    break;
                 }
+
+                is_included = is_included && includes.is_dir_included(ancestor)
             }
+        }
 
-            ProjectData {
-                path: data.path.clone(),
-                root_settings,
-                nested_settings: data.nested_settings.clone(),
-            }
-        });
+        let root_path = match ignore_kind {
+            IgnoreKind::Ancestors => Some(project_data.path(self).as_path()),
+            IgnoreKind::Path => None,
+        };
+        // VCS settings are used from the root settings, regardless of what
+        // package we are analyzing, so we ignore the `path` for those.
+        let is_ignored_by_vcs = project_data
+            .root_settings(self)
+            .as_ref()
+            .vcs_settings
+            .is_ignored(path, is_dir, root_path);
 
-        Ok(())
-    }
-
-    /// Inserts a nested setting.
-    ///
-    /// Does nothing if the project doesn't exist.
-    pub fn set_nested_settings(
-        &self,
-        project_key: ProjectKey,
-        path: Utf8PathBuf,
-        settings: Settings,
-    ) {
-        debug!("Set nested settings for {path}");
-        self.0.pin().update(project_key, |data| {
-            let mut nested_settings = data.nested_settings.clone();
-            nested_settings.insert(path.clone(), Arc::new(settings.clone()));
-
-            ProjectData {
-                path: data.path.clone(),
-                root_settings: data.root_settings.clone(),
-                nested_settings,
-            }
-        });
-    }
-
-    pub fn get_project_path(&self, project_key: ProjectKey) -> Option<Utf8PathBuf> {
-        self.0.pin().get(&project_key).map(|data| data.path.clone())
-    }
-
-    /// Finds the key of the project to which a given path belongs, if any.
-    pub fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
-        self.0
-            .pin()
-            .iter()
-            .find_map(|(key, project_data)| path.starts_with(&project_data.path).then_some(*key))
+        !is_included || is_ignored_by_vcs
     }
 
     /// Checks whether the given `path` belongs to project with the given path
     /// and no other project.
-    pub fn path_belongs_only_to_project_with_path(
+    fn path_belongs_only_to_project_with_path(
         &self,
         path: &Utf8Path,
         project_path: &Utf8Path,
     ) -> bool {
         let mut belongs_to_project = false;
         let mut belongs_to_other = false;
-        for project_data in self.0.pin().values() {
-            if path.starts_with(&project_data.path) {
-                if project_data.path.as_path() == project_path {
+        self.for_each_project(&mut |project| {
+            if path.starts_with(project.path(self)) {
+                if project.path(self).as_path() == project_path {
                     belongs_to_project = true;
                 } else {
                     belongs_to_other = true;
                 }
             }
-        }
+        });
 
         belongs_to_project && !belongs_to_other
     }
 }
 
-#[inline]
-fn is_ignored_by_top_level_config(
-    project_data: &ProjectData,
-    path: &Utf8Path,
-    is_dir: bool,
-    ignore_kind: IgnoreKind,
-) -> bool {
-    // First check if the path is ignored by the `files.includes` setting
-    // relevant to the given `path`.
-    let includes = project_data
-        .nested_settings
-        .iter()
-        .find(|(project_path, _)| path.starts_with(project_path))
-        .map_or(
-            &project_data.root_settings.files.includes,
-            |(_, settings)| &settings.files.includes,
-        );
-    let mut is_included = if is_dir {
-        includes.is_dir_included(path)
-    } else {
-        includes.is_file_included(path)
-    };
+/// A project path ordered by how deeply it is nested.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+pub struct NestedPath(Utf8PathBuf);
 
-    // If necessary, check all the ancestors too.
-    if ignore_kind == IgnoreKind::Ancestors {
-        for ancestor in path.ancestors().skip(1) {
-            if !is_included || ancestor == project_data.path {
-                break;
-            }
-
-            is_included = is_included && includes.is_dir_included(ancestor)
-        }
+impl NestedPath {
+    pub fn new(path: impl Into<Utf8PathBuf>) -> Self {
+        Self(path.into())
     }
 
-    let root_path = match ignore_kind {
-        IgnoreKind::Ancestors => Some(project_data.path.as_path()),
-        IgnoreKind::Path => None,
-    };
-    // VCS settings are used from the root settings, regardless of what
-    // package we are analyzing, so we ignore the `path` for those.
-    let is_ignored_by_vcs = project_data
-        .root_settings
-        .vcs_settings
-        .is_ignored(path, is_dir, root_path);
+    /// The number of components in the path. `/repo/packages` counts 3: the
+    /// root, `repo` and `packages`.
+    fn depth(&self) -> usize {
+        self.0.components().count()
+    }
+}
 
-    !is_included || is_ignored_by_vcs
+impl Ord for NestedPath {
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Deepest first. Two projects at the same depth fall back to the path
+        // order, which is only needed to keep the ordering total.
+        other
+            .depth()
+            .cmp(&self.depth())
+            .then_with(|| self.0.cmp(&other.0))
+    }
+}
+
+impl PartialOrd for NestedPath {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl AsRef<Utf8Path> for NestedPath {
+    fn as_ref(&self) -> &Utf8Path {
+        &self.0
+    }
+}
+
+impl From<&Utf8Path> for NestedPath {
+    fn from(path: &Utf8Path) -> Self {
+        Self(path.into())
+    }
+}
+
+impl From<Utf8PathBuf> for NestedPath {
+    fn from(path: Utf8PathBuf) -> Self {
+        Self(path)
+    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -492,7 +444,7 @@ impl ProjectKey {
     #[expect(clippy::new_without_default)]
     pub fn new() -> Self {
         static KEY: AtomicUsize = AtomicUsize::new(1);
-        let key = KEY.fetch_add(1, Ordering::Relaxed);
+        let key = KEY.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         Self(NonZeroUsize::new(key).unwrap())
     }
 }

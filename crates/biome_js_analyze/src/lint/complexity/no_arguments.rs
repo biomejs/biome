@@ -1,8 +1,8 @@
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::TextRange;
+use biome_js_syntax::{AnyJsIdentifierReference, TextRange};
 use biome_rule_options::no_arguments::NoArgumentsOptions;
 
 declare_lint_rule! {
@@ -37,23 +37,18 @@ declare_lint_rule! {
 }
 
 impl Rule for NoArguments {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierReference>;
     type State = TextRange;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoArgumentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let model = ctx.query();
-        let mut found_arguments = vec![];
-
-        for unresolved_reference in model.all_unresolved_references() {
-            let name = unresolved_reference.syntax().text_trimmed();
-            if name == "arguments" {
-                found_arguments.push(unresolved_reference.range());
-            }
+        let reference = ctx.query();
+        if !ctx.model().is_unresolved_reference(reference) {
+            return None;
         }
-
-        found_arguments.into_boxed_slice()
+        let token = reference.value_token().ok()?;
+        (token.text_trimmed() == "arguments").then(|| token.text_trimmed_range())
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

@@ -21,8 +21,9 @@ Regular paragraph here.
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdIndentCodeBlock {
             content: MdInlineItemList [
@@ -101,9 +102,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..121
+0: MD_ROOT@0..121
   0: (empty)
-  1: MD_BLOCK_LIST@0..121
+  1: (empty)
+  2: MD_BLOCK_LIST@0..121
     0: MD_INDENT_CODE_BLOCK@0..62
       0: MD_INLINE_ITEM_LIST@0..62
         0: MD_INDENT_TOKEN@0..4
@@ -148,6 +150,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@106..120 "continues here" [] []
         5: MD_TEXTUAL@120..121
           0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
-  2: EOF@121..121 "" [] []
+  3: EOF@121..121 "" [] []
 
 ```

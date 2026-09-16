@@ -1,5 +1,7 @@
 use crate::list_ext::AnyListItem;
-use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock, MdParagraph};
+use crate::{
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock, MdHtmlBlock, MdParagraph,
+};
 use biome_rowan::AstNodeList;
 
 impl AnyMdBlock {
@@ -108,5 +110,18 @@ impl MdParagraph {
             }
             _ => false,
         }
+    }
+}
+
+impl MdHtmlBlock {
+    pub fn is_html_comment(&self) -> bool {
+        let Ok(content) = self.content() else {
+            return false;
+        };
+        let Ok(token) = content.value_token() else {
+            return false;
+        };
+
+        token.text_trimmed().starts_with("<!--")
     }
 }

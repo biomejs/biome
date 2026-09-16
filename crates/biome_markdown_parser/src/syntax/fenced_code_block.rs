@@ -19,12 +19,11 @@
 //!
 //! # Info String
 //!
-//! The opening fence may be followed by an info string (language identifier)
-//! that can be used for syntax highlighting.
+//! The opening fence may be followed by an info string. Its first word can be
+//! used for syntax highlighting.
 
-use crate::lexer::MarkdownReLexContext;
+use crate::lexer::{MarkdownLexContext, MarkdownReLexContext};
 use crate::parser::MarkdownParser;
-use crate::syntax::parse_error::unterminated_fenced_code;
 use crate::syntax::quote::try_bump_quote_marker;
 use crate::syntax::{MAX_BLOCK_PREFIX_INDENT, TAB_STOP_SPACES, is_whitespace_only};
 use crate::token_source::find_line_start;
@@ -36,7 +35,7 @@ use biome_parser::{
         TokenSource,
     },
 };
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::TextSize;
 
 /// Minimum number of fence characters required per CommonMark §4.5.
 const MIN_FENCE_LENGTH: usize = 3;
@@ -136,21 +135,17 @@ pub(crate) fn detect_fence(s: &str) -> Option<(char, usize)> {
 
 /// Check if we're at a fenced code block (``` or ~~~).
 pub(crate) fn at_fenced_code_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-
-        let rest = p.source_after_current();
-        let Some((fence_char, _)) = detect_fence(rest) else {
-            return false;
-        };
-        if fence_char == '`' && info_string_has_backtick(p) {
-            return false;
-        }
-        true
-    })
+    if !p.is_at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    let Some(rest) = p.source_after_current().get(indent.byte_count..) else {
+        return false;
+    };
+    let Some((fence_char, fence_len)) = detect_fence(rest) else {
+        return false;
+    };
+    fence_char != '`' || !info_string_has_backtick(rest, fence_len)
 }
 
 /// Parse a fenced code block.
@@ -190,11 +185,6 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     let text = p.cur_text();
     let (fence_char, fence_len) = detect_fence(text).unwrap_or(('`', MIN_FENCE_LENGTH));
     let is_tilde_fence = fence_char == '~';
-    let fence_type = if is_tilde_fence { "~~~" } else { "```" };
-
-    // Record opening fence range for diagnostic
-    let opening_range = p.cur_range();
-
     // Opening fence (``` or ~~~)
     bump_fence(p, is_tilde_fence);
 
@@ -204,8 +194,7 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
     // Content (everything until closing fence)
     parse_code_content(p, is_tilde_fence, fence_len, fence_indent);
 
-    // Closing fence - emit specific diagnostic if missing
-    // Must match the opening fence type
+    // The closing fence is optional at the end of its containing block.
     let has_closing = at_closing_fence(p, is_tilde_fence, fence_len);
 
     if has_closing {
@@ -218,43 +207,87 @@ fn parse_fenced_code_block_impl(p: &mut MarkdownParser, force: bool) -> ParsedSy
         };
         p.emit_line_indent(max);
         bump_fence(p, is_tilde_fence);
+        // Closing-fence whitespace is structural, even when the regular lexer
+        // bundles trailing spaces and a newline into a hard line break.
+        p.re_lex(MarkdownReLexContext::CodeInfoString);
+        if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
+            p.consume_as_whitespace_trivia();
+        }
     } else {
-        // Emit diagnostic for unterminated code block
-        p.error(unterminated_fenced_code(p, opening_range, fence_type));
-        // Emit empty r_fence_indent list to satisfy grammar slot
-        let empty_m = p.start();
-        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+        p.emit_line_indent(0);
     }
 
     Present(m.complete(p, MD_FENCED_CODE_BLOCK))
 }
 
-/// Parse the code name list (language info string).
+/// Parse the code name list (opening-fence info string).
 /// Grammar: MdCodeNameList = MdTextual*
 ///
-/// The language name is on the same line as the opening fence.
-/// If the current token has a preceding line break or is NEWLINE, the code block has no language.
+/// The info string is limited to the opening fence's physical line.
 fn parse_code_name_list(p: &mut MarkdownParser) {
-    // Relexing
     p.re_lex(MarkdownReLexContext::CodeInfoString);
 
     let m = p.start();
 
-    // If the current token is already on a new line, there's no language name
-    if p.at_inline_end() {
+    skip_info_string_whitespace(p);
+
+    if p.at(NEWLINE) || p.at(T![EOF]) {
         m.complete(p, MD_CODE_NAME_LIST);
         return;
     }
 
-    // Parse language identifiers until we hit end of line
-    while !p.at_inline_end() {
-        // Parse each token as textual content
+    while !p.at(NEWLINE) && !p.at(T![EOF]) {
         let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
+        bump_info_string_content(p);
         text_m.complete(p, MD_TEXTUAL);
+
+        skip_info_string_whitespace(p);
     }
 
     m.complete(p, MD_CODE_NAME_LIST);
+}
+
+/// Move leading info-string spaces and tabs into whitespace trivia.
+///
+/// Boundary whitespace stays in trivia to preserve the source while remaining
+/// outside `MdCodeNameList`. The next token is lexed in the code-info-string
+/// context so trailing spaces cannot consume the physical-line newline as a
+/// hard line break.
+fn skip_info_string_whitespace(p: &mut MarkdownParser) {
+    if !p.at(MD_TEXTUAL_LITERAL) {
+        return;
+    }
+
+    let text = p.cur_text();
+    let whitespace_len = text.len() - text.trim_start_matches([' ', '\t']).len();
+    if whitespace_len == 0 {
+        return;
+    }
+
+    if whitespace_len < text.len() {
+        let end = p.cur_range().start() + TextSize::from(whitespace_len as u32);
+        p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    }
+
+    p.consume_as_whitespace_trivia_with_context(MarkdownLexContext::CodeInfoString);
+}
+
+/// Bump the info string's content, leaving trailing spaces and tabs
+/// behind for [`skip_info_string_whitespace`] to move into the trivia list.
+///
+/// The current token must start with non-whitespace content; leading boundary
+/// whitespace is moved into trivia before this helper is called. Advancing in
+/// the code-info-string context keeps the physical-line newline separate.
+fn bump_info_string_content(p: &mut MarkdownParser) {
+    let text = p.cur_text();
+    let content_len = text.trim_end_matches([' ', '\t']).len();
+
+    if content_len > 0 && content_len < text.len() {
+        let end = p.cur_range().start() + TextSize::from(content_len as u32);
+        p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    }
+
+    p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeInfoString);
 }
 
 /// Parse the code content until we find a closing fence.
@@ -428,41 +461,16 @@ fn prepare_next_code_content_token(
 /// Consume all expected `>` quote prefixes for the current line inside a
 /// fenced code block.
 ///
-/// Uses a lookahead preflight to verify all `quote_depth` prefixes are
-/// present before consuming any. This prevents partial consumption from
-/// stealing outer blockquote markers when an inner prefix is missing
+/// Verifies all `quote_depth` prefixes in the source before consuming any.
+/// This prevents partial consumption from stealing outer blockquote markers
+/// when an inner prefix is missing
 /// (e.g., `> hello` inside a depth-2 blockquote would consume the outer
 /// `>` but fail on the missing inner `>`, corrupting outer parsing).
 ///
 /// Returns `true` if all prefixes were consumed successfully, `false` if
 /// any prefix is missing — the caller should break out of the content loop.
 fn consume_quote_prefixes_in_code_content(p: &mut MarkdownParser, quote_depth: usize) -> bool {
-    // Preflight: verify all prefixes exist before consuming any.
-    let all_present = p.lookahead(|p| {
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        for _ in 0..quote_depth {
-            if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with('>') {
-                p.force_relex_regular();
-            }
-            if p.at(T![>]) {
-                p.bump(T![>]);
-            } else if p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == ">" {
-                p.bump(MD_TEXTUAL_LITERAL);
-            } else {
-                return false;
-            }
-            // Skip optional post-marker space
-            if p.at(MD_TEXTUAL_LITERAL) {
-                let text = p.cur_text();
-                if text == " " || text == "\t" {
-                    p.bump(MD_TEXTUAL_LITERAL);
-                }
-            }
-        }
-        true
-    });
-
-    if !all_present {
+    if !has_code_content_quote_prefixes(p, quote_depth) {
         return false;
     }
 
@@ -496,7 +504,7 @@ fn consume_quote_prefix_in_code_content(p: &mut MarkdownParser) -> bool {
 
     let prefix_m = p.start();
 
-    // Empty pre-marker indent list (initial indent handled by skip_line_indent).
+    // The initial pre-marker indent is emitted before consuming the prefixes.
     let indent_list_m = p.start();
     indent_list_m.complete(p, MD_QUOTE_INDENT_LIST);
 
@@ -543,76 +551,31 @@ fn bump_code_textual(p: &mut MarkdownParser) {
     text_m.complete(p, MD_TEXTUAL);
 }
 
-pub(crate) fn info_string_has_backtick(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if p.at(TRIPLE_TILDE) {
-            return false;
-        }
-
-        if p.at(T!["```"]) {
-            p.bump(T!["```"]);
-        } else if p.at(BACKTICK) {
-            p.bump(BACKTICK);
-        } else {
-            return false;
-        }
-
-        while !p.at_inline_end() {
-            if p.at(BACKTICK) || p.at(T!["```"]) {
-                return true;
-            }
-            p.bump(p.cur());
-        }
-
-        false
-    })
+pub(crate) fn info_string_has_backtick(line: &str, fence_len: usize) -> bool {
+    line.get(fence_len..)
+        .and_then(|rest| rest.split(['\n', '\r']).next())
+        .is_some_and(|info| info.contains('`'))
 }
 
-/// Locate a stray backtick in a backtick-fenced code block info string.
-///
-/// CommonMark §4.5 forbids backtick characters in the info string of a
-/// backtick fence. When the info string contains a backtick, the line
-/// is not a fenced code block and falls through to paragraph parsing;
-/// this helper returns the byte range of the offending backtick so the
-/// caller can attach a diagnostic.
-///
-/// Concrete behavior:
-/// - Returns `None` unless the current line can start a fence at
-///   indent ≤ `MAX_BLOCK_PREFIX_INDENT`.
-/// - Returns `None` for tilde fences — they may legally contain backticks.
-/// - Returns `Some(range)` for the first `BACKTICK` or triple-backtick
-///   token after the opening fence; otherwise `None`.
-/// - Runs entirely under `lookahead`, so parser state is unchanged on return.
-pub(crate) fn backtick_info_violation(p: &mut MarkdownParser) -> Option<TextRange> {
-    p.lookahead(|p| {
-        if !p.at_start_of_input() && !is_line_start_within_indent(p, MAX_BLOCK_PREFIX_INDENT) {
-            return None;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+fn has_code_content_quote_prefixes(p: &MarkdownParser, quote_depth: usize) -> bool {
+    let Some((start, source)) = get_source_context(p) else {
+        return false;
+    };
+    let bytes = source.as_bytes();
+    let Some(mut idx) = consume_indent(bytes, start, MAX_BLOCK_PREFIX_INDENT, false) else {
+        return false;
+    };
 
-        let rest = p.source_after_current();
-        let (fence_char, _) = detect_fence(rest)?;
-        if fence_char != '`' {
-            return None;
+    for _ in 0..quote_depth {
+        if bytes.get(idx) != Some(&b'>') {
+            return false;
         }
-
-        if p.at(T!["```"]) {
-            p.bump(T!["```"]);
-        } else if p.at(BACKTICK) {
-            p.bump(BACKTICK);
-        } else {
-            return None;
+        idx += 1;
+        if matches!(bytes.get(idx), Some(b' ' | b'\t')) {
+            idx += 1;
         }
-
-        while !p.at_inline_end() {
-            if p.at(BACKTICK) || p.at(T!["```"]) {
-                return Some(p.cur_range());
-            }
-            p.bump(p.cur());
-        }
-
-        None
-    })
+    }
+    true
 }
 
 /// Skip up to `quote_depth` blockquote prefixes (`>` with optional 0-3 leading

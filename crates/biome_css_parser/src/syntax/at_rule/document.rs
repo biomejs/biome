@@ -1,4 +1,3 @@
-use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_document_matcher;
 use crate::syntax::block::parse_rule_block;
@@ -190,7 +189,8 @@ pub(crate) fn parse_document_custom_matcher(p: &mut CssParser) -> ParsedSyntax {
 
     if is_at_url_prefix(p) {
         p.bump_ts(URL_PREFIX_SET);
-        p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
+        let lex_context = p.source().url_body_lex_context(false);
+        p.bump_with_context(T!['('], lex_context);
         parse_url_value(p).ok();
         p.expect(T![')']);
         return Present(m.complete(p, CSS_DOCUMENT_CUSTOM_MATCHER));

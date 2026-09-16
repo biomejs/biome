@@ -5,7 +5,7 @@ expression: redactor(content)
 ## `file.html`
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 
 ```
 

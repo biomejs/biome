@@ -14,7 +14,13 @@ impl FormatRule<AnyCssGenericPropertyValueOrExpression>
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         match node {
+            AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(node) => {
+                node.format().fmt(f)
+            }
             AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(node) => {
+                node.format().fmt(f)
+            }
+            AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(node) => {
                 node.format().fmt(f)
             }
             AnyCssGenericPropertyValueOrExpression::ScssExpression(node) => node.format().fmt(f),

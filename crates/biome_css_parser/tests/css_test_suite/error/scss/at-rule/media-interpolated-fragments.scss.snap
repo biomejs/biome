@@ -1,0 +1,373 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$query: "and (color)";
+
+@media all #{$query} extra, print {}
+@media foo/* first */-/* second */bar {}
+@media print-#{$suffix {}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..6 "query" [] [],
+                },
+            },
+            colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssString {
+                        value_token: CSS_STRING_LITERAL@8..21 "\"and (color)\"" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@21..22 ";" [] [],
+        },
+        CssAtRule {
+            at_token: AT@22..25 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@25..31 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        ScssMediaQuery {
+                            head: CssMediaTypeQuery {
+                                modifier: missing (optional),
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@31..35 "all" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            tail: CssMediaType {
+                                value: ScssInterpolatedIdentifier {
+                                    items: ScssInterpolatedIdentifierPartList [
+                                        ScssInterpolation {
+                                            hash_token: HASH@35..36 "#" [] [],
+                                            l_curly_token: L_CURLY@36..37 "{" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    ScssVariable {
+                                                        dollar_token: DOLLAR@37..38 "$" [] [],
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@38..43 "query" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            r_curly_token: R_CURLY@43..45 "}" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                        missing separator,
+                        CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@45..50 "extra" [] [],
+                                },
+                            },
+                        },
+                        COMMA@50..52 "," [] [Whitespace(" ")],
+                        CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@52..58 "print" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@58..59 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@59..60 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@60..62 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@62..68 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaTypeQuery {
+                            modifier: missing (optional),
+                            ty: CssMediaType {
+                                value: CssIdentifier {
+                                    value_token: IDENT@68..82 "foo" [] [Comments("/* first */")],
+                                },
+                            },
+                        },
+                        missing separator,
+                        CssBogusMediaQuery {
+                            items: [
+                                MINUS@82..95 "-" [] [Comments("/* second */")],
+                                IDENT@95..99 "bar" [] [Whitespace(" ")],
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@99..100 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@100..101 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@101..103 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@103..109 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogusMediaQuery {
+                                    items: [
+                                        CssBogus {
+                                            items: [
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        CssBogus {
+                                                            items: [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@109..115 "print-" [] [],
+                                                                },
+                                                                CssBogus {
+                                                                    items: [
+                                                                        HASH@115..116 "#" [] [],
+                                                                        L_CURLY@116..117 "{" [] [],
+                                                                        CssBogus {
+                                                                            items: [
+                                                                                CssBogus {
+                                                                                    items: [
+                                                                                        ScssVariable {
+                                                                                            dollar_token: DOLLAR@117..118 "$" [] [],
+                                                                                            name: CssIdentifier {
+                                                                                                value_token: IDENT@118..125 "suffix" [] [Whitespace(" ")],
+                                                                                            },
+                                                                                        },
+                                                                                        CssBogusPropertyValue {
+                                                                                            items: [
+                                                                                                L_CURLY@125..126 "{" [] [],
+                                                                                            ],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        R_CURLY@126..127 "}" [] [],
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@127..128 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..128
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..127
+    0: SCSS_VARIABLE_DECLARATION@0..22
+      0: SCSS_VARIABLE@0..6
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..6
+          0: IDENT@1..6 "query" [] []
+      1: COLON@6..8 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@8..21
+        0: SCSS_EXPRESSION_ITEM_LIST@8..21
+          0: CSS_STRING@8..21
+            0: CSS_STRING_LITERAL@8..21 "\"and (color)\"" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@21..21
+      4: SEMICOLON@21..22 ";" [] []
+    1: CSS_AT_RULE@22..60
+      0: AT@22..25 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@25..60
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@25..58
+          0: MEDIA_KW@25..31 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@31..58
+            0: SCSS_MEDIA_QUERY@31..45
+              0: CSS_MEDIA_TYPE_QUERY@31..35
+                0: (empty)
+                1: CSS_MEDIA_TYPE@31..35
+                  0: CSS_IDENTIFIER@31..35
+                    0: IDENT@31..35 "all" [] [Whitespace(" ")]
+              1: CSS_MEDIA_TYPE@35..45
+                0: SCSS_INTERPOLATED_IDENTIFIER@35..45
+                  0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@35..45
+                    0: SCSS_INTERPOLATION@35..45
+                      0: HASH@35..36 "#" [] []
+                      1: L_CURLY@36..37 "{" [] []
+                      2: SCSS_EXPRESSION@37..43
+                        0: SCSS_EXPRESSION_ITEM_LIST@37..43
+                          0: SCSS_VARIABLE@37..43
+                            0: DOLLAR@37..38 "$" [] []
+                            1: CSS_IDENTIFIER@38..43
+                              0: IDENT@38..43 "query" [] []
+                      3: R_CURLY@43..45 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: CSS_MEDIA_TYPE_QUERY@45..50
+              0: (empty)
+              1: CSS_MEDIA_TYPE@45..50
+                0: CSS_IDENTIFIER@45..50
+                  0: IDENT@45..50 "extra" [] []
+            3: COMMA@50..52 "," [] [Whitespace(" ")]
+            4: CSS_MEDIA_TYPE_QUERY@52..58
+              0: (empty)
+              1: CSS_MEDIA_TYPE@52..58
+                0: CSS_IDENTIFIER@52..58
+                  0: IDENT@52..58 "print" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@58..60
+          0: L_CURLY@58..59 "{" [] []
+          1: CSS_RULE_LIST@59..59
+          2: R_CURLY@59..60 "}" [] []
+    2: CSS_AT_RULE@60..101
+      0: AT@60..62 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@62..101
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@62..99
+          0: MEDIA_KW@62..68 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@68..99
+            0: CSS_MEDIA_TYPE_QUERY@68..82
+              0: (empty)
+              1: CSS_MEDIA_TYPE@68..82
+                0: CSS_IDENTIFIER@68..82
+                  0: IDENT@68..82 "foo" [] [Comments("/* first */")]
+            1: (empty)
+            2: CSS_BOGUS_MEDIA_QUERY@82..99
+              0: MINUS@82..95 "-" [] [Comments("/* second */")]
+              1: IDENT@95..99 "bar" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@99..101
+          0: L_CURLY@99..100 "{" [] []
+          1: CSS_RULE_LIST@100..100
+          2: R_CURLY@100..101 "}" [] []
+    3: CSS_AT_RULE@101..127
+      0: AT@101..103 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@103..127
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@103..127
+          0: MEDIA_KW@103..109 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@109..127
+            0: CSS_BOGUS_MEDIA_QUERY@109..127
+              0: CSS_BOGUS_MEDIA_QUERY@109..127
+                0: CSS_BOGUS@109..127
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@109..127
+                    0: CSS_BOGUS@109..127
+                      0: CSS_IDENTIFIER@109..115
+                        0: IDENT@109..115 "print-" [] []
+                      1: CSS_BOGUS@115..127
+                        0: HASH@115..116 "#" [] []
+                        1: L_CURLY@116..117 "{" [] []
+                        2: CSS_BOGUS@117..126
+                          0: CSS_BOGUS@117..126
+                            0: SCSS_VARIABLE@117..125
+                              0: DOLLAR@117..118 "$" [] []
+                              1: CSS_IDENTIFIER@118..125
+                                0: IDENT@118..125 "suffix" [] [Whitespace(" ")]
+                            1: CSS_BOGUS_PROPERTY_VALUE@125..126
+                              0: L_CURLY@125..126 "{" [] []
+                        3: R_CURLY@126..127 "}" [] []
+        1: CSS_BOGUS_BLOCK@127..127
+  2: EOF@127..128 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+media-interpolated-fragments.scss:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `extra`
+  
+    1 │ $query: "and (color)";
+    2 │ 
+  > 3 │ @media all #{$query} extra, print {}
+      │                      ^^^^^
+    4 │ @media foo/* first */-/* second */bar {}
+    5 │ @media print-#{$suffix {}
+  
+  i Remove extra
+  
+media-interpolated-fragments.scss:4:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `-`
+  
+    3 │ @media all #{$query} extra, print {}
+  > 4 │ @media foo/* first */-/* second */bar {}
+      │                      ^
+    5 │ @media print-#{$suffix {}
+    6 │ 
+  
+  i Remove -
+  
+media-interpolated-fragments.scss:5:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '{'.
+  
+    3 │ @media all #{$query} extra, print {}
+    4 │ @media foo/* first */-/* second */bar {}
+  > 5 │ @media print-#{$suffix {}
+      │                        ^
+    6 │ 
+  
+  i Expected a SCSS expression here.
+  
+    3 │ @media all #{$query} extra, print {}
+    4 │ @media foo/* first */-/* second */bar {}
+  > 5 │ @media print-#{$suffix {}
+      │                        ^
+    6 │ 
+  
+media-interpolated-fragments.scss:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead the file ends
+  
+    4 │ @media foo/* first */-/* second */bar {}
+    5 │ @media print-#{$suffix {}
+  > 6 │ 
+      │ 
+  
+  i the file ends here
+  
+    4 │ @media foo/* first */-/* second */bar {}
+    5 │ @media print-#{$suffix {}
+  > 6 │ 
+      │ 
+  
+```

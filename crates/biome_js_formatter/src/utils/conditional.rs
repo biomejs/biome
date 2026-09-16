@@ -663,8 +663,7 @@ impl AnyJsConditional {
         match self {
             Self::JsConditionalExpression(conditional) => conditional
                 .test()
-                .ok()
-                .is_some_and(|resolved| resolved.syntax() == node),
+                .is_ok_and(|resolved| resolved.syntax() == node),
             Self::TsConditionalType(conditional) => {
                 conditional.check_type().map(AstNode::into_syntax).as_ref() == Ok(node)
                     || conditional

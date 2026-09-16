@@ -11,3 +11,10 @@
 #{$tag} {}
 
 .button-#{$state} {}
+
+.#{$block}--#{$modifier} {}
+.-#{$name} {}
+
+.component {
+  &--#{$state} {}
+}

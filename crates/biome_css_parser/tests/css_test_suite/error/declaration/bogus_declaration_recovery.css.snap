@@ -1,0 +1,198 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+/* should generate diagnostics */
+
+@font-face {
+	9font-family: broken;
+	font-family: Valid;
+	123invalid;
+	42;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..36 "@" [Comments("/* should generate di ..."), Newline("\n"), Newline("\n")] [],
+            rule: CssFontFaceAtRule {
+                declarator: CssFontFaceAtRuleDeclarator {
+                    font_face_token: FONT_FACE_KW@36..46 "font-face" [] [Whitespace(" ")],
+                },
+                block: CssDeclarationBlock {
+                    l_curly_token: L_CURLY@46..47 "{" [] [],
+                    declarations: CssDeclarationList [
+                        CssBogusDeclaration {
+                            items: [
+                                CSS_DIMENSION_VALUE@47..50 "9" [Newline("\n"), Whitespace("\t")] [],
+                                IDENT@50..61 "font-family" [] [],
+                                COLON@61..63 ":" [] [Whitespace(" ")],
+                                IDENT@63..69 "broken" [] [],
+                            ],
+                        },
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@69..70 ";" [] [],
+                        },
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@70..83 "font-family" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@85..90 "Valid" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@90..91 ";" [] [],
+                        },
+                        CssBogusDeclaration {
+                            items: [
+                                CSS_DIMENSION_VALUE@91..96 "123" [Newline("\n"), Whitespace("\t")] [],
+                                IDENT@96..103 "invalid" [] [],
+                            ],
+                        },
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@103..104 ";" [] [],
+                        },
+                        CssBogusDeclaration {
+                            items: [
+                                CSS_NUMBER_LITERAL@104..108 "42" [Newline("\n"), Whitespace("\t")] [],
+                            ],
+                        },
+                        CssEmptyDeclaration {
+                            semicolon_token: SEMICOLON@108..109 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@109..111 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@111..112 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..112
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..111
+    0: CSS_AT_RULE@0..111
+      0: AT@0..36 "@" [Comments("/* should generate di ..."), Newline("\n"), Newline("\n")] []
+      1: CSS_FONT_FACE_AT_RULE@36..111
+        0: CSS_FONT_FACE_AT_RULE_DECLARATOR@36..46
+          0: FONT_FACE_KW@36..46 "font-face" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_BLOCK@46..111
+          0: L_CURLY@46..47 "{" [] []
+          1: CSS_DECLARATION_LIST@47..109
+            0: CSS_BOGUS_DECLARATION@47..69
+              0: CSS_DIMENSION_VALUE@47..50 "9" [Newline("\n"), Whitespace("\t")] []
+              1: IDENT@50..61 "font-family" [] []
+              2: COLON@61..63 ":" [] [Whitespace(" ")]
+              3: IDENT@63..69 "broken" [] []
+            1: CSS_EMPTY_DECLARATION@69..70
+              0: SEMICOLON@69..70 ";" [] []
+            2: CSS_DECLARATION_WITH_SEMICOLON@70..91
+              0: CSS_DECLARATION@70..90
+                0: CSS_GENERIC_PROPERTY@70..90
+                  0: CSS_IDENTIFIER@70..83
+                    0: IDENT@70..83 "font-family" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@83..85 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..90
+                    0: CSS_IDENTIFIER@85..90
+                      0: IDENT@85..90 "Valid" [] []
+                1: (empty)
+              1: SEMICOLON@90..91 ";" [] []
+            3: CSS_BOGUS_DECLARATION@91..103
+              0: CSS_DIMENSION_VALUE@91..96 "123" [Newline("\n"), Whitespace("\t")] []
+              1: IDENT@96..103 "invalid" [] []
+            4: CSS_EMPTY_DECLARATION@103..104
+              0: SEMICOLON@103..104 ";" [] []
+            5: CSS_BOGUS_DECLARATION@104..108
+              0: CSS_NUMBER_LITERAL@104..108 "42" [Newline("\n"), Whitespace("\t")] []
+            6: CSS_EMPTY_DECLARATION@108..109
+              0: SEMICOLON@108..109 ";" [] []
+          2: R_CURLY@109..111 "}" [Newline("\n")] []
+  2: EOF@111..112 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+bogus_declaration_recovery.css:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '9font-family: broken'.
+  
+    3 │ @font-face {
+  > 4 │ 	9font-family: broken;
+      │ 	^^^^^^^^^^^^^^^^^^^^
+    5 │ 	font-family: Valid;
+    6 │ 	123invalid;
+  
+  i Expected a declaration item here.
+  
+    3 │ @font-face {
+  > 4 │ 	9font-family: broken;
+      │ 	^^^^^^^^^^^^^^^^^^^^
+    5 │ 	font-family: Valid;
+    6 │ 	123invalid;
+  
+bogus_declaration_recovery.css:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '123invalid'.
+  
+    4 │ 	9font-family: broken;
+    5 │ 	font-family: Valid;
+  > 6 │ 	123invalid;
+      │ 	^^^^^^^^^^
+    7 │ 	42;
+    8 │ }
+  
+  i Expected a declaration item here.
+  
+    4 │ 	9font-family: broken;
+    5 │ 	font-family: Valid;
+  > 6 │ 	123invalid;
+      │ 	^^^^^^^^^^
+    7 │ 	42;
+    8 │ }
+  
+bogus_declaration_recovery.css:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declaration item but instead found '42'.
+  
+    5 │ 	font-family: Valid;
+    6 │ 	123invalid;
+  > 7 │ 	42;
+      │ 	^^
+    8 │ }
+    9 │ 
+  
+  i Expected a declaration item here.
+  
+    5 │ 	font-family: Valid;
+    6 │ 	123invalid;
+  > 7 │ 	42;
+      │ 	^^
+    8 │ }
+    9 │ 
+  
+```

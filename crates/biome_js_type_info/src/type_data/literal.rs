@@ -1,9 +1,8 @@
 use std::{borrow::Cow, ops::Neg};
 
-use biome_js_type_info_macros::Resolvable;
 use biome_rowan::Text;
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct BooleanLiteral(bool);
 
 impl BooleanLiteral {
@@ -13,9 +12,9 @@ impl BooleanLiteral {
     }
 
     pub fn parse(s: &str) -> Option<Self> {
-        match s.as_bytes().first() {
-            Some(b't') => Some(Self(true)),
-            Some(b'f') => Some(Self(false)),
+        match s {
+            "true" => Some(Self(true)),
+            "false" => Some(Self(false)),
             _ => None,
         }
     }
@@ -27,7 +26,7 @@ impl From<bool> for BooleanLiteral {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct NumberLiteral(Text);
 
 impl NumberLiteral {
@@ -81,7 +80,7 @@ impl NumberLiteral {
     }
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct RegexpLiteral {
     /// The pattern to match against.
     ///
@@ -110,7 +109,7 @@ pub struct RegexpLiteral {
     pub flags: Text,
 }
 
-#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, Resolvable)]
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
 pub struct StringLiteral(Text);
 
 impl StringLiteral {
@@ -159,6 +158,8 @@ mod tests {
     fn parse_boolean() {
         assert_eq!(BooleanLiteral::parse("true"), Some(BooleanLiteral(true)));
         assert_eq!(BooleanLiteral::parse("false"), Some(BooleanLiteral(false)));
+        assert_eq!(BooleanLiteral::parse("truthy"), None);
+        assert_eq!(BooleanLiteral::parse("falsehood"), None);
     }
 
     #[test]

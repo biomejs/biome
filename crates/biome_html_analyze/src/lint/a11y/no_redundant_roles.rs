@@ -9,7 +9,7 @@ use biome_html_syntax::{
     AnyHtmlAttribute, element_ext::AnyHtmlTagElement, static_value::StaticValue,
 };
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::BatchMutationExt;
 use biome_rule_options::no_redundant_roles::NoRedundantRolesOptions;
 
 use crate::HtmlRuleAction;

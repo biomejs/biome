@@ -53,6 +53,29 @@ declare_node_union! {
     pub MaybeExport = JsExport | JsAssignmentExpression
 }
 
+pub struct AnyExportInTest(MaybeExport);
+
+impl Rule for NoExportsInTest {
+    type Query = AnyExportInTest;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = NoExportsInTestOptions;
+
+    fn run(_: &RuleContext<Self>) -> Self::Signals {
+        Some(())
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            markup! {
+                "Do not export from a test file."
+            },
+        ))
+    }
+}
+
 impl MaybeExport {
     fn is_export(&self) -> bool {
         match self {
@@ -159,7 +182,7 @@ impl Visitor for AnyExportInTestVisitor {
     }
 }
 
-pub struct AnyExportInTest(MaybeExport);
+
 
 impl QueryMatch for AnyExportInTest {
     fn text_range(&self) -> TextRange {
@@ -182,26 +205,5 @@ impl Queryable for AnyExportInTest {
 
     fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
         query.0.clone()
-    }
-}
-
-impl Rule for NoExportsInTest {
-    type Query = AnyExportInTest;
-    type State = ();
-    type Signals = Option<Self::State>;
-    type Options = NoExportsInTestOptions;
-
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {
-                "Do not export from a test file."
-            },
-        ))
     }
 }

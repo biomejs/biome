@@ -37,7 +37,7 @@ impl FormatNodeRule<ScssWhileAtRule> for FormatScssWhileAtRule {
         write!(
             f,
             [
-                while_token.format(),
+                while_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&format_args![formatted_condition, block_separator])
                     .with_group_id(Some(header_group_id)),

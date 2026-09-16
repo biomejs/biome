@@ -4,7 +4,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 use crate::HtmlRuleAction;
@@ -108,6 +108,10 @@ impl Rule for NoPositiveTabindex {
             markup! { "Remove the "<Emphasis>"tabindex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        Some(ctx.query().range())
     }
 }
 

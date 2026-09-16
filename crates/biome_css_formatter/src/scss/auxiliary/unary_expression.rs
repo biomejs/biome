@@ -31,12 +31,32 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                 }
             });
 
-            write!(f, [operator.format(), separator, expression.format()])
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    separator,
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         } else if is_source_spaced_minus_function {
             // Prettier keeps the source space in `- pow()`.
-            write!(f, [operator.format(), space(), expression.format()])
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    space(),
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         } else {
-            write!(f, [operator.format(), expression.format()])
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         }
     }
 }

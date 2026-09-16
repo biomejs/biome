@@ -1,0 +1,432 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+this.value;
+const getValue = () => this.value;
+
+function Foo(value) {
+    this.value = value;
+}
+
+const functionExpression = function () {
+    return this.value;
+};
+
+const object = {
+    method() {
+        return this.value;
+    },
+    get value() {
+        return this._value;
+    },
+    set value(value) {
+        this._value = value;
+    },
+};
+
+Foo.prototype.method = function () {
+    this.value();
+};
+
+new SDK({
+    onReady: function () {
+        this.value;
+    },
+});
+
+class NestedFunctions {
+    method() {
+        function getValue() {
+            return this.value;
+        }
+
+        return getValue();
+    }
+
+    field = function () {
+        return this.value;
+    };
+
+    static {
+        function update() {
+            this.value = 1;
+        }
+
+        update();
+    }
+}
+
+class ComputedMembers {
+    [this.methodName]() {}
+    [this.propertyName] = 1;
+}
+
+class Derived extends this.Base {}
+
+(function () {
+    this.initialize();
+})();
+
+const objectFunction = {
+    getName: function () {
+        return this.name;
+    },
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:3:1 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ this.value;
+      │ ^^^^
+    4 │ const getValue = () => this.value;
+    5 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:24 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    3 │ this.value;
+  > 4 │ const getValue = () => this.value;
+      │                        ^^^^
+    5 │ 
+    6 │ function Foo(value) {
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    6 │ function Foo(value) {
+  > 7 │     this.value = value;
+      │     ^^^^
+    8 │ }
+    9 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:12 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    10 │ const functionExpression = function () {
+  > 11 │     return this.value;
+       │            ^^^^
+    12 │ };
+    13 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:16 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    14 │ const object = {
+    15 │     method() {
+  > 16 │         return this.value;
+       │                ^^^^
+    17 │     },
+    18 │     get value() {
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:16 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    17 │     },
+    18 │     get value() {
+  > 19 │         return this._value;
+       │                ^^^^
+    20 │     },
+    21 │     set value(value) {
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:9 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    20 │     },
+    21 │     set value(value) {
+  > 22 │         this._value = value;
+       │         ^^^^
+    23 │     },
+    24 │ };
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:5 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    26 │ Foo.prototype.method = function () {
+  > 27 │     this.value();
+       │     ^^^^
+    28 │ };
+    29 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:9 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    30 │ new SDK({
+    31 │     onReady: function () {
+  > 32 │         this.value;
+       │         ^^^^
+    33 │     },
+    34 │ });
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:20 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    37 │     method() {
+    38 │         function getValue() {
+  > 39 │             return this.value;
+       │                    ^^^^
+    40 │         }
+    41 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:16 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    45 │     field = function () {
+  > 46 │         return this.value;
+       │                ^^^^
+    47 │     };
+    48 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:13 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    49 │     static {
+    50 │         function update() {
+  > 51 │             this.value = 1;
+       │             ^^^^
+    52 │         }
+    53 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:6 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    58 │ class ComputedMembers {
+  > 59 │     [this.methodName]() {}
+       │      ^^^^
+    60 │     [this.propertyName] = 1;
+    61 │ }
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:60:6 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    58 │ class ComputedMembers {
+    59 │     [this.methodName]() {}
+  > 60 │     [this.propertyName] = 1;
+       │      ^^^^
+    61 │ }
+    62 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:23 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    61 │ }
+    62 │ 
+  > 63 │ class Derived extends this.Base {}
+       │                       ^^^^
+    64 │ 
+    65 │ (function () {
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:5 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    65 │ (function () {
+  > 66 │     this.initialize();
+       │     ^^^^
+    67 │ })();
+    68 │ 
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:71:16 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Do not use this outside of a class.
+  
+    69 │ const objectFunction = {
+    70 │     getName: function () {
+  > 71 │         return this.name;
+       │                ^^^^
+    72 │     },
+    73 │ };
+  
+  i this depends on how a function is called and may refer to an unexpected object.
+  
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

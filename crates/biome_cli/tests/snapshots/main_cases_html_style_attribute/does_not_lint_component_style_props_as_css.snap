@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `component.astro`
+
+```astro
+<Button style="colr: blue" />
+
+```
+
+## `component.svelte`
+
+```svelte
+<Button style="colr: blue" />
+
+```
+
+# Emitted Messages
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

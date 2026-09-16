@@ -1,0 +1,130 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<Math>{formula}</Math>
+<math>{formula}</math>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@1..5 "Math" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSingleTextExpression {
+                    l_curly_token: L_CURLY@6..7 "{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@7..14 "formula" [] [],
+                    },
+                    r_curly_token: R_CURLY@14..15 "}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@15..16 "<" [] [],
+                slash_token: SLASH@16..17 "/" [] [],
+                name: HtmlComponentName {
+                    value_token: HTML_COMPONENT_LITERAL@17..21 "Math" [] [],
+                },
+                r_angle_token: R_ANGLE@21..22 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@22..24 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@24..28 "math" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@29..30 "{" [] [],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@30..38 "formula}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@38..39 "<" [] [],
+                slash_token: SLASH@39..40 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@40..44 "math" [] [],
+                },
+                r_angle_token: R_ANGLE@44..45 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@45..46 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..46
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..45
+    0: HTML_ELEMENT@0..22
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_COMPONENT_NAME@1..5
+          0: HTML_COMPONENT_LITERAL@1..5 "Math" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..15
+        0: HTML_SINGLE_TEXT_EXPRESSION@6..15
+          0: L_CURLY@6..7 "{" [] []
+          1: HTML_TEXT_EXPRESSION@7..14
+            0: HTML_LITERAL@7..14 "formula" [] []
+          2: R_CURLY@14..15 "}" [] []
+      2: HTML_CLOSING_ELEMENT@15..22
+        0: L_ANGLE@15..16 "<" [] []
+        1: SLASH@16..17 "/" [] []
+        2: HTML_COMPONENT_NAME@17..21
+          0: HTML_COMPONENT_LITERAL@17..21 "Math" [] []
+        3: R_ANGLE@21..22 ">" [] []
+    1: HTML_ELEMENT@22..45
+      0: HTML_OPENING_ELEMENT@22..29
+        0: L_ANGLE@22..24 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@24..28
+          0: HTML_UNKNOWN_TAG@24..28 "math" [] []
+        2: HTML_ATTRIBUTE_LIST@28..28
+        3: R_ANGLE@28..29 ">" [] []
+      1: HTML_ELEMENT_LIST@29..38
+        0: HTML_CONTENT@29..30
+          0: HTML_LITERAL@29..30 "{" [] []
+        1: HTML_CONTENT@30..38
+          0: HTML_LITERAL@30..38 "formula}" [] []
+      2: HTML_CLOSING_ELEMENT@38..45
+        0: L_ANGLE@38..39 "<" [] []
+        1: SLASH@39..40 "/" [] []
+        2: HTML_TAG_NAME@40..44
+          0: HTML_UNKNOWN_TAG@40..44 "math" [] []
+        3: R_ANGLE@44..45 ">" [] []
+  5: EOF@45..46 "" [Newline("\n")] []
+
+```

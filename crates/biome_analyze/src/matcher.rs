@@ -222,7 +222,7 @@ mod tests {
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
-        Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry,
+        Never, Phases, QueryMatcher, RuleCategory, RuleKey, ServiceBag, SignalEntry, Suppression,
         SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
@@ -233,6 +233,43 @@ mod tests {
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
+
+    struct TestAction;
+
+    impl SuppressionAction for TestAction {
+        type Language = RawLanguage;
+
+        fn find_token_for_inline_suppression(
+            &self,
+            _: SyntaxToken<Self::Language>,
+        ) -> Option<ApplySuppression<Self::Language>> {
+            None
+        }
+
+        fn apply_inline_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: ApplySuppression<Self::Language>,
+            _: &str,
+            _: &str,
+            _: &TextRange,
+        ) {
+            unreachable!("")
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
+            unreachable!("")
+        }
+
+        fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
+            unreachable!("")
+        }
+    }
 
     struct SuppressionMatcher;
 
@@ -371,70 +408,41 @@ mod tests {
             ControlFlow::Continue(())
         };
 
-        fn parse_suppression_comment(
-            comment: &str,
-            _piece_range: TextRange,
-        ) -> Vec<Result<AnalyzerSuppression<'_>, Infallible>> {
-            comment
-                .trim_start_matches("//")
-                .split(' ')
-                .map(|rule_str| {
-                    AnalyzerSuppression::rule(
-                        RuleCategory::Lint,
-                        rule_str,
-                        (
-                            "",
-                            TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
-                        ),
-                    )
-                })
-                .map(Ok)
-                .collect()
+        struct TestSuppression;
+
+        impl Suppression for TestSuppression {
+            type Diagnostic = Infallible;
+
+            fn parse_comment<'a>(
+                &self,
+                comment: &'a str,
+                _piece_range: TextRange,
+            ) -> Vec<Result<AnalyzerSuppression<'a>, Infallible>> {
+                comment
+                    .trim_start_matches("//")
+                    .split(' ')
+                    .map(|rule_str| {
+                        AnalyzerSuppression::rule(
+                            RuleCategory::Lint,
+                            rule_str,
+                            (
+                                "",
+                                TextRange::new(TextSize::of(rule_str), TextSize::of(rule_str)),
+                            ),
+                        )
+                    })
+                    .map(Ok)
+                    .collect()
+            }
         }
 
         let mut metadata = MetadataRegistry::default();
         metadata.insert_rule("group", "rule");
 
-        struct TestAction;
-
-        impl SuppressionAction for TestAction {
-            type Language = RawLanguage;
-
-            fn find_token_for_inline_suppression(
-                &self,
-                _: SyntaxToken<Self::Language>,
-            ) -> Option<ApplySuppression<Self::Language>> {
-                None
-            }
-
-            fn apply_inline_suppression(
-                &self,
-                _: &mut BatchMutation<Self::Language>,
-                _: ApplySuppression<Self::Language>,
-                _: &str,
-                _: &str,
-            ) {
-                unreachable!("")
-            }
-
-            fn apply_top_level_suppression(
-                &self,
-                _: &mut BatchMutation<Self::Language>,
-                _: SyntaxToken<Self::Language>,
-                _: &str,
-            ) {
-                unreachable!("")
-            }
-
-            fn suppression_top_level_comment(&self, _suppression_text: &str) -> String {
-                unreachable!("")
-            }
-        }
-
         let mut analyzer = Analyzer::new(
             &metadata,
             SuppressionMatcher,
-            parse_suppression_comment,
+            Box::new(TestSuppression),
             Box::new(TestAction),
             &mut emit_signal,
         );

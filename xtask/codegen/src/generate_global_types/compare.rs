@@ -4,13 +4,103 @@ use anyhow::{Result, bail};
 
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
-    LoweredGlobalTypes, LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
+    LoweredFunctionParameterBinding, LoweredGlobalTypes, LoweredInterface, LoweredMemberKind,
+    LoweredTypeData, LoweredTypeReference,
 };
 
 /// Number of `Error` class members expected in generated output.
 const ERROR_MEMBER_COUNT: usize = 6;
-/// Expected number of lowered generated globals.
-const GENERATED_GLOBAL_COUNT: usize = 7;
+const ARRAY_MEMBER_COUNT: usize = 4;
+const ARRAY_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
+const ARRAY_MAP_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_U_ID")];
+const PROMISE_MEMBER_COUNT: usize = 11;
+const PROMISE_TYPE_PARAMETERS: &[LoweredTypeReference] =
+    &[LoweredTypeReference::Predefined("GLOBAL_T_ID")];
+const NO_TYPE_PARAMETERS: &[LoweredTypeReference] = &[];
+
+#[derive(Clone, Copy)]
+struct PromiseMethodShape {
+    member_name: &'static str,
+    member_type_id: &'static str,
+    helper_name: &'static str,
+    helper_id_constant: &'static str,
+    is_static: bool,
+}
+
+const PROMISE_METHOD_SHAPES: &[PromiseMethodShape] = &[
+    PromiseMethodShape {
+        member_name: "catch",
+        member_type_id: "GLOBAL_PROMISE_CATCH_ID",
+        helper_name: "Promise.prototype.catch",
+        helper_id_constant: "PROMISE_CATCH_ID_GLOBAL_TYPE_ID",
+        is_static: false,
+    },
+    PromiseMethodShape {
+        member_name: "finally",
+        member_type_id: "GLOBAL_PROMISE_FINALLY_ID",
+        helper_name: "Promise.prototype.finally",
+        helper_id_constant: "PROMISE_FINALLY_ID_GLOBAL_TYPE_ID",
+        is_static: false,
+    },
+    PromiseMethodShape {
+        member_name: "then",
+        member_type_id: "GLOBAL_PROMISE_THEN_ID",
+        helper_name: "Promise.prototype.then",
+        helper_id_constant: "PROMISE_THEN_ID_GLOBAL_TYPE_ID",
+        is_static: false,
+    },
+    PromiseMethodShape {
+        member_name: "all",
+        member_type_id: "GLOBAL_PROMISE_ALL_ID",
+        helper_name: "Promise.all",
+        helper_id_constant: "PROMISE_ALL_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "allSettled",
+        member_type_id: "GLOBAL_PROMISE_ALL_SETTLED_ID",
+        helper_name: "Promise.allSettled",
+        helper_id_constant: "PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "any",
+        member_type_id: "GLOBAL_PROMISE_ANY_ID",
+        helper_name: "Promise.any",
+        helper_id_constant: "PROMISE_ANY_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "race",
+        member_type_id: "GLOBAL_PROMISE_RACE_ID",
+        helper_name: "Promise.race",
+        helper_id_constant: "PROMISE_RACE_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "reject",
+        member_type_id: "GLOBAL_PROMISE_REJECT_ID",
+        helper_name: "Promise.reject",
+        helper_id_constant: "PROMISE_REJECT_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "resolve",
+        member_type_id: "GLOBAL_PROMISE_RESOLVE_ID",
+        helper_name: "Promise.resolve",
+        helper_id_constant: "PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+    PromiseMethodShape {
+        member_name: "try",
+        member_type_id: "GLOBAL_PROMISE_TRY_ID",
+        helper_name: "Promise.try",
+        helper_id_constant: "PROMISE_TRY_ID_GLOBAL_TYPE_ID",
+        is_static: true,
+    },
+];
 
 /// Expected shape of one lowered disposable pair (interface + dispose helper), checked by
 /// [`assert_disposable_shape`] against the generated model.
@@ -28,14 +118,6 @@ struct DisposableShape<'a> {
 
 /// Validates lowered generated globals before they are emitted.
 pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
-    if lowered.globals().len() != GENERATED_GLOBAL_COUNT {
-        bail!(
-            "generated globals contain {} entries, expected {}",
-            lowered.globals().len(),
-            GENERATED_GLOBAL_COUNT
-        );
-    }
-
     let Some(error) = lowered.global("Error") else {
         bail!("generated globals are missing the Error global");
     };
@@ -77,6 +159,8 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
     let call = generated_function(lowered, "Error.call", "ERROR_CALL_ID_GLOBAL_TYPE_ID")?;
     assert_error_call_shape(call)?;
 
+    assert_symbol_shape(lowered)?;
+    assert_promise_shape(lowered)?;
     assert_disposable_shape(
         lowered,
         DisposableShape {
@@ -105,7 +189,298 @@ pub fn compare_lowered_globals(lowered: &LoweredGlobalTypes) -> Result<()> {
             return_type_id: "GLOBAL_INSTANCEOF_PROMISE_ID",
         },
     )?;
+    assert_array_shape(lowered)?;
 
+    Ok(())
+}
+
+/// Rejects lowered Promise data that would change the predefined resolver projection.
+fn assert_promise_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(promise) = lowered.global("Promise") else {
+        bail!("generated globals are missing the Promise global");
+    };
+    if promise.id_constant() != "PROMISE_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated Promise global targets {}, expected PROMISE_ID_GLOBAL_TYPE_ID",
+            promise.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = promise.data() else {
+        bail!("generated Promise global is not a class");
+    };
+    if class.name() != "Promise" {
+        bail!(
+            "generated Promise class has name {}, expected Promise",
+            class.name()
+        );
+    }
+    if class.type_parameters() != PROMISE_TYPE_PARAMETERS {
+        bail!("generated Promise global has unexpected type parameters");
+    }
+    if class.members().len() != PROMISE_MEMBER_COUNT {
+        bail!(
+            "generated Promise global has {} members, expected {PROMISE_MEMBER_COUNT}",
+            class.members().len()
+        );
+    }
+
+    let Some(constructor_member) = class.member("constructor") else {
+        bail!("generated Promise global is missing its constructor");
+    };
+    if constructor_member.kind() != &LoweredMemberKind::Constructor
+        || constructor_member.type_reference()
+            != &LoweredTypeReference::Predefined("GLOBAL_PROMISE_CONSTRUCTOR_ID")
+    {
+        bail!("generated Promise constructor member has unexpected shape");
+    }
+
+    let constructor = generated_function(
+        lowered,
+        "Promise.constructor",
+        "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+    )?;
+    if constructor.is_async()
+        || !constructor.type_parameters().is_empty()
+        || constructor.name() != Some("Promise.constructor")
+        || constructor.return_type() != &LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
+    {
+        bail!("generated Promise constructor helper has unexpected shape");
+    }
+    let [parameter] = constructor.parameters() else {
+        bail!("generated Promise constructor helper must have one parameter");
+    };
+    if parameter.binding() != &LoweredFunctionParameterBinding::Pattern
+        || parameter.type_reference()
+            != &LoweredTypeReference::Predefined("GLOBAL_VOID_CALLBACK_ID")
+        || parameter.is_optional()
+        || parameter.is_rest()
+    {
+        bail!("generated Promise constructor helper has an unexpected parameter");
+    }
+
+    for shape in PROMISE_METHOD_SHAPES {
+        assert_promise_method(class, lowered, *shape)?;
+    }
+
+    Ok(())
+}
+
+/// Checks one Promise member and the synthetic callable referenced by that member.
+fn assert_promise_method(
+    class: &LoweredClass,
+    lowered: &LoweredGlobalTypes,
+    shape: PromiseMethodShape,
+) -> Result<()> {
+    let Some(member) = class.member(shape.member_name) else {
+        bail!("generated Promise global is missing {}", shape.member_name);
+    };
+    let expected_kind = if shape.is_static {
+        LoweredMemberKind::NamedStatic
+    } else {
+        LoweredMemberKind::Named { optional: false }
+    };
+    if member.kind() != &expected_kind
+        || member.type_reference() != &LoweredTypeReference::Predefined(shape.member_type_id)
+    {
+        bail!(
+            "generated Promise.{} member has unexpected shape",
+            shape.member_name
+        );
+    }
+
+    let helper = generated_function(lowered, shape.helper_name, shape.helper_id_constant)?;
+    if helper.is_async()
+        || !helper.type_parameters().is_empty()
+        || helper.name() != Some(shape.helper_name)
+        || !helper.parameters().is_empty()
+        || helper.return_type() != &LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_PROMISE_ID")
+    {
+        bail!(
+            "generated {} helper has unexpected shape",
+            shape.helper_name
+        );
+    }
+    Ok(())
+}
+
+/// Rejects output that differs from the predefined `Array` projection used by the resolver.
+fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(array) = lowered.global("Array") else {
+        bail!("generated globals are missing the Array global");
+    };
+    if array.id_constant() != "ARRAY_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated Array global targets {}, expected ARRAY_ID_GLOBAL_TYPE_ID",
+            array.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = array.data() else {
+        bail!("generated Array global is not a class");
+    };
+    if class.name() != "Array" {
+        bail!(
+            "generated Array class has name {}, expected Array",
+            class.name()
+        );
+    }
+    if class.type_parameters() != ARRAY_TYPE_PARAMETERS {
+        bail!("generated Array global has unexpected type parameters");
+    }
+    if class.members().len() != ARRAY_MEMBER_COUNT {
+        bail!(
+            "generated Array global has {} members, expected {ARRAY_MEMBER_COUNT}",
+            class.members().len()
+        );
+    }
+
+    assert_array_member(class, "filter", "GLOBAL_ARRAY_FILTER_ID")?;
+    assert_array_member(class, "forEach", "GLOBAL_ARRAY_FOREACH_ID")?;
+    assert_array_member(class, "map", "GLOBAL_ARRAY_MAP_ID")?;
+    assert_array_member(class, "length", "GLOBAL_NUMBER_ID")?;
+
+    assert_array_method(
+        lowered,
+        "Array.prototype.filter",
+        "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
+        NO_TYPE_PARAMETERS,
+        "GLOBAL_CONDITIONAL_CALLBACK_ID",
+        "GLOBAL_INSTANCEOF_ARRAY_T_ID",
+    )?;
+    assert_array_method(
+        lowered,
+        "Array.prototype.forEach",
+        "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
+        NO_TYPE_PARAMETERS,
+        "GLOBAL_VOID_CALLBACK_ID",
+        "GLOBAL_VOID_ID",
+    )?;
+    assert_array_method(
+        lowered,
+        "Array.prototype.map",
+        "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
+        ARRAY_MAP_TYPE_PARAMETERS,
+        "GLOBAL_MAP_CALLBACK_ID",
+        "GLOBAL_INSTANCEOF_ARRAY_U_ID",
+    )?;
+
+    Ok(())
+}
+
+/// Requires a named, non-optional Array member with the expected predefined type.
+fn assert_array_member(class: &LoweredClass, name: &str, type_id: &'static str) -> Result<()> {
+    let Some(member) = class.member(name) else {
+        bail!("generated Array global is missing {name}");
+    };
+    if member.kind() != &(LoweredMemberKind::Named { optional: false }) {
+        bail!("generated Array.{name} has unexpected kind");
+    }
+    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
+        bail!("generated Array.{name} has unexpected type");
+    }
+    Ok(())
+}
+
+/// Checks an Array helper's identity, type parameters, callback slot, and return type.
+fn assert_array_method(
+    lowered: &LoweredGlobalTypes,
+    name: &str,
+    id_constant: &str,
+    type_parameters: &[LoweredTypeReference],
+    parameter_type_id: &'static str,
+    return_type_id: &'static str,
+) -> Result<()> {
+    let function = generated_function(lowered, name, id_constant)?;
+    if function.is_async() {
+        bail!("generated {name} helper must not be async");
+    }
+    if function.type_parameters() != type_parameters {
+        bail!("generated {name} helper has unexpected type parameters");
+    }
+    if function.name() != Some(name) {
+        bail!("generated {name} helper has unexpected function name");
+    }
+    let [parameter] = function.parameters() else {
+        bail!("generated {name} helper must have one parameter");
+    };
+    if parameter.binding() != &LoweredFunctionParameterBinding::Pattern {
+        bail!("generated {name} helper must have a pattern parameter");
+    }
+    if parameter.type_reference() != &LoweredTypeReference::Predefined(parameter_type_id) {
+        bail!("generated {name} helper has unexpected parameter type");
+    }
+    if parameter.is_optional() || parameter.is_rest() {
+        bail!("generated {name} helper parameter must be required and non-rest");
+    }
+    if function.return_type() != &LoweredTypeReference::Predefined(return_type_id) {
+        bail!("generated {name} helper has unexpected return type");
+    }
+    Ok(())
+}
+
+/// Validates the generated `Symbol` class and its two symbol-valued helpers.
+fn assert_symbol_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
+    let Some(symbol) = lowered.global("Symbol") else {
+        bail!("generated globals are missing the Symbol global");
+    };
+    if symbol.id_constant() != "SYMBOL_ID_GLOBAL_TYPE_ID" {
+        bail!(
+            "generated Symbol global targets {}, expected SYMBOL_ID_GLOBAL_TYPE_ID",
+            symbol.id_constant()
+        );
+    }
+    let LoweredTypeData::Class(class) = symbol.data() else {
+        bail!("generated Symbol global is not a class");
+    };
+    if class.name() != "Symbol" {
+        bail!(
+            "generated Symbol class has name {}, expected Symbol",
+            class.name()
+        );
+    }
+    // Disposable computed members address these predefined IDs directly.
+    // Their static properties must retain the same identities during lowering.
+    assert_symbol_member(class, "dispose", "GLOBAL_SYMBOL_DISPOSE_ID")?;
+    assert_symbol_member(class, "asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")?;
+    assert_symbol_helper(
+        lowered,
+        "Symbol.dispose",
+        "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+    )?;
+    assert_symbol_helper(
+        lowered,
+        "Symbol.asyncDispose",
+        "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+    )?;
+
+    Ok(())
+}
+
+fn assert_symbol_member(class: &LoweredClass, name: &str, type_id: &'static str) -> Result<()> {
+    let Some(member) = class.member(name) else {
+        bail!("generated Symbol global is missing {name}");
+    };
+    if member.kind() != &LoweredMemberKind::NamedStatic {
+        bail!("generated Symbol.{name} has unexpected kind");
+    }
+    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
+        bail!("generated Symbol.{name} has unexpected type");
+    }
+    Ok(())
+}
+
+fn assert_symbol_helper(lowered: &LoweredGlobalTypes, name: &str, id_constant: &str) -> Result<()> {
+    let Some(helper) = lowered.global(name) else {
+        bail!("generated globals are missing {name}");
+    };
+    if helper.id_constant() != id_constant {
+        bail!(
+            "generated {name} targets {}, expected {id_constant}",
+            helper.id_constant()
+        );
+    }
+    if helper.data() != &LoweredTypeData::Symbol {
+        bail!("generated {name} helper is not symbol data");
+    }
     Ok(())
 }
 
@@ -225,6 +600,12 @@ fn assert_disposable_shape(lowered: &LoweredGlobalTypes, shape: DisposableShape)
     if helper.is_async() != shape.helper_is_async {
         bail!(
             "generated {} helper has unexpected async flag",
+            shape.helper_name
+        );
+    }
+    if !helper.type_parameters().is_empty() {
+        bail!(
+            "generated {} helper should not have type parameters",
             shape.helper_name
         );
     }
@@ -349,6 +730,9 @@ fn assert_error_call_shape(call: &LoweredFunction) -> Result<()> {
     if call.is_async() {
         bail!("generated Error call helper should not be async");
     }
+    if !call.type_parameters().is_empty() {
+        bail!("generated Error call helper should not have type parameters");
+    }
     if call.name() != Some("Error") {
         bail!("generated Error call helper has unexpected function name");
     }
@@ -370,8 +754,11 @@ fn assert_single_optional_message_parameter(
             parameters.len()
         );
     };
-    if parameter.name() != "message" {
-        bail!("{owner} has unexpected parameter name {}", parameter.name());
+    let LoweredFunctionParameterBinding::Named(name) = parameter.binding() else {
+        bail!("{owner} message parameter must be named");
+    };
+    if name.text() != "message" {
+        bail!("{owner} has unexpected parameter name {}", name.text());
     }
     if parameter.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
         bail!("{owner} message parameter has unexpected type");

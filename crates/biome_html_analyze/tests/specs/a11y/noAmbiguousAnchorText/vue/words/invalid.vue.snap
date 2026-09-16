@@ -4,21 +4,25 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-/* should generate diagnostics */
-<a>a disallowed word</a>
+<template>
+	/* should generate diagnostics */
+	<a>a disallowed word</a>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:2:1 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:2 lint/a11y/noAmbiguousAnchorText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × No ambiguous anchor descriptions allowed.
   
-    1 │ /* should generate diagnostics */
-  > 2 │ <a>a disallowed word</a>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ 
+    1 │ <template>
+    2 │ 	/* should generate diagnostics */
+  > 3 │ 	<a>a disallowed word</a>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
   
   i Ambiguous anchor descriptions do not provide sufficient context for screen reader users. Provide more context to these users.
   

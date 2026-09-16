@@ -1,4 +1,4 @@
-use crate::{HtmlTextExpression, static_value::StaticValue};
+use crate::{HtmlTextExpression, is_quoted, static_value::StaticValue};
 use biome_rowan::Text;
 
 impl HtmlTextExpression {
@@ -23,9 +23,7 @@ impl HtmlTextExpression {
             "undefined" => Some(StaticValue::Undefined(token)),
             "null" => Some(StaticValue::Null(token)),
             _ => {
-                if (text.starts_with('"') && text.ends_with('"'))
-                    || (text.starts_with('\'') && text.ends_with('\''))
-                {
+                if is_quoted(text) {
                     return Some(StaticValue::String(token));
                 }
 

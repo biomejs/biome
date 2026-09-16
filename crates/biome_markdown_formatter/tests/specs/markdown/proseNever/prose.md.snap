@@ -1,0 +1,101 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseNever/prose.md
+---
+
+# Input
+
+```md
+This is a long paragraph with enough words to exceed the configured line width and require wrapping.
+
+This paragraph starts on one source line
+and continues on another source line.
+
+Text next to **strong emphasis**, `inline code`, and a [link](https://example.com) remains available for wrapping.
+
+Text with ``inline
+code spanning source lines`` remains one code span.
+
+This paragraph has an explicit hard break here.  
+The next line remains separate from the first.
+
+- This list item contains enough prose to wrap across multiple lines at the configured width.
+
+> This block quote contains enough prose to wrap across multiple lines at the configured width.
+
+This paragraph contains enough words before - this marker remains prose instead of becoming a list.
+
+This paragraph contains enough words before > this marker remains prose instead of becoming a quote.
+
+This paragraph contains enough words before 1. this marker remains prose instead of becoming a list.
+
+This paragraph contains enough words before ### this marker remains prose instead of becoming a heading.
+
+A long setext heading starts on this line
+and continues with enough words to wrap
+===
+
+[a-long-reference-label]: https://example.com/a/long/destination "A long reference title"
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "never",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+This is a long paragraph with enough words to exceed the configured line width and require wrapping.
+
+This paragraph starts on one source line and continues on another source line.
+
+Text next to **strong emphasis**, `inline code`, and a [link](https://example.com) remains available for wrapping.
+
+Text with `inline code spanning source lines` remains one code span.
+
+This paragraph has an explicit hard break here.  
+The next line remains separate from the first.
+
+- This list item contains enough prose to wrap across multiple lines at the configured width.
+
+> This block quote contains enough prose to wrap across multiple lines at the configured width.
+
+This paragraph contains enough words before - this marker remains prose instead of becoming a list.
+
+This paragraph contains enough words before > this marker remains prose instead of becoming a quote.
+
+This paragraph contains enough words before 1. this marker remains prose instead of becoming a list.
+
+This paragraph contains enough words before ### this marker remains prose instead of becoming a heading.
+
+# A long setext heading starts on this line and continues with enough words to wrap
+
+[a-long-reference-label]: https://example.com/a/long/destination "A long reference title"
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: This is a long paragraph with enough words to exceed the configured line width and require wrapping.
+    5: Text next to **strong emphasis**, `inline code`, and a [link](https://example.com) remains available for wrapping.
+   12: - This list item contains enough prose to wrap across multiple lines at the configured width.
+   14: > This block quote contains enough prose to wrap across multiple lines at the configured width.
+   16: This paragraph contains enough words before - this marker remains prose instead of becoming a list.
+   18: This paragraph contains enough words before > this marker remains prose instead of becoming a quote.
+   20: This paragraph contains enough words before 1. this marker remains prose instead of becoming a list.
+   22: This paragraph contains enough words before ### this marker remains prose instead of becoming a heading.
+   24: # A long setext heading starts on this line and continues with enough words to wrap
+   26: [a-long-reference-label]: https://example.com/a/long/destination "A long reference title"
+```

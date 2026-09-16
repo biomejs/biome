@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/property_name_extraction.scss
+---
+
+# Input
+
+```scss
+.grid{grid-template-columns:$track
+ 2fr;
+GrId-TeMpLaTe-RoWs:auto
+ $track;}
+
+.trivia{/* leading */  grid-template-areas /* trailing */ :"header header"
+ "main side";}
+
+.escaped{\67rid-template-columns:$track
+ 2fr;}
+
+.values{margin:1px
+ 2px;
+box-shadow:$x 2px black,$y 4px gray;
+--grid-template-columns:1fr
+ 2fr;}
+
+.interpolated{#{$property}:1fr
+ 2fr;
+grid-template-#{$axis}:1fr
+ 2fr;
+--#{$property}:1fr
+ 2fr;}
+
+```
+
+
+# Formatted
+
+```scss
+.grid {
+	grid-template-columns:
+		$track
+		2fr;
+	grid-template-rows:
+		auto
+		$track;
+}
+
+.trivia {
+	/* leading */ grid-template-areas/* trailing */ :
+		"header header"
+		"main side";
+}
+
+.escaped {
+	\67rid-template-columns: $track 2fr;
+}
+
+.values {
+	margin: 1px 2px;
+	box-shadow: $x 2px black, $y 4px gray;
+	--grid-template-columns: 1fr
+	2fr;
+}
+
+.interpolated {
+	#{$property}: 1fr 2fr;
+	grid-template-#{$axis}: 1fr 2fr;
+	--#{$property}: 1fr
+	2fr;
+}
+
+```

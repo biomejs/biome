@@ -19,7 +19,7 @@ impl FormatNodeRule<CssMediaAtRuleDeclarator> for FormatCssMediaAtRuleDeclarator
         write!(
             f,
             [
-                media_token.format(),
+                media_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 // A regular indent here keeps the start of the query on the
                 // same line, even if it ends up breaking over multiple lines

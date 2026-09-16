@@ -1,6 +1,8 @@
+mod analyzer;
 mod codeblock;
 mod printer;
 
+pub use analyzer::*;
 pub use codeblock::*;
 pub use printer::*;
 
@@ -11,19 +13,22 @@ use biome_db::ParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_html_analyze::HtmlAnalyzerServices;
+use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
+use biome_js_parser::Parse;
 use biome_js_semantic::semantic_model_from_source;
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
-use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
     ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_project_layout::ProjectLayout;
 use biome_rowan::{AstNode, AstSeparatedList};
+use biome_service::db::WorkspaceDb;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths, get_html_added_paths};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8PathBuf;
 use std::collections::HashMap;
 use std::hash::BuildHasher;
@@ -35,7 +40,10 @@ use std::sync::Arc;
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
     module_db: WorkspaceDb,
+    file_system: MemoryFileSystem,
+    path_info_cache: PathInfoCache,
     project_layout: Arc<ProjectLayout>,
+    enable_type_inference: bool,
 }
 
 impl AnalyzerServicesBuilder {
@@ -47,12 +55,18 @@ impl AnalyzerServicesBuilder {
     /// # Arguments
     ///
     /// * `files` - A map of file paths to their contents.
-    pub fn from_files<S: BuildHasher>(files: HashMap<String, String, S>) -> Self {
+    pub fn from_files<S: BuildHasher>(
+        files: HashMap<String, String, S>,
+        enable_type_inference: bool,
+    ) -> Self {
         if files.is_empty() {
             let db = WorkspaceDb::default();
             return Self {
                 module_db: db,
+                file_system: MemoryFileSystem::default(),
+                path_info_cache: PathInfoCache::default(),
                 project_layout: Default::default(),
+                enable_type_inference,
             };
         }
 
@@ -65,7 +79,7 @@ impl AnalyzerServicesBuilder {
         let mut html_paths = Vec::new();
 
         for (path, src) in files {
-            let path_buf = Utf8PathBuf::from(path);
+            let path_buf = Utf8PathBuf::from(codeblock::normalize_file_path(&path));
             let biome_path = BiomePath::new(&path_buf);
             if biome_path.is_manifest() {
                 match biome_path.file_name() {
@@ -105,7 +119,7 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let db = WorkspaceDb::default();
+        let mut db = WorkspaceDb::default();
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
@@ -116,7 +130,7 @@ impl AnalyzerServicesBuilder {
                 &layout,
                 semantic_model,
                 &path_info_cache,
-                true,
+                enable_type_inference,
             );
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
@@ -139,15 +153,19 @@ impl AnalyzerServicesBuilder {
         }
 
         let html_added_paths = get_html_added_paths(&fs, &html_paths);
-        for (path, root, embedded_content) in html_added_paths {
-            let (module_info, _, _) = resolve_html_module(
-                root,
-                &embedded_content,
-                path,
-                &fs,
-                &layout,
-                &path_info_cache,
+        for (path, parse, file_source) in html_added_paths {
+            let source_index = db.insert_source(file_source);
+            let parsed_source = ParsedSource::new(
+                &db,
+                path.as_path().to_path_buf(),
+                parse.into(),
+                source_index,
+                vec![],
             );
+            db.insert_file(path.as_path(), parsed_source);
+            let resolved = resolve_html_module(&db, path, &fs, &layout, &path_info_cache);
+            debug_assert!(resolved.is_some());
+            let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -158,16 +176,20 @@ impl AnalyzerServicesBuilder {
 
         Self {
             module_db: db,
+            file_system: fs,
+            path_info_cache,
             project_layout: Arc::new(layout),
+            enable_type_inference,
         }
     }
 
     pub fn build_for_js_parse(
         &mut self,
         path: Utf8PathBuf,
-        parse: biome_js_parser::Parse<biome_js_parser::AnyJsRoot>,
+        parse: Parse<biome_js_parser::AnyJsRoot>,
         file_source: JsFileSource,
-    ) -> JsAnalyzerServices<'_> {
+    ) -> JsAnalyzerServices {
+        let root = parse.tree();
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
@@ -180,13 +202,63 @@ impl AnalyzerServicesBuilder {
         );
         self.module_db.insert_file(&path, parsed_source);
 
+        let semantic_model =
+            Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
+        let (module_info, _, _) = resolve_js_module(
+            root,
+            &BiomePath::new(&path),
+            &self.file_system,
+            &self.project_layout,
+            semantic_model.clone(),
+            &self.path_info_cache,
+            self.enable_type_inference,
+        );
+        self.module_db
+            .update_or_insert_module(path, ModuleInfoKind::Js(module_info));
+
         JsAnalyzerServices::from((
             self.module_db.rc_module_db(),
             self.project_layout.clone(),
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
-        .with_semantic_model(semantic_model_from_source(&self.module_db, parsed_source))
+        .with_parsed_source(parsed_source.into())
+    }
+
+    pub fn build_for_html_parse(
+        &mut self,
+        path: Utf8PathBuf,
+        parse: HtmlParse,
+        file_source: HtmlFileSource,
+    ) -> HtmlAnalyzerServices {
+        let source_index = self
+            .module_db
+            .insert_source(DocumentFileSource::Html(file_source));
+        let parsed_source = ParsedSource::new(
+            &self.module_db,
+            path.clone(),
+            parse.into(),
+            source_index,
+            vec![],
+        );
+        self.module_db.insert_file(&path, parsed_source);
+
+        let resolved = resolve_html_module(
+            &self.module_db,
+            &BiomePath::new(&path),
+            &self.file_system,
+            &self.project_layout,
+            &self.path_info_cache,
+        );
+        debug_assert!(resolved.is_some());
+        let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
+        self.module_db
+            .update_or_insert_module(path, ModuleInfoKind::Html(module_info));
+
+        HtmlAnalyzerServices::default()
+            .with_module_db(self.module_db.rc_module_db())
+            .with_project_layout(self.project_layout.clone())
+            .with_language_db(self.module_db.rc_language_db())
     }
 }
 
@@ -213,12 +285,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics_writer.write_parse_error(error);
+            diagnostics_writer.write_parse_error(error)?;
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics_writer.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics()?;
             bail!("Please fix the parse errors above.");
         };
     }
@@ -352,12 +424,12 @@ pub fn parse_rule_options(
             let error = diag
                 .with_file_path(block.file_path())
                 .with_file_source_code(code);
-            diagnostics_writer.write_diagnostic(error);
+            diagnostics_writer.write_diagnostic(error)?;
         }
         if block.expect_diagnostic {
             return Ok(None);
         } else {
-            diagnostics_writer.print_all_diagnostics();
+            diagnostics_writer.print_all_diagnostics()?;
             bail!("Please fix the configuration errors above.");
         };
     }

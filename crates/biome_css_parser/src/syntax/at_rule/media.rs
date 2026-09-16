@@ -6,14 +6,12 @@ use crate::syntax::block::parse_conditional_block;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
-    parse_scss_interpolated_media_in_parens, parse_scss_media_condition, parse_scss_media_query,
-    parse_scss_media_query_or_condition_query,
+    is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolation, is_nth_source_tight,
+    parse_scss_interpolated_media_in_parens, parse_scss_interpolated_name,
+    parse_scss_media_condition, parse_scss_media_condition_from_query, parse_scss_media_query,
 };
 use crate::syntax::util::skip_possible_tailwind_syntax;
-use crate::syntax::{
-    CssSyntaxFeatures, is_at_identifier, is_at_metavariable, is_nth_at_identifier,
-    parse_metavariable, parse_regular_identifier,
-};
+use crate::syntax::{CssSyntaxFeatures, is_at_metavariable, parse_metavariable};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::SyntaxFeature;
@@ -107,10 +105,7 @@ impl ParseSeparatedList for MediaQueryList {
 
 #[inline]
 pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
-    is_at_media_type_query(p)
-        || is_at_scss_media_query(p)
-        || is_at_metavariable(p)
-        || is_at_any_media_condition(p)
+    is_at_media_type_query(p) || is_at_metavariable(p) || is_at_any_media_condition(p)
 }
 
 /// Parses one media query list item.
@@ -126,14 +121,6 @@ pub(crate) fn is_at_any_media_query(p: &mut CssParser) -> bool {
 pub(crate) fn parse_any_media_query(p: &mut CssParser) -> ParsedSyntax {
     if is_at_media_type_query(p) {
         parse_any_media_type_query(p)
-    } else if is_at_scss_media_query(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-            p,
-            parse_scss_media_query_or_condition_query,
-            |p, marker| {
-                scss_only_syntax_error(p, "SCSS interpolated media queries", marker.range(p))
-            },
-        )
     } else if is_at_metavariable(p) {
         parse_metavariable(p)
     } else if is_at_any_media_condition(p) {
@@ -190,55 +177,166 @@ pub(crate) fn parse_any_media_condition(p: &mut CssParser) -> ParsedSyntax {
 
 const MODIFIER_TYPE_QUERY_SET: TokenSet<CssSyntaxKind> = token_set!(T![only], T![not]);
 
+/// Returns whether the current token starts a plain or interpolated media type name.
+///
+/// ```scss
+/// @media screen {}
+/// @media print-#{$suffix} {}
+/// ```
+#[inline]
+fn is_at_media_type_name(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolated_identifier(p, 0)
+}
+
+/// Returns whether the current token has a source-tight SCSS interpolation
+/// suffix.
+///
+/// ```scss
+/// @media only#{$type} {}
+/// ```
+#[inline]
+fn is_at_source_tight_scss_interpolation_suffix(p: &mut CssParser) -> bool {
+    is_nth_at_scss_interpolation(p, 1) && is_nth_source_tight(p, 1)
+}
+
+/// Returns whether the current token is a standalone media-type modifier.
+///
+/// ```scss
+/// @media only #{$type} {}
+/// ```
+#[inline]
+fn is_at_media_type_modifier(p: &mut CssParser) -> bool {
+    p.at_ts(MODIFIER_TYPE_QUERY_SET)
+        && is_nth_at_scss_interpolated_identifier(p, 1)
+        && !is_at_source_tight_scss_interpolation_suffix(p)
+}
+
+/// Returns whether the current token is a standalone media condition operator.
+///
+/// A source-tight `and#{$suffix}` remains an interpolated media type name.
+///
+/// ```scss
+/// @media screen and (color) {}
+/// @media screen and#{$suffix} {}
+/// ```
+#[inline]
+pub(crate) fn is_at_media_condition_operator(p: &mut CssParser) -> bool {
+    (p.at(T![and]) || p.at(T![or])) && !is_at_source_tight_scss_interpolation_suffix(p)
+}
+
+/// Returns whether a second media-type-shaped fragment can follow the parsed
+/// head.
+///
+/// ```scss
+/// $query: "and (width >= 40rem)";
+/// @media all #{$query} {}
+/// ```
+#[inline]
+fn is_at_media_query_tail_candidate(p: &mut CssParser) -> bool {
+    !is_nth_source_tight(p, 0) && !is_at_media_condition_operator(p) && is_at_media_type_name(p)
+}
+
 #[inline]
 fn parse_any_media_type_query(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_media_type_query(p) {
         return Absent;
     }
 
-    let media_type_query = parse_media_type_query(p);
+    let has_modifier = is_at_media_type_modifier(p);
+    let head = p.start();
+    if has_modifier {
+        p.bump_ts(MODIFIER_TYPE_QUERY_SET);
+    }
+    let head_has_interpolation = parse_media_type(p);
+    let head = head.complete(p, CSS_MEDIA_TYPE_QUERY);
+
+    // The list-level Tailwind skip runs after this parser returns, but the
+    // optional SCSS tail must not consume a Tailwind import clause as a name.
+    skip_possible_tailwind_syntax(p);
+
+    let has_tail = !has_modifier && is_at_media_query_tail_candidate(p);
+    let tail_has_interpolation = if has_tail { parse_media_type(p) } else { false };
+
+    if head_has_interpolation || tail_has_interpolation {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_media_query_from_head(p, head),
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated media queries", marker.range(p))
+            },
+        );
+    }
+
+    if has_tail {
+        // `$query: "and (width >= 40rem)"; @media all #{$query} {}` may form
+        // a query after evaluation. `@media screen print {}` cannot.
+        let bogus = head.precede(p).complete(p, CSS_BOGUS_MEDIA_QUERY);
+        p.error(expected_media_query(p, bogus.range(p)));
+        return Present(bogus);
+    }
 
     if p.at(T![and]) {
-        let m = media_type_query.precede(p);
+        let m = head.precede(p);
         p.bump(T![and]);
         parse_any_media_type_condition(p).or_add_diagnostic(p, expected_any_media_condition);
         Present(m.complete(p, CSS_MEDIA_AND_TYPE_QUERY))
     } else {
-        media_type_query
+        Present(head)
     }
 }
+
+/// Parses a plain or interpolated media type and reports whether it contains
+/// interpolation.
+///
+/// ```scss
+/// @media print-#{$suffix} {}
+/// ```
+#[inline]
+fn parse_media_type(p: &mut CssParser) -> bool {
+    if !is_at_media_type_name(p) {
+        return false;
+    }
+
+    let media_type = p.start();
+    let has_interpolation = parse_scss_interpolated_name(p)
+        .ok()
+        .is_some_and(|name| name.kind(p) == SCSS_INTERPOLATED_IDENTIFIER);
+    media_type.complete(p, CSS_MEDIA_TYPE);
+
+    has_interpolation
+}
+
+/// Completes an interpolated media-type query and parses its condition chain.
+///
+/// ```scss
+/// $query: "and (width >= 40rem)";
+/// @media all #{$query} and (color) {}
+/// ```
+#[inline]
+fn parse_scss_media_query_from_head(p: &mut CssParser, head: CompletedMarker) -> ParsedSyntax {
+    let query = head.precede(p).complete(p, SCSS_MEDIA_QUERY);
+    let query = if is_at_media_condition_operator(p) {
+        parse_scss_media_condition_from_query(p, query)
+            .precede(p)
+            .complete(p, CSS_MEDIA_CONDITION_QUERY)
+    } else {
+        query
+    };
+
+    Present(query)
+}
+
+/// Returns whether a media-type query starts at the current token.
+///
+/// ```scss
+/// @media only #{$type} {}
+/// @media not #{$type} {}
+/// ```
 #[inline]
 fn is_at_media_type_query(p: &mut CssParser) -> bool {
-    (p.at_ts(MODIFIER_TYPE_QUERY_SET) && is_nth_at_identifier(p, 1))
-        || (is_at_identifier(p) && !p.at(T![not]))
-}
-#[inline]
-fn parse_media_type_query(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_media_type_query(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    p.eat_ts(MODIFIER_TYPE_QUERY_SET);
-    // Guarded by `is_at_media_type_query` above.
-    parse_media_type(p).ok();
-
-    Present(m.complete(p, CSS_MEDIA_TYPE_QUERY))
-}
-
-#[inline]
-fn parse_media_type(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-
-    // Guarded by `is_at_identifier` above.
-    parse_regular_identifier(p).ok();
-
-    Present(m.complete(p, CSS_MEDIA_TYPE))
+    is_at_media_type_modifier(p)
+        || (is_at_media_type_name(p)
+            && (!p.at(T![not]) || is_at_source_tight_scss_interpolation_suffix(p)))
 }
 
 #[inline]

@@ -1,0 +1,218 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-[url("/img/with space.png")] flex
+bg-[url("/img/with
+newline.png")] flex
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@3..4 "[" [] [],
+                        TW_SELECTOR@4..18 "url(\"/img/with" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@18..19 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@19..31 "space.png\")]" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@31..32 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@32..36 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@36..37 "\n" [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@37..39 "bg" [] [],
+                minus_token: DASH@39..40 "-" [] [],
+                value: TwBogusValue {
+                    items: [
+                        L_BRACKET@40..41 "[" [] [],
+                        TW_SELECTOR@41..55 "url(\"/img/with" [] [],
+                    ],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@55..56 "\n" [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@56..70 "newline.png\")]" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@70..71 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@71..75 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@75..76 "\n" [] [],
+    ],
+    eof_token: EOF@76..76 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..76
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..76
+    0: TW_FULL_CANDIDATE@0..18
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..18
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_BOGUS_VALUE@3..18
+          0: L_BRACKET@3..4 "[" [] []
+          1: TW_SELECTOR@4..18 "url(\"/img/with" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@18..19 " " [] []
+    2: TW_FULL_CANDIDATE@19..31
+      0: TW_VARIANT_LIST@19..19
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@19..31
+        0: TW_BASE@19..31 "space.png\")]" [] []
+        1: (empty)
+      4: (empty)
+    3: WHITESPACE@31..32 " " [] []
+    4: TW_FULL_CANDIDATE@32..36
+      0: TW_VARIANT_LIST@32..32
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@32..36
+        0: TW_BASE@32..36 "flex" [] []
+        1: (empty)
+      4: (empty)
+    5: WHITESPACE@36..37 "\n" [] []
+    6: TW_FULL_CANDIDATE@37..55
+      0: TW_VARIANT_LIST@37..37
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@37..55
+        0: TW_BASE@37..39 "bg" [] []
+        1: DASH@39..40 "-" [] []
+        2: TW_BOGUS_VALUE@40..55
+          0: L_BRACKET@40..41 "[" [] []
+          1: TW_SELECTOR@41..55 "url(\"/img/with" [] []
+        3: (empty)
+      4: (empty)
+    7: WHITESPACE@55..56 "\n" [] []
+    8: TW_FULL_CANDIDATE@56..70
+      0: TW_VARIANT_LIST@56..56
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@56..70
+        0: TW_BASE@56..70 "newline.png\")]" [] []
+        1: (empty)
+      4: (empty)
+    9: WHITESPACE@70..71 " " [] []
+    10: TW_FULL_CANDIDATE@71..75
+      0: TW_VARIANT_LIST@71..71
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@71..75
+        0: TW_BASE@71..75 "flex" [] []
+        1: (empty)
+      4: (empty)
+    11: WHITESPACE@75..76 "\n" [] []
+  3: EOF@76..76 "" [] []
+
+```
+
+## Diagnostics
+
+```
+css-string-whitespace.txt:1:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[url("/img/with'.
+  
+  > 1 │ bg-[url("/img/with space.png")] flex
+      │    ^^^^^^^^^^^^^^^
+    2 │ bg-[url("/img/with
+    3 │ newline.png")] flex
+  
+  i Expected a value here.
+  
+  > 1 │ bg-[url("/img/with space.png")] flex
+      │    ^^^^^^^^^^^^^^^
+    2 │ bg-[url("/img/with
+    3 │ newline.png")] flex
+  
+css-string-whitespace.txt:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '[url("/img/with'.
+  
+    1 │ bg-[url("/img/with space.png")] flex
+  > 2 │ bg-[url("/img/with
+      │    ^^^^^^^^^^^^^^^
+    3 │ newline.png")] flex
+    4 │ 
+  
+  i Expected a value here.
+  
+    1 │ bg-[url("/img/with space.png")] flex
+  > 2 │ bg-[url("/img/with
+      │    ^^^^^^^^^^^^^^^
+    3 │ newline.png")] flex
+    4 │ 
+  
+```

@@ -1,0 +1,44 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/style/mj-style.vue
+---
+
+# Input
+
+```vue
+<template>
+<mjml>
+
+<mj-style> .should-not-format{
+  as: 'css'
+}</mj-style>
+
+</mjml>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1,5 @@
+ <template>
+   <mjml>
+-    <mj-style> .should-not-format{ as: 'css' }</mj-style>
++    <mj-style> .should-not-format { as: 'css' }</mj-style>
+   </mjml>
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <mjml>
+    <mj-style> .should-not-format { as: 'css' }</mj-style>
+  </mjml>
+</template>
+```

@@ -22,7 +22,13 @@ impl FormatNodeRule<CssFontPaletteValuesAtRuleDeclarator>
 
         write!(
             f,
-            [font_palette_values_token.format(), space(), name.format()]
+            [
+                font_palette_values_token
+                    .format()?
+                    .with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
         )
     }
 }

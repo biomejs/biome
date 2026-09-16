@@ -15,13 +15,13 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::db::DbState;
 use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
-use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
@@ -289,8 +289,9 @@ impl Session {
     ///   again: dropping a `didChange` would leave our copy of the document
     ///   permanently out of sync with the editor.
     /// - **Background tasks** the server starts on its own, such as
-    ///   refreshing the diagnostics of the open documents, loading the
-    ///   configuration file, or scanning the project folder.
+    ///   refreshing the diagnostics of the open documents or loading the
+    ///   configuration file. Project scans run inside an epoch that queues
+    ///   setter-based writes instead of retrying the traversal.
     ///
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.
