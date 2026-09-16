@@ -25,11 +25,11 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
     JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsVariableDeclarator, TsAccessibilityModifier, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_identifier, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -38,7 +38,9 @@ use crate::globals::{
     GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
     GLOBAL_UNDEFINED_ID,
 };
-use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
+use crate::literal::{
+    BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral, decode_js_string_content,
+};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
@@ -787,8 +789,9 @@ impl TypeData {
             AnyTsType::TsObjectType(ty) => Self::object_with_members(
                 ty.members()
                     .into_iter()
-                    .filter_map(|member| {
+                    .map(|member| {
                         TypeMember::from_any_ts_type_member(collector, scope_id, &member)
+                            .unwrap_or_else(unknown_type_member)
                     })
                     .collect(),
             ),
@@ -1292,7 +1295,8 @@ impl TypeData {
             .members()
             .into_iter()
             .filter_map(|member| {
-                let member = member.ok().and_then(|member| {
+                let member = member.ok();
+                let member = member.and_then(|member| {
                     TypeMember::from_any_js_object_member(collector, scope_id, &member)
                 });
                 has_unknown_members |= member.is_none();
@@ -1440,8 +1444,9 @@ impl TypeData {
             members: decl
                 .members()
                 .into_iter()
-                .filter_map(|member| {
+                .map(|member| {
                     TypeMember::from_any_ts_type_member(collector, scope_id, &member)
+                        .unwrap_or_else(unknown_type_member)
                 })
                 .collect(),
         }))
@@ -2163,25 +2168,60 @@ impl TypeMember {
                     )
                 })
             }
-            AnyJsClassMember::JsGetterClassMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let name = text_from_class_member_name(name.clone());
+            AnyJsClassMember::JsGetterClassMember(member) => member.name().ok().and_then(|name| {
+                let is_static = member
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_js_static_modifier().is_some());
+                let kind = class_member_key_kind(collector, scope_id, name, false, false)?;
+                let kind = getter_member_kind(collector, kind, is_static)?;
+                let return_type = getter_return_type(
+                    collector,
+                    scope_id,
+                    member.return_type(),
+                    member.body().ok(),
+                );
+                let function = Function {
+                    is_async: false,
+                    type_parameters: [].into(),
+                    name: kind.name(),
+                    parameters: [].into(),
+                    return_type: ReturnType::Type(return_type.clone()),
+                };
+                Some(Self {
+                    kind,
+                    ty: if is_static {
+                        return_type
+                    } else {
+                        collector.reference_to_owned_data(function.into())
+                    },
+                })
+            }),
+            AnyJsClassMember::TsGetterSignatureClassMember(member) => {
+                member.name().ok().and_then(|name| {
+                    let is_static = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let kind = class_member_key_kind(collector, scope_id, name, false, false)?;
+                    let kind = getter_member_kind(collector, kind, is_static)?;
+                    let return_type =
+                        getter_return_type(collector, scope_id, member.return_type(), None);
                     let function = Function {
                         is_async: false,
                         type_parameters: [].into(),
-                        name: Some(name.clone()),
+                        name: kind.name(),
                         parameters: [].into(),
-                        return_type: ReturnType::Type(getter_return_type(
-                            collector,
-                            scope_id,
-                            member.return_type(),
-                            member.body().ok(),
-                        )),
+                        return_type: ReturnType::Type(return_type.clone()),
                     };
-                    Self {
-                        kind: TypeMemberKind::Getter(name),
-                        ty: collector.reference_to_owned_data(function.into()),
-                    }
+                    Some(Self {
+                        kind,
+                        ty: if is_static {
+                            return_type
+                        } else {
+                            collector.reference_to_owned_data(function.into())
+                        },
+                    })
                 })
             }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
@@ -2248,11 +2288,13 @@ impl TypeMember {
         match member {
             AnyJsObjectMember::JsBogusMember(_) => None,
             AnyJsObjectMember::JsGetterObjectMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
+                    let kind = object_member_kind(collector, scope_id, name)?;
+                    let kind = getter_member_kind(collector, kind, false)?;
                     let function = Function {
                         is_async: false,
                         type_parameters: [].into(),
-                        name: Some(name.clone().into()),
+                        name: kind.name(),
                         parameters: [].into(),
                         return_type: ReturnType::Type(getter_return_type(
                             collector,
@@ -2261,29 +2303,16 @@ impl TypeMember {
                             member.body().ok(),
                         )),
                     };
-                    Self {
-                        kind: TypeMemberKind::Getter(name.into()),
+                    Some(Self {
+                        kind,
                         ty: collector.register_and_resolve(function.into()).into(),
-                    }
+                    })
                 })
             }
             AnyJsObjectMember::JsMethodObjectMember(member) => member
                 .name()
                 .ok()
-                .and_then(|name| match name {
-                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
-                        name.expression().ok().map(|expr| {
-                            TypeMemberKind::ComputedValue(computed_member_reference(
-                                collector, scope_id, &expr,
-                            ))
-                        })
-                    }
-                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
-                        .name()
-                        .ok()
-                        .map(|name| TypeMemberKind::Named(name.into())),
-                    _ => None,
-                })
+                .and_then(|name| object_member_kind(collector, scope_id, name))
                 .map(|kind| {
                     let is_async = member.async_token().is_some();
                     let function = Function {
@@ -2318,20 +2347,7 @@ impl TypeMember {
             AnyJsObjectMember::JsPropertyObjectMember(member) => member
                 .name()
                 .ok()
-                .and_then(|name| match name {
-                    AnyJsObjectMemberName::JsComputedMemberName(name) => {
-                        name.expression().ok().map(|expr| {
-                            TypeMemberKind::ComputedValue(computed_member_reference(
-                                collector, scope_id, &expr,
-                            ))
-                        })
-                    }
-                    AnyJsObjectMemberName::JsLiteralMemberName(name) => name
-                        .name()
-                        .ok()
-                        .map(|name| TypeMemberKind::Named(name.into())),
-                    _ => None,
-                })
+                .and_then(|name| object_member_kind(collector, scope_id, name))
                 .map(|kind| {
                     let value = member.value().ok();
                     let kind = if value.as_ref().is_some_and(expression_is_const_assertion) {
@@ -2355,11 +2371,17 @@ impl TypeMember {
             AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => member
                 .name()
                 .ok()
-                .and_then(|name| text_from_token(name.value_token()))
-                .map(|name| Self {
-                    kind: TypeMemberKind::Named(name.clone()),
+                .and_then(|name| {
+                    let token = name.value_token().ok()?;
+                    Some((
+                        text_from_member_token(&token)?,
+                        token.token_text_trimmed().into(),
+                    ))
+                })
+                .map(|(name, identifier)| Self {
+                    kind: TypeMemberKind::Named(name),
                     ty: collector.reference_to_owned_data(TypeData::from(TypeofValue {
-                        identifier: name,
+                        identifier,
                         ty: TypeReference::unknown(),
                         scope_id: Some(scope_id),
                     })),
@@ -2434,23 +2456,26 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsGetterSignatureTypeMember(member) => {
-                let name = member.name().ok().and_then(|name| name.name())?;
-                let function = Function {
-                    is_async: false,
-                    type_parameters: [].into(),
-                    name: Some(name.clone().into()),
-                    parameters: [].into(),
-                    return_type: ReturnType::Type(getter_return_type(
-                        collector,
-                        scope_id,
-                        member.type_annotation(),
-                        None,
-                    )),
-                };
-                let ty = collector.register_and_resolve(function.into()).into();
-                Some(Self {
-                    kind: TypeMemberKind::Getter(name.into()),
-                    ty: RawTypeId::Local(collector.optional(ty)).into(),
+                member.name().ok().and_then(|name| {
+                    let kind = object_member_kind(collector, scope_id, name)?;
+                    let kind = getter_member_kind(collector, kind, false)?;
+                    let function = Function {
+                        is_async: false,
+                        type_parameters: [].into(),
+                        name: kind.name(),
+                        parameters: [].into(),
+                        return_type: ReturnType::Type(getter_return_type(
+                            collector,
+                            scope_id,
+                            member.type_annotation(),
+                            None,
+                        )),
+                    };
+                    let ty = collector.register_and_resolve(function.into()).into();
+                    Some(Self {
+                        kind,
+                        ty: RawTypeId::Local(collector.optional(ty)).into(),
+                    })
                 })
             }
             AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
@@ -2471,7 +2496,9 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
+                    let kind = object_member_kind(collector, scope_id, name.clone())?;
+                    let function_name = kind.name();
                     let function = Function {
                         is_async: false,
                         type_parameters: generic_params_from_ts_type_params(
@@ -2479,7 +2506,7 @@ impl TypeMember {
                             scope_id,
                             member.type_parameters(),
                         ),
-                        name: Some(name.clone().into()),
+                        name: function_name,
                         parameters: function_params_from_js_params(
                             collector,
                             scope_id,
@@ -2494,15 +2521,15 @@ impl TypeMember {
                     };
                     let ty = collector.register_and_resolve(function.into()).into();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
+                    Self::from_name_and_optional_type(collector, scope_id, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsPropertySignatureTypeMember(member) => {
-                member.name().ok().and_then(|name| name.name()).map(|name| {
+                member.name().ok().and_then(|name| {
                     let ty = type_from_annotation(collector, scope_id, member.type_annotation())
                         .unwrap_or_default();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
+                    Self::from_name_and_optional_type(collector, scope_id, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(_member) => {
@@ -2521,21 +2548,7 @@ impl TypeMember {
         is_static: bool,
         is_optional: bool,
     ) -> Option<Self> {
-        let kind = match name {
-            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
-                computed_member_reference(collector, scope_id, &name.expression().ok()?),
-            ),
-            _ => {
-                let name = text_from_class_member_name(name.name()?);
-                if is_static {
-                    TypeMemberKind::NamedStatic(name)
-                } else if is_optional {
-                    TypeMemberKind::NamedOptional(name)
-                } else {
-                    TypeMemberKind::Named(name)
-                }
-            }
-        };
+        let kind = class_member_key_kind(collector, scope_id, name, is_static, is_optional)?;
 
         Some(Self {
             kind,
@@ -2552,22 +2565,24 @@ impl TypeMember {
     #[inline]
     fn from_name_and_optional_type(
         collector: &mut dyn RawTypeCollector,
-        name: TokenText,
+        scope_id: ScopeId,
+        name: AnyJsObjectMemberName,
         ty: TypeReference,
         is_optional: bool,
-    ) -> Self {
-        let name: Text = name.into();
+    ) -> Option<Self> {
+        let kind = object_member_kind(collector, scope_id, name)?;
         Self {
             kind: if is_optional {
-                TypeMemberKind::NamedOptional(name)
+                kind.with_optional()
             } else {
-                TypeMemberKind::Named(name)
+                kind
             },
             ty: match is_optional {
                 true => RawTypeId::Local(collector.optional(ty)).into(),
                 false => ty,
             },
         }
+        .into()
     }
 
     fn members_from_class_member_list(
@@ -2586,18 +2601,25 @@ impl TypeMember {
                 && let TypeData::Constructor(constructor) = member_ty
             {
                 for param in &constructor.parameters {
-                    if let Some(_accessibility) = param.accessibility
-                        && let FunctionParameter::Named(named_param) = &param.parameter
-                    {
-                        // TODO: Assign accessibility to type members.
+                    let Some(accessibility) = param.accessibility else {
+                        continue;
+                    };
+                    if let FunctionParameter::Named(named_param) = &param.parameter {
+                        let name = match unescape_js_identifier(named_param.name.text()) {
+                            Cow::Borrowed(_) => named_param.name.clone(),
+                            Cow::Owned(name) => Text::new_owned(name.into_boxed_str()),
+                        };
                         members.push(Self {
                             kind: if named_param.is_optional {
-                                TypeMemberKind::NamedOptional(named_param.name.clone())
+                                TypeMemberKind::NamedOptional(name)
                             } else {
-                                TypeMemberKind::Named(named_param.name.clone())
+                                TypeMemberKind::Named(name)
                             },
                             ty: param.parameter.ty().clone(),
                         });
+                        if accessibility != TypeMemberAccessibility::Public {
+                            members.push(unknown_type_member());
+                        }
                     }
                 }
             }
@@ -2622,23 +2644,31 @@ impl TypeMember {
         let mut collected = Vec::new();
         let mut overloads_by_name = FxHashMap::default();
         for syntax_member in member_list {
+            if class_member_has_no_public_key(&syntax_member) {
+                continue;
+            }
+            let is_inaccessible = class_member_is_inaccessible(&syntax_member);
             let is_method_signature = matches!(
                 &syntax_member,
                 AnyJsClassMember::TsMethodSignatureClassMember(_)
             );
             let is_method_implementation =
                 matches!(&syntax_member, AnyJsClassMember::JsMethodClassMember(_));
-            let Some(member) = Self::from_any_js_class_member(collector, scope_id, &syntax_member)
-            else {
-                continue;
-            };
+            let member = Self::from_any_js_class_member(collector, scope_id, &syntax_member)
+                .unwrap_or_else(unknown_type_member);
             if !is_method_signature && (!is_method_implementation || overloads_by_name.is_empty()) {
                 collected.push(CollectedMember::Direct(member));
+                if is_inaccessible {
+                    collected.push(CollectedMember::Direct(unknown_type_member()));
+                }
                 continue;
             }
 
             let Some(name) = member.kind.name() else {
                 collected.push(CollectedMember::Direct(member));
+                if is_inaccessible {
+                    collected.push(CollectedMember::Direct(unknown_type_member()));
+                }
                 continue;
             };
             let key = (name, member.is_static());
@@ -2666,6 +2696,9 @@ impl TypeMember {
                 *representative = member;
             } else {
                 collected.push(CollectedMember::Direct(member));
+            }
+            if is_inaccessible {
+                collected.push(CollectedMember::Direct(unknown_type_member()));
             }
         }
 
@@ -2696,11 +2729,327 @@ impl TypeMember {
     }
 }
 
+fn class_member_key_kind(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    name: AnyJsClassMemberName,
+    is_static: bool,
+    is_optional: bool,
+) -> Option<TypeMemberKind> {
+    match name {
+        AnyJsClassMemberName::JsComputedMemberName(name) => {
+            let key = computed_member_reference(collector, scope_id, &name.expression().ok()?);
+            let kind = match collector.get_by_reference(&key) {
+                Some(TypeData::Literal(literal)) => match literal.as_ref() {
+                    Literal::Number(number) => {
+                        if is_static {
+                            TypeMemberKind::NamedStaticNumber(number.clone())
+                        } else if is_optional {
+                            TypeMemberKind::NamedOptionalNumber(number.clone())
+                        } else {
+                            TypeMemberKind::NamedNumber(number.clone())
+                        }
+                    }
+                    Literal::String(name) => match name.decoded() {
+                        Some(name) => {
+                            if is_static {
+                                TypeMemberKind::NamedStatic(name)
+                            } else if is_optional {
+                                TypeMemberKind::NamedOptional(name)
+                            } else {
+                                TypeMemberKind::Named(name)
+                            }
+                        }
+                        None => TypeMemberKind::ComputedValue(key),
+                    },
+                    _ => TypeMemberKind::ComputedValue(key),
+                },
+                _ => TypeMemberKind::ComputedValue(key),
+            };
+            if is_static {
+                getter_member_kind(collector, kind, true)
+            } else {
+                Some(kind)
+            }
+        }
+        AnyJsClassMemberName::JsLiteralMemberName(name) => {
+            let token = name.value().ok()?;
+            if token.kind() == JsSyntaxKind::JS_NUMBER_LITERAL {
+                if is_static {
+                    return Some(TypeMemberKind::NamedStaticNumber(NumberLiteral::new(
+                        token.token_text_trimmed().into(),
+                    )));
+                }
+                Some(if is_optional {
+                    TypeMemberKind::NamedOptionalNumber(NumberLiteral::new(
+                        token.token_text_trimmed().into(),
+                    ))
+                } else {
+                    TypeMemberKind::NamedNumber(NumberLiteral::new(
+                        token.token_text_trimmed().into(),
+                    ))
+                })
+            } else {
+                let name = text_from_member_token(&token)?;
+                Some(if is_static {
+                    TypeMemberKind::NamedStatic(name)
+                } else if is_optional {
+                    TypeMemberKind::NamedOptional(name)
+                } else {
+                    TypeMemberKind::Named(name)
+                })
+            }
+        }
+        AnyJsClassMemberName::JsPrivateClassMemberName(name) => Some(TypeMemberKind::Named(
+            format!("#{}", name.id_token().ok()?.token_text_trimmed()).into(),
+        )),
+        AnyJsClassMemberName::JsMetavariable(_) => None,
+    }
+}
+
+fn getter_member_kind(
+    collector: &dyn RawTypeCollector,
+    kind: TypeMemberKind,
+    is_static: bool,
+) -> Option<TypeMemberKind> {
+    match kind {
+        TypeMemberKind::Named(name) => Some(if is_static {
+            TypeMemberKind::NamedStatic(name)
+        } else {
+            TypeMemberKind::Getter(name)
+        }),
+        TypeMemberKind::NamedNumber(number) => Some(if is_static {
+            TypeMemberKind::NamedStaticNumber(number)
+        } else {
+            TypeMemberKind::GetterNumber(number)
+        }),
+        TypeMemberKind::NamedStatic(name) => Some(TypeMemberKind::NamedStatic(name)),
+        TypeMemberKind::NamedStaticNumber(number) => {
+            Some(TypeMemberKind::NamedStaticNumber(number))
+        }
+        TypeMemberKind::ComputedValue(key) => match collector.get_by_reference(&key) {
+            Some(TypeData::Literal(literal)) => match literal.as_ref() {
+                Literal::String(name) => {
+                    let name = name.decoded()?;
+                    Some(if is_static {
+                        TypeMemberKind::NamedStatic(name)
+                    } else {
+                        TypeMemberKind::Getter(name)
+                    })
+                }
+                Literal::Number(number) => Some(if is_static {
+                    TypeMemberKind::NamedStaticNumber(number.clone())
+                } else {
+                    TypeMemberKind::GetterNumber(number.clone())
+                }),
+                _ if is_static => None,
+                _ => Some(TypeMemberKind::ComputedValue(key)),
+            },
+            _ if is_static => None,
+            _ => Some(TypeMemberKind::ComputedValue(key)),
+        },
+        _ => None,
+    }
+}
+
+fn class_member_is_inaccessible(member: &AnyJsClassMember) -> bool {
+    let has_private_modifier = match member {
+        AnyJsClassMember::JsGetterClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::JsMethodClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::JsPropertyClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::TsGetterSignatureClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::TsPropertySignatureClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
+            member.modifiers().into_iter().any(|modifier| {
+                modifier
+                    .as_ts_accessibility_modifier()
+                    .is_some_and(is_non_public_accessibility)
+            })
+        }
+        _ => false,
+    };
+
+    has_private_modifier
+        || matches!(
+            class_member_name(member),
+            Some(AnyJsClassMemberName::JsPrivateClassMemberName(_))
+        )
+}
+
+fn class_member_name(member: &AnyJsClassMember) -> Option<AnyJsClassMemberName> {
+    match member {
+        AnyJsClassMember::JsGetterClassMember(member) => member.name().ok(),
+        AnyJsClassMember::JsMethodClassMember(member) => member.name().ok(),
+        AnyJsClassMember::JsPropertyClassMember(member) => member.name().ok(),
+        AnyJsClassMember::TsGetterSignatureClassMember(member) => member.name().ok(),
+        AnyJsClassMember::TsMethodSignatureClassMember(member) => member.name().ok(),
+        AnyJsClassMember::TsPropertySignatureClassMember(member) => member.name().ok(),
+        AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => member.name().ok(),
+        _ => None,
+    }
+}
+
+fn is_non_public_accessibility(modifier: &TsAccessibilityModifier) -> bool {
+    matches!(
+        modifier.modifier_token().ok().map(|token| token.kind()),
+        Some(JsSyntaxKind::PRIVATE_KW | JsSyntaxKind::PROTECTED_KW)
+    )
+}
+
+fn class_member_has_no_public_key(member: &AnyJsClassMember) -> bool {
+    matches!(
+        member,
+        AnyJsClassMember::JsEmptyClassMember(_)
+            | AnyJsClassMember::JsStaticInitializationBlockClassMember(_)
+    )
+}
+
+fn object_member_kind(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    name: AnyJsObjectMemberName,
+) -> Option<TypeMemberKind> {
+    match name {
+        AnyJsObjectMemberName::JsComputedMemberName(name) => {
+            let key = computed_member_reference(collector, scope_id, &name.expression().ok()?);
+            match collector.get_by_reference(&key) {
+                Some(TypeData::Literal(literal)) => match literal.as_ref() {
+                    Literal::Number(number) => Some(TypeMemberKind::NamedNumber(number.clone())),
+                    Literal::String(name) => Some(
+                        name.decoded()
+                            .map_or(TypeMemberKind::ComputedValue(key), TypeMemberKind::Named),
+                    ),
+                    _ => Some(TypeMemberKind::ComputedValue(key)),
+                },
+                _ => Some(TypeMemberKind::ComputedValue(key)),
+            }
+        }
+        AnyJsObjectMemberName::JsLiteralMemberName(name) => {
+            let token = name.value().ok()?;
+            if token.kind() == JsSyntaxKind::JS_NUMBER_LITERAL {
+                Some(TypeMemberKind::NamedNumber(NumberLiteral::new(
+                    token.token_text_trimmed().into(),
+                )))
+            } else {
+                Some(TypeMemberKind::Named(text_from_member_token(&token)?))
+            }
+        }
+        AnyJsObjectMemberName::JsMetavariable(_) => None,
+    }
+}
+
+fn unknown_type_member() -> TypeMember {
+    TypeMember {
+        kind: TypeMemberKind::ComputedValue(TypeReference::unknown()),
+        ty: TypeReference::unknown(),
+    }
+}
+
+fn text_from_member_token(token: &JsSyntaxToken) -> Option<Text> {
+    Some(if token.kind() == JsSyntaxKind::JS_STRING_LITERAL {
+        let raw = Text::from(inner_string_text(token));
+        decode_js_string_content(&raw)?
+    } else {
+        let token_text = token.token_text_trimmed();
+        match unescape_js_identifier(token_text.text()) {
+            Cow::Borrowed(_) => token_text.into(),
+            Cow::Owned(text) => Text::new_owned(text.into_boxed_str()),
+        }
+    })
+}
+
+fn number_member_reference(
+    collector: &mut dyn RawTypeCollector,
+    token: JsSyntaxToken,
+) -> TypeReference {
+    collector.reference_to_owned_data(TypeData::from(Literal::Number(NumberLiteral::new(
+        token.token_text_trimmed().into(),
+    ))))
+}
+
 fn computed_member_reference(
     collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     expression: &AnyJsExpression,
 ) -> TypeReference {
+    let expression = expression.clone().omit_parentheses();
+    match &expression {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => {
+            if let Ok(text) = literal.inner_string_text() {
+                return collector.reference_to_owned_data(
+                    Literal::String(StringLiteral::from(Text::from(text))).into(),
+                );
+            }
+        }
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+        ) => {
+            if let Ok(token) = literal.value_token() {
+                return number_member_reference(collector, token);
+            }
+        }
+        _ => {}
+    }
+
+    if expression
+        .as_js_template_expression()
+        .is_none_or(|template| template.is_constant())
+        && let Some(value) = expression.as_static_value()
+    {
+        let text = match value {
+            biome_js_syntax::static_value::StaticValue::String(token) => {
+                Some(Text::from(inner_string_text(&token)))
+            }
+            biome_js_syntax::static_value::StaticValue::EmptyString(_) => {
+                Some(Text::new_static(""))
+            }
+            _ => None,
+        };
+        if let Some(text) = text {
+            return collector
+                .reference_to_owned_data(Literal::String(StringLiteral::from(text)).into());
+        }
+    }
+
     if let Some(member) = expression.as_js_static_member_expression()
         && let Ok(object) = member.object()
         && let Some(identifier) = object.as_js_identifier_expression()
@@ -2721,7 +3070,7 @@ fn computed_member_reference(
         .into();
     }
 
-    TypeReference::from_any_js_expression(collector, scope_id, expression)
+    TypeReference::from_any_js_expression(collector, scope_id, &expression)
 }
 
 impl TypeReference {
@@ -3214,7 +3563,7 @@ fn split_regex_literal(token: SyntaxResult<JsSyntaxToken>) -> Option<RegexpLiter
 fn text_from_any_js_name(name: AnyJsName) -> Option<Text> {
     match name {
         AnyJsName::JsMetavariable(_) => None,
-        AnyJsName::JsName(name) => text_from_token(name.value_token()),
+        AnyJsName::JsName(name) => text_from_member_token(&name.value_token().ok()?),
         AnyJsName::JsPrivateName(name) => name
             .value_token()
             .ok()

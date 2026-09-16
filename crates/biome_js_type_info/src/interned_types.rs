@@ -349,7 +349,15 @@ impl<'db> TypeData<'db> {
         matches!(
             self,
             Self::Literal(literal)
-                if matches!(literal.literal(db), Literal::String(string) if string.as_str() == name)
+                if match literal.literal(db) {
+                    Literal::String(string) => string
+                        .decoded()
+                        .is_some_and(|decoded| decoded.text() == name),
+                    Literal::Number(number) => number
+                        .to_property_key()
+                        .is_some_and(|property_key| property_key == name),
+                    _ => false,
+                }
         )
     }
 
@@ -1296,14 +1304,22 @@ impl<'db> TypeDataSlots<'db> {
             | TypeMemberKind::ConstAssertedCallSignature
             | TypeMemberKind::ConstAssertedConstructor
             | TypeMemberKind::ConstAssertedGetter(_)
+            | TypeMemberKind::ConstAssertedGetterNumber(_)
             | TypeMemberKind::ConstAssertedNamed(_)
+            | TypeMemberKind::ConstAssertedNamedNumber(_)
             | TypeMemberKind::ConstAssertedNamedOptional(_)
+            | TypeMemberKind::ConstAssertedNamedOptionalNumber(_)
             | TypeMemberKind::ConstAssertedNamedStatic(_)
+            | TypeMemberKind::ConstAssertedNamedStaticNumber(_)
             | TypeMemberKind::Constructor
             | TypeMemberKind::Getter(_)
+            | TypeMemberKind::GetterNumber(_)
             | TypeMemberKind::Named(_)
+            | TypeMemberKind::NamedNumber(_)
             | TypeMemberKind::NamedOptional(_)
-            | TypeMemberKind::NamedStatic(_) => {}
+            | TypeMemberKind::NamedOptionalNumber(_)
+            | TypeMemberKind::NamedStatic(_)
+            | TypeMemberKind::NamedStaticNumber(_) => {}
         }
         self.slots.push(member.ty);
     }
@@ -1662,24 +1678,44 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeMemberKind::ConstAssertedGetter(name) => {
                 TypeMemberKind::ConstAssertedGetter(name.clone())
             }
+            TypeMemberKind::ConstAssertedGetterNumber(number) => {
+                TypeMemberKind::ConstAssertedGetterNumber(number.clone())
+            }
             TypeMemberKind::ConstAssertedIndexSignature(_) => {
                 TypeMemberKind::ConstAssertedIndexSignature(self.take_type()?)
             }
             TypeMemberKind::ConstAssertedNamed(name) => {
                 TypeMemberKind::ConstAssertedNamed(name.clone())
             }
+            TypeMemberKind::ConstAssertedNamedNumber(number) => {
+                TypeMemberKind::ConstAssertedNamedNumber(number.clone())
+            }
             TypeMemberKind::ConstAssertedNamedOptional(name) => {
                 TypeMemberKind::ConstAssertedNamedOptional(name.clone())
+            }
+            TypeMemberKind::ConstAssertedNamedOptionalNumber(number) => {
+                TypeMemberKind::ConstAssertedNamedOptionalNumber(number.clone())
             }
             TypeMemberKind::ConstAssertedNamedStatic(name) => {
                 TypeMemberKind::ConstAssertedNamedStatic(name.clone())
             }
+            TypeMemberKind::ConstAssertedNamedStaticNumber(number) => {
+                TypeMemberKind::ConstAssertedNamedStaticNumber(number.clone())
+            }
             TypeMemberKind::Constructor => TypeMemberKind::Constructor,
             TypeMemberKind::Getter(name) => TypeMemberKind::Getter(name.clone()),
+            TypeMemberKind::GetterNumber(number) => TypeMemberKind::GetterNumber(number.clone()),
             TypeMemberKind::IndexSignature(_) => TypeMemberKind::IndexSignature(self.take_type()?),
             TypeMemberKind::Named(name) => TypeMemberKind::Named(name.clone()),
+            TypeMemberKind::NamedNumber(number) => TypeMemberKind::NamedNumber(number.clone()),
             TypeMemberKind::NamedOptional(name) => TypeMemberKind::NamedOptional(name.clone()),
+            TypeMemberKind::NamedOptionalNumber(number) => {
+                TypeMemberKind::NamedOptionalNumber(number.clone())
+            }
             TypeMemberKind::NamedStatic(name) => TypeMemberKind::NamedStatic(name.clone()),
+            TypeMemberKind::NamedStaticNumber(number) => {
+                TypeMemberKind::NamedStaticNumber(number.clone())
+            }
         })
     }
 
@@ -1958,16 +1994,24 @@ pub enum TypeMemberKind<'db> {
     ConstAssertedComputedValueNamed(Text, TypeData<'db>),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
+    ConstAssertedGetterNumber(NumberLiteral),
     ConstAssertedIndexSignature(TypeData<'db>),
     ConstAssertedNamed(Text),
+    ConstAssertedNamedNumber(NumberLiteral),
     ConstAssertedNamedOptional(Text),
+    ConstAssertedNamedOptionalNumber(NumberLiteral),
     ConstAssertedNamedStatic(Text),
+    ConstAssertedNamedStaticNumber(NumberLiteral),
     Constructor,
     Getter(Text),
+    GetterNumber(NumberLiteral),
     IndexSignature(TypeData<'db>),
     Named(Text),
+    NamedNumber(NumberLiteral),
     NamedOptional(Text),
+    NamedOptionalNumber(NumberLiteral),
     NamedStatic(Text),
+    NamedStaticNumber(NumberLiteral),
 }
 
 impl<'db> TypeMemberKind<'db> {
@@ -1984,6 +2028,16 @@ impl<'db> TypeMemberKind<'db> {
             | Self::ConstAssertedNamedOptional(own_name)
             | Self::NamedStatic(own_name)
             | Self::ConstAssertedNamedStatic(own_name) => own_name.text() == name,
+            Self::GetterNumber(number)
+            | Self::ConstAssertedGetterNumber(number)
+            | Self::NamedNumber(number)
+            | Self::ConstAssertedNamedNumber(number)
+            | Self::NamedOptionalNumber(number)
+            | Self::ConstAssertedNamedOptionalNumber(number)
+            | Self::NamedStaticNumber(number)
+            | Self::ConstAssertedNamedStaticNumber(number) => number
+                .to_property_key()
+                .is_some_and(|own_name| own_name == name),
             Self::CallSignature
             | Self::ComputedValue(_)
             | Self::ConstAssertedCallSignature
@@ -2007,6 +2061,8 @@ impl<'db> TypeMemberKind<'db> {
                 | Self::ConstAssertedConstructor
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::NamedStaticNumber(_)
+                | Self::ConstAssertedNamedStaticNumber(_)
         )
     }
 
@@ -2014,10 +2070,23 @@ impl<'db> TypeMemberKind<'db> {
         matches!(self, Self::Constructor | Self::ConstAssertedConstructor)
     }
 
+    pub fn is_getter(&self) -> bool {
+        matches!(
+            self,
+            Self::Getter(_)
+                | Self::ConstAssertedGetter(_)
+                | Self::GetterNumber(_)
+                | Self::ConstAssertedGetterNumber(_)
+        )
+    }
+
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
-            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+            Self::NamedOptional(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::NamedOptionalNumber(_)
+                | Self::ConstAssertedNamedOptionalNumber(_)
         )
     }
 
@@ -2029,10 +2098,14 @@ impl<'db> TypeMemberKind<'db> {
                 | Self::ConstAssertedComputedValueNamed(_, _)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
+                | Self::ConstAssertedGetterNumber(_)
                 | Self::ConstAssertedIndexSignature(_)
                 | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedNumber(_)
                 | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedOptionalNumber(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::ConstAssertedNamedStaticNumber(_)
         )
     }
 
@@ -2040,6 +2113,10 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::Named(name) => Self::NamedOptional(name),
             Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::NamedNumber(number) => Self::NamedOptionalNumber(number),
+            Self::ConstAssertedNamedNumber(number) => {
+                Self::ConstAssertedNamedOptionalNumber(number)
+            }
             other => other,
         }
     }
@@ -2048,6 +2125,10 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::NamedOptional(name) => Self::Named(name),
             Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            Self::NamedOptionalNumber(number) => Self::NamedNumber(number),
+            Self::ConstAssertedNamedOptionalNumber(number) => {
+                Self::ConstAssertedNamedNumber(number)
+            }
             other => other,
         }
     }
@@ -2077,6 +2158,16 @@ impl<'db> TypeMemberKind<'db> {
             | Self::Named(name)
             | Self::NamedOptional(name)
             | Self::NamedStatic(name) => Some(name.clone()),
+            Self::ConstAssertedGetterNumber(number)
+            | Self::GetterNumber(number)
+            | Self::ConstAssertedNamedNumber(number)
+            | Self::NamedNumber(number)
+            | Self::ConstAssertedNamedOptionalNumber(number)
+            | Self::NamedOptionalNumber(number)
+            | Self::ConstAssertedNamedStaticNumber(number)
+            | Self::NamedStaticNumber(number) => number
+                .to_property_key()
+                .map(|name| Text::new_owned(name.into_boxed_str())),
         }
     }
 
@@ -2511,26 +2602,46 @@ fn convert_type_member_kind<'db>(
         raw::TypeMemberKind::ConstAssertedGetter(name) => {
             TypeMemberKind::ConstAssertedGetter(name.clone())
         }
+        raw::TypeMemberKind::ConstAssertedGetterNumber(number) => {
+            TypeMemberKind::ConstAssertedGetterNumber(number.clone())
+        }
         raw::TypeMemberKind::ConstAssertedIndexSignature(ty) => {
             TypeMemberKind::ConstAssertedIndexSignature(resolve_reference(ty))
         }
         raw::TypeMemberKind::ConstAssertedNamed(name) => {
             TypeMemberKind::ConstAssertedNamed(name.clone())
         }
+        raw::TypeMemberKind::ConstAssertedNamedNumber(number) => {
+            TypeMemberKind::ConstAssertedNamedNumber(number.clone())
+        }
         raw::TypeMemberKind::ConstAssertedNamedOptional(name) => {
             TypeMemberKind::ConstAssertedNamedOptional(name.clone())
+        }
+        raw::TypeMemberKind::ConstAssertedNamedOptionalNumber(number) => {
+            TypeMemberKind::ConstAssertedNamedOptionalNumber(number.clone())
         }
         raw::TypeMemberKind::ConstAssertedNamedStatic(name) => {
             TypeMemberKind::ConstAssertedNamedStatic(name.clone())
         }
+        raw::TypeMemberKind::ConstAssertedNamedStaticNumber(number) => {
+            TypeMemberKind::ConstAssertedNamedStaticNumber(number.clone())
+        }
         raw::TypeMemberKind::Constructor => TypeMemberKind::Constructor,
         raw::TypeMemberKind::Getter(name) => TypeMemberKind::Getter(name.clone()),
+        raw::TypeMemberKind::GetterNumber(number) => TypeMemberKind::GetterNumber(number.clone()),
         raw::TypeMemberKind::IndexSignature(ty) => {
             TypeMemberKind::IndexSignature(resolve_reference(ty))
         }
         raw::TypeMemberKind::Named(name) => TypeMemberKind::Named(name.clone()),
+        raw::TypeMemberKind::NamedNumber(number) => TypeMemberKind::NamedNumber(number.clone()),
         raw::TypeMemberKind::NamedOptional(name) => TypeMemberKind::NamedOptional(name.clone()),
+        raw::TypeMemberKind::NamedOptionalNumber(number) => {
+            TypeMemberKind::NamedOptionalNumber(number.clone())
+        }
         raw::TypeMemberKind::NamedStatic(name) => TypeMemberKind::NamedStatic(name.clone()),
+        raw::TypeMemberKind::NamedStaticNumber(number) => {
+            TypeMemberKind::NamedStaticNumber(number.clone())
+        }
     }
 }
 
@@ -2818,6 +2929,23 @@ mod tests {
             replacements.finish(TypeData::Number),
             Some(TypeData::Number)
         );
+    }
+
+    #[test]
+    fn numeric_literal_keys_match_canonical_property_names() {
+        let db = TestDb::default();
+        let hexadecimal = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::Number(NumberLiteral::new(text("0x1"))),
+        ));
+        let exponent = TypeData::Literal(InternedLiteral::new(
+            &db,
+            Literal::Number(NumberLiteral::new(text("1e1"))),
+        ));
+
+        assert!(hexadecimal.is_string_literal_key(&db, "1"));
+        assert!(!hexadecimal.is_string_literal_key(&db, "01"));
+        assert!(exponent.is_string_literal_key(&db, "10"));
     }
 
     #[derive(Default)]

@@ -354,6 +354,12 @@ where
             && value.ty(db) == TypeData::Unknown
         {
             TypeTransformAction::Replace(ty)
+        } else if matches!(
+            ty,
+            TypeData::TypeOperator(operator)
+                if matches!(operator.operator(db), crate::TypeOperator::Keyof)
+        ) {
+            TypeTransformAction::Replace(ty)
         } else {
             TypeTransformAction::Descend(ty)
         }

@@ -64,6 +64,8 @@ mod imports;
 mod intersections;
 #[path = "spec_tests/js_doc.test.rs"]
 mod js_doc;
+#[path = "spec_tests/keyof.test.rs"]
+mod keyof;
 #[path = "spec_tests/module_resolution.test.rs"]
 mod module_resolution;
 #[path = "spec_tests/normalization.test.rs"]

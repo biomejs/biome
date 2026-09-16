@@ -12,6 +12,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 mod expressions;
 mod globals;
 mod imports;
+mod keyof;
 mod lookup;
 mod promise_classification;
 mod qualifiers;
@@ -21,6 +22,7 @@ pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
     resolve_export_type_on_demand,
 };
+pub(in crate::db) use keyof::evaluate_keyof;
 pub(in crate::db) use lookup::{
     apply_substitutions_to_root_body, find_member_type_on_demand, find_value_member_type_on_demand,
     resolve_local_type_on_demand, substitutions_for_instance,

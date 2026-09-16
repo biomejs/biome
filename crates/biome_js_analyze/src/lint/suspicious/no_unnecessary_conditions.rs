@@ -11,8 +11,8 @@ use biome_js_syntax::{
     JsIfStatement, JsLogicalExpression, JsLogicalOperator, JsStaticMemberExpression, JsSwitchStatement,
     JsUnaryOperator, JsWhileStatement, inner_string_text,
 };
-use biome_js_type_info::InferredType;
-use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
+use biome_js_type_info::{InferredType, literal::decode_js_string_content};
+use biome_rowan::{AstNode, Text, TextRange, declare_node_union};
 use biome_rule_options::no_unnecessary_conditions::NoUnnecessaryConditionsOptions;
 
 declare_lint_rule! {
@@ -168,7 +168,7 @@ pub enum IssueKind {
 
 /// A literal value extracted from a `case <literal>:` clause.
 enum CaseLiteral {
-    String(TokenText),
+    String(Text),
     Number(f64),
     Boolean(bool),
     Null,
@@ -779,7 +779,8 @@ fn extract_case_literal(test: &AnyJsExpression) -> Option<CaseLiteral> {
     match lit_expr {
         AnyJsLiteralExpression::JsStringLiteralExpression(s) => {
             let token = s.value_token().ok()?;
-            Some(CaseLiteral::String(inner_string_text(&token)))
+            let raw = Text::from(inner_string_text(&token));
+            Some(CaseLiteral::String(decode_js_string_content(&raw)?))
         }
         AnyJsLiteralExpression::JsNumberLiteralExpression(n) => {
             // `as_number` handles hex/binary/octal literals and numeric separators.

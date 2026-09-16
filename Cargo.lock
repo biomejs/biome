@@ -1257,7 +1257,9 @@ dependencies = [
  "hashbrown 0.15.5",
  "insta",
  "rustc-hash 2.1.3",
+ "ryu-js",
  "salsa",
+ "serde_json",
 ]
 
 [[package]]

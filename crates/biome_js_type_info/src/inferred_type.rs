@@ -1,6 +1,7 @@
 use crate::TypeDb;
 use crate::global_types;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};
+use crate::literal::{NumberLiteral, encode_js_string_content};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
     is_escape_hatch as relation_is_escape_hatch, promise_inner as relation_promise_inner,
@@ -1084,9 +1085,17 @@ impl<'db> InferredType<'db> {
                     Literal::Boolean(boolean) => {
                         InferredSwitchCase::BooleanLiteral(boolean.as_bool())
                     }
-                    Literal::Number(number) => InferredSwitchCase::Number(number.text().clone()),
+                    Literal::Number(number) => {
+                        let Some(number) = canonicalize_js_number_literal(number) else {
+                            return Err(TypeTraversalError::UnresolvedType);
+                        };
+                        InferredSwitchCase::Number(number)
+                    }
                     Literal::String(string) => {
-                        InferredSwitchCase::String(Text::new_owned(string.as_str().into()))
+                        let Some(decoded) = string.decoded() else {
+                            return Err(TypeTraversalError::UnresolvedType);
+                        };
+                        InferredSwitchCase::String(encode_js_string_content(decoded.text()))
                     }
                     Literal::BigInt(bigint) => {
                         match canonicalize_js_bigint_literal(bigint.text()) {
@@ -1103,7 +1112,6 @@ impl<'db> InferredType<'db> {
                 }),
                 TypeData::Null => cases.push(InferredSwitchCase::Null),
                 TypeData::Undefined => cases.push(InferredSwitchCase::Undefined),
-                TypeData::Symbol => cases.push(InferredSwitchCase::Symbol),
                 TypeData::InstanceOf(instance) => pending.push(instance.ty(self.db)),
                 TypeData::Intersection(intersection) => pending.extend(
                     intersection
@@ -1117,6 +1125,11 @@ impl<'db> InferredType<'db> {
                 TypeData::TypeofValue(typeof_value) => pending.push(typeof_value.ty(self.db)),
                 TypeData::Union(union) => {
                     pending.extend(union.types(self.db).iter().rev().copied());
+                }
+                TypeData::TypeOperator(operator)
+                    if matches!(operator.operator(self.db), crate::TypeOperator::Keyof) =>
+                {
+                    return Err(TypeTraversalError::UnresolvedType);
                 }
                 _ => {}
             }
@@ -1138,10 +1151,10 @@ impl<'db> InferredType<'db> {
     pub fn could_equal_string_literal(self, value: &str) -> bool {
         self.could_equal_literal(|data| match data {
             TypeData::String => Some(true),
-            TypeData::Literal(literal) => Some(matches!(
-                literal.literal(self.db),
-                Literal::String(string) if string.as_str() == value
-            )),
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::String(string) => string.decoded().map(|decoded| decoded.text() == value),
+                _ => Some(false),
+            },
             _ => Some(false),
         })
     }
@@ -1149,10 +1162,10 @@ impl<'db> InferredType<'db> {
     pub fn could_equal_number_literal(self, value: f64) -> bool {
         self.could_equal_literal(|data| match data {
             TypeData::Number => Some(true),
-            TypeData::Literal(literal) => Some(matches!(
-                literal.literal(self.db),
-                Literal::Number(number) if number.to_f64() == Some(value)
-            )),
+            TypeData::Literal(literal) => match literal.literal(self.db) {
+                Literal::Number(number) => number.to_f64().map(|number| number == value),
+                _ => Some(false),
+            },
             _ => Some(false),
         })
     }
@@ -1297,6 +1310,12 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword
                 | TypeData::Local(_)
                 | TypeData::TypeofExpression(_) => return true,
+                TypeData::TypeOperator(operator)
+                    if matches!(operator.operator(self.db), crate::TypeOperator::Keyof) =>
+                {
+                    return true;
+                }
+                TypeData::TypeOperator(operator) => pending.push(operator.ty(self.db)),
                 TypeData::Generic(generic) => {
                     let Some(constraint) = generic.constraint(self.db) else {
                         return true;
@@ -1611,6 +1630,15 @@ where
     }
 }
 
+fn canonicalize_js_number_literal(number: &NumberLiteral) -> Option<Text> {
+    let value = number.to_f64()?;
+    if !value.is_finite() {
+        return None;
+    }
+    let value = if value == 0.0 { 0.0 } else { value };
+    Some(Text::new_owned(value.to_string().into_boxed_str()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1618,6 +1646,7 @@ mod tests {
         InternedIntersection, InternedLiteral, InternedObject, InternedUnion, TypeMember,
         TypeMemberKind,
     };
+    use crate::literal::StringLiteral;
 
     #[salsa::db]
     #[derive(Default)]
@@ -1651,6 +1680,16 @@ mod tests {
         )
     }
 
+    fn number<'db>(db: &'db TestDb, text: &'static str) -> InferredType<'db> {
+        InferredType::new(
+            db,
+            TypeData::Literal(InternedLiteral::new(
+                db,
+                Literal::Number(NumberLiteral::new(Text::new_static(text))),
+            )),
+        )
+    }
+
     #[test]
     fn bigint_semantics_use_canonical_values() {
         let db = TestDb::default();
@@ -1673,6 +1712,88 @@ mod tests {
             hexadecimal.try_switch_case_variants(),
             Ok(vec![InferredSwitchCase::BigInt(Text::new_static("16n"))])
         );
+    }
+
+    #[test]
+    fn number_switch_cases_use_canonical_numeric_values() {
+        let db = TestDb::default();
+
+        for (text, canonical) in [
+            ("1.0", "1"),
+            ("0x1", "1"),
+            ("1_000", "1000"),
+            ("-0", "0"),
+            ("0", "0"),
+        ] {
+            assert_eq!(
+                number(&db, text).try_switch_case_variants(),
+                Ok(vec![InferredSwitchCase::Number(Text::new_static(
+                    canonical
+                ))]),
+                "{text}"
+            );
+        }
+    }
+
+    #[test]
+    fn number_literal_comparison_is_indeterminate_when_unparsed() {
+        let db = TestDb::default();
+
+        assert!(number(&db, "not-a-number").could_equal_number_literal(1.0));
+        assert!(number(&db, "0x10000000000000000").could_equal_number_literal(1.0));
+        assert!(!number(&db, "2").could_equal_number_literal(1.0));
+        assert!(number(&db, "1").could_equal_number_literal(1.0));
+    }
+
+    #[test]
+    fn string_switch_cases_use_decoded_source_safe_values() {
+        let db = TestDb::default();
+        let escaped = InferredType::new(
+            &db,
+            TypeData::Literal(InternedLiteral::new(
+                &db,
+                Literal::String(StringLiteral::from(Text::new_static(r"\u0061"))),
+            )),
+        );
+        let newline = InferredType::new(
+            &db,
+            TypeData::Literal(InternedLiteral::new(
+                &db,
+                Literal::String(StringLiteral::from(Text::new_static(r"\n"))),
+            )),
+        );
+
+        assert_eq!(
+            escaped.try_switch_case_variants(),
+            Ok(vec![InferredSwitchCase::String(Text::new_static("a"))])
+        );
+        assert!(escaped.could_equal_string_literal("a"));
+        assert_eq!(
+            newline.try_switch_case_variants(),
+            Ok(vec![InferredSwitchCase::String(Text::new_static(r"\n"))])
+        );
+        assert!(newline.could_equal_string_literal("\n"));
+    }
+
+    #[test]
+    fn non_finite_or_invalid_number_switch_cases_are_indeterminate() {
+        let db = TestDb::default();
+
+        for text in ["NaN", "not-a-number"] {
+            assert_eq!(
+                number(&db, text).try_switch_case_variants(),
+                Err(TypeTraversalError::UnresolvedType),
+                "{text}"
+            );
+        }
+    }
+
+    #[test]
+    fn broad_symbol_switch_cases_are_not_finite() {
+        let db = TestDb::default();
+        let symbol = InferredType::new(&db, TypeData::Symbol);
+
+        assert_eq!(symbol.try_switch_case_variants(), Ok(Vec::new()));
     }
 
     #[test]

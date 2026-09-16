@@ -757,10 +757,8 @@ fn member_value_type<'db>(
     db: &'db dyn ModuleDb,
     member: &InferredTypeMember<'db>,
 ) -> InferredTypeData<'db> {
-    if matches!(
-        member.kind,
-        InferredTypeMemberKind::Getter(_) | InferredTypeMemberKind::ConstAssertedGetter(_)
-    ) && let InferredTypeData::Function(function) = member.ty
+    if member.kind.is_getter()
+        && let InferredTypeData::Function(function) = member.ty
         && let InferredReturnType::Type(return_ty) = function.return_type(db)
     {
         *return_ty

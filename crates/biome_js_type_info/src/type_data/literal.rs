@@ -62,10 +62,11 @@ impl NumberLiteral {
                 Some("Na") => (s == "NaN").then_some(f64::NAN),
                 Some(prefix)
                     if prefix.starts_with('0')
-                        && !prefix.ends_with(['e', 'E'])
-                        && !s[1..].contains(['8', '9']) =>
+                        && s[1..].chars().all(|digit| ('0'..='7').contains(&digit)) =>
                 {
-                    Some(u64::from_str_radix(&s[1..], 8).ok()? as f64)
+                    u64::from_str_radix(&s[1..], 8)
+                        .ok()
+                        .map(|value| value as f64)
                 }
                 _ => s.parse().ok(),
             }
@@ -77,6 +78,13 @@ impl NumberLiteral {
         } else {
             parse(text)
         }
+    }
+
+    /// Returns the ECMAScript property-key spelling for this numeric literal.
+    pub fn to_property_key(&self) -> Option<String> {
+        let number = self.to_f64()?;
+        let mut buffer = ryu_js::Buffer::new();
+        Some(buffer.format(number).to_string())
     }
 }
 
@@ -117,9 +125,34 @@ impl StringLiteral {
     pub fn as_str(&self) -> &str {
         self.0.text()
     }
+
+    /// Returns the semantic value represented by the raw string content.
+    pub fn decoded(&self) -> Option<Text> {
+        decode_js_string_content(&self.0)
+    }
 }
 
-// TODO: parse escape sequences
+/// Decodes raw, quote-free JavaScript string content into its semantic value.
+pub fn decode_js_string_content(value: &Text) -> Option<Text> {
+    if !value.contains('\\') {
+        return Some(value.clone());
+    }
+    biome_js_syntax::try_unescape_js_string_content(value.text())
+}
+
+/// Encodes semantic string content as quote-free JavaScript string content.
+pub fn encode_js_string_content(value: &str) -> Text {
+    let encoded = serde_json::to_string(value).expect("serializing a string cannot fail");
+    let encoded = encoded
+        .strip_prefix('"')
+        .and_then(|encoded| encoded.strip_suffix('"'))
+        .expect("serde_json serializes strings with surrounding quotes");
+    let encoded = encoded
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029");
+    Text::new_owned(encoded.into_boxed_str())
+}
+
 impl AsRef<Text> for StringLiteral {
     fn as_ref(&self) -> &Text {
         &self.0
@@ -185,6 +218,16 @@ mod tests {
         assert_eq!(
             NumberLiteral(Text::new_static("0777")).to_f64(),
             Some(511.0)
+        );
+    }
+
+    #[test]
+    fn parse_number_fractional_values() {
+        assert_eq!(NumberLiteral(Text::new_static("0.5")).to_f64(), Some(0.5));
+        assert_eq!(NumberLiteral(Text::new_static("-0.5")).to_f64(), Some(-0.5));
+        assert_eq!(
+            NumberLiteral(Text::new_static("0.125")).to_f64(),
+            Some(0.125)
         );
     }
 
@@ -276,6 +319,69 @@ mod tests {
         assert_eq!(
             NumberLiteral(Text::new_static("0xA0_B0_C0")).to_f64(),
             Some(10_531_008.0)
+        );
+    }
+
+    #[test]
+    fn number_property_keys_use_ecmascript_spelling() {
+        let cases = [
+            ("1", "1"),
+            ("0x1", "1"),
+            ("1e-7", "1e-7"),
+            ("1e21", "1e+21"),
+            ("-0", "0"),
+            ("01", "1"),
+            ("0.5", "0.5"),
+            ("-0.5", "-0.5"),
+            ("0.125", "0.125"),
+            ("0777", "511"),
+            ("0788", "788"),
+            ("0888", "888"),
+        ];
+
+        for (literal, property_key) in cases {
+            assert_eq!(
+                NumberLiteral(Text::new_static(literal)).to_property_key(),
+                Some(property_key.to_string())
+            );
+        }
+
+        assert_eq!(
+            NumberLiteral(Text::new_static("not-a-number")).to_property_key(),
+            None
+        );
+    }
+
+    #[test]
+    fn string_literals_preserve_source_and_decode_semantics() {
+        let escaped = StringLiteral::from(Text::new_static(r"\u0061"));
+        assert_eq!(escaped.as_str(), r"\u0061");
+        assert_eq!(escaped.decoded(), Some(Text::new_static("a")));
+
+        let newline = StringLiteral::from(Text::new_static(r"\n"));
+        assert_eq!(newline.decoded(), Some(Text::new_static("\n")));
+
+        let backslash = StringLiteral::from(Text::new_static(r"\\n"));
+        assert_eq!(backslash.decoded(), Some(Text::new_static(r"\n")));
+        assert_eq!(
+            StringLiteral::from(Text::new_static(r"\07")).decoded(),
+            None
+        );
+        assert_eq!(
+            StringLiteral::from(Text::new_static(r"\ud800")).decoded(),
+            None
+        );
+    }
+
+    #[test]
+    fn string_content_encoding_is_source_safe() {
+        assert_eq!(encode_js_string_content("\""), Text::new_static(r#"\""#));
+        assert_eq!(encode_js_string_content("\\"), Text::new_static(r"\\"));
+        assert_eq!(encode_js_string_content("\n"), Text::new_static(r"\n"));
+        assert_eq!(encode_js_string_content("\0"), Text::new_static(r"\u0000"));
+        assert_eq!(
+            encode_js_string_content("a\u{2028}b\u{2029}c"),
+            Text::new_static(r"a\u2028b\u2029c")
         );
     }
 }
