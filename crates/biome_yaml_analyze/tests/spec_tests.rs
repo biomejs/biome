@@ -6,7 +6,7 @@ use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
-    code_fix_to_string, create_analyzer_options, create_parser_options, diagnostic_to_string,
+    code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot,
 };
@@ -85,7 +85,6 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     };
 
     let mut snapshot = String::new();
-    let mut diagnostics = Vec::new();
     let extension = input_file.extension().unwrap_or_default();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
