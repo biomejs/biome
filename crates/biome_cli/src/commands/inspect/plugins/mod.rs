@@ -3,23 +3,19 @@ use crate::{
     CliDiagnostic, CliSession, cli_options::CliOptions,
     commands::validate_configuration_diagnostics,
 };
-use biome_configuration::{BiomeDiagnostic, OverrideGlobs};
-use biome_console::{ConsoleExt, MarkupBuf, fmt::Formatter, markup};
-use biome_diagnostics::{Diagnostic, MessageAndDescription, PrintDiagnostic};
+use biome_configuration::OverrideGlobs;
+use biome_console::{ConsoleExt, MarkupBuf, markup};
+use biome_diagnostics::PrintDiagnostic;
 use biome_fs::normalize_path;
 use biome_glob::NormalizedGlob;
 use biome_plugin_loader::{ResolvedPluginKind, resolve_plugin};
-use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
+use biome_service::{configuration::load_configuration, settings::Settings};
 use camino::Utf8PathBuf;
-use serde::Serialize;
-use serde_json::json;
-use std::{borrow::Cow, collections::BTreeMap, sync::Arc};
+use std::{collections::BTreeMap, sync::Arc};
 
 /// Include globs attached to one occurrence of a plugin import.
-#[derive(Clone, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, PartialEq)]
 struct ImportSelection<'configuration> {
-    #[serde(skip)]
     selected: bool,
     includes: Option<&'configuration [NormalizedGlob]>,
     override_includes: Option<&'configuration OverrideGlobs>,
@@ -135,11 +131,10 @@ impl<'configuration> PluginInventory<'configuration> {
     }
 }
 
-pub(super) fn inspect_plugins(
+pub(crate) fn inspect_plugins(
     session: CliSession,
     cli_options: &CliOptions,
     path: Option<&str>,
-    json: bool,
 ) -> Result<(), CliDiagnostic> {
     let fs = session.app.workspace.fs();
     let working_directory = fs.working_directory().unwrap_or_default();
@@ -285,53 +280,6 @@ pub(super) fn inspect_plugins(
         .map(|plugin| plugin.rules.len())
         .sum::<usize>();
     let rules = if resolved_count == 1 { "rule" } else { "rules" };
-    if json {
-        let json_errors = errors
-            .iter()
-            .map(|(reference, error)| {
-                let causes = std::iter::successors(error.source(), |cause| cause.source())
-                    .map(|cause| {
-                        let mut message = MarkupBuf::default();
-                        cause.message(&mut Formatter::new(&mut message))?;
-                        Ok(MessageAndDescription::from(message).to_string())
-                    })
-                    .collect::<std::io::Result<Vec<_>>>()?;
-                Ok(json!({
-                    "reference": reference,
-                    "message": error.to_string(),
-                    "causes": causes,
-                }))
-            })
-            .collect::<std::io::Result<Vec<_>>>()?;
-        let output = json!({
-            "path": matched_path.as_deref().map(display_path),
-            "plugins": plugins.iter().map(|((name, path), plugin)| json!({
-                "name": name.as_deref().map_or_else(|| display_path(path), Cow::Borrowed),
-                "path": display_path(path),
-                "imports": plugin.unknown_rules.as_ref().map(|rule| &rule.imports),
-                "enabled": plugin.rules.values().any(RuleInventory::is_enabled)
-                    || plugin.unknown_rules.as_ref().is_some_and(RuleInventory::is_enabled),
-                "rules": plugin.rules.iter().map(|(name, rule)| json!({
-                    "name": name,
-                    "path": display_path(&rule.path),
-                    "enabled": rule.is_enabled(),
-                    "imports": rule.imports,
-                })).collect::<Vec<_>>(),
-                "ruleInventoryAvailable": plugin.unknown_rules.is_none(),
-            })).collect::<Vec<_>>(),
-            "errors": json_errors,
-        });
-        let output = serde_json::to_string_pretty(&output)
-            .map_err(|_| WorkspaceError::from(BiomeDiagnostic::new_serialization_error()))?;
-        session.app.console.log(markup! { {output} });
-        if !errors.is_empty() {
-            return Err(CliDiagnostic::inspection_error(
-                markup! { {resolved_count}" "{rules}" resolved. Some plugin imports could not be resolved." }.to_owned(),
-                InspectionAdvice(Vec::new()),
-            ));
-        }
-        return Ok(());
-    }
 
     let mut advice = Vec::new();
     if let Some(path) = &matched_path {

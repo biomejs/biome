@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
+## `node_modules/@shared/config/biome.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+  "name": "@shared/config",
+  "exports": {
+    "./biome": "./biome.json"
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+node_modules/@shared/config/biome.json:1:31 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 100.
+  
+  > 1 │ { "formatter": { "lineWidth": 100 } }
+      │                               ^^^
+  
+  i This value comes from node_modules/@shared/config/biome.json, extended by biome.json.
+  
+
+```

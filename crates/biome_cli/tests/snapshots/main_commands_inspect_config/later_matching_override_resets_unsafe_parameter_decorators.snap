@@ -24,9 +24,11 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-{
-  "key": "javascript.parser.unsafeParameterDecoratorsEnabled",
-  "value": null,
-  "source": null
-}
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key javascript.parser.unsafeParameterDecoratorsEnabled doesn't exist.
+  
+  i Make sure it's correctly spelled.
+  
+
 ```

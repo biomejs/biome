@@ -10,12 +10,11 @@ Lists resolved rules by plugin and importing preset, including their include glo
 `--path`, filtered imports are listed separately. Resolution does not establish language
 compatibility or successful compilation.
 
-Usage: inspect plugins [--path=PATH] [--json]
+Usage: inspect plugins [--path=PATH]
 
 Available options:
         --path=PATH  Lists only rules selected by override and plugin includes for this path. Does
                      not discover nested configurations or evaluate file/VCS ignores.
-        --json       Emits the resolved rule inventory, enabling imports, and errors as JSON.
     -h, --help       Prints help information
 
 ```

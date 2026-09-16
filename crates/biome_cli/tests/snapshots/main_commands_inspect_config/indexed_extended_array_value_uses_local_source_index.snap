@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "files": { "includes": ["tests/**"] }
+}
+```
+
+## `base.json`
+
+```json
+{ "files": { "includes": ["src/**"] } }
+```
+
+# Emitted Messages
+
+```block
+biome.json:3:27 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key files.includes.1 has the value tests/**.
+  
+    1 │ {
+    2 │   "extends": ["base.json"],
+  > 3 │   "files": { "includes": ["tests/**"] }
+      │                           ^^^^^^^^^^
+    4 │ }
+  
+  i This value is provided by the root configuration.
+  
+
+```

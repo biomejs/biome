@@ -48,18 +48,18 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-{
-  "key": "formatter.lineWidth",
-  "value": 100,
-  "source": {
-    "configurationKind": "extend",
-    "path": "node_modules/@shared/config/recommended.jsonc",
-    "range": {
-      "end": 39,
-      "start": 36
-    },
-    "scope": "base",
-    "specifier": "@shared/config/configs/recommended"
-  }
-}
+node_modules/@shared/config/recommended.jsonc:3:18 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the value 100.
+  
+    1 │ {
+    2 │   "formatter": {
+  > 3 │     "lineWidth": 100,
+      │                  ^^^
+    4 │   },
+    5 │ }
+  
+  i This value comes from node_modules/@shared/config/recommended.jsonc, extended by biome.json.
+  
+
 ```

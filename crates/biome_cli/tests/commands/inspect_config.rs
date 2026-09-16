@@ -172,7 +172,6 @@ fn absent_child_of_override_scalar_has_no_source() {
                 "config",
                 "formatter.lineWidth.extra",
                 "--path=file.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -246,7 +245,7 @@ fn package_extended_value_reports_specifier() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter.lineWidth", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -278,7 +277,7 @@ fn composite_value_reports_contributors() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "files.includes", "--json"].as_slice()),
+        Args::from(["inspect", "config", "files.includes"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -379,7 +378,7 @@ fn identical_composite_declarations_report_the_last_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -412,7 +411,7 @@ fn identical_override_composite_reports_the_override_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter", "--path=file.js", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter", "--path=file.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -512,7 +511,6 @@ fn later_matching_override_uses_runtime_root_fallback() {
                 "config",
                 "formatter.formatWithErrors",
                 "--path=file.test.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -558,7 +556,6 @@ fn equal_runtime_root_fallback_reports_root_source() {
                 "config",
                 "formatter.formatWithErrors",
                 "--path=file.test.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -605,7 +602,6 @@ fn later_matching_override_resets_unsafe_parameter_decorators() {
                 "config",
                 "javascript.parser.unsafeParameterDecoratorsEnabled",
                 "--path=file.test.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -647,7 +643,6 @@ fn javascript_assist_override_matches_runtime() {
                 "config",
                 "javascript.assist.enabled",
                 "--path=file.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -689,7 +684,6 @@ fn markdown_formatter_override_matches_runtime() {
                 "config",
                 "markdown.formatter.lineWidth",
                 "--path=file.md",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -731,7 +725,6 @@ fn yaml_formatter_override_matches_runtime() {
                 "config",
                 "yaml.formatter.indentWidth",
                 "--path=file.yaml",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -773,7 +766,6 @@ fn later_global_override_replaces_language_value() {
                 "config",
                 "javascript.formatter.lineWidth",
                 "--path=file.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -819,7 +811,6 @@ fn runtime_ignored_override_keeps_base_source() {
                 "config",
                 "javascript.resolver.experimentalPnpmCatalogs",
                 "--path=file.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -855,16 +846,7 @@ fn non_matching_override_keeps_base_value() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "formatter.lineWidth",
-                "--path=file.js",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "formatter.lineWidth", "--path=file.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -978,7 +960,7 @@ fn missing_explicit_configuration_is_an_error() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "--config-path=missing.json", "--json"].as_slice()),
+        Args::from(["inspect", "config", "--config-path=missing.json"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -992,20 +974,20 @@ fn missing_explicit_configuration_is_an_error() {
 }
 
 #[test]
-fn no_configuration_json_is_empty() {
+fn no_configuration_is_empty() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "--json"].as_slice()),
+        Args::from(["inspect", "config"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "no_configuration_json_is_empty",
+        "no_configuration_is_empty",
         fs,
         console,
         result,
@@ -1013,7 +995,7 @@ fn no_configuration_json_is_empty() {
 }
 
 #[test]
-fn json_output_includes_source_range() {
+fn key_output_includes_source_range() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "biome.jsonc".into(),
@@ -1026,13 +1008,13 @@ fn json_output_includes_source_range() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter.lineWidth", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "json_output_includes_source_range",
+        "key_output_includes_source_range",
         fs,
         console,
         result,
@@ -1065,7 +1047,6 @@ fn matching_extended_override_keeps_source_axes() {
                 "config",
                 "formatter.lineWidth",
                 "--path=file.test.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -1101,16 +1082,7 @@ fn matching_override_appends_plugins() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "plugins",
-                "--path=file.test.js",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "plugins", "--path=file.test.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1143,16 +1115,7 @@ fn indexed_base_plugin_keeps_base_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "plugins.0",
-                "--path=file.test.js",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "plugins.0", "--path=file.test.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1185,16 +1148,7 @@ fn indexed_override_plugin_uses_local_source_index() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "plugins.1",
-                "--path=file.test.js",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "plugins.1", "--path=file.test.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1226,7 +1180,7 @@ fn indexed_extended_array_value_uses_local_source_index() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "files.includes.1", "--json"].as_slice()),
+        Args::from(["inspect", "config", "files.includes.1"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1266,15 +1220,7 @@ fn typed_merge_preserves_extended_shorthand_origin() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "linter.rules.suspicious.noConsole",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "linter.rules.suspicious.noConsole"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1319,7 +1265,6 @@ fn matching_override_preserves_group_shorthand() {
                 "config",
                 "linter.rules.suspicious.noConsole",
                 "--path=file.test.js",
-                "--json",
             ]
             .as_slice(),
         ),
@@ -1354,7 +1299,7 @@ fn null_value_does_not_replace_extended_provenance() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter.lineWidth", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1401,15 +1346,7 @@ fn replaced_composite_omits_superseded_source() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(
-            [
-                "inspect",
-                "config",
-                "linter.rules.suspicious.noConsole",
-                "--json",
-            ]
-            .as_slice(),
-        ),
+        Args::from(["inspect", "config", "linter.rules.suspicious.noConsole"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1476,7 +1413,7 @@ fn conflicting_nested_package_versions_block_inspection() {
 }
 
 #[test]
-fn manifest_selected_config_reports_source_json() {
+fn manifest_selected_config_reports_source() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "biome.json".into(),
@@ -1516,13 +1453,13 @@ fn manifest_selected_config_reports_source_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "config", "formatter.lineWidth", "--json"].as_slice()),
+        Args::from(["inspect", "config", "formatter.lineWidth"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "manifest_selected_config_reports_source_json",
+        "manifest_selected_config_reports_source",
         fs,
         console,
         result,

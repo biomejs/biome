@@ -716,10 +716,6 @@ pub enum InspectSubCommand {
         /// Does not discover nested configurations or evaluate file/VCS ignores.
         #[bpaf(long("path"), argument("PATH"), optional)]
         path: Option<String>,
-
-        /// Emits the resolved rule inventory, enabling imports, and errors as JSON.
-        #[bpaf(long("json"), switch)]
-        json: bool,
     },
 
     /// Shows the final, resolved configuration, including `extends` and matching `overrides`.
@@ -728,10 +724,6 @@ pub enum InspectSubCommand {
         /// Evaluates matching overrides for this file path.
         #[bpaf(long("path"), argument("PATH"), optional)]
         path: Option<String>,
-
-        /// When provided, the output is emitted in JSON format.
-        #[bpaf(long("json"), switch)]
-        json: bool,
 
         /// A dotted configuration key, such as `formatter.lineWidth`.
         #[bpaf(positional("KEY"), optional)]

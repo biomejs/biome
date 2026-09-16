@@ -317,7 +317,7 @@ fn npm_presets_and_transitive_rules_keep_leaf_origins() {
 }
 
 #[test]
-fn plugin_inventory_json() {
+fn plugin_inventory() {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "biome.json".into(),
@@ -351,13 +351,13 @@ fn plugin_inventory_json() {
     let (fs, result) = run_cli(
         fs,
         &mut console,
-        Args::from(["inspect", "plugins", "--json"].as_slice()),
+        Args::from(["inspect", "plugins"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "plugin_inventory_json",
+        "plugin_inventory",
         fs,
         console,
         result,

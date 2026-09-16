@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "markdown": { "formatter": { "lineWidth": 80 } },
+  "overrides": [
+    {
+      "includes": ["**/*.md"],
+      "markdown": { "formatter": { "lineWidth": 100 } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:6:49 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key markdown.formatter.lineWidth has the value 100.
+  
+    4 │     {
+    5 │       "includes": ["**/*.md"],
+  > 6 │       "markdown": { "formatter": { "lineWidth": 100 } }
+      │                                                 ^^^
+    7 │     }
+    8 │   ]
+  
+  i This value is provided by override 0 in the root configuration.
+  
+  i The override matched file.md using **/*.md.
+  
+
+```
