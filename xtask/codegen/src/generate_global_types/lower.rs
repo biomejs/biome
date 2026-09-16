@@ -83,6 +83,7 @@ pub enum LoweredTypeData {
     NeverKeyword,
     Null,
     NumberLiteral(Text),
+    ObjectKeyword,
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
@@ -95,6 +96,7 @@ pub enum LoweredTypeData {
     ThisKeyword,
     GenericParameter {
         name: Text,
+        constraint: Option<LoweredTypeReference>,
         default: Option<LoweredTypeReference>,
     },
     Tuple(Box<[LoweredTypeReference]>),
