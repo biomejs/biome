@@ -4,8 +4,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::AstroSetDirective;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_languages::HtmlFileSource;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions;
 
 declare_lint_rule! {
@@ -57,6 +58,14 @@ impl Rule for NoAstroSetHtmlDirective {
         let value = ctx.query().value().ok()?;
         let name = value.name().ok()?.token_text_trimmed()?;
         (name.text() == "html").then_some(())
+    }
+
+    fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .find_map(AnyHtmlTagElement::cast)
+            .map(|element| element.range())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

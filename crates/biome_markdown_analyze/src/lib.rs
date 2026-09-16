@@ -3,19 +3,18 @@
 mod assist;
 mod lint;
 mod registry;
+mod suppression;
 mod suppression_action;
 
 pub use crate::registry::visit_registry;
+pub use crate::suppression::MarkdownSuppression;
 use crate::suppression_action::MarkdownSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleAction, RuleRegistry,
 };
-use biome_deserialize::TextRange;
 use biome_diagnostics::Error;
 use biome_markdown_syntax::MarkdownLanguage;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -61,32 +60,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -100,7 +73,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(MarkdownSuppression),
         Box::new(MarkdownSuppressionAction),
         &mut emit_signal,
     );

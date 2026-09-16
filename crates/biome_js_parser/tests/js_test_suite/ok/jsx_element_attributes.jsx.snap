@@ -108,7 +108,7 @@ JsModule {
                                     ],
                                     r_angle_token: R_ANGLE@80..81 ">" [] [],
                                 },
-                                children: JsxChildList [],
+                                elements: JsxChildList [],
                                 closing_element: JsxClosingElement {
                                     l_angle_token: L_ANGLE@81..82 "<" [] [],
                                     slash_token: SLASH@82..83 "/" [] [],

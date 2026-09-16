@@ -891,3 +891,44 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
         &fs,
     );
 }
+
+#[test]
+fn test_call_and_new_expressions_apply_explicit_type_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function make<T>(): T;
+            export declare class Box<T> {
+                value: T;
+            }
+            export const made = make<string>();
+            export const boxed = new Box<number>();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let made = inferred_binding_ty_by_name(&db, module, inferred, "made")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("made binding type must be inferred");
+    assert!(
+        is_inferred_string(&db, made),
+        "explicit type argument must instantiate the return type, got {made:?}"
+    );
+
+    let boxed = inferred_binding_ty_by_name(&db, module, inferred, "boxed")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("boxed binding type must be inferred");
+    let value = find_value_member_type(&db, boxed, "value")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("value member must be inferred");
+    assert!(
+        is_inferred_number(&db, value),
+        "explicit type argument must instantiate the class, got {value:?}"
+    );
+}

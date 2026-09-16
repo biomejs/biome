@@ -2,9 +2,31 @@
 source: crates/biome_plugin_loader/src/lib.rs
 expression: content
 ---
+# Plugin
+
+## `/my-plugin/biome-manifest.jsonc`
+
+```jsonc
+{
+    "version": 2,
+    "plugins": {
+        "rules": [{ "one": "rules/1.grit" }],
+        "presets": { "recommended": ["one"] }
+    }
+}
+```
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Cannot load Biome manifest /my-plugin/biome-manifest.jsonc.
     
     Caused by:
       version must be 1.
+```

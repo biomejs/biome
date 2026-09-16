@@ -34,9 +34,11 @@ biome_rowan               = { workspace = true }
 biome_rule_options        = { workspace = true }
 biome_string_case         = { workspace = true }
 biome_suppression         = { workspace = true }
+biome_unicode_table       = { workspace = true }
 camino                    = { workspace = true }
 regex                     = { workspace = true }
 rustc-hash                = { workspace = true }
+unicode-normalization     = { workspace = true }
 
 [dev-dependencies]
 biome_configuration = { path = "../biome_configuration" }

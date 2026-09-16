@@ -172,7 +172,7 @@ fn get_accessible_child_text(node: &JsxElement) -> String {
     };
 
     let raw_child_text = node
-        .children()
+        .elements()
         .into_iter()
         .map(|child| match child {
             AnyJsxChild::JsxText(element) => {

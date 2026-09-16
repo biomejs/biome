@@ -2,6 +2,26 @@
 source: crates/biome_plugin_loader/src/diagnostics.rs
 expression: content
 ---
+# Plugin
+
+## `biome-manifest.jsonc`
+
+```jsonc
+{
+            "plugins": {
+                "rules": [{ "one": "rules/1.grit" }],
+                "presets": { "recommended": ["one"] }
+            }
+        }
+```
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The key `version` is missing.
@@ -14,3 +34,4 @@ deserialize ━━━━━━━━━━━━━━━━━━━━━━�
   > 5 │             }
   > 6 │         }
       │         ^
+```

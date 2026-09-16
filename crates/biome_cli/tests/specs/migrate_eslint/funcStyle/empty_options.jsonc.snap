@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: empty_options.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "func-style": ["error", "declaration", {}] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useConsistentFunctionStyle": {
+					"level": "error",
+					"options": { "style": "declaration" }
+				}
+			}
+		}
+	}
+}
+
+```

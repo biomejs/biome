@@ -246,6 +246,18 @@ impl ParsedSnippetOrigin {
 }
 
 impl ParsedOrigin {
+    pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
+        match self {
+            Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
+                SnippetsIterator::Workspace(source.snippets(db).iter())
+            }
+            Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
+                SnippetsIterator::Interned([].iter())
+            }
+            Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
+        }
+    }
+
     pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
         Self::Interned {
             parse,
@@ -360,6 +372,29 @@ impl From<AnyParse> for ParsedOrigin {
 pub(crate) enum SnippetsIterator<'a> {
     Workspace(std::slice::Iter<'a, ParsedSnippet>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
+}
+
+impl<'a> SnippetsIterator<'a> {
+    /// Excludes host-owned template comments from guest analysis. The unfiltered
+    /// iterator remains available for formatting and host suppression extraction.
+    pub(crate) fn for_analysis(
+        self,
+        host: &'a ParsedOrigin,
+        source: DocumentFileSource,
+        db: &'a WorkspaceDb,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        self.filter(move |snippet| {
+            #[cfg(feature = "html_embeds")]
+            {
+                !html::is_astro_template_comment(host, source, snippet, db)
+            }
+            #[cfg(not(feature = "html_embeds"))]
+            {
+                let _ = (host, source, snippet, db);
+                true
+            }
+        })
+    }
 }
 
 impl Iterator for SnippetsIterator<'_> {
@@ -910,7 +945,7 @@ impl<'a> ProcessFixAll<'a> {
         if new_text == current_text {
             return Ok(None);
         }
-        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "anonymous")))?;
         Ok(Some(new_text))
     }
 

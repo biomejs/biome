@@ -1,0 +1,63 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+
+		const mutation = createMutation(first);
+		const replacement = factory.token("JS_NUMBER_LITERAL", "9");
+		const updated = first.withValueToken(replacement);
+		mutation.replaceNode(first, updated);
+		registerDiagnostic(first, "warning", "Change argument", {
+			mutation,
+			message: "Apply edit",
+			kind: "unsafe",
+		});
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js:1:6 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Change argument
+  
+  > 1 │ call(1,2);
+      │      ^
+  
+  i Unsafe fix: Apply edit
+  
+  - call(1,2);
+  + call(9,2);
+```

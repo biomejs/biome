@@ -46,8 +46,9 @@ url                  = { workspace = true }
 uuid                 = { workspace = true, features = ["v4"] }
 
 [dev-dependencies]
-tokio = { workspace = true, features = ["io-util", "macros", "rt", "rt-multi-thread"] }
-tower = { workspace = true, features = ["timeout"] }
+biome_service = { path = "../biome_service", features = ["js_plugin"] }
+tokio         = { workspace = true, features = ["io-util", "macros", "rt", "rt-multi-thread"] }
+tower         = { workspace = true, features = ["timeout"] }
 
 [lints]
 workspace = true

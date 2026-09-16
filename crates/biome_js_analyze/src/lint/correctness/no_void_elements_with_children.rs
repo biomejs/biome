@@ -104,7 +104,7 @@ impl Rule for NoVoidElementsWithChildren {
                 if let Some(element_name) = void_dom_element_name(name) {
                     let dangerous_prop =
                         opening_element.find_attribute_by_name("dangerouslySetInnerHTML");
-                    let has_children = !element.children().is_empty();
+                    let has_children = !element.elements().is_empty();
                     let children_prop = opening_element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || has_children || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {

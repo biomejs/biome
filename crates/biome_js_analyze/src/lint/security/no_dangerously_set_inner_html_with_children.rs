@@ -133,8 +133,8 @@ impl AnyJsCreateElement {
     fn has_children(&self, model: &SemanticModel) -> Option<JsSyntaxNode> {
         match self {
             Self::JsxElement(element) => {
-                if !element.children().is_empty() {
-                    Some(element.children().syntax().clone())
+                if !element.elements().is_empty() {
+                    Some(element.elements().syntax().clone())
                 } else {
                     None
                 }

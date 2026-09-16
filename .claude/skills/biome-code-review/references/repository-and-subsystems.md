@@ -2,6 +2,8 @@
 
 Read only the sections matching the diff. Load the corresponding implementation skill for implementation contracts; this reference adds reviewer-specific checks.
 
+Apply checks to changed code and affected integrations; tie findings to contracts, not heuristics. Do not expand scope or run implementation workflows.
+
 ## Repository Map
 
 | Area | Source of truth | Common counterparts |
@@ -77,6 +79,8 @@ Load `type-inference`.
 - A lint-rule change requires generated rule registration and configuration.
 - Do not report bindings or other full analyzer outputs that `AGENTS.md` explicitly leaves to CI Autofix.
 - Search parallel registration, serialization, migration, preset, and documentation sites for new enum variants, options, and manifest fields.
+
+`AGENTS.md` and `testing-codegen` define required artifacts and CI exceptions. Flag missing or stale outputs, not merely an unchanged generated diff.
 
 ## Tests and Snapshots
 

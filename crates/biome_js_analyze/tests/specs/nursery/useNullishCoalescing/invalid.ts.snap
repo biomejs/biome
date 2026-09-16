@@ -363,14 +363,14 @@ invalid.ts:45:17 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:50:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:50:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
     48 │ declare const x: string | null;
     49 │ declare const y: string | null;
   > 50 │ const k = x || y || 'default';
-       │             ^^
+       │                  ^^
     51 │ 
     52 │ // Mixed nullish + falsy types (no safe fix)
   
@@ -384,14 +384,14 @@ invalid.ts:50:13 lint/nursery/useNullishCoalescing ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:50:18 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:50:13 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use ?? instead of ||.
   
     48 │ declare const x: string | null;
     49 │ declare const y: string | null;
   > 50 │ const k = x || y || 'default';
-       │                  ^^
+       │             ^^
     51 │ 
     52 │ // Mixed nullish + falsy types (no safe fix)
   

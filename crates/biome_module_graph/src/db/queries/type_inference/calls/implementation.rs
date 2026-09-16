@@ -1203,6 +1203,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::TypeofExpression(_),
                 _,
             )
@@ -1214,6 +1215,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::TypeofExpression(_),
             )
             | (

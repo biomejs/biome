@@ -5,8 +5,8 @@ use biome_js_syntax::{AstroImplicitFragment, AstroImplicitFragmentFields};
 pub(crate) struct FormatAstroImplicitFragment;
 impl FormatNodeRule<AstroImplicitFragment> for FormatAstroImplicitFragment {
     fn fmt_fields(&self, node: &AstroImplicitFragment, f: &mut JsFormatter) -> FormatResult<()> {
-        let AstroImplicitFragmentFields { children } = node.as_fields();
+        let AstroImplicitFragmentFields { elements } = node.as_fields();
 
-        write!(f, [children.format()])
+        write!(f, [elements.format()])
     }
 }

@@ -1,0 +1,47 @@
+{
+  "biome": {
+    "linter": {
+      "rules": {
+        "nursery": {
+          "useExhaustiveSwitchCases": {
+            "level": "error",
+            "options": { "requireExplicitCase": true }
+          }
+        }
+      }
+    }
+  },
+  "eslint": {
+    "rules": {
+      "@typescript-eslint/switch-exhaustiveness-check": ["warn", {
+        "considerDefaultExhaustiveForUnions": true
+      }]
+    },
+    "overrides": [
+      {
+        "files": ["strict.ts"],
+        "rules": {
+          "@typescript-eslint/switch-exhaustiveness-check": [2, {
+            "considerDefaultExhaustiveForUnions": false
+          }]
+        }
+      },
+      {
+        "files": ["empty.ts"],
+        "rules": {
+          "@typescript-eslint/switch-exhaustiveness-check": ["error", {}]
+        }
+      },
+      {
+        "files": ["unsupported.ts"],
+        "rules": {
+          "@typescript-eslint/switch-exhaustiveness-check": ["error", {
+            "allowDefaultCaseForExhaustiveSwitch": false,
+            "requireDefaultForNonUnion": true,
+            "defaultCaseCommentPattern": "^skip default$"
+          }]
+        }
+      }
+    ]
+  }
+}

@@ -20,4 +20,8 @@
 
   <!-- PascalCase self-closing: custom component, NOT native <img> -->
   <h1><Img /></h1>
+
+  <!-- v-html / v-text render the heading text at runtime -->
+  <h1 v-html="heading"></h1>
+  <h2 v-text="heading"></h2>
 </template>

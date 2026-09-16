@@ -1,0 +1,32 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: deferred/scss/parity-function-adjacency-escape-comments.scss
+---
+
+# Input
+
+```scss
+@use   "sass:list";
+
+$ordinary:   column\73/**/(1fr,2fr);
+$interpolated:   #{"column"}\73/**/(1fr,2fr);
+
+.deferred{ordinary:list.length($ordinary);interpolated:list.length($interpolated)}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:list";
+
+$ordinary: column\73 /**/ (1fr, 2fr);
+$interpolated: #{"column"}\73 /**/ (1fr, 2fr);
+
+.deferred {
+	ordinary: list.length($ordinary);
+	interpolated: list.length($interpolated);
+}
+
+```

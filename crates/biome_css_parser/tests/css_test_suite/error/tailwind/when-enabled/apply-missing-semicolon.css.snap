@@ -56,7 +56,7 @@ CssRoot {
                                         value_token: IDENT@77..85 "lg:px-32" [] [],
                                     },
                                 ],
-                                semicolon_token: missing (required),
+                                semicolon_token: missing (optional),
                             },
                         },
                     ],

@@ -1,0 +1,92 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["lodash.grit"],
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  }
+}
+```
+
+## `lodash.grit`
+
+```grit
+language js
+
+`import $clause from "lodash-es"` where {
+    $clause <: contains `padStart`,
+    register_diagnostic(
+        span = $clause,
+        message = "Prefer native String.padStart() over the lodash version",
+        severity = "error"
+    )
+}
+
+```
+
+## `test.js`
+
+```js
+import { padStart, times } from "lodash-es";
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:3:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+    2 │     "plugins": ["lodash.grit"],
+  > 3 │     "linter": {
+      │               ^
+  > 4 │         "rules": {
+  > 5 │             "recommended": false
+  > 6 │         }
+  > 7 │     }
+      │     ^
+    8 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test.js:1:8 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer native String.padStart() over the lodash version
+  
+  > 1 │ import { padStart, times } from "lodash-es";
+      │        ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

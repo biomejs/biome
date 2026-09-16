@@ -391,6 +391,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .next()
         }
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
+        "ScssInterpolatedSubSelector" => lang::ScssInterpolatedSubSelector::KIND_SET.iter().next(),
         "ScssInterpolatedUrlValue" => lang::ScssInterpolatedUrlValue::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
@@ -705,6 +706,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssInterpolatedPseudoElementSelectorArguments" => &[("selectors", 0)],
         "ScssInterpolatedPseudoElementValueArguments" => &[("values", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
+        "ScssInterpolatedSubSelector" => &[("name", 0)],
         "ScssInterpolatedUrlValue" => &[("parts", 0)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],

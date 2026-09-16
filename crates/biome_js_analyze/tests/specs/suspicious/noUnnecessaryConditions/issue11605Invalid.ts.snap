@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605Invalid.ts
+---
+# Input
+```ts
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<"ready" | "pending">((value) => {
+	if (value) {
+		console.log(value);
+	}
+});
+
+```
+
+# Diagnostics
+```
+issue11605Invalid.ts:4:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    3 │ consume<"ready" | "pending">((value) => {
+  > 4 │ 	if (value) {
+      │ 	    ^^^^^
+    5 │ 		console.log(value);
+    6 │ 	}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: scss/expression/map-context.scss
 ---
 
@@ -13,6 +12,10 @@ $nestedValueMultiArg:(key:foo((a,b),(c,d)),);
 $doubleParenListValue:(key:((a,b)),);
 $doubleParenMapValue:(key:((a:b)),);
 $doubleParenMapValueBroken:(key:((very-very-very-very-very-very-very-very-long-map-key:very-very-very-very-very-very-very-very-long-map-value,other-key:other-other-value)),);
+$ordinaryList:(a,b);
+$emptyMapValue:(plain:(),wrapped:(()));
+$directMapKey:((a:b):value);
+$nestedMapKey:(fn((a:b)):value);
 
 ```
 
@@ -47,6 +50,23 @@ $doubleParenMapValueBroken: (
 			other-key: other-other-value,
 		),
 	),
+);
+$ordinaryList: (a, b);
+$emptyMapValue: (
+	plain: (),
+	wrapped: (
+		(),
+	),
+);
+$directMapKey: (
+	(a: b): value,
+);
+$nestedMapKey: (
+	fn(
+		(
+			a: b,
+		)
+	): value,
 );
 
 ```

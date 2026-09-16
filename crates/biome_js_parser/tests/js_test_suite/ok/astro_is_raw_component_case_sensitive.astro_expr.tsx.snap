@@ -40,7 +40,7 @@ JsExpressionTemplateRoot {
                     ],
                     r_angle_token: R_ANGLE@17..18 ">" [] [],
                 },
-                children: JsxChildList [
+                elements: JsxChildList [
                     JsxText {
                         value_token: JSX_TEXT_LITERAL@18..25 "</card>" [] [],
                     },

@@ -1,0 +1,5 @@
+@media (min-width: tokens.$tablet) { .a { color: red; } }
+@media (tokens.$tablet <= width) { .b { color: red; } }
+@media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+@media (min-width: (tokens.$tablet)) { .d { color: red; } }
+.after { color: blue; }

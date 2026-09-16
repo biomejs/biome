@@ -1,0 +1,257 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@import "theme.css";
+.a { @extend .base; color: red; }
+.b { @foo bar; width: 1px; }
+@foo bar;
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@8..19 "\"theme.css\"" [] [],
+                },
+                layer: missing (optional),
+                supports: missing (optional),
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@19..20 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@20..22 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@22..24 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@24..26 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@26..27 "@" [] [],
+                        rule: CssUnknownValueAtRule {
+                            name: CssIdentifier {
+                                value_token: IDENT@27..34 "extend" [] [Whitespace(" ")],
+                            },
+                            components: CssUnknownAtRuleComponentList {
+                                items: [
+                                    DOT@34..35 "." [] [],
+                                    IDENT@35..39 "base" [] [],
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@39..41 ";" [] [Whitespace(" ")],
+                        },
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@41..46 "color" [] [],
+                                },
+                                colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@48..51 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@51..53 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@53..54 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@54..56 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@56..58 "b" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@58..60 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@60..61 "@" [] [],
+                        rule: CssUnknownValueAtRule {
+                            name: CssIdentifier {
+                                value_token: IDENT@61..65 "foo" [] [Whitespace(" ")],
+                            },
+                            components: CssUnknownAtRuleComponentList {
+                                items: [
+                                    IDENT@65..68 "bar" [] [],
+                                ],
+                            },
+                            semicolon_token: SEMICOLON@68..70 ";" [] [Whitespace(" ")],
+                        },
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@70..75 "width" [] [],
+                                },
+                                colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@77..78 "1" [] [],
+                                        unit_token: IDENT@78..80 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@80..82 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@82..83 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@83..85 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@85..89 "foo" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        IDENT@89..92 "bar" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@92..93 ";" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@93..94 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..94
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..93
+    0: CSS_AT_RULE@0..20
+      0: AT@0..1 "@" [] []
+      1: CSS_IMPORT_AT_RULE@1..20
+        0: IMPORT_KW@1..8 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@8..19
+          0: CSS_STRING_LITERAL@8..19 "\"theme.css\"" [] []
+        2: (empty)
+        3: (empty)
+        4: CSS_MEDIA_QUERY_LIST@19..19
+        5: SEMICOLON@19..20 ";" [] []
+    1: CSS_QUALIFIED_RULE@20..54
+      0: CSS_SELECTOR_LIST@20..24
+        0: CSS_COMPOUND_SELECTOR@20..24
+          0: CSS_NESTED_SELECTOR_LIST@20..20
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@20..24
+            0: CSS_CLASS_SELECTOR@20..24
+              0: DOT@20..22 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@22..24
+                0: IDENT@22..24 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@24..54
+        0: L_CURLY@24..26 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@26..53
+          0: CSS_AT_RULE@26..41
+            0: AT@26..27 "@" [] []
+            1: CSS_UNKNOWN_VALUE_AT_RULE@27..41
+              0: CSS_IDENTIFIER@27..34
+                0: IDENT@27..34 "extend" [] [Whitespace(" ")]
+              1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@34..39
+                0: DOT@34..35 "." [] []
+                1: IDENT@35..39 "base" [] []
+              2: SEMICOLON@39..41 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@41..53
+            0: CSS_DECLARATION@41..51
+              0: CSS_GENERIC_PROPERTY@41..51
+                0: CSS_IDENTIFIER@41..46
+                  0: IDENT@41..46 "color" [] []
+                1: COLON@46..48 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@48..51
+                  0: CSS_IDENTIFIER@48..51
+                    0: IDENT@48..51 "red" [] []
+              1: (empty)
+            1: SEMICOLON@51..53 ";" [] [Whitespace(" ")]
+        2: R_CURLY@53..54 "}" [] []
+    2: CSS_QUALIFIED_RULE@54..83
+      0: CSS_SELECTOR_LIST@54..58
+        0: CSS_COMPOUND_SELECTOR@54..58
+          0: CSS_NESTED_SELECTOR_LIST@54..54
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@54..58
+            0: CSS_CLASS_SELECTOR@54..58
+              0: DOT@54..56 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@56..58
+                0: IDENT@56..58 "b" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@58..83
+        0: L_CURLY@58..60 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@60..82
+          0: CSS_AT_RULE@60..70
+            0: AT@60..61 "@" [] []
+            1: CSS_UNKNOWN_VALUE_AT_RULE@61..70
+              0: CSS_IDENTIFIER@61..65
+                0: IDENT@61..65 "foo" [] [Whitespace(" ")]
+              1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@65..68
+                0: IDENT@65..68 "bar" [] []
+              2: SEMICOLON@68..70 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@70..82
+            0: CSS_DECLARATION@70..80
+              0: CSS_GENERIC_PROPERTY@70..80
+                0: CSS_IDENTIFIER@70..75
+                  0: IDENT@70..75 "width" [] []
+                1: COLON@75..77 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@77..80
+                  0: CSS_REGULAR_DIMENSION@77..80
+                    0: CSS_NUMBER_LITERAL@77..78 "1" [] []
+                    1: IDENT@78..80 "px" [] []
+              1: (empty)
+            1: SEMICOLON@80..82 ";" [] [Whitespace(" ")]
+        2: R_CURLY@82..83 "}" [] []
+    3: CSS_AT_RULE@83..93
+      0: AT@83..85 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@85..93
+        0: CSS_IDENTIFIER@85..89
+          0: IDENT@85..89 "foo" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@89..92
+          0: IDENT@89..92 "bar" [] []
+        2: SEMICOLON@92..93 ";" [] []
+  2: EOF@93..94 "" [Newline("\n")] []
+
+```

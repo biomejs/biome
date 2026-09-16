@@ -5,6 +5,7 @@ const SCSS_VARIABLE_DECLARATION: &str = "$color: red;";
 const SCSS_VARIABLE_VALUE: &str = ".selector { color: $color; }";
 const SCSS_DIMENSION_INTERPOLATED_VALUE: &str = ".selector { width: 10px#{suffix}; }";
 const SCSS_NUMBER_INTERPOLATED_VALUE: &str = ".selector { width: 10#{unit}; }";
+const SCSS_PARENTHESIZED_QUERY_VALUE: &str = "@media (max-width: ($device - 1px)) {}";
 
 fn diagnostic_text(parse: &biome_css_parser::CssParse) -> String {
     format!("{:?}", parse.diagnostics())
@@ -12,7 +13,11 @@ fn diagnostic_text(parse: &biome_css_parser::CssParse) -> String {
 
 #[test]
 fn css_files_do_not_report_scss_exclusive_syntax_without_parser_option() {
-    for source in [SCSS_VARIABLE_DECLARATION, SCSS_VARIABLE_VALUE] {
+    for source in [
+        SCSS_VARIABLE_DECLARATION,
+        SCSS_VARIABLE_VALUE,
+        SCSS_PARENTHESIZED_QUERY_VALUE,
+    ] {
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let diagnostics = diagnostic_text(&parse);
 
@@ -33,6 +38,7 @@ fn reporting_scss_exclusive_syntax_only_changes_diagnostic_text() {
         SCSS_VARIABLE_VALUE,
         SCSS_NUMBER_INTERPOLATED_VALUE,
         SCSS_DIMENSION_INTERPOLATED_VALUE,
+        SCSS_PARENTHESIZED_QUERY_VALUE,
     ] {
         let default_parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let reporting_parse = parse_css(
@@ -63,5 +69,22 @@ fn reporting_scss_exclusive_syntax_only_changes_diagnostic_text() {
             reporting_diagnostics.contains("SCSS"),
             "expected reporting parser option to emit SCSS diagnostics, got: {reporting_diagnostics}"
         );
+    }
+}
+
+#[test]
+fn parenthesized_query_values_report_one_unsupported_syntax_diagnostic() {
+    for source in [
+        SCSS_PARENTHESIZED_QUERY_VALUE,
+        "@container (width > (1px)) {}",
+    ] {
+        let parse = parse_css(
+            source,
+            CssFileSource::css(),
+            CssParserOptions::default().report_scss_exclusive_syntax(),
+        );
+
+        assert_eq!(parse.diagnostics().len(), 1, "{source}");
+        assert!(diagnostic_text(&parse).contains("SCSS"), "{source}");
     }
 }

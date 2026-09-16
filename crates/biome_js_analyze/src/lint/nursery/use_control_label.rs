@@ -133,7 +133,7 @@ impl Rule for UseControlLabel {
         let has_content = match element {
             AnyJsxElement::JsxOpeningElement(opening) => opening
                 .parent::<JsxElement>()
-                .is_some_and(|parent| has_accessible_content(&parent.children())),
+                .is_some_and(|parent| has_accessible_content(&parent.elements())),
             AnyJsxElement::JsxSelfClosingElement(_) => false,
         };
         if has_content {
@@ -181,13 +181,13 @@ fn has_accessible_content(children: &JsxChildList) -> bool {
                     Some(value) => renders_content(&value),
                 })
         }
-        AnyJsxChild::JsxFragment(fragment) => has_accessible_content(&fragment.children()),
+        AnyJsxChild::JsxFragment(fragment) => has_accessible_content(&fragment.elements()),
         AnyJsxChild::JsxElement(element) => {
             let Ok(opening) = element.opening_element() else {
                 return true;
             };
             names_itself(&AnyJsxElement::from(opening))
-                .unwrap_or_else(|| has_accessible_content(&element.children()))
+                .unwrap_or_else(|| has_accessible_content(&element.elements()))
         }
         AnyJsxChild::JsxSelfClosingElement(element) => {
             names_itself(&AnyJsxElement::from(element)).unwrap_or(false)

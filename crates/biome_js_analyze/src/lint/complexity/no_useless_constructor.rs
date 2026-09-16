@@ -7,6 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsClass, AnyJsConstructorParameter, AnyJsFormalParameter,
     JsCallExpression, JsConstructorClassMember,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_constructor::NoUselessConstructorOptions;
 
@@ -22,11 +23,16 @@ declare_lint_rule! {
     ///
     /// - decorated classes;
     /// - constructors with at least one [parameter property](https://www.typescriptlang.org/docs/handbook/2/classes.html#parameter-properties);
-    /// - `private` and `protected` constructors.
+    /// - `private` and `protected` constructors;
+    /// - TypeScript constructors that forward at least one argument to `super`.
+    ///
+    /// TypeScript forwarding constructors can narrow the parameter types accepted by a subclass.
+    /// The rule does not compare parent and child signatures, so it ignores these constructors
+    /// even when the signatures are identical.
     ///
     /// ## Caveat
     ///
-    /// This rule reports on constructors whose sole purpose is to make a parent constructor public.
+    /// This rule reports on zero-argument constructors whose sole purpose is to make a parent constructor public.
     /// See the last invalid example.
     ///
     /// ## Examples
@@ -39,7 +45,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// class B extends A {
     ///     constructor (a) {
     ///         super(a);
@@ -106,6 +112,18 @@ declare_lint_rule! {
     ///   constructor(arg = 4) {
     ///     super(arg)
     ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// class Base {
+    ///     constructor(public value: string | number) {}
+    /// }
+    ///
+    /// class Narrowed extends Base {
+    ///     constructor(value: string) {
+    ///         super(value);
+    ///     }
     /// }
     /// ```
     ///
@@ -194,6 +212,12 @@ impl Rule for NoUselessConstructor {
         let js_call = js_expr.as_js_call_expression()?;
         let is_super_call = js_call.callee().ok()?.as_js_super_expression().is_some();
         if !is_super_call {
+            return None;
+        }
+        // TypeScript forwarding constructors can narrow the inherited parameter types.
+        if ctx.source_type::<JsFileSource>().is_typescript()
+            && !js_call.arguments().ok()?.args().is_empty()
+        {
             return None;
         }
         if !is_delegating_initialization(constructor, js_call) {

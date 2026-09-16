@@ -1,0 +1,18 @@
+@use "sass:list";
+@use "sass:meta";
+
+$url: url (foo);
+$attr: attr/**/(data-x);
+$conditional: if (not false);
+$calculation: calc (1px + 2px);
+.special {
+  counts: list.length($url) list.length($attr) list.length($conditional) list.length($calculation);
+  direct-url: list.length(url (foo));
+  direct-attr: list.length(attr (data-x));
+  direct-if: list.length(if (not false));
+  direct-calc: list.length(calc (1px + 2px));
+  adjacent-url: url(foo);
+  adjacent-attr: attr(data-x);
+  adjacent-if: if(true, red, blue);
+  adjacent-calc: calc(1px + 2px);
+}

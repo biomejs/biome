@@ -1,0 +1,25 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<abbr title="World Wide Web">WWW</abbr>
+<div class="centered"><span class="large">Text</span></div>
+<strong>Important</strong>
+<em>Emphasis</em>
+<s>No longer accurate</s>
+<del>Deleted</del>
+<pre><code>code</code></pre>
+<ruby>漢<rt>kan</rt><rp>(</rp></ruby>
+<iframe title="Content"></iframe>
+<object data="file.pdf"></object>
+<custom-font></custom-font>
+<font-face></font-face>
+<applet-widget></applet-widget>
+<unknown></unknown>
+<div title="<font>">&lt;center&gt;</div>
+<!-- <marquee>Text</marquee> -->
+
+```

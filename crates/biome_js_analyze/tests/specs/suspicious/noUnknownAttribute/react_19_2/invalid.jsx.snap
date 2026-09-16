@@ -1,0 +1,136 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<div
+		onFullscreenChange={handleFullscreenChange}
+		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+		onFullscreenError={handleFullscreenError}
+		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+	/>
+	<iframe credentialless />
+	<svg>
+		<mask maskType="alpha" />
+	</svg>
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:4:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onFullscreenChange' is not a valid DOM attribute.
+  
+    2 │ <>
+    3 │ 	<div
+  > 4 │ 		onFullscreenChange={handleFullscreenChange}
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+    6 │ 		onFullscreenError={handleFullscreenError}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:5:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onFullscreenChangeCapture' is not a valid DOM attribute.
+  
+    3 │ 	<div
+    4 │ 		onFullscreenChange={handleFullscreenChange}
+  > 5 │ 		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 		onFullscreenError={handleFullscreenError}
+    7 │ 		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:6:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onFullscreenError' is not a valid DOM attribute.
+  
+    4 │ 		onFullscreenChange={handleFullscreenChange}
+    5 │ 		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+  > 6 │ 		onFullscreenError={handleFullscreenError}
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+    8 │ 	/>
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:7:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onFullscreenErrorCapture' is not a valid DOM attribute.
+  
+    5 │ 		onFullscreenChangeCapture={handleFullscreenChangeCapture}
+    6 │ 		onFullscreenError={handleFullscreenError}
+  > 7 │ 		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+      │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	/>
+    9 │ 	<iframe credentialless />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:9:10 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'credentialless' is not a valid DOM attribute.
+  
+     7 │ 		onFullscreenErrorCapture={handleFullscreenErrorCapture}
+     8 │ 	/>
+   > 9 │ 	<iframe credentialless />
+       │ 	        ^^^^^^^^^^^^^^
+    10 │ 	<svg>
+    11 │ 		<mask maskType="alpha" />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:11:9 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'maskType' is not a valid DOM attribute.
+  
+     9 │ 	<iframe credentialless />
+    10 │ 	<svg>
+  > 11 │ 		<mask maskType="alpha" />
+       │ 		      ^^^^^^^^^^^^^^^^
+    12 │ 	</svg>
+    13 │ </>;
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```

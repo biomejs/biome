@@ -22,6 +22,7 @@
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
+<span role="separator"></span>
 <span
 	role="slider"
 	aria-valuemax="100"
@@ -39,4 +40,3 @@
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
-

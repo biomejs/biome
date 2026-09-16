@@ -87,6 +87,7 @@ fn should_preserve_identifier_interpolation_spacing(node: &ScssInterpolation) ->
                 | CssSyntaxKind::CSS_GENERIC_PROPERTY
                 | CssSyntaxKind::CSS_ID_SELECTOR
                 | CssSyntaxKind::CSS_TYPE_SELECTOR
+                | CssSyntaxKind::SCSS_INTERPOLATED_SUB_SELECTOR
                 | CssSyntaxKind::SCSS_PLACEHOLDER_SELECTOR
         )
     })

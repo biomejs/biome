@@ -1,6 +1,5 @@
 ---
 source: crates/biome_html_analyze/tests/spec_tests.rs
-assertion_line: 120
 expression: valid.astro
 ---
 # Input
@@ -22,5 +21,11 @@ expression: valid.astro
 <!-- PascalCase: custom components, should NOT trigger the rule -->
 <H1></H1>
 <MyHeading></MyHeading>
+
+<!-- Astro set:html / set:text inject the heading text at render time -->
+<h1 set:html={heading} />
+<h2 set:text={heading} />
+<h3 set:html={heading}></h3>
+<h4 set:text={heading}></h4>
 
 ```

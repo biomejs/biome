@@ -51,6 +51,7 @@ biome_html_formatter     = { workspace = true, features = ["serde"], optional = 
 biome_html_parser        = { workspace = true, optional = true }
 biome_html_syntax        = { workspace = true, optional = true }
 biome_js_analyze         = { workspace = true, optional = true }
+biome_js_control_flow    = { workspace = true, optional = true }
 biome_js_factory         = { workspace = true, optional = true }
 biome_js_formatter       = { workspace = true, features = ["serde"], optional = true }
 biome_js_parser          = { workspace = true, optional = true }
@@ -159,6 +160,7 @@ lang_js                      = [
   "biome_configuration/lang_js",
   "biome_languages/lang_js",
   "dep:biome_js_analyze",
+  "dep:biome_js_control_flow",
   "dep:biome_js_factory",
   "dep:biome_js_formatter",
   "dep:biome_js_parser",

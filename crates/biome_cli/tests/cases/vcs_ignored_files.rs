@@ -7,6 +7,64 @@ use bpaf::Args;
 const UNFORMATTED: &str = "  statement(  )  ";
 
 #[test]
+fn honors_nested_gitignore_negation() {
+    let unformatted = "{\n\t\"a\": [\n\t\t\"b\"\n\t]\n}\n";
+    let formatted = "{\n\t\"a\": [\"b\"]\n}\n";
+
+    for (index, target) in ["project.inlang/settings.json", "project.inlang", "."]
+        .into_iter()
+        .enumerate()
+    {
+        let mut fs = TemporaryFs::new(&format!("honors_nested_gitignore_negation_{index}"));
+        let mut console = BufferConsole::default();
+        fs.create_file(
+            "biome.json",
+            r#"{
+                "vcs": {
+                    "enabled": true,
+                    "clientKind": "git",
+                    "useIgnoreFile": true
+                },
+                "files": { "includes": ["**"] },
+                "formatter": { "indentStyle": "tab" }
+            }"#,
+        );
+        fs.create_file(".gitignore", "dist/\n");
+        fs.create_file("project.inlang/.gitignore", "*\n!settings.json\n");
+        let included = fs.create_file("project.inlang/settings.json", unformatted);
+        let ignored_files = [
+            fs.create_file("project.inlang/ignored.json", unformatted),
+            fs.create_file("project.inlang/ignored/settings.json", unformatted),
+            fs.create_file("dist/settings.json", unformatted),
+        ];
+        let target_path = fs.working_directory.join(target);
+
+        let result = run_cli_with_dyn_fs(
+            Box::new(fs.create_os()),
+            &mut console,
+            Args::from(["check", "--write", target_path.as_str()].as_slice()),
+        );
+
+        assert!(
+            result.is_ok(),
+            "target {target}: run_cli returned {result:?}"
+        );
+        assert_eq!(
+            std::fs::read_to_string(included).unwrap(),
+            formatted,
+            "target {target} must process the re-included file"
+        );
+        for ignored in ignored_files {
+            assert_eq!(
+                std::fs::read_to_string(&ignored).unwrap(),
+                unformatted,
+                "target {target} must leave {ignored} ignored"
+            );
+        }
+    }
+}
+
+#[test]
 fn include_vcs_ignore_cascade() {
     let mut console = BufferConsole::default();
     let mut fs = TemporaryFs::new("include_vcs_ignore_cascade");

@@ -28,6 +28,7 @@ expression: valid.svelte
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
+<span role="separator"></span>
 <span
 	role="slider"
 	aria-valuemax="100"
@@ -45,6 +46,5 @@ expression: valid.svelte
 	aria-valuemin="0"
 	aria-valuenow="50"
 ></span>
-
 
 ```

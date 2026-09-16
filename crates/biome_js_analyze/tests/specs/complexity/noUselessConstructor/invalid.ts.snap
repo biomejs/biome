@@ -4,9 +4,24 @@ expression: invalid.ts
 ---
 # Input
 ```ts
+/* should generate diagnostics */
+class A {
+    constructor() {}
+}
+
 class B extends A {
-    constructor(foo: number) {
-        super(foo);
+    constructor() {
+        super();
+    }
+}
+
+class ProtectedBase {
+    protected constructor() {}
+}
+
+class Public extends ProtectedBase {
+    constructor() {
+        super();
     }
 }
 
@@ -14,27 +29,78 @@ class B extends A {
 
 # Diagnostics
 ```
-invalid.ts:2:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This constructor is unnecessary.
   
-    1 │ class B extends A {
-  > 2 │     constructor(foo: number) {
-      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  > 3 │         super(foo);
-  > 4 │     }
-      │     ^
-    5 │ }
-    6 │ 
+    1 │ /* should generate diagnostics */
+    2 │ class A {
+  > 3 │     constructor() {}
+      │     ^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
   
   i Unsafe fix: Remove the unnecessary constructor.
   
-    1 1 │   class B extends A {
-    2   │ - ····constructor(foo:·number)·{
-    3   │ - ········super(foo);
-    4   │ - ····}
-    5 2 │   }
-    6 3 │   
+     1  1 │   /* should generate diagnostics */
+     2  2 │   class A {
+     3    │ - ····constructor()·{}
+     4  3 │   }
+     5  4 │   
+  
+
+```
+
+```
+invalid.ts:7:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This constructor is unnecessary.
+  
+     6 │ class B extends A {
+   > 7 │     constructor() {
+       │     ^^^^^^^^^^^^^^^
+   > 8 │         super();
+   > 9 │     }
+       │     ^
+    10 │ }
+    11 │ 
+  
+  i Unsafe fix: Remove the unnecessary constructor.
+  
+     5  5 │   
+     6  6 │   class B extends A {
+     7    │ - ····constructor()·{
+     8    │ - ········super();
+     9    │ - ····}
+    10  7 │   }
+    11  8 │   
+  
+
+```
+
+```
+invalid.ts:17:5 lint/complexity/noUselessConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This constructor is unnecessary.
+  
+    16 │ class Public extends ProtectedBase {
+  > 17 │     constructor() {
+       │     ^^^^^^^^^^^^^^^
+  > 18 │         super();
+  > 19 │     }
+       │     ^
+    20 │ }
+    21 │ 
+  
+  i Unsafe fix: Remove the unnecessary constructor.
+  
+    15 15 │   
+    16 16 │   class Public extends ProtectedBase {
+    17    │ - ····constructor()·{
+    18    │ - ········super();
+    19    │ - ····}
+    20 17 │   }
+    21 18 │   
   
 
 ```

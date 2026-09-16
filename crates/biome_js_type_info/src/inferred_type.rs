@@ -9,7 +9,9 @@ use crate::stringification::{
     StringificationAnalyzer, StringificationMode, StringificationUsefulness,
 };
 use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
-use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+use biome_js_syntax::numbers::{
+    canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 use std::{borrow::Cow, collections::VecDeque, fmt, ops::ControlFlow};
@@ -158,14 +160,26 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
-    pub fn is_all_integer_like(self) -> bool {
+    /// Returns whether `~~` leaves every possible value unchanged.
+    ///
+    /// Bigints are unchanged. Number literals must fit in a signed 32-bit integer
+    /// and must not be negative zero:
+    ///
+    /// ```ts
+    /// ~~(-1);          // -1: unchanged
+    /// ~~(-2147483649); // 2147483647: changed by 32-bit conversion
+    /// ~~(-0);          // 0: the sign is lost
+    /// ```
+    pub fn is_unchanged_by_double_bitwise_not(self) -> bool {
         self.try_all_variants_match(|data| match data {
             TypeData::BigInt => true,
             TypeData::Literal(literal) => match literal.literal(self.db) {
                 Literal::BigInt(_) => true,
-                Literal::Number(number) => {
-                    number.to_f64().is_some_and(|number| number.fract() == 0.0)
-                }
+                Literal::Number(number) => number.to_f64().is_some_and(|number| {
+                    number.fract() == 0.0
+                        && (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&number)
+                        && (number != 0.0 || !number.is_sign_negative())
+                }),
                 _ => false,
             },
             _ => false,
@@ -181,6 +195,18 @@ impl<'db> InferredType<'db> {
                     TypeData::Literal(literal)
                         if matches!(literal.literal(self.db), Literal::String(_))
                 )
+                || matches!(
+                    data,
+                    TypeData::InstanceOf(instance)
+                        if instance.ty(self.db).is_array_class(self.db)
+                )
+        })
+        .unwrap_or(false)
+    }
+
+    pub fn is_all_array_or_tuple(self) -> bool {
+        self.try_all_variants_match(|data| {
+            matches!(data, TypeData::Tuple(_))
                 || matches!(
                     data,
                     TypeData::InstanceOf(instance)
@@ -275,6 +301,7 @@ impl<'db> InferredType<'db> {
                 TypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
                 TypeData::Unknown
                 | TypeData::Local(_)
+                | TypeData::IndexedAccess(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword => return None,
@@ -539,6 +566,7 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword => {
                     indeterminate = true;
                 }
+                TypeData::IndexedAccess(_) => indeterminate = true,
             }
         }
 
@@ -1084,7 +1112,23 @@ impl<'db> InferredType<'db> {
                     Literal::Boolean(boolean) => {
                         InferredSwitchCase::BooleanLiteral(boolean.as_bool())
                     }
-                    Literal::Number(number) => InferredSwitchCase::Number(number.text().clone()),
+                    Literal::Number(number) => {
+                        let value = match number.as_str().strip_prefix('-') {
+                            Some(unsigned) => {
+                                parse_js_number_with_single_rounding(unsigned).map(|value| -value)
+                            }
+                            None => parse_js_number_with_single_rounding(number.as_str()),
+                        };
+                        match value {
+                            Some(value) if value.is_finite() => {
+                                let value = if value == 0.0 { 0.0 } else { value };
+                                InferredSwitchCase::Number(Text::new_owned(
+                                    value.to_string().into(),
+                                ))
+                            }
+                            _ => InferredSwitchCase::UnsupportedLiteral,
+                        }
+                    }
                     Literal::String(string) => {
                         InferredSwitchCase::String(Text::new_owned(string.as_str().into()))
                     }
@@ -1461,6 +1505,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
         match data {
             TypeData::Unknown
             | TypeData::Local(_)
+            | TypeData::IndexedAccess(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword
             | TypeData::UnknownKeyword => self.indeterminate = true,
@@ -1618,6 +1663,7 @@ mod tests {
         InternedIntersection, InternedLiteral, InternedObject, InternedUnion, TypeMember,
         TypeMemberKind,
     };
+    use crate::literal::NumberLiteral;
 
     #[salsa::db]
     #[derive(Default)]
@@ -1673,6 +1719,34 @@ mod tests {
             hexadecimal.try_switch_case_variants(),
             Ok(vec![InferredSwitchCase::BigInt(Text::new_static("16n"))])
         );
+    }
+
+    #[test]
+    fn numeric_switch_cases_use_values_instead_of_spellings() {
+        let db = TestDb::default();
+        for (source, expected) in [
+            ("0x1", "1"),
+            ("0b1", "1"),
+            ("1.0", "1"),
+            ("1_000", "1000"),
+            ("0.1", "0.1"),
+            (".5", "0.5"),
+            ("-0", "0"),
+            ("-0x2", "-2"),
+        ] {
+            let ty = InferredType::new(
+                &db,
+                TypeData::Literal(InternedLiteral::new(
+                    &db,
+                    Literal::Number(NumberLiteral::new(Text::new_static(source))),
+                )),
+            );
+            assert_eq!(
+                ty.try_switch_case_variants(),
+                Ok(vec![InferredSwitchCase::Number(Text::new_static(expected))]),
+                "{source}"
+            );
+        }
     }
 
     #[test]

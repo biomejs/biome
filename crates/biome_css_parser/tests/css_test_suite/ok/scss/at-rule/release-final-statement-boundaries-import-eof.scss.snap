@@ -1,0 +1,61 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@import "theme.css"
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: ScssImportAtRule {
+                import_token: IMPORT_KW@1..8 "import" [] [Whitespace(" ")],
+                imports: ScssImportItemList [
+                    ScssPlainImport {
+                        url: CssString {
+                            value_token: CSS_STRING_LITERAL@8..19 "\"theme.css\"" [] [],
+                        },
+                        layer: missing (optional),
+                        supports: missing (optional),
+                        media: CssMediaQueryList [],
+                    },
+                ],
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@19..19 "" [] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..19
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..19
+    0: CSS_AT_RULE@0..19
+      0: AT@0..1 "@" [] []
+      1: SCSS_IMPORT_AT_RULE@1..19
+        0: IMPORT_KW@1..8 "import" [] [Whitespace(" ")]
+        1: SCSS_IMPORT_ITEM_LIST@8..19
+          0: SCSS_PLAIN_IMPORT@8..19
+            0: CSS_STRING@8..19
+              0: CSS_STRING_LITERAL@8..19 "\"theme.css\"" [] []
+            1: (empty)
+            2: (empty)
+            3: CSS_MEDIA_QUERY_LIST@19..19
+        2: (empty)
+  2: EOF@19..19 "" [] []
+
+```

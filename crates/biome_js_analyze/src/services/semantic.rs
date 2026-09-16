@@ -1,12 +1,14 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
-    VisitorFinishContext,
+    VisitorStartContext,
 };
-use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
+use biome_db::AnyParsedSource;
+use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
-use biome_languages::JsFileSource;
+use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::AstNode;
+use std::rc::Rc;
 
 /// ## Warning
 ///
@@ -55,8 +57,8 @@ impl Queryable for SemanticServices {
     type Language = JsLanguage;
     type Services = Self;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, || SemanticModelVisitor);
     }
 
@@ -82,8 +84,8 @@ where
     type Language = JsLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 
@@ -95,67 +97,41 @@ where
         N::unwrap_cast(node.clone())
     }
 }
-/// Syntax-phase visitor that extracts semantic events and builds semantic data.
-///
-/// Flavor-specific behavior (for example Svelte semantics) is configured from
-/// the file source service when entering the root node.
-pub struct SemanticModelBuilderVisitor {
-    extractor: SemanticEventExtractor,
-    builder: SemanticModelBuilder,
-}
 
-impl SemanticModelBuilderVisitor {
-    pub(crate) fn new(root: &AnyJsRoot) -> Self {
-        Self {
-            extractor: SemanticEventExtractor::default(),
-            builder: SemanticModelBuilder::new(root.clone()),
-        }
-    }
-}
+pub(crate) struct SemanticModelBuilderVisitor;
 
 impl Visitor for SemanticModelBuilderVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
-        // Visitor construction has no access to the service bag, so configure
-        // semantic flavor when we enter the root node.
-        if let WalkEvent::Enter(node) = event
-            && node.parent().is_none()
-        {
-            let source_type = ctx
-                .services
-                .get_service::<JsFileSource>()
-                .copied()
-                .unwrap_or_default();
-            let flavor = (&source_type).into();
-            self.extractor.set_flavor(flavor);
-            self.builder.set_flavor(flavor);
-        }
-
-        match event {
-            WalkEvent::Enter(node) => {
-                self.builder.push_node(node);
-                self.extractor.enter(node);
-            }
-            WalkEvent::Leave(node) => {
-                self.extractor.leave(node);
-            }
-        }
-
-        while let Some(e) = self.extractor.pop() {
-            self.builder.push_event(e);
-        }
-    }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
-        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
-        // open_file/change_file cycle), skip building a new one.
+    fn start(&mut self, ctx: VisitorStartContext<JsLanguage>) {
         if ctx.services.get_service::<SemanticModel>().is_some() {
             return;
         }
-        let model = self.builder.build();
-        ctx.services.insert_service(model);
+        let source_type = ctx
+            .services
+            .get_service::<JsFileSource>()
+            .copied()
+            .unwrap_or_default();
+        if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
+            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+        {
+            let model = js_semantic_model(db.as_ref(), source);
+            // Semantic equality excludes locations, but analyzer consumers need the
+            // current syntax and the embedding flavor of the analyzed source.
+            if model.root().syntax().as_send() == ctx.root.syntax().as_send()
+                && model.flavor() == (&source_type).into()
+            {
+                ctx.services.insert_service(model.clone());
+                return;
+            }
+        }
+        ctx.services.insert_service(semantic_model(
+            ctx.root,
+            SemanticModelOptions::from(&source_type),
+        ));
     }
+
+    fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
 }
 
 pub struct SemanticModelVisitor;

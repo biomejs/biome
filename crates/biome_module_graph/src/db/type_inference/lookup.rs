@@ -371,6 +371,16 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         }
 
         match ty {
+            InferredTypeData::Literal(literal)
+                if matches!(literal.literal(db), InferredLiteral::RegExp(_)) =>
+            {
+                state.ty = InferredTypeData::instance_of(
+                    db,
+                    InferredTypeData::regexp_class(),
+                    Box::default(),
+                );
+                pending.push(state);
+            }
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
                     if matches!(
@@ -443,6 +453,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             | InferredTypeData::Tuple(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::TypeofExpression(_)
@@ -523,6 +534,7 @@ fn declared_type_parameters<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -595,6 +607,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -699,6 +712,7 @@ fn find_own_member_type<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)

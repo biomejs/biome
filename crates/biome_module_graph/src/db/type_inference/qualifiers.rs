@@ -10,9 +10,9 @@ use biome_js_type_info::{
     Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     global_type_id_for_qualifier,
     interned_types::{
-        Literal as InferredLiteral, LocalTypeHandle, LocalTypeId, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-        well_known_symbol_type,
+        InternedObject as InferredObject, Literal as InferredLiteral, LocalTypeHandle, LocalTypeId,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind, well_known_symbol_type,
     },
 };
 use biome_rowan::Text;
@@ -265,7 +265,10 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         if let Some(id) = global_type_id_for_qualifier(qualifier) {
-            return super::globals::global_type(self.db, id);
+            return self.apply_qualifier_type_parameters(
+                super::globals::global_type(self.db, id),
+                qualifier,
+            );
         }
 
         InferredTypeData::Unknown
@@ -433,19 +436,36 @@ impl<'db> ResolutionCtx<'db, '_> {
             .iter()
             .map(|parameter| self.resolve(parameter))
             .collect::<Vec<_>>();
-        let merged_parameters = declared_parameters
-            .iter()
-            .enumerate()
-            .map(|(index, parameter)| {
-                incoming_parameters
-                    .get(index)
-                    .copied()
-                    .unwrap_or(*parameter)
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice();
+        let mut merged_parameters = Vec::new();
+        let mut substitutions = Vec::new();
+        for (index, parameter) in declared_parameters.iter().copied().enumerate() {
+            let argument = if let Some(argument) = incoming_parameters.get(index) {
+                *argument
+            } else {
+                let resolved = self.resolve_inferred_type(parameter);
+                let generic = if let InferredTypeData::Generic(generic) = resolved {
+                    Some(generic)
+                } else if let InferredTypeData::InstanceOf(instance) = resolved
+                    && let InferredTypeData::Generic(generic) = instance.ty(self.db)
+                {
+                    Some(generic)
+                } else {
+                    None
+                };
+                generic
+                    .and_then(|generic| generic.default(self.db))
+                    .map_or(parameter, |default| {
+                        super::lookup::apply_substitutions(self.db, default, &substitutions)
+                    })
+            };
+            substitutions.push(biome_js_type_info::interned_types::TypeSubstitution {
+                generic: parameter,
+                replacement: argument,
+            });
+            merged_parameters.push(argument);
+        }
 
-        InferredTypeData::instance_of(self.db, target, merged_parameters)
+        InferredTypeData::instance_of(self.db, target, merged_parameters.into_boxed_slice())
     }
 
     fn declared_type_parameters(
@@ -542,6 +562,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Union(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -565,15 +586,26 @@ impl<'db> ResolutionCtx<'db, '_> {
         let Some(key_names) = self.string_literal_keys(key_ty) else {
             return InferredTypeData::Unknown;
         };
-        let Some(members) = self.own_members(target_ty) else {
+        if key_names.iter().any(|key| key.text().contains('\\')) {
+            return InferredTypeData::Unknown;
+        }
+        let Some((members, has_unknown_members)) = self.own_members(target_ty) else {
             return InferredTypeData::Unknown;
         };
 
-        if qualifier.is_pick() {
+        let has_unknown_members = has_unknown_members
+            || qualifier.is_pick()
+                && key_names.iter().any(|key| {
+                    !members
+                        .iter()
+                        .any(|member| member.kind.has_name(key.text()))
+                });
+        let ty = if qualifier.is_pick() {
             InferredTypeData::pick_members(self.db, members, &key_names)
         } else {
             InferredTypeData::omit_members(self.db, members, &key_names)
-        }
+        };
+        self.preserve_unknown_members(ty, has_unknown_members)
     }
 
     fn resolve_partial_or_required(
@@ -581,37 +613,81 @@ impl<'db> ResolutionCtx<'db, '_> {
         qualifier: &TypeReferenceQualifier,
     ) -> InferredTypeData<'db> {
         let target_ty = self.resolve(&qualifier.type_parameters[0]);
-        let Some(members) = self.own_members(target_ty) else {
+        let Some((members, has_unknown_members)) = self.own_members(target_ty) else {
             return InferredTypeData::Unknown;
         };
 
-        if qualifier.is_partial() {
+        let ty = if qualifier.is_partial() {
             InferredTypeData::with_all_optional_members(self.db, members)
         } else {
             InferredTypeData::with_all_required_members(self.db, members)
-        }
+        };
+        self.preserve_unknown_members(ty, has_unknown_members)
     }
 
     fn resolve_readonly(&mut self, qualifier: &TypeReferenceQualifier) -> InferredTypeData<'db> {
         let target_ty = self.resolve(&qualifier.type_parameters[0]);
-        self.own_members(target_ty)
-            .map_or(InferredTypeData::Unknown, |members| {
-                InferredTypeData::object_from_members(self.db, members)
-            })
+        self.own_members(target_ty).map_or(
+            InferredTypeData::Unknown,
+            |(members, has_unknown_members)| {
+                InferredTypeData::Object(InferredObject::new(
+                    self.db,
+                    None,
+                    members.into_boxed_slice(),
+                    has_unknown_members,
+                ))
+            },
+        )
     }
 
-    fn own_members(&mut self, ty: InferredTypeData<'db>) -> Option<Vec<InferredTypeMember<'db>>> {
+    /// Keeps an incomplete key list incomplete after a utility type changes its members.
+    ///
+    /// For example, rebuilding `Partial<Shape>` must not imply that its only key
+    /// is `A` when collection could not represent the computed member:
+    ///
+    /// ```ts
+    /// declare const key: "C";
+    /// type Shape = { A: number; [key]: number };
+    /// type Keys = keyof Partial<Shape>;
+    /// ```
+    fn preserve_unknown_members(
+        &self,
+        ty: InferredTypeData<'db>,
+        has_unknown_members: bool,
+    ) -> InferredTypeData<'db> {
+        if has_unknown_members && let InferredTypeData::Object(object) = ty {
+            InferredTypeData::Object(InferredObject::new(
+                self.db,
+                object.prototype(self.db),
+                object.members(self.db).clone(),
+                true,
+            ))
+        } else {
+            ty
+        }
+    }
+
+    /// Returns the collected own members and whether the list may omit keys.
+    /// Class, interface, and namespace member lists are not assumed complete.
+    fn own_members(
+        &mut self,
+        ty: InferredTypeData<'db>,
+    ) -> Option<(Vec<InferredTypeMember<'db>>, bool)> {
         let mut ty = ty;
 
         for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
             match self.resolve_inferred_type(ty) {
-                InferredTypeData::Class(class) => return Some(class.members(self.db).to_vec()),
+                InferredTypeData::Class(class) => {
+                    return Some((class.members(self.db).to_vec(), true));
+                }
                 InferredTypeData::Interface(interface) => {
-                    return Some(interface.members(self.db).to_vec());
+                    return Some((interface.members(self.db).to_vec(), true));
                 }
                 InferredTypeData::InstanceOf(instance) => ty = instance.ty(self.db),
+                InferredTypeData::TypeofType(typeof_type) => ty = typeof_type.ty(self.db),
+                InferredTypeData::TypeofValue(typeof_value) => ty = typeof_value.ty(self.db),
                 InferredTypeData::Literal(literal) => match literal.literal(self.db) {
-                    InferredLiteral::Object(members) => return Some(members.to_vec()),
+                    InferredLiteral::Object(members) => return Some((members.to_vec(), false)),
                     InferredLiteral::BigInt(_)
                     | InferredLiteral::Boolean(_)
                     | InferredLiteral::Number(_)
@@ -619,11 +695,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                     | InferredLiteral::String(_)
                     | InferredLiteral::Template(_) => return None,
                 },
-                InferredTypeData::Module(module) => return Some(module.members(self.db).to_vec()),
-                InferredTypeData::Namespace(namespace) => {
-                    return Some(namespace.members(self.db).to_vec());
+                InferredTypeData::Module(module) => {
+                    return Some((module.members(self.db).to_vec(), true));
                 }
-                InferredTypeData::Object(object) => return Some(object.members(self.db).to_vec()),
+                InferredTypeData::Namespace(namespace) => {
+                    return Some((namespace.members(self.db).to_vec(), true));
+                }
+                InferredTypeData::Object(object) => {
+                    return Some((
+                        object.members(self.db).to_vec(),
+                        object.has_unknown_members(self.db) || object.prototype(self.db).is_some(),
+                    ));
+                }
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
@@ -643,10 +726,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::Intersection(_)
                 | InferredTypeData::Union(_)
                 | InferredTypeData::TypeOperator(_)
+                | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofExpression(_)
-                | InferredTypeData::TypeofType(_)
-                | InferredTypeData::TypeofValue(_)
                 | InferredTypeData::AnyKeyword
                 | InferredTypeData::NeverKeyword
                 | InferredTypeData::ObjectKeyword
@@ -670,14 +752,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::RegExp(_)
                 | InferredLiteral::Template(_) => None,
             },
-            InferredTypeData::Union(union) => Some(
-                union
-                    .types(self.db)
-                    .to_vec()
-                    .into_iter()
-                    .filter_map(|ty| self.string_literal_key(ty))
-                    .collect(),
-            ),
+            InferredTypeData::Union(union) => union
+                .types(self.db)
+                .to_vec()
+                .into_iter()
+                .map(|ty| self.string_literal_key(ty))
+                .collect(),
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
@@ -701,6 +781,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Local(_)
             | InferredTypeData::Intersection(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)
@@ -750,6 +831,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Union(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::MergedReference(_)
             | InferredTypeData::TypeofExpression(_)

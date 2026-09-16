@@ -120,6 +120,8 @@ static SOLID_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 });
 static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noSvelteAtDebugTags"),
+        RuleFilter::Rule("nursery", "noSvelteAtHtmlTags"),
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
@@ -140,6 +142,7 @@ static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useExpect"),
         RuleFilter::Rule("nursery", "useTestHooksInOrder"),
         RuleFilter::Rule("nursery", "useTestHooksOnTop"),
+        RuleFilter::Rule("nursery", "useValidTestTitle"),
         RuleFilter::Rule("suspicious", "noDuplicateTestHooks"),
         RuleFilter::Rule("suspicious", "noExportsInTest"),
         RuleFilter::Rule("suspicious", "noFocusedTests"),
@@ -192,6 +195,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
         RuleFilter::Rule("nursery", "noVueImportCompilerMacros"),
         RuleFilter::Rule("nursery", "noVueRefAsOperand"),
+        RuleFilter::Rule("nursery", "noVueUndeclaredDirectives"),
         RuleFilter::Rule("nursery", "noVueVOnNumberValues"),
         RuleFilter::Rule("nursery", "useScopedStyles"),
         RuleFilter::Rule("nursery", "useVueBaseImport"),
