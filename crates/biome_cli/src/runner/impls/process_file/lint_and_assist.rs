@@ -217,13 +217,7 @@ impl ProcessFile for LintAssistProcessFile {
         if result.parse_errors > 0 && execution.should_skip_parse_errors() {
             return Ok(());
         }
-        print_stdin_diagnostics(
-            console,
-            cli_options,
-            biome_path,
-            source,
-            result.diagnostics
-        );
+        print_stdin_diagnostics(console, cli_options, biome_path, source, result.diagnostics);
 
         let category = execution.as_diagnostic_category();
         if result.format_with_errors_disabled {
