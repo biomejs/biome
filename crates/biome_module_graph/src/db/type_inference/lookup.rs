@@ -487,6 +487,9 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     let mut substitutions = inherited.to_vec();
     for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
         let declared = apply_substitutions(db, *declared, inherited);
+        if !declared.is_generic_reference(db) {
+            continue;
+        }
         let replacement = apply_substitutions(db, *replacement, inherited);
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
         if declared_instance != declared {
