@@ -7696,6 +7696,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTypedIterableCallbackReturn": {
+					"description": "Enforce consistent return values in iterable callbacks using type information.\nSee https://biomejs.dev/linter/rules/use-typed-iterable-callback-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTypedIterableCallbackReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
@@ -13175,6 +13182,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTypedIterableCallbackReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTypedIterableCallbackReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUnicodeRegexOptions": {
 			"type": "object",
 			"properties": {
@@ -17552,6 +17568,26 @@
 		},
 		"UseTrimStartEndOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTypedIterableCallbackReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTypedIterableCallbackReturnOptions" }
+			]
+		},
+		"UseTypedIterableCallbackReturnOptions": {
+			"type": "object",
+			"properties": {
+				"allowImplicit": {
+					"description": "Allow empty returns and void-valued expressions in callbacks that require a return.\nDefaults to `false`. Falling through the callback remains an error.",
+					"type": ["boolean", "null"]
+				},
+				"checkForEach": {
+					"description": "Report values returned from `forEach` callbacks. Defaults to `true`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseUnicodeRegexConfiguration": {

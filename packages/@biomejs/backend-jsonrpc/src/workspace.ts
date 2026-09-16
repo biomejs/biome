@@ -2923,6 +2923,11 @@ See https://biomejs.dev/linter/rules/use-this-in-class-methods
 	 */
 	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
 	/**
+	* Enforce consistent return values in iterable callbacks using type information.
+See https://biomejs.dev/linter/rules/use-typed-iterable-callback-return 
+	 */
+	useTypedIterableCallbackReturn?: UseTypedIterableCallbackReturnConfiguration;
+	/**
 	* Enforce the use of the u or v flag for regular expressions.
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
@@ -5149,6 +5154,9 @@ export type UseTestHooksOnTopConfiguration =
 export type UseThisInClassMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThisInClassMethodsOptions;
+export type UseTypedIterableCallbackReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTypedIterableCallbackReturnOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -7243,6 +7251,10 @@ export interface RuleWithUseThisInClassMethodsOptions {
 	level: RulePlainConfiguration;
 	options?: UseThisInClassMethodsOptions;
 }
+export interface RuleWithUseTypedIterableCallbackReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseTypedIterableCallbackReturnOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -9120,6 +9132,17 @@ Defaults to `false`.
 	 */
 	ignoreOverrideMethods?: boolean;
 }
+export interface UseTypedIterableCallbackReturnOptions {
+	/**
+	* Allow empty returns and void-valued expressions in callbacks that require a return.
+Defaults to `false`. Falling through the callback remains an error. 
+	 */
+	allowImplicit?: boolean;
+	/**
+	 * Report values returned from `forEach` callbacks. Defaults to `true`.
+	 */
+	checkForEach?: boolean;
+}
 export type UseUnicodeRegexOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
@@ -10315,6 +10338,7 @@ export type Category =
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
+	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
@@ -10352,10 +10376,8 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
-	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
-	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -10376,6 +10398,7 @@ export type Category =
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
@@ -10424,6 +10447,7 @@ export type Category =
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useTypedIterableCallbackReturn"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
