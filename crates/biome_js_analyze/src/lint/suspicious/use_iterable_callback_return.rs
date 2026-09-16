@@ -18,7 +18,7 @@ declare_lint_rule! {
     ///
     /// This rule relies on static analysis. For a type-aware alternative,
     /// use [`useTypedIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-typed-iterable-callback-return/).
-    /// That rule allows callbacks such that return `void`.
+    /// That rule allows callbacks that return `void`.
     /// It also checks the object's type, so a custom method named `every` is not treated as an array method.
     ///
     /// Note that async and generator callbacks are ignored as they always return `Promise` or
