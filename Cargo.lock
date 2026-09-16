@@ -239,6 +239,8 @@ dependencies = [
  "biome_rule_options",
  "biome_service",
  "biome_text_edit",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "bpaf",
  "camino",
  "crossbeam",
@@ -325,6 +327,8 @@ dependencies = [
  "biome_markdown_analyze",
  "biome_markdown_syntax",
  "biome_string_case",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "proc-macro2",
  "pulldown-cmark",
  "quote",
@@ -1927,6 +1931,9 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_text_edit",
+ "biome_yaml_analyze",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
 ]
 
@@ -1991,6 +1998,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
+ "biome_yaml_analyze",
  "biome_yaml_formatter",
  "biome_yaml_parser",
  "biome_yaml_syntax",
@@ -2199,6 +2207,36 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "biome_yaml_analyze"
+version = "0.1.0"
+dependencies = [
+ "biome_analyze",
+ "biome_analyze_macros",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_languages",
+ "biome_rowan",
+ "biome_rule_options",
+ "biome_suppression",
+ "biome_test_utils",
+ "biome_yaml_factory",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
+ "camino",
+ "codspeed-criterion-compat",
+ "filetime",
+ "insta",
+ "mimalloc",
+ "rustc-hash 2.1.3",
+ "schemars",
+ "serde",
+ "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -5587,6 +5625,8 @@ dependencies = [
  "biome_markdown_analyze",
  "biome_markdown_syntax",
  "biome_ruledoc_utils",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "pulldown-cmark",
 ]
 
@@ -7516,6 +7556,8 @@ dependencies = [
  "biome_service",
  "biome_string_case",
  "biome_ungrammar",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "bpaf",
  "git2",
  "prettyplease",
