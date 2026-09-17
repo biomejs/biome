@@ -1235,7 +1235,7 @@ and sequences do not.
 	 */
 	lineWidth?: LineWidth;
 	/**
-	 * The type of quotes used in GraphQL code. Defaults to `double`.
+	 * The type of quotes used in YAML code. Defaults to `double`.
 	 */
 	quoteStyle?: QuoteStyle;
 	/**

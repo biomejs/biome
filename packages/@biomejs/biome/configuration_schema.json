@@ -18404,7 +18404,7 @@
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
 				},
 				"quoteStyle": {
-					"description": "The type of quotes used in GraphQL code. Defaults to `double`.",
+					"description": "The type of quotes used in YAML code. Defaults to `double`.",
 					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
 					"default": null
 				},
