@@ -21,6 +21,8 @@ pub(crate) fn syntax_tree(session: &Session, url: &Uri) -> Result<Option<String>
     let Some(doc) = session.document(url) else {
         return Ok(None);
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     let features = FeaturesBuilder::new().build();
 
     if session

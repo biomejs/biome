@@ -1,4 +1,5 @@
-use super::{document::Document, *};
+use super::document::{Document, DocumentLockGuard, DocumentLocks};
+use super::*;
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::db::{DbReadGuard, DbState, WorkspaceDb};
@@ -155,12 +156,27 @@ pub struct WorkspaceServer {
     /// Channel sender for sending notifications of service data updates.
     notification_tx: watch::Sender<ServiceNotification>,
 
+    /// Locks keeping the parsed file and the content of a document consistent
+    /// for readers, see [`DocumentLocks`].
+    document_locks: DocumentLocks,
+
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
 
     #[cfg(test)]
     scanner_test_state: ScannerTestState,
+
+    /// See [`Self::set_hook_before_parse_update`].
+    #[cfg(feature = "testing")]
+    hook_before_parse_update: Mutex<Option<WriteHook>>,
+
+    /// See [`Self::set_hook_between_parse_and_content_update`].
+    #[cfg(feature = "testing")]
+    hook_between_parse_and_content_update: Mutex<Option<WriteHook>>,
 }
+
+#[cfg(feature = "testing")]
+type WriteHook = Box<dyn FnOnce(&Utf8Path) + Send>;
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
 ///
@@ -435,10 +451,46 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
+            document_locks: DocumentLocks::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
             scanner_test_state: ScannerTestState::default(),
+            #[cfg(feature = "testing")]
+            hook_before_parse_update: Mutex::new(None),
+            #[cfg(feature = "testing")]
+            hook_between_parse_and_content_update: Mutex::new(None),
+        }
+    }
+
+    /// Locks `path` so no writer replaces the document while the caller reads
+    /// it, see [`DocumentLocks`]. Must not be held across an `.await`.
+    pub fn lock_document(&self, path: &Utf8Path) -> DocumentLockGuard {
+        self.document_locks.lock(path)
+    }
+
+    /// Runs `hook` once, in the next write, between taking the document lock
+    /// and storing the parse. Blocking in it holds the writer there.
+    #[cfg(feature = "testing")]
+    pub fn set_hook_before_parse_update(&self, hook: impl FnOnce(&Utf8Path) + Send + 'static) {
+        *self.hook_before_parse_update.lock().unwrap() = Some(Box::new(hook));
+    }
+
+    /// Runs `hook` once, in the next write, between storing the parse and the
+    /// content. Blocking in it holds the writer there.
+    #[cfg(feature = "testing")]
+    pub fn set_hook_between_parse_and_content_update(
+        &self,
+        hook: impl FnOnce(&Utf8Path) + Send + 'static,
+    ) {
+        *self.hook_between_parse_and_content_update.lock().unwrap() = Some(Box::new(hook));
+    }
+
+    #[cfg(feature = "testing")]
+    fn run_write_hook(hook: &Mutex<Option<WriteHook>>, path: &Utf8Path) {
+        let hook = hook.lock().unwrap().take();
+        if let Some(hook) = hook {
+            hook(path);
         }
     }
 
@@ -933,11 +985,17 @@ impl WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_file_commit(reason);
 
+        // Taken after parsing, right before the first store update, so that
+        // the parse, the long part, runs outside of it.
+        let document_lock = self.lock_document(&path);
+
         let mut parsed_source = None;
         let syntax = match parsed {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
             Ok(Some((any_parse, file_source_index, embedded_snippets))) => {
+                #[cfg(feature = "testing")]
+                WorkspaceServer::run_write_hook(&self.hook_before_parse_update, &path);
                 let final_source = self.db_update_parsed_file(
                     &path,
                     any_parse,
@@ -948,6 +1006,9 @@ impl WorkspaceServerWithDb<'_> {
                 Some(Ok(()))
             }
         };
+
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(&self.hook_between_parse_and_content_update, &path);
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -1014,6 +1075,7 @@ impl WorkspaceServerWithDb<'_> {
             // requests and client requests for files that are already indexed.
             reason.is_index() || self.is_indexed(&path)
         };
+        drop(document_lock);
 
         // Manifest files need to update the module graph.
         if is_indexed {
@@ -3146,6 +3208,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let is_indexed = self.is_indexed(&path);
+        let document_lock = self.lock_document(&path);
         let documents = self.documents.pin();
         let (index, existing_version, same_content) = documents
             .get(path.as_path())
@@ -3174,6 +3237,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 db.get_parsed_source(path.as_path())
                     .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
             };
+            drop(document_lock);
             return self.finish_change_file(project_key, &path, parsed);
         }
 
@@ -3235,8 +3299,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
         .collect();
 
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(&self.hook_before_parse_update, path.as_path());
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
+
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(
+            &self.hook_between_parse_and_content_update,
+            path.as_path(),
+        );
 
         let document = Document {
             content,
@@ -3255,6 +3327,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        drop(document_lock);
 
         #[cfg(test)]
         if self
@@ -4093,9 +4166,12 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
 
-        self.documents.pin().remove(path);
-        self.node_cache.lock().unwrap().remove(path);
-        self.db_remove_file(path);
+        {
+            let _document_lock = self.lock_document(path);
+            self.documents.pin().remove(path);
+            self.node_cache.lock().unwrap().remove(path);
+            self.db_remove_file(path);
+        }
 
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the

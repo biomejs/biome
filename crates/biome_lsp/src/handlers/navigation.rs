@@ -20,6 +20,8 @@ pub(crate) fn goto_definition(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
 
     let position_encoding = session.position_encoding();
     let cursor_offset = from_proto::offset(
