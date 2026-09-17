@@ -198,3 +198,185 @@ fn test_infer_module_types_substitutes_callback_returns_through_type_aliases_on_
         &fs,
     );
 }
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_for_union_arguments_within_union_parameters_on_build()
+ {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function pick(value: string | number | boolean): "primitive";
+            declare function pick(value: unknown): "unknown";
+
+            declare const subset: string | number;
+            declare const mixed: string | { armour: number };
+
+            export const fromSubset = pick(subset);
+            export const fromMixed = pick(mixed);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    // Each member of the argument union fits the parameter union, so the
+    // first overload is selected even though no single parameter member
+    // accepts the whole argument.
+    let from_subset_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "fromSubset")
+        .expect("fromSubset binding type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, from_subset_ty),
+        "primitive"
+    ));
+
+    // `{ armour: number }` fits no parameter member, so the first overload
+    // is rejected.
+    let from_mixed_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "fromMixed")
+        .expect("fromMixed binding type must be inferred");
+    assert!(is_inferred_string_literal(
+        &db,
+        inferred.resolve_type(&db, from_mixed_ty),
+        "unknown"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_selects_call_overloads_by_permissive_callback_return_types_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function run(callback: () => unknown): "unknown";
+            declare function run(callback: unknown): "fallback";
+
+            declare function loose(callback: () => any): "any";
+            declare function loose(callback: unknown): "fallback";
+
+            declare function either(callback: () => string | Promise<string>): "either";
+            declare function either(callback: unknown): "fallback";
+
+            declare function strict(callback: () => string): "string";
+            declare function strict(callback: unknown): "fallback";
+
+            export const fromUnknown = run(async () => 1);
+            export const fromAny = loose(async () => 1);
+            export const fromEither = either(async () => "value");
+            export const fromStrict = strict(async () => "value");
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let literal = |name: &str| {
+        inferred_binding_ty_by_name(&db, index_module, inferred, name).map_or_else(
+            || panic!("{name} binding type must be inferred"),
+            |ty| inferred.resolve_type(&db, ty),
+        )
+    };
+
+    // `unknown`, `any`, and a union containing a Promise all accept an async
+    // callback, so the first overload is selected.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromUnknown"),
+        "unknown"
+    ));
+    assert!(is_inferred_string_literal(&db, literal("fromAny"), "any"));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromEither"),
+        "either"
+    ));
+
+    // A concrete non-Promise return type still rejects the async callback.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromStrict"),
+        "fallback"
+    ));
+}
+
+#[test]
+fn test_infer_module_types_keeps_strict_callback_return_types_for_async_callbacks_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function voided(callback: () => string | void): "voided";
+            declare function voided(callback: () => Promise<string>): "promise";
+
+            declare function constrained<T extends string>(callback: () => T): "constrained";
+            declare function constrained(callback: () => Promise<string>): "promise";
+
+            declare function unconstrained<T>(callback: () => T): "unconstrained";
+            declare function unconstrained(callback: () => Promise<string>): "promise";
+
+            declare function predicate(callback: (value: unknown) => value is string): "predicate";
+            declare function predicate(callback: unknown): "fallback";
+
+            export const fromVoided = voided(async () => "");
+            export const fromVoidedSync = voided(() => "");
+            export const fromConstrained = constrained(async () => "");
+            export const fromUnconstrained = unconstrained(async () => "");
+            export const fromPredicate = predicate(async (value: unknown) => true);
+            export const fromPredicateSync = predicate((value: unknown): value is string => true);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+    let literal = |name: &str| {
+        inferred_binding_ty_by_name(&db, index_module, inferred, name).map_or_else(
+            || panic!("{name} binding type must be inferred"),
+            |ty| inferred.resolve_type(&db, ty),
+        )
+    };
+
+    // Only a complete `void` return type discards the result; `void` inside a
+    // union is an ordinary member that a Promise does not satisfy.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromVoided"),
+        "promise"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromVoidedSync"),
+        "voided"
+    ));
+
+    // A generic return type accepts what its constraint accepts.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromConstrained"),
+        "promise"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromUnconstrained"),
+        "unconstrained"
+    ));
+
+    // A type predicate is a boolean result that an async callback cannot provide.
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromPredicate"),
+        "fallback"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        literal("fromPredicateSync"),
+        "predicate"
+    ));
+}

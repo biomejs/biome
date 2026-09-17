@@ -31,7 +31,9 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 /// query accepts plain positional arguments and supports functions, callable
 /// interfaces and objects, and unions of callable types. Overloads are tested
 /// in declaration order. If no supported signature matches, the result is
-/// `Unknown`.
+/// `Unknown`. Explicit type arguments instantiate the callee; for an overload
+/// set or a non-generic interface they instantiate each call signature before
+/// overloads are tested.
 ///
 /// In this example, the inferred type of `result` is `number`.
 ///
@@ -64,8 +66,10 @@ pub fn infer_call_expression_type<'db>(
 /// `input.argument_index` refers to the source argument before tuple spreads
 /// are expanded. The requested argument is ignored while overload candidates
 /// are checked because its expected type is the result being inferred. Other
-/// arguments still select among overloads. Returns `None` when no supported
-/// call signature can provide an expected type.
+/// arguments still select among overloads. Explicit type arguments instantiate
+/// the callee; for an overload set or a non-generic interface they instantiate
+/// each call signature before overloads are tested. Returns `None` when no
+/// supported call signature can provide an expected type.
 ///
 /// In this example, the expected type of the second argument is `() => void`.
 ///

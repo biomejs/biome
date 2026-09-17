@@ -1,0 +1,115 @@
+/* should not generate diagnostics */
+
+type Trooper = { armour: number };
+
+declare function clone<T>(unit: T): T;
+
+export function deploy(): number {
+    const tk421 = clone<Trooper | null>(null);
+    if (!tk421) {
+        return 0;
+    }
+    return tk421.armour;
+}
+
+declare function garrison<T>(unit: T): { current: T };
+declare function garrison<T>(unit: T | null): { current: T | null };
+
+export function muster(): number {
+    const post = garrison<Trooper>(null);
+    if (!post.current) {
+        return 0;
+    }
+    return post.current.armour;
+}
+
+declare function count<T>(value: T): T;
+
+export function tally(): number {
+    const n = count<number | null>(0);
+    if (n === null) {
+        return 0;
+    }
+    return n;
+}
+
+declare function pick<T extends string>(x: T): { current: T };
+declare function pick<T>(x: T): { current: T | null };
+
+export function constrained(): number {
+    const picked = pick<number>(0);
+    if (picked.current === null) {
+        return 0;
+    }
+    return picked.current;
+}
+
+declare function f<T>(x: T): T | null;
+declare function f(x: null): object;
+declare function f<T>(x: T | null): T | null;
+
+export function arity(): number {
+    const result = f<string>(null);
+    if (!result) {
+        return 0;
+    }
+    return result.length;
+}
+
+declare function choose<T extends string | number | boolean>(x: T): T | null;
+declare function choose<T>(x: T): T;
+
+export function unionArgument(): number {
+    const chosen = choose<string | number>(0);
+    if (chosen === null) {
+        return 0;
+    }
+    return 1;
+}
+
+declare function build<T extends () => unknown>(): T | null;
+declare function build<T>(): T;
+
+export function callableArgument(): number {
+    const built = build<() => Promise<number>>();
+    if (built === null) {
+        return 0;
+    }
+    return 1;
+}
+
+declare function voided(callback: () => string | void): object;
+declare function voided(callback: () => Promise<string>): object | null;
+
+export function voidInUnion(): number {
+    const result = voided(async () => "");
+    if (result === null) {
+        return 0;
+    }
+    return 1;
+}
+
+declare function narrowed<T extends string>(callback: () => T): object;
+declare function narrowed(callback: () => Promise<string>): object | null;
+
+export function constrainedReturn(): number {
+    const result = narrowed(async () => "");
+    if (result === null) {
+        return 0;
+    }
+    return 1;
+}
+
+type Overloaded<T> = {
+    (value: T): T;
+    (value: T | null): T | null;
+};
+declare const lookup: Overloaded<Trooper>;
+
+export function aliasInstance(): number {
+    const found = lookup(null);
+    if (!found) {
+        return 0;
+    }
+    return found.armour;
+}

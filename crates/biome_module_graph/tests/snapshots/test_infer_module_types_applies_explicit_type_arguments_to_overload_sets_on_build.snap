@@ -1,0 +1,135 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Trooper = { armour: number };
+
+declare function garrison<T>(unit: T): { current: T };
+declare function garrison<T>(unit: T | null): { current: T | null };
+
+export const post = garrison<Trooper>(null);
+export const current = post.current;
+```
+
+## Inferred types
+
+```
+Binding Trooper "Trooper" => Object {
+  prototype: No prototype
+  members: ["armour": number]
+}
+
+Binding garrison "garrison" => sync Function "garrison" {
+  accepts: {
+    params: [
+      required unit: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: Object {
+    prototype: No prototype
+    members: ["current": instanceof T]
+  }
+}
+
+Binding T "T" => T
+
+Binding unit "unit" => instanceof T
+
+Binding garrison "garrison" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "garrison" {
+        accepts: {
+          params: [
+            required unit: instanceof T
+          ]
+          type_args: [T]
+        }
+        returns: Object {
+          prototype: No prototype
+          members: ["current": instanceof T]
+        }
+      }
+    ,
+    ():
+      sync Function "garrison" {
+        accepts: {
+          params: [
+            required unit: instanceof T | null
+          ]
+          type_args: [T]
+        }
+        returns: Object {
+          prototype: No prototype
+          members: ["current": instanceof T | null]
+        }
+      }
+  ]
+}
+
+Binding T "T" => T
+
+Binding unit "unit" => instanceof T | null
+
+Binding post "post" => Object {
+  prototype: No prototype
+  members: ["current": instanceof Trooper | null]
+}
+
+Expression "garrison" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "garrison" {
+        accepts: {
+          params: [
+            required unit: instanceof T
+          ]
+          type_args: [T]
+        }
+        returns: Object {
+          prototype: No prototype
+          members: ["current": instanceof T]
+        }
+      }
+    ,
+    ():
+      sync Function "garrison" {
+        accepts: {
+          params: [
+            required unit: instanceof T | null
+          ]
+          type_args: [T]
+        }
+        returns: Object {
+          prototype: No prototype
+          members: ["current": instanceof T | null]
+        }
+      }
+  ]
+}
+
+Expression "garrison<Trooper>(null)" => Object {
+  prototype: No prototype
+  members: ["current": instanceof Trooper | null]
+}
+
+Expression "null" => null
+
+Binding current "current" => instanceof Trooper | null
+
+Expression "post" => Object {
+  prototype: No prototype
+  members: ["current": instanceof Trooper | null]
+}
+
+Expression "post.current" => instanceof Trooper | null
+```
