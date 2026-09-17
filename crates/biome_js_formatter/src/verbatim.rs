@@ -175,6 +175,17 @@ impl Format<JsFormatContext> for FormatJsVerbatimNode<'_> {
     }
 }
 
+/// "Formats" a node according to its original formatting in the source text. Functionally equal
+/// to [`format_js_verbatim_node`], except the node isn't tracked as [`VerbatimKind::Verbatim`],
+/// which would report it as one whose formatting is unimplemented.
+pub fn format_verbatim_skipped(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {
+    FormatJsVerbatimNode {
+        node,
+        kind: VerbatimKind::Skipped,
+        format_comments: true,
+    }
+}
+
 /// Formats bogus nodes. The difference between this method  and `format_verbatim` is that this method
 /// doesn't track nodes/tokens as [VerbatimKind::Verbatim]. They are just printed as they are.
 pub fn format_bogus_node(node: &JsSyntaxNode) -> FormatJsVerbatimNode<'_> {

@@ -1,0 +1,10 @@
+---
+const items = ["a", "b"];
+const title = 'hello';
+---
+<p>{ title }</p>
+<p>{ items . map( ( item )=>( <li class = 'item' >{item}</li> ) ) }</p>
+<div>{items.length>0&&<span>{items.length}</span>}</div>
+<img src={ '/a.png' } alt={title} />
+<div class={ ['a','b'] . join( ' ' ) }>text</div>
+<p>before {title} after</p>

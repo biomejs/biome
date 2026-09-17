@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/template-expression-breaking.astro
+---
+
+# Input
+
+```astro
+---
+const posts = [];
+---
+<main>
+	<section>
+		<ul>
+			{posts.map((post) => <li class="post-item" data-id={post.id} data-slug={post.slug}>{post.title}</li>)}
+		</ul>
+		<p>{ someVeryLongFunctionName( firstArgument, secondArgument, thirdArgument, fourthArgument ) }</p>
+	</section>
+</main>
+<div class={cond ? "a-fairly-long-class-name-here" : "another-fairly-long-class-name"}>x</div>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const posts = [];
+---
+
+<main>
+	<section>
+		<ul>
+			{posts.map((post) => (
+				<li class="post-item" data-id={post.id} data-slug={post.slug}>
+					{post.title}
+				</li>
+			))}
+		</ul>
+		<p>
+			{someVeryLongFunctionName(
+				firstArgument,
+				secondArgument,
+				thirdArgument,
+				fourthArgument,
+			)}
+		</p>
+	</section>
+</main>
+<div
+	class={cond
+		? "a-fairly-long-class-name-here"
+		: "another-fairly-long-class-name"}
+>
+	x
+</div>
+
+```
