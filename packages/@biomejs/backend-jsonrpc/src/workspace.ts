@@ -1212,6 +1212,13 @@ export type VcsClientKind = "git";
  */
 export interface YamlFormatterConfiguration {
 	/**
+	* Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)
+and sequences (`[ item ]`) that fit on one line. If unset, inherits the
+global bracket spacing setting. When neither is set, mappings have spaces
+and sequences do not. 
+	 */
+	bracketSpacing?: BracketSpacing;
+	/**
 	 * Control the formatter for Yaml (and its super languages) files.
 	 */
 	enabled?: Bool;
@@ -1227,6 +1234,10 @@ export interface YamlFormatterConfiguration {
 	 * What's the max width of a line applied to Yaml files. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * The type of quotes used in GraphQL code. Defaults to `double`.
+	 */
+	quoteStyle?: QuoteStyle;
 	/**
 	* Whether to add a trailing newline at the end of the file.
 

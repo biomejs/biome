@@ -18383,6 +18383,10 @@
 			"description": "Options that change how the Yaml formatter behaves",
 			"type": "object",
 			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)\nand sequences (`[ item ]`) that fit on one line. If unset, inherits the\nglobal bracket spacing setting. When neither is set, mappings have spaces\nand sequences do not.",
+					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
 				"enabled": {
 					"description": "Control the formatter for Yaml (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -18398,6 +18402,11 @@
 				"lineWidth": {
 					"description": "What's the max width of a line applied to Yaml files. Defaults to 80.",
 					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"description": "The type of quotes used in GraphQL code. Defaults to `double`.",
+					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
+					"default": null
 				},
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",

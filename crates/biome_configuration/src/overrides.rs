@@ -319,6 +319,7 @@ impl OverridePattern {
             formatter.indent_width = formatter.indent_width.or(global.indent_width);
             formatter.line_ending = formatter.line_ending.or(global.line_ending);
             formatter.line_width = formatter.line_width.or(global.line_width);
+            formatter.bracket_spacing = formatter.bracket_spacing.or(global.bracket_spacing);
             formatter.trailing_newline = formatter.trailing_newline.or(global.trailing_newline);
         }
 

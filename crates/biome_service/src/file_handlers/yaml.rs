@@ -16,7 +16,8 @@ use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled
 use biome_db::AnyParsedSource;
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
@@ -36,6 +37,7 @@ pub struct YamlFormatterSettings {
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
+    pub bracket_spacing: Option<BracketSpacing>,
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<YamlFormatterEnabled>,
 }
@@ -49,6 +51,7 @@ impl From<YamlFormatterConfiguration> for YamlFormatterSettings {
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
             quote_style: configuration.quote_style,
+            bracket_spacing: configuration.bracket_spacing,
             indent_style: Some(IndentStyle::Space),
         }
     }
@@ -110,6 +113,10 @@ impl ServiceLanguage for YamlLanguage {
             .with_line_ending(line_ending)
             .with_quote_style(quote_style)
             .with_trailing_newline(trailing_newline);
+
+        if let Some(bracket_spacing) = language.bracket_spacing.or(global.bracket_spacing) {
+            options.set_bracket_spacing(bracket_spacing);
+        }
 
         overrides.apply_override_yaml_format_options_by_indices(override_indices, &mut options);
 

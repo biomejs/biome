@@ -224,8 +224,12 @@ The configuration contained in `biome.json`.
                               Defaults to 2.
         --yaml-formatter-line-width=NUMBER  What's the max width of a line applied to Yaml files.
                               Defaults to 80.
-        --yaml-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
-                              Defaults to `double`.
+        --yaml-formatter-quote-style=<double|single>  The type of quotes used in YAML code. Defaults
+                              to `double`.
+        --yaml-formatter-bracket-spacing=<true|false>  Whether to insert spaces inside non-empty
+                              flow mappings (`{ key: value }`) and sequences (`[ item ]`) that fit
+                              on one line. If unset, inherits the global bracket spacing setting.
+                              When neither is set, mappings have spaces and sequences do not.
         --yaml-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file.
                               Setting this option to `false` is **highly discouraged** because it

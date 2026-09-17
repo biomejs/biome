@@ -1,0 +1,123 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.yaml`
+
+```yaml
+mapping: { first: 1, second: 2 }
+sequence: [first, second]
+empty_mapping: {}
+empty_sequence: []
+nested: { map: { a: b }, sequence: [a, { b: c }], empty: [{}, []] }
+pairs: [key: value, ? explicit, : empty]
+empty_pair: [: ]
+empty_entry: { : }
+collection_keys: { [a, b]: value, { a: b }: other }
+anchor: &anchor key
+aliases: { *anchor : value }
+tagged: { key: !!str , !!str : value }
+block:
+  - { key: [a, b] }
+long_mapping: { first_key: first_value, second_key: second_value, third_key: third_value, fourth_key: fourth_value }
+long_sequence: [first_value, second_value, third_value, fourth_value, fifth_value, sixth_value]
+commented_mapping: {
+  # before
+  first: 1, # between
+  second: 2
+  # after
+  }
+commented_sequence: [
+  # before
+  first, # between
+  second
+  # after
+  ]
+
+```
+
+# Termination Message
+
+```block
+ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.yaml format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × File content differs from formatting output
+  
+     1  1 │   mapping: { first: 1, second: 2 }
+     2    │ - sequence:·[first,·second]
+        2 │ + sequence:·[·first,·second·]
+     3  3 │   empty_mapping: {}
+     4  4 │   empty_sequence: []
+     5    │ - nested:·{·map:·{·a:·b·},·sequence:·[a,·{·b:·c·}],·empty:·[{},·[]]·}
+     6    │ - pairs:·[key:·value,·?·explicit,·:·empty]
+     7    │ - empty_pair:·[:·]
+        5 │ + nested:·{·map:·{·a:·b·},·sequence:·[·a,·{·b:·c·}·],·empty:·[·{},·[]·]·}
+        6 │ + pairs:·[·key:·value,·?·explicit,·:·empty·]
+        7 │ + empty_pair:·[·:·]
+     8  8 │   empty_entry: { : }
+     9    │ - collection_keys:·{·[a,·b]:·value,·{·a:·b·}:·other·}
+        9 │ + collection_keys:·{·[·a,·b·]:·value,·{·a:·b·}:·other·}
+    10 10 │   anchor: &anchor key
+    11 11 │   aliases: { *anchor : value }
+    12 12 │   tagged: { key: !!str , !!str : value }
+    13 13 │   block:
+    14    │ - ··-·{·key:·[a,·b]·}
+    15    │ - long_mapping:·{·first_key:·first_value,·second_key:·second_value,·third_key:·third_value,·fourth_key:·fourth_value·}
+    16    │ - long_sequence:·[first_value,·second_value,·third_value,·fourth_value,·fifth_value,·sixth_value]
+       14 │ + ··-·{·key:·[·a,·b·]·}
+       15 │ + long_mapping:
+       16 │ + ··{
+       17 │ + ····first_key:·first_value,
+       18 │ + ····second_key:·second_value,
+       19 │ + ····third_key:·third_value,
+       20 │ + ····fourth_key:·fourth_value,
+       21 │ + ··}
+       22 │ + long_sequence:
+       23 │ + ··[
+       24 │ + ····first_value,
+       25 │ + ····second_value,
+       26 │ + ····third_value,
+       27 │ + ····fourth_value,
+       28 │ + ····fifth_value,
+       29 │ + ····sixth_value,
+       30 │ + ··]
+    17 31 │   commented_mapping: {
+    18    │ - ··#·before
+    19    │ - ··first:·1,·#·between
+    20    │ - ··second:·2
+    21    │ - ··#·after
+       32 │ + ····#·before
+       33 │ + ····first:·1,·#·between
+       34 │ + ····second:·2,
+       35 │ + ····#·after
+    22 36 │     }
+    23 37 │   commented_sequence: [
+    24    │ - ··#·before
+    25    │ - ··first,·#·between
+    26    │ - ··second
+    27    │ - ··#·after
+       38 │ + ····#·before
+       39 │ + ····first,·#·between
+       40 │ + ····second,
+       41 │ + ····#·after
+    28 42 │     ]
+    29 43 │   
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```
