@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "./rule.grit",
+    { "path": "./rule.grit" },
+    { "path": "./rule.grit", "includes": [] }
+  ],
+  "overrides": [
+    {
+      "includes": ["**/*.ts"],
+      "plugins": ["./rule.grit", { "path": "./rule.grit", "includes": [] }]
+    },
+    { "includes": ["**/*.js"], "plugins": ["./rule.grit"] },
+    { "plugins": ["./rule.grit"] },
+    { "includes": [], "plugins": ["./rule.grit"] }
+  ]
+}
+```
+
+## `rule.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Target path: src/file.ts
+  
+  Local plugins
+  
+  - rule
+  
+
+```

@@ -1,0 +1,52 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "./known.grit",
+    "./throw.js",
+    { "path": "./throw.ts", "includes": ["src/**/*.ts", "!**/*.test.ts"] }
+  ]
+}
+```
+
+## `known.grit`
+
+```grit
+`unterminated
+```
+
+## `throw.js`
+
+```js
+throw new Error('must not execute');
+```
+
+## `throw.ts`
+
+```ts
+const error: Error = new Error('must not execute'); throw error;
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved. Some JavaScript rule names are unavailable.
+  
+  Local plugins
+  
+  - known
+  
+  JavaScript plugins
+  
+  - throw.js
+  - throw.ts (includes: [src/**/*.ts, !**/*.test.ts])
+  
+
+```

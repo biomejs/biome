@@ -1,5 +1,6 @@
 mod config;
 mod file;
+mod plugins;
 
 use self::{
     config::configuration::{
@@ -9,6 +10,7 @@ use self::{
 };
 use super::{InspectSubCommand, validate_configuration_diagnostics};
 use crate::commands::inspect::file::{InspectFile, inspect_file};
+use crate::commands::inspect::plugins::inspect_plugins;
 use crate::{CliDiagnostic, CliSession, cli_options::CliOptions};
 use biome_configuration::BiomeDiagnostic;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
@@ -18,7 +20,6 @@ use biome_diagnostics::{
 };
 use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde::Serialize;
 use serde_json::Value;
 use std::{borrow::Cow, io, sync::Arc};
 
@@ -37,8 +38,11 @@ pub(crate) fn inspect(
     sub_command: InspectSubCommand,
 ) -> Result<(), CliDiagnostic> {
     match sub_command {
-        InspectSubCommand::Config { key, path, json } => {
-            ConfigInspectionCommand::new(session, cli_options, key, path, json)?.execute()
+        InspectSubCommand::Plugins { path } => {
+            inspect_plugins(session, cli_options, path.as_deref())
+        }
+        InspectSubCommand::Config { key, path } => {
+            ConfigInspectionCommand::new(session, cli_options, key, path)?.execute()
         }
         InspectSubCommand::File {
             ast,
@@ -64,7 +68,6 @@ struct ConfigInspectionCommand<'app, 'options> {
     cli_options: &'options CliOptions,
     key: Option<ConfigurationKey>,
     path: Option<String>,
-    json: bool,
 }
 
 impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
@@ -74,7 +77,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         cli_options: &'options CliOptions,
         key: Option<String>,
         path: Option<String>,
-        json: bool,
     ) -> Result<Self, CliDiagnostic> {
         let key = key.map(ConfigurationKey::parse).transpose()?;
 
@@ -87,7 +89,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             cli_options,
             key,
             path,
-            json,
         })
     }
 
@@ -99,7 +100,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             cli_options,
             key,
             path,
-            json,
         } = self;
 
         let fs = session.app.workspace.fs();
@@ -128,7 +128,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         let Some(key) = key else {
             return Self::print_resolved_configuration(
                 session,
-                json,
                 configuration_path.as_deref(),
                 &inspector,
             );
@@ -160,18 +159,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         let inspection =
             inspector.inspect_key(&key, &matching_overrides, matched_path_display.as_deref())?;
 
-        if json {
-            let output = InspectionJson {
-                key: key.as_str(),
-                value: inspection.value.as_ref().unwrap_or(&Value::Null),
-                source: inspection.source_json(),
-            };
-            let output = serde_json::to_string_pretty(&output)
-                .map_err(|_| WorkspaceError::from(BiomeDiagnostic::new_serialization_error()))?;
-            session.app.console.log(markup! {{output}});
-            return Ok(());
-        }
-
         let diagnostic = inspection.value.as_ref().map_or_else(
             || InspectionDiagnostic::absent(key.as_str().to_string()),
             |value| {
@@ -193,16 +180,11 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
     /// Renders the structurally resolved configuration without evaluating overrides for a path.
     fn print_resolved_configuration(
         session: CliSession,
-        json: bool,
         configuration_path: Option<&Utf8Path>,
         inspector: &ConfigurationInspector,
     ) -> Result<(), CliDiagnostic> {
         let output = serde_json::to_string_pretty(inspector.serialized_configuration())
             .map_err(|_| WorkspaceError::from(BiomeDiagnostic::new_serialization_error()))?;
-        if json {
-            session.app.console.log(markup! {{output}});
-            return Ok(());
-        }
 
         let configuration_paths = inspector.configuration_paths().collect::<Vec<_>>();
         let diagnostic = InspectionDiagnostic::resolved(
@@ -241,17 +223,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             .into(),
         )
     }
-}
-
-/// Stable JSON response for a configuration-key inspection.
-///
-/// `source` is null when the key is not configured and contains either one declaration or an
-/// ordered set of contributors for a composite value.
-#[derive(Serialize)]
-struct InspectionJson<'a> {
-    key: &'a str,
-    value: &'a Value,
-    source: Option<Value>,
 }
 
 /// Human-readable result of a successful configuration inspection.
@@ -507,6 +478,8 @@ impl InspectionDiagnostic {
 /// One ordered advice entry rendered as either a log line or a source code frame.
 #[derive(Debug)]
 enum AdviceLine {
+    List(Vec<MarkupBuf>),
+    Error(Error),
     Frame {
         path: String,
         span: Option<TextRange>,
@@ -518,12 +491,30 @@ enum AdviceLine {
 
 /// Ordered supplemental output rendered after the inspection message and optional code frame.
 #[derive(Debug)]
-struct InspectionAdvice(Vec<AdviceLine>);
+pub(crate) struct InspectionAdvice(Vec<AdviceLine>);
 
 impl Advices for InspectionAdvice {
     fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         for line in &self.0 {
             match line {
+                AdviceLine::List(items) => {
+                    let items = items
+                        .iter()
+                        .map(|item| item as &dyn biome_console::fmt::Display)
+                        .collect::<Vec<_>>();
+                    visitor.record_list(&items)?;
+                }
+                AdviceLine::Error(error) => {
+                    for diagnostic in
+                        std::iter::successors(Some(error.as_ref()), |error| error.source())
+                    {
+                        let mut message = MarkupBuf::default();
+                        diagnostic
+                            .message(&mut biome_console::fmt::Formatter::new(&mut message))?;
+                        visitor.record_log(LogCategory::Error, &message)?;
+                        diagnostic.advices(visitor)?;
+                    }
+                }
                 AdviceLine::Frame {
                     path,
                     span,

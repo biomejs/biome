@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["first.json", "second.json"],
+  "plugins": ["./root.grit", "./shared.grit", "./shared.grit"],
+  "overrides": [
+    { "includes": ["**/*.js"], "plugins": ["./shared.grit", "./shared.grit"] }
+  ]
+}
+```
+
+## `first.grit`
+
+```grit
+`unterminated
+```
+
+## `first.json`
+
+```json
+{ "plugins": ["./first.grit", "./shared.grit"], "overrides": [{ "includes": ["**/*.js"], "plugins": ["./shared.grit"] }] }
+```
+
+## `root.grit`
+
+```grit
+`unterminated
+```
+
+## `second.grit`
+
+```grit
+`unterminated
+```
+
+## `second.json`
+
+```json
+{ "plugins": ["./second.grit", "./shared.grit"], "overrides": [{ "includes": ["**/*.js"], "plugins": ["./second.grit"] }] }
+```
+
+## `shared.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 4 rules resolved.
+  
+  Local plugins
+  
+  - first
+  - root
+  - second
+  - shared
+  
+
+```

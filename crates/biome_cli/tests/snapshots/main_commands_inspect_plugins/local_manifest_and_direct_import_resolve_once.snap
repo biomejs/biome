@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./rules", "./rules/foo.grit"] }
+```
+
+## `rules/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "foo": "foo.grit" }] } }
+```
+
+## `rules/foo.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Local plugins
+  
+  - foo
+  
+
+```

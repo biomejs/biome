@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["base.grit"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "plugins": ["override.grit"]
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:2:15 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key plugins.0 has the value base.grit.
+  
+    1 │ {
+  > 2 │   "plugins": ["base.grit"],
+      │               ^^^^^^^^^^^
+    3 │   "overrides": [
+    4 │     {
+  
+  i This value is provided by the root configuration.
+  
+
+```

@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "javascript": { "assist": { "enabled": true } },
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "javascript": { "assist": { "enabled": false } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:6:46 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key javascript.assist.enabled has the value false.
+  
+    4 │     {
+    5 │       "includes": ["**/*.js"],
+  > 6 │       "javascript": { "assist": { "enabled": false } }
+      │                                              ^^^^^
+    7 │     }
+    8 │   ]
+  
+  i This value is provided by override 0 in the root configuration.
+  
+  i The override matched file.js using **/*.js.
+  
+
+```

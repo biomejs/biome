@@ -1,0 +1,34 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "javascript": {
+        "parser": { "unsafeParameterDecoratorsEnabled": true }
+      }
+    },
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key javascript.parser.unsafeParameterDecoratorsEnabled doesn't exist.
+  
+  i Make sure it's correctly spelled.
+  
+
+```

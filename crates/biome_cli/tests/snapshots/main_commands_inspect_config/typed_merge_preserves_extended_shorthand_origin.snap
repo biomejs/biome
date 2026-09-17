@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "linter": {
+    "rules": {
+      "suspicious": { "noDebugger": "off" }
+    }
+  }
+}
+```
+
+## `base.json`
+
+```json
+{
+  "linter": {
+    "rules": { "suspicious": "error" }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+base.json:3:30 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key linter.rules.suspicious.noConsole has the value error.
+  
+    1 │ {
+    2 │   "linter": {
+  > 3 │     "rules": { "suspicious": "error" }
+      │                              ^^^^^^^
+    4 │   }
+    5 │ }
+  
+  i This value comes from base.json, extended by biome.json.
+  
+
+```

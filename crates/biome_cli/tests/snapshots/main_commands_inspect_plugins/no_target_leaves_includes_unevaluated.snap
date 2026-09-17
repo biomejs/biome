@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./rule.grit", "includes": [] },
+    { "path": "./rule.grit", "includes": ["**/*.ts"] }
+  ],
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "plugins": [{ "path": "./rule.grit", "includes": [] }]
+    },
+    { "includes": [], "plugins": ["./rule.grit"] },
+    { "plugins": ["./rule.grit"] }
+  ]
+}
+```
+
+## `rule.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 rule resolved.
+  
+  Rules with include globs
+  
+  - rule.grit (includes: [**/*.ts])
+  
+
+```

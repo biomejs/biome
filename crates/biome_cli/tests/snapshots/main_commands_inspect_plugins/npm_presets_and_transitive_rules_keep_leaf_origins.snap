@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["wrapper/presets/recommended", "wrapper/first"] }
+```
+
+## `node_modules/leaf/biome-manifest.json`
+
+```json
+{
+            "version": 1,
+            "plugins": {
+                "rules": [{ "first": "first.grit", "second": "second.grit", "unused": "missing.grit" }],
+                "presets": { "recommended": ["second", "first"] }
+            }
+        }
+```
+
+## `node_modules/leaf/first.grit`
+
+```grit
+`unterminated
+```
+
+## `node_modules/leaf/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"leaf"}
+```
+
+## `node_modules/leaf/second.grit`
+
+```grit
+`unterminated
+```
+
+## `node_modules/middle/biome-manifest.json`
+
+```json
+{
+            "version": 1,
+            "plugins": {
+                "rules": ["leaf/presets/recommended"],
+                "presets": { "recommended": ["leaf/second", "leaf/first"] }
+            }
+        }
+```
+
+## `node_modules/middle/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"middle"}
+```
+
+## `node_modules/wrapper/biome-manifest.json`
+
+```json
+{
+            "version": 1,
+            "plugins": {
+                "rules": ["middle/presets/recommended"],
+                "presets": { "recommended": ["middle/second", "middle/first"] }
+            }
+        }
+```
+
+## `node_modules/wrapper/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"wrapper"}
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  wrapper
+  
+  - first (direct import, presets/recommended)
+  - second (presets/recommended)
+  
+
+```

@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["shared/base.json"] }
+```
+
+## `node_modules/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "selected": "selected.grit", "unused": "missing.grit" }] } }
+```
+
+## `node_modules/plugin/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"plugin"}
+```
+
+## `node_modules/plugin/selected.grit`
+
+```grit
+`unterminated
+```
+
+## `shared/base.json`
+
+```json
+{
+            "plugins": [
+                { "path": "plugin/selected", "resolutionKind": "config" },
+                "plugin/selected"
+            ]
+        }
+```
+
+## `shared/node_modules/plugin/biome-manifest.json`
+
+```json
+{ "version": 1, "plugins": { "rules": [{ "selected": "selected.grit", "unused": "missing.grit" }] } }
+```
+
+## `shared/node_modules/plugin/package.json`
+
+```json
+{"exports":{"biome":"./biome-manifest.json","default":"./index.js"},"name":"plugin"}
+```
+
+## `shared/node_modules/plugin/selected.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  plugin (node_modules/plugin/biome-manifest.json)
+  
+  - selected (direct import)
+  
+  plugin (shared/node_modules/plugin/biome-manifest.json)
+  
+  - selected (direct import)
+  
+
+```

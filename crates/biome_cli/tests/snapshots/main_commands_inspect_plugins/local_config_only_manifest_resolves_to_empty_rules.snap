@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["./config-only"] }
+```
+
+## `config-only/biome-manifest.jsonc`
+
+```jsonc
+{ "version": 1, "configs": [{ "recommended": "./missing.json" }] }
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i No plugin rules resolved.
+  
+
+```
