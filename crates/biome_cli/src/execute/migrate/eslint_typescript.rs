@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, str::FromStr};
 
-use super::eslint_eslint;
+use super::migration;
 /// Configuration related to [TypeScript Eslint](https://typescript-eslint.io/).
 ///
 /// Also, the module includes implementation to convert rule options to Biome's rule options.
@@ -231,7 +231,7 @@ impl From<NamingConventionOptions> for use_naming_convention::UseNamingConventio
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct NamingConventionSelection {
-    pub(crate) selector: eslint_eslint::ShorthandVec<Selector>,
+    pub(crate) selector: migration::ShorthandVec<Selector>,
     pub(crate) modifiers: Option<Vec<Modifier>>,
     pub(crate) types: Option<Vec<Type>>,
     pub(crate) custom: Option<Anything>,
