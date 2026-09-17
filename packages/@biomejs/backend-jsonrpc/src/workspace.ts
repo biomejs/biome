@@ -1228,6 +1228,10 @@ export interface YamlFormatterConfiguration {
 	 */
 	lineWidth?: LineWidth;
 	/**
+	 * The type of quotes used in GraphQL code. Defaults to `double`.
+	 */
+	quoteStyle?: QuoteStyle;
+	/**
 	* Whether to add a trailing newline at the end of the file.
 
 Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
