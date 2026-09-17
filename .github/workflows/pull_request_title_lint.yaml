@@ -1,4 +1,4 @@
-name: "Lint Pull Request Titles"
+name: 'Lint Pull Request Titles'
 
 on:
   pull_request_target:

@@ -7,17 +7,16 @@ on:
       - next
     paths:
       # Run only when we change the analyze crates
-      - "**/biome_*_analyze/**/*.rs"
-      - "**/biome_analyze/**/*.rs"
+      - '**/biome_*_analyze/**/*.rs'
+      - '**/biome_analyze/**/*.rs'
   push:
     branches:
       - main
       - next
     paths:
       # Run only when we change the analyze crates
-      - "**/biome_*_analyze/**/*.rs"
-      - "**/biome_analyze/**/*.rs"
-
+      - '**/biome_*_analyze/**/*.rs'
+      - '**/biome_analyze/**/*.rs'
 
 # Cancel jobs when the PR is updated
 concurrency:

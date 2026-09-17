@@ -1,6 +1,6 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -54,6 +54,13 @@ pub struct YamlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
+
+    /// The type of quotes used in GraphQL code. Defaults to `double`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-quote-style"), argument("double|single"))
+    )]
+    pub quote_style: Option<QuoteStyle>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

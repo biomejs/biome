@@ -2287,6 +2287,9 @@ impl OverrideSettingPattern {
         {
             options.set_trailing_newline(trailing_newline);
         }
+        if let Some(quote_style) = yaml_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
     }
 
     #[cfg(feature = "lang_js")]
