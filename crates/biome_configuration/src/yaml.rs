@@ -60,6 +60,7 @@ pub struct YamlFormatterConfiguration {
         feature = "cli",
         bpaf(long("yaml-formatter-quote-style"), argument("double|single"))
     )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_style: Option<QuoteStyle>,
 
     /// Whether to add a trailing newline at the end of the file.
