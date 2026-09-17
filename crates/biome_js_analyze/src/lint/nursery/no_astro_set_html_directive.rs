@@ -58,18 +58,11 @@ impl Rule for NoAstroSetHtmlDirective {
             return None;
         }
 
-        let name = ctx.query().name().ok()?;
-        let is_set_html = match name {
-            AnyJsxAttributeName::JsxName(jsx_name) => {
-                jsx_name.value_token().ok()?.text_trimmed() == "set:html"
-            }
-            AnyJsxAttributeName::JsxNamespaceName(jsx_namespace_name) => {
-                jsx_namespace_name.namespace().ok()?.value_token().ok()?.text_trimmed() == "set"
-                    && jsx_namespace_name.name().ok()?.value_token().ok()?.text_trimmed() == "html"
-            }
+        let AnyJsxAttributeName::JsxName(jsx_name) = ctx.query().name().ok()? else {
+            return None;
         };
 
-        is_set_html.then_some(())
+        (jsx_name.value_token().ok()?.text_trimmed() == "set:html").then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
