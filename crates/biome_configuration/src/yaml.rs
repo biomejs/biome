@@ -55,7 +55,7 @@ pub struct YamlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in GraphQL code. Defaults to `double`.
+    /// The type of quotes used in YAML files. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("yaml-formatter-quote-style"), argument("double|single"))
