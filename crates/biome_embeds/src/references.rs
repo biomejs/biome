@@ -274,6 +274,7 @@ mod tests {
                 0 => DocumentFileSource::Html(HtmlFileSource::vue()),
                 _ => DocumentFileSource::Js(JsFileSource::ts().with_embedding_kind(
                     JsEmbeddingKind::Vue {
+                        is_class_attribute: false,
                         setup: false,
                         is_source: false,
                         event_handler: false,
@@ -295,6 +296,7 @@ mod tests {
         let snippet_parse = biome_js_parser::parse(
             "Component",
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
+                is_class_attribute: false,
                 setup: false,
                 is_source: false,
                 event_handler: false,
@@ -326,6 +328,7 @@ mod tests {
         let snippet_parse = biome_js_parser::parse(
             js_source,
             JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Vue {
+                is_class_attribute: false,
                 setup: false,
                 is_source: false,
                 event_handler: false,

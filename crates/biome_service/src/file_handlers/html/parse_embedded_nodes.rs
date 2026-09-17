@@ -110,8 +110,10 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Astro directives: class:list={...}, define:vars={...}, etc.
                 if let Some(directive) = AnyAstroDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) =
-                        build_attribute_expression_candidate(&initializer, true)
+                    && let Some(candidate) = build_attribute_expression_candidate(
+                        &initializer,
+                        directive.as_astro_class_directive().is_some(),
+                    )
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
                 }
@@ -232,7 +234,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle @click shorthand (VueVOnShorthandDirective)
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, true)
+                    && let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, true, false)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -245,7 +248,17 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle :prop shorthand (VueVBindShorthandDirective)
                 if let Some(directive) = VueVBindShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
+                    && let Some(candidate) = build_vue_directive_candidate(
+                        &initializer,
+                        false,
+                        directive
+                            .arg()
+                            .ok()
+                            .and_then(|arg| arg.arg())
+                            .and_then(|arg| arg.as_vue_static_argument().cloned())
+                            .and_then(|arg| arg.name_token().ok())
+                            .is_some_and(|name| name.text_trimmed() == "class"),
+                    )
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -258,7 +271,8 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Handle #slot shorthand (VueVSlotShorthandDirective)
                 if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
-                    && let Some(candidate) = build_vue_directive_candidate(&initializer, false)
+                    && let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, false, false)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -275,7 +289,18 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     let is_v_on = directive
                         .name_token()
                         .is_ok_and(|t| t.text_trimmed() == "v-on" && directive.arg().is_some());
-                    if let Some(candidate) = build_vue_directive_candidate(&initializer, is_v_on) {
+                    let is_class_attribute = directive
+                        .name_token()
+                        .is_ok_and(|name| name.text_trimmed() == "v-bind")
+                        && directive
+                            .arg()
+                            .and_then(|arg| arg.arg())
+                            .and_then(|arg| arg.as_vue_static_argument().cloned())
+                            .and_then(|arg| arg.name_token().ok())
+                            .is_some_and(|name| name.text_trimmed() == "class");
+                    if let Some(candidate) =
+                        build_vue_directive_candidate(&initializer, is_v_on, is_class_attribute)
+                    {
                         ctx.parse_and_push(
                             &candidate,
                             &doc_file_source,
@@ -751,6 +776,7 @@ fn build_svelte_text_expression_candidate(
 fn build_vue_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_event_handler: bool,
+    is_class_attribute: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let html_string = value_node.as_html_string()?;
@@ -767,7 +793,7 @@ fn build_vue_directive_candidate(
             text: inner_text,
         },
         is_event_handler,
-        is_class_attribute: false,
+        is_class_attribute,
     })
 }
 
@@ -1092,11 +1118,13 @@ fn parse_matched_embed(
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind: SvelteEmbeddingKind::Source,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
+                            is_class_attribute: false,
                             setup: candidate.has_attribute("setup"),
                             is_source: true,
                             event_handler: false,
@@ -1126,11 +1154,13 @@ fn parse_matched_embed(
                             _ => SvelteEmbeddingKind::Expression,
                         };
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind,
                         });
                     } else if ctx.host_file_source.is_vue() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
+                            is_class_attribute: false,
                             setup: false,
                             is_source: false,
                             event_handler: false,
@@ -1154,6 +1184,7 @@ fn parse_matched_embed(
                         }
                         HtmlVariant::Vue => {
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Vue {
+                                is_class_attribute: *is_class_attribute,
                                 setup: false,
                                 is_source: false,
                                 event_handler: *is_event_handler,
@@ -1163,6 +1194,7 @@ fn parse_matched_embed(
                         HtmlVariant::Svelte => {
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                                 file_kind: SvelteFileKind::Component,
+                                is_class_attribute: *is_class_attribute,
                                 embedding_kind: SvelteEmbeddingKind::Expression,
                             });
                         }
