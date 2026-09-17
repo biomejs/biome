@@ -2287,6 +2287,13 @@ impl OverrideSettingPattern {
         {
             options.set_trailing_newline(trailing_newline);
         }
+        if let Some(quote_style) = yaml_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+        if let Some(bracket_spacing) = yaml_formatter.bracket_spacing.or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
+        }
     }
 
     #[cfg(feature = "lang_js")]

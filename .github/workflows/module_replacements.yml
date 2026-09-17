@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # This cron schedule runs the workflow at midnight (00:00) on Sundays.
-    - cron: "0 0 * * 0"
+    - cron: '0 0 * * 0'
 
 jobs:
   check-release:

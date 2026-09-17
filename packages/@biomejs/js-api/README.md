@@ -21,6 +21,7 @@ You need to install one of the `@biomejs/wasm-*` package as a **peer dependency*
 
 ```js
 import { Biome } from "@biomejs/js-api/nodejs";
+
 // Or:
 // import { Biome } from "@biomejs/js-api/bundler";
 // import { Biome } from "@biomejs/js-api/web";
@@ -29,7 +30,9 @@ const biome = new Biome();
 const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
-biome.applyConfiguration(projectKey, {...});
+biome.applyConfiguration(projectKey, {
+  // options
+});
 
 const formatted = biome.formatContent(
   projectKey,
@@ -64,7 +67,7 @@ for (const diagnostic of result.diagnostics) {
     formatted.content,
   );
   // Correctly extracts the text
-  const text = formatted.content.slice(start, end);
+  const _text = formatted.content.slice(start, end);
 }
 ```
 

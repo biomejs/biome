@@ -119,7 +119,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: JavaScript APIs v${{ needs.build.outputs.version }}
-          tag_name: "@biomejs/js-api@v${{ needs.build.outputs.version }}"
+          tag_name: '@biomejs/js-api@v${{ needs.build.outputs.version }}'
           draft: false
           prerelease: true
           generate_release_notes: true

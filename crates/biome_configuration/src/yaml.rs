@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{
+    BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -54,6 +56,24 @@ pub struct YamlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
+
+    /// The type of quotes used in YAML code. Defaults to `double`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-quote-style"), argument("double|single"))
+    )]
+    pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)
+    /// and sequences (`[ item ]`) that fit on one line. If unset, inherits the
+    /// global bracket spacing setting. When neither is set, mappings have spaces
+    /// and sequences do not.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-bracket-spacing"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_spacing: Option<BracketSpacing>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///

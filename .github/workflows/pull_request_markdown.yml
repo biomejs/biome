@@ -6,7 +6,7 @@ on:
       - main
       - next
     paths:
-      - "**/*.md"
+      - '**/*.md'
 
 jobs:
   lint:

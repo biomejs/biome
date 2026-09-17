@@ -16,7 +16,13 @@ impl FormatNodeRule<YamlFlowSequence> for FormatYamlFlowSequence {
             f,
             [group(&format_args![
                 l_brack_token.format(),
-                soft_block_indent(&entries.format()),
+                soft_block_indent_with_maybe_space(
+                    &entries.format(),
+                    !entries.is_empty()
+                        && f.options()
+                            .bracket_spacing()
+                            .is_some_and(|spacing| spacing.value())
+                ),
                 r_brack_token.format()
             ])
             .should_expand(should_expand)]

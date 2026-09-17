@@ -1,28 +1,33 @@
 use crate::WorkspaceError;
 use crate::db::WorkspaceDb;
 use crate::file_handlers::{
-    Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities,
+    LintParams, LintResults, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
     Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
     check_override_feature_activity,
 };
-use crate::workspace::GetSyntaxTreeResult;
+use crate::workspace::{GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
 use biome_db::AnyParsedSource;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
+use biome_diagnostics::{Diagnostic, Severity};
+use biome_formatter::{
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle,
+    TrailingNewline,
+};
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::NodeParse;
-use biome_rowan::NodeCache;
+use biome_rowan::{AstNode, NodeCache};
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
 use camino::Utf8Path;
-use tracing::{debug, error};
+use tracing::{debug, debug_span, error};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -31,6 +36,8 @@ pub struct YamlFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
+    pub quote_style: Option<QuoteStyle>,
+    pub bracket_spacing: Option<BracketSpacing>,
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<YamlFormatterEnabled>,
 }
@@ -43,6 +50,8 @@ impl From<YamlFormatterConfiguration> for YamlFormatterSettings {
             indent_width: configuration.indent_width,
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
+            quote_style: configuration.quote_style,
+            bracket_spacing: configuration.bracket_spacing,
             indent_style: Some(IndentStyle::Space),
         }
     }
@@ -96,11 +105,18 @@ impl ServiceLanguage for YamlLanguage {
             .trailing_newline
             .or(global.trailing_newline)
             .unwrap_or_default();
+        let quote_style = language.quote_style.unwrap_or_default();
+
         let mut options = YamlFormatOptions::new()
             .with_indent_width(indent_width)
             .with_line_width(line_width)
             .with_line_ending(line_ending)
+            .with_quote_style(quote_style)
             .with_trailing_newline(trailing_newline);
+
+        if let Some(bracket_spacing) = language.bracket_spacing.or(global.bracket_spacing) {
+            options.set_bracket_spacing(bracket_spacing);
+        }
 
         overrides.apply_override_yaml_format_options_by_indices(override_indices, &mut options);
 
@@ -223,7 +239,14 @@ impl ExtensionHandler for YamlFileHandler {
                 debug_registered_types: None,
                 debug_semantic_model: None,
             },
-            analyzer: Default::default(),
+            analyzer: AnalyzerCapabilities {
+                lint: Some(lint),
+                code_actions: Some(code_actions),
+                fix_all: Some(fix_all),
+                rename: None,
+                update_snippets: None,
+                pull_diagnostics_and_actions: None,
+            },
             formatter: FormatterCapabilities {
                 format: Some(format),
                 format_range: None,
@@ -315,4 +338,44 @@ pub(crate) fn format(
             Err(WorkspaceError::FormatError(error.into()))
         }
     }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting YAML file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() >= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+        // safe to hardcode them to zero because we don't have a linting step, and all parse
+        // diagnostics are errors
+        infos: 0,
+        warnings: 0,
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
+    let tree: YamlRoot = params.parsed_source.tree(&params.workspace_db);
+    Ok(Some(FixedFileResult {
+        root: tree.syntax().as_send().unwrap(),
+        skipped_suggested_fixes: 0,
+        actions: vec![],
+        errors: 0,
+    }))
+}
+
+#[tracing::instrument(level = "debug", skip(_params))]
+fn code_actions(_params: CodeActionsParams) -> PullActionsResult {
+    PullActionsResult { actions: vec![] }
 }
