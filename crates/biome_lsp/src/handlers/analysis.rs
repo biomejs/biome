@@ -19,8 +19,7 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::workspace::{
     CheckFileSizeParams, FeaturesBuilder, FileFeaturesResult, FixFileMode, FixFileParams,
-    GetFileContentParams, IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams,
-    SupportsFeatureParams,
+    IgnoreKind, PathIsIgnoredParams, ProjectKey, PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::{WorkspaceError, extension_error};
 use serde_json::Value;
@@ -63,6 +62,8 @@ pub(crate) fn code_actions(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -141,16 +142,11 @@ pub(crate) fn code_actions(
     let position_encoding = session.position_encoding();
 
     let diagnostics = params.context.diagnostics;
-    let content = session
-        .workspace_for_request()
-        .get_file_content(GetFileContentParams {
-            project_key: doc.project_key,
-            path: path.clone(),
-        })?;
+    // The workspace holds this client's text after the sync above.
     let offset = match path.extension() {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        Some("vue") => VueFileHandler::start(&doc.content),
+        Some("astro") => AstroFileHandler::start(&doc.content),
+        Some("svelte") => SvelteFileHandler::start(&doc.content),
         _ => None,
     };
 
@@ -238,7 +234,7 @@ pub(crate) fn code_actions(
             fix_all(
                 session,
                 &url,
-                path,
+                path.clone(),
                 &doc.line_index,
                 &diagnostics,
                 None,
@@ -248,6 +244,10 @@ pub(crate) fn code_actions(
     } else {
         None
     };
+
+    // The actions hold offsets into the text they were computed from, which
+    // must still be the text of this client.
+    session.ensure_workspace_holds_document(&session.workspace_for_request(), &path, &doc)?;
 
     let mut has_fixes = false;
 
@@ -418,6 +418,8 @@ pub(crate) fn code_action_resolve(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     let position_encoding = session.position_encoding();
 
     // Handle fix_all resolve
@@ -425,12 +427,13 @@ pub(crate) fn code_action_resolve(
         let result = fix_all(
             session,
             &url,
-            path,
+            path.clone(),
             &doc.line_index,
             &[],
             None,
             true, // include_organize_imports
         );
+        session.ensure_workspace_holds_document(&session.workspace_for_request(), &path, &doc)?;
         let mut resolved = params;
         if let Ok(Some(CodeActionOrCommand::CodeAction(fix_all_action))) = result {
             resolved.edit = fix_all_action.edit;
@@ -459,6 +462,7 @@ pub(crate) fn code_action_resolve(
             inline_config: session.inline_config(),
             compute_actions: true,
         })?;
+    session.ensure_workspace_holds_document(&session.workspace_for_request(), &path, &doc)?;
 
     // Find the action matching the requested kind
     let target_action = result.actions.into_iter().find(|action| {
@@ -637,18 +641,14 @@ fn fix_all(
         fixed.code
     } else {
         match path.as_path().extension() {
+            // The caller holds the document lock and synced the workspace
+            // with this client's text, so that text is the input.
             Some(extension) => {
-                let input =
-                    session
-                        .workspace_for_request()
-                        .get_file_content(GetFileContentParams {
-                            project_key: doc.project_key,
-                            path: path.clone(),
-                        })?;
+                let input = &doc.content;
                 match extension {
-                    "astro" => AstroFileHandler::output(input.as_str(), fixed.code.as_str()),
-                    "vue" => VueFileHandler::output(input.as_str(), fixed.code.as_str()),
-                    "svelte" => SvelteFileHandler::output(input.as_str(), fixed.code.as_str()),
+                    "astro" => AstroFileHandler::output(input, fixed.code.as_str()),
+                    "vue" => VueFileHandler::output(input, fixed.code.as_str()),
+                    "svelte" => SvelteFileHandler::output(input, fixed.code.as_str()),
                     _ => fixed.code,
                 }
             }

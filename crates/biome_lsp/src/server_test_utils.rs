@@ -76,6 +76,28 @@ pub(crate) fn to_utf8_file_path_buf(uri: Uri) -> camino::Utf8PathBuf {
     camino::Utf8PathBuf::from_path_buf(uri.to_file_path().unwrap().to_path_buf()).unwrap()
 }
 
+/// Applies the edits returned by a request such as `textDocument/formatting`
+/// to `text`, the way an editor would.
+///
+/// All edits refer to positions in the original `text`, so they are applied
+/// from the last to the first to keep the earlier positions valid.
+pub(crate) fn apply_text_edits(text: &str, mut edits: Vec<lsp::TextEdit>) -> String {
+    edits.sort_by_key(|edit| std::cmp::Reverse(edit.range.start));
+    let changes = edits
+        .into_iter()
+        .map(|edit| TextDocumentContentChangeEvent {
+            range: Some(edit.range),
+            range_length: None,
+            text: edit.new_text,
+        })
+        .collect();
+    crate::utils::apply_document_changes(
+        biome_lsp_converters::PositionEncoding::Utf8,
+        text.to_string(),
+        changes,
+    )
+}
+
 pub(crate) struct Server {
     service: Timeout<LspService<LSPServer>>,
 }

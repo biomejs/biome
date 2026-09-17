@@ -2,7 +2,8 @@ use crate::capabilities::{DEFAULT_CODE_ACTION_CAPABILITIES, server_capabilities}
 use crate::diagnostics::{LspError, handle_lsp_error};
 use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
-    CapabilitySet, CapabilityStatus, ClientInformation, Session, SessionHandle, SessionKey,
+    CapabilitySet, CapabilityStatus, ClientInformation, DiagnosticsTrigger, Session, SessionHandle,
+    SessionKey,
 };
 use crate::utils::{cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
@@ -67,7 +68,7 @@ impl LSPServer {
             catch_lsp_operation(move || requests::syntax_tree::syntax_tree(&self.session, &url));
         match result {
             Ok(Ok(Ok(result))) => Ok(result.unwrap_or_default()),
-            Ok(Ok(Err(err))) => Err(into_lsp_error(err)),
+            Ok(Ok(Err(err))) => Err(err.into_jsonrpc_error()),
             Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
             Err(err) => Err(into_lsp_error(err)),
         }
@@ -392,7 +393,9 @@ impl LanguageServer for LSPServer {
         self.setup_capabilities().await;
 
         // Diagnostics are disabled by default, so update them after fetching workspace config
-        self.session.update_all_diagnostics().await;
+        self.session
+            .update_all_diagnostics(DiagnosticsTrigger::ConfigurationChange)
+            .await;
     }
 
     async fn shutdown(&self) -> LspResult<()> {
@@ -408,7 +411,9 @@ impl LanguageServer for LSPServer {
         // user to restart the server or open a new file.
         self.session.load_workspace_settings(true).await;
         self.setup_capabilities().await;
-        self.session.update_all_diagnostics().await;
+        self.session
+            .update_all_diagnostics(DiagnosticsTrigger::ConfigurationChange)
+            .await;
     }
 
     #[tracing::instrument(level = "debug", skip_all)]
@@ -448,7 +453,9 @@ impl LanguageServer for LSPServer {
                     self.session.load_extension_settings(None).await;
                     self.session.load_workspace_settings(true).await;
                     self.setup_capabilities().await;
-                    self.session.update_all_diagnostics().await;
+                    self.session
+                        .update_all_diagnostics(DiagnosticsTrigger::ConfigurationChange)
+                        .await;
                     // for now we are only interested to the configuration file,
                     // so it's OK to exit the loop
                     break;
@@ -508,7 +515,9 @@ impl LanguageServer for LSPServer {
         self.session.clear_configuration_cache().await;
         self.session.load_workspace_settings(true).await;
         self.setup_capabilities().await;
-        self.session.update_all_diagnostics().await;
+        self.session
+            .update_all_diagnostics(DiagnosticsTrigger::ConfigurationChange)
+            .await;
     }
 
     async fn code_action(&self, params: CodeActionParams) -> LspResult<Option<CodeActionResponse>> {
@@ -528,7 +537,7 @@ impl LanguageServer for LSPServer {
         });
 
         match result {
-            Ok(Ok(action)) => action.map_err(into_lsp_error),
+            Ok(Ok(action)) => action.map_err(LspError::into_jsonrpc_error),
             Ok(Err(cancelled)) => Err(cancelled_to_lsp_error(cancelled)),
             Err(err) => Err(into_lsp_error(err)),
         }

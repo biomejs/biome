@@ -4,11 +4,11 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
 use biome_languages::DocumentFileSource;
-use biome_service::Workspace;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
-    IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
+    ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, IgnoreKind, OpenFileParams,
+    PathIsIgnoredParams, ProjectKey,
 };
+use biome_service::{Workspace, WorkspaceError};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
 use tower_lsp_server::ls_types as lsp;
@@ -58,19 +58,33 @@ pub(crate) async fn did_open(
         return Ok(());
     }
 
-    let doc = Document::new(project_key, version, &content);
+    let doc = Document::new(project_key, version, &content, language_hint);
 
-    session.workspace().open_file(OpenFileParams {
-        project_key,
-        path,
-        content: FileContent::FromClient { content, version },
-        document_file_source: Some(language_hint),
-        persist_node_cache: true,
-        inline_config: session.inline_config(),
-        editor_features: Some(session.extension_settings.read().editor_features()),
-    })?;
+    {
+        let _guard = session.lock_document(path.as_path());
+        session.workspace().open_file(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::FromClient { content, version },
+            document_file_source: Some(language_hint),
+            persist_node_cache: true,
+            inline_config: session.inline_config(),
+            editor_features: Some(session.extension_settings.read().editor_features()),
+        })?;
 
-    session.insert_document(url.clone(), doc);
+        // The workspace doesn't store some files it is asked to open, such as
+        // dependencies. Tracking them here would make every request re-open
+        // them, only to find them missing again.
+        if !session.workspace().file_exists(path.into())? {
+            debug!(
+                "The workspace doesn't store {}, not tracking it",
+                url.as_str()
+            );
+            return Ok(());
+        }
+
+        session.insert_document(url.clone(), doc);
+    }
 
     session.schedule_diagnostics(url, version);
 
@@ -192,46 +206,57 @@ pub(crate) async fn did_change(
     let version = params.text_document.version;
 
     let path = session.file_path(&url)?;
-    let Some(doc) = session.document(&url) else {
-        return Ok(());
-    };
-    if !session.workspace().file_exists(path.clone().into())? {
-        return Ok(());
-    }
-    let features = FeaturesBuilder::new().build();
-    if session.workspace().is_path_ignored(PathIsIgnoredParams {
-        path: path.clone(),
-        is_dir: false,
-        project_key: doc.project_key,
-        features,
-        ignore_kind: IgnoreKind::Ancestors,
-    })? {
-        return Ok(());
-    }
-
-    let old_text = session.workspace().get_file_content(GetFileContentParams {
-        project_key: doc.project_key,
-        path: path.clone(),
-    })?;
 
     trace!("content changes: {:?}", params.content_changes);
 
-    let text = apply_document_changes(
-        session.position_encoding(),
-        old_text,
-        params.content_changes,
-    );
+    {
+        // The document is read and replaced under the lock, so that changes
+        // of the same client which are processed concurrently build on each
+        // other's text.
+        let _guard = session.lock_document(path.as_path());
+        let Some(doc) = session.document(&url) else {
+            return Ok(());
+        };
+        let features = FeaturesBuilder::new().build();
+        if session.workspace().is_path_ignored(PathIsIgnoredParams {
+            path: path.clone(),
+            is_dir: false,
+            project_key: doc.project_key,
+            features,
+            ignore_kind: IgnoreKind::Ancestors,
+        })? {
+            return Ok(());
+        }
 
-    session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
+        // The changes are relative to the text this client sent us last,
+        // which isn't necessarily what the shared workspace holds when
+        // another client has the same file open.
+        let text = apply_document_changes(
+            session.position_encoding(),
+            doc.content.to_string(),
+            params.content_changes,
+        );
 
-    session.workspace().change_file(ChangeFileParams {
-        project_key: doc.project_key,
-        path,
-        version,
-        content: text,
-        inline_config: session.inline_config(),
-        editor_features: None,
-    })?;
+        let doc = Document::new(doc.project_key, version, &text, doc.file_source);
+        session.insert_document(url.clone(), doc.clone());
+
+        let result = session.workspace().change_file(ChangeFileParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            version,
+            content: text,
+            inline_config: session.inline_config(),
+            editor_features: None,
+        });
+        match result {
+            Ok(_) => {}
+            // Another client closed the file in the meantime; open it again.
+            Err(WorkspaceError::NotFound(_)) => {
+                session.sync_document_with_workspace(&session.workspace(), &path, &doc)?;
+            }
+            Err(err) => return Err(err.into()),
+        }
+    }
 
     session.schedule_diagnostics(url, version);
 
@@ -249,24 +274,33 @@ pub(crate) async fn did_save(
     // If text is provided in the notification (as per LSP spec), update the file
     if let Some(text) = params.text {
         let path = session.file_path(&url)?;
-        let Some(doc) = session.document(&url) else {
-            debug!("Document wasn't open: {}", url.as_str());
-            return Ok(());
-        };
 
-        session.workspace().change_file(ChangeFileParams {
-            project_key: doc.project_key,
-            path,
-            content: text.clone(),
-            version: doc.version,
-            inline_config: None,
-            editor_features: None,
-        })?;
+        {
+            let _guard = session.lock_document(path.as_path());
+            let Some(doc) = session.document(&url) else {
+                debug!("Document wasn't open: {}", url.as_str());
+                return Ok(());
+            };
+            let doc = Document::new(doc.project_key, doc.version, &text, doc.file_source);
+            session.insert_document(url.clone(), doc.clone());
 
-        session.insert_document(
-            url.clone(),
-            Document::new(doc.project_key, doc.version, &text),
-        );
+            let result = session.workspace().change_file(ChangeFileParams {
+                project_key: doc.project_key,
+                path: path.clone(),
+                content: text,
+                version: doc.version,
+                inline_config: None,
+                editor_features: None,
+            });
+            match result {
+                Ok(_) => {}
+                // Another client closed the file in the meantime; open it again.
+                Err(WorkspaceError::NotFound(_)) => {
+                    session.sync_document_with_workspace(&session.workspace(), &path, &doc)?;
+                }
+                Err(err) => return Err(err.into()),
+            }
+        }
 
         // Update diagnostics with fresh content
         if let Err(err) = session.update_diagnostics(url).await {
@@ -286,14 +320,17 @@ pub(crate) async fn did_close(
     let uri = params.text_document.uri;
     session.close_diagnostics(&uri);
     let path = session.file_path(&uri)?;
-    let Some(project_key) = session.remove_document(&uri) else {
-        debug!("Document wasn't open: {}", uri.as_str());
-        return Ok(());
-    };
+    {
+        let _guard = session.lock_document(path.as_path());
+        let Some(project_key) = session.remove_document(&uri) else {
+            debug!("Document wasn't open: {}", uri.as_str());
+            return Ok(());
+        };
 
-    session
-        .workspace()
-        .close_file(CloseFileParams { project_key, path })?;
+        session
+            .workspace()
+            .close_file(CloseFileParams { project_key, path })?;
+    }
 
     session
         .client

@@ -177,7 +177,7 @@ uuid                         = "1.18.1"
 walkdir                      = "2.5.0"
 web-time                     = "1.1.0"
 windows                      = "0.62.2"
-parking_lot                  = { version = "0.12.5" }
+parking_lot                  = { version = "0.12.5", features = ["arc_lock"] }
 xtask_codegen                = { path = "xtask/codegen" }
 xtask_coverage               = { path = "xtask/coverage" }
 xtask_glue                   = { path = "xtask/glue" }

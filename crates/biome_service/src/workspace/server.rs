@@ -1,4 +1,5 @@
-use super::{document::Document, *};
+use super::document::{Document, DocumentLockGuard, DocumentLocks};
+use super::*;
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
@@ -159,9 +160,30 @@ pub struct WorkspaceServer {
     /// Re-usable cache for analyzer visitors.
     analyzer_cache: HashMap<ProjectKey, AnalyzerVisitorCache>,
 
+    /// Locks keeping the parsed file and the content of a document consistent
+    /// for readers, see [`DocumentLocks`].
+    document_locks: DocumentLocks,
+
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
+
+    /// Test-only hook run once, by the next write of a file, after the
+    /// document lock is taken and before the parsed file is stored in the
+    /// database. Lets tests hold a writer at the point where it starts
+    /// replacing the document. See [`Self::set_hook_before_parse_update`].
+    #[cfg(feature = "testing")]
+    hook_before_parse_update: Mutex<Option<WriteHook>>,
+
+    /// Test-only hook run once, by the next write of a file, after the parsed
+    /// file was stored in the database and before the document content is
+    /// updated. Lets tests exercise readers that observe the two stores in
+    /// between. See [`Self::set_hook_between_parse_and_content_update`].
+    #[cfg(feature = "testing")]
+    hook_between_parse_and_content_update: Mutex<Option<WriteHook>>,
 }
+
+#[cfg(feature = "testing")]
+type WriteHook = Box<dyn FnOnce(&Utf8Path) + Send>;
 
 /// A convenient wrapper around a [WorkspaceServer] that holds salsa database state.
 ///
@@ -359,8 +381,49 @@ impl WorkspaceServer {
             fs,
             notification_tx,
             analyzer_cache: HashMap::default(),
+            document_locks: DocumentLocks::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
+            #[cfg(feature = "testing")]
+            hook_before_parse_update: Mutex::new(None),
+            #[cfg(feature = "testing")]
+            hook_between_parse_and_content_update: Mutex::new(None),
+        }
+    }
+
+    /// Locks `path` so that no writer replaces the document while the caller
+    /// reads its parsed file and its content, see [`DocumentLocks`]. The lock
+    /// is re-entrant, and the guard must not be held across an `.await`.
+    pub fn lock_document(&self, path: &Utf8Path) -> DocumentLockGuard {
+        self.document_locks.lock(path)
+    }
+
+    /// Registers a hook that the next `open_file` or `change_file` runs after
+    /// taking the document lock and before storing the parsed file. The hook
+    /// runs only once and may block, which keeps the writer in that window
+    /// for as long as the test needs.
+    #[cfg(feature = "testing")]
+    pub fn set_hook_before_parse_update(&self, hook: impl FnOnce(&Utf8Path) + Send + 'static) {
+        *self.hook_before_parse_update.lock().unwrap() = Some(Box::new(hook));
+    }
+
+    /// Registers a hook that the next `open_file` or `change_file` runs after
+    /// storing the parsed file and before storing the document content. The
+    /// hook runs only once and may block, which keeps the writer in that
+    /// window for as long as the test needs.
+    #[cfg(feature = "testing")]
+    pub fn set_hook_between_parse_and_content_update(
+        &self,
+        hook: impl FnOnce(&Utf8Path) + Send + 'static,
+    ) {
+        *self.hook_between_parse_and_content_update.lock().unwrap() = Some(Box::new(hook));
+    }
+
+    #[cfg(feature = "testing")]
+    fn run_write_hook(hook: &Mutex<Option<WriteHook>>, path: &Utf8Path) {
+        let hook = hook.lock().unwrap().take();
+        if let Some(hook) = hook {
+            hook(path);
         }
     }
 
@@ -804,6 +867,10 @@ impl WorkspaceServerWithDb<'_> {
         let size = content.len();
         let limit = settings.as_ref().get_max_file_size(&path);
 
+        // Taken right before the first store update, so that the parse, the
+        // long part, runs outside of it.
+        let mut document_lock = None;
+
         let mut parsed_source = None;
         let syntax = if size > limit {
             Some(Err(FileTooLarge { size, limit }))
@@ -856,11 +923,18 @@ impl WorkspaceServerWithDb<'_> {
                 .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
                 .collect();
 
+            document_lock = Some(self.lock_document(&path));
+            #[cfg(feature = "testing")]
+            WorkspaceServer::run_write_hook(&self.hook_before_parse_update, &path);
             let final_source =
                 self.db_update_parsed_file(&path, any_parse, file_source_index, embedded_snippets);
             parsed_source = Some(final_source);
             Some(Ok(()))
         };
+        let document_lock = document_lock.unwrap_or_else(|| self.lock_document(&path));
+
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(&self.hook_between_parse_and_content_update, &path);
 
         let is_indexed = if
         // Dependency files can be skipped altoghether
@@ -927,6 +1001,7 @@ impl WorkspaceServerWithDb<'_> {
             // requests and client requests for files that are already indexed.
             reason.is_index() || self.is_indexed(&path)
         };
+        drop(document_lock);
 
         // Manifest files need to update the module graph.
         if is_indexed {
@@ -2953,6 +3028,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let is_indexed = self.is_indexed(&path);
+        let document_lock = self.lock_document(&path);
         let documents = self.documents.pin();
         let (index, existing_version, same_content) = documents
             .get(path.as_path())
@@ -2981,6 +3057,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 db.get_file(path.as_path())
                     .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
             };
+            drop(document_lock);
             return self.finish_change_file(project_key, &path, parsed);
         }
 
@@ -3044,8 +3121,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
         .collect();
 
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(&self.hook_before_parse_update, path.as_path());
         let parsed =
             self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
+
+        #[cfg(feature = "testing")]
+        WorkspaceServer::run_write_hook(
+            &self.hook_between_parse_and_content_update,
+            path.as_path(),
+        );
 
         let document = Document {
             content,
@@ -3064,6 +3149,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         documents
             .insert(path.clone().into(), document)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        drop(document_lock);
 
         #[cfg(test)]
         if self
@@ -3841,8 +3927,11 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
         let path = params.path.as_path();
 
-        self.documents.pin().remove(path);
-        self.node_cache.lock().unwrap().remove(path);
+        {
+            let _document_lock = self.lock_document(path);
+            self.documents.pin().remove(path);
+            self.node_cache.lock().unwrap().remove(path);
+        }
 
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the
