@@ -1,0 +1,46 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["base.json"] }
+```
+
+## `base.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 120,
+  "source": {
+    "configurationKind": "extend",
+    "includes": [
+      "**/*.test.js"
+    ],
+    "matchedPath": "file.test.js",
+    "overrideIndex": 0,
+    "path": "base.json",
+    "range": {
+      "end": 98,
+      "start": 95
+    },
+    "scope": "override",
+    "specifier": "base.json"
+  }
+}
+```

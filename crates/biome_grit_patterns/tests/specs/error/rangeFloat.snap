@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeFloat
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "start_line must be an unsigned integer literal",
+        ),
+    ],
+}

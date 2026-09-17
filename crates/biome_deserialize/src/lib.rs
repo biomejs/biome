@@ -95,6 +95,18 @@ pub trait Deserializable: Sized {
 pub trait DeserializationContext {
     fn id(&self) -> Option<&str>;
     fn report(&mut self, diagnostic: DeserializationDiagnostic);
+
+    /// Enters a named property before its value is deserialized.
+    fn enter_property(&mut self, _name: &str, _key_range: TextRange, _value_range: TextRange) {}
+
+    /// Exits the property most recently passed to [`Self::enter_property`].
+    fn exit_property(&mut self) {}
+
+    /// Enters an array element before its value is deserialized.
+    fn enter_index(&mut self, _index: usize, _range: TextRange) {}
+
+    /// Exits the array element most recently passed to [`Self::enter_index`].
+    fn exit_index(&mut self) {}
 }
 
 /// Default implementation for [DeserializationContext].

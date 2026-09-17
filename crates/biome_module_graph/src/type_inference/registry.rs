@@ -22,18 +22,6 @@ pub(crate) enum TypeInferenceQueryKind {
 }
 
 impl TypeInferenceQueryKind {
-    /// Returns the stable profile ID for this query family.
-    pub(crate) const fn id(self) -> &'static str {
-        match self {
-            Self::Lookups => "query.lookups",
-            Self::Exports => "query.exports",
-            Self::Promises => "query.promises",
-            Self::Calls => "query.calls",
-            Self::Normalization => "query.normalization",
-            Self::ModuleTypes => "query.module-types",
-        }
-    }
-
     /// Returns the label rendered in human-readable profiles.
     pub(crate) const fn label(self) -> &'static str {
         match self {
@@ -57,14 +45,6 @@ pub(crate) enum TypeInferenceWholeModuleReason {
 }
 
 impl TypeInferenceWholeModuleReason {
-    /// Returns the stable profile ID for this widening reason.
-    pub(crate) const fn id(self) -> &'static str {
-        match self {
-            Self::ImportDepthLimit => "whole-module.import-depth-limit",
-            Self::InternalDependency => "whole-module.internal-dependency",
-        }
-    }
-
     /// Returns the label rendered in human-readable profiles.
     pub(crate) const fn label(self) -> &'static str {
         match self {

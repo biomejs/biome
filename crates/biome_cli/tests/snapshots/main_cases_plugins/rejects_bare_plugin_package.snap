@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "plugins": ["@shared/plugin"] }
+```
+
+## `node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": { "rules": [{ "noAssign": "rules/noAssign.grit" }] }
+}
+```
+
+## `node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `test.js`
+
+```js
+Object.assign({}, value);
+
+```
+
+# Termination Message
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    Plugin package @shared/plugin must select a named rule or preset.
+  
+
+
+```

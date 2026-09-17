@@ -1,0 +1,40 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "yaml": { "formatter": { "indentWidth": 2 } },
+  "overrides": [
+    {
+      "includes": ["**/*.yaml"],
+      "yaml": { "formatter": { "indentWidth": 4 } }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "yaml.formatter.indentWidth",
+  "value": 4,
+  "source": {
+    "configurationKind": "root",
+    "includes": [
+      "**/*.yaml"
+    ],
+    "matchedPath": "file.yaml",
+    "overrideIndex": 0,
+    "path": "biome.json",
+    "range": {
+      "end": 154,
+      "start": 153
+    },
+    "scope": "override"
+  }
+}
+```

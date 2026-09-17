@@ -74,7 +74,7 @@ fn linter_biome_json() {
         r#"{
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noDebugger": "off"
         }
@@ -123,7 +123,7 @@ fn check_biome_json() {
         r#"{
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noDebugger": "off"
         }

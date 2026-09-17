@@ -1,0 +1,27 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 577
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth.extra",
+  "value": null,
+  "source": null
+}
+```

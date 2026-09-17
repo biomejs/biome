@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "formatter": { "lineWidth": null }
+}
+```
+
+## `base.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "formatter.lineWidth",
+  "value": 100,
+  "source": {
+    "configurationKind": "extend",
+    "path": "base.json",
+    "range": {
+      "end": 33,
+      "start": 30
+    },
+    "scope": "base",
+    "specifier": "base.json"
+  }
+}
+```

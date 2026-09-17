@@ -44,6 +44,15 @@ impl FormatNodeRule<YamlFlowYamlNode> for FormatYamlFlowYamlNode {
             // Without comments the content joins the properties' line even
             // when the source had a line break between them: `!!str\nfoo`
             // becomes `!!str foo`
+            // A line break between the properties and the content is
+            // kept: the parser attaches the properties of a following
+            // block collection to its first key, so joining the lines
+            // would move them onto the key for real:
+            //
+            // ```yaml
+            // - !circle
+            //   center: 1
+            // ```
             if has_middle_comments {
                 write!(
                     f,

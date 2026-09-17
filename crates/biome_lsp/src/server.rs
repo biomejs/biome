@@ -4,7 +4,9 @@ use crate::requests::syntax_tree::{SYNTAX_TREE_REQUEST, SyntaxTreePayload};
 use crate::session::{
     CapabilitySet, CapabilityStatus, ClientInformation, Session, SessionHandle, SessionKey,
 };
-use crate::utils::{cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error};
+use crate::utils::{
+    cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error, workspace_error_to_lsp,
+};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
@@ -734,7 +736,7 @@ macro_rules! workspace_method {
                     // Salsa cancellation, and the inner result is the workspace method.
                     match result {
                         Ok(Ok(Ok(Ok(result)))) => Ok(result),
-                        Ok(Ok(Ok(Err(err)))) => Err(into_lsp_error(err)),
+                        Ok(Ok(Ok(Err(err)))) => Err(workspace_error_to_lsp(err)),
                         Ok(Ok(Err(cancelled))) => Err(cancelled_to_lsp_error(cancelled)),
                         Ok(Err(err)) => Err(into_lsp_error(err)),
                         Err(err) => match err.try_into_panic() {
@@ -899,6 +901,7 @@ impl ServerFactory {
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
+        workspace_method!(builder, get_semantic_model);
         workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);

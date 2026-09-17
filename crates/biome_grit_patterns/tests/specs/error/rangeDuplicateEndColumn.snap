@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeDuplicateEndColumn
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        FunctionArgument(
+            DuplicateArguments {
+                name: "end_column",
+            },
+        ),
+    ],
+}

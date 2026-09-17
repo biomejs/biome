@@ -16,6 +16,16 @@ Options that change how the JSON parser behaves.
         --json-parse-allow-trailing-commas=<true|false>  Allows parsing trailing commas in `.json`
                               files.
 
+Options that change how the CSS parser behaves.
+        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules-specific features.
+                              Enable this feature only when your files don't end in `.module.css`.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
+                              and functions.
+
+Options that change how the Markdown parser behaves
+        --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
+                              Defaults to `false`.
+
 Settings for integrating Biome with version control.
         --vcs-enabled=<true|false>  Whether Biome should integrate with the version control client.
         --vcs-client-kind=<git>  The version control client.
@@ -41,6 +51,15 @@ Linter options specific to the JavaScript linter
 Linter options specific to the JSON linter
         --json-linter-enabled=<true|false>  Controls the linter for JSON and languages that extend
                               it.
+
+Options that change how the CSS linter behaves.
+        --css-linter-enabled=<true|false>  Controls the linter for CSS files.
+
+Options that change how the GraphQL linter behaves.
+        --graphql-linter-enabled=<true|false>  Controls the linter for GraphQL files.
+
+Options that change how the Markdown linter behaves
+        --md-linter-enabled=<true|false>  Control the linter for Markdown files.
 
 These options are available to many commands and control general CLI behavior, diagnostics, and
 output.
@@ -142,6 +161,8 @@ Available options:
                               `vcs.defaultBranch`. Requires `--changed`.
         --profile-rules       Reports how long each rule takes to run. It excludes the time spent
                               preparing the analysis, such as building the semantic model.
+        --profile-type-inference  Enables type-inference profiling output, grouped and ranked by
+                              source file.
         --watch               After the initial run, watches the selected paths and reprocesses
                               files modified afterward.
     -h, --help                Prints help information

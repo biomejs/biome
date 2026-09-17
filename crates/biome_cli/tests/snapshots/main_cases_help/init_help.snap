@@ -7,10 +7,11 @@ expression: redactor(content)
 ```block
 Creates a default Biome configuration file in the current working directory.
 
-Usage: init [--jsonc]
+Usage: init [--jsonc] [--git]
 
 Available options:
         --jsonc  Creates `biome.jsonc` instead of `biome.json`.
+        --git    Enables Git VCS integration and respects Git ignore files.
     -h, --help   Prints help information
 
 ```

@@ -1,6 +1,8 @@
 use crate::bool::Bool;
 use biome_deserialize_macros::{Deserializable, Merge};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, TrailingNewline};
+use biome_formatter::{
+    BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
+};
 #[cfg(feature = "cli")]
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -11,15 +13,16 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct YamlConfiguration {
+    /// Formatter options
     #[cfg_attr(
         feature = "cli",
-        bpaf(external(yaml_formatter_configuration), optional, hide)
+        bpaf(external(yaml_formatter_configuration), optional)
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<YamlFormatterConfiguration>,
 }
 
-pub type YamlFormatterEnabled = Bool<false>; // Keep it disabled by default while experimental.
+pub type YamlFormatterEnabled = Bool<true>;
 pub type YamlLinterEnabled = Bool<true>;
 pub type YamlAssistEnabled = Bool<true>;
 pub type YamlParseInterpolation = Bool<false>;
@@ -31,19 +34,46 @@ pub type YamlParseInterpolation = Bool<false>;
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct YamlFormatterConfiguration {
     /// Control the formatter for Yaml (and its super languages) files.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<YamlFormatterEnabled>,
 
     /// The size of the indentation applied to Yaml files. Defaults to 2.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-indent-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
     /// What's the max width of a line applied to Yaml files. Defaults to 80.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-line-width"), argument("NUMBER"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
+
+    /// The type of quotes used in YAML code. Defaults to `double`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-quote-style"), argument("double|single"))
+    )]
+    pub quote_style: Option<QuoteStyle>,
+
+    /// Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)
+    /// and sequences (`[ item ]`) that fit on one line. If unset, inherits the
+    /// global bracket spacing setting. When neither is set, mappings have spaces
+    /// and sequences do not.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-bracket-spacing"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bracket_spacing: Option<BracketSpacing>,
 
     /// Whether to add a trailing newline at the end of the file.
     ///
@@ -55,12 +85,18 @@ pub struct YamlFormatterConfiguration {
     /// Disable the option at your own risk.
     ///
     /// Defaults to true.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-trailing-newline"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_newline: Option<TrailingNewline>,
 
     /// The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("yaml-formatter-line-ending"), argument("lf|crlf|cr|auto"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 }

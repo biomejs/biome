@@ -11,6 +11,7 @@ use biome_configuration::analyzer::assist::{AssistConfiguration, AssistEnabled};
 use biome_configuration::css::CssParserConfiguration;
 use biome_configuration::formatter::{FormatWithErrorsEnabled, FormatterEnabled};
 use biome_configuration::json::JsonParserConfiguration;
+use biome_configuration::markdown::MarkdownParserConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
@@ -43,6 +44,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) format_with_errors: Option<FormatWithErrorsEnabled>,
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
+    pub(crate) markdown_parser: Option<MarkdownParserConfiguration>,
     pub(crate) only: Vec<AnalyzerSelector>,
     pub(crate) skip: Vec<AnalyzerSelector>,
     pub(crate) watch: bool,
@@ -286,6 +288,10 @@ impl TraversalCommand for CheckCommandPayload {
         let json = configuration.json.get_or_insert_with(Default::default);
         if self.json_parser.is_some() {
             json.parser.merge_with(self.json_parser.clone())
+        }
+        let markdown = configuration.markdown.get_or_insert_with(Default::default);
+        if self.markdown_parser.is_some() {
+            markdown.parser.merge_with(self.markdown_parser.clone())
         }
 
         if let Some(mut conf) = self.configuration.clone() {

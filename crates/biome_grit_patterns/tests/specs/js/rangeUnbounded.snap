@@ -1,0 +1,16 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeUnbounded
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:8",
+        "2:3-2:11",
+        "2:13-2:20",
+        "3:1-5:2",
+        "4:3-4:10",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

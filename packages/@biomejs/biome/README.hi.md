@@ -1,18 +1,19 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" />
+    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700" />
   </picture>
+</div>
 
   <br>
   <br>
 
-  [![CI on main][ci-badge]][ci-url]
-  [![Discord chat][discord-badge]][discord-url]
-  [![npm version][npm-badge]][npm-url]
-  [![VSCode version][vscode-badge]][vscode-url]
-  [![Open VSX version][open-vsx-badge]][open-vsx-url]
+[![CI on main][ci-badge]][ci-url]
+[![Discord chat][discord-badge]][discord-url]
+[![npm version][npm-badge]][npm-url]
+[![VSCode version][vscode-badge]][vscode-url]
+[![Open VSX version][open-vsx-badge]][open-vsx-url]
 
   [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
@@ -29,16 +30,14 @@
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-  हिन्दी | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) |  [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Polski](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pl.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
-</div>
-
+हिन्दी | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Polski](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pl.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md) | [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | [Українська](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.uk.md)
 <br>
 
 **Biome** वेब[^1] परियोजना[^2]ओं के लिए एक प्रदर्शनकारी उपकरण-श्रृंखला[^3] है, इसका उद्देश्य उक्त परियोजना[^2]ओं के स्वास्थ्य को बनाए रखने के लिए डेवलपर[^4] उपकरण प्रदान करना है।
 
-**Biome** *JavaScript*, *TypeScript*, *JSX* और *JSON* के लिए **एक [तेज़ स्वरूपक](https://github.com/biomejs/benchmark#formatting)[^5]** है जो **[*Prettier* के साथ ९७% अनुकूलता](https://algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
+**Biome** _JavaScript_, _TypeScript_, _JSX_ और _JSON_ के लिए **एक [तेज़ स्वरूपक](https://github.com/biomejs/benchmark#formatting)[^5]** है जो **[_Prettier_ के साथ ९७% अनुकूलता](https://algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
 
-**Biome *JavaScript*, *TypeScript* और *JSX* के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[३४० से अधिक नियम](https://biomejs.dev/linter/javascript/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
+**Biome _JavaScript_, _TypeScript_ और _JSX_ के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[३४० से अधिक नियम](https://biomejs.dev/linter/javascript/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
 
 **Biome** को शुरू से ही [संपादक](https://biomejs.dev/guides/integrate-in-editor/)[^15] [के भीतर अंतरक्रियात्मक](https://biomejs.dev/guides/integrate-in-editor/)[^16] [रूप से](https://biomejs.dev/editors/first-party-extensions/) उपयोग करने के लिए डिज़ाइन[^17] किया गया है। यह आपके द्वारा लिखे जा रहे विकृत[^18] कोड[^13] को स्वरूप[^5] और लिंट[^8] कर सकता है।
 
@@ -50,25 +49,25 @@ npm install --save-dev --save-exact @biomejs/biome
 
 ### प्रयोग[^20]
 
-* फ़ाइलें[^21] स्वरूप[^5] करें
+- फ़ाइलें[^21] स्वरूप[^5] करें
 
   ```shell
   npx @biomejs/biome format --write ./src
   ```
 
-* फ़ाइलें[^21] लिंट[^8] करें
+- फ़ाइलें[^21] लिंट[^8] करें
 
   ```shell
   npx @biomejs/biome lint ./src
   ```
 
-* स्वरूप, लिंट आदि चलाएँ और सुरक्षित सुझाव लागू करें
+- स्वरूप, लिंट आदि चलाएँ और सुरक्षित सुझाव लागू करें
 
   ```shell
   npx @biomejs/biome check --write ./src
   ```
 
-* CI वातावरण में सभी फ़ाइलों को स्वरूप, लिंट आदि के विरुद्ध जाँचें
+- CI वातावरण में सभी फ़ाइलों को स्वरूप, लिंट आदि के विरुद्ध जाँचें
 
   ```shell
   npx @biomejs/biome ci ./src
@@ -216,46 +215,46 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 नीचे दिए गए तिरछे शब्द आगत शब्द हैं।
 
-[^1]: *वेब* - web: the internet
+[^1]: _वेब_ - web: the internet
 [^2]: परियोजना - project
 [^3]: उपकरण-श्रृंखला - toolchain
-[^4]: *डेव/डेवलपर* - dev/developer
+[^4]: _डेव/डेवलपर_ - dev/developer
 [^5]: स्वरूप/स्वरूपक - format/foramtter
 [^6]: अनुकूल/अनुकूलता - compatible/compatibility
-[^7]: *स्कोर* - score
-[^8]: *लिंट/लिंटर* - lint/linter
+[^7]: _स्कोर_ - score
+[^8]: _लिंट/लिंटर_ - lint/linter
 [^9]: विस्तार/विस्तृत - detail/detailed
 [^10]: संदर्भ/संदर्भिकृत - context/contextualized
 [^11]: निदान - diagnosis
-[^12]: *आउटपुट* - output
-[^13]: *कोड* - code
-[^14]: *प्रोग्रामर* - programmer
+[^12]: _आउटपुट_ - output
+[^13]: _कोड_ - code
+[^14]: _प्रोग्रामर_ - programmer
 [^15]: संपादक - editor, the text editor: vscode, zed, etc.
 [^16]: अंतरक्रिया/अंतरक्रियात्मक - interact/interactive
-[^17]: *डिज़ाइन* - design
+[^17]: _डिज़ाइन_ - design
 [^18]: विकृत - malformed
 [^19]: स्थापित_करना/स्थापना - install/installation
 [^20]: प्रयोग - usage
-[^21]: *फ़ाइल* - file
+[^21]: _फ़ाइल_ - file
 [^22]: संकलित_करना/संकलित/संकलनकर्ता - compile/compiled/compiler
-[^23]: *ऑनलाइन* - online
+[^23]: _ऑनलाइन_ - online
 [^24]: प्रयोगशाला - laboratory
 [^25]: दस्तावेज़/दस्तावेज़ीकरण - document/documentation
 [^26]: मार्गदर्शिका - guide
 [^27]: पूर्व-निर्धारित - default
-[^28]: *कॉन्फ़िग/कॉन्फ़िगर/कॉन्फ़िगरेशन* - config/configure/configuration
+[^28]: _कॉन्फ़िग/कॉन्फ़िगर/कॉन्फ़िगरेशन_ - config/configure/configuration
 [^29]: परिष्कृत - sophisticated
-[^30]: *पार्सर* - parser
+[^30]: _पार्सर_ - parser
 [^31]: पाठ - text
 [^32]: त्रुटि - error
 [^33]: पुनर्प्राप्ति - recovery
 [^34]: कार्यक्षमता - functionality
-[^35]: *कैश/कैशिंग* - cache/caching, ~~cash/cashing~~
+[^35]: _कैश/कैशिंग_ - cache/caching, ~~cash/cashing~~
 [^36]: वित्तपोषित_करना/वित्तपोषण - fund/funding
 [^37]: प्रायोजित/प्रायोजन - sponsor/sponsorship
 [^38]: दृश्यता - visibility
 [^39]: विशिष्ट - specific
-[^40]: *वोट* - vote
+[^40]: _वोट_ - vote
 [^41]: बकाया_कार्य - backlog
 [^42]: प्लैटिनम_प्रायोजक - Platinum Sponsor
 [^43]: रजत_प्रायोजक - Silver Sponsor

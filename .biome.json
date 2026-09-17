@@ -25,6 +25,7 @@
       "**/packages/prettier-compare/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "**/.github/**",
       "plugins/*.js",
       "scripts/**",
       "!**/crates",
@@ -50,6 +51,11 @@
     "formatter": {
       "indentStyle": "space",
       "lineWidth": 1
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
     }
   },
   "linter": {

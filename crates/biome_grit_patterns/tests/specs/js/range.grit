@@ -1,0 +1,3 @@
+range(start_line=2, end_line=2) as $call where {
+    $call <: call_expression()
+}

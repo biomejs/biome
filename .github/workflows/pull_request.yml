@@ -7,16 +7,16 @@ on:
       - main
       - next
     paths: # Only run when changes are made to rust code or root Cargo
-      - "crates/**"
-      - "fuzz/**"
-      - "xtask/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "deny.toml"
-      - "justfile"
-      - ".github/workflows/**"
+      - 'crates/**'
+      - 'fuzz/**'
+      - 'xtask/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'rustfmt.toml'
+      - 'deny.toml'
+      - 'justfile'
+      - '.github/workflows/**'
 
 # Cancel jobs when the PR is updated
 concurrency:
@@ -109,8 +109,8 @@ jobs:
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os == 'depot-windows-2022-16'
         env:
-          CARGO_PROFILE_TEST_DEBUG: "0"
-          CARGO_INCREMENTAL: "0"
+          CARGO_PROFILE_TEST_DEBUG: '0'
+          CARGO_INCREMENTAL: '0'
         run: cargo test --workspace --features=js_plugin
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os != 'depot-windows-2022-16'

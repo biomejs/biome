@@ -1,0 +1,51 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.jsonc`
+
+```json
+{
+  // formatter settings
+  "formatter": {
+    "lineWidth": 100
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.jsonc configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Resolved configuration from biome.jsonc.
+  
+  Configuration files used (merge order):
+    - biome.jsonc
+  
+  {
+    "formatter": {
+      "lineWidth": 100
+    },
+    "overrides": [
+      {
+        "formatter": {
+          "lineWidth": 120
+        },
+        "includes": [
+          "**/*.test.js"
+        ]
+      }
+    ]
+  }
+  
+  i Overrides are included but were not evaluated because no --path was provided.
+  
+
+```

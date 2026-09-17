@@ -8,7 +8,7 @@ expression: redactor(content)
 {
   "linter": {
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     },
     "domains": {
       "next": "all",
@@ -40,30 +40,6 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
 # Emitted Messages
-
-```block
-biome.jsonc:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
-  
-     1 │ {
-   > 2 │     "linter": {
-       │               ^
-   > 3 │         "rules": {
-   > 4 │             "recommended": true,
-        ...
-  > 10 │             "solid": "all",
-  > 11 │         }
-  > 12 │     }
-       │     ^
-    13 │ }
-  
-  i Migrate the configuration with the proper command
-  
-  $ biome migrate
-  
-
-```
 
 ```block
 src/hooks/useHook.ts:1:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -111,5 +87,4 @@ src/hooks/useHook.ts:2:5 lint/correctness/useHookAtTopLevel ━━━━━━�
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
 Found 1 warning.
-Found 1 info.
 ```

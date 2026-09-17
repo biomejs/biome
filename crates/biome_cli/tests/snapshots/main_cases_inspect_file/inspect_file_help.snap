@@ -1,0 +1,21 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+# Emitted Messages
+
+```block
+Provides development information about a file. By default, it prints the CST of the file.
+
+Usage: inspect file [--ast] [--ir] [--semantic] PATH
+
+Available positional items:
+    PATH            Path to the file
+
+Available options:
+        --ast       Prints the AST of the file.
+        --ir        Prints the formatter IR, if supported.
+        --semantic  Prints the semantic information of a file, if it exists.
+    -h, --help      Prints help information
+
+```

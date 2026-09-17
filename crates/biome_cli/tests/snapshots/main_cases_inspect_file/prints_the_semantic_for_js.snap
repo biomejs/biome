@@ -1,0 +1,110 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.ts`
+
+```ts
+function name(value) {
+    return value;
+}
+export { name }
+
+```
+
+# Emitted Messages
+
+```block
+inspect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Below the information requested.
+  
+  CST
+  
+  0: JS_MODULE@0..59
+    0: (empty)
+    1: (empty)
+    2: JS_DIRECTIVE_LIST@0..0
+    3: JS_MODULE_ITEM_LIST@0..58
+      0: JS_FUNCTION_DECLARATION@0..42
+        0: (empty)
+        1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+        2: (empty)
+        3: JS_IDENTIFIER_BINDING@9..13
+          0: IDENT@9..13 "name" [] []
+        4: (empty)
+        5: JS_PARAMETERS@13..21
+          0: L_PAREN@13..14 "(" [] []
+          1: JS_PARAMETER_LIST@14..19
+            0: JS_FORMAL_PARAMETER@14..19
+              0: JS_DECORATOR_LIST@14..14
+              1: JS_IDENTIFIER_BINDING@14..19
+                0: IDENT@14..19 "value" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+          2: R_PAREN@19..21 ")" [] [Whitespace(" ")]
+        6: (empty)
+        7: JS_FUNCTION_BODY@21..42
+          0: L_CURLY@21..22 "{" [] []
+          1: JS_DIRECTIVE_LIST@22..22
+          2: JS_STATEMENT_LIST@22..40
+            0: JS_RETURN_STATEMENT@22..40
+              0: RETURN_KW@22..34 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              1: JS_IDENTIFIER_EXPRESSION@34..39
+                0: JS_REFERENCE_IDENTIFIER@34..39
+                  0: IDENT@34..39 "value" [] []
+              2: SEMICOLON@39..40 ";" [] []
+          3: R_CURLY@40..42 "}" [Newline("\n")] []
+      1: JS_EXPORT@42..58
+        0: JS_DECORATOR_LIST@42..42
+        1: EXPORT_KW@42..50 "export" [Newline("\n")] [Whitespace(" ")]
+        2: JS_EXPORT_NAMED_CLAUSE@50..58
+          0: (empty)
+          1: L_CURLY@50..52 "{" [] [Whitespace(" ")]
+          2: JS_EXPORT_NAMED_SPECIFIER_LIST@52..57
+            0: JS_EXPORT_NAMED_SHORTHAND_SPECIFIER@52..57
+              0: (empty)
+              1: JS_REFERENCE_IDENTIFIER@52..57
+                0: IDENT@52..57 "name" [] [Whitespace(" ")]
+          3: R_CURLY@57..58 "}" [] []
+          4: (empty)
+    4: EOF@58..59 "" [Newline("\n")] []
+  
+  
+  Semantic model
+  
+  Scope {
+    id: ScopeId(1) @ 0..58
+    children: [
+      Scope {
+        id: ScopeId(2) @ 0..42
+        children: [
+          Binding {
+            Id: BindingId(1) @ 14..19
+            Scope: ScopeId(2)
+            Imported: false
+            Exported: false
+            Kind: Value
+            ident: value
+          }
+          Scope {
+            id: ScopeId(3) @ 21..42
+            children: []
+          }
+        ]
+      }
+      Binding {
+        Id: BindingId(0) @ 9..13
+        Scope: ScopeId(2)
+        Imported: false
+        Exported: true
+        Kind: Function
+        ident: name
+      }
+    ]
+  }
+  
+  
+
+```

@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "linter": {
+    "rules": {
+      "suspicious": { "noDebugger": "off" }
+    }
+  }
+}
+```
+
+## `base.json`
+
+```json
+{
+  "linter": {
+    "rules": { "suspicious": "error" }
+  }
+}
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "linter.rules.suspicious.noConsole",
+  "value": "error",
+  "source": {
+    "configurationKind": "extend",
+    "path": "base.json",
+    "range": {
+      "end": 52,
+      "start": 45
+    },
+    "scope": "base",
+    "specifier": "base.json"
+  }
+}
+```

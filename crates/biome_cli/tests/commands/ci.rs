@@ -24,7 +24,7 @@ const CI_CONFIGURATION: &str = r#"
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     }
 }
@@ -631,7 +631,7 @@ fn ci_formatter_linter_organize_imports() {
     "linter": {
         "enabled": true,
         "rules": {
-            "recommended": true
+            "preset": "recommended"
         }
     },
     "assist": {
@@ -802,7 +802,7 @@ fn does_error_with_only_warnings() {
     "formatter": { "enabled": false},
   "linter": {
     "rules": {
-        "recommended": true,
+        "preset": "recommended",
         "suspicious": {
             "noClassAssign": "warn"
         }

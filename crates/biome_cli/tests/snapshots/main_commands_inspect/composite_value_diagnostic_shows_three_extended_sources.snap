@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["first.json", "second.json", "third.json"] }
+```
+
+## `first.json`
+
+```json
+{ "files": { "includes": ["first/**"] } }
+```
+
+## `second.json`
+
+```json
+{ "files": { "includes": ["second/**"] } }
+```
+
+## `third.json`
+
+```json
+{ "files": { "includes": ["third/**"] } }
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key files.includes has the value ["first/**","second/**","third/**"].
+  
+  i This value is defined across 3 configuration files.
+  
+  i The highlighted value is configured in first.json, referenced by extends as first.json.
+  
+  > 1 │ { "files": { "includes": ["first/**"] } }
+      │                          ^^^^^^^^^^^^
+  
+  i The highlighted value is configured in second.json, referenced by extends as second.json.
+  
+  > 1 │ { "files": { "includes": ["second/**"] } }
+      │                          ^^^^^^^^^^^^^
+  
+  i The highlighted value is configured in third.json, referenced by extends as third.json.
+  
+  > 1 │ { "files": { "includes": ["third/**"] } }
+      │                          ^^^^^^^^^^^^
+  
+
+```

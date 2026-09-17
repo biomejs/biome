@@ -106,7 +106,7 @@ mod private {
 /// different result contracts require distinct request types that each
 /// implement this trait.
 pub trait TypeInferenceRequestMetadata {
-    /// Stable maintenance identifier printed in verbose profiles.
+    /// Stable identifier used to aggregate records for this request contract.
     const ID: &'static str;
 
     /// Concise human-readable label printed in profiles.

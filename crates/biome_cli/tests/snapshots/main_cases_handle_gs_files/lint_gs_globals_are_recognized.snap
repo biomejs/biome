@@ -1,0 +1,61 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredVariables": "error"
+      }
+    }
+  }
+}
+```
+
+## `Code.gs`
+
+```gs
+SpreadsheetApp.getActiveSpreadsheet();
+Logger.log("hello");
+notAGlobal();
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+Code.gs:3:1 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The notAGlobal variable is undeclared.
+  
+    1 │ SpreadsheetApp.getActiveSpreadsheet();
+    2 │ Logger.log("hello");
+  > 3 │ notAGlobal();
+      │ ^^^^^^^^^^
+    4 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

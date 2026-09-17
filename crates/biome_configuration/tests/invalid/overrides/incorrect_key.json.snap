@@ -22,6 +22,8 @@ incorrect_key.json:4:4 deserialize ━━━━━━━━━━━━━━━
   - graphql
   - grit
   - html
+  - markdown
+  - yaml
   - formatter
   - linter
   - assist

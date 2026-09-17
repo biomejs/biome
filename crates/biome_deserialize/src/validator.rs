@@ -30,7 +30,7 @@ pub fn non_empty<T: IsEmpty>(
     if value.is_empty() {
         ctx.report(
             DeserializationDiagnostic::new(markup! {
-                <Emphasis>{name}</Emphasis>" may not be empty"
+                "The field "<Emphasis>{name}</Emphasis>" may not be empty."
             })
             .with_range(range),
         );

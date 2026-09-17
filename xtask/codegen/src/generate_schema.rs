@@ -2,6 +2,7 @@ use crate::update;
 use biome_configuration::Configuration;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_manifest::BiomeManifest;
 use schemars::{Schema, schema_for};
 use serde_json::{Map, Value, to_string};
 use xtask_glue::*;
@@ -10,6 +11,21 @@ use xtask_glue::*;
 pub fn generate_schema_as_string() -> Result<String> {
     let schema = rename_references_in_schema(schema_for!(Configuration));
 
+    format_schema(schema)
+}
+
+/// Returns the plugin manifest schema as a string.
+pub fn generate_manifest_schema_as_string() -> Result<String> {
+    let mut schema = schema_for!(BiomeManifest);
+    if let Some(properties) = schema.get_mut("properties").and_then(Value::as_object_mut)
+        && let Some(version) = properties.get_mut("version").and_then(Value::as_object_mut)
+    {
+        version.insert("const".into(), Value::from(1));
+    }
+    format_schema(schema)
+}
+
+fn format_schema(schema: Schema) -> Result<String> {
     let json_schema = to_string(&schema)?;
     let parsed = parse_json(&json_schema, JsonParserOptions::default());
     let formatted =
@@ -19,13 +35,17 @@ pub fn generate_schema_as_string() -> Result<String> {
     Ok(formatted.into_code())
 }
 
-/// Generate the schema and saves it at `packages/@biomejs/biome/configuration_schema.json`
+/// Generates the configuration and plugin manifest schemas for the npm package.
 pub fn generate_configuration_schema(mode: Mode) -> Result<()> {
     let schema_path_npm = project_root().join("packages/@biomejs/biome/configuration_schema.json");
+    let manifest_schema_path_npm =
+        project_root().join("packages/@biomejs/biome/manifest_schema.json");
 
     let schema = generate_schema_as_string()?;
+    let manifest_schema = generate_manifest_schema_as_string()?;
 
     update(&schema_path_npm, schema.as_str(), &mode)?;
+    update(&manifest_schema_path_npm, manifest_schema.as_str(), &mode)?;
 
     Ok(())
 }

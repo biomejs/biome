@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: googleAppsScript.gs
+---
+# Input
+```cjs
+// Reassigning Google Apps Script service globals is reported.
+SpreadsheetApp = null;
+Logger = 1;
+
+// Assigning to a non-global identifier is fine.
+localVar = 2;
+
+```
+
+# Diagnostics
+```
+googleAppsScript.gs:2:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    1 │ // Reassigning Google Apps Script service globals is reported.
+  > 2 │ SpreadsheetApp = null;
+      │ ^^^^^^^^^^^^^^
+    3 │ Logger = 1;
+    4 │ 
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```
+
+```
+googleAppsScript.gs:3:1 lint/suspicious/noGlobalAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A global variable should not be reassigned.
+  
+    1 │ // Reassigning Google Apps Script service globals is reported.
+    2 │ SpreadsheetApp = null;
+  > 3 │ Logger = 1;
+      │ ^^^^^^
+    4 │ 
+    5 │ // Assigning to a non-global identifier is fine.
+  
+  i Assigning to a global variable can override essential functionality.
+  
+
+```

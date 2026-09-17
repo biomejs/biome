@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": { "rules": ["@shared/rules"] }
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome-manifest.json:1:1 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × @shared/rules must select a named rule or preset from a package.
+  
+  > 1 │ {
+      │ ^
+  > 2 │     "version": 1,
+  > 3 │     "plugins": { "rules": ["@shared/rules"] }
+  > 4 │ }
+      │ ^
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
+```

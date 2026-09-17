@@ -1,0 +1,90 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["@shared/config/biome"] }
+```
+
+## `node_modules/@shared/config/biome.jsonc`
+
+```json
+{
+  "root": false,
+  "plugins": [
+    { "path": "@shared/plugin/presets/recommended", "resolutionKind": "config" }
+  ]
+}
+```
+
+## `node_modules/@shared/config/node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": {
+        "rules": ["@shared/rules/presets/recommended"],
+        "presets": { "recommended": ["@shared/rules/noAssign"] }
+    }
+}
+```
+
+## `node_modules/@shared/config/node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `node_modules/@shared/config/node_modules/@shared/rules/biome-manifest.json`
+
+```json
+{
+    "version": 1,
+    "plugins": {
+        "rules": [{ "noAssign": "rules/noAssign.grit" }],
+        "presets": { "recommended": ["noAssign"] }
+    }
+}
+```
+
+## `node_modules/@shared/config/node_modules/@shared/rules/package.json`
+
+```json
+{ "name": "@shared/rules" }
+```
+
+## `node_modules/@shared/config/node_modules/@shared/rules/rules/noAssign.grit`
+
+```grit
+`Object.assign($args)` where {
+    register_diagnostic(
+        span = $args,
+        message = "Prefer object spread instead of Object.assign()"
+    )
+}
+```
+
+## `node_modules/@shared/config/package.json`
+
+```json
+{
+    "name": "@shared/config",
+    "exports": { "./biome": "./biome.jsonc" }
+}
+```
+
+## `test.js`
+
+```js
+// biome-ignore lint/plugin/@shared/plugin/noAssign: compatibility
+Object.assign({}, value);
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

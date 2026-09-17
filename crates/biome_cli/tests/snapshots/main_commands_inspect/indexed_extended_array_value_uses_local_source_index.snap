@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "files": { "includes": ["tests/**"] }
+}
+```
+
+## `base.json`
+
+```json
+{ "files": { "includes": ["src/**"] } }
+```
+
+# Emitted Messages
+
+```block
+{
+  "key": "files.includes.1",
+  "value": "tests/**",
+  "source": {
+    "configurationKind": "root",
+    "path": "biome.json",
+    "range": {
+      "end": 66,
+      "start": 56
+    },
+    "scope": "base"
+  }
+}
+```

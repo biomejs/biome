@@ -515,9 +515,17 @@ impl<T: Deserializable> Deserializable for Vec<T> {
                 _name: &str,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::with_capacity(values.len());
-                result.extend(
-                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
-                );
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
+                        result.push(value);
+                    }
+                }
                 Some(result)
             }
         }
@@ -554,9 +562,17 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
                 _name: &str,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::with_capacity(values.len());
-                result.extend(
-                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
-                );
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
+                        result.push(value);
+                    }
+                }
                 Some(result)
             }
         }
@@ -584,9 +600,17 @@ impl<T: Deserializable + Eq + Hash, S: BuildHasher + Default> Deserializable for
                 _name: &str,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::with_capacity_and_hasher(values.len(), S::default());
-                result.extend(
-                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
-                );
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
+                        result.insert(value);
+                    }
+                }
                 Some(result)
             }
         }
@@ -611,11 +635,19 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
-                Some(
-                    values
-                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
-                        .collect(),
-                )
+                let mut result = Self::Output::new();
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
+                        result.insert(value);
+                    }
+                }
+                Some(result)
             }
         }
         value.deserialize(ctx, Visitor(PhantomData), name)
@@ -641,9 +673,17 @@ impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
                 _name: &str,
             ) -> Option<Self::Output> {
                 let mut result = Self::Output::with_capacity(values.len());
-                result.extend(
-                    values.filter_map(|value| Deserializable::deserialize(ctx, &value?, "")),
-                );
+                for (index, value) in values.enumerate() {
+                    let Some(value) = value else {
+                        continue;
+                    };
+                    ctx.enter_index(index, value.range());
+                    let deserialized = Deserializable::deserialize(ctx, &value, "");
+                    ctx.exit_index();
+                    if let Some(value) = deserialized {
+                        result.insert(value);
+                    }
+                }
                 Some(result)
             }
         }

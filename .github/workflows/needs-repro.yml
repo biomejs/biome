@@ -2,7 +2,7 @@ name: Needs reproduction
 
 on:
   issues:
-    types: [ labeled ]
+    types: [labeled]
 
 jobs:
   reply-labeled:

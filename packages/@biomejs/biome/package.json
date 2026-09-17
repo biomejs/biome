@@ -17,6 +17,7 @@
   "files": [
     "bin/biome",
     "configuration_schema.json",
+    "manifest_schema.json",
     "README.md",
     "LICENSE-APACHE",
     "LICENSE-MIT",

@@ -7,13 +7,13 @@ on:
       - main
       - next
     paths: # Only run when changes are made to rust code or root Cargo
-      - "crates/**"
-      - "fuzz/**"
-      - "xtask/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
+      - 'crates/**'
+      - 'fuzz/**'
+      - 'xtask/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'rustfmt.toml'
 permissions:
   contents: read
 

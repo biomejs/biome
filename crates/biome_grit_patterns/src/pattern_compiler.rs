@@ -59,6 +59,7 @@ mod predicate_call_compiler;
 mod predicate_compiler;
 mod predicate_definition_compiler;
 mod predicate_return_compiler;
+mod range_compiler;
 mod regex_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;

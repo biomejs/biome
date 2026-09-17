@@ -34,13 +34,15 @@ use biome_formatter::{
     BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
     LineWidth, Printed, TrailingNewline,
 };
+use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::{ExtendedConfigurationProvider, JsonAnalyzeServices, analyze};
+use biome_json_analyze::{JsonAnalyzeServices, analyze};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
+use biome_manifest::BiomeManifest;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;
@@ -668,10 +670,7 @@ fn lint(params: LintParams) -> LintResults {
     let mut process_lint = ProcessLint::new(&params);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: params
-            .settings
-            .full_source()
-            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        configuration_provider: params.settings.configuration_provider(),
         project_layout: Some(params.project_layout.clone()),
     };
     let (_, analyze_diagnostics) = analyze(
@@ -686,10 +685,21 @@ fn lint(params: LintParams) -> LintResults {
     let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
     // malformed configuration
-    if params.path.ends_with(ConfigName::biome_json())
-        || params.path.ends_with(ConfigName::biome_jsonc())
-    {
+    if ConfigName::is_manifest_file(params.path.as_path()) {
         let deserialized = deserialize_from_json_ast::<Configuration>(&root, "");
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect::<Vec<_>>(),
+        );
+    }
+
+    // if we're parsing the `biome-manifest.json` file, we deserialize it, so we can emit diagnostics for
+    // malformed configuration
+    if ManifestName::is_manifest_file(params.path.as_path()) {
+        let deserialized = deserialize_from_json_ast::<BiomeManifest>(&root, "");
         diagnostics.extend(
             deserialized
                 .into_diagnostics()
@@ -760,9 +770,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = JsonAnalyzeServices {
         file_source,
-        configuration_provider: settings
-            .full_source()
-            .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+        configuration_provider: settings.configuration_provider(),
         project_layout: Some(project_layout_for_services),
     };
     analyze(
@@ -855,10 +863,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
         loop {
             let services = JsonAnalyzeServices {
                 file_source,
-                configuration_provider: params
-                    .settings
-                    .full_source()
-                    .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+                configuration_provider: params.settings.configuration_provider(),
                 project_layout: Some(params.project_layout.clone()),
             };
             let mut pending_actions = Vec::new();
@@ -905,10 +910,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
     loop {
         let services = JsonAnalyzeServices {
             file_source,
-            configuration_provider: params
-                .settings
-                .full_source()
-                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            configuration_provider: params.settings.configuration_provider(),
             project_layout: Some(params.project_layout.clone()),
         };
         let mut pending_actions = Vec::new();
@@ -964,10 +966,7 @@ fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceErr
     if params.collect_final_diagnostics {
         let services = JsonAnalyzeServices {
             file_source,
-            configuration_provider: params
-                .settings
-                .full_source()
-                .map(|s| s as std::sync::Arc<dyn ExtendedConfigurationProvider>),
+            configuration_provider: params.settings.configuration_provider(),
             project_layout: Some(params.project_layout.clone()),
         };
 

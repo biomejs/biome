@@ -1,0 +1,20 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeUnknownArgument
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        FunctionArgument(
+            UnknownArgument {
+                name: "range",
+                argument: "line",
+                valid_args: [
+                    "start_line",
+                    "start_column",
+                    "end_line",
+                    "end_column",
+                ],
+            },
+        ),
+    ],
+}

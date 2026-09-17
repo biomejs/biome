@@ -32,5 +32,29 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "enabled": true,
+   > 4 │         "rules": {
+        ...
+   > 9 │         }
+  > 10 │     },
+       │     ^
+    11 │     "css": {
+    12 │         "parser": {
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
 ```

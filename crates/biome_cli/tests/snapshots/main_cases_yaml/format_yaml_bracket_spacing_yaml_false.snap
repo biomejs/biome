@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `file.yaml`
+
+```yaml
+mapping: {first: 1, second: 2}
+sequence: [first, second]
+empty_mapping: {}
+empty_sequence: []
+nested: {map: {a: b}, sequence: [a, {b: c}], empty: [{}, []]}
+pairs: [key: value, ? explicit, : empty]
+empty_pair: [: ]
+empty_entry: {:}
+collection_keys: {[a, b]: value, {a: b}: other}
+anchor: &anchor key
+aliases: {*anchor : value}
+tagged: {key: !!str , !!str : value}
+block:
+  - {key: [a, b]}
+long_mapping:
+  {
+    first_key: first_value,
+    second_key: second_value,
+    third_key: third_value,
+    fourth_key: fourth_value,
+  }
+long_sequence:
+  [
+    first_value,
+    second_value,
+    third_value,
+    fourth_value,
+    fifth_value,
+    sixth_value,
+  ]
+commented_mapping: {
+    # before
+    first: 1, # between
+    second: 2,
+    # after
+  }
+commented_sequence: [
+    # before
+    first, # between
+    second,
+    # after
+  ]
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
