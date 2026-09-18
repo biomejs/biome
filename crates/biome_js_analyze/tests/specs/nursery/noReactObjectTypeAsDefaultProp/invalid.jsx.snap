@@ -49,7 +49,7 @@ export default function NotReturningJsx({ foo = {} }) {}
 ```
 invalid.jsx:5:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an object literal is created here on every render.
+  × Every render creates an object literal here.
   
     3 │ // function declaration
     4 │ function Foo({
@@ -70,7 +70,7 @@ invalid.jsx:5:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:6:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an array literal is created here on every render.
+  × Every render creates an array literal here.
   
     4 │ function Foo({
     5 │   a = {},
@@ -91,7 +91,7 @@ invalid.jsx:6:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:7:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a regular expression literal is created here on every render.
+  × Every render creates a regular expression literal here.
   
     5 │   a = {},
     6 │   b = ["one", "two"],
@@ -112,7 +112,7 @@ invalid.jsx:7:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:8:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an arrow function is created here on every render.
+  × Every render creates an arrow function here.
   
      6 │   b = ["one", "two"],
      7 │   c = /regex/i,
@@ -133,7 +133,7 @@ invalid.jsx:8:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:9:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a function expression is created here on every render.
+  × Every render creates a function expression here.
   
      7 │   c = /regex/i,
      8 │   d = () => {},
@@ -154,7 +154,7 @@ invalid.jsx:9:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:10:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a class expression is created here on every render.
+  × Every render creates a class expression here.
   
      8 │   d = () => {},
      9 │   e = function () {},
@@ -175,7 +175,7 @@ invalid.jsx:10:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:11:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a newly constructed object is created here on every render.
+  × Every render creates a newly constructed object here.
   
      9 │   e = function () {},
     10 │   f = class {},
@@ -196,7 +196,7 @@ invalid.jsx:11:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:12:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a JSX element is created here on every render.
+  × Every render creates a JSX element here.
   
     10 │   f = class {},
     11 │   g = new Thing(),
@@ -217,7 +217,7 @@ invalid.jsx:12:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:13:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a Symbol is created here on every render.
+  × Every render creates a Symbol here.
   
     11 │   g = new Thing(),
     12 │   h = <Thing />,
@@ -238,7 +238,7 @@ invalid.jsx:13:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:20:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an object literal is created here on every render.
+  × Every render creates an object literal here.
   
     18 │ // arrow function
     19 │ const Bar = ({
@@ -259,7 +259,7 @@ invalid.jsx:20:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:21:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an array literal is created here on every render.
+  × Every render creates an array literal here.
   
     19 │ const Bar = ({
     20 │   a = {},
@@ -280,7 +280,7 @@ invalid.jsx:21:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:22:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a regular expression literal is created here on every render.
+  × Every render creates a regular expression literal here.
   
     20 │   a = {},
     21 │   b = ["one", "two"],
@@ -301,7 +301,7 @@ invalid.jsx:22:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:23:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an arrow function is created here on every render.
+  × Every render creates an arrow function here.
   
     21 │   b = ["one", "two"],
     22 │   c = /regex/i,
@@ -322,7 +322,7 @@ invalid.jsx:23:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:24:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a function expression is created here on every render.
+  × Every render creates a function expression here.
   
     22 │   c = /regex/i,
     23 │   d = () => {},
@@ -343,7 +343,7 @@ invalid.jsx:24:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:25:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a class expression is created here on every render.
+  × Every render creates a class expression here.
   
     23 │   d = () => {},
     24 │   e = function () {},
@@ -364,7 +364,7 @@ invalid.jsx:25:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:26:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a newly constructed object is created here on every render.
+  × Every render creates a newly constructed object here.
   
     24 │   e = function () {},
     25 │   f = class {},
@@ -385,7 +385,7 @@ invalid.jsx:26:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:27:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a JSX element is created here on every render.
+  × Every render creates a JSX element here.
   
     25 │   f = class {},
     26 │   g = new Thing(),
@@ -406,7 +406,7 @@ invalid.jsx:27:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:28:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new a Symbol is created here on every render.
+  × Every render creates a Symbol here.
   
     26 │   g = new Thing(),
     27 │   h = <Thing />,
@@ -427,7 +427,7 @@ invalid.jsx:28:7 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━�
 ```
 invalid.jsx:34:29 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an object literal is created here on every render.
+  × Every render creates an object literal here.
   
     33 │ // memo / forwardRef wrappers
   > 34 │ const Wrapped = memo(({ a = {} }) => null);
@@ -447,7 +447,7 @@ invalid.jsx:34:29 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━
 ```
 invalid.jsx:35:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an array literal is created here on every render.
+  × Every render creates an array literal here.
   
     33 │ // memo / forwardRef wrappers
     34 │ const Wrapped = memo(({ a = {} }) => null);
@@ -468,7 +468,7 @@ invalid.jsx:35:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━
 ```
 invalid.jsx:38:49 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × A new an object literal is created here on every render.
+  × Every render creates an object literal here.
   
     37 │ // PascalCase name is enough; Biome detects components by name, not by return value
   > 38 │ export default function NotReturningJsx({ foo = {} }) {}

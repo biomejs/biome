@@ -88,7 +88,7 @@ impl Rule for NoReactObjectTypeAsDefaultProp {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "A new "{kind}" is created here on every render."
+                    "Every render creates "{kind}" here."
                 },
             )
             .note(markup! {
