@@ -8,12 +8,13 @@ use crate::{
     JsArrayExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsAwaitExpression,
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsBooleanLiteralExpression,
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
-    JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsForStatement,
-    JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression, JsImportMetaExpression,
-    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator, JsMetavariable,
-    JsNewExpression, JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression,
-    JsObjectExpression, JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
-    JsPreUpdateOperator, JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
+    JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsExpressionTemplateRoot,
+    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression,
+    JsImportMetaExpression, JsInExpression, JsInstanceofExpression, JsLogicalExpression,
+    JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
+    JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
+    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
+    JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
     JsStringLiteralExpression, JsSuperExpression, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
     JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxTagExpression,
     TsAsExpression, TsInstantiationExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
@@ -138,6 +139,7 @@ impl NeedsParentheses for JsAssignmentExpression {
         match_ast! {
             match &parent {
                 JsAssignmentExpression(_) => false,
+                JsExpressionTemplateRoot(_) => false,
                 // `[a = b]`
                 JsComputedMemberName(_) => false,
 
