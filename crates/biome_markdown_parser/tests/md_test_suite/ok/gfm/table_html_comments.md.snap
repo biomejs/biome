@@ -1,0 +1,277 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+| <!-- cell -->[text][target] | `<!-- literal -->` |
+| --- | --- |
+| <!-- only --> | text |
+
+[target]: /target
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        GfmTable {
+            header: GfmTableRow {
+                quote_prefixes: MdQuotePrefixList [],
+                l_pipe_token: PIPE@0..2 "|" [] [Whitespace(" ")],
+                cells: GfmTableCellList [
+                    GfmTableCell {
+                        content: MdInlineItemList [
+                            MdInlineHtml {
+                                value_token: MD_HTML_LITERAL@2..15 "" [Comments("<!-- cell -->")] [],
+                            },
+                            MdReferenceLink {
+                                l_brack_token: L_BRACK@15..16 "[" [] [],
+                                text: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@16..20 "text" [] [],
+                                    },
+                                ],
+                                r_brack_token: R_BRACK@20..21 "]" [] [],
+                                label: MdReferenceLinkLabel {
+                                    l_brack_token: L_BRACK@21..22 "[" [] [],
+                                    label: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@22..28 "target" [] [],
+                                        },
+                                    ],
+                                    r_brack_token: R_BRACK@28..30 "]" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                    PIPE@30..32 "|" [] [Whitespace(" ")],
+                    GfmTableCell {
+                        content: MdInlineItemList [
+                            MdInlineCode {
+                                l_tick_token: BACKTICK@32..33 "`" [] [],
+                                content: MdInlineItemList [
+                                    MdTextual {
+                                        value_token: MD_TEXTUAL_LITERAL@33..49 "<!-- literal -->" [] [],
+                                    },
+                                ],
+                                r_tick_token: BACKTICK@49..51 "`" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                ],
+                r_pipe_token: PIPE@51..52 "|" [] [],
+                newline_token: NEWLINE@52..53 "\n" [] [],
+            },
+            delimiter: GfmTableDelimiterRow {
+                quote_prefixes: MdQuotePrefixList [],
+                l_pipe_token: PIPE@53..55 "|" [] [Whitespace(" ")],
+                cells: GfmTableDelimiterCellList [
+                    GfmTableDelimiterCell {
+                        l_colon_token: missing (optional),
+                        dashes: GfmTableDelimiterDashList [
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@55..56 "-" [] [],
+                            },
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@56..57 "-" [] [],
+                            },
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@57..59 "-" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_colon_token: missing (optional),
+                    },
+                    PIPE@59..61 "|" [] [Whitespace(" ")],
+                    GfmTableDelimiterCell {
+                        l_colon_token: missing (optional),
+                        dashes: GfmTableDelimiterDashList [
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@61..62 "-" [] [],
+                            },
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@62..63 "-" [] [],
+                            },
+                            GfmTableDelimiterDash {
+                                minus_token: MINUS@63..65 "-" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_colon_token: missing (optional),
+                    },
+                ],
+                r_pipe_token: PIPE@65..66 "|" [] [],
+                newline_token: NEWLINE@66..67 "\n" [] [],
+            },
+            body: GfmTableRowList [
+                GfmTableRow {
+                    quote_prefixes: MdQuotePrefixList [],
+                    l_pipe_token: PIPE@67..69 "|" [] [Whitespace(" ")],
+                    cells: GfmTableCellList [
+                        GfmTableCell {
+                            content: MdInlineItemList [
+                                MdInlineHtml {
+                                    value_token: MD_HTML_LITERAL@69..83 "" [Comments("<!-- only -->")] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        PIPE@83..85 "|" [] [Whitespace(" ")],
+                        GfmTableCell {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@85..90 "text" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                    r_pipe_token: PIPE@90..91 "|" [] [],
+                    newline_token: NEWLINE@91..92 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@92..93 "\n" [] [],
+        },
+        MdLinkReferenceDefinition {
+            indent: MdIndentTokenList [],
+            l_brack_token: L_BRACK@93..94 "[" [] [],
+            label: MdLinkLabel {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@94..100 "target" [] [],
+                    },
+                ],
+            },
+            r_brack_token: R_BRACK@100..101 "]" [] [],
+            colon_token: COLON@101..102 ":" [] [],
+            destination: MdLinkDestination {
+                content: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@102..103 " " [] [],
+                    },
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@103..110 "/target" [] [],
+                    },
+                ],
+            },
+            title: missing (optional),
+        },
+        MdNewline {
+            value_token: NEWLINE@110..111 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@111..111 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..111
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..111
+    0: GFM_TABLE@0..92
+      0: GFM_TABLE_ROW@0..53
+        0: MD_QUOTE_PREFIX_LIST@0..0
+        1: PIPE@0..2 "|" [] [Whitespace(" ")]
+        2: GFM_TABLE_CELL_LIST@2..51
+          0: GFM_TABLE_CELL@2..30
+            0: MD_INLINE_ITEM_LIST@2..30
+              0: MD_INLINE_HTML@2..15
+                0: MD_HTML_LITERAL@2..15 "" [Comments("<!-- cell -->")] []
+              1: MD_REFERENCE_LINK@15..30
+                0: L_BRACK@15..16 "[" [] []
+                1: MD_INLINE_ITEM_LIST@16..20
+                  0: MD_TEXTUAL@16..20
+                    0: MD_TEXTUAL_LITERAL@16..20 "text" [] []
+                2: R_BRACK@20..21 "]" [] []
+                3: MD_REFERENCE_LINK_LABEL@21..30
+                  0: L_BRACK@21..22 "[" [] []
+                  1: MD_INLINE_ITEM_LIST@22..28
+                    0: MD_TEXTUAL@22..28
+                      0: MD_TEXTUAL_LITERAL@22..28 "target" [] []
+                  2: R_BRACK@28..30 "]" [] [Whitespace(" ")]
+          1: PIPE@30..32 "|" [] [Whitespace(" ")]
+          2: GFM_TABLE_CELL@32..51
+            0: MD_INLINE_ITEM_LIST@32..51
+              0: MD_INLINE_CODE@32..51
+                0: BACKTICK@32..33 "`" [] []
+                1: MD_INLINE_ITEM_LIST@33..49
+                  0: MD_TEXTUAL@33..49
+                    0: MD_TEXTUAL_LITERAL@33..49 "<!-- literal -->" [] []
+                2: BACKTICK@49..51 "`" [] [Whitespace(" ")]
+        3: PIPE@51..52 "|" [] []
+        4: NEWLINE@52..53 "\n" [] []
+      1: GFM_TABLE_DELIMITER_ROW@53..67
+        0: MD_QUOTE_PREFIX_LIST@53..53
+        1: PIPE@53..55 "|" [] [Whitespace(" ")]
+        2: GFM_TABLE_DELIMITER_CELL_LIST@55..65
+          0: GFM_TABLE_DELIMITER_CELL@55..59
+            0: (empty)
+            1: GFM_TABLE_DELIMITER_DASH_LIST@55..59
+              0: GFM_TABLE_DELIMITER_DASH@55..56
+                0: MINUS@55..56 "-" [] []
+              1: GFM_TABLE_DELIMITER_DASH@56..57
+                0: MINUS@56..57 "-" [] []
+              2: GFM_TABLE_DELIMITER_DASH@57..59
+                0: MINUS@57..59 "-" [] [Whitespace(" ")]
+            2: (empty)
+          1: PIPE@59..61 "|" [] [Whitespace(" ")]
+          2: GFM_TABLE_DELIMITER_CELL@61..65
+            0: (empty)
+            1: GFM_TABLE_DELIMITER_DASH_LIST@61..65
+              0: GFM_TABLE_DELIMITER_DASH@61..62
+                0: MINUS@61..62 "-" [] []
+              1: GFM_TABLE_DELIMITER_DASH@62..63
+                0: MINUS@62..63 "-" [] []
+              2: GFM_TABLE_DELIMITER_DASH@63..65
+                0: MINUS@63..65 "-" [] [Whitespace(" ")]
+            2: (empty)
+        3: PIPE@65..66 "|" [] []
+        4: NEWLINE@66..67 "\n" [] []
+      2: GFM_TABLE_ROW_LIST@67..92
+        0: GFM_TABLE_ROW@67..92
+          0: MD_QUOTE_PREFIX_LIST@67..67
+          1: PIPE@67..69 "|" [] [Whitespace(" ")]
+          2: GFM_TABLE_CELL_LIST@69..90
+            0: GFM_TABLE_CELL@69..83
+              0: MD_INLINE_ITEM_LIST@69..83
+                0: MD_INLINE_HTML@69..83
+                  0: MD_HTML_LITERAL@69..83 "" [Comments("<!-- only -->")] [Whitespace(" ")]
+            1: PIPE@83..85 "|" [] [Whitespace(" ")]
+            2: GFM_TABLE_CELL@85..90
+              0: MD_INLINE_ITEM_LIST@85..90
+                0: MD_TEXTUAL@85..90
+                  0: MD_TEXTUAL_LITERAL@85..90 "text" [] [Whitespace(" ")]
+          3: PIPE@90..91 "|" [] []
+          4: NEWLINE@91..92 "\n" [] []
+    1: MD_NEWLINE@92..93
+      0: NEWLINE@92..93 "\n" [] []
+    2: MD_LINK_REFERENCE_DEFINITION@93..110
+      0: MD_INDENT_TOKEN_LIST@93..93
+      1: L_BRACK@93..94 "[" [] []
+      2: MD_LINK_LABEL@94..100
+        0: MD_INLINE_ITEM_LIST@94..100
+          0: MD_TEXTUAL@94..100
+            0: MD_TEXTUAL_LITERAL@94..100 "target" [] []
+      3: R_BRACK@100..101 "]" [] []
+      4: COLON@101..102 ":" [] []
+      5: MD_LINK_DESTINATION@102..110
+        0: MD_INLINE_ITEM_LIST@102..110
+          0: MD_TEXTUAL@102..103
+            0: MD_TEXTUAL_LITERAL@102..103 " " [] []
+          1: MD_TEXTUAL@103..110
+            0: MD_TEXTUAL_LITERAL@103..110 "/target" [] []
+      6: (empty)
+    3: MD_NEWLINE@110..111
+      0: NEWLINE@110..111 "\n" [] []
+  3: EOF@111..111 "" [] []
+
+```

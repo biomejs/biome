@@ -5,3 +5,43 @@
 Literal: something <!-- commenmt --></p>
 <p>PI: <?xml version="1.0"?> here.</p>
 <p>CDATA: <![CDATA[text]]> here.</p>
+<blockquote>
+<p>before <!--
+hidden
+--> after</p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>before <!--
+hidden
+--> after</p>
+</blockquote>
+</blockquote>
+<p>before &lt;!--</p>
+<blockquote>
+<p>hidden
+--&gt; after</p>
+</blockquote>
+<blockquote>
+<p>before &lt;!--</p>
+<h1>heading</h1>
+<p>--&gt;</p>
+</blockquote>
+<blockquote>
+<p>before &lt;!--</p>
+<p>--&gt; after</p>
+</blockquote>
+<blockquote>
+<p>before &lt;!--</p>
+<h1>heading</h1>
+<p>--&gt;</p>
+</blockquote>
+<ul>
+<li>item
+<ul>
+<li>before &lt;!--
+<h1>heading</h1>
+--&gt;</li>
+</ul>
+</li>
+</ul>

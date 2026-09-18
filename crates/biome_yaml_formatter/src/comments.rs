@@ -1,4 +1,3 @@
-use biome_diagnostics::category;
 use biome_formatter::comments::{
     CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, Comments, DecoratedComment,
     SourceComment,
@@ -9,11 +8,11 @@ use biome_parser::{TokenSet, token_set};
 use biome_rowan::AstNode;
 use biome_rowan::AstNodeList;
 use biome_rowan::{SyntaxTriviaPieceComments, TextSize};
-use biome_suppression::{SuppressionKind, parse_suppression_comment};
+use biome_suppression::SuppressionKind;
 use biome_yaml_syntax::{
     AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
     YamlBlockMapImplicitEntry, YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
-    YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlRoot, YamlSyntaxKind,
+    YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlSyntaxKind,
     YamlSyntaxNode, YamlSyntaxToken,
 };
 
@@ -51,22 +50,6 @@ pub struct YamlCommentStyle;
 impl CommentStyle for YamlCommentStyle {
     type Language = YamlLanguage;
 
-    fn is_suppression(text: &str) -> bool {
-        parse_suppression_comment(text)
-            .filter_map(Result::ok)
-            .filter(|suppression| suppression.kind == SuppressionKind::Classic)
-            .flat_map(|suppression| suppression.categories)
-            .any(|(key, ..)| key == category!("format"))
-    }
-
-    fn is_global_suppression(text: &str) -> bool {
-        parse_suppression_comment(text)
-            .filter_map(Result::ok)
-            .filter(|suppression| suppression.kind == SuppressionKind::All)
-            .flat_map(|suppression| suppression.categories)
-            .any(|(key, ..)| key == category!("format"))
-    }
-
     fn get_comment_kind(_comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
         CommentKind::Line
     }
@@ -75,8 +58,7 @@ impl CommentStyle for YamlCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        handle_global_suppression(comment)
-            .or_else(handle_document_comment)
+        handle_document_comment(comment)
             .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_block_map_explicit_entry_comment)
             .or_else(handle_middle_comment)
@@ -318,7 +300,9 @@ fn handle_own_line_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
     if comment.text_position() != CommentTextPosition::OwnLine
-        || YamlCommentStyle::is_suppression(comment.piece().text())
+        || comment
+            .suppression_kind()
+            .is_some_and(SuppressionKind::is_classic)
     {
         return CommentPlacement::Default(comment);
     }
@@ -683,29 +667,6 @@ fn handle_end_of_line_comment(
         }
 
         return CommentPlacement::trailing(preceding_node.clone(), comment);
-    }
-
-    CommentPlacement::Default(comment)
-}
-
-fn handle_global_suppression(
-    comment: DecoratedComment<YamlLanguage>,
-) -> CommentPlacement<YamlLanguage> {
-    let node = comment.enclosing_node();
-
-    if node.text_range_with_trivia().start() == TextSize::from(0) {
-        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
-            trivia
-                .pieces()
-                .filter(|piece| piece.is_comments())
-                .any(|piece| YamlCommentStyle::is_global_suppression(piece.text()))
-        });
-        let root = node.ancestors().find_map(YamlRoot::cast);
-        if let Some(root) = root
-            && has_global_suppression
-        {
-            return CommentPlacement::leading(root.syntax().clone(), comment);
-        }
     }
 
     CommentPlacement::Default(comment)

@@ -192,6 +192,10 @@ fn nested_link_starts_here(p: &mut MarkdownParser) -> bool {
                 return false;
             }
 
+            if code_span::skip_code_span_in_lookahead(p) || html::skip_inline_html_in_lookahead(p) {
+                continue;
+            }
+
             if p.at(L_BRACK) {
                 depth += 1;
                 p.bump(L_BRACK);

@@ -25,31 +25,27 @@ pub(crate) fn parse_hard_line(p: &mut MarkdownParser) -> ParsedSyntax {
     Present(m.complete(p, MD_HARD_LINE))
 }
 
-/// Check if there's a matching closing backtick sequence before EOF/blank line.
+/// Returns the position of a matching closing backtick sequence before EOF/blank line.
 ///
 /// Per CommonMark §6.1, a code span opener must have a matching closer with the
 /// same number of backticks. If no match exists, the opener should be treated
 /// as literal text, not an unclosed code span.
 ///
-/// Returns false if no match found (opener should become literal text).
-fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> bool {
+/// Returns `None` if no match is found; the opener is literal text.
+fn matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -> Option<TextSize> {
     p.lookahead(|p| {
-        // Skip the opening backticks (handle both BACKTICK and TRIPLE_BACKTICK)
-        if p.at(T!["```"]) {
-            p.bump(T!["```"]);
-        } else {
-            p.bump(BACKTICK);
-        }
+        // Backslashes are literal from the first content byte, including before a closing tick.
+        p.bump_with_context(p.cur(), MarkdownLexContext::CodeSpan);
 
         loop {
             // EOF = no matching closer found
             if p.at(T![EOF]) {
-                return false;
+                return None;
             }
 
             // Blank line = paragraph boundary, terminates search
             if p.at(NEWLINE) && p.is_at_blank_line() {
-                return false;
+                return None;
             }
 
             // Per CommonMark §4.3, setext heading underlines take priority over
@@ -58,12 +54,13 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             if p.at(NEWLINE) {
                 p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
                 if at_setext_underline_after_newline(p).is_some() {
-                    return false;
+                    return None;
                 }
                 // Per CommonMark, block interrupts (including list markers) can
                 // terminate paragraphs. A code span cannot cross a block boundary.
-                if at_block_interrupt(p) || is_at_list_marker_after_newline(p) {
-                    return false;
+                // The list check uses regular lexing, so its token changes must be rewound.
+                if at_block_interrupt(p) || p.lookahead(is_at_list_marker_after_newline) {
+                    return None;
                 }
                 continue;
             }
@@ -72,14 +69,10 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             if p.at(BACKTICK) || p.at(T!["```"]) {
                 let closing_count = p.cur_text().len();
                 if closing_count == opening_count {
-                    return true;
+                    return Some(p.cur_range().start());
                 }
                 // Not matching - continue searching
-                if p.at(T!["```"]) {
-                    p.bump(T!["```"]);
-                } else {
-                    p.bump(BACKTICK);
-                }
+                p.bump_with_context(p.cur(), MarkdownLexContext::CodeSpan);
                 continue;
             }
 
@@ -87,6 +80,22 @@ fn has_matching_code_span_closer(p: &mut MarkdownParser, opening_count: usize) -
             p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
         }
     })
+}
+
+/// Consumes a complete code span during lookahead, leaving unmatched backticks untouched.
+pub(super) fn skip_code_span_in_lookahead(p: &mut MarkdownParser) -> bool {
+    if !p.at(BACKTICK) && !p.at(T!["```"]) {
+        return false;
+    }
+    let Some(close) = matching_code_span_closer(p, p.cur_text().len()) else {
+        return false;
+    };
+    p.bump_with_context(p.cur(), MarkdownLexContext::CodeSpan);
+    while !p.at(T![EOF]) && p.cur_range().start() < close {
+        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
+    }
+    p.bump_any();
+    true
 }
 
 /// Check if we're at a list marker after a newline.
@@ -179,7 +188,7 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     // DESIGN PRINCIPLE #2 & #4: Check for matching closer BEFORE creating any nodes.
     // If no match exists, return Absent so backticks become literal text.
     // This avoids synthesizing MD_INLINE_CODE with missing r_tick_token.
-    if !has_matching_code_span_closer(p, opening_count) {
+    if matching_code_span_closer(p, opening_count).is_none() {
         return Absent; // Caller will treat backtick as literal MD_TEXTUAL
     }
 
@@ -187,11 +196,7 @@ pub(crate) fn parse_inline_code(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
     // Opening backtick(s) - remap TRIPLE_BACKTICK to BACKTICK for consistency
-    if is_triple_backtick {
-        p.bump_remap(BACKTICK);
-    } else {
-        p.bump(BACKTICK);
-    }
+    p.bump_remap_with_context(BACKTICK, MarkdownLexContext::CodeSpan);
 
     // Content - parse until we find matching closing backticks
     // Per CommonMark, code spans can span multiple lines (newlines become spaces in output)
