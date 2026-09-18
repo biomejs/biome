@@ -1,0 +1,35 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/suppression_global.yaml
+---
+
+# Input
+
+```yaml
+# License header
+# biome-ignore-all format: preserve every document
+%YAML 1.2
+---
+first:    [1,2]
+...
+---
+second:    {a:  1,b:  2}
+# Trailing comment
+
+```
+
+
+# Formatted
+
+```yaml
+# License header
+# biome-ignore-all format: preserve every document
+%YAML 1.2
+---
+first:    [1,2]
+...
+---
+second:    {a:  1,b:  2}
+# Trailing comment
+
+```

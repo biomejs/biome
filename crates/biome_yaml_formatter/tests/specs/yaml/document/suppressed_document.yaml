@@ -2,3 +2,36 @@
 foo:     bar
 ---
 a:    1
+---
+before:    [1,2]
+# biome-ignore format: preserve the following mapping entry
+preserved:    [3,  4]
+after:    [5,6]
+nested:
+  before:    [1,2]
+  # biome-ignore format: preserve the following nested entry
+  preserved:    {a:  1,b:  2}
+  after:    [5,6]
+sequence:
+  - [1,2]
+  # biome-ignore format: preserve the following sequence entry
+  -    [3,  4]
+  - [5,6]
+flow: [
+  [1,2],
+  # biome-ignore format: preserve a flow item
+  [3,  4],
+  [5,6]
+]
+value_comment: # biome-ignore format: preserve the following value
+  [1,  2]
+opening_comment: [ # biome-ignore format: preserve the first flow item
+  [3,  4], [5,6]
+]
+flow_mapping: {
+  value: # biome-ignore format: preserve a flow mapping value
+    [1,  2], next: [3,4]
+}
+opening_mapping: { # biome-ignore format: preserve the first flow entry
+  a:    [1,  2], b: [3,4]
+}

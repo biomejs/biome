@@ -58,7 +58,8 @@ impl CommentStyle for YamlCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        handle_document_comment(comment)
+        handle_suppression_comment(comment)
+            .or_else(handle_document_comment)
             .or_else(handle_flow_map_explicit_entry_comment)
             .or_else(handle_block_map_explicit_entry_comment)
             .or_else(handle_middle_comment)
@@ -67,6 +68,31 @@ impl CommentStyle for YamlCommentStyle {
             .or_else(handle_own_line_comment)
             .or_else(handle_end_of_line_comment)
     }
+}
+
+/// Attaches inline formatter suppressions to the following mapping value or flow entry.
+fn handle_suppression_comment(
+    comment: DecoratedComment<YamlLanguage>,
+) -> CommentPlacement<YamlLanguage> {
+    if comment.text_position() != CommentTextPosition::EndOfLine
+        || !comment
+            .suppression_kind()
+            .is_some_and(SuppressionKind::is_classic)
+        || !(FLOW_COLLECTIONS.contains(comment.enclosing_node().kind())
+            || matches!(
+                comment.enclosing_node().kind(),
+                YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
+                    | YamlSyntaxKind::YAML_FLOW_MAP_IMPLICIT_ENTRY
+            ))
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let Some(following) = comment.following_node() else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::leading(following.clone(), comment)
 }
 
 /// Handles a middle comment, one sitting between a node's properties and its

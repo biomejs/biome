@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/suppression_ignored.yaml
+---
+
+# Input
+
+```yaml
+# biome-ignore lint: only formatter suppressions apply
+first:    [1,2]
+# biome-ignore format:
+missing_reason:    [3,4]
+# biome-ignore-start format: range suppressions are unsupported
+range:    [5,6]
+# biome-ignore-end format: range suppressions are unsupported
+after:    [7,8]
+# biome-ignore-all format: content has already started
+late:    [9,10]
+literal: |
+  # biome-ignore-all format: this is scalar content
+  text
+quoted: "# biome-ignore format: this is scalar content"
+formatted:    [11,12]
+---
+# biome-ignore-all format: this is a later document
+later_document:    [13,14]
+
+```
+
+
+# Formatted
+
+```yaml
+# biome-ignore lint: only formatter suppressions apply
+first: [1, 2]
+# biome-ignore format:
+missing_reason: [3, 4]
+# biome-ignore-start format: range suppressions are unsupported
+range: [5, 6]
+# biome-ignore-end format: range suppressions are unsupported
+after: [7, 8]
+# biome-ignore-all format: content has already started
+late: [9, 10]
+literal: |
+  # biome-ignore-all format: this is scalar content
+  text
+quoted: "# biome-ignore format: this is scalar content"
+formatted: [11, 12]
+---
+# biome-ignore-all format: this is a later document
+later_document: [13, 14]
+
+```

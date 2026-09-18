@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/suppression_global_header.yaml
+---
+
+# Input
+
+```yaml
+%YAML 1.2
+---
+# biome-ignore-all format: this comment follows the document header
+first:    [1,2]
+...
+---
+second:    {a:  1,b:  2}
+
+```
+
+
+# Formatted
+
+```yaml
+%YAML 1.2
+---
+# biome-ignore-all format: this comment follows the document header
+first: [1, 2]
+...
+---
+second: { a: 1, b: 2 }
+
+```
