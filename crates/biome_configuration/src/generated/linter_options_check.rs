@@ -2145,6 +2145,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_literal_keys::UseLiteralKeysOptions>(),
     ));
     result.push((
+        "nursery",
+        "useLogicalProperties",
+        TypeId::of::<biome_rule_options::use_logical_properties::UseLogicalPropertiesOptions>(),
+    ));
+    result.push((
         "correctness",
         "useLoneAnonymousOperation",
         TypeId::of::<

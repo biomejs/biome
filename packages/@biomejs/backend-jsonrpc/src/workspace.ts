@@ -2809,7 +2809,7 @@ See https://biomejs.dev/linter/rules/use-layered-styles
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
 	* Enforce logical properties over physical properties.
-See https://biomejs.dev/linter/rules/use-logical-properties
+See https://biomejs.dev/linter/rules/use-logical-properties 
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
