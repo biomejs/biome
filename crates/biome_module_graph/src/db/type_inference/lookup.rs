@@ -7,7 +7,7 @@ use biome_js_type_info::interned_types::{
     TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     TypeTransformResult,
 };
-use rustc_hash::{FxHashMap, FxHashSet, FxHasher};
+use rustc_hash::{FxHashSet, FxHasher};
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
@@ -148,7 +148,7 @@ impl<'db> InferredModuleTypes<'db> {
 }
 
 /// Selects which side of a type participates in member lookup.
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(in crate::db::type_inference) enum MemberLookupMode {
     /// Accepts both class-side and instance-side members.
     Any,
@@ -199,7 +199,7 @@ pub(in crate::db::type_inference) trait MemberLookupResolver<'db> {
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
         is_optional: bool,
-        substitutions: &SubstitutionEnvironment<'db>,
+        substitutions: &[InferredTypeSubstitution<'db>],
         crossed_instance: bool,
     ) -> InferredTypeData<'db>;
 }
@@ -218,10 +218,10 @@ impl<'db> MemberLookupResolver<'db> for &InferredModuleTypes<'db> {
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
         _is_optional: bool,
-        substitutions: &SubstitutionEnvironment<'db>,
+        substitutions: &[InferredTypeSubstitution<'db>],
         _crossed_instance: bool,
     ) -> InferredTypeData<'db> {
-        substitutions.apply(db, ty)
+        apply_substitutions(db, ty, substitutions)
     }
 }
 
@@ -241,88 +241,56 @@ impl<'db> MemberLookupResolver<'db> for OnDemandMemberLookupResolver {
         db: &'db dyn ModuleDb,
         ty: InferredTypeData<'db>,
         _is_optional: bool,
-        substitutions: &SubstitutionEnvironment<'db>,
+        substitutions: &[InferredTypeSubstitution<'db>],
         _crossed_instance: bool,
     ) -> InferredTypeData<'db> {
-        substitutions.apply(db, ty)
+        apply_substitutions(db, ty, substitutions)
     }
 }
 
-/// Current generic bindings for a member lookup branch. Equality ignores the
-/// order in which bindings were introduced so recursive lookup can reuse states.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub(in crate::db::type_inference) struct SubstitutionEnvironment<'db> {
-    bindings: Rc<FxHashMap<InferredTypeData<'db>, InferredTypeData<'db>>>,
-}
-
-impl Hash for SubstitutionEnvironment<'_> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let mut hash = 0u64;
-        for binding in self.bindings.iter() {
-            let mut hasher = FxHasher::default();
-            binding.hash(&mut hasher);
-            hash = hash.wrapping_add(hasher.finish());
-        }
-        self.bindings.len().hash(state);
-        hash.hash(state);
-    }
-}
-
-impl<'db> SubstitutionEnvironment<'db> {
-    pub(super) fn apply(
-        &self,
-        db: &'db dyn ModuleDb,
-        ty: InferredTypeData<'db>,
-    ) -> InferredTypeData<'db> {
-        let substitutions = self
-            .bindings
-            .iter()
-            .map(|(&generic, &replacement)| InferredTypeSubstitution {
-                generic,
-                replacement,
-            })
-            .collect::<Vec<_>>();
-        ty.substitute_types(db, &substitutions)
-            .map_or(InferredTypeData::Unknown, |ty| ty)
-    }
-
-    fn for_instance(
-        &self,
-        db: &'db dyn ModuleDb,
-        target: InferredTypeData<'db>,
-        arguments: &[InferredTypeData<'db>],
-    ) -> Self {
-        let mut environment = self.clone();
-        if let Some(parameters) = declared_type_parameters(db, target) {
-            for (&generic, &argument) in parameters.iter().zip(arguments) {
-                if !generic.is_generic_reference(db) {
-                    continue;
-                }
-                // Substituting the parameter would turn its existing argument
-                // into a pattern that can rewrite unrelated types.
-                let replacement = self.apply(db, argument);
-                let instance = InferredTypeData::instance_of(db, generic, Box::default());
-                if environment.bindings.get(&generic) == Some(&replacement)
-                    && environment.bindings.get(&instance) == Some(&replacement)
-                {
-                    continue;
-                }
-                let bindings = Rc::make_mut(&mut environment.bindings);
-                bindings.insert(instance, replacement);
-                bindings.insert(generic, replacement);
-            }
-        }
-        environment
-    }
-}
-
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct MemberLookupState<'db> {
     ty: InferredTypeData<'db>,
     mode: MemberLookupMode,
     collect_result: bool,
     crossed_instance: bool,
-    substitutions: SubstitutionEnvironment<'db>,
+    substitutions: Rc<[InferredTypeSubstitution<'db>]>,
+}
+
+// Substitutions are applied simultaneously, so their order does not distinguish
+// lookup states. Each substitution has a distinct `generic` value.
+impl PartialEq for MemberLookupState<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ty == other.ty
+            && self.mode == other.mode
+            && self.collect_result == other.collect_result
+            && self.crossed_instance == other.crossed_instance
+            && self.substitutions.len() == other.substitutions.len()
+            && (self.substitutions == other.substitutions
+                || self
+                    .substitutions
+                    .iter()
+                    .all(|substitution| other.substitutions.contains(substitution)))
+    }
+}
+
+impl Eq for MemberLookupState<'_> {}
+
+impl Hash for MemberLookupState<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ty.hash(state);
+        self.mode.hash(state);
+        self.collect_result.hash(state);
+        self.crossed_instance.hash(state);
+        self.substitutions.len().hash(state);
+        let mut hash = 0u64;
+        for substitution in self.substitutions.iter() {
+            let mut hasher = FxHasher::default();
+            substitution.hash(&mut hasher);
+            hash = hash.wrapping_add(hasher.finish());
+        }
+        hash.hash(state);
+    }
 }
 
 impl<'db> MemberLookupState<'db> {
@@ -332,7 +300,7 @@ impl<'db> MemberLookupState<'db> {
             mode,
             collect_result: false,
             crossed_instance: false,
-            substitutions: SubstitutionEnvironment::default(),
+            substitutions: Rc::default(),
         }
     }
 
@@ -406,20 +374,19 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
         let ty = resolver
             .resolve_type(db, state.ty)
             .expand_canonical_global(db);
-        let ty = if let Some(&replacement) = state.substitutions.bindings.get(&ty) {
+        let ty = if let Some(substitution) = state
+            .substitutions
+            .iter()
+            .find(|substitution| substitution.generic == ty)
+        {
             resolver
-                .resolve_type(db, replacement)
+                .resolve_type(db, substitution.replacement)
                 .expand_canonical_global(db)
         } else {
             ty
         };
-        if !seen.insert((
-            ty,
-            state.mode,
-            state.collect_result,
-            state.crossed_instance,
-            state.substitutions.clone(),
-        )) {
+        state.ty = ty;
+        if !seen.insert(state.clone()) {
             continue;
         }
 
@@ -434,10 +401,15 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             let target = resolver
                 .resolve_type(db, instance.ty(db))
                 .expand_canonical_global(db);
-            state.substitutions =
-                state
-                    .substitutions
-                    .for_instance(db, target, instance.type_parameters(db));
+            let substitutions = substitutions_for_instance(
+                db,
+                target,
+                instance.type_parameters(db),
+                &state.substitutions,
+            );
+            if substitutions.as_slice() != state.substitutions.as_ref() {
+                state.substitutions = substitutions.into();
+            }
             state.ty = target;
             state.mode = MemberLookupMode::Instance;
             state.crossed_instance = true;
@@ -561,6 +533,11 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     collected_type_result(db, found)
 }
 
+/// Collects replacements for an instance's generic parameters.
+///
+/// Arguments are substituted using the inherited replacements first. A new
+/// replacement for the same parameter updates its entry rather than adding a
+/// duplicate. The inherited list is left unchanged.
 pub(in crate::db) fn substitutions_for_instance<'db>(
     db: &'db dyn ModuleDb,
     target: InferredTypeData<'db>,
@@ -576,22 +553,25 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
 
     let mut substitutions = inherited.to_vec();
     for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
-        let declared = apply_substitutions(db, *declared, inherited);
+        let declared = *declared;
         if !declared.is_generic_reference(db) {
             continue;
         }
         let replacement = apply_substitutions(db, *replacement, inherited);
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
-        if declared_instance != declared {
-            substitutions.push(InferredTypeSubstitution {
-                generic: declared_instance,
-                replacement,
-            });
+        for generic in [declared_instance, declared] {
+            if let Some(substitution) = substitutions
+                .iter_mut()
+                .find(|substitution| substitution.generic == generic)
+            {
+                substitution.replacement = replacement;
+            } else {
+                substitutions.push(InferredTypeSubstitution {
+                    generic,
+                    replacement,
+                });
+            }
         }
-        substitutions.push(InferredTypeSubstitution {
-            generic: declared,
-            replacement,
-        });
     }
 
     substitutions
@@ -642,19 +622,14 @@ fn declared_type_parameters<'db>(
     }
 }
 
+/// Replaces each generic once without substituting inside its replacement.
 pub(in crate::db::type_inference) fn apply_substitutions<'db>(
     db: &'db dyn ModuleDb,
-    mut ty: InferredTypeData<'db>,
+    ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
-    for substitution in substitutions {
-        let TypeTransformResult::Transformed(substituted) = ty.substitute_type(db, *substitution)
-        else {
-            return InferredTypeData::Unknown;
-        };
-        ty = substituted;
-    }
-    ty
+    ty.substitute_types(db, substitutions)
+        .map_or(InferredTypeData::Unknown, |ty| ty)
 }
 
 pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
@@ -945,10 +920,11 @@ mod tests {
     }
 
     #[test]
-    fn substitution_environment_rebinding_preserves_other_branches() {
+    fn instance_substitutions_rebind_without_changing_other_branches() {
         let db = TestDb::default();
         let generic = InferredTypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             None,
             Text::from("T"),
@@ -960,56 +936,118 @@ mod tests {
             Box::default(),
             Text::from("Base"),
         ));
-        let parent = SubstitutionEnvironment::default().for_instance(
-            &db,
-            target,
-            &[InferredTypeData::Number],
-        );
-        let unchanged = parent.for_instance(&db, target, &[InferredTypeData::Number]);
-        let rebound = parent.for_instance(&db, target, &[InferredTypeData::Null]);
-        let mut seen = FxHashSet::default();
-        seen.insert(parent.clone());
-        assert!(seen.contains(&unchanged));
-        assert!(!seen.contains(&rebound));
+        let parent = substitutions_for_instance(&db, target, &[InferredTypeData::Number], &[]);
+        let unchanged =
+            substitutions_for_instance(&db, target, &[InferredTypeData::Number], &parent);
+        let rebound = substitutions_for_instance(&db, target, &[InferredTypeData::Null], &parent);
+        assert_eq!(parent, unchanged);
+        assert_eq!(parent.len(), rebound.len());
         for reference in [
             generic,
             InferredTypeData::instance_of(&db, generic, Box::default()),
         ] {
-            assert_eq!(parent.apply(&db, reference), InferredTypeData::Number);
-            assert_eq!(unchanged.apply(&db, reference), InferredTypeData::Number);
-            assert_eq!(rebound.apply(&db, reference), InferredTypeData::Null);
+            assert_eq!(
+                apply_substitutions(&db, reference, &parent),
+                InferredTypeData::Number
+            );
+            assert_eq!(
+                apply_substitutions(&db, reference, &unchanged),
+                InferredTypeData::Number
+            );
+            assert_eq!(
+                apply_substitutions(&db, reference, &rebound),
+                InferredTypeData::Null
+            );
         }
         let reference = InferredTypeData::instance_of(&db, generic, Box::default());
         let alias = InferredTypeData::instance_of(&db, target, vec![reference].into_boxed_slice());
-        let alias_bound = parent.for_instance(&db, alias, &[InferredTypeData::Null]);
-        assert_eq!(alias_bound.apply(&db, generic), InferredTypeData::Number);
-        assert_eq!(alias_bound.apply(&db, reference), InferredTypeData::Null);
-        let restored = alias_bound.for_instance(&db, target, &[InferredTypeData::Number]);
-        assert_eq!(restored.apply(&db, generic), InferredTypeData::Number);
-        assert_eq!(restored.apply(&db, reference), InferredTypeData::Number);
+        let alias_bound =
+            substitutions_for_instance(&db, alias, &[InferredTypeData::Null], &parent);
+        assert_eq!(
+            apply_substitutions(&db, generic, &alias_bound),
+            InferredTypeData::Number
+        );
+        assert_eq!(
+            apply_substitutions(&db, reference, &alias_bound),
+            InferredTypeData::Null
+        );
+        let restored =
+            substitutions_for_instance(&db, target, &[InferredTypeData::Number], &alias_bound);
+        assert_eq!(
+            apply_substitutions(&db, generic, &restored),
+            InferredTypeData::Number
+        );
+        assert_eq!(
+            apply_substitutions(&db, reference, &restored),
+            InferredTypeData::Number
+        );
     }
 
     #[test]
-    fn substitution_environment_identity_ignores_insertion_order() {
-        let first = SubstitutionEnvironment {
-            bindings: Rc::new(FxHashMap::from_iter([
-                (InferredTypeData::String, InferredTypeData::Number),
-                (InferredTypeData::Boolean, InferredTypeData::BigInt),
-            ])),
+    fn instance_substitutions_resolve_arguments_before_rebinding_parameters() {
+        let db = TestDb::default();
+        let generic = |name| {
+            InferredTypeData::Generic(InternedGenericTypeParameter::new(
+                &db,
+                false,
+                None,
+                None,
+                Text::from(name),
+            ))
         };
-        let second = SubstitutionEnvironment {
-            bindings: Rc::new(FxHashMap::from_iter([
-                (InferredTypeData::Boolean, InferredTypeData::BigInt),
-                (InferredTypeData::String, InferredTypeData::Number),
-            ])),
-        };
+        let t = generic("T");
+        let u = generic("U");
+        let target = InferredTypeData::Interface(InternedInterface::new(
+            &db,
+            vec![t, u].into_boxed_slice(),
+            Box::default(),
+            Box::default(),
+            Text::from("Pair"),
+        ));
+        let parent = substitutions_for_instance(
+            &db,
+            target,
+            &[InferredTypeData::String, InferredTypeData::Number],
+            &[],
+        );
+        let swapped = substitutions_for_instance(&db, target, &[u, t], &parent);
+        assert_eq!(swapped.len(), parent.len());
+        assert_eq!(
+            apply_substitutions(&db, t, &swapped),
+            InferredTypeData::Number
+        );
+        assert_eq!(
+            apply_substitutions(&db, u, &swapped),
+            InferredTypeData::String
+        );
+        let symbolic = substitutions_for_instance(&db, target, &[u, t], &[]);
+        assert_eq!(apply_substitutions(&db, t, &symbolic), u);
+        assert_eq!(apply_substitutions(&db, u, &symbolic), t);
+    }
+
+    #[test]
+    fn member_lookup_state_ignores_substitution_order() {
+        let mut first =
+            MemberLookupState::new(InferredTypeData::ObjectKeyword, MemberLookupMode::Any);
+        first.substitutions = vec![
+            InferredTypeSubstitution {
+                generic: InferredTypeData::String,
+                replacement: InferredTypeData::Number,
+            },
+            InferredTypeSubstitution {
+                generic: InferredTypeData::Boolean,
+                replacement: InferredTypeData::BigInt,
+            },
+        ]
+        .into();
+        let mut second = first.clone();
+        Rc::make_mut(&mut second.substitutions).reverse();
         assert_eq!(first, second);
         let mut seen = FxHashSet::default();
         assert!(seen.insert(first.clone()));
         assert!(!seen.insert(second));
         let mut rebound = first;
-        Rc::make_mut(&mut rebound.bindings)
-            .insert(InferredTypeData::String, InferredTypeData::Boolean);
+        Rc::make_mut(&mut rebound.substitutions)[0].replacement = InferredTypeData::Boolean;
         assert!(seen.insert(rebound));
     }
 }
