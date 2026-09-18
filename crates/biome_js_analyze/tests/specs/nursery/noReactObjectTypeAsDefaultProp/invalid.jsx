@@ -34,5 +34,14 @@ const Bar = ({
 const Wrapped = memo(({ a = {} }) => null);
 const Forwarded = forwardRef(({ b = [] }, ref) => null);
 
+// aliased and nested defaults
+function Aliased({ value: renamed = {} }) {
+  return renamed;
+}
+
+function NestedDefault({ config: { value = {} } = {} }) {
+  return value;
+}
+
 // PascalCase name is enough; Biome detects components by name, not by return value
 export default function NotReturningJsx({ foo = {} }) {}

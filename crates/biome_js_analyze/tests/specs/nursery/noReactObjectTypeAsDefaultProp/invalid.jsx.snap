@@ -40,6 +40,15 @@ const Bar = ({
 const Wrapped = memo(({ a = {} }) => null);
 const Forwarded = forwardRef(({ b = [] }, ref) => null);
 
+// aliased and nested defaults
+function Aliased({ value: renamed = {} }) {
+  return renamed;
+}
+
+function NestedDefault({ config: { value = {} } = {} }) {
+  return value;
+}
+
 // PascalCase name is enough; Biome detects components by name, not by return value
 export default function NotReturningJsx({ foo = {} }) {}
 
@@ -454,7 +463,7 @@ invalid.jsx:35:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━
   > 35 │ const Forwarded = forwardRef(({ b = [] }, ref) => null);
        │                                     ^^
     36 │ 
-    37 │ // PascalCase name is enough; Biome detects components by name, not by return value
+    37 │ // aliased and nested defaults
   
   i React sees this as a different value each render, so the component may re-render more than needed.
   
@@ -466,14 +475,55 @@ invalid.jsx:35:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━
 ```
 
 ```
-invalid.jsx:38:49 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:38:37 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Every render creates an object literal here.
   
-    37 │ // PascalCase name is enough; Biome detects components by name, not by return value
-  > 38 │ export default function NotReturningJsx({ foo = {} }) {}
+    37 │ // aliased and nested defaults
+  > 38 │ function Aliased({ value: renamed = {} }) {
+       │                                     ^^
+    39 │   return renamed;
+    40 │ }
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:42:51 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Every render creates an object literal here.
+  
+    40 │ }
+    41 │ 
+  > 42 │ function NestedDefault({ config: { value = {} } = {} }) {
+       │                                                   ^^
+    43 │   return value;
+    44 │ }
+  
+  i React sees this as a different value each render, so the component may re-render more than needed.
+  
+  i Move this value to a constant outside the component and use that as the default.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:47:49 lint/nursery/noReactObjectTypeAsDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Every render creates an object literal here.
+  
+    46 │ // PascalCase name is enough; Biome detects components by name, not by return value
+  > 47 │ export default function NotReturningJsx({ foo = {} }) {}
        │                                                 ^^
-    39 │ 
+    48 │ 
   
   i React sees this as a different value each render, so the component may re-render more than needed.
   

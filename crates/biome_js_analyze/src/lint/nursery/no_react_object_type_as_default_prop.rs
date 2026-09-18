@@ -170,12 +170,16 @@ fn collect_forbidden_defaults(object_pattern: &JsObjectBindingPattern) -> Vec<Fo
         .properties()
         .into_iter()
         .filter_map(|property| {
-            let AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(shorthand) =
-                property.ok()?
-            else {
-                return None;
+            let initializer = match property.ok()? {
+                AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(property) => {
+                    property.init()
+                }
+                AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                    shorthand,
+                ) => shorthand.init(),
+                _ => None,
             };
-            let default_value = shorthand.init()?.expression().ok()?;
+            let default_value = initializer?.expression().ok()?;
             let kind = ForbiddenDefaultKind::from_expression(&default_value)?;
             Some(ForbiddenDefault {
                 range: default_value.range(),

@@ -40,8 +40,8 @@ function Baz(props) {
 }
 Baz.defaultProps = { bar: () => {} };
 
-// nested patterns are not checked
-function Nested({ config: { value = {} } = {} }) {
+// nested defaults without a top-level default are not checked
+function Nested({ config: { value = {} } }) {
   return null;
 }
 
