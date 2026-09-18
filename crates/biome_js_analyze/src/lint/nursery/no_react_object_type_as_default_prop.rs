@@ -21,7 +21,7 @@ declare_lint_rule! {
     /// `useEffect` that depends on the prop.
     ///
     /// Numbers, strings, and other primitives are fine, because they stay the same
-    /// between renders.
+    /// among renders.
     ///
     /// ## Examples
     ///
