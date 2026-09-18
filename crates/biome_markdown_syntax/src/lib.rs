@@ -5,6 +5,7 @@ pub mod emphasis_ext;
 mod generated;
 pub mod block_ext;
 mod header_ext;
+pub mod html_comment_ext;
 pub mod inline_ext;
 pub mod list_ext;
 mod syntax_node;
@@ -72,6 +73,13 @@ impl SyntaxKind for MarkdownSyntaxKind {
 
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
+    }
+
+    fn is_allowed_before_suppressions(&self) -> bool {
+        matches!(
+            self,
+            Self::UNICODE_BOM | Self::FENCE | Self::MD_FRONTMATTER_LITERAL | Self::NEWLINE
+        )
     }
 }
 

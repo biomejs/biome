@@ -1,0 +1,43 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: code.md
+---
+# Input
+```md
+```
+code
+```
+
+```
+
+# Diagnostics
+```
+code.md:1:1 lint/nursery/useFencedCodeLanguage  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+  > 1 │ ```
+      │ ^^^
+    2 │ code
+    3 │ ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/useFencedCodeLanguage for this line.
+  
+      1 │ + <!--·biome-ignore·lint/nursery/useFencedCodeLanguage:·<explanation>·-->
+    1 2 │   ```
+    2 3 │   code
+  
+  i Safe fix: Suppress rule lint/nursery/useFencedCodeLanguage for the whole file.
+  
+      1 │ + <!--·biome-ignore-all·lint/nursery/useFencedCodeLanguage:·<explanation>·-->
+    1 2 │   ```
+    2 3 │   code
+  
+
+```

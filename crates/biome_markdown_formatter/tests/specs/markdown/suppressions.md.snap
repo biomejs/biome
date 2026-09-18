@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/suppressions.md
+---
+
+# Input
+
+```md
+<!-- biome-ignore format: preserve heading spacing -->
+#    Preserved     heading
+
+#    Formatted heading
+
+<!-- biome-ignore format: preserve list spacing -->
+-    preserved item
+
+<!-- biome-ignore lint: keep this attached to the list -->
+-    formatted item
+
+Mixed    paragraph <!-- biome-ignore format: preserve the following heading -->
+###    preserved after inline suppression
+
+- parent
+
+  <!-- biome-ignore format: preserve nested heading spacing -->
+  ##    nested heading
+
+> parent
+>
+> <!-- biome-ignore format: preserve quoted heading spacing -->
+> #    quoted heading
+
+> <!--
+> biome-ignore format: preserve multiline quoted heading spacing
+> -->
+> ##    multiline quoted heading
+
+```
+
+
+# Formatted
+
+```md
+<!-- biome-ignore format: preserve heading spacing -->
+#    Preserved     heading
+
+# Formatted heading
+
+<!-- biome-ignore format: preserve list spacing -->
+-    preserved item
+
+<!-- biome-ignore lint: keep this attached to the list -->
+-    formatted item
+
+Mixed    paragraph <!-- biome-ignore format: preserve the following heading -->
+###    preserved after inline suppression
+
+- parent
+
+  <!-- biome-ignore format: preserve nested heading spacing -->
+  ##    nested heading
+
+> parent
+>
+> <!-- biome-ignore format: preserve quoted heading spacing -->
+> #    quoted heading
+
+> <!--
+> biome-ignore format: preserve multiline quoted heading spacing
+> -->
+> ##    multiline quoted heading
+
+```

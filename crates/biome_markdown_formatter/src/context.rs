@@ -4,7 +4,7 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
-use biome_markdown_syntax::MarkdownLanguage;
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use std::{fmt, rc::Rc, str::FromStr};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
@@ -154,11 +154,19 @@ impl MdFormatOptions {
 }
 
 impl MarkdownFormatContext {
-    pub fn new(options: MdFormatOptions) -> Self {
+    pub fn new(
+        options: MdFormatOptions,
+        root: &MarkdownSyntaxNode,
+        source_map: Option<TransformSourceMap>,
+    ) -> Self {
         Self {
             options,
-            comments: Rc::new(MarkdownComments::default()),
-            source_map: None,
+            comments: Rc::new(MarkdownComments::from_node(
+                root,
+                &MarkdownCommentStyle,
+                source_map.as_ref(),
+            )),
+            source_map,
         }
     }
 

@@ -2,7 +2,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerAction, ControlFlow, Never, Queryable, RegistryVisitor,
     Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_diagnostics::advice::CodeSuggestionAdvice;
+use biome_diagnostics::{Diagnostic, advice::CodeSuggestionAdvice};
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::AstNode;
@@ -16,8 +16,16 @@ use camino::Utf8Path;
 use std::ops::Deref;
 use std::{fs::read_to_string, slice};
 
-tests_macros::gen_tests! {"tests/specs/**/*.{md,json,jsonc}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{md,json,jsonc}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {
+    "tests/specs/**/*.{md,json,jsonc}",
+    crate::run_test,
+    "module"
+}
+tests_macros::gen_tests! {
+    "tests/suppression/**/*.{md,json,jsonc}",
+    crate::run_suppression_test,
+    "module"
+}
 
 /// Checks if any of the enabled rules is in the project domain and requires the module graph.
 struct NeedsModuleGraph<'a> {
@@ -152,11 +160,25 @@ pub(crate) fn analyze_and_snap(
             for action in event.actions(ActionFilter::all()) {
                 if check_action_type.is_suppression() {
                     if action.is_suppression() {
-                        check_code_action(input_file, input_code, &action, &parser_options);
+                        check_code_action(
+                            input_file,
+                            input_code,
+                            &action,
+                            &parser_options,
+                            filter,
+                            &options,
+                        );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
                 } else if !action.is_suppression() {
-                    check_code_action(input_file, input_code, &action, &parser_options);
+                    check_code_action(
+                        input_file,
+                        input_code,
+                        &action,
+                        &parser_options,
+                        filter,
+                        &options,
+                    );
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
             }
@@ -168,11 +190,25 @@ pub(crate) fn analyze_and_snap(
         for action in event.actions(ActionFilter::all()) {
             if check_action_type.is_suppression() {
                 if action.category.matches("quickfix.suppressRule") {
-                    check_code_action(input_file, input_code, &action, &parser_options);
+                    check_code_action(
+                        input_file,
+                        input_code,
+                        &action,
+                        &parser_options,
+                        filter,
+                        &options,
+                    );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
             } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(input_file, input_code, &action, &parser_options);
+                check_code_action(
+                    input_file,
+                    input_code,
+                    &action,
+                    &parser_options,
+                    filter,
+                    &options,
+                );
                 code_fixes.push(code_fix_to_string(input_code, action));
             }
         }
@@ -206,6 +242,8 @@ fn check_code_action(
     source: &str,
     action: &AnalyzerAction<MarkdownLanguage>,
     parser_options: &MarkdownParserOptions,
+    filter: AnalysisFilter,
+    options: &biome_analyze::AnalyzerOptions,
 ) {
     let (new_tree, text_edit) = match action
         .mutation
@@ -234,9 +272,26 @@ fn check_code_action(
     // Re-parse the modified code and panic if the resulting tree has syntax errors
     let re_parse = parse_markdown(&output, parser_options.clone());
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
+
+    if action.is_suppression() {
+        let mut rule_diagnostics = 0;
+        biome_markdown_analyze::analyze(&re_parse.tree(), filter, options, |event| {
+            if event
+                .diagnostic()
+                .and_then(|diagnostic| diagnostic.category())
+                .is_some_and(|category| category.name().starts_with("lint/"))
+            {
+                rule_diagnostics += 1;
+            }
+            ControlFlow::<Never>::Continue(())
+        });
+        assert_eq!(
+            rule_diagnostics, 0,
+            "suppression action did not suppress the rule:\n{output}"
+        );
+    }
 }
 
-#[expect(unused)]
 pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 

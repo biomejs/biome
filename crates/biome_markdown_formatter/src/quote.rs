@@ -1,4 +1,4 @@
-use crate::bullet_list::FmtAnyList;
+use crate::bullet_list::{FmtAnyList, list_marker_alignment};
 use crate::context::ProseWrap;
 use crate::markdown::auxiliary::hard_line::FormatMdFormatHardLineOptions;
 use crate::markdown::auxiliary::inline_italic::FormatMdInlineItalicOptions;
@@ -42,11 +42,7 @@ impl Format<MarkdownFormatContext> for Quote {
             QuoteBoundaryTrim::Leading
         };
         let trim_range = quote_boundary_trim_range(&content, quote_boundary_trim);
-        let starts_with_blank_line = content
-            .iter()
-            .next()
-            .is_some_and(|block| block.is_newline());
-        let remove_prefix = starts_with_blank_line && !trim_range.is_empty();
+        let remove_prefix = trim_range.start > 0 && !trim_range.is_empty();
 
         if remove_prefix {
             write!(
@@ -241,10 +237,13 @@ struct QuoteParagraph<'a> {
 
 impl<'a> Format<MarkdownFormatContext> for QuoteParagraph<'a> {
     fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        // Some items won't be formatted, so we mark them as suppressed
-        f.context()
+        if f.context()
             .comments()
-            .is_suppressed(self.paragraph.syntax());
+            .is_suppressed(self.paragraph.syntax())
+            || self.paragraph.syntax().has_comments_descendants()
+        {
+            return Format::fmt(&format_suppressed_node(self.paragraph.syntax()), f);
+        }
         let line_prefix = quote_line_prefix(self.paragraph.syntax())?;
         let mut joiner = f.join();
         let mut after_quote_continuation_newline = false;
@@ -451,14 +450,6 @@ pub(crate) fn quote_line_prefix(syntax: &MarkdownSyntaxNode) -> FormatResult<Quo
     }
 
     Ok(QuoteLinePrefix { parts })
-}
-
-fn list_marker_alignment(bullet: &MdBullet) -> FormatResult<usize> {
-    let prefix = bullet.as_fields().prefix?;
-    let marker = prefix.marker()?;
-    Ok(prefix.pre_marker_indent().len()
-        + marker.text_trimmed().len()
-        + prefix.post_marker_len().unwrap_or(2))
 }
 
 fn should_format_quote_paragraph(paragraph: &MdParagraph) -> FormatResult<bool> {

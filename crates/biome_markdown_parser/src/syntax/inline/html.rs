@@ -4,6 +4,7 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
+use crate::lexer::html_comment_len;
 use crate::syntax::inline_span_crosses_setext;
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
@@ -29,32 +30,10 @@ pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
 
 /// HTML comment: `<!-- ... -->` per CommonMark §6.8.
 ///
-/// Special cases: `<!-->` and `<!--->` are valid degenerate comments per spec.
-/// The body must not end with `-`, and `<!--` must not be immediately followed
-/// by `>` or `->` (those are the degenerate forms, handled explicitly).
+/// The body must not contain `--` or end with `-`, and `<!--` must not be
+/// immediately followed by `>` or `->`.
 fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
-    if !bytes.starts_with(b"<!--") {
-        return None;
-    }
-
-    let rest = &bytes[4..];
-
-    // Degenerate comments: <!-->  and  <!--->
-    if rest.starts_with(b">") {
-        return Some(5);
-    }
-    if rest.starts_with(b"->") {
-        return Some(6);
-    }
-
-    // Find closing --> after <!--
-    let pos = text[4..].find("-->")?;
-    let body = &text[4..4 + pos];
-    // Body must not end with '-'
-    if body.ends_with('-') {
-        return None;
-    }
-    Some(4 + pos + 3)
+    bytes.starts_with(b"<!--").then(|| html_comment_len(text))?
 }
 
 /// Processing instruction: `<? ... ?>` per CommonMark §6.8.

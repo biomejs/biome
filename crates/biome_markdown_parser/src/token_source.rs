@@ -1,7 +1,7 @@
-use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext, html_comment_len};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, WHITESPACE};
+use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, L_ANGLE, MD_HTML_LITERAL, WHITESPACE};
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
@@ -83,7 +83,40 @@ impl<'source> MarkdownTokenSource<'source> {
         let mut trailing = !first_token;
 
         loop {
-            let kind = self.lexer.next_token(context);
+            let mut kind = self.lexer.next_token(context);
+            if kind == L_ANGLE
+                && matches!(
+                    context,
+                    MarkdownLexContext::Regular
+                        | MarkdownLexContext::HeadingContent
+                        | MarkdownLexContext::Table
+                )
+            {
+                let range = self.current_range();
+                let start = usize::from(range.start());
+                let source = self.lexer.source();
+                if let Some(comment_len) = source.get(start..).and_then(html_comment_len) {
+                    let end = start + comment_len;
+                    self.lexer.lexer_mut().set_relex_span(end, MD_HTML_LITERAL);
+                    kind = self.lexer.re_lex(MarkdownReLexContext::Span);
+                    debug_assert_eq!(kind, MD_HTML_LITERAL);
+
+                    let comment_range = self.current_range();
+                    let has_newline = source
+                        .get(usize::from(comment_range.start())..usize::from(comment_range.end()))
+                        .is_some_and(|text| text.contains(['\n', '\r']));
+                    if has_newline {
+                        self.lexer.lexer_mut().set_after_newline(true);
+                    }
+                    trailing = false;
+                    self.trivia_list.push(Trivia::new(
+                        TriviaPieceKind::MultiLineComment,
+                        comment_range,
+                        trailing,
+                    ));
+                    continue;
+                }
+            }
             let trivia_kind = if TABLE && kind == WHITESPACE {
                 Ok(TriviaPieceKind::Whitespace)
             } else {
