@@ -2242,6 +2242,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "usePlaywrightValidDescribeCallback", TypeId::of::<biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions>()));
     result.push((
+        "nursery",
+        "usePromiseRejectErrors",
+        TypeId::of::<biome_rule_options::use_promise_reject_errors::UsePromiseRejectErrorsOptions>(
+        ),
+    ));
+    result.push((
         "correctness",
         "useQwikClasslist",
         TypeId::of::<biome_rule_options::use_qwik_classlist::UseQwikClasslistOptions>(),
