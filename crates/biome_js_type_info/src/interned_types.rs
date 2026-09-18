@@ -3189,13 +3189,10 @@ mod tests {
             raw::TypeOperator::Keyof,
         ));
         let mut transformer = TypeDataTransformer::new(1);
-        let mut substituter = TypeSubstituter::new(
-            &db,
-            TypeSubstitution {
-                generic: TypeData::Number,
-                replacement: TypeData::Boolean,
-            },
-        );
+        let mut substituter = TypeSubstituter::new(&[TypeSubstitution {
+            generic: TypeData::Number,
+            replacement: TypeData::Boolean,
+        }]);
 
         assert_eq!(
             substituter.substitute(&mut transformer, &db, ty),
