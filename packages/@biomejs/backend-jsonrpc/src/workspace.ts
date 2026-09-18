@@ -2565,7 +2565,7 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
-	* Disallow array, object, and function values as default props.
+	* Disallow array, object, and function values as default props in React components.
 See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop 
 	 */
 	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;

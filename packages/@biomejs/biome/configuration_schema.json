@@ -7205,7 +7205,7 @@
 					]
 				},
 				"noReactObjectTypeAsDefaultProp": {
-					"description": "Disallow array, object, and function values as default props.\nSee https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
+					"description": "Disallow array, object, and function values as default props in React components.\nSee https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropConfiguration" },
 						{ "type": "null" }
