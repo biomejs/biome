@@ -366,11 +366,25 @@ impl<'db> TypeTransform<'db> for TypeEnvironmentSubstituter<'_, 'db> {
         TypeTransformAction::Descend(ty)
     }
 
-    fn leave(&mut self, _db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+    fn leave(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
         if let Some(length) = self.scopes.pop() {
             self.shadowed.truncate(length);
         }
-        ty
+        let is_unknown = |ty| match ty {
+            TypeData::Unknown => true,
+            TypeData::InstanceOf(instance) => {
+                instance.ty(db) == TypeData::Unknown && instance.type_parameters(db).is_empty()
+            }
+            _ => false,
+        };
+        match ty {
+            TypeData::IndexedAccess(access)
+                if is_unknown(access.object(db)) || is_unknown(access.index(db)) =>
+            {
+                TypeData::Unknown
+            }
+            _ => ty,
+        }
     }
 }
 
@@ -457,6 +471,7 @@ impl<'db> TypeData<'db> {
     /// Replaces generic references simultaneously, without substituting inside
     /// their replacements. Each generic must have at most one replacement.
     /// Nested declarations shadow only the bindings for their own parameters.
+    /// Indexed accesses with an unknown operand become [`TypeData::Unknown`].
     pub fn substitute_types(
         self,
         db: &'db dyn TypeDb,
@@ -548,7 +563,8 @@ impl<'db> TypeData<'db> {
 mod tests {
     use super::*;
     use crate::interned_types::{
-        InternedFunction, InternedGenericTypeParameter, InternedTypeofType, ReturnType,
+        InternedFunction, InternedGenericTypeParameter, InternedIndexedAccessType,
+        InternedTypeofType, ReturnType,
     };
     use biome_rowan::Text;
 
@@ -682,6 +698,59 @@ mod tests {
             .unwrap(),
             u
         );
+    }
+
+    #[test]
+    fn simultaneous_substitution_propagates_unknown_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let wrapped_unknown = TypeData::instance_of(&db, TypeData::Unknown, Box::default());
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: array,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: wrapped_unknown,
+            },
+        ];
+        for (object, index) in [
+            (t, TypeData::Unknown),
+            (t, wrapped_unknown),
+            (TypeData::Unknown, TypeData::Number),
+            (wrapped_unknown, TypeData::Number),
+            (t, u),
+            (u, TypeData::Number),
+        ] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_deferred_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: u,
+        }];
+        for index in [TypeData::Number, generic(&db, "K")] {
+            let source = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, index));
+            let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, u, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                expected,
+            );
+        }
     }
 
     #[test]
