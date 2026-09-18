@@ -2657,25 +2657,15 @@ See https://biomejs.dev/linter/rules/use-imports-first
 	 */
 	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
-	* Enforce id attribute on next/script components with inline content or dangerouslySetInnerHTML.
-See https://biomejs.dev/linter/rules/use-inline-script-id 
-	 */
-	useInlineScriptId?: UseInlineScriptIdConfiguration;
-	/**
-	* Require mutation argument to be always called "input".
-See https://biomejs.dev/linter/rules/use-input-name 
-	 */
-	useInputName?: UseInputNameConfiguration;
-	/**
-	* Disallow anonymous operations when more than one operation specified in document.
-See https://biomejs.dev/linter/rules/use-lone-anonymous-operation 
-	 */
-	useLoneAnonymousOperation?: UseLoneAnonymousOperationConfiguration;
-	/**
-	* Require queries, mutations, subscriptions or fragments each to be located in separate files.
-See https://biomejs.dev/linter/rules/use-lone-executable-definition 
+	* Prefer Array#includes() over Array#indexOf() checks.
+See https://biomejs.dev/linter/rules/use-includes 
 	 */
 	useIncludes?: UseIncludesConfiguration;
+	/**
+	* Enforce logical properties over physical properties.
+See https://biomejs.dev/linter/rules/use-logical-properties 
+	 */
+	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
@@ -4823,16 +4813,10 @@ export type UseImportsFirstConfiguration =
 	| RuleWithUseImportsFirstOptions;
 export type UseIncludesConfiguration =
 	| RulePlainConfiguration
-	| RuleWithUseInlineScriptIdOptions;
-export type UseInputNameConfiguration =
+	| RuleWithUseIncludesOptions;
+export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
-	| RuleWithUseInputNameOptions;
-export type UseLoneAnonymousOperationConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseLoneAnonymousOperationOptions;
-export type UseLoneExecutableDefinitionConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseLoneExecutableDefinitionOptions;
+	| RuleWithUseLogicalPropertiesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -6742,19 +6726,11 @@ export interface RuleWithUseImportsFirstOptions {
 export interface RuleWithUseIncludesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
-	options?: UseInlineScriptIdOptions;
+	options?: UseIncludesOptions;
 }
-export interface RuleWithUseInputNameOptions {
+export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
-	options?: UseInputNameOptions;
-}
-export interface RuleWithUseLoneAnonymousOperationOptions {
-	level: RulePlainConfiguration;
-	options?: UseLoneAnonymousOperationOptions;
-}
-export interface RuleWithUseLoneExecutableDefinitionOptions {
-	level: RulePlainConfiguration;
-	options?: UseLoneExecutableDefinitionOptions;
+	options?: UseLogicalPropertiesOptions;
 }
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
@@ -8483,15 +8459,11 @@ When `true`, only declarations (function statements and class methods) are check
 export type UseExplicitTypeOptions = {};
 export type UseIframeSandboxOptions = {};
 export type UseImportsFirstOptions = {};
-export type UseInlineScriptIdOptions = {};
-export interface UseInputNameOptions {
-	/**
-	 * Check that the input type name follows the convention <mutationName>Input
-	 */
-	checkInputType?: CheckInputType;
-}
-export type UseLoneAnonymousOperationOptions = {};
-export type UseLoneExecutableDefinitionOptions = {};
+/**
+ * Options for the `useIncludes` rule.
+ */
+export type UseIncludesOptions = {};
+export type UseLogicalPropertiesOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseNamedCaptureGroupOptions = {};
 /**
@@ -9773,8 +9745,7 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useLoneAnonymousOperation"
-	| "lint/nursery/useLoneExecutableDefinition"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useNamedCaptureGroup"
