@@ -20,6 +20,54 @@ use biome_service::db::WorkspaceDb;
 use divan::Bencher;
 use std::sync::Arc;
 
+#[path = "support/integration.rs"]
+mod integration;
+
+#[divan::bench(args = integration::ZOD_TANSTACK_FORM_CASES)]
+fn bench_zod_tanstack_form_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::ZOD_TANSTACK_FORM_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_svelte_valibot_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::SVELTE_VALIBOT_FILES, "/stores.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_type_challenges_query_string_parser_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            integration::build_db(
+                integration::TYPE_CHALLENGES_FILES,
+                "/query_string_parser.ts",
+            )
+        })
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_drizzle_typebox_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::DRIZZLE_TYPEBOX_FILES, "/queries.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
 #[cfg(target_os = "windows")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
