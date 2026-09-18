@@ -1,3 +1,4 @@
+// Biome intentionally normalizes SCSS comparison operator spacing.
 @if $media == phonePortrait {
     $k: .15625;
 } @else if $media == phoneLandscape {

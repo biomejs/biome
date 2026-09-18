@@ -66,7 +66,6 @@ MdDocument {
                                             value_token: MD_HARD_LINE_LITERAL@21..24 "  \n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [
@@ -104,7 +103,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@41..42 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                             ],
                         },
@@ -130,7 +128,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@50..51 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -180,7 +177,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@17..21 "line" [] []
                     4: MD_HARD_LINE@21..24
                       0: MD_HARD_LINE_LITERAL@21..24 "  \n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@24..27
                   0: MD_QUOTE_INDENT_LIST@24..26
                     0: MD_QUOTE_INDENT@24..25
@@ -205,7 +201,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@32..41 "next para" [] []
                     1: MD_TEXTUAL@41..42
                       0: MD_TEXTUAL_LITERAL@41..42 "\n" [] []
-                  1: (empty)
             1: MD_NEWLINE@42..43
               0: NEWLINE@42..43 "\n" [] []
         1: MD_BULLET@43..51
@@ -221,7 +216,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@45..50 "after" [] []
                 1: MD_TEXTUAL@50..51
                   0: MD_TEXTUAL_LITERAL@50..51 "\n" [] []
-              1: (empty)
   2: EOF@51..51 "" [] []
 
 ```

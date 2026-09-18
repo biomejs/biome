@@ -3,7 +3,8 @@ use crate::prelude::*;
 use biome_formatter::QuoteStyle;
 use biome_formatter::token::string::normalize_string;
 use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JSX_STRING_LITERAL};
-use biome_js_syntax::{JsFileSource, JsSyntaxToken};
+use biome_js_syntax::JsSyntaxToken;
+use biome_languages::JsFileSource;
 use biome_unicode_table::is_js_ident;
 use std::borrow::Cow;
 use unicode_width::UnicodeWidthStr;
@@ -204,7 +205,7 @@ struct LiteralStringNormaliser<'token> {
     chosen_quote_properties: QuoteProperties,
 }
 
-/// Convenience enum to map [biome_js_syntax::JsFileSource] by just reading
+/// Convenience enum to map [biome_languages::JsFileSource] by just reading
 /// the type of file
 #[derive(Eq, PartialEq)]
 pub(crate) enum SourceFileKind {

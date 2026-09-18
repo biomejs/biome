@@ -1,0 +1,230 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomOptions.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+let foo;
+
+// Decimal: minimumDigits: 7, so 7+ digits without separators are invalid
+foo = 1234567; // 1_234_567
+foo = 1234567890; // 1_234_567_890
+
+// Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+foo = 0xABCD; // 0xAB_CD
+foo = 0xABCDEF; // 0xAB_CD_EF
+
+// Binary: groupLength: 2, wrong grouping
+foo = 0b11001100; // 0b11_00_11_00
+foo = 0b1010_0001; // 0b10_10_00_01
+
+// Octal: groupLength: 2, wrong grouping
+foo = 0o12345670; // 0o12_34_56_70
+foo = 0o1234_5670; // 0o12_34_56_70
+
+```
+
+# Diagnostics
+```
+invalidCustomOptions.js:6:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    5 │ // Decimal: minimumDigits: 7, so 7+ digits without separators are invalid
+  > 6 │ foo = 1234567; // 1_234_567
+      │       ^^^^^^^
+    7 │ foo = 1234567890; // 1_234_567_890
+    8 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+     4  4 │   
+     5  5 │   // Decimal: minimumDigits: 7, so 7+ digits without separators are invalid
+     6    │ - foo·=·1234567;·//·1_234_567
+        6 │ + foo·=·1_234_567;·//·1_234_567
+     7  7 │   foo = 1234567890; // 1_234_567_890
+     8  8 │   
+  
+
+```
+
+```
+invalidCustomOptions.js:7:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    5 │ // Decimal: minimumDigits: 7, so 7+ digits without separators are invalid
+    6 │ foo = 1234567; // 1_234_567
+  > 7 │ foo = 1234567890; // 1_234_567_890
+      │       ^^^^^^^^^^
+    8 │ 
+    9 │ // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+     5  5 │   // Decimal: minimumDigits: 7, so 7+ digits without separators are invalid
+     6  6 │   foo = 1234567; // 1_234_567
+     7    │ - foo·=·1234567890;·//·1_234_567_890
+        7 │ + foo·=·1_234_567_890;·//·1_234_567_890
+     8  8 │   
+     9  9 │   // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+  
+
+```
+
+```
+invalidCustomOptions.js:10:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+     9 │ // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+  > 10 │ foo = 0xABCD; // 0xAB_CD
+       │       ^^^^^^
+    11 │ foo = 0xABCDEF; // 0xAB_CD_EF
+    12 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+     8  8 │   
+     9  9 │   // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+    10    │ - foo·=·0xABCD;·//·0xAB_CD
+       10 │ + foo·=·0xAB_CD;·//·0xAB_CD
+    11 11 │   foo = 0xABCDEF; // 0xAB_CD_EF
+    12 12 │   
+  
+
+```
+
+```
+invalidCustomOptions.js:11:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+     9 │ // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+    10 │ foo = 0xABCD; // 0xAB_CD
+  > 11 │ foo = 0xABCDEF; // 0xAB_CD_EF
+       │       ^^^^^^^^
+    12 │ 
+    13 │ // Binary: groupLength: 2, wrong grouping
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+     9  9 │   // Hexadecimal: minimumDigits: 4, so 4+ digits without separators are invalid
+    10 10 │   foo = 0xABCD; // 0xAB_CD
+    11    │ - foo·=·0xABCDEF;·//·0xAB_CD_EF
+       11 │ + foo·=·0xAB_CD_EF;·//·0xAB_CD_EF
+    12 12 │   
+    13 13 │   // Binary: groupLength: 2, wrong grouping
+  
+
+```
+
+```
+invalidCustomOptions.js:14:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    13 │ // Binary: groupLength: 2, wrong grouping
+  > 14 │ foo = 0b11001100; // 0b11_00_11_00
+       │       ^^^^^^^^^^
+    15 │ foo = 0b1010_0001; // 0b10_10_00_01
+    16 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    12 12 │   
+    13 13 │   // Binary: groupLength: 2, wrong grouping
+    14    │ - foo·=·0b11001100;·//·0b11_00_11_00
+       14 │ + foo·=·0b11_00_11_00;·//·0b11_00_11_00
+    15 15 │   foo = 0b1010_0001; // 0b10_10_00_01
+    16 16 │   
+  
+
+```
+
+```
+invalidCustomOptions.js:15:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    13 │ // Binary: groupLength: 2, wrong grouping
+    14 │ foo = 0b11001100; // 0b11_00_11_00
+  > 15 │ foo = 0b1010_0001; // 0b10_10_00_01
+       │       ^^^^^^^^^^^
+    16 │ 
+    17 │ // Octal: groupLength: 2, wrong grouping
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    13 13 │   // Binary: groupLength: 2, wrong grouping
+    14 14 │   foo = 0b11001100; // 0b11_00_11_00
+    15    │ - foo·=·0b1010_0001;·//·0b10_10_00_01
+       15 │ + foo·=·0b10_10_00_01;·//·0b10_10_00_01
+    16 16 │   
+    17 17 │   // Octal: groupLength: 2, wrong grouping
+  
+
+```
+
+```
+invalidCustomOptions.js:18:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Long numeric literal lacks separators.
+  
+    17 │ // Octal: groupLength: 2, wrong grouping
+  > 18 │ foo = 0o12345670; // 0o12_34_56_70
+       │       ^^^^^^^^^^
+    19 │ foo = 0o1234_5670; // 0o12_34_56_70
+    20 │ 
+  
+  i Adding separators helps improve readability and clarity for long numbers.
+  
+  i Safe fix: Add numeric separators.
+  
+    16 16 │   
+    17 17 │   // Octal: groupLength: 2, wrong grouping
+    18    │ - foo·=·0o12345670;·//·0o12_34_56_70
+       18 │ + foo·=·0o12_34_56_70;·//·0o12_34_56_70
+    19 19 │   foo = 0o1234_5670; // 0o12_34_56_70
+    20 20 │   
+  
+
+```
+
+```
+invalidCustomOptions.js:19:7 lint/style/useNumericSeparators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Inconsistent grouping of digits in numeric literal.
+  
+    17 │ // Octal: groupLength: 2, wrong grouping
+    18 │ foo = 0o12345670; // 0o12_34_56_70
+  > 19 │ foo = 0o1234_5670; // 0o12_34_56_70
+       │       ^^^^^^^^^^^
+    20 │ 
+  
+  i Numbers with inconsistently placed separators can be misleading or confusing.
+  
+  i Safe fix: Use consistent numeric separator grouping.
+  
+    17 17 │   // Octal: groupLength: 2, wrong grouping
+    18 18 │   foo = 0o12345670; // 0o12_34_56_70
+    19    │ - foo·=·0o1234_5670;·//·0o12_34_56_70
+       19 │ + foo·=·0o12_34_56_70;·//·0o12_34_56_70
+    20 20 │   
+  
+
+```

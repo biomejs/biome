@@ -41,7 +41,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@24..25 "\n" [] [],
@@ -76,7 +75,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@76..77 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@77..78 "\n" [] [],
@@ -111,7 +109,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@118..119 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@119..120 "\n" [] [],
@@ -140,7 +137,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@151..152 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@152..152 "" [] [],
@@ -165,7 +161,6 @@ MdDocument {
           2: BACKTICK@22..23 "`" [] []
         2: MD_TEXTUAL@23..24
           0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@24..25
       0: NEWLINE@24..25 "\n" [] []
     2: MD_PARAGRAPH@25..77
@@ -188,7 +183,6 @@ MdDocument {
           2: BACKTICK@74..76 "``" [] []
         2: MD_TEXTUAL@76..77
           0: MD_TEXTUAL_LITERAL@76..77 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@77..78
       0: NEWLINE@77..78 "\n" [] []
     4: MD_PARAGRAPH@78..119
@@ -211,7 +205,6 @@ MdDocument {
           2: BACKTICK@115..118 "```" [] []
         2: MD_TEXTUAL@118..119
           0: MD_TEXTUAL_LITERAL@118..119 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@119..120
       0: NEWLINE@119..120 "\n" [] []
     6: MD_PARAGRAPH@120..152
@@ -230,7 +223,6 @@ MdDocument {
           2: BACKTICK@149..151 "``" [] []
         2: MD_TEXTUAL@151..152
           0: MD_TEXTUAL_LITERAL@151..152 "\n" [] []
-      1: (empty)
   2: EOF@152..152 "" [] []
 
 ```

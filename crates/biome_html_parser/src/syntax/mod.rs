@@ -31,6 +31,7 @@ use biome_parser::parse_recovery::{ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
+use biome_rowan::TextRange;
 
 pub(crate) enum HtmlSyntaxFeatures {
     /// Exclusive to those documents that support Astro
@@ -232,6 +233,34 @@ fn parse_any_tag_name(p: &mut HtmlParser) -> ParsedSyntax {
     })
 }
 
+/// Parses `<?instruction foo="bar" ?>
+fn parse_processing_instruction(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<?]) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    let start_range = p.cur_range();
+    p.bump_with_context(T![<?], inside_tag_context(p));
+
+    let name_range = p.cur_range();
+    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+
+    if start_range.end() != name_range.start() {
+        p.error(expected_no_spaces(
+            p,
+            TextRange::new(start_range.end(), name_range.start()),
+        ));
+    }
+
+    AttributeList.parse_list(p);
+
+    p.expect(T![?>]);
+
+    Present(m.complete(p, HTML_PROCESSING_INSTRUCTION))
+}
+
 fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
@@ -244,9 +273,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
         && !is_possible_component(p, opening_tag_name.as_str());
+    // In Svelte files, <pre> must be parsed as a regular element so that
+    // Svelte expressions inside it ({@html expr}, {expr}) are visible as AST
+    // nodes for variable-reference tracking.  The HTML formatter's
+    // HTML_VERBATIM_TAGS list independently ensures <pre> content is still
+    // printed verbatim, so removing <pre> from the embedded-language path
+    // here has no effect on formatting output.
+    let is_pre = opening_tag_name.eq_ignore_ascii_case("pre");
     let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
         .iter()
-        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()))
+        && !(is_pre && Svelte.is_supported(p));
 
     parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
@@ -383,6 +420,7 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 pub(crate) fn parse_html_element(p: &mut HtmlParser) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
+        T![<?] => parse_processing_instruction(p),
         T![<] => parse_element(p),
         T!["{{"] => HtmlSyntaxFeatures::DoubleTextExpressions.parse_exclusive_syntax(
             p,
@@ -466,7 +504,7 @@ impl ParseNodeList for AttributeList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![>]) || p.at(T![/]) || p.at(T!['}'])
+        p.at(T![>]) || p.at(T![?>]) || p.at(T![/]) || p.at(T!['}'])
     }
 
     fn recover(
@@ -642,6 +680,89 @@ fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_STRING))
 }
 
+struct SvelteTemplateElementList {
+    chunk_context: HtmlLexContext,
+    has_interpolation: bool,
+}
+
+impl SvelteTemplateElementList {
+    fn new(chunk_context: HtmlLexContext) -> Self {
+        Self {
+            chunk_context,
+            has_interpolation: false,
+        }
+    }
+}
+
+impl ParseNodeList for SvelteTemplateElementList {
+    type Kind = HtmlSyntaxKind;
+    type Parser<'source> = HtmlParser<'source>;
+    const LIST_KIND: Self::Kind = SVELTE_TEMPLATE_ELEMENT_LIST;
+
+    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.at(T!['{']) {
+            let result = parse_single_text_expression(p, self.chunk_context);
+            if result.is_present() {
+                self.has_interpolation = true;
+            }
+            result
+        } else if p.at(HTML_TEMPLATE_CHUNK) {
+            let chunk = p.start();
+            p.bump_with_context(HTML_TEMPLATE_CHUNK, self.chunk_context);
+            Present(chunk.complete(p, SVELTE_TEMPLATE_CHUNK_ELEMENT))
+        } else {
+            Absent
+        }
+    }
+
+    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
+        !p.at(T!['{']) && !p.at(HTML_TEMPLATE_CHUNK)
+    }
+
+    fn recover(
+        &mut self,
+        p: &mut Self::Parser<'_>,
+        parsed_element: ParsedSyntax,
+    ) -> RecoveryResult {
+        parsed_element.or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(HTML_BOGUS, token_set![T!['"'], T!["'"]]),
+            expected_attribute,
+        )
+    }
+}
+
+/// Parses a quoted Svelte attribute value as a template that mixes literal text
+/// and `{expression}` interpolations, e.g. `style="top: {top}px"`. The opening
+/// quote token must be the current token.
+///
+/// Returns `true` if any interpolation was encountered. When it returns `false`
+/// the value is a plain string and the caller is expected to rewind and re-parse
+/// it as an `HtmlString`.
+fn parse_svelte_template_attribute_value(p: &mut HtmlParser) -> bool {
+    let quote_kind = p.cur();
+    let quote = if quote_kind == T!['"'] { b'"' } else { b'\'' };
+    let chunk_context = HtmlLexContext::SvelteTemplateChunk { quote };
+
+    let m = p.start();
+    p.bump_with_context(quote_kind, chunk_context);
+
+    let mut list = SvelteTemplateElementList::new(chunk_context);
+    list.parse_list(p);
+    let has_interpolation = list.has_interpolation;
+
+    // r_quote — lex the next token in the inside-tag context so `>` / attributes
+    // are correctly recognised after the closing quote.
+    if p.at(quote_kind) {
+        p.bump_with_context(quote_kind, inside_tag_context(p));
+    } else {
+        p.error(p.err_builder("Missing closing quote", p.cur_range()));
+    }
+
+    m.complete(p, SVELTE_TEMPLATE_ATTRIBUTE_VALUE);
+    has_interpolation
+}
+
 fn parse_attribute_initializer(
     p: &mut HtmlParser,
     context: AttrInitializerContext,
@@ -659,7 +780,12 @@ fn parse_attribute_initializer(
         return Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE));
     }
 
-    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+    let attr_value_context = if Svelte.is_supported(p) {
+        HtmlLexContext::SvelteAttributeValue
+    } else {
+        HtmlLexContext::AttributeValue
+    };
+    p.bump_with_context(T![=], attr_value_context);
     if p.at(T!['{']) {
         HtmlSyntaxFeatures::SingleTextExpressions
             .parse_exclusive_syntax(
@@ -699,6 +825,16 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
+    } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
+        // Speculatively parse as a template. If no interpolation is found the
+        // value is a plain string, so rewind and re-lex it as a single
+        // `HTML_STRING_LITERAL` to parse it as a normal `HtmlString`.
+        let checkpoint = p.checkpoint();
+        if !parse_svelte_template_attribute_value(p) {
+            p.rewind(checkpoint);
+            p.re_lex(HtmlReLexContext::SvelteAttributeString);
+            parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
+        }
     } else {
         parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     }
@@ -801,6 +937,7 @@ pub(crate) fn parse_single_text_expression(
             || matches!(context, HtmlLexContext::InsideTagWithDirectives { .. })
             || context == HtmlLexContext::InsideTagAstro
             || context == HtmlLexContext::InsideTagSvelte
+            || matches!(context, HtmlLexContext::SvelteTemplateChunk { .. })
         {
             Present(m.complete(p, HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION))
         } else {

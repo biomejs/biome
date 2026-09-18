@@ -376,7 +376,8 @@ impl<T: HasClosureAstNode> ClosureExtensions for T {}
 mod test {
     use super::*;
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{JsArrowFunctionExpression, JsFileSource, JsSyntaxKind};
+    use biome_js_syntax::{JsArrowFunctionExpression, JsSyntaxKind};
+    use biome_languages::JsFileSource;
     use biome_rowan::SyntaxNodeCast;
 
     fn assert_closure(code: &str, name: &str, captures: &[&str]) {

@@ -4,6 +4,7 @@ use crate::analyzers::includes::Includes;
 use crate::analyzers::monorepo::Monorepo;
 use crate::analyzers::no_restriected_globals::NoRestrictedGlobals;
 use crate::analyzers::organize_imports::OrganizeImports;
+use crate::analyzers::recommended::Recommended;
 use crate::analyzers::rule_mover::RuleMover;
 use crate::analyzers::schema::Schema;
 use crate::analyzers::trailing_comma::TrailingComma;
@@ -17,6 +18,7 @@ mod includes;
 mod monorepo;
 mod no_restriected_globals;
 mod organize_imports;
+mod recommended;
 mod rule_mover;
 mod schema;
 mod trailing_comma;
@@ -44,6 +46,8 @@ impl RuleGroup for MigrationGroup {
         registry.record_rule::<NoRestrictedGlobals>();
         registry.record_rule::<Monorepo>();
         registry.record_rule::<IgnoreScanner>();
+        // v2.5.0
+        registry.record_rule::<Recommended>()
     }
 }
 

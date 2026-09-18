@@ -14,23 +14,27 @@ proc-macro = true
 
 [dependencies]
 biome_analyze         = { workspace = true }
-biome_css_analyze     = { workspace = true }
-biome_css_syntax      = { workspace = true }
+biome_css_analyze     = { workspace = true, optional = true }
+biome_css_syntax      = { workspace = true, optional = true }
 biome_graphql_analyze = { workspace = true, optional = true }
 biome_graphql_syntax  = { workspace = true, optional = true }
-biome_html_analyze    = { workspace = true }
-biome_html_syntax     = { workspace = true }
-biome_js_analyze      = { workspace = true }
-biome_js_syntax       = { workspace = true }
-biome_json_analyze    = { workspace = true }
-biome_json_syntax     = { workspace = true }
+biome_html_analyze    = { workspace = true, optional = true }
+biome_html_syntax     = { workspace = true, optional = true }
+biome_js_analyze      = { workspace = true, optional = true }
+biome_js_syntax       = { workspace = true, optional = true }
+biome_json_analyze    = { workspace = true, optional = true }
+biome_json_syntax     = { workspace = true, optional = true }
 biome_string_case     = { workspace = true }
 proc-macro2           = { workspace = true }
 pulldown-cmark        = { version = "0.13.3" }
 quote                 = { workspace = true }
 
 [features]
+lang_css     = ["dep:biome_css_analyze", "dep:biome_css_syntax"]
 lang_graphql = ["dep:biome_graphql_analyze", "dep:biome_graphql_syntax"]
+lang_html    = ["dep:biome_html_analyze", "dep:biome_html_syntax"]
+lang_js      = ["dep:biome_js_analyze", "dep:biome_js_syntax"]
+lang_json    = ["dep:biome_json_analyze", "dep:biome_json_syntax"]
 
 [lints]
 workspace = true

@@ -7,7 +7,8 @@ use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
+use biome_languages::javascript::{JsEmbeddingKind, SvelteFileKind};
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
@@ -85,10 +86,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     // This simulates how template expressions are parsed in frameworks like Vue, Svelte, and Astro
     if file_name.contains(".inline_expr.") {
         // Use Svelte embedding kind for testing (any embedding kind would work)
-        file_source = file_source.with_embedding_kind(biome_js_syntax::EmbeddingKind::Svelte {
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Svelte {
             is_source: false,
             is_function_signature: false,
-            kind: biome_js_syntax::SvelteFileKind::Component,
+            kind: SvelteFileKind::Component,
             is_const_block: false,
         });
     }

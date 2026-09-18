@@ -2,6 +2,7 @@ use crate::frameworks::vue::vue_call::{
     is_to_refs_call, is_vue_api_reference, is_vue_compiler_macro_call,
 };
 use crate::services::semantic::Semantic;
+use crate::utils::rename::RenamableNode;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsArrayElement, AnyJsBinding, AnyJsBindingPattern,
@@ -9,21 +10,20 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsModuleItem, AnyJsNamedImportSpecifier,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsStatement, AnyTsType, AnyTsTypeMember,
     JsArrayBindingPattern, JsArrowFunctionExpression, JsCallExpression, JsDefaultImportSpecifier,
-    JsExportDefaultExpressionClause, JsFileSource, JsFunctionDeclaration, JsFunctionExpression,
+    JsExportDefaultExpressionClause, JsFunctionDeclaration, JsFunctionExpression,
     JsIdentifierBinding, JsMethodObjectMember, JsModule, JsNamedImportSpecifier,
     JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsObjectBindingPattern,
     JsPropertyObjectMember, JsShorthandNamedImportSpecifier, JsStringLiteralExpression,
     JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsIdentifierBinding, TsInterfaceDeclaration,
     TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, TextRange, TokenText, declare_node_union,
 };
 use camino::Utf8Path;
-use std::iter;
-
-use crate::utils::rename::RenamableNode;
 use enumflags2::{BitFlags, bitflags};
+use std::iter;
 
 mod component_name;
 

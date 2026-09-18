@@ -171,7 +171,7 @@ fn find_descending_selector(
         if let Some(child_rule) = model.get_rule_by_id(child_id) {
             find_descending_selector(
                 root,
-                child_rule,
+                &child_rule,
                 model,
                 visited_rules,
                 visited_selectors,
@@ -196,7 +196,7 @@ impl Rule for NoDescendingSpecificity {
         for rule in model.rules() {
             find_descending_selector(
                 &root,
-                rule,
+                &rule,
                 model,
                 &mut visited_rules,
                 &mut visited_selectors,

@@ -91,7 +91,7 @@ declare_lint_rule! {
         version: "1.4.0",
         name: "useValidAriaRole",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-role").same()],
+        sources: &[RuleSource::EslintJsxA11y("aria-role").same(), RuleSource::HtmlEslint("no-invalid-role").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

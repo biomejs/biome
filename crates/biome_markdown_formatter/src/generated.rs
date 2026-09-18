@@ -423,44 +423,6 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdHtmlBlock {
         )
     }
 }
-impl FormatRule<biome_markdown_syntax::MdIndent>
-    for crate::markdown::auxiliary::indent::FormatMdIndent
-{
-    type Context = MarkdownFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_markdown_syntax::MdIndent,
-        f: &mut MarkdownFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_markdown_syntax::MdIndent>::fmt(self, node, f)
-    }
-}
-impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndent {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_markdown_syntax::MdIndent,
-        crate::markdown::auxiliary::indent::FormatMdIndent,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::markdown::auxiliary::indent::FormatMdIndent::default(),
-        )
-    }
-}
-impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdIndent {
-    type Format = FormatOwnedWithRule<
-        biome_markdown_syntax::MdIndent,
-        crate::markdown::auxiliary::indent::FormatMdIndent,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::markdown::auxiliary::indent::FormatMdIndent::default(),
-        )
-    }
-}
 impl FormatRule<biome_markdown_syntax::MdIndentCodeBlock>
     for crate::markdown::auxiliary::indent_code_block::FormatMdIndentCodeBlock
 {
@@ -1329,44 +1291,6 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdSetextHeader
         )
     }
 }
-impl FormatRule<biome_markdown_syntax::MdSoftBreak>
-    for crate::markdown::auxiliary::soft_break::FormatMdSoftBreak
-{
-    type Context = MarkdownFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_markdown_syntax::MdSoftBreak,
-        f: &mut MarkdownFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_markdown_syntax::MdSoftBreak>::fmt(self, node, f)
-    }
-}
-impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdSoftBreak {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_markdown_syntax::MdSoftBreak,
-        crate::markdown::auxiliary::soft_break::FormatMdSoftBreak,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::markdown::auxiliary::soft_break::FormatMdSoftBreak::default(),
-        )
-    }
-}
-impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdSoftBreak {
-    type Format = FormatOwnedWithRule<
-        biome_markdown_syntax::MdSoftBreak,
-        crate::markdown::auxiliary::soft_break::FormatMdSoftBreak,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::markdown::auxiliary::soft_break::FormatMdSoftBreak::default(),
-        )
-    }
-}
 impl FormatRule<biome_markdown_syntax::MdTextual>
     for crate::markdown::auxiliary::textual::FormatMdTextual
 {
@@ -1746,6 +1670,44 @@ impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogusBlock {
         FormatOwnedWithRule::new(
             self,
             crate::markdown::bogus::bogus_block::FormatMdBogusBlock::default(),
+        )
+    }
+}
+impl FormatRule<biome_markdown_syntax::MdBogusBullet>
+    for crate::markdown::bogus::bogus_bullet::FormatMdBogusBullet
+{
+    type Context = MarkdownFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_markdown_syntax::MdBogusBullet,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_markdown_syntax::MdBogusBullet>::fmt(self, node, f)
+    }
+}
+impl AsFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogusBullet {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_markdown_syntax::MdBogusBullet,
+        crate::markdown::bogus::bogus_bullet::FormatMdBogusBullet,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::markdown::bogus::bogus_bullet::FormatMdBogusBullet::default(),
+        )
+    }
+}
+impl IntoFormat<MarkdownFormatContext> for biome_markdown_syntax::MdBogusBullet {
+    type Format = FormatOwnedWithRule<
+        biome_markdown_syntax::MdBogusBullet,
+        crate::markdown::bogus::bogus_bullet::FormatMdBogusBullet,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::markdown::bogus::bogus_bullet::FormatMdBogusBullet::default(),
         )
     }
 }

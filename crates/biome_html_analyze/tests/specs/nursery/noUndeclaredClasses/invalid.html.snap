@@ -1,0 +1,253 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<!doctype html>
+<html>
+<head>
+<style>.card { border: 1px solid; } .title { font-weight: bold; }</style>
+<style>.container { max-width: 1200px; } .btn { padding: 8px; }</style>
+</head>
+<body>
+	<!-- .header is not declared in any <style> block -->
+	<div class="card header">Single unknown</div>
+
+	<!-- .header and .footer are undeclared -->
+	<div class="card header title footer">Multi unknown</div>
+
+	<!-- .header, .footer, .unknown are all undeclared -->
+	<div class="header footer unknown">Multi-block unknown</div>
+
+	<!-- .main-content and .unknown-btn are undeclared -->
+	<div class="container">
+		<main class="main-content">
+			<button class="btn unknown-btn">Element types</button>
+		</main>
+	</div>
+</body>
+</html>
+
+```
+
+# Diagnostics
+```
+invalid.html:10:19 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class header is not defined in any available stylesheet.
+  
+     8 │ <body>
+     9 │ 	<!-- .header is not declared in any <style> block -->
+  > 10 │ 	<div class="card header">Single unknown</div>
+       │ 	                 ^^^^^^
+    11 │ 
+    12 │ 	<!-- .header and .footer are undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:13:19 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class header is not defined in any available stylesheet.
+  
+    12 │ 	<!-- .header and .footer are undeclared -->
+  > 13 │ 	<div class="card header title footer">Multi unknown</div>
+       │ 	                 ^^^^^^
+    14 │ 
+    15 │ 	<!-- .header, .footer, .unknown are all undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:13:32 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class footer is not defined in any available stylesheet.
+  
+    12 │ 	<!-- .header and .footer are undeclared -->
+  > 13 │ 	<div class="card header title footer">Multi unknown</div>
+       │ 	                              ^^^^^^
+    14 │ 
+    15 │ 	<!-- .header, .footer, .unknown are all undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:16:14 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class header is not defined in any available stylesheet.
+  
+    15 │ 	<!-- .header, .footer, .unknown are all undeclared -->
+  > 16 │ 	<div class="header footer unknown">Multi-block unknown</div>
+       │ 	            ^^^^^^
+    17 │ 
+    18 │ 	<!-- .main-content and .unknown-btn are undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:16:21 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class footer is not defined in any available stylesheet.
+  
+    15 │ 	<!-- .header, .footer, .unknown are all undeclared -->
+  > 16 │ 	<div class="header footer unknown">Multi-block unknown</div>
+       │ 	                   ^^^^^^
+    17 │ 
+    18 │ 	<!-- .main-content and .unknown-btn are undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:16:28 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class unknown is not defined in any available stylesheet.
+  
+    15 │ 	<!-- .header, .footer, .unknown are all undeclared -->
+  > 16 │ 	<div class="header footer unknown">Multi-block unknown</div>
+       │ 	                          ^^^^^^^
+    17 │ 
+    18 │ 	<!-- .main-content and .unknown-btn are undeclared -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:20:16 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class main-content is not defined in any available stylesheet.
+  
+    18 │ 	<!-- .main-content and .unknown-btn are undeclared -->
+    19 │ 	<div class="container">
+  > 20 │ 		<main class="main-content">
+       │ 		             ^^^^^^^^^^^^
+    21 │ 			<button class="btn unknown-btn">Element types</button>
+    22 │ 		</main>
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:21:23 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class unknown-btn is not defined in any available stylesheet.
+  
+    19 │ 	<div class="container">
+    20 │ 		<main class="main-content">
+  > 21 │ 			<button class="btn unknown-btn">Element types</button>
+       │ 			                   ^^^^^^^^^^^
+    22 │ 		</main>
+    23 │ 	</div>
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.html (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

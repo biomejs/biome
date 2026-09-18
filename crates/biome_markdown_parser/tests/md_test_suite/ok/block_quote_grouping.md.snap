@@ -50,7 +50,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -84,7 +83,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -114,7 +112,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@29..30 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -151,7 +148,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@6..7 "b" [] []
             4: MD_TEXTUAL@7..8
               0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
-          1: (empty)
     1: MD_NEWLINE@8..9
       0: NEWLINE@8..9 "\n" [] []
     2: MD_QUOTE@9..18
@@ -174,7 +170,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@16..17 "b" [] []
             4: MD_TEXTUAL@17..18
               0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
-          1: (empty)
     3: MD_NEWLINE@18..19
       0: NEWLINE@18..19 "\n" [] []
     4: MD_QUOTE@19..30
@@ -195,7 +190,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@23..29 "nested" [] []
                 1: MD_TEXTUAL@29..30
                   0: MD_TEXTUAL_LITERAL@29..30 "\n" [] []
-              1: (empty)
   2: EOF@30..30 "" [] []
 
 ```

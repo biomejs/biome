@@ -59,7 +59,10 @@ pub(crate) fn write_include_closing_comments(
 
 /// Returns `true` for `//` comments before the include-owned closing `)`.
 ///
-/// Example: `@include mix((a, // end\n))` needs a hard break before `)`.
+/// ```scss
+/// @include mix((a, // end
+/// ));
+/// ```
 fn has_line_closing_comment(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
     f.comments()
         .dangling_comments(node)

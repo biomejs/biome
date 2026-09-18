@@ -1,6 +1,6 @@
 use crate::WorkspaceError;
 use crate::file_handlers::{
-    Capabilities, DebugCapabilities, DocumentFileSource, EnabledForPath, ExtensionHandler,
+    Capabilities, DebugCapabilities, EditorCapabilities, EnabledForPath, ExtensionHandler,
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 use crate::settings::{
@@ -10,10 +10,13 @@ use crate::settings::{
 use crate::workspace::GetSyntaxTreeResult;
 use biome_analyze::AnalyzerOptions;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
+use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_parser::{AnyParse, NodeParse};
+use biome_languages::DocumentFileSource;
+use biome_parser::NodeParse;
 use biome_rowan::NodeCache;
+use biome_workspace_db::WorkspaceDb;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
@@ -183,6 +186,10 @@ impl ExtensionHandler for YamlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -216,9 +223,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: YamlSyntaxNode = parse.syntax();
-    let tree: YamlRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: YamlSyntaxNode = parse.syntax(&workspace_db);
+    let tree: YamlRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -228,12 +239,13 @@ fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeR
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<YamlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
@@ -243,12 +255,13 @@ fn debug_formatter_ir(
 pub(crate) fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<YamlLanguage>(biome_path, document_file_source);
     debug!("{:?}", &options);
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
     match formatted.print() {
         Ok(printed) => Ok(printed),

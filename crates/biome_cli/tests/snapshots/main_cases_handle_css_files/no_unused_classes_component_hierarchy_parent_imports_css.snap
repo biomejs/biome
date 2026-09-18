@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `App.jsx`
+
+```jsx
+import "./button.css";
+import Button from "./Button.jsx";
+export default () => <div><Button /></div>;
+
+```
+
+## `Button.jsx`
+
+```jsx
+// Button component uses classes but doesn't import CSS
+export default () => <button className="btn btn-primary">Click</button>;
+
+```
+
+## `button.css`
+
+```css
+.btn {
+  padding: 8px;
+}
+.btn-primary {
+  color: blue;
+}
+```
+
+# Emitted Messages
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+```

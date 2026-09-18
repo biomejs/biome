@@ -259,7 +259,7 @@ fn parse_language_flavor_kind(p: &mut GritParser) -> ParsedSyntax {
 fn parse_maybe_named_arg(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
         T![')'] => Absent,
-        GRIT_NAME => parse_named_arg(p),
+        GRIT_NAME if p.lookahead() == T![=] => parse_named_arg(p),
         _ => parse_pattern(p),
     }
 }

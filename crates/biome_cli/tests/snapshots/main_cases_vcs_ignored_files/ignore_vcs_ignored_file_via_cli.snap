@@ -32,6 +32,8 @@ file1.js:1:1 lint/complexity/useFlatMap  FIXABLE  ━━━━━━━━━━
   > 1 │ array.map(sentence => sentence.split(' ')).flat();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Using .flatMap() avoids the creation of an intermediate array.
+  
   i Safe fix: Replace the chain with .flatMap().
   
   - array.map(sentence·=>·sentence.split('·')).flat();

@@ -22,6 +22,7 @@ pub struct RuleContext<'a, R: Rule> {
     jsx_runtime: Option<JsxRuntime>,
     jsx_factory: Option<&'a str>,
     jsx_fragment_factory: Option<&'a str>,
+    working_directory: Option<&'a Utf8Path>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -42,6 +43,7 @@ where
         jsx_runtime: Option<JsxRuntime>,
         jsx_factory: Option<&'a str>,
         jsx_fragment_factory: Option<&'a str>,
+        working_directory: Option<&'a Utf8Path>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -58,6 +60,7 @@ where
             jsx_runtime,
             jsx_factory,
             jsx_fragment_factory,
+            working_directory,
         })
     }
 
@@ -183,6 +186,10 @@ where
     /// The file path of the current file
     pub fn file_path(&self) -> &Utf8Path {
         self.file_path
+    }
+
+    pub fn working_directory(&self) -> Option<&Utf8Path> {
+        self.working_directory
     }
 
     /// Returns the preferred quote that should be used when providing code actions

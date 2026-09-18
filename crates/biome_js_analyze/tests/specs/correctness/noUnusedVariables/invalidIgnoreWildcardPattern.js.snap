@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: invalidIgnoreWildcardPattern.js
+---
+# Input
+```js
+// With ignore: { "class": ["*"] }, all other language constructs should still be reported if they are unused
+const unusedVariable = 0;
+function unusedFunction(unusedParameter) {}
+class UnusedClass {}
+
+```
+
+# Diagnostics
+```
+invalidIgnoreWildcardPattern.js:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This variable unusedVariable is unused.
+  
+    1 │ // With ignore: { "class": ["*"] }, all other language constructs should still be reported if they are unused
+  > 2 │ const unusedVariable = 0;
+      │       ^^^^^^^^^^^^^^
+    3 │ function unusedFunction(unusedParameter) {}
+    4 │ class UnusedClass {}
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unusedVariable with an underscore.
+  
+    1 1 │   // With ignore: { "class": ["*"] }, all other language constructs should still be reported if they are unused
+    2   │ - const·unusedVariable·=·0;
+      2 │ + const·_unusedVariable·=·0;
+    3 3 │   function unusedFunction(unusedParameter) {}
+    4 4 │   class UnusedClass {}
+  
+
+```
+
+```
+invalidIgnoreWildcardPattern.js:3:10 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This function unusedFunction is unused.
+  
+    1 │ // With ignore: { "class": ["*"] }, all other language constructs should still be reported if they are unused
+    2 │ const unusedVariable = 0;
+  > 3 │ function unusedFunction(unusedParameter) {}
+      │          ^^^^^^^^^^^^^^
+    4 │ class UnusedClass {}
+    5 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend unusedFunction with an underscore.
+  
+    1 1 │   // With ignore: { "class": ["*"] }, all other language constructs should still be reported if they are unused
+    2 2 │   const unusedVariable = 0;
+    3   │ - function·unusedFunction(unusedParameter)·{}
+      3 │ + function·_unusedFunction(unusedParameter)·{}
+    4 4 │   class UnusedClass {}
+    5 5 │   
+  
+
+```

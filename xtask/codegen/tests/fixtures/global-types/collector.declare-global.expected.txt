@@ -1,0 +1,6 @@
+records
+DeclarationRecord { file_repo_relative: "collector.declare-global.d.ts", scope: Global, declared_name: "Window", kind: Interface, text_range: 21..69, syntax_kind: TS_INTERFACE_DECLARATION }
+coverage
+EnteredScope { scope: DeclareGlobal, file: "collector.declare-global.d.ts", range: 8..71 }
+Collected(0)
+ExitedScope { scope: DeclareGlobal, file: "collector.declare-global.d.ts", range: 8..71 }

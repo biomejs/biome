@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["fixVersion.grit"],
+  "json": { "linter": { "enabled": true } },
+  "linter": {
+    "rules": { "recommended": false }
+  },
+  "formatter": { "enabled": false }
+}
+```
+
+## `fixVersion.grit`
+
+```grit
+language json
+
+`"1.0.0"` as $version where {
+    register_diagnostic(
+        span = $version,
+        message = "Update version.",
+        severity = "warn"
+    ),
+    $version => `"2.0.0"`
+}
+
+```
+
+## `package.json`
+
+```json
+{"version": "2.0.0"}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

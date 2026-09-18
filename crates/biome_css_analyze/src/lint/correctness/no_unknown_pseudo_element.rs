@@ -2,10 +2,9 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{
-    AnyCssPseudoElement, AnyCssSelectorIdentifier, CssFileSource, CssPseudoElementSelector,
-};
+use biome_css_syntax::{AnyCssPseudoElement, AnyCssSelectorIdentifier, CssPseudoElementSelector};
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_pseudo_element::NoUnknownPseudoElementOptions;
 use biome_string_case::StrLikeExtension;
@@ -119,13 +118,11 @@ impl Rule for NoUnknownPseudoElement {
                     ctx.options(),
                 )
             }
-            AnyCssPseudoElement::CssPseudoElementFunction(ident) => {
-                should_not_trigger(
-                    ident.name().ok()?.to_trimmed_text().text(),
-                    file_source,
-                    ctx.options(),
-                )
-            }
+            AnyCssPseudoElement::CssPseudoElementFunction(ident) => should_not_trigger(
+                ident.name().ok()?.to_trimmed_text().text(),
+                file_source,
+                ctx.options(),
+            ),
             AnyCssPseudoElement::ScssInterpolatedPseudoElementFunction(_) => true,
         };
 

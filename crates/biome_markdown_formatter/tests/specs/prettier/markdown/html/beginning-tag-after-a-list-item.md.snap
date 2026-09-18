@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/beginning-tag-after-a-list-item.md
+---
+
+# Input
+
+```md
+- A list item.
+<details><summary>Summary</summary>
+<p>
+
+- A list item.
+
+</p>
+</details>
+
+- A list item.
+<blockquote>
+
+<p>quoted sentence1<br>
+quoted sentence2</p>
+</blockquote>
+
+- indented html is formatted as it is
+  <blockquote>asdf</blockquote>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,18 +1,15 @@
+ - A list item.
+ <details><summary>Summary</summary>
+ <p>
+-
+ - A list item.
+ 
+ </p>
+ </details>
+-
+ - A list item.
+ <blockquote>
+ 
+ <p>quoted sentence1<br>
+ quoted sentence2</p>
+ </blockquote>
+-
+ - indented html is formatted as it is
+   <blockquote>asdf</blockquote>
+```
+
+# Output
+
+```md
+- A list item.
+<details><summary>Summary</summary>
+<p>
+- A list item.
+
+</p>
+</details>
+- A list item.
+<blockquote>
+
+<p>quoted sentence1<br>
+quoted sentence2</p>
+</blockquote>
+- indented html is formatted as it is
+  <blockquote>asdf</blockquote>
+```

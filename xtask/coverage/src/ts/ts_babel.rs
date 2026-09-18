@@ -4,7 +4,7 @@ use crate::{
     runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite},
 };
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{JsFileSource, LanguageVariant};
+use biome_languages::{JsFileSource, javascript::LanguageVariant};
 use biome_rowan::SyntaxKind;
 use std::io;
 use std::path::Path;

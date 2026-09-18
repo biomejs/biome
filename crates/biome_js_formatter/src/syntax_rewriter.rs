@@ -464,14 +464,16 @@ fn has_type_cast_comment_or_skipped(trivia: &JsSyntaxTrivia) -> bool {
 #[cfg(test)]
 mod tests {
     use super::JsFormatSyntaxRewriter;
-    use crate::{JsFormatOptions, TextRange, format_node};
+    use crate::JsFormatLanguage;
+    use crate::{JsFormatOptions, TextRange};
     use biome_formatter::{SourceMapGeneration, SourceMarker, TransformSourceMap};
     use biome_js_parser::{JsParserOptions, parse, parse_module};
     use biome_js_syntax::{
-        JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsFileSource,
-        JsIdentifierExpression, JsLogicalExpression, JsSequenceExpression,
-        JsStringLiteralExpression, JsSyntaxNode, JsUnaryExpression, JsxTagExpression,
+        JsArrayExpression, JsBinaryExpression, JsExpressionStatement, JsIdentifierExpression,
+        JsLogicalExpression, JsSequenceExpression, JsStringLiteralExpression, JsSyntaxNode,
+        JsUnaryExpression, JsxTagExpression,
     };
+    use biome_languages::JsFileSource;
     use biome_rowan::{AstNode, SyntaxRewriter, TextSize};
 
     #[test]
@@ -845,10 +847,11 @@ mod tests {
     fn mappings() {
         let (transformed, source_map) = source_map_test("(((a * b) * c)) / 3");
 
-        let formatted = format_node(
-            JsFormatOptions::new(JsFileSource::default()),
+        let formatted = biome_formatter::format_node_with_source_map_generation(
             &transformed,
+            JsFormatLanguage::new(JsFormatOptions::default()),
             false,
+            SourceMapGeneration::Enabled,
         )
         .unwrap();
         let printed = formatted

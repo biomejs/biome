@@ -44,7 +44,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@31..31 "" [] [],
@@ -75,7 +74,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@16..30 "unclosed label" [] []
         7: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-      1: (empty)
   2: EOF@31..31 "" [] []
 
 ```

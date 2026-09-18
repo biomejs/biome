@@ -34,6 +34,10 @@ a { grid-template-areas: "s s s"
     content: "";
 }
 
+/* Do not treat other grid-template-* properties as grid area declarations */
+a { grid-template-rows: "a a" "b b b"; }
+a { grid-templatefoo: "a a" "b b b"; }
+
 ```
 
 _Note: The parser emitted 1 diagnostics which are not shown here._

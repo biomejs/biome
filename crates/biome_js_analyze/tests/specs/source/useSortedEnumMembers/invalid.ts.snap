@@ -1,0 +1,101 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+enum InvalidStatus1 {
+	InProgress = 'In Progress',
+	Completed = 'Completed',
+	/**
+	 * JSDoc
+	 */
+	OnHold = 'On Hold',
+	Cancelled = 'Cancelled', // Some inline comment
+	// Pre comment
+	NotStarted = 'Not Started',
+}
+
+enum InvalidStatus2 {
+	Status1 = 'First',
+	Status10 = 'Tenth',
+	Status2 = 'Second',
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members of the enum InvalidStatus1 are not sorted.
+  
+     1 │ /* should generate diagnostics */
+   > 2 │ enum InvalidStatus1 {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+   > 3 │ 	InProgress = 'In Progress',
+   > 4 │ 	Completed = 'Completed',
+        ...
+  > 11 │ 	NotStarted = 'Not Started',
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ enum InvalidStatus2 {
+  
+  i Safe fix: Sort the enum members.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   enum InvalidStatus1 {
+     3    │ - → InProgress·=·'In·Progress',
+        3 │ + → Cancelled·=·'Cancelled',·//·Some·inline·comment
+     4  4 │     Completed = 'Completed',
+     5    │ - → /**
+     6    │ - → ·*·JSDoc
+     7    │ - → ·*/
+     8    │ - → OnHold·=·'On·Hold',
+     9    │ - → Cancelled·=·'Cancelled',·//·Some·inline·comment
+    10    │ - → //·Pre·comment
+    11    │ - → NotStarted·=·'Not·Started',
+        5 │ + → InProgress·=·'In·Progress',
+        6 │ + → //·Pre·comment
+        7 │ + → NotStarted·=·'Not·Started',
+        8 │ + → /**
+        9 │ + → ·*·JSDoc
+       10 │ + → ·*/
+       11 │ + → OnHold·=·'On·Hold',
+    12 12 │   }
+    13 13 │   
+  
+
+```
+
+```
+invalid.ts:14:1 assist/source/useSortedEnumMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members of the enum InvalidStatus2 are not sorted.
+  
+    12 │ }
+    13 │ 
+  > 14 │ enum InvalidStatus2 {
+       │ ^^^^^^^^^^^^^^^^^^^^^
+  > 15 │ 	Status1 = 'First',
+  > 16 │ 	Status10 = 'Tenth',
+  > 17 │ 	Status2 = 'Second',
+  > 18 │ }
+       │ ^
+    19 │ 
+  
+  i Safe fix: Sort the enum members.
+  
+    14 14 │   enum InvalidStatus2 {
+    15 15 │     Status1 = 'First',
+    16    │ - → Status10·=·'Tenth',
+    17    │ - → Status2·=·'Second',
+       16 │ + → Status2·=·'Second',
+       17 │ + → Status10·=·'Tenth',
+    18 18 │   }
+    19 19 │   
+  
+
+```

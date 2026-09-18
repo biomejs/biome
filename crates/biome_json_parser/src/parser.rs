@@ -1,5 +1,6 @@
 use crate::token_source::JsonTokenSource;
-use biome_json_syntax::{JsonFileSource, JsonSyntaxKind};
+use biome_json_syntax::JsonSyntaxKind;
+use biome_languages::JsonFileSource;
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
@@ -109,7 +110,7 @@ impl<'source> Parser for JsonParser<'source> {
 #[cfg(test)]
 mod tests {
     use crate::JsonParserOptions;
-    use biome_json_syntax::JsonFileSource;
+    use biome_languages::JsonFileSource;
 
     #[test]
     fn parse_options_from_json_file_source_respects_allow_comments_and_allow_trailing_comma() {

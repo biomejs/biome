@@ -29,7 +29,7 @@ expression: basic.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"a11y": {
 				"useValidAriaRole": {
 					"level": "error",

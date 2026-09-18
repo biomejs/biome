@@ -43,5 +43,28 @@ function Component2() {
 # Emitted Messages
 
 ```block
+biome.json:2:11 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │ "linter": {
+      │           ^
+  > 3 │     "rules": {
+  > 4 │         "recommended": false
+  > 5 │     }
+  > 6 │ }
+      │ ^
+    7 │     }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 Checked 3 files in <TIME>. No fixes applied.
+Found 1 info.
 ```

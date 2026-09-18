@@ -1,0 +1,1128 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<div @click="() => void 0"></div>
+<div v-on:click="() => void 0"></div>
+<div onkeyup="() => void 0" aria-hidden="false"></div>
+
+<!-- Static elements; no inherent role -->
+<a @click="() => void 0"></a>
+<a @click="() => {}"></a>
+<a tabindex="0" @click="() => void 0"></a>
+<area @click="() => {}" />
+<b @click="() => {}"></b>
+<base @click="() => {}" />
+<bdi @click="() => {}"></bdi>
+<bdo @click="() => {}"></bdo>
+<body @click="() => {}"></body>
+<cite @click="() => {}"></cite>
+<col @click="() => {}" />
+<colgroup @click="() => {}"></colgroup>
+<data @click="() => {}"></data>
+<div @click="() => {}"></div>
+<head @click="() => {}"></head>
+<header @click="() => {}"></header>
+<hgroup @click="() => {}"></hgroup>
+<i @click="() => {}"></i>
+<kbd @click="() => {}"></kbd>
+
+<map @click="() => {}"></map>
+<meta @click="() => {}" />
+<noscript @click="() => {}"></noscript>
+<object @click="() => {}"></object>
+<picture @click="() => {}"></picture>
+<q @click="() => {}"></q>
+<rp @click="() => {}"></rp>
+<rt @click="() => {}"></rt>
+<s @click="() => {}"></s>
+<samp @click="() => {}"></samp>
+<script @click="() => {}"></script>
+<section @click="() => {}"></section>
+<small @click="() => {}"></small>
+<source @click="() => {}" />
+<span @click="() => {}"></span>
+<style @click="() => {}"></style>
+<title @click="() => {}"></title>
+<track @click="() => {}" />
+<u @click="() => {}"></u>
+<var @click="() => {}"></var>
+<wbr @click="() => {}" />
+
+<!-- Handlers -->
+<div onkeydown="() => {}"></div>
+<div onkeypress="() => {}"></div>
+<div onkeyup="() => {}"></div>
+<div @click="() => {}"></div>
+<div onmousedown="() => {}"></div>
+<div onmouseup="() => {}"></div>
+
+<!-- Presentation is a special case role that indicates intentional static semantics -->
+<div role="presentation" @click="() => {}"></div>
+<div role="presentation" onkeydown="() => {}"></div>
+
+<!-- HTML elements attributed with an abstract role -->
+<div role="command" @click="() => {}"></div>
+<div role="composite" @click="() => {}"></div>
+<div role="input" @click="() => {}"></div>
+<div role="landmark" @click="() => {}"></div>
+<div role="range" @click="() => {}"></div>
+<div role="roletype" @click="() => {}"></div>
+<div role="sectionhead" @click="() => {}"></div>
+<div role="select" @click="() => {}"></div>
+<div role="structure" @click="() => {}"></div>
+<div role="widget" @click="() => {}"></div>
+<div role="window" @click="() => {}"></div>
+
+```
+
+# Diagnostics
+```
+invalid.vue:2:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div @click="() => void 0"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <div v-on:click="() => void 0"></div>
+    4 │ <div onkeyup="() => void 0" aria-hidden="false"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:3:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div @click="() => void 0"></div>
+  > 3 │ <div v-on:click="() => void 0"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div onkeyup="() => void 0" aria-hidden="false"></div>
+    5 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:4:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    2 │ <div @click="() => void 0"></div>
+    3 │ <div v-on:click="() => void 0"></div>
+  > 4 │ <div onkeyup="() => void 0" aria-hidden="false"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- Static elements; no inherent role -->
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:7:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    6 │ <!-- Static elements; no inherent role -->
+  > 7 │ <a @click="() => void 0"></a>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <a @click="() => {}"></a>
+    9 │ <a tabindex="0" @click="() => void 0"></a>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:8:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+     6 │ <!-- Static elements; no inherent role -->
+     7 │ <a @click="() => void 0"></a>
+   > 8 │ <a @click="() => {}"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+     9 │ <a tabindex="0" @click="() => void 0"></a>
+    10 │ <area @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:9:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+     7 │ <a @click="() => void 0"></a>
+     8 │ <a @click="() => {}"></a>
+   > 9 │ <a tabindex="0" @click="() => void 0"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <area @click="() => {}" />
+    11 │ <b @click="() => {}"></b>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:10:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+     8 │ <a @click="() => {}"></a>
+     9 │ <a tabindex="0" @click="() => void 0"></a>
+  > 10 │ <area @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <b @click="() => {}"></b>
+    12 │ <base @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:11:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+     9 │ <a tabindex="0" @click="() => void 0"></a>
+    10 │ <area @click="() => {}" />
+  > 11 │ <b @click="() => {}"></b>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    12 │ <base @click="() => {}" />
+    13 │ <bdi @click="() => {}"></bdi>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:12:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    10 │ <area @click="() => {}" />
+    11 │ <b @click="() => {}"></b>
+  > 12 │ <base @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <bdi @click="() => {}"></bdi>
+    14 │ <bdo @click="() => {}"></bdo>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:13:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    11 │ <b @click="() => {}"></b>
+    12 │ <base @click="() => {}" />
+  > 13 │ <bdi @click="() => {}"></bdi>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <bdo @click="() => {}"></bdo>
+    15 │ <body @click="() => {}"></body>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:14:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    12 │ <base @click="() => {}" />
+    13 │ <bdi @click="() => {}"></bdi>
+  > 14 │ <bdo @click="() => {}"></bdo>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <body @click="() => {}"></body>
+    16 │ <cite @click="() => {}"></cite>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:15:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    13 │ <bdi @click="() => {}"></bdi>
+    14 │ <bdo @click="() => {}"></bdo>
+  > 15 │ <body @click="() => {}"></body>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <cite @click="() => {}"></cite>
+    17 │ <col @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:16:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    14 │ <bdo @click="() => {}"></bdo>
+    15 │ <body @click="() => {}"></body>
+  > 16 │ <cite @click="() => {}"></cite>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <col @click="() => {}" />
+    18 │ <colgroup @click="() => {}"></colgroup>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:17:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    15 │ <body @click="() => {}"></body>
+    16 │ <cite @click="() => {}"></cite>
+  > 17 │ <col @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <colgroup @click="() => {}"></colgroup>
+    19 │ <data @click="() => {}"></data>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:18:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    16 │ <cite @click="() => {}"></cite>
+    17 │ <col @click="() => {}" />
+  > 18 │ <colgroup @click="() => {}"></colgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <data @click="() => {}"></data>
+    20 │ <div @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:19:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    17 │ <col @click="() => {}" />
+    18 │ <colgroup @click="() => {}"></colgroup>
+  > 19 │ <data @click="() => {}"></data>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <div @click="() => {}"></div>
+    21 │ <head @click="() => {}"></head>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:20:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    18 │ <colgroup @click="() => {}"></colgroup>
+    19 │ <data @click="() => {}"></data>
+  > 20 │ <div @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <head @click="() => {}"></head>
+    22 │ <header @click="() => {}"></header>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:21:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    19 │ <data @click="() => {}"></data>
+    20 │ <div @click="() => {}"></div>
+  > 21 │ <head @click="() => {}"></head>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ <header @click="() => {}"></header>
+    23 │ <hgroup @click="() => {}"></hgroup>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:22:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    20 │ <div @click="() => {}"></div>
+    21 │ <head @click="() => {}"></head>
+  > 22 │ <header @click="() => {}"></header>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ <hgroup @click="() => {}"></hgroup>
+    24 │ <i @click="() => {}"></i>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:23:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    21 │ <head @click="() => {}"></head>
+    22 │ <header @click="() => {}"></header>
+  > 23 │ <hgroup @click="() => {}"></hgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <i @click="() => {}"></i>
+    25 │ <kbd @click="() => {}"></kbd>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:24:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    22 │ <header @click="() => {}"></header>
+    23 │ <hgroup @click="() => {}"></hgroup>
+  > 24 │ <i @click="() => {}"></i>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    25 │ <kbd @click="() => {}"></kbd>
+    26 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:25:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    23 │ <hgroup @click="() => {}"></hgroup>
+    24 │ <i @click="() => {}"></i>
+  > 25 │ <kbd @click="() => {}"></kbd>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ <map @click="() => {}"></map>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:27:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    25 │ <kbd @click="() => {}"></kbd>
+    26 │ 
+  > 27 │ <map @click="() => {}"></map>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ <meta @click="() => {}" />
+    29 │ <noscript @click="() => {}"></noscript>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:28:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    27 │ <map @click="() => {}"></map>
+  > 28 │ <meta @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ <noscript @click="() => {}"></noscript>
+    30 │ <object @click="() => {}"></object>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:29:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    27 │ <map @click="() => {}"></map>
+    28 │ <meta @click="() => {}" />
+  > 29 │ <noscript @click="() => {}"></noscript>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ <object @click="() => {}"></object>
+    31 │ <picture @click="() => {}"></picture>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:30:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    28 │ <meta @click="() => {}" />
+    29 │ <noscript @click="() => {}"></noscript>
+  > 30 │ <object @click="() => {}"></object>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <picture @click="() => {}"></picture>
+    32 │ <q @click="() => {}"></q>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:31:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    29 │ <noscript @click="() => {}"></noscript>
+    30 │ <object @click="() => {}"></object>
+  > 31 │ <picture @click="() => {}"></picture>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <q @click="() => {}"></q>
+    33 │ <rp @click="() => {}"></rp>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:32:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    30 │ <object @click="() => {}"></object>
+    31 │ <picture @click="() => {}"></picture>
+  > 32 │ <q @click="() => {}"></q>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    33 │ <rp @click="() => {}"></rp>
+    34 │ <rt @click="() => {}"></rt>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:33:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    31 │ <picture @click="() => {}"></picture>
+    32 │ <q @click="() => {}"></q>
+  > 33 │ <rp @click="() => {}"></rp>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <rt @click="() => {}"></rt>
+    35 │ <s @click="() => {}"></s>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:34:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    32 │ <q @click="() => {}"></q>
+    33 │ <rp @click="() => {}"></rp>
+  > 34 │ <rt @click="() => {}"></rt>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <s @click="() => {}"></s>
+    36 │ <samp @click="() => {}"></samp>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:35:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    33 │ <rp @click="() => {}"></rp>
+    34 │ <rt @click="() => {}"></rt>
+  > 35 │ <s @click="() => {}"></s>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    36 │ <samp @click="() => {}"></samp>
+    37 │ <script @click="() => {}"></script>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:36:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    34 │ <rt @click="() => {}"></rt>
+    35 │ <s @click="() => {}"></s>
+  > 36 │ <samp @click="() => {}"></samp>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ <script @click="() => {}"></script>
+    38 │ <section @click="() => {}"></section>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:37:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    35 │ <s @click="() => {}"></s>
+    36 │ <samp @click="() => {}"></samp>
+  > 37 │ <script @click="() => {}"></script>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ <section @click="() => {}"></section>
+    39 │ <small @click="() => {}"></small>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:38:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    36 │ <samp @click="() => {}"></samp>
+    37 │ <script @click="() => {}"></script>
+  > 38 │ <section @click="() => {}"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ <small @click="() => {}"></small>
+    40 │ <source @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:39:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    37 │ <script @click="() => {}"></script>
+    38 │ <section @click="() => {}"></section>
+  > 39 │ <small @click="() => {}"></small>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ <source @click="() => {}" />
+    41 │ <span @click="() => {}"></span>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:40:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    38 │ <section @click="() => {}"></section>
+    39 │ <small @click="() => {}"></small>
+  > 40 │ <source @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ <span @click="() => {}"></span>
+    42 │ <style @click="() => {}"></style>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:41:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    39 │ <small @click="() => {}"></small>
+    40 │ <source @click="() => {}" />
+  > 41 │ <span @click="() => {}"></span>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ <style @click="() => {}"></style>
+    43 │ <title @click="() => {}"></title>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:42:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    40 │ <source @click="() => {}" />
+    41 │ <span @click="() => {}"></span>
+  > 42 │ <style @click="() => {}"></style>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ <title @click="() => {}"></title>
+    44 │ <track @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:43:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    41 │ <span @click="() => {}"></span>
+    42 │ <style @click="() => {}"></style>
+  > 43 │ <title @click="() => {}"></title>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ <track @click="() => {}" />
+    45 │ <u @click="() => {}"></u>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:44:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    42 │ <style @click="() => {}"></style>
+    43 │ <title @click="() => {}"></title>
+  > 44 │ <track @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ <u @click="() => {}"></u>
+    46 │ <var @click="() => {}"></var>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:45:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    43 │ <title @click="() => {}"></title>
+    44 │ <track @click="() => {}" />
+  > 45 │ <u @click="() => {}"></u>
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    46 │ <var @click="() => {}"></var>
+    47 │ <wbr @click="() => {}" />
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:46:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    44 │ <track @click="() => {}" />
+    45 │ <u @click="() => {}"></u>
+  > 46 │ <var @click="() => {}"></var>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ <wbr @click="() => {}" />
+    48 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:47:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    45 │ <u @click="() => {}"></u>
+    46 │ <var @click="() => {}"></var>
+  > 47 │ <wbr @click="() => {}" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ <!-- Handlers -->
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:50:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    49 │ <!-- Handlers -->
+  > 50 │ <div onkeydown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ <div onkeypress="() => {}"></div>
+    52 │ <div onkeyup="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:51:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    49 │ <!-- Handlers -->
+    50 │ <div onkeydown="() => {}"></div>
+  > 51 │ <div onkeypress="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ <div onkeyup="() => {}"></div>
+    53 │ <div @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:52:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    50 │ <div onkeydown="() => {}"></div>
+    51 │ <div onkeypress="() => {}"></div>
+  > 52 │ <div onkeyup="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ <div @click="() => {}"></div>
+    54 │ <div onmousedown="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:53:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    51 │ <div onkeypress="() => {}"></div>
+    52 │ <div onkeyup="() => {}"></div>
+  > 53 │ <div @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ <div onmousedown="() => {}"></div>
+    55 │ <div onmouseup="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:54:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    52 │ <div onkeyup="() => {}"></div>
+    53 │ <div @click="() => {}"></div>
+  > 54 │ <div onmousedown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ <div onmouseup="() => {}"></div>
+    56 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:55:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    53 │ <div @click="() => {}"></div>
+    54 │ <div onmousedown="() => {}"></div>
+  > 55 │ <div onmouseup="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 
+    57 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:58:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    57 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+  > 58 │ <div role="presentation" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ <div role="presentation" onkeydown="() => {}"></div>
+    60 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:59:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    57 │ <!-- Presentation is a special case role that indicates intentional static semantics -->
+    58 │ <div role="presentation" @click="() => {}"></div>
+  > 59 │ <div role="presentation" onkeydown="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ <!-- HTML elements attributed with an abstract role -->
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:62:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    61 │ <!-- HTML elements attributed with an abstract role -->
+  > 62 │ <div role="command" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ <div role="composite" @click="() => {}"></div>
+    64 │ <div role="input" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:63:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    61 │ <!-- HTML elements attributed with an abstract role -->
+    62 │ <div role="command" @click="() => {}"></div>
+  > 63 │ <div role="composite" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ <div role="input" @click="() => {}"></div>
+    65 │ <div role="landmark" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:64:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    62 │ <div role="command" @click="() => {}"></div>
+    63 │ <div role="composite" @click="() => {}"></div>
+  > 64 │ <div role="input" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ <div role="landmark" @click="() => {}"></div>
+    66 │ <div role="range" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:65:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    63 │ <div role="composite" @click="() => {}"></div>
+    64 │ <div role="input" @click="() => {}"></div>
+  > 65 │ <div role="landmark" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ <div role="range" @click="() => {}"></div>
+    67 │ <div role="roletype" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:66:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    64 │ <div role="input" @click="() => {}"></div>
+    65 │ <div role="landmark" @click="() => {}"></div>
+  > 66 │ <div role="range" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ <div role="roletype" @click="() => {}"></div>
+    68 │ <div role="sectionhead" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:67:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    65 │ <div role="landmark" @click="() => {}"></div>
+    66 │ <div role="range" @click="() => {}"></div>
+  > 67 │ <div role="roletype" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ <div role="sectionhead" @click="() => {}"></div>
+    69 │ <div role="select" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:68:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    66 │ <div role="range" @click="() => {}"></div>
+    67 │ <div role="roletype" @click="() => {}"></div>
+  > 68 │ <div role="sectionhead" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ <div role="select" @click="() => {}"></div>
+    70 │ <div role="structure" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:69:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    67 │ <div role="roletype" @click="() => {}"></div>
+    68 │ <div role="sectionhead" @click="() => {}"></div>
+  > 69 │ <div role="select" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ <div role="structure" @click="() => {}"></div>
+    71 │ <div role="widget" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:70:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    68 │ <div role="sectionhead" @click="() => {}"></div>
+    69 │ <div role="select" @click="() => {}"></div>
+  > 70 │ <div role="structure" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ <div role="widget" @click="() => {}"></div>
+    72 │ <div role="window" @click="() => {}"></div>
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:71:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    69 │ <div role="select" @click="() => {}"></div>
+    70 │ <div role="structure" @click="() => {}"></div>
+  > 71 │ <div role="widget" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ <div role="window" @click="() => {}"></div>
+    73 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```
+
+```
+invalid.vue:72:1 lint/a11y/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected event handler on static element.
+  
+    70 │ <div role="structure" @click="() => {}"></div>
+    71 │ <div role="widget" @click="() => {}"></div>
+  > 72 │ <div role="window" @click="() => {}"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 
+  
+  i Static elements should not be interactive. To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+```

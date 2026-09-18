@@ -59,22 +59,14 @@ impl Rule for NoTsIgnore {
 
         let mut tokens = vec![];
         for token in module.syntax().descendants_tokens(Direction::Next) {
-            let leading_trivia = token.leading_trivia();
-            let comments: Vec<_> = leading_trivia
-                .pieces()
-                .filter_map(|trivia| {
-                    if let Some(comment) = trivia.as_comments()
-                        && let Some((index, _)) = comment.text().match_indices("@ts-ignore").next()
-                    {
-                        return Some((
-                            token.clone(),
-                            comment.text_range().add_start(TextSize::from(index as u32)),
-                        ));
-                    }
-                    None
-                })
-                .collect();
-
+            let comments = token.leading_trivia().pieces().filter_map(|trivia| {
+                const TS_IGNORE_DIRECTIVE: &str = "@ts-ignore";
+                let comment = trivia.as_comments()?;
+                let (index, _) = comment.text().match_indices(TS_IGNORE_DIRECTIVE).next()?;
+                let start = comment.text_range().start() + TextSize::from(index as u32);
+                let len = TextSize::from(TS_IGNORE_DIRECTIVE.len() as u32);
+                Some((token.clone(), TextRange::new(start, start + len)))
+            });
             tokens.extend(comments);
         }
 

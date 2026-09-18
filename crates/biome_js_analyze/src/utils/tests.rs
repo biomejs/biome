@@ -3,10 +3,10 @@ use crate::utils::batch::JsBatchMutation;
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{
-    AnyJsObjectMember, JsFileSource, JsFormalParameter, JsIdentifierBinding, JsLanguage,
-    JsVariableDeclarator,
+    AnyJsObjectMember, JsFormalParameter, JsIdentifierBinding, JsLanguage, JsVariableDeclarator,
 };
 use biome_js_syntax::{JsSyntaxNode, TsIdentifierBinding};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast};
 use std::{any::type_name, fmt::Debug};
 

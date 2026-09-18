@@ -25,7 +25,7 @@ impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
                 f,
                 [
                     format_removed(&token),
-                    text("\\", token.text_range().start()),
+                    text("\\", Some(token.text_range().start())),
                     hard_line_break()
                 ]
             )
@@ -51,7 +51,7 @@ impl FormatNodeRule<MdHardLine> for FormatMdHardLine {
                 f,
                 [
                     format_removed(&token),
-                    text("  ", token.text_range().start()),
+                    text("  ", Some(token.text_range().start())),
                     hard_line_break(),
                 ]
             )

@@ -83,7 +83,7 @@ impl ScssInterpolatedStringQuotes {
 
         format_replaced(
             token,
-            &text(replacement, token.text_trimmed_range().start()),
+            &text(replacement, Some(token.text_trimmed_range().start())),
         )
         .fmt(f)
     }

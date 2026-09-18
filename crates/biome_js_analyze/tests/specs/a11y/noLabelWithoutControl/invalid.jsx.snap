@@ -134,7 +134,7 @@ invalid.jsx:8:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
   
   i Consider adding an accessible text content to the label element.
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  i Consider adding a "for" or "htmlFor" attribute to the label element or moving the input element to inside the label element.
   
 
 ```
@@ -151,7 +151,7 @@ invalid.jsx:9:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
     10 │ <div><label /><input /></div>;
     11 │ <div><label>A label</label><input /></div>;
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  i Consider adding a "for" or "htmlFor" attribute to the label element or moving the input element to inside the label element.
   
 
 ```
@@ -170,7 +170,7 @@ invalid.jsx:10:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
   
   i Consider adding an accessible text content to the label element.
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  i Consider adding a "for" or "htmlFor" attribute to the label element or moving the input element to inside the label element.
   
 
 ```
@@ -186,7 +186,7 @@ invalid.jsx:11:6 lint/a11y/noLabelWithoutControl ━━━━━━━━━━�
        │      ^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
   
-  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  i Consider adding a "for" or "htmlFor" attribute to the label element or moving the input element to inside the label element.
   
 
 ```

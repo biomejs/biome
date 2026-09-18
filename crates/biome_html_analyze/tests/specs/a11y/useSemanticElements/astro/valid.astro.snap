@@ -1,0 +1,48 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<div></div>
+<header>header</header>
+<img alt="" src="image.jpg" />
+
+<div aria-label="foo">hello world</div>
+
+<svg role="img" aria-label="Description of your SVG image"></svg>
+<div role="img" aria-label="Description of the overall image">
+  <img src="graphic1.png" alt="" />
+  <img src="graphic2.png" />
+</div>
+
+<div role="alert"></div>
+<div role="alertdialog"></div>
+
+<div role="combobox"></div>
+<div role="listbox"></div>
+<div role="option"></div>
+
+<div role="status"></div>
+
+<!-- Semantic elements with a matching role should not be flagged -->
+<nav role="navigation"></nav>
+<footer role="contentinfo"></footer>
+<aside role="complementary"></aside>
+<article role="article"></article>
+<button role="button"></button>
+<form role="form"></form>
+<main role="main"></main>
+<table role="table"></table>
+<hr role="separator" />
+
+<!-- Constrained elements: tag + matching attributes should not be flagged -->
+<input role="checkbox" type="checkbox" />
+<input role="radio" type="radio" />
+<input role="searchbox" type="search" />
+<input role="textbox" type="text" />
+<th role="columnheader" scope="col"></th>
+<th role="rowheader" scope="row"></th>
+
+```

@@ -6,7 +6,6 @@
 
 #[macro_use]
 mod generated;
-mod file_source;
 mod object_ext;
 pub mod string_value_ext;
 mod syntax_node;
@@ -14,7 +13,6 @@ mod syntax_node;
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
-pub use file_source::GraphqlFileSource;
 pub use generated::*;
 pub use syntax_node::*;
 

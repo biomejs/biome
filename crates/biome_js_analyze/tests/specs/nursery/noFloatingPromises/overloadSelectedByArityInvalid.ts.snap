@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: overloadSelectedByArityInvalid.ts
+---
+# Input
+```ts
+function run(cb: () => void): void;
+function run(cb: () => void, immediate: boolean): Promise<void>;
+function run(cb: () => void, immediate?: boolean): void | Promise<void> {
+	return immediate ? Promise.resolve() : cb();
+}
+
+function task(): void {}
+
+// Two arguments select the second overload, which returns `Promise<void>` (not
+// the first, `void`-returning one). That promise floats here, so it must still
+// be flagged.
+run(task, true);
+
+```
+
+# Diagnostics
+```
+overloadSelectedByArityInvalid.ts:12:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ // the first, `void`-returning one). That promise floats here, so it must still
+    11 │ // be flagged.
+  > 12 │ run(task, true);
+       │ ^^^^^^^^^^^^^^^^
+    13 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

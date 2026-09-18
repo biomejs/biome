@@ -95,6 +95,13 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
 
     let m = p.start();
     p.state_mut().block_quote_depth += 1;
+    // A `>` marker interrupts a paragraph (CommonMark §5.1), so a pending
+    // link-reference-definition continuation from a block before the quote
+    // does not extend into the quote's content. Without this reset, an
+    // ordered list starting at a number other than 1 (e.g. `> 2. q`) is
+    // wrongly demoted to a paragraph by the §5.2 interrupt check. A
+    // definition *inside* the quote sets the flag again after this point.
+    p.state_mut().link_reference_definition_continuation = false;
 
     let marker_space = emit_quote_prefix_node(p);
     relex_after_quote_prefix_consumed(p);

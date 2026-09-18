@@ -1,0 +1,46 @@
+/* Unquoted URLs */
+.unquoted {
+    background: url(/images/bg.png);
+    background-image: url(../assets/image.jpg);
+    list-style-image: url(bullet.svg);
+}
+
+/* Quoted URLs */
+.quoted {
+    background: url("https://example.com/image.jpg");
+    background-image: url('/path/to/file.png');
+    cursor: url("cursor.cur"), auto;
+}
+
+/* Data URLs */
+.data-url {
+    background: url(data:image/png;base64,iVBORw0KGgo=);
+}
+
+/* URLs with special characters */
+.special {
+    background: url("/path/with spaces/file.png");
+    background-image: url('../path/../other/file.png');
+}
+
+/* Multiple url() in same property */
+.multiple {
+    background: url(bg1.png), url(bg2.png);
+    cursor: url(pointer.cur), url(fallback.cur), auto;
+}
+
+/* src() function */
+@font-face {
+    font-family: "Custom Font";
+    src: url("font.woff2") format("woff2"),
+         url("font.woff") format("woff");
+}
+
+/* url() in other contexts */
+.filter-url {
+    filter: url(#blur-filter);
+}
+
+.mask-url {
+    mask-image: url(mask.svg);
+}

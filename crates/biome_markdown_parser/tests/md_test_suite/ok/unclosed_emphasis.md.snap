@@ -32,7 +32,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@27..28 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@28..28 "" [] [],
@@ -55,7 +54,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@10..27 "unclosed emphasis" [] []
         3: MD_TEXTUAL@27..28
           0: MD_TEXTUAL_LITERAL@27..28 "\n" [] []
-      1: (empty)
   2: EOF@28..28 "" [] []
 
 ```

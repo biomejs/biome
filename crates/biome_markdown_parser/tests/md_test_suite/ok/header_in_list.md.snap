@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 190
 expression: snapshot
 ---
 
@@ -55,7 +54,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@3..7 " Foo" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -111,7 +109,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@26..27 "\n" [] [],
@@ -139,7 +136,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -176,7 +172,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -213,7 +208,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -246,7 +240,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [
                                 MdHash {
@@ -287,7 +280,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -317,7 +309,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -357,7 +348,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@3..7
                   0: MD_TEXTUAL@3..7
                     0: MD_TEXTUAL_LITERAL@3..7 " Foo" [] []
-                1: (empty)
               3: MD_HASH_LIST@7..7
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
@@ -393,7 +383,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@22..25 "baz" [] []
                 1: MD_TEXTUAL@25..26
                   0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
-              1: (empty)
             4: MD_NEWLINE@26..27
               0: NEWLINE@26..27 "\n" [] []
         2: MD_BULLET@27..39
@@ -412,7 +401,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@31..39
                   0: MD_TEXTUAL@31..39
                     0: MD_TEXTUAL_LITERAL@31..39 " Level 2" [] []
-                1: (empty)
               3: MD_HASH_LIST@39..39
     1: MD_NEWLINE@39..40
       0: NEWLINE@39..40 "\n" [] []
@@ -436,7 +424,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@46..54
                   0: MD_TEXTUAL@46..54
                     0: MD_TEXTUAL_LITERAL@46..54 " Level 3" [] []
-                1: (empty)
               3: MD_HASH_LIST@54..54
     4: MD_NEWLINE@54..55
       0: NEWLINE@54..55 "\n" [] []
@@ -460,7 +447,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@64..72
                   0: MD_TEXTUAL@64..72
                     0: MD_TEXTUAL_LITERAL@64..72 " Level 6" [] []
-                1: (empty)
               3: MD_HASH_LIST@72..72
             1: MD_NEWLINE@72..73
               0: NEWLINE@72..73 "\n" [] []
@@ -482,7 +468,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@77..91
                   0: MD_TEXTUAL@77..91
                     0: MD_TEXTUAL_LITERAL@77..91 " Trailing hash" [] []
-                1: (empty)
               3: MD_HASH_LIST@91..93
                 0: MD_HASH@91..93
                   0: HASH@91..93 "#" [Whitespace(" ")] []
@@ -508,7 +493,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@99..115
                   0: MD_TEXTUAL@99..115
                     0: MD_TEXTUAL_LITERAL@99..115 " Ordered heading" [] []
-                1: (empty)
               3: MD_HASH_LIST@115..115
             1: MD_NEWLINE@115..116
               0: NEWLINE@115..116 "\n" [] []
@@ -528,7 +512,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@121..137
                   0: MD_TEXTUAL@121..137
                     0: MD_TEXTUAL_LITERAL@121..137 " Ordered level 2" [] []
-                1: (empty)
               3: MD_HASH_LIST@137..137
     10: MD_NEWLINE@137..138
       0: NEWLINE@137..138 "\n" [] []

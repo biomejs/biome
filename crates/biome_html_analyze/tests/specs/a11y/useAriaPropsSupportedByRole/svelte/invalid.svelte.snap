@@ -1,0 +1,368 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<a href="#" aria-checked="true" />
+<a href="#" aria-checked />
+<area href="#" aria-checked="true" />
+<img alt="foobar" aria-checked="true" />
+<menu type="toolbar" aria-checked="true" />
+<aside aria-checked="true" />
+<ul aria-expanded="true" />
+<details aria-expanded="true" />
+<dialog aria-expanded="true" />
+<aside aria-expanded="true" />
+<article aria-expanded="true" />
+<li aria-expanded="true" />
+<nav aria-expanded="true" />
+<ol aria-expanded="true" />
+<output aria-expanded="true" />
+<tbody aria-expanded="true" />
+<tfoot aria-expanded="true" />
+<thead aria-expanded="true" />
+<input type="radio" aria-selected="true" />
+<menu type="toolbar" aria-expanded="true" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <a href="#" aria-checked="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <a href="#" aria-checked />
+    4 │ <area href="#" aria-checked="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:3:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <a href="#" aria-checked="true" />
+  > 3 │ <a href="#" aria-checked />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <area href="#" aria-checked="true" />
+    5 │ <img alt="foobar" aria-checked="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:4:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    2 │ <a href="#" aria-checked="true" />
+    3 │ <a href="#" aria-checked />
+  > 4 │ <area href="#" aria-checked="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <img alt="foobar" aria-checked="true" />
+    6 │ <menu type="toolbar" aria-checked="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:5:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    3 │ <a href="#" aria-checked />
+    4 │ <area href="#" aria-checked="true" />
+  > 5 │ <img alt="foobar" aria-checked="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <menu type="toolbar" aria-checked="true" />
+    7 │ <aside aria-checked="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:6:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    4 │ <area href="#" aria-checked="true" />
+    5 │ <img alt="foobar" aria-checked="true" />
+  > 6 │ <menu type="toolbar" aria-checked="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <aside aria-checked="true" />
+    8 │ <ul aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:7:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-checked' is not supported by this element.
+  
+    5 │ <img alt="foobar" aria-checked="true" />
+    6 │ <menu type="toolbar" aria-checked="true" />
+  > 7 │ <aside aria-checked="true" />
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <ul aria-expanded="true" />
+    9 │ <details aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:8:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+     6 │ <menu type="toolbar" aria-checked="true" />
+     7 │ <aside aria-checked="true" />
+   > 8 │ <ul aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <details aria-expanded="true" />
+    10 │ <dialog aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:9:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+     7 │ <aside aria-checked="true" />
+     8 │ <ul aria-expanded="true" />
+   > 9 │ <details aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <dialog aria-expanded="true" />
+    11 │ <aside aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:10:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+     8 │ <ul aria-expanded="true" />
+     9 │ <details aria-expanded="true" />
+  > 10 │ <dialog aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <aside aria-expanded="true" />
+    12 │ <article aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:11:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+     9 │ <details aria-expanded="true" />
+    10 │ <dialog aria-expanded="true" />
+  > 11 │ <aside aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <article aria-expanded="true" />
+    13 │ <li aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:12:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    10 │ <dialog aria-expanded="true" />
+    11 │ <aside aria-expanded="true" />
+  > 12 │ <article aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <li aria-expanded="true" />
+    14 │ <nav aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:13:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    11 │ <aside aria-expanded="true" />
+    12 │ <article aria-expanded="true" />
+  > 13 │ <li aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <nav aria-expanded="true" />
+    15 │ <ol aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:14:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    12 │ <article aria-expanded="true" />
+    13 │ <li aria-expanded="true" />
+  > 14 │ <nav aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <ol aria-expanded="true" />
+    16 │ <output aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:15:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    13 │ <li aria-expanded="true" />
+    14 │ <nav aria-expanded="true" />
+  > 15 │ <ol aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <output aria-expanded="true" />
+    17 │ <tbody aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:16:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    14 │ <nav aria-expanded="true" />
+    15 │ <ol aria-expanded="true" />
+  > 16 │ <output aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <tbody aria-expanded="true" />
+    18 │ <tfoot aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:17:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    15 │ <ol aria-expanded="true" />
+    16 │ <output aria-expanded="true" />
+  > 17 │ <tbody aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <tfoot aria-expanded="true" />
+    19 │ <thead aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:18:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    16 │ <output aria-expanded="true" />
+    17 │ <tbody aria-expanded="true" />
+  > 18 │ <tfoot aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <thead aria-expanded="true" />
+    20 │ <input type="radio" aria-selected="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:19:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    17 │ <tbody aria-expanded="true" />
+    18 │ <tfoot aria-expanded="true" />
+  > 19 │ <thead aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <input type="radio" aria-selected="true" />
+    21 │ <menu type="toolbar" aria-expanded="true" />
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:20:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-selected' is not supported by this element.
+  
+    18 │ <tfoot aria-expanded="true" />
+    19 │ <thead aria-expanded="true" />
+  > 20 │ <input type="radio" aria-selected="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <menu type="toolbar" aria-expanded="true" />
+    22 │ 
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```
+
+```
+invalid.svelte:21:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ARIA attribute 'aria-expanded' is not supported by this element.
+  
+    19 │ <thead aria-expanded="true" />
+    20 │ <input type="radio" aria-selected="true" />
+  > 21 │ <menu type="toolbar" aria-expanded="true" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i Ensure that ARIA attributes are valid for the role of the element.
+  
+
+```

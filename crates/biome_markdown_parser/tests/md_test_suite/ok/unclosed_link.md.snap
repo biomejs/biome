@@ -32,7 +32,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@23..24 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@24..24 "" [] [],
@@ -55,7 +54,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@10..23 "unclosed link" [] []
         3: MD_TEXTUAL@23..24
           0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
-      1: (empty)
   2: EOF@24..24 "" [] []
 
 ```

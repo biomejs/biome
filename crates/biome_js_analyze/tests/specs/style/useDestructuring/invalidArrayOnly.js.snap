@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidArrayOnly.js
+---
+# Input
+```js
+/* should generate diagnostics */
+/* object disabled, only array should fire */
+{
+	var foo = array[0];
+}
+{
+	var foo = object.foo;
+}
+{
+	foo = array[0];
+}
+{
+	foo = object.foo;
+}
+
+```
+
+# Diagnostics
+```
+invalidArrayOnly.js:4:6 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+    2 │ /* object disabled, only array should fire */
+    3 │ {
+  > 4 │ 	var foo = array[0];
+      │ 	    ^^^^^^^^^^^^^^
+    5 │ }
+    6 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+
+```
+
+```
+invalidArrayOnly.js:10:2 lint/style/useDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use array destructuring instead of accessing array elements by index.
+  
+     8 │ }
+     9 │ {
+  > 10 │ 	foo = array[0];
+       │ 	^^^^^^^^^^^^^^
+    11 │ }
+    12 │ {
+  
+  i Array destructuring is more readable and expressive than accessing individual elements by index.
+  
+  i Replace the array index access with array destructuring syntax.
+  
+
+```

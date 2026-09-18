@@ -377,7 +377,8 @@ pub fn is_function_boundary(kind: JsSyntaxKind) -> bool {
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{AnyJsLiteralExpression, JsFileSource};
+    use biome_js_syntax::AnyJsLiteralExpression;
+    use biome_languages::JsFileSource;
     use biome_rowan::SyntaxNodeCast;
 
     use super::get_boolean_value;

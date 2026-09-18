@@ -1,4 +1,5 @@
-use biome_html_syntax::{HtmlFileSource, element_ext::AnyHtmlTagElement};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_languages::HtmlFileSource;
 
 // In HTML files: case-insensitive (TAG, Tag, tag all match)
 // In component frameworks (Vue, Svelte, Astro): case-sensitive (only "tag" matches)

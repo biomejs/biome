@@ -12,8 +12,8 @@ use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set}
 
 use super::ScssExpressionOptions;
 use super::list::{
-    SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET, complete_scss_list_expression,
-    complete_scss_list_expression_element, parse_scss_expression_with_options,
+    SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET, complete_scss_list_expression_element,
+    parse_scss_expression_with_options, parse_scss_list_expression,
 };
 
 const SCSS_MAP_EXPRESSION_KEY_END_TOKEN_SET: TokenSet<CssSyntaxKind> =
@@ -61,14 +61,14 @@ pub(super) fn parse_scss_parenthesized_or_map_expression(
 
     if p.at(T![:]) {
         let first_pair = parse_scss_map_expression_pair_with_key(p, first_expression, options);
-        complete_scss_map_expression_pair_list(p, first_pair, options);
+        parse_scss_map_expression_pair_list(p, first_pair, options);
         p.expect(T![')']);
         return Present(m.complete(p, SCSS_MAP_EXPRESSION));
     }
 
     if p.at(T![,]) {
         let first_element = complete_scss_list_expression_element(p, first_expression);
-        complete_scss_list_expression(
+        parse_scss_list_expression(
             p,
             first_element,
             options.with_end_ts(SCSS_LIST_EXPRESSION_ELEMENT_END_TOKEN_SET),
@@ -107,7 +107,7 @@ fn parse_scss_map_expression_pair_with_key(
 }
 
 #[inline]
-fn complete_scss_map_expression_pair_list(
+fn parse_scss_map_expression_pair_list(
     p: &mut CssParser,
     first_pair: CompletedMarker,
     options: ScssExpressionOptions,

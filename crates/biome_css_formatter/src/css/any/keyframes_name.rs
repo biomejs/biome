@@ -11,6 +11,7 @@ impl FormatRule<AnyCssKeyframesName> for FormatAnyCssKeyframesName {
             AnyCssKeyframesName::AnyCssKeyframesIdentifier(node) => node.format().fmt(f),
             AnyCssKeyframesName::CssBogusKeyframesName(node) => node.format().fmt(f),
             AnyCssKeyframesName::CssKeyframesScopedName(node) => node.format().fmt(f),
+            AnyCssKeyframesName::ScssKeyframesName(node) => node.format().fmt(f),
         }
     }
 }

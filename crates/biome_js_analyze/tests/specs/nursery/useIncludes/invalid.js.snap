@@ -1,0 +1,642 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid.js
+---
+# Input
+```js
+const arr = [1, 2, 3];
+const str = "hello world";
+
+// presence checks — all should be flagged
+arr.indexOf(1) !== -1;
+arr.indexOf(1) != -1;
+arr.indexOf(1) >= 0;
+arr.indexOf(1) > -1;
+
+// absence checks — all should be flagged
+arr.indexOf(1) === -1;
+arr.indexOf(1) == -1;
+arr.indexOf(1) < 0;
+arr.indexOf(1) <= -1;
+
+// reversed operands
+-1 !== arr.indexOf(1);
+-1 != arr.indexOf(1);
+0 <= arr.indexOf(1);
+-1 < arr.indexOf(1);
+
+-1 === arr.indexOf(1);
+-1 == arr.indexOf(1);
+0 > arr.indexOf(1);
+-1 >= arr.indexOf(1);
+
+// works with strings too
+str.indexOf("world") !== -1;
+str.indexOf("world") === -1;
+
+// parenthesized expressions
+(arr.indexOf(1)) !== -1;
+arr.indexOf(1) !== (-1);
+
+```
+
+# Diagnostics
+```
+invalid.js:5:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    4 │ // presence checks — all should be flagged
+  > 5 │ arr.indexOf(1) !== -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    6 │ arr.indexOf(1) != -1;
+    7 │ arr.indexOf(1) >= 0;
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+     3  3 │   
+     4  4 │   // presence checks — all should be flagged
+     5    │ - arr.indexOf(1)·!==·-1;
+        5 │ + arr.includes(1);
+     6  6 │   arr.indexOf(1) != -1;
+     7  7 │   arr.indexOf(1) >= 0;
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    4 │ // presence checks — all should be flagged
+    5 │ arr.indexOf(1) !== -1;
+  > 6 │ arr.indexOf(1) != -1;
+      │ ^^^^^^^^^^^^^^^^^^^^
+    7 │ arr.indexOf(1) >= 0;
+    8 │ arr.indexOf(1) > -1;
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+     4  4 │   // presence checks — all should be flagged
+     5  5 │   arr.indexOf(1) !== -1;
+     6    │ - arr.indexOf(1)·!=·-1;
+        6 │ + arr.includes(1);
+     7  7 │   arr.indexOf(1) >= 0;
+     8  8 │   arr.indexOf(1) > -1;
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    5 │ arr.indexOf(1) !== -1;
+    6 │ arr.indexOf(1) != -1;
+  > 7 │ arr.indexOf(1) >= 0;
+      │ ^^^^^^^^^^^^^^^^^^^
+    8 │ arr.indexOf(1) > -1;
+    9 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+     5  5 │   arr.indexOf(1) !== -1;
+     6  6 │   arr.indexOf(1) != -1;
+     7    │ - arr.indexOf(1)·>=·0;
+        7 │ + arr.includes(1);
+     8  8 │   arr.indexOf(1) > -1;
+     9  9 │   
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+     6 │ arr.indexOf(1) != -1;
+     7 │ arr.indexOf(1) >= 0;
+   > 8 │ arr.indexOf(1) > -1;
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // absence checks — all should be flagged
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+     6  6 │   arr.indexOf(1) != -1;
+     7  7 │   arr.indexOf(1) >= 0;
+     8    │ - arr.indexOf(1)·>·-1;
+        8 │ + arr.includes(1);
+     9  9 │   
+    10 10 │   // absence checks — all should be flagged
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    10 │ // absence checks — all should be flagged
+  > 11 │ arr.indexOf(1) === -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    12 │ arr.indexOf(1) == -1;
+    13 │ arr.indexOf(1) < 0;
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+     9  9 │   
+    10 10 │   // absence checks — all should be flagged
+    11    │ - arr.indexOf(1)·===·-1;
+       11 │ + !
+       12 │ + 
+       13 │ + //·absence·checks·—·all·should·be·flagged
+       14 │ + arr.includes(1);
+    12 15 │   arr.indexOf(1) == -1;
+    13 16 │   arr.indexOf(1) < 0;
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    10 │ // absence checks — all should be flagged
+    11 │ arr.indexOf(1) === -1;
+  > 12 │ arr.indexOf(1) == -1;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    13 │ arr.indexOf(1) < 0;
+    14 │ arr.indexOf(1) <= -1;
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    10 10 │   // absence checks — all should be flagged
+    11 11 │   arr.indexOf(1) === -1;
+    12    │ - arr.indexOf(1)·==·-1;
+       12 │ + !
+       13 │ + arr.includes(1);
+    13 14 │   arr.indexOf(1) < 0;
+    14 15 │   arr.indexOf(1) <= -1;
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    11 │ arr.indexOf(1) === -1;
+    12 │ arr.indexOf(1) == -1;
+  > 13 │ arr.indexOf(1) < 0;
+       │ ^^^^^^^^^^^^^^^^^^
+    14 │ arr.indexOf(1) <= -1;
+    15 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    11 11 │   arr.indexOf(1) === -1;
+    12 12 │   arr.indexOf(1) == -1;
+    13    │ - arr.indexOf(1)·<·0;
+       13 │ + !
+       14 │ + arr.includes(1);
+    14 15 │   arr.indexOf(1) <= -1;
+    15 16 │   
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    12 │ arr.indexOf(1) == -1;
+    13 │ arr.indexOf(1) < 0;
+  > 14 │ arr.indexOf(1) <= -1;
+       │ ^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ // reversed operands
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    12 12 │   arr.indexOf(1) == -1;
+    13 13 │   arr.indexOf(1) < 0;
+    14    │ - arr.indexOf(1)·<=·-1;
+       14 │ + !
+       15 │ + arr.includes(1);
+    15 16 │   
+    16 17 │   // reversed operands
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    16 │ // reversed operands
+  > 17 │ -1 !== arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    18 │ -1 != arr.indexOf(1);
+    19 │ 0 <= arr.indexOf(1);
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    15 15 │   
+    16 16 │   // reversed operands
+    17    │ - -1·!==·arr.indexOf(1);
+       17 │ + arr.includes(1);
+    18 18 │   -1 != arr.indexOf(1);
+    19 19 │   0 <= arr.indexOf(1);
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    16 │ // reversed operands
+    17 │ -1 !== arr.indexOf(1);
+  > 18 │ -1 != arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    19 │ 0 <= arr.indexOf(1);
+    20 │ -1 < arr.indexOf(1);
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    16 16 │   // reversed operands
+    17 17 │   -1 !== arr.indexOf(1);
+    18    │ - -1·!=·arr.indexOf(1);
+       18 │ + arr.includes(1);
+    19 19 │   0 <= arr.indexOf(1);
+    20 20 │   -1 < arr.indexOf(1);
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    17 │ -1 !== arr.indexOf(1);
+    18 │ -1 != arr.indexOf(1);
+  > 19 │ 0 <= arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^
+    20 │ -1 < arr.indexOf(1);
+    21 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    17 17 │   -1 !== arr.indexOf(1);
+    18 18 │   -1 != arr.indexOf(1);
+    19    │ - 0·<=·arr.indexOf(1);
+       19 │ + arr.includes(1);
+    20 20 │   -1 < arr.indexOf(1);
+    21 21 │   
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    18 │ -1 != arr.indexOf(1);
+    19 │ 0 <= arr.indexOf(1);
+  > 20 │ -1 < arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ -1 === arr.indexOf(1);
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    18 18 │   -1 != arr.indexOf(1);
+    19 19 │   0 <= arr.indexOf(1);
+    20    │ - -1·<·arr.indexOf(1);
+       20 │ + arr.includes(1);
+    21 21 │   
+    22 22 │   -1 === arr.indexOf(1);
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    20 │ -1 < arr.indexOf(1);
+    21 │ 
+  > 22 │ -1 === arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    23 │ -1 == arr.indexOf(1);
+    24 │ 0 > arr.indexOf(1);
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    20 20 │   -1 < arr.indexOf(1);
+    21 21 │   
+    22    │ - -1·===·arr.indexOf(1);
+       22 │ + !arr.includes(1);
+    23 23 │   -1 == arr.indexOf(1);
+    24 24 │   0 > arr.indexOf(1);
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    22 │ -1 === arr.indexOf(1);
+  > 23 │ -1 == arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    24 │ 0 > arr.indexOf(1);
+    25 │ -1 >= arr.indexOf(1);
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    21 21 │   
+    22 22 │   -1 === arr.indexOf(1);
+    23    │ - -1·==·arr.indexOf(1);
+       23 │ + !arr.includes(1);
+    24 24 │   0 > arr.indexOf(1);
+    25 25 │   -1 >= arr.indexOf(1);
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    22 │ -1 === arr.indexOf(1);
+    23 │ -1 == arr.indexOf(1);
+  > 24 │ 0 > arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^
+    25 │ -1 >= arr.indexOf(1);
+    26 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    22 22 │   -1 === arr.indexOf(1);
+    23 23 │   -1 == arr.indexOf(1);
+    24    │ - 0·>·arr.indexOf(1);
+       24 │ + !arr.includes(1);
+    25 25 │   -1 >= arr.indexOf(1);
+    26 26 │   
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    23 │ -1 == arr.indexOf(1);
+    24 │ 0 > arr.indexOf(1);
+  > 25 │ -1 >= arr.indexOf(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // works with strings too
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    23 23 │   -1 == arr.indexOf(1);
+    24 24 │   0 > arr.indexOf(1);
+    25    │ - -1·>=·arr.indexOf(1);
+       25 │ + !arr.includes(1);
+    26 26 │   
+    27 27 │   // works with strings too
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    27 │ // works with strings too
+  > 28 │ str.indexOf("world") !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ str.indexOf("world") === -1;
+    30 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    26 26 │   
+    27 27 │   // works with strings too
+    28    │ - str.indexOf("world")·!==·-1;
+       28 │ + str.includes("world");
+    29 29 │   str.indexOf("world") === -1;
+    30 30 │   
+  
+
+```
+
+```
+invalid.js:29:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    27 │ // works with strings too
+    28 │ str.indexOf("world") !== -1;
+  > 29 │ str.indexOf("world") === -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ // parenthesized expressions
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use !...includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with !...includes().
+  
+    27 27 │   // works with strings too
+    28 28 │   str.indexOf("world") !== -1;
+    29    │ - str.indexOf("world")·===·-1;
+       29 │ + !
+       30 │ + str.includes("world");
+    30 31 │   
+    31 32 │   // parenthesized expressions
+  
+
+```
+
+```
+invalid.js:32:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    31 │ // parenthesized expressions
+  > 32 │ (arr.indexOf(1)) !== -1;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ arr.indexOf(1) !== (-1);
+    34 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    30 30 │   
+    31 31 │   // parenthesized expressions
+    32    │ - (arr.indexOf(1))·!==·-1;
+       32 │ + arr.includes(1);
+    33 33 │   arr.indexOf(1) !== (-1);
+    34 34 │   
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/useIncludes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Checking the result of indexOf() against -1 to test for presence.
+  
+    31 │ // parenthesized expressions
+    32 │ (arr.indexOf(1)) !== -1;
+  > 33 │ arr.indexOf(1) !== (-1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 
+  
+  i indexOf() returns a numeric index, not a boolean. Comparing it against -1 is error-prone and harder to read.
+  
+  i Use includes() instead, which directly expresses the intent and returns a boolean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace with .includes().
+  
+    31 31 │   // parenthesized expressions
+    32 32 │   (arr.indexOf(1)) !== -1;
+    33    │ - arr.indexOf(1)·!==·(-1);
+       33 │ + arr.includes(1);
+    34 34 │   
+  
+
+```

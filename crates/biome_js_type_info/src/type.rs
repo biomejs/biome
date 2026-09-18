@@ -24,7 +24,7 @@ use crate::{
     },
 };
 
-/// Wrapper used to refer to type information stored in the `ModuleGraph`.
+/// Wrapper used to refer to type information stored in module info.
 ///
 /// Type information is stored as part of `TypeData` structures that are stored
 /// inside [`TypeStore`](crate::TypeStore) instances. However, there are many

@@ -75,6 +75,7 @@ AnyHtmlElement =
 	| HtmlElement
 	| AnyHtmlContent
 	| HtmlCdataSection
+	| HtmlProcessingInstruction
 	| HtmlBogusElement
 
 AnyHtmlContent =
@@ -174,6 +175,14 @@ AstroFrontmatterElement =
 AstroEmbeddedContent =
 	content: 'html_literal'?
 
+// <?something href="something" ?>
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+HtmlProcessingInstruction =
+  start: '<?'
+	target: AnyHtmlTagName
+	attributes: HtmlAttributeList
+  end: '?>'
+
 // ==================================
 // Attributes
 // ==================================
@@ -208,6 +217,7 @@ HtmlAttributeInitializerClause =
 AnyHtmlAttributeInitializer =
 	HtmlString
 	| HtmlAttributeSingleTextExpression
+	| SvelteTemplateAttributeValue
 	| VueVForValue
 
 
@@ -226,6 +236,21 @@ HtmlAttributeSingleTextExpression =
 	'{'
 	expression: HtmlTextExpression
 	'}'
+
+// <a style="top: {top}px">
+//          ^^^^^^^^^^^^^^
+SvelteTemplateAttributeValue =
+	l_quote: ('"' | '\'')
+	elements: SvelteTemplateElementList
+	r_quote: ('"' | '\'')
+
+SvelteTemplateElementList = AnySvelteTemplateElement*
+
+AnySvelteTemplateElement =
+	SvelteTemplateChunkElement
+	| HtmlAttributeSingleTextExpression
+
+SvelteTemplateChunkElement = 'html_template_chunk'
 
 // ==================================
 // Svelte

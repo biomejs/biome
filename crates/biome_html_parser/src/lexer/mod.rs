@@ -70,12 +70,14 @@ impl<'src> HtmlLexer<'src> {
         self.after_frontmatter = value;
     }
 
-    /// Consume a token in the [HtmlLexContext::InsideTag] context.
+    /// Consume a token in the [HtmlLexContext::InsideTag] or [HtmlLexContext::InsideProcessingInstruction] context.
+    /// The `inside_processing_instruction` indicates that it's inside a processing instruction
     fn consume_token_inside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         let dispatched = lookup_byte(current);
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
+            QST if self.at_pi_end() => self.consume_pi_end(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => self.consume_byte(T![/]),
@@ -364,10 +366,9 @@ impl<'src> HtmlLexer<'src> {
             LSS => {
                 // if this truly is the start of a tag, it *must* be immediately followed by a tag name. Whitespace is not allowed.
                 // https://html.spec.whatwg.org/multipage/syntax.html#start-tags
-                if self
-                    .peek_byte()
-                    .is_some_and(|b| is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>')
-                {
+                if self.peek_byte().is_some_and(|b| {
+                    is_tag_start_byte(b) || b == b'!' || b == b'/' || b == b'>' || b == b'?'
+                }) {
                     self.consume_l_angle()
                 } else {
                     self.push_diagnostic(
@@ -408,6 +409,40 @@ impl<'src> HtmlLexer<'src> {
             QOT => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
         }
+    }
+
+    fn consume_token_svelte_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'"' => self.consume_byte(T!['"']),
+            b'\'' => self.consume_byte(T!["'"]),
+            _ => self.consume_token_attribute_value(current),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::SvelteTemplateChunk] context.
+    fn consume_token_svelte_template_chunk(&mut self, current: u8, quote: u8) -> HtmlSyntaxKind {
+        if current == b'{' {
+            self.consume_byte(T!['{'])
+        } else if current == quote {
+            self.advance(1);
+            if quote == b'"' { T!['"'] } else { T!["'"] }
+        } else {
+            self.consume_svelte_template_chunk(quote)
+        }
+    }
+
+    fn consume_svelte_template_chunk(&mut self, quote: u8) -> HtmlSyntaxKind {
+        while let Some(current) = self.current_byte() {
+            if current == b'{' || current == quote {
+                break;
+            }
+            match lookup_byte(current) {
+                UNI => self.advance_char_unchecked(),
+                _ => self.advance(1),
+            }
+        }
+
+        HTML_TEMPLATE_CHUNK
     }
 
     /// Consume a token in the [HtmlLexContext::Doctype] context.
@@ -541,6 +576,9 @@ impl<'src> HtmlLexer<'src> {
     ) -> HtmlSyntaxKind {
         let start_pos = self.position;
         let mut brackets_stack = 0;
+        // For `AsOrCommaSkipFirstAs`: tracks whether the first stop keyword has
+        // already been skipped (i.e., the TypeScript `as` in `as const`).
+        let mut first_stop_keyword_seen = false;
 
         let is_opening_paren = |byte: u8| byte == b'(' || byte == b'[' || byte == b'{';
         let is_closing_paren = |byte: u8| byte == b')' || byte == b']' || byte == b'}';
@@ -575,16 +613,25 @@ impl<'src> HtmlLexer<'src> {
                     let checkpoint_pos = self.position;
                     let prev_byte = self.prev_byte();
                     if let Some(keyword_kind) = self.consume_language_identifier(current) {
-                        // Check if this keyword is in our stop list
                         let should_stop =
                             kind.matches_keyword(keyword_kind) && prev_byte == Some(b' ');
 
                         if should_stop {
-                            // Rewind - don't consume the keyword
-                            self.position = checkpoint_pos;
-                            break;
+                            if kind == RestrictedExpressionStopAt::AsOrCommaSkipFirstAs
+                                && !first_stop_keyword_seen
+                            {
+                                // First `as` belongs to a TypeScript `as const` assertion;
+                                // the parser determined this via lookahead. Skip it and
+                                // continue scanning for the Svelte binding `as`.
+                                first_stop_keyword_seen = true;
+                            } else {
+                                // Rewind — don't consume the keyword
+                                self.position = checkpoint_pos;
+                                break;
+                            }
                         }
-                        // Not a stop keyword, continue (position already advanced by consume_language_identifier)
+                        // Not a stop keyword (or skipped), continue
+                        // (position already advanced by consume_language_identifier)
                     } else {
                         // Not a keyword, advance one byte (position was reset by consume_language_identifier)
                         self.advance_byte_or_char(current);
@@ -1049,9 +1096,29 @@ impl<'src> HtmlLexer<'src> {
             self.consume_comment()
         } else if self.at_start_cdata() {
             self.consume_cdata_start()
+        } else if self.at_pi_start() {
+            self.consume_pi_start()
         } else {
             self.consume_byte(T![<])
         }
+    }
+
+    /// Consumes `<?`
+    fn consume_pi_start(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'<');
+
+        self.advance(2);
+
+        T![<?]
+    }
+
+    /// Consumes `<?`
+    fn consume_pi_end(&mut self) -> HtmlSyntaxKind {
+        self.assert_byte(b'?');
+
+        self.advance(2);
+
+        T![?>]
     }
 
     /// Consumes an opening double text expression '{{' token used for interpolation.
@@ -1152,6 +1219,16 @@ impl<'src> HtmlLexer<'src> {
                 || self.byte_at(1) == Some(b'#')
                 || self.byte_at(1) == Some(b':')
                 || self.byte_at(1) == Some(b'/'))
+    }
+
+    #[inline(always)]
+    fn at_pi_start(&self) -> bool {
+        self.current_byte() == Some(b'<') && self.byte_at(1) == Some(b'?')
+    }
+
+    #[inline(always)]
+    fn at_pi_end(&self) -> bool {
+        self.current_byte() == Some(b'?') && self.byte_at(1) == Some(b'>')
     }
 
     #[inline(always)]
@@ -1396,6 +1473,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_vue_v_for_expression(current, quote)
                     }
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::SvelteAttributeValue => {
+                        self.consume_token_svelte_attribute_value(current)
+                    }
+                    HtmlLexContext::SvelteTemplateChunk { quote } => {
+                        self.consume_token_svelte_template_chunk(current, quote)
+                    }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang, context)
@@ -1495,6 +1578,7 @@ impl<'src> ReLexer<'src> for HtmlLexer<'src> {
                 HtmlReLexContext::InsideTag => self.consume_token_inside_tag(current),
                 HtmlReLexContext::InsideTagAstro => self.consume_token_inside_tag_astro(current),
                 HtmlReLexContext::InsideTagSvelte => self.consume_token_inside_tag_svelte(current),
+                HtmlReLexContext::SvelteAttributeString => self.consume_string_literal(current),
             },
             None => EOF,
         };

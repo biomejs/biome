@@ -1,0 +1,48 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "suspicious": {
+        "preset": "all"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+function emptyFunctionBody() {}
+a["b"] = 42;
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:30 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block.
+  
+  > 1 │ function emptyFunctionBody() {}
+      │                              ^^
+    2 │ a["b"] = 42;
+    3 │ 
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

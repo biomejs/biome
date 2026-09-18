@@ -32,7 +32,7 @@ expression: explicit.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"style": {
 				"useConsistentMemberAccessibility": {
 					"level": "error",

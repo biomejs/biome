@@ -58,7 +58,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@16..17 "\n" [] [],
@@ -75,7 +74,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@30..31 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@31..32 "\n" [] [],
@@ -101,7 +99,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@67..68 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@68..69 "\n" [] [],
@@ -121,7 +118,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@100..101 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@101..102 "\n" [] [],
@@ -206,7 +202,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@163..195 "\tTab after hash is valid heading" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -229,7 +224,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@199..224 "\tMultiple hashes with tab" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -335,7 +329,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@363..364 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@364..365 "\n" [] [],
@@ -349,7 +342,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@377..378 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdHeader {
             indent: MdIndentTokenList [
@@ -383,7 +375,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@415..416 ")" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -441,7 +432,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@504..505 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@505..505 "" [] [],
@@ -462,7 +452,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@1..15 "NoSpaceHeading" [] []
         2: MD_TEXTUAL@15..16
           0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@16..17
       0: NEWLINE@16..17 "\n" [] []
     2: MD_PARAGRAPH@17..31
@@ -473,7 +462,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@19..30 "AlsoNoSpace" [] []
         2: MD_TEXTUAL@30..31
           0: MD_TEXTUAL_LITERAL@30..31 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@31..32
       0: NEWLINE@31..32 "\n" [] []
     4: MD_PARAGRAPH@32..68
@@ -490,7 +478,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@39..67 " bar is not a thematic break" [] []
         5: MD_TEXTUAL@67..68
           0: MD_TEXTUAL_LITERAL@67..68 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@68..69
       0: NEWLINE@68..69 "\n" [] []
     6: MD_PARAGRAPH@69..101
@@ -503,7 +490,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@79..100 " tilde is not a fence" [] []
         3: MD_TEXTUAL@100..101
           0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@101..102
       0: NEWLINE@101..102 "\n" [] []
     8: MD_INDENT_CODE_BLOCK@102..161
@@ -559,7 +545,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@163..195
           0: MD_TEXTUAL@163..195
             0: MD_TEXTUAL_LITERAL@163..195 "\tTab after hash is valid heading" [] []
-        1: (empty)
       3: MD_HASH_LIST@195..195
     11: MD_NEWLINE@195..196
       0: NEWLINE@195..196 "\n" [] []
@@ -574,7 +559,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@199..224
           0: MD_TEXTUAL@199..224
             0: MD_TEXTUAL_LITERAL@199..224 "\tMultiple hashes with tab" [] []
-        1: (empty)
       3: MD_HASH_LIST@224..224
     14: MD_NEWLINE@224..225
       0: NEWLINE@224..225 "\n" [] []
@@ -644,7 +628,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@341..363 "continues as paragraph" [] []
         30: MD_TEXTUAL@363..364
           0: MD_TEXTUAL_LITERAL@363..364 "\n" [] []
-      1: (empty)
     17: MD_NEWLINE@364..365
       0: NEWLINE@364..365 "\n" [] []
     18: MD_PARAGRAPH@365..378
@@ -653,7 +636,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@365..377 "Another para" [] []
         1: MD_TEXTUAL@377..378
           0: MD_TEXTUAL_LITERAL@377..378 "\n" [] []
-      1: (empty)
     19: MD_HEADER@378..416
       0: MD_INDENT_TOKEN_LIST@378..381
         0: MD_INDENT_TOKEN@378..379
@@ -675,7 +657,6 @@ MdDocument {
             0: MD_TEXTUAL_LITERAL@402..415 "only 3 spaces" [] []
           3: MD_TEXTUAL@415..416
             0: MD_TEXTUAL_LITERAL@415..416 ")" [] []
-        1: (empty)
       3: MD_HASH_LIST@416..416
     20: MD_NEWLINE@416..417
       0: NEWLINE@416..417 "\n" [] []
@@ -713,7 +694,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@480..504 "still the same paragraph" [] []
         9: MD_TEXTUAL@504..505
           0: MD_TEXTUAL_LITERAL@504..505 "\n" [] []
-      1: (empty)
   2: EOF@505..505 "" [] []
 
 ```

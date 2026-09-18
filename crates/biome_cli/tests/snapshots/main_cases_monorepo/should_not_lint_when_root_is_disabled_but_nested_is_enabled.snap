@@ -2,16 +2,16 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/lib/biome.json`
-
-```json
-{ "extends": "//", "linter": { "enabled": true } }
-```
-
 ## `biome.json`
 
 ```json
 { "linter": { "enabled": false } }
+```
+
+## `packages/lib/biome.json`
+
+```json
+{ "extends": "//", "linter": { "enabled": true } }
 ```
 
 ## `file.js`

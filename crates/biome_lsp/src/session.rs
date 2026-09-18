@@ -21,7 +21,7 @@ use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
-use biome_service::settings::ModuleGraphResolutionKind;
+use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, SupportsFeatureParams,
@@ -33,19 +33,21 @@ use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
-use papaya::HashMap;
+use papaya::{HashMap, HashSet};
+use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
 use std::sync::Arc;
-use std::sync::RwLock;
 use std::sync::atomic::Ordering;
-use std::sync::atomic::{AtomicBool, AtomicU8};
+use std::sync::atomic::{AtomicBool, AtomicI32};
+use std::time::Duration;
 use tokio::spawn;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
 use tokio::sync::watch;
 use tokio::task::spawn_blocking;
+use tokio::time::sleep;
 use tower_lsp_server::Client;
 use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, Diagnostic, MessageType, ProgressToken, Registration,
@@ -73,6 +75,31 @@ struct ConfigurationCacheKey {
     settings_path: Option<Utf8PathBuf>,
 }
 
+const DIAGNOSTICS_DEBOUNCE: Duration = Duration::from_millis(250);
+
+struct DiagnosticsEntry {
+    /// The version of the document that was last scheduled for diagnostics.
+    scheduled_version: AtomicI32,
+    /// Whether diagnostics are currently being computed for this document.
+    running: AtomicBool,
+    /// Whether diagnostics should be recomputed after the current one completes.
+    /// This is used when multiple calls are queued, and we need to re-compute diagnostics for the last version of the document.
+    rerun_after_current: AtomicBool,
+    /// Whether the diagnostics entry has been closed.
+    closed: AtomicBool,
+}
+
+impl DiagnosticsEntry {
+    fn new(version: i32) -> Self {
+        Self {
+            scheduled_version: AtomicI32::new(version),
+            running: AtomicBool::new(false),
+            rerun_after_current: AtomicBool::new(false),
+            closed: AtomicBool::new(false),
+        }
+    }
+}
+
 /// Represents the state of an LSP server session.
 pub(crate) struct Session {
     /// The unique key identifying this session.
@@ -92,11 +119,13 @@ pub(crate) struct Session {
 
     pub(crate) workspace: Arc<dyn Workspace>,
 
-    configuration_status: AtomicU8,
+    /// Configuration status tracked independently per project key.
+    configuration_status: HashMap<ProjectKey, ConfigurationStatus>,
 
-    /// A flag to notify a message to the user when the configuration is broken, and the LSP attempts
-    /// to update the diagnostics
-    notified_broken_configuration: AtomicBool,
+    /// Remembers which projects we have already warned the user about having a
+    /// broken configuration, so we don't show the same warning again every time
+    /// we refresh that project's diagnostics.
+    notified_broken_configuration: HashSet<ProjectKey>,
 
     /// Tracks whether the initialized() notification has been received
     initialized: AtomicBool,
@@ -107,6 +136,9 @@ pub(crate) struct Session {
 
     /// Documents opened in this session.
     documents: HashMap<Uri, Document, FxBuildHasher>,
+
+    /// Pending and active diagnostic refreshes for open documents.
+    diagnostics: HashMap<Uri, Arc<DiagnosticsEntry>, FxBuildHasher>,
 
     pub(crate) cancellation: Arc<Notify>,
 
@@ -226,12 +258,13 @@ impl Session {
             client,
             initialize_params: OnceCell::default(),
             workspace,
-            configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
+            configuration_status: Default::default(),
             projects: Default::default(),
             documents: Default::default(),
+            diagnostics: Default::default(),
             extension_settings: config,
             cancellation,
-            notified_broken_configuration: AtomicBool::new(false),
+            notified_broken_configuration: Default::default(),
             initialized: AtomicBool::new(false),
             service_rx,
             loading_operations: Default::default(),
@@ -256,7 +289,7 @@ impl Session {
         });
 
         {
-            let mut this_workspace_folders = self.workspace_folders.write().unwrap();
+            let mut this_workspace_folders = self.workspace_folders.write();
             *this_workspace_folders = workspace_folders;
         }
 
@@ -381,6 +414,91 @@ impl Session {
         self.documents.pin().remove(url).map(|doc| doc.project_key)
     }
 
+    fn diagnostics_entry(&self, url: Uri, version: i32) -> Arc<DiagnosticsEntry> {
+        Arc::clone(
+            self.diagnostics
+                .pin()
+                .get_or_insert_with(url, || Arc::new(DiagnosticsEntry::new(version))),
+        )
+    }
+
+    pub(crate) fn close_diagnostics(&self, url: &Uri) {
+        let entry = self.diagnostics.pin().remove(url).cloned();
+        if let Some(entry) = entry {
+            entry.closed.store(true, Ordering::Release);
+        }
+    }
+
+    pub(crate) fn schedule_diagnostics(self: &Arc<Self>, url: Uri, version: i32) {
+        let entry = self.diagnostics_entry(url.clone(), version);
+        entry.closed.store(false, Ordering::Release);
+        entry.scheduled_version.store(version, Ordering::Release);
+
+        self.spawn_delayed_diagnostics(url, entry, version);
+    }
+
+    fn spawn_delayed_diagnostics(
+        self: &Arc<Self>,
+        url: Uri,
+        entry: Arc<DiagnosticsEntry>,
+        version: i32,
+    ) {
+        let session = Arc::clone(self);
+        spawn(async move {
+            sleep(DIAGNOSTICS_DEBOUNCE).await;
+            session.run_debounced_diagnostics(url, entry, version).await;
+        });
+    }
+
+    async fn run_debounced_diagnostics(
+        self: Arc<Self>,
+        url: Uri,
+        entry: Arc<DiagnosticsEntry>,
+        version: i32,
+    ) {
+        if entry.closed.load(Ordering::Acquire)
+            || entry.scheduled_version.load(Ordering::Acquire) != version
+        {
+            return;
+        }
+
+        // Only one diagnostics update should run for a document at a time.
+        // This tries to change `running` from `false` to `true`. If it works,
+        // this task owns the update. `AcqRel` is used for that successful claim,
+        // so this task sees the latest state, and other tasks see that this task
+        // claimed the update. If it fails, another task already owns the update,
+        // so `Acquire` is enough because we only need to read that state.
+        if entry
+            .running
+            .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+            .is_err()
+        {
+            entry.rerun_after_current.store(true, Ordering::Release);
+            return;
+        }
+
+        if let Err(err) = self
+            .update_diagnostics_for_version(url.clone(), version, &entry)
+            .await
+        {
+            error!("Failed to update diagnostics: {err}");
+        }
+
+        entry.running.store(false, Ordering::Release);
+
+        // A newer change may have arrived while this update was running. This
+        // resets the flag back to `false` and tells us whether another update
+        // was requested. `AcqRel` makes the reset visible to other tasks and
+        // also lets this task see the latest request before deciding whether to
+        // schedule another diagnostics update.
+        if entry.rerun_after_current.swap(false, Ordering::AcqRel) {
+            let latest_version = entry.scheduled_version.load(Ordering::Acquire);
+            if latest_version != version && !entry.closed.load(Ordering::Acquire) {
+                self.spawn_delayed_diagnostics(url, entry, latest_version);
+            }
+        }
+    }
+
     pub(crate) fn file_path(&self, url: &Uri) -> Result<BiomePath> {
         let path_to_file = match url.to_file_path() {
             None => {
@@ -403,7 +521,24 @@ impl Session {
         let Some(doc) = self.document(&url) else {
             return Ok(());
         };
-        self.update_diagnostics_for_document(url.clone(), doc).await
+        self.update_diagnostics_for_document(url.clone(), doc, None)
+            .await
+    }
+
+    async fn update_diagnostics_for_version(
+        &self,
+        url: Uri,
+        version: i32,
+        entry: &DiagnosticsEntry,
+    ) -> Result<(), LspError> {
+        let Some(doc) = self.document(&url) else {
+            return Ok(());
+        };
+        if doc.version != version || entry.closed.load(Ordering::Acquire) {
+            return Ok(());
+        }
+        self.update_diagnostics_for_document(url.clone(), doc, Some(entry))
+            .await
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -414,22 +549,24 @@ impl Session {
         &self,
         url: Uri,
         doc: Document,
+        entry: Option<&DiagnosticsEntry>,
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
 
-        if !self.notified_broken_configuration() {
-            if self.configuration_status().is_editorconfig_error() {
-                self.set_notified_broken_configuration();
+        let configuration_status = self.configuration_status(doc.project_key);
+        if !self.notified_broken_configuration(doc.project_key) {
+            if configuration_status.is_editorconfig_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client
                     .show_message(MessageType::WARNING, "The .editorconfig file has errors. Biome will report only parsing errors until the file is fixed or its usage is disabled.")
                     .await
-            } else if self.configuration_status().is_error() {
-                self.set_notified_broken_configuration();
+            } else if configuration_status.is_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client
                     .show_message(MessageType::WARNING, "The configuration file has errors. Biome will report only parsing errors until the configuration is fixed.")
                     .await;
-            } else if self.configuration_status().is_plugin_error() {
-                self.set_notified_broken_configuration();
+            } else if configuration_status.is_plugin_error() {
+                self.set_notified_broken_configuration(doc.project_key);
                 self.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await
             }
         }
@@ -446,6 +583,9 @@ impl Session {
         })?;
 
         if !file_features.supports_lint() && !file_features.supports_assist() {
+            if !self.can_publish_diagnostics(&url, doc.version, entry) {
+                return Ok(());
+            }
             self.client
                 .publish_diagnostics(url.clone(), vec![], Some(doc.version))
                 .await;
@@ -454,7 +594,7 @@ impl Session {
 
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
-            if self.configuration_status().is_loaded() {
+            if configuration_status.is_loaded() {
                 if file_features.supports_lint() {
                     categories = categories.with_lint();
                 }
@@ -520,11 +660,30 @@ impl Session {
 
         info!("Diagnostics sent to the client {}", diagnostics.len());
 
+        if !self.can_publish_diagnostics(&url, doc.version, entry) {
+            return Ok(());
+        }
+
         self.client
             .publish_diagnostics(url.clone(), diagnostics, Some(doc.version))
             .await;
 
         Ok(())
+    }
+
+    fn is_document_current(&self, url: &Uri, version: i32) -> bool {
+        self.document(url)
+            .is_some_and(|document| document.version == version)
+    }
+
+    fn can_publish_diagnostics(
+        &self,
+        url: &Uri,
+        version: i32,
+        entry: Option<&DiagnosticsEntry>,
+    ) -> bool {
+        !entry.is_some_and(|entry| entry.closed.load(Ordering::Acquire))
+            && self.is_document_current(url, version)
     }
 
     /// Updates diagnostics for every [`Document`] in this [`Session`]
@@ -534,7 +693,7 @@ impl Session {
             .documents
             .pin()
             .iter()
-            .map(|(url, doc)| self.update_diagnostics_for_document(url.clone(), doc.clone()))
+            .map(|(url, doc)| self.update_diagnostics_for_document(url.clone(), doc.clone(), None))
             .collect();
 
         while let Some(result) = futures.next().await {
@@ -643,9 +802,27 @@ impl Session {
         result
     }
 
+    pub(crate) fn can_register_goto_definition(&self) -> bool {
+        let result = self
+            .initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.text_document.as_ref())
+            .and_then(|c| c.definition.as_ref())
+            .and_then(|c| c.dynamic_registration)
+            == Some(true)
+            && self
+                .extension_settings
+                .read()
+                .editor_features()
+                .contains(EditorFeature::GotoDefinition);
+        info!("Can register gotoDefinition: {result}");
+
+        result
+    }
+
     /// Get the current workspace folders
     pub(crate) fn get_workspace_folders(&self) -> Option<Vec<WorkspaceFolder>> {
-        self.workspace_folders.read().unwrap().clone()
+        self.workspace_folders.read().clone()
     }
 
     pub(crate) fn update_workspace_folders(
@@ -653,7 +830,7 @@ impl Session {
         added: Vec<WorkspaceFolder>,
         removed: Vec<WorkspaceFolder>,
     ) {
-        let mut workspace_folders = self.workspace_folders.write().unwrap();
+        let mut workspace_folders = self.workspace_folders.write();
 
         if let Some(ref mut folders) = *workspace_folders {
             if !removed.is_empty() {
@@ -709,10 +886,7 @@ impl Session {
 
     /// Returns the configuration path set by the user in the extension settings
     pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
-        self.extension_settings
-            .read()
-            .ok()
-            .and_then(|s| s.configuration_path())
+        self.extension_settings.read().configuration_path()
     }
 
     /// Resolves the user-provided `configurationPath` setting to an absolute path.
@@ -803,16 +977,14 @@ impl Session {
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
         if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
-            self.set_configuration_status(ConfigurationStatus::Loading);
-
+            let config_file_path = config_path.to_path_buf();
             let status = self
                 .load_biome_configuration_file(config_path, reload)
                 .await;
             debug!("Configuration status: {:?}", status);
-            self.set_configuration_status(status);
+            self.record_configuration_status(config_file_path.as_deref(), status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
-            self.set_configuration_status(ConfigurationStatus::Loading);
             for folder in folders {
                 info!("Attempt to load the configuration file in {:?}", folder.uri);
                 let base_path = folder.uri.to_file_path().map(|p| {
@@ -822,12 +994,12 @@ impl Session {
                     Some(base_path) => {
                         let status = self
                             .load_biome_configuration_file(
-                                ConfigurationPathHint::FromWorkspace(base_path),
+                                ConfigurationPathHint::FromWorkspace(base_path.clone()),
                                 reload,
                             )
                             .await;
                         debug!("Configuration status: {:?}", status);
-                        self.set_configuration_status(status);
+                        self.record_configuration_status(Some(&base_path), status);
                     }
                     None => {
                         error!(
@@ -842,8 +1014,9 @@ impl Session {
                 None => ConfigurationPathHint::default(),
                 Some(path) => ConfigurationPathHint::FromLsp(path),
             };
+            let config_file_path = base_path.to_path_buf();
             let status = self.load_biome_configuration_file(base_path, reload).await;
-            self.set_configuration_status(status);
+            self.record_configuration_status(config_file_path.as_deref(), status);
         }
     }
 
@@ -1158,7 +1331,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
-        let scan_kind = if scan_kind.is_none() {
+        // We give the editor priority
+        let scan_kind = if !self.scan_kind_from_editor_features().is_none() {
+            self.scan_kind_from_editor_features()
+        } else if scan_kind.is_none() {
             ScanKind::KnownFiles
         } else {
             scan_kind
@@ -1220,7 +1396,7 @@ impl Session {
                 if let Some(client_configuration) = client_configuration {
                     info!("Loaded client configuration: {client_configuration:#?}");
 
-                    let mut config = self.extension_settings.write().unwrap();
+                    let mut config = self.extension_settings.write();
                     if let Err(err) = config.set_workspace_settings(client_configuration) {
                         error!("Couldn't set client configuration: {}", err);
                     }
@@ -1233,7 +1409,7 @@ impl Session {
                     .get(CONFIGURATION_SECTION)
                     .cloned()
                     .unwrap_or(settings);
-                let mut config = self.extension_settings.write().unwrap();
+                let mut config = self.extension_settings.write();
                 if let Err(err) = config.set_workspace_settings(settings) {
                     error!("Couldn't set client configuration: {}", err);
                 }
@@ -1264,55 +1440,77 @@ impl Session {
         })
     }
 
-    /// Retrieves information regarding the configuration status
-    pub(crate) fn configuration_status(&self) -> ConfigurationStatus {
+    /// Retrieves the configuration status of the given project, defaulting to
+    /// [`ConfigurationStatus::Missing`] when the project has no recorded status.
+    pub(crate) fn configuration_status(&self, project_key: ProjectKey) -> ConfigurationStatus {
         self.configuration_status
-            .load(Ordering::Relaxed)
-            .try_into()
-            .unwrap()
+            .pin()
+            .get(&project_key)
+            .copied()
+            .unwrap_or(ConfigurationStatus::Missing)
     }
 
-    /// Updates the status of the configuration
-    pub(super) fn set_configuration_status(&self, status: ConfigurationStatus) {
+    /// Updates the status of the configuration for the given project.
+    pub(super) fn set_configuration_status(
+        &self,
+        project_key: ProjectKey,
+        status: ConfigurationStatus,
+    ) {
         self.notified_broken_configuration
-            .store(false, Ordering::Relaxed);
-        self.configuration_status
-            .store(status as u8, Ordering::Relaxed);
+            .pin()
+            .remove(&project_key);
+        self.configuration_status.pin().insert(project_key, status);
     }
 
-    fn notified_broken_configuration(&self) -> bool {
-        self.notified_broken_configuration.load(Ordering::Relaxed)
+    /// Records the configuration status for the project that owns `path`.
+    fn record_configuration_status(&self, path: Option<&Utf8Path>, status: ConfigurationStatus) {
+        if let Some(project_key) = path.and_then(|path| self.project_for_path(path)) {
+            self.set_configuration_status(project_key, status);
+        }
     }
-    fn set_notified_broken_configuration(&self) {
+
+    fn notified_broken_configuration(&self, project_key: ProjectKey) -> bool {
         self.notified_broken_configuration
-            .store(true, Ordering::Relaxed);
+            .pin()
+            .contains(&project_key)
+    }
+    fn set_notified_broken_configuration(&self, project_key: ProjectKey) {
+        self.notified_broken_configuration.pin().insert(project_key);
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
+        self.extension_settings.read().requires_configuration()
+    }
+
+    pub(crate) fn scan_kind_from_editor_features(&self) -> ScanKind {
         self.extension_settings
             .read()
-            .unwrap()
-            .requires_configuration()
+            .scan_kind_from_editor_features()
     }
 
     pub(crate) fn inline_config(&self) -> Option<Configuration> {
-        self.extension_settings.read().unwrap().inline_config()
+        self.extension_settings.read().inline_config()
     }
 
     pub(crate) fn is_linting_and_formatting_disabled(&self) -> bool {
-        debug!("configuration status {:?}", self.configuration_status());
-        match self.configuration_status() {
+        let disabled_for = |status: ConfigurationStatus| match status {
             ConfigurationStatus::Loaded => false,
-            ConfigurationStatus::Missing => self
-                .extension_settings
-                .read()
-                .unwrap()
-                .requires_configuration(),
+            ConfigurationStatus::Missing => self.extension_settings.read().requires_configuration(),
             ConfigurationStatus::Error
             | ConfigurationStatus::EditorConfigError
             | ConfigurationStatus::PluginError => false,
             ConfigurationStatus::Loading => true,
+        };
+
+        // This is a single on/off switch for the whole editor: formatting and
+        // code actions are turned on once, not per file. Each request later checks
+        // the file's own project again, so we keep them on as long as at least one
+        // project can use them, and only turn them off when every project would.
+        let statuses = self.configuration_status.pin();
+        if statuses.is_empty() {
+            return self.requires_configuration();
         }
+        statuses.values().all(|status| disabled_for(*status))
     }
 
     pub fn position_encoding(&self) -> PositionEncoding {
@@ -1360,6 +1558,7 @@ mod tests {
             Arc::new(NoopQueryProvider {}),
             None,
         ));
+
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
 

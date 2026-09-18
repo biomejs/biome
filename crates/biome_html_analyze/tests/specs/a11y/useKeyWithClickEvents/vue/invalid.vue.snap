@@ -1,0 +1,87 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<!-- div with onclick but no keyboard handler -->
+	<div @click="handleClick()"></div>
+	<div v-on:click="handleClick()"></div>
+
+	<!-- span with onclick but no keyboard handler -->
+	<span @click="handleClick()">text</span>
+
+	<!-- <a> without href is not interactive -->
+	<a @click="handleClick()">bare link</a>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:2 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    2 │ <template>
+    3 │ 	<!-- div with onclick but no keyboard handler -->
+  > 4 │ 	<div @click="handleClick()"></div>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<div v-on:click="handleClick()"></div>
+    6 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.vue:5:2 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    3 │ 	<!-- div with onclick but no keyboard handler -->
+    4 │ 	<div @click="handleClick()"></div>
+  > 5 │ 	<div v-on:click="handleClick()"></div>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ 	<!-- span with onclick but no keyboard handler -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.vue:8:2 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+     7 │ 	<!-- span with onclick but no keyboard handler -->
+   > 8 │ 	<span @click="handleClick()">text</span>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ 	<!-- <a> without href is not interactive -->
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```
+
+```
+invalid.vue:11:2 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Elements with onclick must also include at least one keyboard handler: onkeydown, onkeyup, or onkeypress.
+  
+    10 │ 	<!-- <a> without href is not interactive -->
+  > 11 │ 	<a @click="handleClick()">bare link</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+```

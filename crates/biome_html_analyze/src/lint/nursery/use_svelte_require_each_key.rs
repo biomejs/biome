@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSvelteRequireEachKey {
-        version: "next",
+        version: "2.5.0",
         name: "useSvelteRequireEachKey",
         language: "html",
         domains: &[RuleDomain::Svelte],

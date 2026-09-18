@@ -17,6 +17,8 @@ impl FormatNodeRule<JsxSpreadAttribute> for FormatJsxSpreadAttribute {
         } = node.as_fields();
 
         let argument = argument?;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         let format_inner = format_with(|f| {
             if f.comments().is_suppressed(argument.syntax()) {
                 write!(
@@ -32,7 +34,7 @@ impl FormatNodeRule<JsxSpreadAttribute> for FormatJsxSpreadAttribute {
                     f,
                     [
                         format_leading_comments(argument.syntax()),
-                        dotdotdot_token.format()
+                        dotdotdot_token.format(),
                     ]
                 )?;
                 FormatAnyJsExpressionWithoutComments.fmt(&argument, f)?;
@@ -41,6 +43,7 @@ impl FormatNodeRule<JsxSpreadAttribute> for FormatJsxSpreadAttribute {
                     [
                         format_dangling_comments(argument.syntax()).with_soft_block_indent(),
                         format_trailing_comments(argument.syntax()),
+                        line_suffix_boundary()
                     ]
                 )
             }
@@ -51,11 +54,25 @@ impl FormatNodeRule<JsxSpreadAttribute> for FormatJsxSpreadAttribute {
         if f.comments().has_comments(argument.syntax())
             && !f.comments().is_suppressed(argument.syntax())
         {
-            write!(f, [soft_block_indent(&format_inner)])?;
+            if delimiter_spacing {
+                // With delimiter spacing, try to fit on one line with spaces
+                write!(
+                    f,
+                    [group(&soft_block_indent_with_maybe_space(
+                        &format_inner,
+                        true
+                    ))]
+                )?;
+            } else {
+                // Without delimiter spacing, always break to multiple lines
+                write!(f, [soft_block_indent(&format_inner)])?;
+            }
+        } else if delimiter_spacing {
+            write!(f, [space(), format_inner, space()])?;
         } else {
             write!(f, [format_inner])?;
         }
 
-        write![f, [r_curly_token.format()]]
+        write!(f, [r_curly_token.format()])
     }
 }

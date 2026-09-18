@@ -13,9 +13,9 @@ function reasonText() {
 
 
 <template>
-    <span>{hello}</span>
-    <span>{notDefined}</span>
-    <span>{greeting}</span>
+    <span>{{ hello }}</span>
+    <span>{{ notDefined }}</span>
+    <span>{{ greeting }}</span>
     <Component />
     <span class="dc-reason">{{ reasonText() }}</span>
 </template>

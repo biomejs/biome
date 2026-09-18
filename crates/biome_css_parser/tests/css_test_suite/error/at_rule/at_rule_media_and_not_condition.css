@@ -1,0 +1,5 @@
+@media (a) and not (b) {
+  x {
+    y: z;
+  }
+}

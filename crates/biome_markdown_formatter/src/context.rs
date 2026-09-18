@@ -10,6 +10,7 @@ use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
+#[derive(Debug, Clone)]
 pub struct MarkdownFormatContext {
     source_map: Option<TransformSourceMap>,
     options: MdFormatOptions,

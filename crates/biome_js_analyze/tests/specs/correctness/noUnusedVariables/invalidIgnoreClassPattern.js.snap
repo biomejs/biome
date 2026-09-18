@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 155
+expression: invalidIgnoreClassPattern.js
+---
+# Input
+```js
+// With ignore: { "class": ["ignored"] }, variables should still be reported even if they match the pattern
+const ignored = 0;
+
+```
+
+# Diagnostics
+```
+invalidIgnoreClassPattern.js:2:7 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable ignored is unused.
+  
+    1 │ // With ignore: { "class": ["ignored"] }, variables should still be reported even if they match the pattern
+  > 2 │ const ignored = 0;
+      │       ^^^^^^^
+    3 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend ignored with an underscore.
+  
+    1 1 │   // With ignore: { "class": ["ignored"] }, variables should still be reported even if they match the pattern
+    2   │ - const·ignored·=·0;
+      2 │ + const·_ignored·=·0;
+    3 3 │   
+  
+
+```

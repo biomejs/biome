@@ -51,7 +51,7 @@ declare_lint_rule! {
 
 impl Rule for UseFocusableInteractive {
     type Query = Aria<AnyJsxElement>;
-    type State = Box<str>;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = UseFocusableInteractiveOptions;
 
@@ -69,24 +69,26 @@ impl Rule for UseFocusableInteractive {
                 if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(role_attribute_value.to_trimmed_text().text().into());
+                    return Some(());
                 }
             }
         }
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
+        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute_value = role_attribute.initializer()?.value().ok()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "The HTML element with the interactive role "<Emphasis>{state}</Emphasis>" is not focusable."
+                    "The HTML element with the interactive role "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>" is not focusable."
                 },
             ).note(markup! {
-                "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{state}</Emphasis>"."
+                "A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "<Emphasis>{role_attribute_value.to_trimmed_string()}</Emphasis>"."
             })
             .note(markup! {
                 "Add a "<Emphasis>"tabIndex"</Emphasis>" attribute to make this element focusable."

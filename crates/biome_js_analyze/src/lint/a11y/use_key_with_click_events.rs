@@ -7,9 +7,9 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_click_events::UseKeyWithClickEventsOptions;
 
 declare_lint_rule! {
-    /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
+    /// Enforce elements with a click event handler to also have at least one keyboard event handler.
     ///
-    /// Coding for the keyboard is important for users with physical disabilities who cannot use a mouse, AT compatibility, and screenreader users.
+    /// Coding for the keyboard is important for users with physical disabilities who cannot use a mouse, AT compatibility, and screen reader users.
     /// This does not apply for interactive or hidden elements.
     ///
     /// ## Examples
@@ -79,7 +79,11 @@ impl Rule for UseKeyWithClickEvents {
         }
 
         if !aria_roles.is_not_interactive_element(element) {
-            return None;
+            let element_name = element.name().ok()?.as_jsx_name()?.value_token().ok()?;
+            let element_name = element_name.text_trimmed();
+            if element_name != "a" || element.find_attribute_by_name("href").is_some() {
+                return None;
+            }
         }
 
         if element.find_attribute_by_name("onKeyDown").is_some()

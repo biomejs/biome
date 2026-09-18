@@ -1,6 +1,11 @@
 $lines:[full-start  ,  main-start
 /  main-end,
   full-end];
+$value: 2;
+$list:[1,$value,  []];
+$keywords:[inherit,initial,unset];
+$nested:[[c] [d]];
+$paren:[(c) (d e)];
 $columns:[col-start] minmax(200px,  1fr
 ) [col-end];
  $rows:[header-start] auto [header-end

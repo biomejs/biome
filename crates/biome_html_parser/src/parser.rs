@@ -3,9 +3,9 @@ use crate::token_source::{
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
-use biome_html_syntax::{
-    HtmlFileSource, HtmlLanguage, HtmlSyntaxKind, HtmlTextExpressions, HtmlVariant,
-};
+use biome_html_syntax::{HtmlLanguage, HtmlSyntaxKind};
+use biome_languages::HtmlFileSource;
+use biome_languages::html::{HtmlTextExpressions, HtmlVariant};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
@@ -67,6 +67,20 @@ impl<'source> HtmlParser<'source> {
         // `state` is not checkpointed because it (currently) only contains
         // scoped properties that aren't only dependent on checkpoints and
         // should be reset manually when the scope of their use is exited.
+    }
+
+    /// Execute a lookahead operation without consuming tokens.
+    ///
+    /// Saves a checkpoint, executes the provided closure, then rewinds to
+    /// the checkpoint. The closure's return value is passed through.
+    pub fn lookahead<F, R>(&mut self, op: F) -> R
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        let checkpoint = self.checkpoint();
+        let result = op(self);
+        self.rewind(checkpoint);
+        result
     }
 
     /// Re-lexes the current token in the specified context. Returns the kind
@@ -164,6 +178,10 @@ impl HtmlParserOptions {
     pub fn with_vue(mut self) -> Self {
         self.vue = true;
         self
+    }
+
+    pub fn set_vue(&mut self, value: bool) {
+        self.vue = value;
     }
 
     pub fn with_svelte(mut self) -> Self {

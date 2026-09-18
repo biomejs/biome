@@ -22,6 +22,8 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
@@ -29,7 +31,10 @@ impl FormatNodeRule<CssPseudoClassFunctionRelativeSelectorList>
                     .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&relative_selectors.format()),
+                    soft_block_indent_with_maybe_space(
+                        &relative_selectors.format(),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

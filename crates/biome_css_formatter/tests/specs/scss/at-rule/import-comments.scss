@@ -1,0 +1,20 @@
+@import
+// Comment
+"mixins" ,
+"variables",
+// Comment
+"reset" ,
+"scaffolding"   ,"type",
+// Comment
+"bar" ,"tabs" ;
+
+@import  "print.css"  print,
+// Comment
+screen ;
+
+@import "separator.css" print,// Separator
+screen ;
+
+@import "theme.css"  print,
+// Comment
+#{$query} ;

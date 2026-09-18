@@ -14,15 +14,16 @@ impl FormatNodeRule<JsonArrayValue> for FormatJsonArrayValue {
 
         let should_expand = f.comments().has_dangling_comments(node.syntax())
             || f.context().options().expand() == Expand::Always;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
 
         write!(
             f,
             [
                 l_brack_token.format(),
-                group(&soft_block_indent(&format_args![
-                    elements.format(),
-                    format_dangling_comments(node.syntax())
-                ]))
+                group(&soft_block_indent_with_maybe_space(
+                    &format_args![elements.format(), format_dangling_comments(node.syntax())],
+                    delimiter_spacing
+                ))
                 .should_expand(should_expand),
                 line_suffix_boundary(),
                 r_brack_token.format()

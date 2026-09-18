@@ -22,7 +22,7 @@ expression: severity_only.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"noExcessiveNestedCallbacks": {
 					"level": "error",

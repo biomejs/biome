@@ -78,7 +78,14 @@ impl FormatNodeRule<ScssEachHeader> for FormatScssEachHeader {
 
 /// Detects a single map value whose pairs had blank lines in source.
 ///
-/// Example: `@each $k, $v in (a: b,\n\nc: d)`.
+/// ```scss
+/// @each $k, $v in (
+///   a: b,
+///
+///   c: d
+/// ) {
+/// }
+/// ```
 fn has_single_map_with_blank_lines(values: &ScssEachValueList) -> bool {
     let mut value_elements = values.elements();
     let Some(value) = value_elements.next() else {
@@ -102,7 +109,13 @@ fn has_single_map_with_blank_lines(values: &ScssEachValueList) -> bool {
 
 /// Returns `true` when a map keeps a blank line between pairs.
 ///
-/// Example: `(a: b,\n\nc: d)`.
+/// ```scss
+/// $map: (
+///   a: b,
+///
+///   c: d
+/// );
+/// ```
 fn has_blank_line_between_pairs(node: &ScssMapExpression) -> bool {
     node.pairs().elements().skip(1).any(|element| {
         element
@@ -207,7 +220,11 @@ impl Format<CssFormatContext> for FormatScssEachMultiValueHeader<'_> {
             if index + 1 == binding_count {
                 // The final binding owns `in` and the first value.
                 if has_value_list_line_comment {
-                    // `@each $x in // list\n a, b` keeps the comment after `in`.
+                    // Keep the comment after `in` in:
+                    //
+                    // @each $x in // list
+                    //   a, b {
+                    // }
                     fill.entry(
                         &separator,
                         &group(&indent(&format_args![

@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "unknown-module": "^1.0.0"
+  },
+  "not-dependencies": {
+    "some-other-nonsense": 123
+  }
+}

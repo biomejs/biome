@@ -573,6 +573,20 @@ impl FunctionParameter {
             Self::Pattern(pattern) => &pattern.ty,
         }
     }
+
+    pub fn is_optional(&self) -> bool {
+        match self {
+            Self::Named(named) => named.is_optional,
+            Self::Pattern(pattern) => pattern.is_optional,
+        }
+    }
+
+    pub fn is_rest(&self) -> bool {
+        match self {
+            Self::Named(named) => named.is_rest,
+            Self::Pattern(pattern) => pattern.is_rest,
+        }
+    }
 }
 
 /// A plain function parameter where the name of the parameter is also the name

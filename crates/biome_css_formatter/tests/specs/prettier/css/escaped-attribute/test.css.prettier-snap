@@ -4,8 +4,7 @@ short"] {
 }
 
 /* Should not break before `span`, since it doesn't reach printWidth */
-div
-  span[foo="bar long long long\
+div span[foo="bar long long long\
 long long long long long long long long long long long long"] {
   color: red;
 }
@@ -17,8 +16,7 @@ short"] {
   }
 
   /* Should not break before `span`, since it doesn't reach printWidth */
-  &
-    span[foo="bar long long long\
+  & span[foo="bar long long long\
 long long long long long long long long long long long long"] {
     color: red;
   }

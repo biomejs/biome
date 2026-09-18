@@ -120,7 +120,9 @@ impl FromStr for ColorsArg {
 pub struct CliReporter {
     #[bpaf(
         long("reporter"),
-        argument("default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif"),
+        argument(
+            "default|json|json-pretty|github|junit|summary|gitlab|checkstyle|rdjson|sarif|concise"
+        ),
         fallback(CliReporterKind::default())
     )]
     pub(crate) kind: CliReporterKind,
@@ -158,6 +160,8 @@ pub enum CliReporterKind {
     RdJson,
     /// Reports diagnostics using the SARIF format
     Sarif,
+    /// Reports diagnostics in a concise one-line-per-diagnostic format, with formatter diagnostics aggregated
+    Concise,
 }
 
 impl CliReporter {
@@ -181,6 +185,7 @@ impl FromStr for CliReporterKind {
             "checkstyle" => Ok(Self::Checkstyle),
             "rdjson" => Ok(Self::RdJson),
             "sarif" => Ok(Self::Sarif),
+            "concise" => Ok(Self::Concise),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -201,6 +206,7 @@ impl Display for CliReporterKind {
             Self::Checkstyle { .. } => f.write_str("checkstyle"),
             Self::RdJson { .. } => f.write_str("rdjson"),
             Self::Sarif { .. } => f.write_str("sarif"),
+            Self::Concise { .. } => f.write_str("concise"),
         }
     }
 }

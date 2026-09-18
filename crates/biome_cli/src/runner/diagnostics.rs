@@ -142,3 +142,14 @@ impl<T> ResultIoExt for io::Result<T> {
         self.map_err(|error| IoError::from(error).with_file_path(file_path))
     }
 }
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "internalError/fs",
+    severity = Warning,
+    message = "Failed to watch file or folder for changes."
+)]
+pub struct WatcherDiagnostic {
+    #[source]
+    pub(crate) source: Option<Error>,
+}

@@ -38,19 +38,30 @@ info: markdown/code/indent.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -14,10 +14,10 @@
+@@ -3,7 +3,6 @@
+     Indented Code Block
+     Indented Code Block
+     Indented Code Block
+-
+ - ```
+   Fenced Code Block
+   Fenced Code Block
+@@ -13,11 +12,10 @@
+   ```
  
  <!-- prettier/prettier#3459 -->
- 
--1.  Change to your home directory:
 +1. Change to your home directory:
  
-         cd
+-1.  Change to your home directory:
++       cd
  
+-        cd
+-
 -2.  List the contents:
 +2. List the contents:
  
-         ls -l
+-        ls -l
++       ls -l
 ```
 
 # Output
@@ -61,7 +72,6 @@ info: markdown/code/indent.md
     Indented Code Block
     Indented Code Block
     Indented Code Block
-
 - ```
   Fenced Code Block
   Fenced Code Block
@@ -71,12 +81,11 @@ info: markdown/code/indent.md
   ```
 
 <!-- prettier/prettier#3459 -->
-
 1. Change to your home directory:
 
-        cd
+       cd
 
 2. List the contents:
 
-        ls -l
+       ls -l
 ```

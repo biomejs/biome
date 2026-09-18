@@ -1,0 +1,312 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+<div style="{"></div>
+<div style="a {b"></div>
+<div data-empty="{}"></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            HtmlAttributeName {
+                                value_token: HTML_LITERAL@5..10 "style" [] [],
+                            },
+                            HtmlBogus {
+                                items: [
+                                    EQ@10..11 "=" [] [],
+                                    HtmlBogus {
+                                        items: [
+                                            DOUBLE_QUOTE@11..12 "\"" [] [],
+                                            HtmlBogus {
+                                                items: [
+                                                    HtmlBogusTextExpression {
+                                                        items: [
+                                                            L_CURLY@12..13 "{" [] [],
+                                                            HTML_LITERAL@13..15 "\">" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@15..16 "<" [] [],
+                slash_token: SLASH@16..17 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@17..20 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@20..21 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@21..23 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@23..27 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlBogusAttribute {
+                        items: [
+                            HtmlAttributeName {
+                                value_token: HTML_LITERAL@27..32 "style" [] [],
+                            },
+                            HtmlBogus {
+                                items: [
+                                    EQ@32..33 "=" [] [],
+                                    HtmlBogus {
+                                        items: [
+                                            DOUBLE_QUOTE@33..34 "\"" [] [],
+                                            HtmlBogus {
+                                                items: [
+                                                    SvelteTemplateChunkElement {
+                                                        html_template_chunk_token: HTML_TEMPLATE_CHUNK@34..36 "a " [] [],
+                                                    },
+                                                    HtmlBogusTextExpression {
+                                                        items: [
+                                                            L_CURLY@36..37 "{" [] [],
+                                                            HTML_LITERAL@37..40 "b\">" [] [],
+                                                        ],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+                r_angle_token: missing (required),
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@40..41 "<" [] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@46..48 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@52..62 "data-empty" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@62..63 "=" [] [],
+                            value: SvelteTemplateAttributeValue {
+                                l_quote: DOUBLE_QUOTE@63..64 "\"" [] [],
+                                elements: SvelteTemplateElementList [
+                                    HtmlAttributeSingleTextExpression {
+                                        l_curly_token: L_CURLY@64..65 "{" [] [],
+                                        expression: missing (required),
+                                        r_curly_token: R_CURLY@65..66 "}" [] [],
+                                    },
+                                ],
+                                r_quote: DOUBLE_QUOTE@66..67 "\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@67..68 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@68..69 "<" [] [],
+                slash_token: SLASH@69..70 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@70..73 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@73..74 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..75
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_ELEMENT_LIST@0..74
+    0: HTML_ELEMENT@0..21
+      0: HTML_OPENING_ELEMENT@0..15
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..15
+          0: HTML_BOGUS_ATTRIBUTE@5..15
+            0: HTML_ATTRIBUTE_NAME@5..10
+              0: HTML_LITERAL@5..10 "style" [] []
+            1: HTML_BOGUS@10..15
+              0: EQ@10..11 "=" [] []
+              1: HTML_BOGUS@11..15
+                0: DOUBLE_QUOTE@11..12 "\"" [] []
+                1: HTML_BOGUS@12..15
+                  0: HTML_BOGUS_TEXT_EXPRESSION@12..15
+                    0: L_CURLY@12..13 "{" [] []
+                    1: HTML_LITERAL@13..15 "\">" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@15..15
+      2: HTML_CLOSING_ELEMENT@15..21
+        0: L_ANGLE@15..16 "<" [] []
+        1: SLASH@16..17 "/" [] []
+        2: HTML_TAG_NAME@17..20
+          0: HTML_LITERAL@17..20 "div" [] []
+        3: R_ANGLE@20..21 ">" [] []
+    1: HTML_ELEMENT@21..46
+      0: HTML_OPENING_ELEMENT@21..40
+        0: L_ANGLE@21..23 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@23..27
+          0: HTML_LITERAL@23..27 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@27..40
+          0: HTML_BOGUS_ATTRIBUTE@27..40
+            0: HTML_ATTRIBUTE_NAME@27..32
+              0: HTML_LITERAL@27..32 "style" [] []
+            1: HTML_BOGUS@32..40
+              0: EQ@32..33 "=" [] []
+              1: HTML_BOGUS@33..40
+                0: DOUBLE_QUOTE@33..34 "\"" [] []
+                1: HTML_BOGUS@34..40
+                  0: SVELTE_TEMPLATE_CHUNK_ELEMENT@34..36
+                    0: HTML_TEMPLATE_CHUNK@34..36 "a " [] []
+                  1: HTML_BOGUS_TEXT_EXPRESSION@36..40
+                    0: L_CURLY@36..37 "{" [] []
+                    1: HTML_LITERAL@37..40 "b\">" [] []
+        3: (empty)
+      1: HTML_ELEMENT_LIST@40..40
+      2: HTML_CLOSING_ELEMENT@40..46
+        0: L_ANGLE@40..41 "<" [] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..45
+          0: HTML_LITERAL@42..45 "div" [] []
+        3: R_ANGLE@45..46 ">" [] []
+    2: HTML_ELEMENT@46..74
+      0: HTML_OPENING_ELEMENT@46..68
+        0: L_ANGLE@46..48 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@48..52
+          0: HTML_LITERAL@48..52 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@52..67
+          0: HTML_ATTRIBUTE@52..67
+            0: HTML_ATTRIBUTE_NAME@52..62
+              0: HTML_LITERAL@52..62 "data-empty" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@62..67
+              0: EQ@62..63 "=" [] []
+              1: SVELTE_TEMPLATE_ATTRIBUTE_VALUE@63..67
+                0: DOUBLE_QUOTE@63..64 "\"" [] []
+                1: SVELTE_TEMPLATE_ELEMENT_LIST@64..66
+                  0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@64..66
+                    0: L_CURLY@64..65 "{" [] []
+                    1: (empty)
+                    2: R_CURLY@65..66 "}" [] []
+                2: DOUBLE_QUOTE@66..67 "\"" [] []
+        3: R_ANGLE@67..68 ">" [] []
+      1: HTML_ELEMENT_LIST@68..68
+      2: HTML_CLOSING_ELEMENT@68..74
+        0: L_ANGLE@68..69 "<" [] []
+        1: SLASH@69..70 "/" [] []
+        2: HTML_TAG_NAME@70..73
+          0: HTML_LITERAL@70..73 "div" [] []
+        3: R_ANGLE@73..74 ">" [] []
+  4: EOF@74..75 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+attribute_interpolation_unterminated.svelte:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+  > 1 │ <div style="{"></div>
+      │             ^^^
+    2 │ <div style="a {b"></div>
+    3 │ <div data-empty="{}"></div>
+  
+  i This is where the opening expression was found:
+  
+  > 1 │ <div style="{"></div>
+      │             ^
+    2 │ <div style="a {b"></div>
+    3 │ <div data-empty="{}"></div>
+  
+attribute_interpolation_unterminated.svelte:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ <div style="{"></div>
+      │                ^
+    2 │ <div style="a {b"></div>
+    3 │ <div data-empty="{}"></div>
+  
+attribute_interpolation_unterminated.svelte:2:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found a text expression that doesn't have the closing expression:
+  
+    1 │ <div style="{"></div>
+  > 2 │ <div style="a {b"></div>
+      │               ^^^^
+    3 │ <div data-empty="{}"></div>
+    4 │ 
+  
+  i This is where the opening expression was found:
+  
+    1 │ <div style="{"></div>
+  > 2 │ <div style="a {b"></div>
+      │               ^
+    3 │ <div data-empty="{}"></div>
+    4 │ 
+  
+attribute_interpolation_unterminated.svelte:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    1 │ <div style="{"></div>
+  > 2 │ <div style="a {b"></div>
+      │                   ^
+    3 │ <div data-empty="{}"></div>
+    4 │ 
+  
+```

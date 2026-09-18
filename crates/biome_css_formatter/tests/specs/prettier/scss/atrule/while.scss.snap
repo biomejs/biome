@@ -1,0 +1,247 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/atrule/while.scss
+---
+
+# Input
+
+```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
+@while $i > 0 {}
+@while $i>0{}
+@while  $i  >  0  {}
+@while $i
+    >
+    0
+    {}
+@while
+    $i
+    >
+    0
+    {}
+@while
+$i
+>
+0
+{
+}
+@while
+
+$i
+
+>
+
+0
+
+{
+
+}
+@while ($i > 0) {}
+@while ($i>0){}
+@while ( $i > 0 ) {}
+@while  (  $i  >  0  )  {}
+@while (
+    $i > 0
+) {}
+@while
+    ($i > 0) {}
+@while
+(
+$i
+>
+0
+)
+{
+}
+@while
+
+(
+
+$i
+
+>
+
+0
+
+)
+
+{
+
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1 {}
+@while 1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var {}
+@while (($i) > (0)) {}
+@while (($i)>(0)){}
+@while  (  (  $i  )  >  (  0  )  )  {}
+@while (($i)
+    >
+    (0)
+) {}
+@while
+(
+(
+$i
+)
+>
+(
+0
+)
+)
+{
+}
+@while
+
+(
+
+(
+
+$i
+
+)
+
+>
+
+(
+
+0
+
+)
+
+)
+
+{
+
+}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+@while (1 > $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1) {}
+@while ($very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var > $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var) {}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,6 +1,7 @@
++// Biome intentionally normalizes SCSS comparison operator spacing.
+ @while $i > 0 {
+ }
+-@while $i>0 {
++@while $i > 0 {
+ }
+ @while $i > 0 {
+ }
+@@ -14,7 +15,7 @@
+ }
+ @while ($i > 0) {
+ }
+-@while ($i>0) {
++@while ($i > 0) {
+ }
+ @while ($i > 0) {
+ }
+@@ -42,7 +43,7 @@
+ }
+ @while (($i) > (0)) {
+ }
+-@while (($i) >(0)) {
++@while (($i) > (0)) {
+ }
+ @while (($i) > (0)) {
+ }
+```
+
+# Output
+
+```scss
+// Biome intentionally normalizes SCSS comparison operator spacing.
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while $i > 0 {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while ($i > 0) {
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+  1
+{
+}
+@while 1 >
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+{
+}
+@while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+  $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+{
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (($i) > (0)) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-long-var > 1
+) {
+}
+@while (
+  1 >
+    $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+    1
+) {
+}
+@while (
+  $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+    $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+) {
+}
+```
+
+# Lines exceeding max width of 80 characters
+```
+   32: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   37:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   40: @while $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   41:   $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   62:     $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+   66:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   71:   $very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var >
+   72:     $other-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-very-long-var
+```

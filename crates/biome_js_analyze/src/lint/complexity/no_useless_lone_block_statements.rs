@@ -6,9 +6,10 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFileSource, JsLabeledStatement,
-    JsStatementList, JsSyntaxKind, JsVariableStatement,
+    AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsLabeledStatement, JsStatementList,
+    JsSyntaxKind, JsVariableStatement,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_useless_lone_block_statements::NoUselessLoneBlockStatementsOptions;
 

@@ -53,7 +53,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@21..22 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@22..22 "" [] [],
@@ -90,7 +89,6 @@ MdDocument {
           2: STAR@20..21 "*" [] []
         2: MD_TEXTUAL@21..22
           0: MD_TEXTUAL_LITERAL@21..22 "\n" [] []
-      1: (empty)
   2: EOF@22..22 "" [] []
 
 ```

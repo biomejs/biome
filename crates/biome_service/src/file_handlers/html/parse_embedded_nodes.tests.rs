@@ -37,12 +37,11 @@ fn prepare(file: &str, content: &str) -> Vec<ParseDiagnostic> {
             document_file_source: None,
             persist_node_cache: false,
             inline_config: None,
+            editor_features: None,
         })
         .unwrap();
 
-    workspace
-        .get_parse_diagnostics(Utf8Path::new(file))
-        .unwrap()
+    workspace.db_get_parse_diagnostics(Utf8Path::new(file))
 }
 
 fn assert_no_diagnostics(file: &str, content: &str) {

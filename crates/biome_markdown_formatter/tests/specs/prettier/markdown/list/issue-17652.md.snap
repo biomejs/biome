@@ -38,18 +38,28 @@ info: markdown/list/issue-17652.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -9,9 +9,11 @@
-    2. List
- 
- 1. Some text, and code block below, with newline after code block
-+
+@@ -4,18 +4,19 @@
+    ---
+    foo: bar
+    ```
+-
++   
     1. Another
     2. List
  
-+
+ 1. Some text, and code block below, with newline after code block
+    1. Another
+    2. List
++   
+ 
     ```yaml
     ---
     foo: bar
+    ```
+-
++   
+    1. Another
+    2. List
 ```
 
 # Output
@@ -61,21 +71,20 @@ info: markdown/list/issue-17652.md
    ---
    foo: bar
    ```
-
+   
    1. Another
    2. List
 
 1. Some text, and code block below, with newline after code block
-
    1. Another
    2. List
-
+   
 
    ```yaml
    ---
    foo: bar
    ```
-
+   
    1. Another
    2. List
 ```

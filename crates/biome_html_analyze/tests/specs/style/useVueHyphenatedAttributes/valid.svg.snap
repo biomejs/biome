@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svg
+---
+# Input
+```svg
+<!-- should not generate diagnostics -->
+<svg version="1" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#">
+  <rect width="320" height="180"/>
+</svg>
+
+```

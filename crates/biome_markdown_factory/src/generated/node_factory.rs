@@ -175,12 +175,6 @@ pub fn md_html_block(indent: MdIndentTokenList, content: MdInlineItemList) -> Md
         ],
     ))
 }
-pub fn md_indent(value_token: SyntaxToken) -> MdIndent {
-    MdIndent::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_INDENT,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn md_indent_code_block(content: MdInlineItemList) -> MdIndentCodeBlock {
     MdIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_INDENT_CODE_BLOCK,
@@ -455,31 +449,11 @@ pub fn md_ordered_list_item(md_bullet_list: MdBulletList) -> MdOrderedListItem {
         [Some(SyntaxElement::Node(md_bullet_list.into_syntax()))],
     ))
 }
-pub fn md_paragraph(list: MdInlineItemList) -> MdParagraphBuilder {
-    MdParagraphBuilder {
-        list,
-        hard_line: None,
-    }
-}
-pub struct MdParagraphBuilder {
-    list: MdInlineItemList,
-    hard_line: Option<MdHardLine>,
-}
-impl MdParagraphBuilder {
-    pub fn with_hard_line(mut self, hard_line: MdHardLine) -> Self {
-        self.hard_line = Some(hard_line);
-        self
-    }
-    pub fn build(self) -> MdParagraph {
-        MdParagraph::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MD_PARAGRAPH,
-            [
-                Some(SyntaxElement::Node(self.list.into_syntax())),
-                self.hard_line
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-            ],
-        ))
-    }
+pub fn md_paragraph(list: MdInlineItemList) -> MdParagraph {
+    MdParagraph::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_PARAGRAPH,
+        [Some(SyntaxElement::Node(list.into_syntax()))],
+    ))
 }
 pub fn md_quote(prefix: MdQuotePrefix, content: MdBlockList) -> MdQuote {
     MdQuote::unwrap_cast(SyntaxNode::new_detached(
@@ -627,12 +601,6 @@ pub fn md_setext_header(content: MdInlineItemList, underline_token: SyntaxToken)
         ],
     ))
 }
-pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
-    MdSoftBreak::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_SOFT_BREAK,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
     MdTextual::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_TEXTUAL,
@@ -764,6 +732,16 @@ where
 {
     MdBogusBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_BOGUS_BLOCK,
+        slots,
+    ))
+}
+pub fn md_bogus_bullet<I>(slots: I) -> MdBogusBullet
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MdBogusBullet::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_BOGUS_BULLET,
         slots,
     ))
 }

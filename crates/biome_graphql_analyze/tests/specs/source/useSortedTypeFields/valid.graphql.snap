@@ -1,0 +1,73 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+# should not generate diagnostics
+
+# Already sorted ObjectType fields
+type User {
+  age: Int
+  id: ID
+  name: String
+}
+
+# Already sorted InterfaceType fields
+interface Node {
+  id: ID
+  name: String
+}
+
+# Already sorted InputObjectType fields
+input CreateUserInput {
+  age: Int
+  name: String
+}
+
+# Single field (always sorted)
+type Single {
+  id: ID
+}
+
+# Empty type (no fields to sort)
+type Empty {
+}
+
+# Mixed case: case-insensitive ("apple" before "Zoo")
+type Mixed {
+  apple: String
+  Zoo: String
+}
+
+# Tiebreaker: lowercase "aField" before uppercase "AField"
+type CaseTiebreaker {
+  aField: String
+  AField: String
+}
+
+# localeCompare parity: underscore sorts before digits
+type IdentifierChars {
+  a_: String
+  a1: String
+}
+
+# Already sorted ObjectTypeExtension fields
+extend type User {
+  age: Int
+  name: String
+}
+
+# Already sorted InterfaceTypeExtension fields
+extend interface Node {
+  id: ID
+  name: String
+}
+
+# Already sorted InputObjectTypeExtension fields
+extend input CreateUserInput {
+  age: Int
+  name: String
+}
+
+```

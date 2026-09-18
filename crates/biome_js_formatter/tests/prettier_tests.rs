@@ -1,7 +1,7 @@
 use biome_formatter::{IndentStyle, IndentWidth};
 use biome_formatter_test::test_prettier_snapshot::{PrettierSnapshot, PrettierTestFile};
 use biome_js_formatter::{JsFormatLanguage, context::JsFormatOptions};
-use biome_js_syntax::{JsFileSource, LanguageVariant, ModuleKind};
+use biome_languages::{JsFileSource, javascript::LanguageVariant, javascript::ModuleKind};
 use camino::Utf8Path;
 use std::env;
 

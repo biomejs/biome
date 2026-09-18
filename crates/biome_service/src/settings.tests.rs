@@ -3,10 +3,10 @@ use crate::settings::{
     LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
     to_json_language_settings,
 };
-use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleFilter;
 use biome_configuration::analyzer::{GroupPlainConfiguration, SeverityOrGroup, Style};
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::html::{HtmlConfiguration, HtmlParserConfiguration};
+use biome_configuration::javascript::{JsResolverConfiguration, JsxRuntime};
 use biome_configuration::json::{JsonAssistConfiguration, JsonLinterConfiguration};
 use biome_configuration::max_size::MaxSize;
 use biome_configuration::{
@@ -15,7 +15,11 @@ use biome_configuration::{
     Overrides, RuleConfiguration, RulePlainConfiguration, Rules,
 };
 use biome_fs::BiomePath;
+use biome_html_parser::{HtmlParserOptions, parse_html};
+use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
+use biome_languages::DocumentFileSource;
+use biome_languages::HtmlFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 use std::num::NonZeroU64;
@@ -79,7 +83,7 @@ fn correctly_computes_analyzer_options() {
         &language.linter,
         environment,
         &BiomePath::new(Utf8PathBuf::new()),
-        &DocumentFileSource::from_language_id("javascript"),
+        &DocumentFileSource::from_language_id("javascript", None),
         None,
     );
 
@@ -87,6 +91,30 @@ fn correctly_computes_analyzer_options() {
         options.jsx_runtime(),
         Some(biome_analyze::options::JsxRuntime::ReactClassic)
     );
+}
+
+#[test]
+fn javascript_resolver_experimental_pnpm_catalogs_is_opt_in() {
+    let mut default_settings = Settings::default();
+    default_settings
+        .merge_with_configuration(Configuration::default(), None, vec![])
+        .expect("valid configuration");
+    assert!(!default_settings.use_pnpm_workspace_catalogs());
+
+    let configuration = Configuration {
+        javascript: Some(JsConfiguration {
+            resolver: Some(JsResolverConfiguration {
+                experimental_pnpm_catalogs: Some(true.into()),
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(configuration, None, vec![])
+        .expect("valid configuration");
+    assert!(settings.use_pnpm_workspace_catalogs());
 }
 
 #[test]
@@ -237,6 +265,50 @@ fn override_inherits_global_formatter_when_not_specified() {
 }
 
 #[test]
+fn html_parser_vue_only_applies_to_html_files() {
+    let configuration = Configuration {
+        html: Some(HtmlConfiguration {
+            parser: Some(HtmlParserConfiguration {
+                vue: Some(true.into()),
+                ..HtmlParserConfiguration::default()
+            }),
+            ..HtmlConfiguration::default()
+        }),
+        ..Default::default()
+    };
+
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(configuration, None, vec![])
+        .expect("valid configuration");
+
+    let language = HtmlLanguage::lookup_settings(&settings.languages);
+
+    let html_options = resolve_html_parse_options(
+        &settings,
+        &language.parser,
+        Utf8Path::new("file.html"),
+        HtmlFileSource::html(),
+    );
+    let astro_options = resolve_html_parse_options(
+        &settings,
+        &language.parser,
+        Utf8Path::new("file.astro"),
+        HtmlFileSource::astro(),
+    );
+    let svelte_options = resolve_html_parse_options(
+        &settings,
+        &language.parser,
+        Utf8Path::new("file.svelte"),
+        HtmlFileSource::svelte(),
+    );
+
+    assert_no_parse_diagnostics("<div v-if=\"show\"></div>", html_options);
+    assert_has_parse_diagnostics("<div v-if=\"show\"></div>", astro_options);
+    assert_has_parse_diagnostics("<div v-if=\"show\"></div>", svelte_options);
+}
+
+#[test]
 fn test_module_graph_resolution_kind_from_scan_kind() {
     // Test all ScanKind variants map to correct ModuleGraphResolutionKind
     assert_eq!(
@@ -293,5 +365,36 @@ fn test_project_scan_disables_module_graph_type_inference() {
     assert!(
         !project_kind.is_modules_and_types(),
         "Project scan should NOT enable type inference"
+    );
+}
+
+fn resolve_html_parse_options(
+    settings: &Settings,
+    parser: &<HtmlLanguage as ServiceLanguage>::ParserSettings,
+    path: &Utf8Path,
+    file_source: HtmlFileSource,
+) -> HtmlParserOptions {
+    HtmlLanguage::resolve_parse_options(
+        &settings.override_settings,
+        parser,
+        &BiomePath::new(Utf8PathBuf::from(path)),
+        &DocumentFileSource::from(file_source),
+    )
+}
+
+fn assert_has_parse_diagnostics(source: &str, options: HtmlParserOptions) {
+    let parse = parse_html(source, options);
+    assert!(
+        !parse.diagnostics().is_empty(),
+        "expected parsing to fail, but it succeeded"
+    );
+}
+
+fn assert_no_parse_diagnostics(source: &str, options: HtmlParserOptions) {
+    let parse = parse_html(source, options);
+    assert!(
+        parse.diagnostics().is_empty(),
+        "expected parsing to succeed, got diagnostics: {:?}",
+        parse.diagnostics()
     );
 }

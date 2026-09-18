@@ -50,13 +50,14 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) profile_rules: bool,
+    pub(crate) watch: bool,
 }
 
 struct LintExecution {
     /// The type of fixes that should be applied when analyzing a file.
     ///
-    /// It's [None] if the `lint` command is called without `--apply` or `--apply-suggested`
-    /// arguments.
+    /// It's [None] if the `lint` command is called without `--write`, `--fix`, or `--suppress`.
+    /// `--unsafe` upgrades the mode when combined with `--write` or `--fix`.
     fix_file_mode: Option<FixFileMode>,
     /// An optional tuple.
     /// 1. The virtual path to the file
@@ -159,6 +160,10 @@ impl TraversalCommand for LintCommandPayload {
 
     fn command_name(&self) -> &'static str {
         "lint"
+    }
+
+    fn is_watch_mode(&self) -> bool {
+        self.watch
     }
 
     fn minimal_scan_kind(&self) -> Option<ScanKind> {
@@ -272,5 +277,35 @@ impl TraversalCommand for LintCommandPayload {
         .unwrap_or(self.paths.clone());
 
         Ok(paths)
+    }
+
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        if self.is_watch_mode() {
+            if self.fix {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--fix",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.write {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--write",
+                    "Applying code fixes is not available in watch mode.",
+                ));
+            }
+
+            if self.suppress {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--watch",
+                    "--suppress",
+                    "Applying suppressions is not available in watch mode.",
+                ));
+            }
+        }
+
+        Ok(())
     }
 }

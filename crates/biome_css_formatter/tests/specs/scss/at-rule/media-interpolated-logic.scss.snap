@@ -1,0 +1,55 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/media-interpolated-logic.scss
+---
+
+# Input
+
+```scss
+@media   (a)   and   #{"(b) and (c)"}{x{y:z}}
+
+@media   (a)   or   #{"(b) or (c)"}{x{y:z}}
+
+@media   a   and   not   #{"(b)"}{x{y:z}}
+
+@media   #{a}   and   not   (b){x{y:z}}
+
+@media   not   #{"(a)"}{x{y:z}}
+
+```
+
+
+# Formatted
+
+```scss
+@media (a) and #{"(b) and (c)"} {
+	x {
+		y: z;
+	}
+}
+
+@media (a) or #{"(b) or (c)"} {
+	x {
+		y: z;
+	}
+}
+
+@media a and not #{"(b)"} {
+	x {
+		y: z;
+	}
+}
+
+@media #{a} and not (b) {
+	x {
+		y: z;
+	}
+}
+
+@media not #{"(a)"} {
+	x {
+		y: z;
+	}
+}
+
+```

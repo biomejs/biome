@@ -39,7 +39,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@5..6 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -70,7 +69,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                         MdNewline {
                                             value_token: NEWLINE@16..17 "\n" [] [],
@@ -101,7 +99,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@26..27 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -137,7 +134,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..5 "top" [] []
                 1: MD_TEXTUAL@5..6
                   0: MD_TEXTUAL_LITERAL@5..6 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@6..8
               0: MD_INDENT_TOKEN_LIST@6..8
                 0: MD_INDENT_TOKEN@6..7
@@ -159,7 +155,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@10..15 "sub a" [] []
                         1: MD_TEXTUAL@15..16
                           0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
-                      1: (empty)
                     1: MD_NEWLINE@16..17
                       0: NEWLINE@16..17 "\n" [] []
                 1: MD_BULLET@17..27
@@ -179,7 +174,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@21..26 "sub b" [] []
                         1: MD_TEXTUAL@26..27
                           0: MD_TEXTUAL_LITERAL@26..27 "\n" [] []
-                      1: (empty)
   2: EOF@27..27 "" [] []
 
 ```

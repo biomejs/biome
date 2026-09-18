@@ -1,9 +1,9 @@
-use biome_js_factory::syntax::JsFileSource;
 use biome_js_factory::{
     make,
     syntax::{AnyJsDeclaration, AnyJsModuleItem, AnyJsStatement},
 };
 use biome_js_formatter::{context::JsFormatOptions, format_node};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_service::workspace_types::{ModuleQueue, generate_type, methods};
 use quote::{format_ident, quote};

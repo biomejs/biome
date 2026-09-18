@@ -6,7 +6,8 @@ use biome_formatter::{
     IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
     printer::PrinterOptions,
 };
-use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::HtmlFileSource;
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 

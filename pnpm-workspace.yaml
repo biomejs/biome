@@ -13,3 +13,6 @@ allowBuilds:
   dprint: false
   esbuild: false
   tombi: true
+minimumReleaseAgeExclude:
+  # Renovate security update: vite@7.3.5
+  - vite@7.3.5

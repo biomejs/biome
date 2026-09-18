@@ -5,7 +5,7 @@ use crate::grit_node_patterns::{GritNodePattern, GritNodePatternArg};
 use crate::grit_target_language::GritNodePatternSource;
 use crate::grit_target_node::GritTargetSyntaxKind;
 use crate::{CompileError, grit_context::GritQueryContext};
-use biome_grit_syntax::{AnyGritMaybeNamedArg, AnyGritPattern, GritNodeLike, GritSyntaxKind};
+use biome_grit_syntax::{AnyGritMaybeNamedArg, GritNodeLike, GritSyntaxKind};
 use biome_rowan::TokenText;
 use grit_pattern_matcher::pattern::Pattern;
 use std::cmp::Ordering;
@@ -77,13 +77,6 @@ fn node_pattern_from_node_with_name_and_kind(
     for (index, arg) in node.named_args().into_iter().enumerate() {
         let (arg_name, slot_index, pattern) = match arg {
             Ok(AnyGritMaybeNamedArg::AnyGritPattern(pattern)) => {
-                let AnyGritPattern::GritVariable(variable) = pattern else {
-                    return Err(NodeLikeArgumentError::ExpectedVariable {
-                        name: name.to_string(),
-                    }
-                    .into());
-                };
-
                 let Some((slot_name, slot_index)) = node_slots.get(index) else {
                     return Err(NodeLikeArgumentError::TooManyArguments {
                         name: name.to_string(),
@@ -92,11 +85,7 @@ fn node_pattern_from_node_with_name_and_kind(
                     .into());
                 };
 
-                (
-                    (*slot_name).to_string(),
-                    *slot_index,
-                    AnyGritPattern::GritVariable(variable),
-                )
+                ((*slot_name).to_string(), *slot_index, pattern)
             }
             Ok(AnyGritMaybeNamedArg::GritNamedArg(named_arg)) => {
                 let arg_name = named_arg.name()?.value_token()?.token_text_trimmed();

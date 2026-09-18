@@ -22,25 +22,23 @@ with two lines.
 --- Prettier
 +++ Biome
 @@ -1,6 +1,6 @@
--1.  A paragraph
--    with two lines.
-+  1.  A paragraph
-+with two lines.
+ 1.  A paragraph
+     with two lines.
  
 -              indented code
-+          indented code
++        indented code
  
 -          > A block quote.
-+      > A block quote.
++    > A block quote.
 ```
 
 # Output
 
 ```md
-  1.  A paragraph
-with two lines.
+1.  A paragraph
+    with two lines.
 
-          indented code
+        indented code
 
-      > A block quote.
+    > A block quote.
 ```

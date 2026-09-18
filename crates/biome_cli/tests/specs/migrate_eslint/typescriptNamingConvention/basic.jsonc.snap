@@ -38,7 +38,7 @@ expression: basic.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"style": {
 				"useNamingConvention": {
 					"level": "error",

@@ -46,7 +46,7 @@ impl FormatNodeRule<MdDocument> for FormatMdDocument {
             [
                 value.format().with_options(FormatMdBlockListOptions {
                     paragraph_print_mode: TextPrintMode::Pristine,
-                    trim: true
+                    trim: true,
                 }),
                 format_removed(&eof_token?)
             ]

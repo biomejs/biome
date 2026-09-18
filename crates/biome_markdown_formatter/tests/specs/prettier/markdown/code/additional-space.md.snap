@@ -31,75 +31,277 @@ info: markdown/code/additional-space.md
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,26 +1,22 @@
- 1. Fork the repo and create your branch from `master`.
- 
-    Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
--
-    ```sh
-    git clone https://github.com/<your_username>/jest
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -6,7 +6,6 @@
     cd jest
     git checkout -b my_branch
     ```
--
+-   
+ 
     Note:
     Replace `<your_username>` with your GitHub username
- 
--2. Run `yarn install`.
-+3. Run `yarn install`.
-    On Windows:
-    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
- 
--   ```sh
--   yarn install
--   ```
--
-+    ```sh
-+    yarn install
-+    ```
-    To check your version of Yarn and ensure it's installed you can type:
--
--   ```sh
--   yarn --version
--   ```
-+    ```sh
-+    yarn --version
-+    ```
-```
-
-# Output
-
-```md
-1. Fork the repo and create your branch from `master`.
-
-   Open terminal (e.g. Terminal, iTerm, Git Bash or Git Shell) and type:
-   ```sh
-   git clone https://github.com/<your_username>/jest
-   cd jest
-   git checkout -b my_branch
-   ```
-   Note:
-   Replace `<your_username>` with your GitHub username
-
-3. Run `yarn install`.
-   On Windows:
-   To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
-
+@@ -18,7 +17,6 @@
     ```sh
     yarn install
     ```
-   To check your version of Yarn and ensure it's installed you can type:
+-   
+ 
+    To check your version of Yarn and ensure it's installed you can type:
     ```sh
-    yarn --version
-    ```
-```
 
-# Lines exceeding max width of 80 characters
-```
-   14:    To install [Yarn](https://yarnpkg.com/en/docs/install#windows-tab) on Windows you may need to download either node.js or Chocolatey<br />
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -97,113 +97,109 @@
+     hard_line_break,
+     source_position(234),
+     "```",
+-    hard_line_break,
+-    source_position(237),
+-    "
+-",
+     empty_line,
+-    source_position(242),
++    source_position(241),
+     "Note:",
+     hard_line_break,
+-    source_position(251),
++    source_position(250),
+     "Replace ",
+-    source_position(259),
++    source_position(258),
+     "`",
+-    source_position(260),
++    source_position(259),
+     "<",
+-    source_position(261),
++    source_position(260),
+     "your",
+-    source_position(265),
++    source_position(264),
+     "_",
+-    source_position(266),
++    source_position(265),
+     "username",
+-    source_position(274),
++    source_position(273),
+     ">",
+-    source_position(275),
++    source_position(274),
+     "` ",
+-    source_position(277),
++    source_position(276),
+     "with ",
+-    source_position(282),
++    source_position(281),
+     "your ",
+-    source_position(287),
++    source_position(286),
+     "GitHub ",
+-    source_position(294),
++    source_position(293),
+     "username",
+     hard_line_break,
+     empty_line
+   ]),
+-  source_position(304),
++  source_position(303),
+   "3.",
+-  source_position(306),
++  source_position(305),
+   " ",
+   align(3, [
+-    source_position(307),
++    source_position(306),
+     "Run ",
+-    source_position(311),
++    source_position(310),
+     "`",
+-    source_position(312),
++    source_position(311),
+     "yarn install",
+-    source_position(324),
++    source_position(323),
+     "`",
+-    source_position(325),
++    source_position(324),
+     ".",
+     hard_line_break,
+-    source_position(330),
++    source_position(329),
+     "On ",
+-    source_position(333),
++    source_position(332),
+     "Windows:",
+     hard_line_break,
+-    source_position(345),
++    source_position(344),
+     "To ",
+-    source_position(348),
++    source_position(347),
+     "install ",
+-    source_position(356),
++    source_position(355),
+     "[",
+-    source_position(357),
++    source_position(356),
+     "Yarn",
+-    source_position(361),
++    source_position(360),
+     "]",
+-    source_position(362),
++    source_position(361),
+     "(",
+-    source_position(363),
++    source_position(362),
+     "https://yarnpkg.com/en/docs/install",
++    source_position(397),
++    "#",
+     source_position(398),
+-    "#",
+-    source_position(399),
+     "windows",
+-    source_position(406),
++    source_position(405),
+     "-",
+-    source_position(407),
++    source_position(406),
+     "tab",
+-    source_position(410),
++    source_position(409),
+     ") ",
+-    source_position(412),
++    source_position(411),
+     "on ",
+-    source_position(415),
++    source_position(414),
+     "Windows ",
+-    source_position(423),
++    source_position(422),
+     "you ",
+-    source_position(427),
++    source_position(426),
+     "may ",
+-    source_position(431),
++    source_position(430),
+     "need ",
+-    source_position(436),
++    source_position(435),
+     "to ",
+-    source_position(439),
++    source_position(438),
+     "download ",
+-    source_position(448),
++    source_position(447),
+     "either ",
+-    source_position(455),
++    source_position(454),
+     "node.js ",
+-    source_position(463),
++    source_position(462),
+     "or ",
+-    source_position(466),
++    source_position(465),
+     "Chocolatey",
+-    source_position(476),
++    source_position(475),
+     "<",
+-    source_position(477),
++    source_position(476),
+     "br /",
+-    source_position(481),
++    source_position(480),
+     ">",
+     hard_line_break,
+     empty_line,
+@@ -212,61 +208,58 @@
+     source_position(490),
+     "sh",
+     hard_line_break,
+-    source_position(496),
++    source_position(497),
+     "yarn install",
+     hard_line_break,
+     hard_line_break,
+-    source_position(512),
++    source_position(514),
+     "```",
+-    hard_line_break,
+-    source_position(515),
+-    "
+-",
+     empty_line,
+-    source_position(520),
++    " ",
++    source_position(522),
+     "To ",
+-    source_position(523),
++    source_position(525),
+     "check ",
+-    source_position(529),
++    source_position(531),
+     "your ",
+-    source_position(534),
++    source_position(536),
+     "version ",
+-    source_position(542),
++    source_position(544),
+     "of ",
+-    source_position(545),
++    source_position(547),
+     "Yarn ",
+-    source_position(550),
++    source_position(552),
+     "and ",
+-    source_position(554),
++    source_position(556),
+     "ensure ",
+-    source_position(561),
++    source_position(563),
+     "it's ",
+-    source_position(566),
++    source_position(568),
+     "installed ",
+-    source_position(576),
++    source_position(578),
+     "you ",
+-    source_position(580),
++    source_position(582),
+     "can ",
+-    source_position(584),
++    source_position(586),
+     "type:",
+     hard_line_break,
+     hard_line_break,
+-    source_position(593),
++    source_position(596),
+     "```",
+-    source_position(596),
++    source_position(599),
+     "sh",
+     hard_line_break,
+-    source_position(602),
++    source_position(606),
+     "yarn ",
+-    source_position(607),
++    source_position(611),
+     "-",
+-    source_position(608),
++    source_position(612),
+     "-",
+-    source_position(609),
++    source_position(613),
+     "version",
+     hard_line_break,
+     hard_line_break,
+-    source_position(620),
++    source_position(625),
+     "```",
+     hard_line_break
+   ]),
+
 ```

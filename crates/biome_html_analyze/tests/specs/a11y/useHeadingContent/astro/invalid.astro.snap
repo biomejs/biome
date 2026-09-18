@@ -1,0 +1,102 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 120
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+---
+<h1></h1>
+<h2>   </h2>
+<h1 aria-hidden="true">invisible content</h1>
+<h1><span aria-hidden="true">hidden</span></h1>
+<h3></h3>
+
+```
+
+# Diagnostics
+```
+invalid.astro:4:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    2 │ // should generate diagnostics
+    3 │ ---
+  > 4 │ <h1></h1>
+      │ ^^^^^^^^^
+    5 │ <h2>   </h2>
+    6 │ <h1 aria-hidden="true">invisible content</h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:5:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    3 │ ---
+    4 │ <h1></h1>
+  > 5 │ <h2>   </h2>
+      │ ^^^^^^^^^^^^
+    6 │ <h1 aria-hidden="true">invisible content</h1>
+    7 │ <h1><span aria-hidden="true">hidden</span></h1>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:6:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    4 │ <h1></h1>
+    5 │ <h2>   </h2>
+  > 6 │ <h1 aria-hidden="true">invisible content</h1>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <h1><span aria-hidden="true">hidden</span></h1>
+    8 │ <h3></h3>
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:7:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    5 │ <h2>   </h2>
+    6 │ <h1 aria-hidden="true">invisible content</h1>
+  > 7 │ <h1><span aria-hidden="true">hidden</span></h1>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <h3></h3>
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```
+
+```
+invalid.astro:8:1 lint/a11y/useHeadingContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using heading elements.
+  
+    6 │ <h1 aria-hidden="true">invisible content</h1>
+    7 │ <h1><span aria-hidden="true">hidden</span></h1>
+  > 8 │ <h3></h3>
+      │ ^^^^^^^^^
+    9 │ 
+  
+  i All headings on a page should have content that is accessible to screen readers.
+  
+
+```

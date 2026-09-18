@@ -42,7 +42,6 @@ MdDocument {
                                         value_token: MD_TEXTUAL_LITERAL@3..7 " Bar" [] [],
                                     },
                                 ],
-                                hard_line: missing (optional),
                             },
                             after: MdHashList [],
                         },
@@ -75,7 +74,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -110,7 +108,6 @@ MdDocument {
                 0: MD_INLINE_ITEM_LIST@3..7
                   0: MD_TEXTUAL@3..7
                     0: MD_TEXTUAL_LITERAL@3..7 " Bar" [] []
-                1: (empty)
               3: MD_HASH_LIST@7..7
     1: MD_NEWLINE@7..8
       0: NEWLINE@7..8 "\n" [] []
@@ -131,7 +128,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@11..15 "item" [] []
                 1: MD_TEXTUAL@15..16
                   0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
-              1: (empty)
   2: EOF@16..16 "" [] []
 
 ```

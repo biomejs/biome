@@ -121,7 +121,7 @@ mod tests {
     use super::*;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
-    use biome_js_syntax::JsFileSource;
+    use biome_languages::JsFileSource;
 
     fn create_turbo_json(json: &str) -> TurboJson {
         let (turbo_json, _diagnostics) =

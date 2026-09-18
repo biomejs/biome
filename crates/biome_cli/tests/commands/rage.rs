@@ -54,6 +54,64 @@ fn with_configuration() {
     ));
 }
 
+// The configuration lives at a non-default path and is selected via `--config-path`.
+// Because bpaf populates the same `config_path` field from either the flag or the
+// `BIOME_CONFIG_PATH` env var, exercising the flag also covers the env var, without
+// mutating the process environment. See https://github.com/biomejs/biome/issues/6686
+#[test]
+#[serial]
+fn with_custom_config_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        Utf8Path::new("custom/biome.json").to_path_buf(),
+        r#"{
+  "formatter": {
+    "enabled": false
+  }
+}"#,
+    );
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path=custom/biome.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_custom_config_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+#[serial]
+fn with_missing_custom_config_path() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_rage(
+        fs,
+        &mut console,
+        Args::from(["rage", "--config-path=missing/biome.json"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_rage_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "with_missing_custom_config_path",
+        fs,
+        console,
+        result,
+    ));
+}
+
 #[test]
 #[serial]
 fn with_no_configuration() {

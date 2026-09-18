@@ -372,7 +372,11 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
+        "ScssKeyframesName" => lang::ScssKeyframesName::KIND_SET.iter().next(),
         "ScssKeyframesSelector" => lang::ScssKeyframesSelector::KIND_SET.iter().next(),
+        "ScssKeyframesVariableDeclaration" => lang::ScssKeyframesVariableDeclaration::KIND_SET
+            .iter()
+            .next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
@@ -396,6 +400,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssReturnAtRule" => lang::ScssReturnAtRule::KIND_SET.iter().next(),
         "ScssShowClause" => lang::ScssShowClause::KIND_SET.iter().next(),
         "ScssStringText" => lang::ScssStringText::KIND_SET.iter().next(),
+        "ScssSupportsInterpolatedCondition" => lang::ScssSupportsInterpolatedCondition::KIND_SET
+            .iter()
+            .next(),
         "ScssUnaryExpression" => lang::ScssUnaryExpression::KIND_SET.iter().next(),
         "ScssUseAllNamespace" => lang::ScssUseAllNamespace::KIND_SET.iter().next(),
         "ScssUseAsClause" => lang::ScssUseAsClause::KIND_SET.iter().next(),
@@ -449,7 +456,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssCommaSeparatedValue" => &[("items", 1)],
         "CssComplexSelector" => &[("left", 0), ("right", 2)],
         "CssComposesImportSpecifier" => &[("source", 1)],
-        "CssComposesProperty" => &[("name", 0), ("value", 2)],
+        "CssComposesProperty" => &[("name", 0), ("values", 2)],
         "CssComposesPropertyValue" => &[("classes", 0), ("specifier", 1)],
         "CssCompoundSelector" => &[
             ("nesting_selectors", 0),
@@ -665,7 +672,9 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssInterpolatedString" => &[("parts", 1)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],
+        "ScssKeyframesName" => &[("name", 0)],
         "ScssKeyframesSelector" => &[("selector", 0)],
+        "ScssKeyframesVariableDeclaration" => &[("declaration", 0)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
@@ -684,6 +693,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssPlainImport" => &[("url", 0), ("layer", 1), ("supports", 2), ("media", 3)],
         "ScssReturnAtRule" => &[("value", 1)],
         "ScssShowClause" => &[("members", 1)],
+        "ScssSupportsInterpolatedCondition" => &[("condition", 0)],
         "ScssUnaryExpression" => &[("expression", 1)],
         "ScssUseAsClause" => &[("namespace", 1)],
         "ScssUseAtRule" => &[("url", 1), ("as_clause", 2), ("with_clause", 3)],

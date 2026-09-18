@@ -75,7 +75,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@100..101 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@101..101 "" [] [],
@@ -123,7 +122,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@68..100 "Next paragraph after blank line." [] []
         1: MD_TEXTUAL@100..101
           0: MD_TEXTUAL_LITERAL@100..101 "\n" [] []
-      1: (empty)
   2: EOF@101..101 "" [] []
 
 ```

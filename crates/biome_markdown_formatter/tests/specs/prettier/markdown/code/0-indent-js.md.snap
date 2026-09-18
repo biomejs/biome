@@ -35,7 +35,7 @@ info: markdown/code/0-indent-js.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,6 @@
+@@ -1,21 +1,15 @@
  - 1
    - 2
      - 3
@@ -43,6 +43,20 @@ info: markdown/code/0-indent-js.md
        ```js
        md`
        # this is the root indent
+-
+       # this is the root indent
+-
+       # this is the root indent
+       `
+-
+       something`
+       asd
+-
+       asd
+-
+       asd
+       `
+       ```
 ```
 
 # Output
@@ -54,17 +68,12 @@ info: markdown/code/0-indent-js.md
       ```js
       md`
       # this is the root indent
-
       # this is the root indent
-
       # this is the root indent
       `
-
       something`
       asd
-
       asd
-
       asd
       `
       ```

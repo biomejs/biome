@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlFileSource};
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList};
+use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_media_caption::UseMediaCaptionOptions;
 
@@ -64,7 +65,7 @@ declare_lint_rule! {
         version: "2.4.0",
         name: "useMediaCaption",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("media-has-caption").same()],
+        sources: &[RuleSource::EslintJsxA11y("media-has-caption").inspired()],
         recommended: true,
         severity: Severity::Error,
     }

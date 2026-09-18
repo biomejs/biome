@@ -35,7 +35,6 @@ MdDocument {
                     value_token: MD_HARD_LINE_LITERAL@31..34 "  \n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@34..35 "\n" [] [],
@@ -55,7 +54,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@69..71 "  " [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@71..71 "" [] [],
@@ -78,7 +76,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@6..31 "bar with empty line after" [] []
         3: MD_HARD_LINE@31..34
           0: MD_HARD_LINE_LITERAL@31..34 "  \n" [] []
-      1: (empty)
     1: MD_NEWLINE@34..35
       0: NEWLINE@34..35 "\n" [] []
     2: MD_PARAGRAPH@35..71
@@ -91,7 +88,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@41..69 "bar without empty line after" [] []
         3: MD_TEXTUAL@69..71
           0: MD_TEXTUAL_LITERAL@69..71 "  " [] []
-      1: (empty)
   2: EOF@71..71 "" [] []
 
 ```

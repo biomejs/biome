@@ -62,15 +62,12 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::{Applicability, CodeSuggestion, Severity, serde::Diagnostic};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
-use biome_js_syntax::{TextRange, TextSize};
-use biome_module_graph::SerializedModuleInfo;
+use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
+use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
-pub use document::{
-    AnyEmbeddedSnippet, CssDocumentServices, DocumentServices, EmbeddedSnippet, JsDocumentServices,
-};
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -88,16 +85,15 @@ use tokio::sync::watch;
 use tracing::debug;
 
 pub use crate::{
-    WorkspaceError,
-    file_handlers::{Capabilities, DocumentFileSource},
-    projects::ProjectKey,
-    scanner::ScanKind,
+    WorkspaceError, file_handlers::Capabilities, projects::ProjectKey, scanner::ScanKind,
     settings::Settings,
 };
 #[cfg(feature = "schema")]
 use schemars::{Schema, SchemaGenerator};
 
-use crate::settings::{ModuleGraphResolutionKind, SettingsWithEditor};
+pub mod db;
+use crate::module_graph::SerializedModuleInfo;
+use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEditor};
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
 pub use search::grit::GritSearchQuery;
@@ -241,10 +237,7 @@ impl FeaturesSupported {
             }
         }
 
-        if let Some(experimental_full_html_support) =
-            settings.as_ref().experimental_full_html_support
-            && experimental_full_html_support.value()
-        {
+        if settings.as_ref().experimental_full_html_support_enabled() {
             self.insert(FeatureKind::HtmlFullSupport, SupportKind::Supported);
         }
 
@@ -842,6 +835,10 @@ pub struct OpenFileParams {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Used to enable further document services e.g. semantic model
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor_features: Option<EditorFeatures>,
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -982,6 +979,10 @@ pub struct ChangeFileParams {
 
     #[serde(skip_serializing_if = "Option::is_none")]
     pub inline_config: Option<Configuration>,
+
+    /// Used to enable further document services e.g. semantic model
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor_features: Option<EditorFeatures>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1255,6 +1256,77 @@ pub struct RenameResult {
     pub range: TextRange,
     /// List of text edit operations to apply on the source code
     pub indels: TextEdit,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GoToDefinitionParams {
+    pub project_key: ProjectKey,
+    pub path: BiomePath,
+    pub cursor_range: TextRange,
+    pub enabled: bool,
+}
+
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GoToDefinitionResult {
+    pub matches: Vec<(BiomePath, TextRange)>,
+}
+
+impl GoToDefinitionResult {
+    // Used only by language-gated logic.
+    #[expect(
+        clippy::allow_attributes,
+        reason = "`dead_code` is feature-dependent here; `expect(dead_code)` is unfulfilled when language features use this method."
+    )]
+    #[allow(
+        dead_code,
+        reason = "This method is used only by language-gated logic."
+    )]
+    pub(crate) fn store(&mut self, path: BiomePath, range: TextRange) {
+        if !self.matches.iter().any(|(p, r)| *p == path && *r == range) {
+            self.matches.push((path, range));
+        }
+    }
+}
+
+/// The definition kind of definition
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum DefinitionReference {
+    /// A component defined in an HTML
+    HtmlComponent {
+        local_name: String,
+        /// The path where the component is imported from. In `import { MyComponent } from "./my-component.html"`
+        /// the source will be `./my-component.html`
+        source: String,
+    },
+    /// The binding is in the same file at this range.
+    Local { range: TextRange },
+    LocalEmbedded {
+        /// Where the binding is embedded in the source code, relative to its embedded root.
+        range: TextRange,
+        /// In which language embedding kind the binding needs to be resolved
+        to_language: LocalEmbeddedLanguage,
+    },
+    /// Imported symbol — needs module graph resolution.
+    Import {
+        local_name: String,
+        specifier: String,
+    },
+    /// A CSS class name from a JSX className/class attribute or a CSS-in-JS snippet (not yet supported)
+    CssClass { class_name: String },
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub enum LocalEmbeddedLanguage {
+    /// Look in a JS snippet
+    Js,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1639,6 +1711,15 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Returns the content of the file after renaming a symbol.
     fn rename(&self, params: RenameParams) -> Result<RenameResult, WorkspaceError>;
 
+    /// Navigates to the definition of the symbol at the given cursor position.
+    ///
+    /// Returns `None` if the symbol cannot be resolved (e.g., external
+    /// dependency, cursor not on an identifier, or no definition found).
+    fn go_to_definition(
+        &self,
+        params: GoToDefinitionParams,
+    ) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
+
     /// Closes a file that is opened in the workspace.
     ///
     /// This only unloads the document from the workspace if the file is NOT
@@ -1766,6 +1847,7 @@ pub struct FileGuard<'app, W: Workspace + ?Sized> {
     workspace: &'app W,
     project_key: ProjectKey,
     path: BiomePath,
+    close_on_drop: bool,
 }
 
 impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
@@ -1778,6 +1860,20 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             workspace,
             project_key,
             path,
+            close_on_drop: true,
+        })
+    }
+
+    pub fn borrowed(
+        workspace: &'app W,
+        project_key: ProjectKey,
+        path: BiomePath,
+    ) -> Result<Self, WorkspaceError> {
+        Ok(Self {
+            workspace,
+            project_key,
+            path,
+            close_on_drop: false,
         })
     }
 
@@ -1829,6 +1925,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             version,
             content,
             inline_config: None,
+            editor_features: None,
         })
     }
 
@@ -1955,6 +2052,10 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
 impl<W: Workspace + ?Sized> Drop for FileGuard<'_, W> {
     fn drop(&mut self) {
+        if !self.close_on_drop {
+            return;
+        }
+
         self.workspace
             .close_file(CloseFileParams {
                 project_key: self.project_key,

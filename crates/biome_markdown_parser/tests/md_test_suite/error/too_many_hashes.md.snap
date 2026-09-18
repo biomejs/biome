@@ -29,7 +29,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@33..33 "" [] [],
@@ -50,7 +49,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@7..32 " This has too many hashes" [] []
         2: MD_TEXTUAL@32..33
           0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
-      1: (empty)
   2: EOF@33..33 "" [] []
 
 ```

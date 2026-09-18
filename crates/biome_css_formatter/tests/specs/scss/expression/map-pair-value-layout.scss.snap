@@ -52,9 +52,7 @@ $map: (
 		"list",
 		"list",
 		"list",
-	): (
-			"list",
-		),
+	): ("list"),
 	(
 		"list",
 		"long long long long long long long long long long long long long list",
@@ -95,7 +93,7 @@ $icons: (
 		$key: (
 				$theme-name: $value,
 			),
-	)
+	);
 }
 
 @for $i from 1 through 2 {

@@ -5,7 +5,6 @@ use biome_formatter::{
     SourceMapGeneration, TrailingNewline, TransformSourceMap,
 };
 use biome_formatter::{format_args, write};
-use biome_js_syntax::TextSize;
 
 pub struct FormatSemanticModelOptions;
 
@@ -110,7 +109,7 @@ impl Format<FormatSemanticModelContext> for Scope {
                     token("id: "),
                     self.id,
                     token(" @ "),
-                    text(range.as_str(), TextSize::default()),
+                    text(range.as_str(), None),
                     hard_line_break()
                 ]
             )?;
@@ -165,7 +164,7 @@ impl Format<FormatSemanticModelContext> for Binding {
                     token("Id: "),
                     self.id,
                     token(" @ "),
-                    text(range.as_str(), TextSize::default()),
+                    text(range.as_str(), None),
                     hard_line_break()
                 ]
             )?;
@@ -178,21 +177,11 @@ impl Format<FormatSemanticModelContext> for Binding {
             let full_text = self.syntax().text_trimmed().into_text();
             write!(
                 f,
-                [
-                    token("ident: "),
-                    text(&full_text, TextSize::default()),
-                    hard_line_break()
-                ]
+                [token("ident: "), text(&full_text, None), hard_line_break()]
             )?;
 
             if let Some(jsdoc) = self.to_fmt_jsonc() {
-                write!(
-                    f,
-                    [
-                        token("JsDoc Comments: "),
-                        text(jsdoc.as_str(), TextSize::default())
-                    ]
-                )?;
+                write!(f, [token("JsDoc Comments: "), text(jsdoc.as_str(), None)])?;
             }
 
             Ok(())
@@ -214,20 +203,20 @@ impl Format<FormatSemanticModelContext> for Binding {
 impl Format<FormatSemanticModelContext> for ScopeId {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let scope_text = std::format!("ScopeId({})", self.0);
-        write!(f, [text(scope_text.as_str(), TextSize::default())])
+        write!(f, [text(scope_text.as_str(), None)])
     }
 }
 
 impl Format<FormatSemanticModelContext> for BindingId {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let binding_text = std::format!("BindingId({})", self.0);
-        write!(f, [text(binding_text.as_str(), TextSize::default())])
+        write!(f, [text(binding_text.as_str(), None)])
     }
 }
 
 impl Format<FormatSemanticModelContext> for JsDeclarationKind {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let text_kind = std::format!("{:?}", self);
-        write!(f, [text(text_kind.as_str(), TextSize::default())])
+        write!(f, [text(text_kind.as_str(), None)])
     }
 }

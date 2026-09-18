@@ -1,0 +1,381 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# Unsorted ObjectType fields
+type User {
+  name: String
+  age: Int
+  id: ID
+}
+
+# Unsorted InterfaceType fields
+interface Node {
+  name: String
+  id: ID
+}
+
+# Unsorted InputObjectType fields
+input CreateUserInput {
+  name: String
+  age: Int
+}
+
+# Mixed case (case-insensitive: "Zoo" should come after "apple")
+type Mixed {
+  Zoo: String
+  apple: String
+}
+
+# Tiebreaker: lowercase before uppercase when names differ only in case
+type CaseTiebreaker {
+  AField: String
+  aField: String
+}
+
+# localeCompare parity: underscore sorts before digits
+type IdentifierChars {
+  a1: String
+  a_: String
+}
+
+# Unsorted ObjectTypeExtension fields
+extend type User {
+  name: String
+  age: Int
+}
+
+# Unsorted InterfaceTypeExtension fields
+extend interface Node {
+  name: String
+  id: ID
+}
+
+# Unsorted InputObjectTypeExtension fields
+extend input CreateUserInput {
+  name: String
+  age: Int
+}
+
+# Unsorted ObjectType fields with comments & descriptions
+type User {
+	# Name of the user
+  name: String
+  age: Int # Age of the user
+	"""
+  ID of the user
+  """
+  id: ID
+	"City of the user"
+	city: String
+	# Add aditional fields
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:11 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    1 │ # Unsorted ObjectType fields
+  > 2 │ type User {
+      │           ^
+  > 3 │   name: String
+  > 4 │   age: Int
+  > 5 │   id: ID
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ # Unsorted InterfaceType fields
+  
+  i Safe fix: Sort these fields.
+  
+     1  1 │   # Unsorted ObjectType fields
+     2  2 │   type User {
+     3    │ - ··name:·String
+     4    │ - ··age:·Int
+     5    │ - ··id:·ID
+        3 │ + ··age:·Int
+        4 │ + ··id:·ID
+        5 │ + ··name:·String
+     6  6 │   }
+     7  7 │   
+  
+
+```
+
+```
+invalid.graphql:9:16 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+     8 │ # Unsorted InterfaceType fields
+   > 9 │ interface Node {
+       │                ^
+  > 10 │   name: String
+  > 11 │   id: ID
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ # Unsorted InputObjectType fields
+  
+  i Safe fix: Sort these fields.
+  
+     8  8 │   # Unsorted InterfaceType fields
+     9  9 │   interface Node {
+    10    │ - ··name:·String
+    11    │ - ··id:·ID
+       10 │ + ··id:·ID
+       11 │ + ··name:·String
+    12 12 │   }
+    13 13 │   
+  
+
+```
+
+```
+invalid.graphql:15:23 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    14 │ # Unsorted InputObjectType fields
+  > 15 │ input CreateUserInput {
+       │                       ^
+  > 16 │   name: String
+  > 17 │   age: Int
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ # Mixed case (case-insensitive: "Zoo" should come after "apple")
+  
+  i Safe fix: Sort these fields.
+  
+    14 14 │   # Unsorted InputObjectType fields
+    15 15 │   input CreateUserInput {
+    16    │ - ··name:·String
+    17    │ - ··age:·Int
+       16 │ + ··age:·Int
+       17 │ + ··name:·String
+    18 18 │   }
+    19 19 │   
+  
+
+```
+
+```
+invalid.graphql:21:12 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    20 │ # Mixed case (case-insensitive: "Zoo" should come after "apple")
+  > 21 │ type Mixed {
+       │            ^
+  > 22 │   Zoo: String
+  > 23 │   apple: String
+  > 24 │ }
+       │ ^
+    25 │ 
+    26 │ # Tiebreaker: lowercase before uppercase when names differ only in case
+  
+  i Safe fix: Sort these fields.
+  
+    20 20 │   # Mixed case (case-insensitive: "Zoo" should come after "apple")
+    21 21 │   type Mixed {
+    22    │ - ··Zoo:·String
+    23    │ - ··apple:·String
+       22 │ + ··apple:·String
+       23 │ + ··Zoo:·String
+    24 24 │   }
+    25 25 │   
+  
+
+```
+
+```
+invalid.graphql:27:21 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    26 │ # Tiebreaker: lowercase before uppercase when names differ only in case
+  > 27 │ type CaseTiebreaker {
+       │                     ^
+  > 28 │   AField: String
+  > 29 │   aField: String
+  > 30 │ }
+       │ ^
+    31 │ 
+    32 │ # localeCompare parity: underscore sorts before digits
+  
+  i Safe fix: Sort these fields.
+  
+    26 26 │   # Tiebreaker: lowercase before uppercase when names differ only in case
+    27 27 │   type CaseTiebreaker {
+    28    │ - ··AField:·String
+    29    │ - ··aField:·String
+       28 │ + ··aField:·String
+       29 │ + ··AField:·String
+    30 30 │   }
+    31 31 │   
+  
+
+```
+
+```
+invalid.graphql:33:22 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    32 │ # localeCompare parity: underscore sorts before digits
+  > 33 │ type IdentifierChars {
+       │                      ^
+  > 34 │   a1: String
+  > 35 │   a_: String
+  > 36 │ }
+       │ ^
+    37 │ 
+    38 │ # Unsorted ObjectTypeExtension fields
+  
+  i Safe fix: Sort these fields.
+  
+    32 32 │   # localeCompare parity: underscore sorts before digits
+    33 33 │   type IdentifierChars {
+    34    │ - ··a1:·String
+    35    │ - ··a_:·String
+       34 │ + ··a_:·String
+       35 │ + ··a1:·String
+    36 36 │   }
+    37 37 │   
+  
+
+```
+
+```
+invalid.graphql:39:18 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    38 │ # Unsorted ObjectTypeExtension fields
+  > 39 │ extend type User {
+       │                  ^
+  > 40 │   name: String
+  > 41 │   age: Int
+  > 42 │ }
+       │ ^
+    43 │ 
+    44 │ # Unsorted InterfaceTypeExtension fields
+  
+  i Safe fix: Sort these fields.
+  
+    38 38 │   # Unsorted ObjectTypeExtension fields
+    39 39 │   extend type User {
+    40    │ - ··name:·String
+    41    │ - ··age:·Int
+       40 │ + ··age:·Int
+       41 │ + ··name:·String
+    42 42 │   }
+    43 43 │   
+  
+
+```
+
+```
+invalid.graphql:45:23 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    44 │ # Unsorted InterfaceTypeExtension fields
+  > 45 │ extend interface Node {
+       │                       ^
+  > 46 │   name: String
+  > 47 │   id: ID
+  > 48 │ }
+       │ ^
+    49 │ 
+    50 │ # Unsorted InputObjectTypeExtension fields
+  
+  i Safe fix: Sort these fields.
+  
+    44 44 │   # Unsorted InterfaceTypeExtension fields
+    45 45 │   extend interface Node {
+    46    │ - ··name:·String
+    47    │ - ··id:·ID
+       46 │ + ··id:·ID
+       47 │ + ··name:·String
+    48 48 │   }
+    49 49 │   
+  
+
+```
+
+```
+invalid.graphql:51:30 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    50 │ # Unsorted InputObjectTypeExtension fields
+  > 51 │ extend input CreateUserInput {
+       │                              ^
+  > 52 │   name: String
+  > 53 │   age: Int
+  > 54 │ }
+       │ ^
+    55 │ 
+    56 │ # Unsorted ObjectType fields with comments & descriptions
+  
+  i Safe fix: Sort these fields.
+  
+    50 50 │   # Unsorted InputObjectTypeExtension fields
+    51 51 │   extend input CreateUserInput {
+    52    │ - ··name:·String
+    53    │ - ··age:·Int
+       52 │ + ··age:·Int
+       53 │ + ··name:·String
+    54 54 │   }
+    55 55 │   
+  
+
+```
+
+```
+invalid.graphql:57:11 assist/source/useSortedTypeFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These fields are not sorted.
+  
+    56 │ # Unsorted ObjectType fields with comments & descriptions
+  > 57 │ type User {
+       │           ^
+  > 58 │ 	# Name of the user
+        ...
+  > 66 │ 	city: String
+  > 67 │ 	# Add aditional fields
+  > 68 │ }
+       │ ^
+    69 │ 
+  
+  i Safe fix: Sort these fields.
+  
+    57 57 │   type User {
+    58 58 │     # Name of the user
+    59    │ - ··name:·String
+    60    │ - ··age:·Int·#·Age·of·the·user
+    61    │ - → """
+       59 │ + ··age:·Int·#·Age·of·the·user
+       60 │ + → "City·of·the·user"
+       61 │ + → city:·String
+       62 │ + → """
+    62 63 │     ID of the user
+    63 64 │     """
+    64 65 │     id: ID
+    65    │ - → "City·of·the·user"
+    66    │ - → city:·String
+       66 │ + → #·Name·of·the·user
+       67 │ + ··name:·String
+    67 68 │     # Add aditional fields
+    68 69 │   }
+  
+
+```

@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidDynamicImportEnv.js
+---
+# Input
+```js
+async function fromProcess() {
+	const { env } = await import("process");
+	env.NODE_ENV;
+}
+
+async function fromNodeProcess() {
+	const { env } = await import("node:process");
+	env.HOME;
+}
+
+```
+
+# Diagnostics
+```
+invalidDynamicImportEnv.js:3:2 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+    1 │ async function fromProcess() {
+    2 │ 	const { env } = await import("process");
+  > 3 │ 	env.NODE_ENV;
+      │ 	^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```
+
+```
+invalidDynamicImportEnv.js:8:2 lint/style/noProcessEnv ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't use process.env.
+  
+     6 │ async function fromNodeProcess() {
+     7 │ 	const { env } = await import("node:process");
+   > 8 │ 	env.HOME;
+       │ 	^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Use a centralized configuration file instead for better maintainability and deployment consistency.
+  
+
+```

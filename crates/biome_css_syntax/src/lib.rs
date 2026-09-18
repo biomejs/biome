@@ -1,10 +1,10 @@
 #![deny(clippy::use_self)]
 
 #[macro_use]
-mod file_source;
 mod generated;
 mod import_ext;
 mod number_ext;
+mod property_ext;
 mod scss_ext;
 pub mod selector_ext;
 pub mod stmt_ext;
@@ -15,8 +15,8 @@ pub use self::generated::*;
 pub use biome_rowan::{
     SyntaxNodeText, TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
-pub use file_source::{CssFileLanguage, CssFileSource, CssVariant, EmbeddingKind};
 pub use number_ext::{CssNumberScanOptions, scan_css_number};
+pub use property_ext::{CssGridTemplateProperty, css_grid_template_property};
 pub use scss_ext::{
     ScssMapContext, ScssMapPositionKind, ScssMapRole, is_in_scss_control_condition_sequence,
     is_in_scss_include_arguments, is_in_scss_map_key, is_in_scss_parenthesized_expression,

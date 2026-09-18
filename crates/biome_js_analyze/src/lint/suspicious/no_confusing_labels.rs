@@ -2,7 +2,8 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsStatement, JsFileSource, JsLabeledStatement};
+use biome_js_syntax::{AnyJsStatement, JsLabeledStatement};
+use biome_languages::JsFileSource;
 use biome_rule_options::no_confusing_labels::NoConfusingLabelsOptions;
 
 declare_lint_rule! {

@@ -9,15 +9,13 @@ mod model;
 mod reference;
 mod scope;
 
-#[cfg(test)]
-mod tests;
-
 use crate::{SemanticEvent, SemanticEventExtractor};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, JsFileSource, JsIdentifierAssignment, JsIdentifierBinding,
-    JsLanguage, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier,
-    TextRange, TextSize, TsIdentifierBinding,
+    AnyJsExpression, AnyJsRoot, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier, TextRange, TextSize,
+    TsIdentifierBinding,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 pub use closure::*;
 use rust_lapper::{Interval, Lapper};
@@ -29,7 +27,6 @@ use std::{
 
 pub use binding::*;
 pub use builder::*;
-
 pub use flavor::*;
 pub use globals::*;
 pub use import::*;

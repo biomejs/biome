@@ -2,12 +2,6 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
-## `packages/lib/biome.json`
-
-```json
-{ "extends": "//" }
-```
-
 ## `biome.json`
 
 ```json
@@ -19,6 +13,12 @@ expression: redactor(content)
     "useIgnoreFile": true
   }
 }
+```
+
+## `packages/lib/biome.json`
+
+```json
+{ "extends": "//" }
 ```
 
 ## `.gitignore`

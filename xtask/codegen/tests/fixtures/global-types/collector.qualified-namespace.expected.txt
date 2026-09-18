@@ -1,0 +1,6 @@
+records
+DeclarationRecord { file_repo_relative: "collector.qualified-namespace.d.ts", scope: Namespace(["Intl", "DateTimeFormat"]), declared_name: "ResolvedOptions", kind: Interface, text_range: 44..72, syntax_kind: TS_INTERFACE_DECLARATION }
+coverage
+EnteredScope { scope: Namespace(["Intl", "DateTimeFormat"]), file: "collector.qualified-namespace.d.ts", range: 8..74 }
+Collected(0)
+ExitedScope { scope: Namespace(["Intl", "DateTimeFormat"]), file: "collector.qualified-namespace.d.ts", range: 8..74 }

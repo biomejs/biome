@@ -42,6 +42,24 @@ impl<'a> FormatComputedMemberLookup<'a> {
 
 impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
     fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let l_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [self.0.l_brack_token().format(), space()])
+            } else {
+                write!(f, [self.0.l_brack_token().format()])
+            }
+        });
+
+        let r_brack = format_with(|f: &mut JsFormatter| {
+            if f.options().delimiter_spacing().value() {
+                write!(f, [space(), self.0.r_brack_token().format()])
+            } else {
+                write!(f, [self.0.r_brack_token().format()])
+            }
+        });
+
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         match self.0.member()? {
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
@@ -50,9 +68,9 @@ impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
                     f,
                     [
                         self.0.optional_chain_token().format(),
-                        self.0.l_brack_token().format(),
+                        l_brack,
                         literal.format(),
-                        self.0.r_brack_token().format()
+                        r_brack
                     ]
                 )
             }
@@ -62,7 +80,7 @@ impl Format<JsFormatContext> for FormatComputedMemberLookup<'_> {
                     [group(&format_args![
                         self.0.optional_chain_token().format(),
                         self.0.l_brack_token().format(),
-                        soft_block_indent(&member.format()),
+                        soft_block_indent_with_maybe_space(&member.format(), should_insert_space),
                         self.0.r_brack_token().format()
                     ])]
                 ]

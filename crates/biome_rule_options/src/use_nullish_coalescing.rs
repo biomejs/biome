@@ -17,6 +17,10 @@ pub struct UseNullishCoalescingOptions {
     /// Whether to ignore `||` and `||=` binary operations that are part of a mixed logical expression with `&&` (default: `false`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_mixed_logical_expressions: Option<bool>,
+
+    /// Whether to ignore `||` and `||=` binary operations used inside a `Boolean()` call (default: `false`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ignore_boolean_coercion: Option<bool>,
 }
 
 impl UseNullishCoalescingOptions {
@@ -30,5 +34,9 @@ impl UseNullishCoalescingOptions {
 
     pub fn ignore_mixed_logical_expressions(&self) -> bool {
         self.ignore_mixed_logical_expressions.unwrap_or(false)
+    }
+
+    pub fn ignore_boolean_coercion(&self) -> bool {
+        self.ignore_boolean_coercion.unwrap_or(false)
     }
 }

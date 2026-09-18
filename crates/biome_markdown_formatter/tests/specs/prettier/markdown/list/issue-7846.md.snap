@@ -27,20 +27,21 @@ info: markdown/list/issue-7846.md
 +++ Biome
 @@ -1,11 +1,11 @@
  - a a  
-    b b  
+-   b b  
 -   c c  
-+    c c  
-    d d  
+-   d d  
++  b b  
++  c c  
++  d d  
    e e
  
  1.  a a a  
 -     b b b  
--    c c c  
++    b b b  
+     c c c  
 -     d d d  
 -     e e e
-+   b b b  
-+  c c c  
-+   d d d  
++    d d d  
 +    e e e
 ```
 
@@ -48,14 +49,14 @@ info: markdown/list/issue-7846.md
 
 ```md
 - a a  
-   b b  
-    c c  
-   d d  
+  b b  
+  c c  
+  d d  
   e e
 
 1.  a a a  
-   b b b  
-  c c c  
-   d d d  
+    b b b  
+    c c c  
+    d d d  
     e e e
 ```

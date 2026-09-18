@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/media-comments.scss
+---
+
+# Input
+
+```scss
+@media   print,// Separator
+screen{a{color:red}}
+
+```
+
+
+# Formatted
+
+```scss
+@media print, // Separator
+	screen {
+	a {
+		color: red;
+	}
+}
+
+```

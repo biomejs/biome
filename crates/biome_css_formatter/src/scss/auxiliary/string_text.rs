@@ -34,7 +34,10 @@ impl FormatNodeRule<ScssStringText> for FormatScssStringText {
 
         format_replaced(
             &token,
-            &text(normalized.as_ref(), token.text_trimmed_range().start()),
+            &text(
+                normalized.as_ref(),
+                Some(token.text_trimmed_range().start()),
+            ),
         )
         .fmt(f)
     }

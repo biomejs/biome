@@ -29,10 +29,10 @@ info: markdown/spec/example-268.md
  
 -  notcode
 +    notcode
-+
-+-   foo
  
 -- foo
++-   foo
++    
  
 -  code
 +    code
@@ -46,7 +46,7 @@ info: markdown/spec/example-268.md
     notcode
 
 -   foo
-
+    
 
     code
 ```

@@ -172,42 +172,63 @@ pub(super) fn node_to_args_pairs(
         .enumerate()
         .map(|(i, node)| match node {
             Ok(AnyGritMaybeNamedArg::AnyGritPattern(pattern)) => {
-                let var = match pattern {
-                    AnyGritPattern::GritVariable(var) => var,
-                    _ => Err(NodeLikeArgumentError::ExpectedVariable {
-                        name: fn_name.to_string(),
-                    })?,
+                let name = match &pattern {
+                    AnyGritPattern::GritVariable(var) => {
+                        let var_name = var.to_trimmed_string();
+                        let name = var_name
+                            .strip_prefix(lang.metavariable_prefix())
+                            .filter(|stripped| {
+                                expected_params.as_ref().is_none_or(|expected| {
+                                    expected
+                                        .iter()
+                                        .any(|exp| exp == &var_name || exp == stripped)
+                                })
+                            })
+                            .or_else(|| {
+                                expected_params.as_ref().and_then(|params| {
+                                    params.get(i).map(|p| {
+                                        p.strip_prefix(lang.metavariable_prefix()).unwrap_or(p)
+                                    })
+                                })
+                            })
+                            .ok_or_else(|| {
+                                if let Some(exp) = expected_params {
+                                    NodeLikeArgumentError::TooManyArguments {
+                                        name: fn_name.to_string(),
+                                        max_args: exp.len(),
+                                    }
+                                } else {
+                                    NodeLikeArgumentError::MissingArgumentName {
+                                        name: fn_name.to_string(),
+                                        variable: var_name.clone(),
+                                    }
+                                }
+                            })?;
+                        name.to_owned()
+                    }
+                    _ => {
+                        // Non-variable positional args: resolve parameter name by position
+                        expected_params
+                            .as_ref()
+                            .and_then(|params| params.get(i))
+                            .map(|p| p.strip_prefix(lang.metavariable_prefix()).unwrap_or(p))
+                            .ok_or_else(|| {
+                                if let Some(params) = expected_params.as_ref() {
+                                    NodeLikeArgumentError::TooManyArguments {
+                                        name: fn_name.to_string(),
+                                        max_args: params.len(),
+                                    }
+                                } else {
+                                    NodeLikeArgumentError::MissingArgumentName {
+                                        name: fn_name.to_string(),
+                                        variable: String::new(),
+                                    }
+                                }
+                            })?
+                            .to_owned()
+                    }
                 };
-
-                let name = var.to_trimmed_string();
-                let name = name
-                    .strip_prefix(lang.metavariable_prefix())
-                    .filter(|stripped| {
-                        expected_params.as_ref().is_none_or(|expected| {
-                            expected.iter().any(|exp| exp == &name || exp == stripped)
-                        })
-                    })
-                    .or_else(|| {
-                        expected_params.as_ref().and_then(|params| {
-                            params
-                                .get(i)
-                                .map(|p| p.strip_prefix(lang.metavariable_prefix()).unwrap_or(p))
-                        })
-                    })
-                    .ok_or_else(|| {
-                        if let Some(exp) = expected_params {
-                            NodeLikeArgumentError::TooManyArguments {
-                                name: fn_name.to_string(),
-                                max_args: exp.len(),
-                            }
-                        } else {
-                            NodeLikeArgumentError::MissingArgumentName {
-                                name: fn_name.to_string(),
-                                variable: name.clone(),
-                            }
-                        }
-                    })?;
-                Ok((name.to_owned(), AnyGritPattern::GritVariable(var)))
+                Ok((name, pattern))
             }
             Ok(AnyGritMaybeNamedArg::GritNamedArg(named_arg)) => {
                 let name = named_arg.name()?;

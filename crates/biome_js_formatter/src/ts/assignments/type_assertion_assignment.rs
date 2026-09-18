@@ -22,11 +22,16 @@ impl FormatNodeRule<TsTypeAssertionAssignment> for FormatTsTypeAssertionAssignme
             assignment,
         } = node.as_fields();
 
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         write![
             f,
             [
                 l_angle_token.format(),
-                group(&soft_block_indent(&ty.format())),
+                group(&soft_block_indent_with_maybe_space(
+                    &ty.format(),
+                    delimiter_spacing
+                )),
                 r_angle_token.format(),
                 assignment.format()
             ]

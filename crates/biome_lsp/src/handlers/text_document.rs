@@ -3,9 +3,10 @@ use crate::session::ConfigurationStatus;
 use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
-    ChangeFileParams, CloseFileParams, DocumentFileSource, FeaturesBuilder, FileContent,
-    GetFileContentParams, IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
+    ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
+    IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
 };
 use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
@@ -28,9 +29,10 @@ pub(crate) async fn did_open(
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
-    let language_hint = DocumentFileSource::from_language_id(&params.text_document.language_id);
-
     let path = session.file_path(&url)?;
+    let language_hint =
+        DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
+
     let file_path = path.to_path_buf();
     let config_path = session.resolve_configuration_path(Some(&file_path));
 
@@ -64,13 +66,12 @@ pub(crate) async fn did_open(
         document_file_source: Some(language_hint),
         persist_node_cache: true,
         inline_config: session.inline_config(),
+        editor_features: Some(session.extension_settings.read().editor_features()),
     })?;
 
     session.insert_document(url.clone(), doc);
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
 }
@@ -94,10 +95,10 @@ async fn ensure_project_for_opened_document(
             // Use the per-file resolved configurationPath so each workspace folder
             // uses its own config, even when a project is already open.
             if let Some(resolved_path) = config_path {
-                session.set_configuration_status(ConfigurationStatus::Loading);
                 let status = session
                     .load_biome_configuration_file(resolved_path.clone(), false)
                     .await;
+                session.set_configuration_status(project_key, status);
                 load_status = Some(status);
             }
         }
@@ -109,15 +110,18 @@ async fn ensure_project_for_opened_document(
     }
 
     if load_status.is_none() {
-        session.set_configuration_status(ConfigurationStatus::Loading);
         if !session.has_initialized() {
             session.load_extension_settings(None).await;
         }
-        load_status = Some(load_from_workspace_root_for_path(session, path, config_path).await);
+        let status = load_from_workspace_root_for_path(session, path, config_path).await;
+        // On success the project was created during loading, so it can now be
+        // resolved from the path and the status recorded against it.
+        if let Some(project_key) = session.project_for_path(path) {
+            session.set_configuration_status(project_key, status);
+        }
+        load_status = Some(status);
     }
     let status = load_status.expect("load_status should be set");
-
-    session.set_configuration_status(status);
 
     if status.is_loaded() {
         session.project_for_path(path).or_else(|| {
@@ -180,7 +184,7 @@ fn resolve_workspace_base_path(session: &Session, project_path: &Utf8Path) -> Ut
 /// Handler for `textDocument/didChange` LSP notification
 #[tracing::instrument(level = "debug", skip_all, fields(url = field::display(&params.text_document.uri.as_str()), version = params.text_document.version), err)]
 pub(crate) async fn did_change(
-    session: &Session,
+    session: &Arc<Session>,
     params: lsp::DidChangeTextDocumentParams,
 ) -> Result<(), LspError> {
     let url = params.text_document.uri;
@@ -225,11 +229,10 @@ pub(crate) async fn did_change(
         version,
         content: text,
         inline_config: session.inline_config(),
+        editor_features: None,
     })?;
 
-    if let Err(err) = session.update_diagnostics(url).await {
-        error!("Failed to update diagnostics: {}", err);
-    }
+    session.schedule_diagnostics(url, version);
 
     Ok(())
 }
@@ -256,6 +259,7 @@ pub(crate) async fn did_save(
             content: text.clone(),
             version: doc.version,
             inline_config: None,
+            editor_features: None,
         })?;
 
         session.insert_document(
@@ -279,6 +283,7 @@ pub(crate) async fn did_close(
     params: lsp::DidCloseTextDocumentParams,
 ) -> Result<(), LspError> {
     let uri = params.text_document.uri;
+    session.close_diagnostics(&uri);
     let path = session.file_path(&uri)?;
     let Some(project_key) = session.remove_document(&uri) else {
         debug!("Document wasn't open: {}", uri.as_str());

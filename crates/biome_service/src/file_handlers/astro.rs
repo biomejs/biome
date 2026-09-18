@@ -1,21 +1,22 @@
+use super::SearchCapabilities;
 use crate::WorkspaceError;
 use crate::file_handlers::{
-    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, javascript,
+    AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EditorCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults,
+    ParseResult, ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, PullActionsResult};
+use biome_db::AnyParsedSource;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{JsFileSource, TextRange, TextSize};
-use biome_parser::AnyParse;
+use biome_js_syntax::{TextRange, TextSize};
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
+use biome_workspace_db::WorkspaceDb;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;
-
-use super::SearchCapabilities;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct AstroFileHandler;
@@ -103,12 +104,16 @@ impl ExtensionHandler for AstroFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
 
 fn parse(
-    _rome_path: &BiomePath,
+    _biome_path: &BiomePath,
     file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
@@ -130,33 +135,56 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format(biome_path, document_file_source, parse, settings)
+    javascript::format(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        workspace_db,
+    )
 }
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, document_file_source, parse, settings, range)
+    javascript::format_range(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        range,
+        workspace_db,
+    )
 }
 
 pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+    javascript::format_on_type(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        offset,
+        workspace_db,
+    )
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

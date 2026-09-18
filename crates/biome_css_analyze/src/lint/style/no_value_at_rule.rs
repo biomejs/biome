@@ -1,7 +1,8 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssAtRule, CssFileSource};
+use biome_css_syntax::CssAtRule;
 use biome_diagnostics::Severity;
+use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_value_at_rule::NoValueAtRuleOptions;
 

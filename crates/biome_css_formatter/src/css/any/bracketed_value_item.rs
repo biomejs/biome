@@ -9,6 +9,7 @@ impl FormatRule<AnyCssBracketedValueItem> for FormatAnyCssBracketedValueItem {
     fn fmt(&self, node: &AnyCssBracketedValueItem, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssBracketedValueItem::AnyCssCustomIdentifier(node) => node.format().fmt(f),
+            AnyCssBracketedValueItem::AnyScssExpression(node) => node.format().fmt(f),
             AnyCssBracketedValueItem::CssGenericDelimiter(node) => node.format().fmt(f),
         }
     }

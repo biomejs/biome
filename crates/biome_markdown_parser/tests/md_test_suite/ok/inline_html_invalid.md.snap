@@ -50,7 +50,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@1..27 " Invalid Inline HTML Cases" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -69,7 +68,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@84..85 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@85..86 "\n" [] [],
@@ -87,7 +85,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@88..107 " Period in Tag Name" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -133,7 +130,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@195..196 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@196..197 "\n" [] [],
@@ -151,7 +147,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@199..213 " Unclosed Tags" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -290,7 +285,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@505..506 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@506..507 "\n" [] [],
@@ -308,7 +302,6 @@ MdDocument {
                         value_token: MD_TEXTUAL_LITERAL@509..526 " Invalid Comments" [] [],
                     },
                 ],
-                hard_line: missing (optional),
             },
             after: MdHashList [],
         },
@@ -423,7 +416,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@657..658 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
     ],
     eof_token: EOF@658..658 "" [] [],
@@ -445,7 +437,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@1..27
           0: MD_TEXTUAL@1..27
             0: MD_TEXTUAL_LITERAL@1..27 " Invalid Inline HTML Cases" [] []
-        1: (empty)
       3: MD_HASH_LIST@27..27
     1: MD_NEWLINE@27..28
       0: NEWLINE@27..28 "\n" [] []
@@ -457,7 +448,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@29..84 "These should all be parsed as text, NOT as inline HTML." [] []
         1: MD_TEXTUAL@84..85
           0: MD_TEXTUAL_LITERAL@84..85 "\n" [] []
-      1: (empty)
     4: MD_NEWLINE@85..86
       0: NEWLINE@85..86 "\n" [] []
     5: MD_HEADER@86..107
@@ -469,7 +459,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@88..107
           0: MD_TEXTUAL@88..107
             0: MD_TEXTUAL_LITERAL@88..107 " Period in Tag Name" [] []
-        1: (empty)
       3: MD_HASH_LIST@107..107
     6: MD_NEWLINE@107..108
       0: NEWLINE@107..108 "\n" [] []
@@ -499,7 +488,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@175..195 " should remain text." [] []
         11: MD_TEXTUAL@195..196
           0: MD_TEXTUAL_LITERAL@195..196 "\n" [] []
-      1: (empty)
     8: MD_NEWLINE@196..197
       0: NEWLINE@196..197 "\n" [] []
     9: MD_HEADER@197..213
@@ -511,7 +499,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@199..213
           0: MD_TEXTUAL@199..213
             0: MD_TEXTUAL_LITERAL@199..213 " Unclosed Tags" [] []
-        1: (empty)
       3: MD_HASH_LIST@213..213
     10: MD_NEWLINE@213..214
       0: NEWLINE@213..214 "\n" [] []
@@ -603,7 +590,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@489..505 " should be text." [] []
         40: MD_TEXTUAL@505..506
           0: MD_TEXTUAL_LITERAL@505..506 "\n" [] []
-      1: (empty)
     12: MD_NEWLINE@506..507
       0: NEWLINE@506..507 "\n" [] []
     13: MD_HEADER@507..526
@@ -615,7 +601,6 @@ MdDocument {
         0: MD_INLINE_ITEM_LIST@509..526
           0: MD_TEXTUAL@509..526
             0: MD_TEXTUAL_LITERAL@509..526 " Invalid Comments" [] []
-        1: (empty)
       3: MD_HASH_LIST@526..526
     14: MD_NEWLINE@526..527
       0: NEWLINE@526..527 "\n" [] []
@@ -689,7 +674,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@641..657 " should be text." [] []
         11: MD_TEXTUAL@657..658
           0: MD_TEXTUAL_LITERAL@657..658 "\n" [] []
-      1: (empty)
   2: EOF@658..658 "" [] []
 
 ```

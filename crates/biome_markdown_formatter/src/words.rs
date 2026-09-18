@@ -1,8 +1,9 @@
 use biome_formatter::prelude::*;
-use biome_formatter::{Format, FormatResult};
+use biome_formatter::{Format, FormatOptions, FormatResult};
 use biome_markdown_syntax::{AnyMdInline, MdHardLine, MdInlineItemList};
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
 
+use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::{AsFormat, MarkdownFormatContext, MarkdownFormatter, format_removed};
 
 /// A word slice from a syntax token — stores the text and source position for source maps.
@@ -23,10 +24,17 @@ impl MdWord {
 
 impl Format<MarkdownFormatContext> for MdWord {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        f.write_element(FormatElement::LocatedTokenText {
-            source_position: self.source_position,
-            slice: self.text.clone(),
-        })
+        if f.source_map_generation().is_enabled() {
+            f.write_element(FormatElement::MappedLocatedTokenText {
+                slice: self.text.clone(),
+                source_position: self.source_position,
+            })
+        } else {
+            f.write_element(FormatElement::LocatedTokenText {
+                slice: self.text.clone(),
+                text_width: TextWidth::from_text(&self.text, f.options().indent_width()),
+            })
+        }
     }
 }
 
@@ -57,8 +65,6 @@ pub(crate) enum ProseItem {
 pub(crate) struct WordStreamResult {
     /// Flat stream of prose items — may contain `HardBreak` items inline.
     pub stream: Vec<ProseItem>,
-    /// Whether the original stream ended with a soft break (trailing \n in source).
-    pub has_trailing_break: bool,
 }
 
 /// Build a flat word stream from an `MdInlineItemList`.
@@ -75,18 +81,7 @@ pub(crate) fn build_word_stream_flat(
         stream.push(ProseItem::WordGroup(current_word_group));
     }
 
-    // Check if stream ends with a soft break (trailing \n from source)
-    let has_trailing_break = matches!(stream.last(), Some(ProseItem::SoftBreak));
-
-    // Strip trailing breaks/spaces — they're not meaningful content
-    while matches!(stream.last(), Some(ProseItem::SoftBreak | ProseItem::Space)) {
-        stream.pop();
-    }
-
-    Ok(WordStreamResult {
-        stream,
-        has_trailing_break,
-    })
+    Ok(WordStreamResult { stream })
 }
 
 fn flush_word_group(stream: &mut Vec<ProseItem>, current: &mut Vec<ProseAtom>) {
@@ -116,9 +111,6 @@ fn flush_word_group(stream: &mut Vec<ProseItem>, current: &mut Vec<ProseAtom>) {
 ///   internal layout and fence normalization.
 /// - Any run of whitespace inside an `MdTextual` token collapses into a
 ///   single `Space`, ending the current group.
-/// - `MdSoftBreak` tokens are removed from the output (`format_removed`) and
-///   replaced with a `SoftBreak` item. The fill infrastructure re-emits
-///   the actual line break later.
 /// - A newline `MdTextual` token emits a `SoftBreak`, ending the current
 ///   group. (The token is tracked but not removed — it's already a no-op
 ///   in the output since it has no visible content.)
@@ -139,9 +131,7 @@ fn build_word_stream(
                 let token = text.value_token()?;
                 let token_text_str = token.text();
 
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(text.syntax());
+                f.context().comments().is_suppressed(text.syntax());
 
                 if text.is_newline()? {
                     flush_word_group(&mut stream, &mut current_word_group);
@@ -191,19 +181,6 @@ fn build_word_stream(
                 stream.push(ProseItem::HardBreak(hard_line.clone()));
             }
 
-            AnyMdInline::MdSoftBreak(soft_break) => {
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(soft_break.syntax());
-                let token = soft_break.value_token()?;
-                // Mark the original token as removed so the formatter's
-                // source-map accounts for it; the actual line break is
-                // re-emitted later by the fill infrastructure.
-                format_removed(&token).fmt(f).ok();
-                flush_word_group(&mut stream, &mut current_word_group);
-                stream.push(ProseItem::SoftBreak);
-            }
-
             // Atomic inline elements — never broken internally.
             // Emphasis/italic are kept atomic to preserve their fence
             // normalization logic (e.g. _ → *) which lives in their formatters.
@@ -221,23 +198,25 @@ fn build_word_stream(
             }
 
             AnyMdInline::MdIndentToken(indent) => {
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(indent.syntax());
+                f.context().comments().is_suppressed(indent.syntax());
                 let token = indent.md_indent_char_token()?;
                 format_removed(&token).fmt(f).ok();
             }
 
             AnyMdInline::MdHtmlBlock(html_block) => {
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(html_block.syntax());
+                f.context().comments().is_suppressed(html_block.syntax());
                 flush_word_group(&mut stream, &mut current_word_group);
                 current_word_group.push(ProseAtom::InlineElement(item));
                 flush_word_group(&mut stream, &mut current_word_group);
             }
-            AnyMdInline::MdQuotePrefix(_) => {
-                // No need to do anything, it gets formatted as part of the formatting infra
+            AnyMdInline::MdQuotePrefix(prefix) => {
+                prefix
+                    .format()
+                    .with_options(FormatMdQuotePrefixOptions {
+                        should_remove: true,
+                    })
+                    .fmt(f)
+                    .ok();
             }
         }
     }

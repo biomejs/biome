@@ -77,15 +77,7 @@ info: scss/comments/selectors.scss
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,4 +1,6 @@
--.powerPathNavigator .helm button.pressedButton, // comment 1
-+.powerPathNavigator
-+  .helm
-+  button.pressedButton, // comment 1
- .powerPathNavigator .helm button:active:not(.disabledButton),
- .powerPathNavigator table.powerPathInfo th:active,
- .powerPathNavigator table.powerPathInfo th:active + th:last-child {
-@@ -25,8 +27,7 @@
+@@ -25,8 +25,7 @@
  }
  
  // comment 7
@@ -95,7 +87,7 @@ info: scss/comments/selectors.scss
  {
    // comment 9
    // comment 10
-@@ -38,8 +39,7 @@
+@@ -38,8 +37,7 @@
    // comment 16
    &[data-field-id="3"], // comment 17
    // comment 18
@@ -105,7 +97,7 @@ info: scss/comments/selectors.scss
      // comment 20
      background: green;
      // comment 21
-@@ -50,16 +50,13 @@
+@@ -50,16 +48,13 @@
  
  .foo
  // comment 25
@@ -131,9 +123,7 @@ info: scss/comments/selectors.scss
 # Output
 
 ```scss
-.powerPathNavigator
-  .helm
-  button.pressedButton, // comment 1
+.powerPathNavigator .helm button.pressedButton, // comment 1
 .powerPathNavigator .helm button:active:not(.disabledButton),
 .powerPathNavigator table.powerPathInfo th:active,
 .powerPathNavigator table.powerPathInfo th:active + th:last-child {

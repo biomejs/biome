@@ -71,6 +71,14 @@ pub(crate) fn expected_matching_closing_tag(p: &HtmlParser, range: TextRange) ->
     expected_node("matching closing tag", range, p).into_diagnostic(p)
 }
 
+pub(crate) fn expected_no_spaces(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    p.err_builder(
+        "Processing instruction name can't have a leading space.",
+        range,
+    )
+    .with_hint("Remove the leading space.")
+}
+
 /// The parser was encountered a tag that does not have a name.
 ///
 /// ```html
@@ -113,9 +121,7 @@ pub(crate) fn expected_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic
 }
 
 pub(crate) fn disabled_vue(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
-    // TODO: uncomment when the parser option is implemented
-    // p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
-    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file? HTML-as-Vue is not yet supported.", range).with_hint(markup!("Remove it or rename this file to have the "<Emphasis>".vue"</Emphasis>" file extension."))
+    p.err_builder("Vue syntax isn't enabled. Is this supposed to be a .vue file?", range).with_hint(markup!("Remove it, change the extension to "<Emphasis>".vue"</Emphasis>", or enable the parsing using the "<Emphasis>"html.parser.vue"</Emphasis>" option."))
 }
 
 pub(crate) fn expected_vue_directive_argument(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {

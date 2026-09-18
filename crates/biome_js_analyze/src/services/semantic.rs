@@ -4,7 +4,8 @@ use biome_analyze::{
     VisitorFinishContext,
 };
 use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
-use biome_js_syntax::{AnyJsRoot, JsFileSource, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 
 pub struct SemanticServices {

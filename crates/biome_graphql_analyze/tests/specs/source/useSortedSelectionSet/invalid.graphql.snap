@@ -1,0 +1,221 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query Member {
+  member {
+    firstName
+    ...profileFields
+    ...accountFields
+    lastName
+    ... on User {
+      updatedAt
+      createdAt
+    }
+    email
+    ... on Address {
+      street
+      city
+      zipCode
+    }
+  }
+}
+
+query AliasMember {
+  member {
+    firstName
+    accountId: id
+    email
+  }
+}
+
+fragment memberFragment on Member {
+  email
+  ...contactFields
+  lastName
+  firstName
+  ... on User {
+    createdAt
+  }
+}
+```
+
+# Diagnostics
+```
+invalid.graphql:3:10 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Selection set is not sorted.
+  
+     1 │ # should generate diagnostics
+     2 │ query Member {
+   > 3 │   member {
+       │          ^
+   > 4 │     firstName
+        ...
+  > 17 │     }
+  > 18 │   }
+       │   ^
+    19 │ }
+    20 │ 
+  
+  i Unsafe fix: Sort selection set.
+  
+     2  2 │   query Member {
+     3  3 │     member {
+     4    │ - ····firstName
+     5    │ - ····...profileFields
+        4 │ + ····email
+        5 │ + ····firstName
+        6 │ + ····lastName
+     6  7 │       ...accountFields
+     7    │ - ····lastName
+     8    │ - ····...·on·User·{
+     9    │ - ······updatedAt
+    10    │ - ······createdAt
+        8 │ + ····...profileFields
+        9 │ + ····...·on·Address·{
+       10 │ + ······street
+       11 │ + ······city
+       12 │ + ······zipCode
+    11 13 │       }
+    12    │ - ····email
+    13    │ - ····...·on·Address·{
+    14    │ - ······street
+    15    │ - ······city
+    16    │ - ······zipCode
+       14 │ + ····...·on·User·{
+       15 │ + ······updatedAt
+       16 │ + ······createdAt
+    17 17 │       }
+    18 18 │     }
+  
+
+```
+
+```
+invalid.graphql:8:17 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Selection set is not sorted.
+  
+     6 │     ...accountFields
+     7 │     lastName
+   > 8 │     ... on User {
+       │                 ^
+   > 9 │       updatedAt
+  > 10 │       createdAt
+  > 11 │     }
+       │     ^
+    12 │     email
+    13 │     ... on Address {
+  
+  i Unsafe fix: Sort selection set.
+  
+     7  7 │       lastName
+     8  8 │       ... on User {
+     9    │ - ······updatedAt
+    10    │ - ······createdAt
+        9 │ + ······createdAt
+       10 │ + ······updatedAt
+    11 11 │       }
+    12 12 │       email
+  
+
+```
+
+```
+invalid.graphql:13:20 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Selection set is not sorted.
+  
+    11 │     }
+    12 │     email
+  > 13 │     ... on Address {
+       │                    ^
+  > 14 │       street
+  > 15 │       city
+  > 16 │       zipCode
+  > 17 │     }
+       │     ^
+    18 │   }
+    19 │ }
+  
+  i Unsafe fix: Sort selection set.
+  
+    12 12 │       email
+    13 13 │       ... on Address {
+    14    │ - ······street
+    15    │ - ······city
+       14 │ + ······city
+       15 │ + ······street
+    16 16 │         zipCode
+    17 17 │       }
+  
+
+```
+
+```
+invalid.graphql:22:10 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Selection set is not sorted.
+  
+    21 │ query AliasMember {
+  > 22 │   member {
+       │          ^
+  > 23 │     firstName
+  > 24 │     accountId: id
+  > 25 │     email
+  > 26 │   }
+       │   ^
+    27 │ }
+    28 │ 
+  
+  i Unsafe fix: Sort selection set.
+  
+    21 21 │   query AliasMember {
+    22 22 │     member {
+    23    │ - ····firstName
+    24    │ - ····accountId:·id
+    25    │ - ····email
+       23 │ + ····accountId:·id
+       24 │ + ····email
+       25 │ + ····firstName
+    26 26 │     }
+    27 27 │   }
+  
+
+```
+
+```
+invalid.graphql:29:35 assist/source/useSortedSelectionSet  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Selection set is not sorted.
+  
+    27 │ }
+    28 │ 
+  > 29 │ fragment memberFragment on Member {
+       │                                   ^
+  > 30 │   email
+        ...
+  > 34 │   ... on User {
+  > 35 │     createdAt
+  > 36 │   }
+  > 37 │ }
+       │ ^
+  
+  i Unsafe fix: Sort selection set.
+  
+    29 29 │   fragment memberFragment on Member {
+    30 30 │     email
+    31    │ - ··...contactFields
+       31 │ + ··firstName
+    32 32 │     lastName
+    33    │ - ··firstName
+       33 │ + ··...contactFields
+    34 34 │     ... on User {
+    35 35 │       createdAt
+  
+
+```

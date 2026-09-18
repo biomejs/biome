@@ -1,10 +1,10 @@
 use crate::WorkspaceError;
 use crate::file_handlers::Capabilities;
-use crate::settings::{Settings, SettingsWithEditor};
-use crate::workspace::{
-    DocumentFileSource, FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind,
-};
+use crate::settings::{Settings, SettingsWithEditor, VcsIgnoredPatterns};
+use crate::workspace::{FeatureName, FeaturesSupported, FileFeaturesResult, IgnoreKind};
+use biome_configuration::vcs::VcsClientKind;
 use biome_fs::{ConfigName, FileSystem};
+use biome_languages::DocumentFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use rustc_hash::FxBuildHasher;
@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::num::NonZeroUsize;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
@@ -37,11 +38,11 @@ struct ProjectData {
     ///
     /// Usually inferred from the **top-level** configuration file,
     /// e.g. `biome.json`.
-    root_settings: Settings,
+    root_settings: Arc<Settings>,
 
     /// Optional nested settings, usually populated in monorepo
     /// projects.
-    nested_settings: BTreeMap<Utf8PathBuf, Settings>,
+    nested_settings: BTreeMap<Utf8PathBuf, Arc<Settings>>,
 }
 
 /// Type that holds all the settings and information for different projects
@@ -77,7 +78,7 @@ impl Projects {
             key,
             ProjectData {
                 path,
-                root_settings: Settings::default(),
+                root_settings: Arc::new(Settings::default()),
                 nested_settings: Default::default(),
             },
         );
@@ -94,7 +95,7 @@ impl Projects {
         &self,
         project_key: ProjectKey,
         file_path: &Utf8Path,
-    ) -> Option<Settings> {
+    ) -> Option<Arc<Settings>> {
         let projects = self.0.pin();
         let data = projects.get(&project_key)?;
 
@@ -107,12 +108,30 @@ impl Projects {
         Some(data.root_settings.clone())
     }
 
+    /// Retrieves the correct settings and working directory for the given project.
+    pub fn get_settings_and_wd_based_on_path(
+        &self,
+        project_key: ProjectKey,
+        file_path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, Arc<Settings>)> {
+        let projects = self.0.pin();
+        let data = projects.get(&project_key)?;
+
+        for (project_path, settings) in &data.nested_settings {
+            if file_path.starts_with(project_path) {
+                return Some((project_path.clone(), settings.clone()));
+            }
+        }
+
+        Some((data.path.clone(), data.root_settings.clone()))
+    }
+
     /// Retrieves the correct settings for the given project.
     pub fn get_nested_settings(
         &self,
         project_key: ProjectKey,
         file_path: &Utf8Path,
-    ) -> Option<Settings> {
+    ) -> Option<Arc<Settings>> {
         let projects = self.0.pin();
         let data = projects.get(&project_key)?;
 
@@ -130,11 +149,19 @@ impl Projects {
         self.0.pin().get(&project_key).is_some()
     }
 
-    pub fn get_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
+    pub fn get_root_settings(&self, project_key: ProjectKey) -> Option<Arc<Settings>> {
         self.0
             .pin()
             .get(&project_key)
             .map(|data| data.root_settings.clone())
+    }
+
+    /// Returns a dereferenced pointer to the root settings. This inefficient and shouldn't be used other than testing.
+    pub fn get_mut_root_settings(&self, project_key: ProjectKey) -> Option<Settings> {
+        self.0
+            .pin()
+            .get(&project_key)
+            .map(|data| (*data.root_settings).clone())
     }
 
     /// Returns whether a path is force-ignored using a forced negation (`!!`)
@@ -301,9 +328,48 @@ impl Projects {
     pub fn set_root_settings(&self, project_key: ProjectKey, settings: Settings) {
         self.0.pin().update(project_key, |data| ProjectData {
             path: data.path.clone(),
-            root_settings: settings.clone(),
+            root_settings: Arc::new(settings.clone()),
             nested_settings: data.nested_settings.clone(),
         });
+    }
+
+    pub fn store_nested_ignore_patterns(
+        &self,
+        project_key: ProjectKey,
+        payload: Vec<(Utf8PathBuf, Vec<String>)>,
+    ) -> Result<(), WorkspaceError> {
+        let root_settings = self
+            .get_root_settings(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+
+        let git_ignores = match root_settings.vcs_settings.client_kind {
+            Some(VcsClientKind::Git) => payload
+                .iter()
+                .map(|(path, patterns)| {
+                    let patterns = patterns.iter().map(String::as_str).collect::<Vec<_>>();
+                    VcsIgnoredPatterns::git_ignore(path.as_path(), patterns.as_slice())
+                })
+                .collect::<Result<Vec<_>, _>>()?,
+            None => Vec::new(),
+        };
+
+        self.0.pin().update(project_key, |data| {
+            let mut root_settings = data.root_settings.clone();
+            let settings = Arc::make_mut(&mut root_settings);
+            if let Some(ignore_matches) = settings.vcs_settings.ignore_matches.as_mut() {
+                for git_ignore in &git_ignores {
+                    ignore_matches.insert_git_match(git_ignore.clone());
+                }
+            }
+
+            ProjectData {
+                path: data.path.clone(),
+                root_settings,
+                nested_settings: data.nested_settings.clone(),
+            }
+        });
+
+        Ok(())
     }
 
     /// Inserts a nested setting.
@@ -318,7 +384,7 @@ impl Projects {
         debug!("Set nested settings for {path}");
         self.0.pin().update(project_key, |data| {
             let mut nested_settings = data.nested_settings.clone();
-            nested_settings.insert(path.clone(), settings.clone());
+            nested_settings.insert(path.clone(), Arc::new(settings.clone()));
 
             ProjectData {
                 path: data.path.clone(),

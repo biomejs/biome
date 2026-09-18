@@ -58,7 +58,7 @@ new Vue({el: '#app'})
 ```
 upper-case-html-tag-2.html:3:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Vue syntax isn't enabled. Is this supposed to be a .vue file? HTML-as-Vue is not yet supported.
+  × Vue syntax isn't enabled. Is this supposed to be a .vue file?
   
     1 │ <!DOCTYPE html><HTML>
     2 │   <body>
@@ -67,7 +67,7 @@ upper-case-html-tag-2.html:3:10 parse ━━━━━━━━━━━━━━
     4 │ 
     5 │ </div>
   
-  i Remove it or rename this file to have the .vue file extension.
+  i Remove it, change the extension to .vue, or enable the parsing using the html.parser.vue option.
   
 
 ```

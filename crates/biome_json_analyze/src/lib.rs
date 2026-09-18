@@ -18,7 +18,8 @@ use biome_analyze::{
     PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::{JsonFileSource, JsonLanguage, TextRange};
+use biome_json_syntax::{JsonLanguage, TextRange};
+use biome_languages::JsonFileSource;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
@@ -142,7 +143,7 @@ where
         .cloned()
         .collect();
 
-    if !json_plugins.is_empty() {
+    if filter.match_plugins() && !json_plugins.is_empty() {
         // SAFETY: All plugins have been verified to target JSON above.
         unsafe {
             analyzer.add_visitor(
@@ -175,7 +176,8 @@ mod tests {
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_json_parser::{JsonParserOptions, parse_json};
-    use biome_json_syntax::{JsonFileSource, TextRange};
+    use biome_json_syntax::TextRange;
+    use biome_languages::JsonFileSource;
     use std::slice;
 
     use crate::{AnalysisFilter, ControlFlow, JsonAnalyzeServices, analyze};

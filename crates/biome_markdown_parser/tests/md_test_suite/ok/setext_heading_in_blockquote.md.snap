@@ -1,6 +1,5 @@
 ---
 source: crates/biome_markdown_parser/tests/spec_test.rs
-assertion_line: 192
 expression: snapshot
 ---
 
@@ -167,7 +166,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@66..67 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -217,7 +215,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@83..84 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -261,7 +258,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@110..111 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -311,7 +307,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@133..134 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -355,7 +350,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@166..167 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -445,7 +439,6 @@ MdDocument {
                             value_token: MD_TEXTUAL_LITERAL@304..305 "\n" [] [],
                         },
                     ],
-                    hard_line: missing (optional),
                 },
             ],
         },
@@ -545,7 +538,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@48..66 "Dashes with spaces" [] []
             1: MD_TEXTUAL@66..67
               0: MD_TEXTUAL_LITERAL@66..67 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@67..69
           0: MD_QUOTE_INDENT_LIST@67..67
           1: R_ANGLE@67..68 ">" [] []
@@ -578,7 +570,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@78..83 "Stars" [] []
             1: MD_TEXTUAL@83..84
               0: MD_TEXTUAL_LITERAL@83..84 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@84..86
           0: MD_QUOTE_INDENT_LIST@84..84
           1: R_ANGLE@84..85 ">" [] []
@@ -607,7 +598,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@93..110 "Stars with spaces" [] []
             1: MD_TEXTUAL@110..111
               0: MD_TEXTUAL_LITERAL@110..111 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@111..113
           0: MD_QUOTE_INDENT_LIST@111..111
           1: R_ANGLE@111..112 ">" [] []
@@ -640,7 +630,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@122..133 "Underscores" [] []
             1: MD_TEXTUAL@133..134
               0: MD_TEXTUAL_LITERAL@133..134 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@134..136
           0: MD_QUOTE_INDENT_LIST@134..134
           1: R_ANGLE@134..135 ">" [] []
@@ -669,7 +658,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@143..166 "Underscores with spaces" [] []
             1: MD_TEXTUAL@166..167
               0: MD_TEXTUAL_LITERAL@166..167 "\n" [] []
-          1: (empty)
         1: MD_QUOTE_PREFIX@167..169
           0: MD_QUOTE_INDENT_LIST@167..167
           1: R_ANGLE@167..168 ">" [] []
@@ -730,7 +718,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@303..304 "_" [] []
             13: MD_TEXTUAL@304..305
               0: MD_TEXTUAL_LITERAL@304..305 "\n" [] []
-          1: (empty)
   2: EOF@305..305 "" [] []
 
 ```

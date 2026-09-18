@@ -26,7 +26,8 @@ pub fn is_constant(expr: &AnyJsExpression) -> bool {
 #[cfg(test)]
 mod tests {
     use biome_js_parser::JsParserOptions;
-    use biome_js_syntax::{JsFileSource, JsIdentifierBinding, JsVariableDeclarator};
+    use biome_js_syntax::{JsIdentifierBinding, JsVariableDeclarator};
+    use biome_languages::JsFileSource;
 
     use crate::{SemanticModelOptions, semantic_model};
 

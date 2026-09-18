@@ -179,7 +179,7 @@ impl Rule for NoMissingVarFunction {
 
         let mut parent_id = rule.parent_id();
         while let Some(id) = parent_id {
-            let parent_rule = model.get_rule_by_id(id)?;
+            let parent_rule = model.get_rule_by_id(&id)?;
             if parent_rule
                 .declarations()
                 .iter()

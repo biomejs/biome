@@ -4,7 +4,7 @@ use biome_analyze::{
     RuleCategoriesBuilder,
 };
 use biome_css_parser::CssParserOptions;
-use biome_css_syntax::CssFileSource;
+use biome_languages::CssFileSource;
 use biome_test_utils::BenchCase;
 use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
 use std::collections::HashMap;

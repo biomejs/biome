@@ -3,32 +3,6 @@ source: crates/biome_module_graph/tests/snap/mod.rs
 expression: content
 ---
 
-# `/src/reexport.ts` (Module 2)
-
-## Source
-
-```ts
-export { PromisedResult } from "./promisedResult.ts";
-```
-
-## Module Info
-
-```
-Exports {
-  "PromisedResult" => {
-    ExportReexport => Reexport(
-      Specifier: "./promisedResult.ts"
-      Resolved path: "/src/promisedResult.ts"
-      Import Symbol: PromisedResult
-    )
-  }
-}
-Imports {
-  No imports
-}
-```
-
-
 # `/src/index.ts` (Not imported by resolver)
 
 ## Source
@@ -105,6 +79,32 @@ Module TypeId(2) => Object {
 
 Module TypeId(3) => instanceof Promise<Module(0) TypeId(2)>
 ```
+
+# `/src/reexport.ts` (Module 2)
+
+## Source
+
+```ts
+export { PromisedResult } from "./promisedResult.ts";
+```
+
+## Module Info
+
+```
+Exports {
+  "PromisedResult" => {
+    ExportReexport => Reexport(
+      Specifier: "./promisedResult.ts"
+      Resolved path: "/src/promisedResult.ts"
+      Import Symbol: PromisedResult
+    )
+  }
+}
+Imports {
+  No imports
+}
+```
+
 
 # `/src/returnPromiseResult.ts` (Module 1)
 

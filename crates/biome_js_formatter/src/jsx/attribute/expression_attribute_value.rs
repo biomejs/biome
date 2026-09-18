@@ -21,25 +21,40 @@ impl FormatNodeRule<JsxExpressionAttributeValue> for FormatJsxExpressionAttribut
         } = node.as_fields();
 
         let expression = expression?;
+        let delimiter_spacing = f.options().delimiter_spacing().value();
 
         let should_inline = should_inline_jsx_expression(&expression, f.context().comments());
 
         if should_inline {
-            write!(
-                f,
-                [
-                    l_curly_token.format(),
-                    expression.format(),
-                    line_suffix_boundary(),
-                    r_curly_token.format()
-                ]
-            )
+            if delimiter_spacing {
+                write!(
+                    f,
+                    [
+                        l_curly_token.format(),
+                        space(),
+                        expression.format(),
+                        space(),
+                        line_suffix_boundary(),
+                        r_curly_token.format()
+                    ]
+                )
+            } else {
+                write!(
+                    f,
+                    [
+                        l_curly_token.format(),
+                        expression.format(),
+                        line_suffix_boundary(),
+                        r_curly_token.format()
+                    ]
+                )
+            }
         } else {
             write!(
                 f,
                 [group(&format_args![
                     l_curly_token.format(),
-                    soft_block_indent(&expression.format()),
+                    soft_block_indent_with_maybe_space(&expression.format(), delimiter_spacing),
                     line_suffix_boundary(),
                     r_curly_token.format()
                 ])]

@@ -57,47 +57,48 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.is_element() {
-            let role_attribute = node.find_attribute_by_name("role")?;
-            let role_attribute_static_value = role_attribute.as_static_value()?;
-            let role_attribute_value = role_attribute_static_value.text();
-            let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-            let element_name = element_name.text_trimmed();
+        if !node.is_element() {
+            return None;
+        }
+        let role_attribute = node.find_attribute_by_name("role")?;
+        let role_attribute_static_value = role_attribute.as_static_value()?;
+        let role_attribute_value = role_attribute_static_value.text();
+        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
+        let element_name = element_name.text_trimmed();
 
-            // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
-            // allowed on separators.
-            if element_name == "hr" && matches!(role_attribute_value, "presentation" | "none") {
+        // `hr` implicitly maps to `separator`, and `presentation`/`none` is explicitly
+        // allowed on separators.
+        if element_name == "hr" && matches!(role_attribute_value, "presentation" | "none") {
+            return None;
+        }
+
+        if !ctx.aria_roles().is_not_interactive_element(node)
+            && AriaRole::from_roles(role_attribute_value)
+                .is_some_and(|role| role.is_non_interactive())
+        {
+            // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
+            // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
+            let role_sensitive_elements = ["div", "span", "source"];
+            if role_sensitive_elements.contains(&element_name) {
                 return None;
             }
 
-            if !ctx.aria_roles().is_not_interactive_element(node)
-                && AriaRole::from_roles(role_attribute_value)
-                    .is_some_and(|role| role.is_non_interactive())
-            {
-                // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
-                // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
-                let role_sensitive_elements = ["div", "span", "source"];
-                if role_sensitive_elements.contains(&element_name) {
-                    return None;
-                }
-
-                // A <svg> element can be given an "img" to make it non-interactive for a11y reasons.
-                if element_name == "svg" && role_attribute_value == "img" {
-                    return None;
-                }
-
-                // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
-                if element_name == "canvas" && role_attribute_value == "img" {
-                    return None;
-                }
-
-                // a tag without href is considered non-interactive
-                if element_name == "a" && node.find_attribute_by_name("href").is_none() {
-                    return None;
-                }
-
-                return Some(());
+            // A <svg> element can be given an "img" to make it non-interactive for a11y reasons.
+            if element_name == "svg" && role_attribute_value == "img" {
+                return None;
             }
+
+            // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
+            if element_name == "canvas" && role_attribute_value == "img" {
+                return None;
+            }
+
+            // a tag without href is considered non-interactive
+            if element_name == "a" && node.find_attribute_by_name("href").is_none() {
+                return None;
+            }
+
+            return Some(());
         }
 
         None

@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "preset": "all"
+      }
+    }
+  }
+}
+```
+
+## `test.js`
+
+```js
+const queue = [];
+let shared = 0;
+for (let i = 0; i < 10; i += 1) {
+    queue.push(() => shared);
+}
+shared = 100;
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -30,6 +30,8 @@ impl FormatNodeRule<TsTypeParameters> for FormatTsTypeParameters {
             l_angle_token,
         } = node.as_fields();
 
+        let delimiter_spacing = f.options().delimiter_spacing().value();
+
         if items.is_empty() && self.options.is_type_or_interface_decl {
             write!(f, [l_angle_token.format(), r_angle_token.format()])
         } else if items.is_empty() {
@@ -39,7 +41,7 @@ impl FormatNodeRule<TsTypeParameters> for FormatTsTypeParameters {
                 f,
                 [group(&format_args![
                     l_angle_token.format(),
-                    soft_block_indent(&items.format()),
+                    soft_block_indent_with_maybe_space(&items.format(), delimiter_spacing),
                     r_angle_token.format()
                 ])
                 .with_group_id(self.options.group_id)]

@@ -24,7 +24,7 @@ impl Rule for TrailingComma {
         let node = ctx.query();
 
         let name = node.name().ok()?;
-        let node_text = name.inner_string_text()?.ok()?;
+        let node_text = name.inner_string_text()?;
         if node_text.text() == "trailingComma" {
             return Some(name);
         }

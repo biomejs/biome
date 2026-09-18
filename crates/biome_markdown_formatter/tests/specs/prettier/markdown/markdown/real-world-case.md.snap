@@ -917,7 +917,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
  - [JSX](https://facebook.github.io/jsx/)
  - [Flow](https://flow.org/)
-@@ -74,7 +73,7 @@
+@@ -24,7 +23,6 @@
+ <!-- Do not edit TOC, regenerate with `yarn toc` -->
+ 
+ <!-- toc -->
+-
+ - [What does Prettier do?](#what-does-prettier-do)
+ - [Why Prettier?](#why-prettier)
+   - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
+@@ -74,7 +72,7 @@
  
  </details>
  
@@ -926,7 +934,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ## What does Prettier do?
  
-@@ -118,12 +117,12 @@
+@@ -118,12 +116,12 @@
  
  <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
  
@@ -940,7 +948,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - “We want to free mental threads and end discussions around style. While sometimes fruitful, these discussions are for the most part wasteful.”
  - “Literally had an engineer go through a huge effort of cleaning up all of our code because we were debating ternary style for the longest time and were inconsistent about it. It was dumb, but it was a weird on-going "great debate" that wasted lots of little back and forth bits. It's far easier for us all to agree now: just run Prettier, and go with that style.”
  - “Getting tired telling people how to style their product code.”
-@@ -135,7 +134,6 @@
+@@ -135,7 +133,6 @@
  ### Helping Newcomers
  
  Prettier is usually introduced by people with experience in the current codebase and JavaScript but the people that disproportionally benefit from it are newcomers to the codebase. One may think that it's only useful for people with very limited programming experience, but we've seen it quicken the ramp up time from experienced engineers joining the company, as they likely used a different coding style before, and developers coming from a different programming language.
@@ -948,7 +956,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - “My motivations for using Prettier are: appearing that I know how to write JavaScript well.”
  - “I always put spaces in the wrong place, now I don't have to worry about it anymore.”
  - “When you're a beginner you're making a lot of mistakes caused by the syntax. Thanks to Prettier, you can reduce these mistakes and save a lot of time to focus on what really matters.”
-@@ -144,7 +142,6 @@
+@@ -144,7 +141,6 @@
  ### Writing code
  
  What usually happens once people are using Prettier is that they realize that they actually spend a lot of time and mental energy formatting their code. With Prettier editor integration, you can just press that magic key binding and poof, the code is formatted. This is an eye opening experience if anything else.
@@ -956,7 +964,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - “I want to write code. Not spend cycles on formatting.”
  - “It removed 5% that sucks in our daily life - aka formatting”
  - “We're in 2017 and it's still painful to break a call into multiple lines when you happen to add an argument that makes it go over the 80 columns limit :(“
-@@ -152,7 +149,6 @@
+@@ -152,7 +148,6 @@
  ### Easy to adopt
  
  We've worked very hard to use the least controversial coding styles, went through many rounds of fixing all the edge cases and polished the getting started experience. When you're ready to push Prettier into your codebase, not only should it be painless for you to do it technically but the newly formatted codebase should not generate major controversy and be accepted painlessly by your co-workers.
@@ -964,7 +972,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - “It's low overhead. We were able to throw Prettier at very different kinds of repos without much work.”
  - “It's been mostly bug free. Had there been major styling issues during the course of implementation we would have been wary about throwing this at our JS codebase. I'm happy to say that's not the case.”
  - “Everyone runs it as part of their pre commit scripts, a couple of us use the editor on save extensions as well.”
-@@ -162,14 +158,12 @@
+@@ -162,14 +157,12 @@
  ### Clean up an existing codebase
  
  Since coming up with a coding style and enforcing it is a big undertaking, it often slips through the cracks and you are left working on inconsistent codebases. Running Prettier in this case is a quick win, the codebase is now uniform and easier to read without spending hardly any time.
@@ -979,7 +987,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - “The amazing thing, for me, is: 1) Announced 2 months ago. 2) Already adopted by, it seems, every major JS project. 3) 7000 stars, 100,000 npm downloads/mo”
  - “Was built by the same people as React & React Native.”
  - “I like to be part of the hot new things.”
-@@ -190,6 +184,7 @@
+@@ -190,6 +183,7 @@
  </tr>
  </table>
  
@@ -987,7 +995,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ## How does it compare to ESLint (or TSLint, stylelint...)?
  
  Linters have two categories of rules:
-@@ -202,6 +197,7 @@
+@@ -202,6 +196,7 @@
  
  Prettier does nothing to help with those kind of rules. They are also the most important ones provided by linters as they are likely to catch real bugs with your code!
  
@@ -995,7 +1003,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ## Usage
  
  Install:
-@@ -286,7 +282,6 @@
+@@ -286,7 +281,6 @@
  #### `--require-pragma`
  
  Require a special comment, called a pragma, to be present in the file's first docblock comment in order for prettier to format it.
@@ -1003,7 +1011,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ```js
  /**
   * @prettier
-@@ -369,6 +364,7 @@
+@@ -369,6 +363,7 @@
  }
  ```
  
@@ -1011,7 +1019,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ### Pre-commit Hook
  
  You can use Prettier with a pre-commit tool. This can re-format your files that are marked as "staged" via `git add` before you commit.
-@@ -396,11 +392,11 @@
+@@ -396,11 +391,11 @@
    }
  }
  ```
@@ -1024,7 +1032,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ##### Option 2. [pre-commit](https://github.com/pre-commit/pre-commit)
  
  Copy the following config into your `.pre-commit-config.yaml` file:
-@@ -471,7 +467,6 @@
+@@ -471,7 +466,6 @@
  `resolveConfig` can be used to resolve configuration for a given source file.
  The function optionally accepts an input file path as an argument, which defaults to the current working directory.
  A promise is returned which will resolve to:
@@ -1032,7 +1040,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  - An options object, providing a [config file](#configuration-file) was found.
  - `null`, if no file was found.
  
-@@ -497,7 +492,6 @@
+@@ -497,7 +491,6 @@
  #### Custom Parser API
  
  If you need to make modifications to the AST (such as codemods), or you want to provide an alternate parser, you can do so by setting the `parser` option to a function. The function signature of the parser function is:
@@ -1040,7 +1048,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  ```js
  (text: string, parsers: object, options: object) => AST;
  ```
-@@ -565,25 +559,25 @@
+@@ -565,51 +558,49 @@
  >
  > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
  
@@ -1075,14 +1083,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ### Semicolons
  
-@@ -591,25 +585,24 @@
+ Print semicolons at the ends of statements.
  
  Valid options:
- 
--- `true` - Add a semicolon at the end of every statement.
--- `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
-+ - `true` - Add a semicolon at the end of every statement.
-+ - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
+-
+ - `true` - Add a semicolon at the end of every statement.
+ - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
  
 -| Default | CLI Override | API Override   |
 -| ------- | ------------ | -------------- |
@@ -1109,16 +1115,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ### Trailing Commas
  
-@@ -617,49 +610,46 @@
+@@ -617,49 +608,46 @@
  for example, never gets trailing commas.)
  
  Valid options:
 -
  - `"none"` - No trailing commas.
--- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
--- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
-+ - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
-+ - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
+ - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
+ - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
  
 -| Default  | CLI Override                                           | API Override                                           |
 -| -------- | ------------------------------------------------------ | ------------------------------------------------------ |
@@ -1134,8 +1138,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  Valid options:
 -
  - `true` - Example: `{ foo: bar }`.
--- `false` - Example: `{foo: bar}`.
-+ - `false` - Example: `{foo: bar}`.
+ - `false` - Example: `{foo: bar}`.
  
 -| Default | CLI Override           | API Override             |
 -| ------- | ---------------------- | ------------------------ |
@@ -1175,22 +1178,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ### Parser
  
-@@ -668,19 +658,18 @@
+@@ -668,7 +656,6 @@
  Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
  
  Built-in parsers:
 -
  - [`babylon`](https://github.com/babel/babylon/)
--- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
--- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
--- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
--- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
--- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
-+ - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
-+ - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
-+ - [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
-+ - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
-+ - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
+ - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+ - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+@@ -678,9 +665,9 @@
  
  [Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
  
@@ -1203,7 +1199,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ### Filepath
  
-@@ -692,9 +681,9 @@
+@@ -692,9 +679,9 @@
  cat foo | prettier --stdin-filepath foo.css
  ```
  
@@ -1216,7 +1212,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ### Require pragma
  
-@@ -717,9 +706,9 @@
+@@ -717,15 +704,14 @@
   */
  ```
  
@@ -1229,27 +1225,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
  
  ## Configuration File
  
-@@ -863,15 +852,15 @@
- - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
- - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
- - [`prettier-eslint`](https://github.com/prettier/prettier-eslint)
--  passes `prettier` output to `eslint --fix`
-+passes `prettier` output to `eslint --fix`
- - [`prettier-stylelint`](https://github.com/hugomrdias/prettier-stylelint)
--  passes `prettier` output to `stylelint --fix`
-+passes `prettier` output to `stylelint --fix`
- - [`prettier-standard`](https://github.com/sheerun/prettier-standard)
--  uses `prettier` and `prettier-eslint` to format code with standard rules
-+uses `prettier` and `prettier-eslint` to format code with standard rules
- - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
--  passes `prettier` output to `standard --fix`
-+passes `prettier` output to `standard --fix`
- - [`prettier-miscellaneous`](https://github.com/arijs/prettier-miscellaneous)
--  `prettier` with a few minor extra options
-+`prettier` with a few minor extra options
- - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
- - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
- - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
+ Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
+ This means you can configure prettier via:
+-
+ - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
+ - A `prettier.config.js` file that exports an object.
+ - A `"prettier"` key in your `package.json` file.
 ```
 
 # Output
@@ -1280,7 +1261,6 @@ conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Pre
 <!-- Do not edit TOC, regenerate with `yarn toc` -->
 
 <!-- toc -->
-
 - [What does Prettier do?](#what-does-prettier-do)
 - [Why Prettier?](#why-prettier)
   - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
@@ -1841,9 +1821,8 @@ Default | CLI Override | API Override
 Print semicolons at the ends of statements.
 
 Valid options:
-
- - `true` - Add a semicolon at the end of every statement.
- - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
+- `true` - Add a semicolon at the end of every statement.
+- `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
 
 Default | CLI Override | API Override
 --------|--------------|-------------
@@ -1868,8 +1847,8 @@ for example, never gets trailing commas.)
 
 Valid options:
 - `"none"` - No trailing commas.
- - `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
- - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
+- `"es5"` - Trailing commas where valid in ES5 (objects, arrays, etc.)
+- `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
 
 Default | CLI Override | API Override
 --------|--------------|-------------
@@ -1881,7 +1860,7 @@ Print spaces between brackets in object literals.
 
 Valid options:
 - `true` - Example: `{ foo: bar }`.
- - `false` - Example: `{foo: bar}`.
+- `false` - Example: `{foo: bar}`.
 
 Default | CLI Override | API Override
 --------|--------------|-------------
@@ -1916,11 +1895,11 @@ Both the `babylon` and `flow` parsers support the same set of JavaScript feature
 
 Built-in parsers:
 - [`babylon`](https://github.com/babel/babylon/)
- - [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
- - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
- - [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
- - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
- - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
+- [`flow`](https://github.com/facebook/flow/tree/master/src/parser)
+- [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+- [`postcss`](https://github.com/postcss/postcss) _Since v1.4.0_
+- [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+- [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
 
 [Custom parsers](#custom-parser-api) are also supported. _Since v1.5.0_
 
@@ -1971,7 +1950,6 @@ Default | CLI Override | API Override
 
 Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
 This means you can configure prettier via:
-
 - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
 - A `prettier.config.js` file that exports an object.
 - A `"prettier"` key in your `package.json` file.
@@ -2109,15 +2087,15 @@ The minimum version of TypeScript supported is 2.1.3 as it introduces the abilit
 - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
 - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
 - [`prettier-eslint`](https://github.com/prettier/prettier-eslint)
-passes `prettier` output to `eslint --fix`
+  passes `prettier` output to `eslint --fix`
 - [`prettier-stylelint`](https://github.com/hugomrdias/prettier-stylelint)
-passes `prettier` output to `stylelint --fix`
+  passes `prettier` output to `stylelint --fix`
 - [`prettier-standard`](https://github.com/sheerun/prettier-standard)
-uses `prettier` and `prettier-eslint` to format code with standard rules
+  uses `prettier` and `prettier-eslint` to format code with standard rules
 - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
-passes `prettier` output to `standard --fix`
+  passes `prettier` output to `standard --fix`
 - [`prettier-miscellaneous`](https://github.com/arijs/prettier-miscellaneous)
-`prettier` with a few minor extra options
+  `prettier` with a few minor extra options
 - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
 - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
 - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
@@ -2173,127 +2151,127 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
     9: - JavaScript, including [ES2017](https://github.com/tc39/proposals/blob/master/finished-proposals.md)
    17: It removes all original styling[\*](#styling-footnote) and ensures that all outputted code
    18: conforms to a consistent style. (See this [blog post](http://jlongster.com/A-Prettier-Formatter))
-   29:   - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
-   35: - [How does it compare to ESLint (or TSLint, stylelint...)?](#how-does-it-compare-to-eslint-or-tslint-stylelint)
-   65:   - [JetBrains WebStorm, PHPStorm, PyCharm...](#jetbrains-webstorm-phpstorm-pycharm)
-   80: Prettier takes your code and reprints it from scratch by taking the line length into account.
-   88: It fits in a single line so it's going to stay as is. However, we've all run into this situation:
-   92: foo(reallyLongArg(), omgSoManyParameters(), IShouldRefactorThis(), isThereSeriouslyAnotherOne());
-   95: Suddenly our previous format for calling function breaks down because this is too long. Prettier is going to do the painstaking work of reprinting it like that for you:
-  106: Prettier enforces a consistent code **style** (i.e. code formatting that won't affect the AST) across your entire codebase because it disregards the original styling[\*](#styling-footnote) by parsing it away and re-printing the parsed AST with its own rules that take the maximum line length
-  118: <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
-  125: By far the biggest reason for adopting Prettier is to stop all the on-going debates over styles. It is generally accepted that having a common style guide is valuable for a project and team but getting there is a very painful and unrewarding process. People get very emotional around particular ways of writing code and nobody likes spending time writing and receiving nits.
-  126: - “We want to free mental threads and end discussions around style. While sometimes fruitful, these discussions are for the most part wasteful.”
-  127: - “Literally had an engineer go through a huge effort of cleaning up all of our code because we were debating ternary style for the longest time and were inconsistent about it. It was dumb, but it was a weird on-going "great debate" that wasted lots of little back and forth bits. It's far easier for us all to agree now: just run Prettier, and go with that style.”
-  130: - “Having a githook set up has reduced the amount of style issues in PRs that result in broken builds due to ESLint rules or things I have to nit-pick or clean up later.”
-  132: - “It reminds me of how Steve Jobs used to wear the same clothes every day because he has a million decisions to make and he didn't want to be bothered to make trivial ones like picking out clothes. I think Prettier is like that.”
-  136: Prettier is usually introduced by people with experience in the current codebase and JavaScript but the people that disproportionally benefit from it are newcomers to the codebase. One may think that it's only useful for people with very limited programming experience, but we've seen it quicken the ramp up time from experienced engineers joining the company, as they likely used a different coding style before, and developers coming from a different programming language.
-  137: - “My motivations for using Prettier are: appearing that I know how to write JavaScript well.”
-  138: - “I always put spaces in the wrong place, now I don't have to worry about it anymore.”
-  139: - “When you're a beginner you're making a lot of mistakes caused by the syntax. Thanks to Prettier, you can reduce these mistakes and save a lot of time to focus on what really matters.”
-  140: - “As a teacher, I will also tell to my students to install Prettier to help them to learn the JS syntax and have readable files.”
-  144: What usually happens once people are using Prettier is that they realize that they actually spend a lot of time and mental energy formatting their code. With Prettier editor integration, you can just press that magic key binding and poof, the code is formatted. This is an eye opening experience if anything else.
-  147: - “We're in 2017 and it's still painful to break a call into multiple lines when you happen to add an argument that makes it go over the 80 columns limit :(“
-  151: We've worked very hard to use the least controversial coding styles, went through many rounds of fixing all the edge cases and polished the getting started experience. When you're ready to push Prettier into your codebase, not only should it be painless for you to do it technically but the newly formatted codebase should not generate major controversy and be accepted painlessly by your co-workers.
-  152: - “It's low overhead. We were able to throw Prettier at very different kinds of repos without much work.”
-  153: - “It's been mostly bug free. Had there been major styling issues during the course of implementation we would have been wary about throwing this at our JS codebase. I'm happy to say that's not the case.”
-  154: - “Everyone runs it as part of their pre commit scripts, a couple of us use the editor on save extensions as well.”
-  155: - “It's fast, against one of our larger JS codebases we were able to run Prettier in under 13 seconds.”
-  156: - “The biggest benefit for Prettier for us was being able to format the entire code base at once.”
-  160: Since coming up with a coding style and enforcing it is a big undertaking, it often slips through the cracks and you are left working on inconsistent codebases. Running Prettier in this case is a quick win, the codebase is now uniform and easier to read without spending hardly any time.
-  162: - “We inherited a ~2000 module ES6 code base, developed by 20 different developers over 18 months, in a global team. Felt like such a win without much research.”
-  166: Purely technical aspects of the projects aren't the only thing people look into when choosing to adopt Prettier. Who built and uses it and how quickly it spreads through the community has a non-trivial impact.
-  167: - “The amazing thing, for me, is: 1) Announced 2 months ago. 2) Already adopted by, it seems, every major JS project. 3) 7000 stars, 100,000 npm downloads/mo”
-  172: A few of the [many projects](https://www.npmjs.com/browse/depended/prettier) using Prettier:
-  176: <td><p align="center"><a href="https://facebook.github.io/react/"><img src="website/static/images/react-200x100.png" alt="React" width="200" height="100"><br>React</a></p></td>
-  177: <td><p align="center"><a href="https://facebook.github.io/jest/"><img src="website/static/images/jest-200x100.png" alt="Jest" width="200" height="100"><br>Jest</a></p></td>
-  178: <td><p align="center"><a href="https://yarnpkg.com"><img src="website/static/images/yarn-200x100.png" alt="Yarn" width="200" height="100"><br>Yarn</a></p></td>
-  181: <td><p align="center"><a href="https://babeljs.io/"><img src="website/static/images/babel-200x100.png" alt="Babel" width="200" height="100"><br>Babel</a></p></td>
-  182: <td><p align="center"><a href="https://zeit.co/"><img src="website/static/images/zeit-200x100.png" alt="Zeit" width="200" height="100"><br>Zeit</a></p></td>
-  183: <td><p align="center"><a href="https://webpack.js.org/api/cli/"><img src="website/static/images/webpack-200x100.png" alt="Webpack-cli" width="200" height="100"><br>Webpack-cli</a></p></td>
-  192: **Formatting rules**: eg: [max-len](http://eslint.org/docs/rules/max-len), [no-mixed-spaces-and-tabs](http://eslint.org/docs/rules/no-mixed-spaces-and-tabs), [keyword-spacing](http://eslint.org/docs/rules/keyword-spacing), [comma-style](http://eslint.org/docs/rules/comma-style)...
-  194: Prettier alleviates the need for this whole category of rules! Prettier is going to reprint the entire program from scratch in a consistent way, so it's not possible for the programmer to make a mistake there anymore :)
-  196: **Code-quality rules**: eg [no-unused-vars](http://eslint.org/docs/rules/no-unused-vars), [no-extra-bind](http://eslint.org/docs/rules/no-extra-bind), [no-implicit-globals](http://eslint.org/docs/rules/no-implicit-globals), [prefer-promise-reject-errors](http://eslint.org/docs/rules/prefer-promise-reject-errors)...
-  198: Prettier does nothing to help with those kind of rules. They are also the most important ones provided by linters as they are likely to catch real bugs with your code!
-  241: prettier --single-quote --trailing-comma es5 --write "{app,__{tests,mocks}__}/**/*.js"
-  246: The [glob syntax from the glob module](https://github.com/isaacs/node-glob/blob/master/README.md#glob-primer)
-  251: If you're worried that Prettier will change the correctness of your code, add `--debug-check` to the command.
-  252: This will cause Prettier to print an error message if it detects that code correctness might have changed.
-  257: If you are repeatedly formatting individual files with `prettier`, you will incur a small performance cost
-  258: when prettier attempts to look up a [configuration file](#configuration-file). In order to skip this, you may
-  266: This will provide you with a path to the configuration file, which you can pass to `--config`:
-  272: You can also use `--config` if your configuration file lives somewhere where prettier cannot find it,
-  280: Path to a file containing patterns that describe files to ignore. By default, prettier looks for `./.prettierignore`.
-  284: Require a special comment, called a pragma, to be present in the file's first docblock comment in order for prettier to format it.
-  295: Another useful flag is `--list-different` (or `-l`) which prints the filenames of files that are different from Prettier formatting. If there are differences the script errors out, which is useful in a CI scenario.
-  319: If a config file is found will evaluate it and ignore other CLI options. If no config file is found CLI options will evaluate as normal.
-  321: This option adds support to editor integrations where users define their default configuration but want to respect project specific configuration.
-  325: Prettier CLI will ignore files located in `node_modules` directory. To opt-out from this behavior use `--with-node-modules` flag.
-  329: This rewrites all processed files in place. This is comparable to the `eslint --fix` workflow.
-  333: If you are using ESLint, integrating Prettier to your workflow is straightforward:
-  335: Just add Prettier as an ESLint rule using [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier).
-  351: We also recommend that you use [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) to disable all the existing formatting rules. It's a one liner that can be added on-top of any existing ESLint configuration.
-  370: You can use Prettier with a pre-commit tool. This can re-format your files that are marked as "staged" via `git add` before you commit.
-  395: There is a limitation where if you stage specific lines this approach will stage the whole file after regardless. See this [issue](https://github.com/okonet/lint-staged/issues/62) for more info.
-  397: See https://github.com/okonet/lint-staged#configuration for more details about how you can configure lint-staged.
-  417: Alternately you can save this script as `.git/hooks/pre-commit` and give it execute permission:
-  421: jsfiles=$(git diff --cached --name-only --diff-filter=ACM | grep '\.jsx\?$' | tr '\n' ' ')
-  441: `format` is used to format text using Prettier. [Options](#options) may be provided to override the defaults.
-  450: `check` checks to see if the file has been formatted with Prettier given those options and returns a `Boolean`.
-  451: This is similar to the `--list-different` parameter in the CLI and is useful for running Prettier in CI scenarios.
-  455: `formatWithCursor` both formats the code, and translates a cursor position from unformatted code to formatted code.
-  456: This is useful for editor integrations, to prevent the cursor from moving when code is formatted.
-  468: The function optionally accepts an input file path as an argument, which defaults to the current working directory.
-  473: The promise will be rejected if there was an error parsing the configuration file.
-  484: Use `prettier.resolveConfig.sync([filePath [, options]])` if you'd like to use sync version.
-  488: As you repeatedly call `resolveConfig`, the file system structure will be cached for performance.
-  489: This function will clear the cache. Generally this is only needed for editor integrations that
-  494: If you need to make modifications to the AST (such as codemods), or you want to provide an alternate parser, you can do so by setting the `parser` option to a function. The function signature of the parser function is:
-  512: The `--parser` CLI option may be a path to a node.js module exporting a parse function.
-  516: A JavaScript comment of `// prettier-ignore` will exclude the next node in the abstract syntax tree from formatting.
-  550: Prettier ships with a handful of customizable format options, usable in both the CLI and API.
-  558: > In code styleguides, maximum line length rules are often set to 100 or 120. However, when humans write code, they don't strive to reach the maximum number of columns on every line. Developers often use whitespace to break up long lines for readability. In practice, the average line length often ends up well below the maximum.
-  560: > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
-  589:  - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
-  601: - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
-  615:  - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
-  619: `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
-  635: Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
-  645: These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
-  658: Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
-  663:  - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
-  665:  - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
-  666:  - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
-  672: `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
-  690: Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
-  693: For example, a file with the following as its first comment will be formatted when `--require-pragma` is supplied:
-  715: Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
-  718: - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
-  722: The configuration file will be resolved starting from the location of the file being formatted,
-  749: Prettier borrows eslint's [override format](http://eslint.org/docs/user-guide/configuring#example-configuration).
-  777: `excludeFiles` may be optionally provided to exclude files for a given rule, and may also be a string or array of strings.
-  790: For more information on how to use the CLI to locate a file, see the [CLI](#cli) section.
-  794: If you'd like a JSON schema to validate your configuration, one is available here: https://www.schemastore.org/prettierrc.
-  800: Atom users can simply install the [prettier-atom](https://github.com/prettier/prettier-atom) package and use
-  805: Emacs users should see [this repository](https://github.com/prettier/prettier-emacs)
-  810: Vim users can simply install either [sbdchd](https://github.com/sbdchd)/[neoformat](https://github.com/sbdchd/neoformat), [w0rp](https://github.com/w0rp)/[ale](https://github.com/w0rp/ale), or [prettier](https://github.com/prettier)/[vim-prettier](https://github.com/prettier/vim-prettier), for more details see [this directory](https://github.com/prettier/prettier/tree/master/editors/vim).
-  814: Can be installed using the extension sidebar. Search for `Prettier - JavaScript formatter`.
-  818: [Check its repository for configuration and shortcuts](https://github.com/prettier/prettier-vscode)
-  822: Install the [JavaScript Prettier extension](https://github.com/madskristensen/JavaScriptPrettier).
-  832: guide](https://github.com/jlongster/prettier/tree/master/editors/webstorm/README.md).
-  846: Prettier also supports [TypeScript](https://www.typescriptlang.org/), CSS, [Less](http://lesscss.org/), [SCSS](http://sass-lang.com), [JSON](http://json.org/), and [GraphQL](http://graphql.org/).
-  848: The minimum version of TypeScript supported is 2.1.3 as it introduces the ability to have leading `|` for type definitions which prettier outputs.
-  852: - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
-  853: - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
-  860: - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
-  864: - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
-  865: - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
-  866: - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
-  867: - [`prettier-github`](https://github.com/jgierer12/prettier-github) formats code in GitHub comments
-  868: - [`rollup-plugin-prettier`](https://github.com/mjeanroy/rollup-plugin-prettier) allows you to use Prettier with Rollup
-  869: - [`markdown-magic-prettier`](https://github.com/camacho/markdown-magic-prettier) allows you to use Prettier to format JS [codeblocks](https://help.github.com/articles/creating-and-highlighting-code-blocks/) in Markdown files via [Markdown Magic](https://github.com/DavidWells/markdown-magic)
-  870: - [`tslint-plugin-prettier`](https://github.com/ikatyang/tslint-plugin-prettier) runs Prettier as a TSLint rule and reports differences as individual TSLint issues
-  871: - [`tslint-config-prettier`](https://github.com/alexjoverm/tslint-config-prettier) use TSLint with Prettier without any conflict
-  899: Show the world you're using _Prettier_ → [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-  902: [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+   28:   - [Building and enforcing a style guide](#building-and-enforcing-a-style-guide)
+   34: - [How does it compare to ESLint (or TSLint, stylelint...)?](#how-does-it-compare-to-eslint-or-tslint-stylelint)
+   64:   - [JetBrains WebStorm, PHPStorm, PyCharm...](#jetbrains-webstorm-phpstorm-pycharm)
+   79: Prettier takes your code and reprints it from scratch by taking the line length into account.
+   87: It fits in a single line so it's going to stay as is. However, we've all run into this situation:
+   91: foo(reallyLongArg(), omgSoManyParameters(), IShouldRefactorThis(), isThereSeriouslyAnotherOne());
+   94: Suddenly our previous format for calling function breaks down because this is too long. Prettier is going to do the painstaking work of reprinting it like that for you:
+  105: Prettier enforces a consistent code **style** (i.e. code formatting that won't affect the AST) across your entire codebase because it disregards the original styling[\*](#styling-footnote) by parsing it away and re-printing the parsed AST with its own rules that take the maximum line length
+  117: <a href="https://www.youtube.com/watch?v=hkfBvpEfWdA"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886367/dda8a6f0-1e08-11e7-865b-22492450f10f.png"></a> <a href="https://www.youtube.com/watch?v=0Q4kUNx85_4"><img width="298" src="https://cloud.githubusercontent.com/assets/197597/24886368/ddacd6f8-1e08-11e7-806a-9febd23cbf47.png"></a>
+  124: By far the biggest reason for adopting Prettier is to stop all the on-going debates over styles. It is generally accepted that having a common style guide is valuable for a project and team but getting there is a very painful and unrewarding process. People get very emotional around particular ways of writing code and nobody likes spending time writing and receiving nits.
+  125: - “We want to free mental threads and end discussions around style. While sometimes fruitful, these discussions are for the most part wasteful.”
+  126: - “Literally had an engineer go through a huge effort of cleaning up all of our code because we were debating ternary style for the longest time and were inconsistent about it. It was dumb, but it was a weird on-going "great debate" that wasted lots of little back and forth bits. It's far easier for us all to agree now: just run Prettier, and go with that style.”
+  129: - “Having a githook set up has reduced the amount of style issues in PRs that result in broken builds due to ESLint rules or things I have to nit-pick or clean up later.”
+  131: - “It reminds me of how Steve Jobs used to wear the same clothes every day because he has a million decisions to make and he didn't want to be bothered to make trivial ones like picking out clothes. I think Prettier is like that.”
+  135: Prettier is usually introduced by people with experience in the current codebase and JavaScript but the people that disproportionally benefit from it are newcomers to the codebase. One may think that it's only useful for people with very limited programming experience, but we've seen it quicken the ramp up time from experienced engineers joining the company, as they likely used a different coding style before, and developers coming from a different programming language.
+  136: - “My motivations for using Prettier are: appearing that I know how to write JavaScript well.”
+  137: - “I always put spaces in the wrong place, now I don't have to worry about it anymore.”
+  138: - “When you're a beginner you're making a lot of mistakes caused by the syntax. Thanks to Prettier, you can reduce these mistakes and save a lot of time to focus on what really matters.”
+  139: - “As a teacher, I will also tell to my students to install Prettier to help them to learn the JS syntax and have readable files.”
+  143: What usually happens once people are using Prettier is that they realize that they actually spend a lot of time and mental energy formatting their code. With Prettier editor integration, you can just press that magic key binding and poof, the code is formatted. This is an eye opening experience if anything else.
+  146: - “We're in 2017 and it's still painful to break a call into multiple lines when you happen to add an argument that makes it go over the 80 columns limit :(“
+  150: We've worked very hard to use the least controversial coding styles, went through many rounds of fixing all the edge cases and polished the getting started experience. When you're ready to push Prettier into your codebase, not only should it be painless for you to do it technically but the newly formatted codebase should not generate major controversy and be accepted painlessly by your co-workers.
+  151: - “It's low overhead. We were able to throw Prettier at very different kinds of repos without much work.”
+  152: - “It's been mostly bug free. Had there been major styling issues during the course of implementation we would have been wary about throwing this at our JS codebase. I'm happy to say that's not the case.”
+  153: - “Everyone runs it as part of their pre commit scripts, a couple of us use the editor on save extensions as well.”
+  154: - “It's fast, against one of our larger JS codebases we were able to run Prettier in under 13 seconds.”
+  155: - “The biggest benefit for Prettier for us was being able to format the entire code base at once.”
+  159: Since coming up with a coding style and enforcing it is a big undertaking, it often slips through the cracks and you are left working on inconsistent codebases. Running Prettier in this case is a quick win, the codebase is now uniform and easier to read without spending hardly any time.
+  161: - “We inherited a ~2000 module ES6 code base, developed by 20 different developers over 18 months, in a global team. Felt like such a win without much research.”
+  165: Purely technical aspects of the projects aren't the only thing people look into when choosing to adopt Prettier. Who built and uses it and how quickly it spreads through the community has a non-trivial impact.
+  166: - “The amazing thing, for me, is: 1) Announced 2 months ago. 2) Already adopted by, it seems, every major JS project. 3) 7000 stars, 100,000 npm downloads/mo”
+  171: A few of the [many projects](https://www.npmjs.com/browse/depended/prettier) using Prettier:
+  175: <td><p align="center"><a href="https://facebook.github.io/react/"><img src="website/static/images/react-200x100.png" alt="React" width="200" height="100"><br>React</a></p></td>
+  176: <td><p align="center"><a href="https://facebook.github.io/jest/"><img src="website/static/images/jest-200x100.png" alt="Jest" width="200" height="100"><br>Jest</a></p></td>
+  177: <td><p align="center"><a href="https://yarnpkg.com"><img src="website/static/images/yarn-200x100.png" alt="Yarn" width="200" height="100"><br>Yarn</a></p></td>
+  180: <td><p align="center"><a href="https://babeljs.io/"><img src="website/static/images/babel-200x100.png" alt="Babel" width="200" height="100"><br>Babel</a></p></td>
+  181: <td><p align="center"><a href="https://zeit.co/"><img src="website/static/images/zeit-200x100.png" alt="Zeit" width="200" height="100"><br>Zeit</a></p></td>
+  182: <td><p align="center"><a href="https://webpack.js.org/api/cli/"><img src="website/static/images/webpack-200x100.png" alt="Webpack-cli" width="200" height="100"><br>Webpack-cli</a></p></td>
+  191: **Formatting rules**: eg: [max-len](http://eslint.org/docs/rules/max-len), [no-mixed-spaces-and-tabs](http://eslint.org/docs/rules/no-mixed-spaces-and-tabs), [keyword-spacing](http://eslint.org/docs/rules/keyword-spacing), [comma-style](http://eslint.org/docs/rules/comma-style)...
+  193: Prettier alleviates the need for this whole category of rules! Prettier is going to reprint the entire program from scratch in a consistent way, so it's not possible for the programmer to make a mistake there anymore :)
+  195: **Code-quality rules**: eg [no-unused-vars](http://eslint.org/docs/rules/no-unused-vars), [no-extra-bind](http://eslint.org/docs/rules/no-extra-bind), [no-implicit-globals](http://eslint.org/docs/rules/no-implicit-globals), [prefer-promise-reject-errors](http://eslint.org/docs/rules/prefer-promise-reject-errors)...
+  197: Prettier does nothing to help with those kind of rules. They are also the most important ones provided by linters as they are likely to catch real bugs with your code!
+  240: prettier --single-quote --trailing-comma es5 --write "{app,__{tests,mocks}__}/**/*.js"
+  245: The [glob syntax from the glob module](https://github.com/isaacs/node-glob/blob/master/README.md#glob-primer)
+  250: If you're worried that Prettier will change the correctness of your code, add `--debug-check` to the command.
+  251: This will cause Prettier to print an error message if it detects that code correctness might have changed.
+  256: If you are repeatedly formatting individual files with `prettier`, you will incur a small performance cost
+  257: when prettier attempts to look up a [configuration file](#configuration-file). In order to skip this, you may
+  265: This will provide you with a path to the configuration file, which you can pass to `--config`:
+  271: You can also use `--config` if your configuration file lives somewhere where prettier cannot find it,
+  279: Path to a file containing patterns that describe files to ignore. By default, prettier looks for `./.prettierignore`.
+  283: Require a special comment, called a pragma, to be present in the file's first docblock comment in order for prettier to format it.
+  294: Another useful flag is `--list-different` (or `-l`) which prints the filenames of files that are different from Prettier formatting. If there are differences the script errors out, which is useful in a CI scenario.
+  318: If a config file is found will evaluate it and ignore other CLI options. If no config file is found CLI options will evaluate as normal.
+  320: This option adds support to editor integrations where users define their default configuration but want to respect project specific configuration.
+  324: Prettier CLI will ignore files located in `node_modules` directory. To opt-out from this behavior use `--with-node-modules` flag.
+  328: This rewrites all processed files in place. This is comparable to the `eslint --fix` workflow.
+  332: If you are using ESLint, integrating Prettier to your workflow is straightforward:
+  334: Just add Prettier as an ESLint rule using [eslint-plugin-prettier](https://github.com/prettier/eslint-plugin-prettier).
+  350: We also recommend that you use [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) to disable all the existing formatting rules. It's a one liner that can be added on-top of any existing ESLint configuration.
+  369: You can use Prettier with a pre-commit tool. This can re-format your files that are marked as "staged" via `git add` before you commit.
+  394: There is a limitation where if you stage specific lines this approach will stage the whole file after regardless. See this [issue](https://github.com/okonet/lint-staged/issues/62) for more info.
+  396: See https://github.com/okonet/lint-staged#configuration for more details about how you can configure lint-staged.
+  416: Alternately you can save this script as `.git/hooks/pre-commit` and give it execute permission:
+  420: jsfiles=$(git diff --cached --name-only --diff-filter=ACM | grep '\.jsx\?$' | tr '\n' ' ')
+  440: `format` is used to format text using Prettier. [Options](#options) may be provided to override the defaults.
+  449: `check` checks to see if the file has been formatted with Prettier given those options and returns a `Boolean`.
+  450: This is similar to the `--list-different` parameter in the CLI and is useful for running Prettier in CI scenarios.
+  454: `formatWithCursor` both formats the code, and translates a cursor position from unformatted code to formatted code.
+  455: This is useful for editor integrations, to prevent the cursor from moving when code is formatted.
+  467: The function optionally accepts an input file path as an argument, which defaults to the current working directory.
+  472: The promise will be rejected if there was an error parsing the configuration file.
+  483: Use `prettier.resolveConfig.sync([filePath [, options]])` if you'd like to use sync version.
+  487: As you repeatedly call `resolveConfig`, the file system structure will be cached for performance.
+  488: This function will clear the cache. Generally this is only needed for editor integrations that
+  493: If you need to make modifications to the AST (such as codemods), or you want to provide an alternate parser, you can do so by setting the `parser` option to a function. The function signature of the parser function is:
+  511: The `--parser` CLI option may be a path to a node.js module exporting a parse function.
+  515: A JavaScript comment of `// prettier-ignore` will exclude the next node in the abstract syntax tree from formatting.
+  549: Prettier ships with a handful of customizable format options, usable in both the CLI and API.
+  557: > In code styleguides, maximum line length rules are often set to 100 or 120. However, when humans write code, they don't strive to reach the maximum number of columns on every line. Developers often use whitespace to break up long lines for readability. In practice, the average line length often ends up well below the maximum.
+  559: > Prettier, on the other hand, strives to fit the most code into every line. With the print width set to 120, prettier may produce overly compact, or otherwise undesirable code.
+  587: - `false` - Only add semicolons at the beginning of lines that may introduce ASI failures.
+  599: - If the number of quotes outweighs the other quote, the quote which is less used will be used to format the string - Example: `"I'm double quoted"` results in `"I'm double quoted"` and `"This \"example\" is single quoted"` results in `'This "example" is single quoted'`.
+  613: - `"all"` - Trailing commas wherever possible (including function arguments). This requires node 8 or a [transform](https://babeljs.io/docs/plugins/syntax-trailing-function-commas/).
+  617: `"none"` | <code>--trailing-comma <none&#124;es5&#124;all></code> | <code>trailingComma: "<none&#124;es5&#124;all>"</code>
+  633: Put the `>` of a multi-line JSX element at the end of the last line instead of being alone on the next line (does not apply to self closing elements).
+  643: These two options can be used to format code starting and ending at a given character offset (inclusive and exclusive, respectively). The range will extend:
+  656: Both the `babylon` and `flow` parsers support the same set of JavaScript features (including Flow). Prettier automatically infers the parser from the input file path, so you shouldn't have to change this setting.
+  661: - [`typescript`](https://github.com/eslint/typescript-eslint-parser) _Since v1.4.0_
+  663: - [`json`](https://github.com/babel/babylon/tree/f09eb3200f57ea94d51c2a5b1facf2149fb406bf#babylonparseexpressioncode-options) _Since v1.5.0_
+  664: - [`graphql`](https://github.com/graphql/graphql-js/tree/master/src/language) _Since v1.5.0_
+  670: `babylon` | `--parser <string>`<br />`--parser ./my-parser` | `parser: "<string>"`<br />`parser: require("./my-parser")`
+  688: Prettier can restrict itself to only format files that contain a special comment, called a pragma, at the top of the file. This is very useful
+  691: For example, a file with the following as its first comment will be formatted when `--require-pragma` is supplied:
+  713: Prettier uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration file support.
+  715: - A `.prettierrc` file, written in YAML or JSON, with optional extensions: `.yaml/.yml/.json/.js`.
+  719: The configuration file will be resolved starting from the location of the file being formatted,
+  746: Prettier borrows eslint's [override format](http://eslint.org/docs/user-guide/configuring#example-configuration).
+  774: `excludeFiles` may be optionally provided to exclude files for a given rule, and may also be a string or array of strings.
+  787: For more information on how to use the CLI to locate a file, see the [CLI](#cli) section.
+  791: If you'd like a JSON schema to validate your configuration, one is available here: https://www.schemastore.org/prettierrc.
+  797: Atom users can simply install the [prettier-atom](https://github.com/prettier/prettier-atom) package and use
+  802: Emacs users should see [this repository](https://github.com/prettier/prettier-emacs)
+  807: Vim users can simply install either [sbdchd](https://github.com/sbdchd)/[neoformat](https://github.com/sbdchd/neoformat), [w0rp](https://github.com/w0rp)/[ale](https://github.com/w0rp/ale), or [prettier](https://github.com/prettier)/[vim-prettier](https://github.com/prettier/vim-prettier), for more details see [this directory](https://github.com/prettier/prettier/tree/master/editors/vim).
+  811: Can be installed using the extension sidebar. Search for `Prettier - JavaScript formatter`.
+  815: [Check its repository for configuration and shortcuts](https://github.com/prettier/prettier-vscode)
+  819: Install the [JavaScript Prettier extension](https://github.com/madskristensen/JavaScriptPrettier).
+  829: guide](https://github.com/jlongster/prettier/tree/master/editors/webstorm/README.md).
+  843: Prettier also supports [TypeScript](https://www.typescriptlang.org/), CSS, [Less](http://lesscss.org/), [SCSS](http://sass-lang.com), [JSON](http://json.org/), and [GraphQL](http://graphql.org/).
+  845: The minimum version of TypeScript supported is 2.1.3 as it introduces the ability to have leading `|` for type definitions which prettier outputs.
+  849: - [`eslint-plugin-prettier`](https://github.com/prettier/eslint-plugin-prettier) plugs Prettier into your ESLint workflow
+  850: - [`eslint-config-prettier`](https://github.com/prettier/eslint-config-prettier) turns off all ESLint rules that are unnecessary or might conflict with Prettier
+  857: - [`prettier-standard-formatter`](https://github.com/dtinth/prettier-standard-formatter)
+  861: - [`neutrino-preset-prettier`](https://github.com/SpencerCDixon/neutrino-preset-prettier) allows you to use Prettier as a Neutrino preset
+  862: - [`prettier_d`](https://github.com/josephfrazier/prettier_d.js) runs Prettier as a server to avoid Node.js startup delay. It also supports configuration via `.prettierrc`, `package.json`, and `.editorconfig`.
+  863: - [`Prettier Bookmarklet`](https://prettier.glitch.me/) provides a bookmarklet and exposes a REST API for Prettier that allows to format CodeMirror editor in your browser
+  864: - [`prettier-github`](https://github.com/jgierer12/prettier-github) formats code in GitHub comments
+  865: - [`rollup-plugin-prettier`](https://github.com/mjeanroy/rollup-plugin-prettier) allows you to use Prettier with Rollup
+  866: - [`markdown-magic-prettier`](https://github.com/camacho/markdown-magic-prettier) allows you to use Prettier to format JS [codeblocks](https://help.github.com/articles/creating-and-highlighting-code-blocks/) in Markdown files via [Markdown Magic](https://github.com/DavidWells/markdown-magic)
+  867: - [`tslint-plugin-prettier`](https://github.com/ikatyang/tslint-plugin-prettier) runs Prettier as a TSLint rule and reports differences as individual TSLint issues
+  868: - [`tslint-config-prettier`](https://github.com/alexjoverm/tslint-config-prettier) use TSLint with Prettier without any conflict
+  896: Show the world you're using _Prettier_ → [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+  899: [![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 ```

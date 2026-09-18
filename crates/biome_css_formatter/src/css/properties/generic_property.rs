@@ -159,10 +159,14 @@ impl<'a> CssPropertyColonComments<'a> {
             || value_list_needs_multiline_layout(&value, f);
 
         if should_break_before_value {
-            write!(
-                f,
-                [indent(&format_args![hard_line_break(), &value.format()])]
-            )
+            if should_indent_value_after_colon_comments(&value, f) {
+                write!(
+                    f,
+                    [indent(&format_args![hard_line_break(), &value.format()])]
+                )
+            } else {
+                write!(f, [hard_line_break(), value.format()])
+            }
         } else {
             write!(f, [space(), value.format()])
         }
@@ -233,5 +237,37 @@ fn value_list_needs_multiline_layout(
         ValueListLayout::OnePerLine
             | ValueListLayout::OneGroupPerLine
             | ValueListLayout::OneGroupPerLineWithDanglingComments
+    )
+}
+
+/// Returns `true` when the boundary formatter should indent the value.
+///
+/// For:
+///
+/// ```scss
+/// a {
+///   grid-template-areas: // c
+///     "header";
+/// }
+/// ```
+///
+/// `PreserveInline` indents `"header"`, so the property boundary only writes
+/// the line break after `// c`.
+fn should_indent_value_after_colon_comments(
+    value: &SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+    f: &CssFormatter,
+) -> bool {
+    !matches!(
+        value.as_ref().ok().and_then(|value| {
+            value
+                .as_css_generic_component_value_list()
+                .map(|list| get_value_list_layout(list, f.comments(), f))
+                .or_else(|| {
+                    value.as_scss_expression().map(|expression| {
+                        get_value_list_layout(&expression.items(), f.comments(), f)
+                    })
+                })
+        }),
+        Some(ValueListLayout::PreserveInline)
     )
 }

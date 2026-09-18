@@ -8,7 +8,7 @@ expression: redactor(content)
 {
   "linter": {
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "nursery": {
         "useConsistentTestIt": {
           "level": "error",

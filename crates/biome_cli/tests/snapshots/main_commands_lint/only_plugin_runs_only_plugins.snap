@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["noManualZIndex.grit"]
+}
+```
+
+## `file.js`
+
+```js
+const merged = Object.assign({}, a, b);
+debugger
+```
+
+## `noManualZIndex.grit`
+
+```grit
+`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}
+```
+
+# Emitted Messages
+
+```block
+file.js:1:16 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Prefer object spread instead of Object.assign()
+  
+  > 1 │ const merged = Object.assign({}, a, b);
+      │                ^^^^^^^^^^^^^
+    2 │ debugger
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

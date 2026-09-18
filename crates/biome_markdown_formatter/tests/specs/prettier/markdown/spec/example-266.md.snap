@@ -21,11 +21,12 @@ info: markdown/spec/example-266.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -2,4 +2,5 @@
+@@ -1,5 +1,6 @@
+ - foo
    - bar
      - baz
++      
  
-+
        bim
 ```
 
@@ -35,7 +36,7 @@ info: markdown/spec/example-266.md
 - foo
   - bar
     - baz
-
+      
 
       bim
 ```

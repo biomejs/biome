@@ -1,0 +1,10 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<CustomLabel for="js_id" aria-label="A label" />
+
+```

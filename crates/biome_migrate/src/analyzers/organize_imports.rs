@@ -27,12 +27,7 @@ impl Rule for OrganizeImports {
         };
         let mut result = Vec::new();
         for member in root.json_member_list().into_iter().flatten() {
-            let Some(name) = member
-                .name()
-                .ok()
-                .and_then(|n| n.inner_string_text())
-                .and_then(|r| r.ok())
-            else {
+            let Some(name) = member.name().ok().and_then(|n| n.inner_string_text()) else {
                 continue;
             };
             match name.text() {
@@ -48,11 +43,7 @@ impl Rule for OrganizeImports {
                             continue;
                         };
                         for member in override_item.json_member_list().into_iter().flatten() {
-                            let Some(name) = member
-                                .name()
-                                .ok()
-                                .and_then(|n| n.inner_string_text())
-                                .and_then(|r| r.ok())
+                            let Some(name) = member.name().ok().and_then(|n| n.inner_string_text())
                             else {
                                 continue;
                             };
@@ -150,7 +141,6 @@ fn is_organize_imports_enabled(organize_imports_member: &JsonMember) -> bool {
                 .name()
                 .ok()
                 .and_then(|val| val.inner_string_text())
-                .and_then(|r| r.ok())
                 .is_some_and(|val| val.text() == "enabled")
                 && let Ok(AnyJsonValue::JsonBooleanValue(enabled)) = member_val.value()
                 && let Ok(enabled) = enabled.value_token()

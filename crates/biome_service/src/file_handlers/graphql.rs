@@ -1,7 +1,7 @@
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, DocumentFileSource,
-    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
-    ProcessFixAll, ProcessLint, SearchCapabilities,
+    EditorCapabilities, EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults,
+    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities,
 };
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules;
@@ -22,6 +22,7 @@ use biome_configuration::graphql::{
     GraphqlAssistConfiguration, GraphqlAssistEnabled, GraphqlFormatterConfiguration,
     GraphqlFormatterEnabled, GraphqlLinterConfiguration, GraphqlLinterEnabled,
 };
+use biome_db::AnyParsedSource;
 use biome_formatter::{
     BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     QuoteStyle, TrailingNewline,
@@ -32,12 +33,12 @@ use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, TextRange, TextSize};
-use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
+use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
 use either::Either;
 use std::borrow::Cow;
-use tracing::{debug_span, error, info, trace_span};
+use tracing::{debug_span, info, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -126,7 +127,7 @@ impl ServiceLanguage for GraphqlLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        _document_file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -155,18 +156,14 @@ impl ServiceLanguage for GraphqlLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
 
-        let mut options = GraphqlFormatOptions::new(
-            document_file_source
-                .to_graphql_file_source()
-                .unwrap_or_default(),
-        )
-        .with_indent_style(indent_style)
-        .with_indent_width(indent_width)
-        .with_line_width(line_width)
-        .with_line_ending(line_ending)
-        .with_bracket_spacing(bracket_spacing)
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_trailing_newline(trailing_newline);
+        let mut options = GraphqlFormatOptions::new()
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending)
+            .with_bracket_spacing(bracket_spacing)
+            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_trailing_newline(trailing_newline);
 
         overrides.apply_override_graphql_format_options(path, &mut options);
 
@@ -310,6 +307,10 @@ impl ExtensionHandler for GraphqlFileHandler {
                 format_embedded: None,
             },
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
@@ -345,9 +346,13 @@ fn parse(
     }
 }
 
-fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
-    let syntax: GraphqlSyntaxNode = parse.syntax();
-    let tree: GraphqlRoot = parse.tree();
+fn debug_syntax_tree(
+    _biome_path: &BiomePath,
+    parse: AnyParsedSource,
+    workspace_db: WorkspaceDb,
+) -> GetSyntaxTreeResult {
+    let syntax: GraphqlSyntaxNode = parse.syntax(&workspace_db);
+    let tree: GraphqlRoot = parse.tree(&workspace_db);
     GetSyntaxTreeResult {
         cst: format!("{syntax:#?}"),
         ast: format!("{tree:#?}"),
@@ -357,28 +362,30 @@ fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeRe
 fn debug_formatter_ir(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
 
     match formatted.print() {
@@ -390,13 +397,14 @@ fn format(
 fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let printed = biome_graphql_formatter::format_range(options, &tree, range)?;
     Ok(printed)
 }
@@ -404,13 +412,14 @@ fn format_range(
 fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<GraphqlLanguage>(biome_path, document_file_source);
 
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
 
     let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
@@ -444,10 +453,11 @@ fn lint(params: LintParams) -> LintResults {
     let workspace_settings = &params.settings;
     let analyzer_options = workspace_settings.analyzer_options::<GraphqlLanguage>(
         params.path,
+        params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
     );
-    let tree = params.parse.tree();
+    let tree = params.parsed_source.tree(&params.workspace_db);
 
     let AnalyzerVisitorResult {
         enabled_rules,
@@ -460,6 +470,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
+        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -476,9 +487,7 @@ fn lint(params: LintParams) -> LintResults {
     });
 
     process_lint.into_result(
-        params
-            .parse
-            .into_serde_diagnostics(params.diagnostic_offset),
+        params.parsed_source.serde_diagnostics(&params.workspace_db),
         analyze_diagnostics,
     )
 }
@@ -486,11 +495,11 @@ fn lint(params: LintParams) -> LintResults {
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
-        parse,
+        parsed_source,
         range,
         settings,
         path,
-        module_graph: _,
+        workspace_db,
         project_layout,
         language,
         only,
@@ -499,23 +508,17 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         enabled_rules: rules,
         plugins: _,
         categories,
-        action_offset,
-        document_services: _,
+        working_directory,
         compute_actions,
-        snippet_services: _,
+        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions GraphQL", range =? range, path =? path).entered();
-    let tree = parse.tree();
+    let tree = parsed_source.tree(&workspace_db);
     let _ = trace_span!("Parsed file", tree =? tree).entered();
-    let Some(_) = language.to_graphql_file_source() else {
-        error!("Could not determine the file source of the file");
-        return PullActionsResult {
-            actions: Vec::new(),
-        };
-    };
 
     let analyzer_options = settings.analyzer_options::<GraphqlLanguage>(
         path,
+        working_directory,
         &language,
         suppression_reason.as_deref(),
     );
@@ -531,8 +534,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout)
+        .with_cache(analyzer_cache)
         .finish();
 
+    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),
@@ -580,7 +585,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let mut tree: GraphqlRoot = params.parse.tree();
+    let mut tree: GraphqlRoot = params.parsed_source.tree(&params.workspace_db);
 
     // Compute final rules (taking `overrides` into account)
     let rules = params
@@ -589,6 +594,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         .as_linter_rules(params.biome_path.as_path());
     let analyzer_options = params.settings.analyzer_options::<GraphqlLanguage>(
         params.biome_path,
+        params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
     );

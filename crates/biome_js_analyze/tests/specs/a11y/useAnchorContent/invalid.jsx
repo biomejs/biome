@@ -11,4 +11,5 @@
 	<a><span aria-hidden={"true"}>content</span></a>
 	<a><span aria-hidden={`true`}>content</span></a>
 	<a><span aria-hidden={`${true}`}>content</span></a>
+	<my-button render={<a />} />
 </>

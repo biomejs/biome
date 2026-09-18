@@ -12,6 +12,7 @@ pub(crate) mod interpolated_pseudo_class_function_arguments;
 pub(crate) mod interpolated_pseudo_element_function_arguments;
 pub(crate) mod interpolated_string_part;
 pub(crate) mod interpolated_value_part;
+pub(crate) mod keyframes_name;
 pub(crate) mod module_configuration;
 pub(crate) mod module_member;
 pub(crate) mod parameter;

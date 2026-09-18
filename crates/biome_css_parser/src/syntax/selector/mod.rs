@@ -16,7 +16,9 @@ use crate::syntax::scss::{
     parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
-use crate::syntax::selector::nested_selector::NestedSelectorList;
+use crate::syntax::selector::nested_selector::{
+    NestedSelectorList, parse_nested_selector_as_sub_selector,
+};
 use crate::syntax::selector::pseudo_class::parse_pseudo_class_selector;
 pub(crate) use crate::syntax::selector::pseudo_class::{
     PSEUDO_CLASS_NTH_SIGN_SET, PseudoValueList, is_at_pseudo_class_nth_argument,
@@ -413,7 +415,7 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) struct SubSelectorList;
 impl SubSelectorList {
     pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
-        token_set![T![#], T![.], T![:], T![::], T!['[']];
+        token_set![T![#], T![.], T![:], T![::], T!['['], T![&]];
 }
 impl ParseNodeList for SubSelectorList {
     type Kind = CssSyntaxKind;
@@ -442,7 +444,8 @@ impl ParseNodeList for SubSelectorList {
 ///
 /// This function is responsible for identifying and parsing different types of sub-selectors
 /// based on the current token in the CSS parser. It dispatches to specific parsing functions
-/// for class selectors, ID selectors, attribute selectors, pseudo-classes, and pseudo-elements.
+/// for class selectors, ID selectors, attribute selectors, pseudo-classes, pseudo-elements,
+/// and the nesting selector (`&`), e.g. the trailing `&` in `h1&`.
 #[inline]
 fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
@@ -451,6 +454,7 @@ fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
         T!['['] => parse_attribute_selector(p),
         T![:] => parse_pseudo_class_selector(p),
         T![::] => parse_pseudo_element_selector(p),
+        T![&] => parse_nested_selector_as_sub_selector(p),
         _ => Absent,
     }
 }

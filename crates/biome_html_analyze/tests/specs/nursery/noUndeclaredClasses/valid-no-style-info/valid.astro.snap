@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+const title = "Hello";
+---
+
+<!-- No CSS imports or inline styles: the rule must stay silent. -->
+<div class:list={["whatever"]}>Content</div>
+<div class={"anything"}>Content</div>
+<div class="something">Content</div>
+
+```

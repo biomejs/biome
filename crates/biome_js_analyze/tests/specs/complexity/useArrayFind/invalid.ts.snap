@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+[1, 2, 3].filter(x => x > 1)[0];
+const found1 = [1, 2, 3].filter(x => x > 1)[0];
+
+[1, 2, 3].filter(x => x > 1).at(0);
+const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+
+[1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+[1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+  > 1 │ [1, 2, 3].filter(x => x > 1)[0];
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+    3 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:2:16 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    1 │ [1, 2, 3].filter(x => x > 1)[0];
+  > 2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ [1, 2, 3].filter(x => x > 1).at(0);
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:4:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    2 │ const found1 = [1, 2, 3].filter(x => x > 1)[0];
+    3 │ 
+  > 4 │ [1, 2, 3].filter(x => x > 1).at(0);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+    6 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:5:16 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    4 │ [1, 2, 3].filter(x => x > 1).at(0);
+  > 5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:7:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    5 │ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
+    6 │ 
+  > 7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+    9 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:8:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+    7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+  > 8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```

@@ -1,4 +1,7 @@
-use super::{ParsedLangAndSetup, SearchCapabilities, parse_lang_and_setup_from_script_opening_tag};
+use super::{
+    EditorCapabilities, ParsedLangAndSetup, SearchCapabilities,
+    parse_lang_and_setup_from_script_opening_tag,
+};
 use crate::WorkspaceError;
 use crate::file_handlers::{
     AnalyzerCapabilities, Capabilities, CodeActionsParams, DebugCapabilities, EnabledForPath,
@@ -6,15 +9,18 @@ use crate::file_handlers::{
     ParserCapabilities, javascript,
 };
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{DocumentFileSource, FixFileResult, PullActionsResult};
+use crate::workspace::{FixFileResult, PullActionsResult};
+use biome_db::AnyParsedSource;
 use biome_formatter::{Printed, SourceMapGeneration};
 use biome_fs::BiomePath;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::format_node;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextRange, TextSize};
-use biome_parser::AnyParse;
+use biome_js_syntax::{JsLanguage, TextRange, TextSize};
+use biome_languages::javascript::JsEmbeddingKind;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_rowan::NodeCache;
+use biome_workspace_db::WorkspaceDb;
 use regex::{Match, Regex};
 use std::sync::LazyLock;
 use tracing::{debug, error};
@@ -78,7 +84,7 @@ impl VueFileHandler {
                 Some(
                     JsFileSource::from(language)
                         .with_variant(variant)
-                        .with_embedding_kind(EmbeddingKind::Vue {
+                        .with_embedding_kind(JsEmbeddingKind::Vue {
                             setup,
                             is_source: true,
                             event_handler: false,
@@ -127,12 +133,16 @@ impl ExtensionHandler for VueFileHandler {
             },
             // TODO: We should be able to search JS portions already
             search: SearchCapabilities { search: None },
+            editors: EditorCapabilities {
+                resolve_binding: None,
+                resolve_definition: None,
+            },
         }
     }
 }
 
 fn parse(
-    _rome_path: &BiomePath,
+    _biome_path: &BiomePath,
     _file_source: DocumentFileSource,
     text: &str,
     _settings: &SettingsWithEditor,
@@ -151,12 +161,13 @@ fn parse(
     }
 }
 
-#[tracing::instrument(level = "debug", skip(parse, settings))]
+#[tracing::instrument(level = "debug", skip(parse, settings, workspace_db))]
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let options = settings.format_options::<JsLanguage>(biome_path, document_file_source);
     let html_options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
@@ -165,7 +176,7 @@ fn format(
     } else {
         0
     };
-    let tree = parse.syntax();
+    let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree, false)?;
     match formatted.print_with_indent(indent_amount, SourceMapGeneration::Disabled) {
         Ok(printed) => Ok(printed),
@@ -179,21 +190,37 @@ fn format(
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_range(biome_path, document_file_source, parse, settings, range)
+    javascript::format_range(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        range,
+        workspace_db,
+    )
 }
 
 pub(crate) fn format_on_type(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParse,
+    parse: AnyParsedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
+    workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    javascript::format_on_type(biome_path, document_file_source, parse, settings, offset)
+    javascript::format_on_type(
+        biome_path,
+        document_file_source,
+        parse,
+        settings,
+        offset,
+        workspace_db,
+    )
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {

@@ -49,7 +49,7 @@ use biome_markdown_syntax::{
     MdInlineEmphasis, MdInlineHtml, MdInlineImage, MdInlineItalic, MdInlineItemList, MdInlineLink,
     MdLinkDestination, MdLinkLabel, MdLinkReferenceDefinition, MdLinkTitle, MdNewline,
     MdOrderedListItem, MdParagraph, MdQuote, MdQuotePrefix, MdReferenceImage, MdReferenceLink,
-    MdReferenceLinkLabel, MdSetextHeader, MdSoftBreak, MdTextual, MdThematicBreakBlock,
+    MdReferenceLinkLabel, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{AstNode, AstNodeList, Direction, SyntaxNode, TextRange, WalkEvent};
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
@@ -1049,11 +1049,6 @@ impl<'a> HtmlRenderer<'a> {
             return;
         }
 
-        if MdSoftBreak::cast(node.clone()).is_some() {
-            self.push_str("\n");
-            return;
-        }
-
         if let Some(text) = MdTextual::cast(node.clone()) {
             render_textual(&text, self.out_mut());
             return;
@@ -1691,9 +1686,6 @@ fn collect_raw_inline_item(item: &AnyMdInline, out: &mut String) {
                 out.push_str(token.text());
             }
         }
-        AnyMdInline::MdSoftBreak(_) => {
-            out.push('\n');
-        }
         AnyMdInline::MdHardLine(_) => {
             out.push('\n');
         }
@@ -1941,7 +1933,7 @@ fn extract_alt_text_inline(inline: &AnyMdInline, ctx: &HtmlRenderContext, out: &
             let content = collect_raw_inline_text(&autolink.value());
             out.push_str(&content);
         }
-        AnyMdInline::MdHardLine(_) | AnyMdInline::MdSoftBreak(_) => {
+        AnyMdInline::MdHardLine(_) => {
             out.push(' ');
         }
         AnyMdInline::MdEntityReference(entity) => {

@@ -1,0 +1,39 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: longhand-invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div @click="onClick" />
+</template>
+
+```
+
+# Diagnostics
+```
+longhand-invalid.vue:3:8 lint/style/useVueConsistentVOnStyle  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use longhand 'v-on' syntax instead of '@'.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div @click="onClick" />
+      │        ^^^^^^^^^^^^^^^^
+    4 │ </template>
+    5 │ 
+  
+  i This project prefers to use longhand syntax for v-on.
+  
+  i Unsafe fix: Rewrite to longhand 'v-on' syntax.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - ··<div·@click="onClick"·/>
+      3 │ + ··<div·v-on:click="onClick"·/>
+    4 4 │   </template>
+    5 5 │   
+  
+
+```

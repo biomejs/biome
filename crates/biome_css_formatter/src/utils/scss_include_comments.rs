@@ -27,7 +27,10 @@ pub(crate) fn place_map_trailing_separator_comment(
 
 /// Places comments that follow a list separator.
 ///
-/// Example: `$list: a, // next\nb;`.
+/// ```scss
+/// $list: a, // next
+/// b;
+/// ```
 pub(crate) fn place_list_trailing_separator_comment(
     list_expression: &ScssListExpression,
     preceding_element: &ScssListExpressionElement,
@@ -201,7 +204,10 @@ fn place_line_separator_comment(
 
 /// Keeps Prettier-style line comments that were written before the separator.
 ///
-/// Example: `@include mix(1px // note\n, 2px)`.
+/// ```scss
+/// @include mix(1px // note
+/// , 2px);
+/// ```
 fn should_keep_line_comment_trailing(
     comment: &DecoratedComment<CssLanguage>,
     preceding_node: &CssSyntaxNode,

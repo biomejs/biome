@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsFileSource, JsImport};
+use biome_js_syntax::JsImport;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::no_document_import_in_page::NoDocumentImportInPageOptions;
 

@@ -293,6 +293,28 @@ function genTabBlankContinuation() {
   return marker + " first\n\t\n\tsecond paragraph\n";
 }
 
+function genLooseTabSublist() {
+  // Loose parent item, a blank line, then a tab-indented sublist whose
+  // marker sits past the parent's content column via a mixed space+tab
+  // indent. Class surfaced by issue #10558: every other tab generator is
+  // *tight* (no blank line) and every blank-separated generator uses
+  // *pure spaces*, so the loose×mixed-tab crossproduct was never produced.
+  // The tab expands to column 4 → ≥ the parent content column 2 (so it
+  // attaches to the item) while the remaining indent is < 4 (so it is a
+  // nested bullet list, not an indented code block).
+  const outer = pick(["-", "*", "+"]);
+  const inner = pick(["-", "*", "+"]);
+  // Mixed space+tab indents that all expand to column 4.
+  const indent = pick([" \t", "  \t", "   \t", "\t"]);
+  return (
+    `${outer} Text\n` +
+    `\n` +
+    `${indent}${inner} foo\n` +
+    `${indent}${inner} lreum\n` +
+    `${indent}${inner} bar\n`
+  );
+}
+
 // #endregion
 
 // #region Content-column-aware nested list combinators — class of
@@ -374,6 +396,7 @@ const blockGenerators = [
   { fn: genTabAfterListMarker, weight: 3 },
   { fn: genDeepTabNesting, weight: 2 },
   { fn: genTabBlankContinuation, weight: 3 },
+  { fn: genLooseTabSublist, weight: 4 },
   // Content-column-aware nested list combinators — class surfaced by
   // PR 10347 (sublist marker at exactly the outer item's content
   // column, pure spaces, no blank-line separator).

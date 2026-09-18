@@ -7,6 +7,8 @@ mod extension_settings;
 mod handlers;
 mod requests;
 mod server;
+#[cfg(test)]
+mod server_test_utils;
 mod session;
 mod utils;
 

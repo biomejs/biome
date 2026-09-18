@@ -6,10 +6,11 @@ use biome_formatter::{
 
 use crate::{AsFormat, IntoFormat};
 use biome_js_syntax::{
-    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression, JsFileSource,
+    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression,
     JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
 
 declare_node_union! {

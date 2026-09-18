@@ -1,6 +1,6 @@
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
-use crate::shared::TextPrintMode;
+use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::write;
 use biome_markdown_syntax::{MdInlineCode, MdInlineCodeFields};
 
@@ -23,7 +23,7 @@ impl FormatNodeRule<MdInlineCode> for FormatMdInlineCode {
                     .with_options(FormatMdFormatInlineItemListOptions {
                         print_mode: TextPrintMode::Pristine,
                         keep_fences_in_italics: false,
-                        inside_list: false,
+                        text_context: TextContext::Neutral,
                     }),
                 r_tick_token.format()
             ]

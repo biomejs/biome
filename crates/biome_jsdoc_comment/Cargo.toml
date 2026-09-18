@@ -17,5 +17,8 @@ biome_js_parser = { workspace = true }
 biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
 
+[dev-dependencies]
+biome_languages = { workspace = true, features = ["lang_js"] }
+
 [lints]
 workspace = true

@@ -54,7 +54,6 @@ MdDocument {
                         },
                         MdParagraph {
                             list: MdInlineItemList [],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@13..14 "\n" [] [],
@@ -127,7 +126,6 @@ MdDocument {
               6: (empty)
             1: MD_PARAGRAPH@13..13
               0: MD_INLINE_ITEM_LIST@13..13
-              1: (empty)
             2: MD_NEWLINE@13..14
               0: NEWLINE@13..14 "\n" [] []
             3: MD_CONTINUATION_INDENT@14..16

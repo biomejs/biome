@@ -30,6 +30,7 @@ Platform:
   OS:                           **PLACEHOLDER**
 
 Environment:
+  BIOME_DISTRIBUTION:                unset
   BIOME_LOG_PATH:                    **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:             unset
   BIOME_LOG_LEVEL:                   unset
@@ -45,7 +46,8 @@ Environment:
   NODE_PACKAGE_MANAGER:         unset
 
 Biome Configuration:
-  Status:                       Loaded successfully
+  Error:                        The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  Status:                       Loaded successfully.
   Path:                         biome.json
   Formatter enabled:            true
   Linter enabled:               true

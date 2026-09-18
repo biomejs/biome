@@ -3,10 +3,11 @@
 
 use super::{JsLexContext, JsLexer, JsReLexContext, TextRange, TextSize};
 use crate::span::Span;
-use crate::{JsFileSource, JsParserOptions, parse};
+use crate::{JsParserOptions, parse};
 use biome_js_syntax::JsSyntaxKind::{self, EOF, ERROR_TOKEN};
 use biome_js_syntax::JsSyntaxKind::{JS_NUMBER_LITERAL, NEWLINE, WHITESPACE};
 use biome_js_syntax::T;
+use biome_languages::JsFileSource;
 use biome_parser::lexer::{BufferedLexer, Lexer, ReLexer};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;

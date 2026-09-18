@@ -1,0 +1,32 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+@keyframes fade {
+  $stop: 50%;
+
+  to {
+    opacity: 1 !important;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:5:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using !important within keyframes declaration is completely ignored in some browsers.
+  
+    4 │   to {
+  > 5 │     opacity: 1 !important;
+      │                ^^^^^^^^^^
+    6 │   }
+    7 │ }
+  
+  i Consider removing useless !important declaration.
+  
+
+```

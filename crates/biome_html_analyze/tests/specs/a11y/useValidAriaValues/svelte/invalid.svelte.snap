@@ -1,0 +1,59 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+<!-- invalid boolean value -->
+<div aria-hidden="yes">content</div>
+
+<!-- invalid tristate value -->
+<span aria-checked="test">some text</span>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:6 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-hidden is not correct.
+  
+    3 │ <!-- invalid boolean value -->
+  > 4 │ <div aria-hidden="yes">content</div>
+      │      ^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ <!-- invalid tristate value -->
+  
+  i Use a valid value for the aria-hidden attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-hidden property are:
+  
+  - undefined
+  - false
+  - true
+  
+
+```
+
+```
+invalid.svelte:7:7 lint/a11y/useValidAriaValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of the ARIA attribute aria-checked is not correct.
+  
+    6 │ <!-- invalid tristate value -->
+  > 7 │ <span aria-checked="test">some text</span>
+      │       ^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Use a valid value for the aria-checked attribute according to the WAI-ARIA specification.
+  
+  i The only supported values for the aria-checked property are:
+  
+  - false
+  - true
+  - mixed
+  
+
+```

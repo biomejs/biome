@@ -8,7 +8,7 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
-use biome_diagnostics::{Applicability, category};
+use biome_diagnostics::Applicability;
 use biome_js_factory::make::{
     js_literal_member_name, js_string_literal, js_string_literal_expression,
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
@@ -85,7 +85,7 @@ impl Rule for NoDuplicateClasses {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(duplicate_classes_diagnostic(
-            category!("assist/source/noDuplicateClasses"),
+            rule_category!(),
             ctx.query().range(),
             &state.duplicates,
         ))

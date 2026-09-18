@@ -114,7 +114,10 @@ impl Finalizer for DefaultFinalizer {
                 working_directory: fs.working_directory().clone(),
                 evaluated_paths: evaluated_paths.clone(),
             };
-            reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+            reporter.write(
+                &mut console_reporter_writer,
+                &mut ConsoleReporterVisitor { concise: false },
+            )?;
         }
 
         // Processing emitted error diagnostics, exit with a non-zero code
@@ -177,7 +180,7 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
 
     let mut console_reporter_writer = ConsoleReporterWriter(console);
     match cli_reporter.kind {
-        CliReporterKind::Default => {
+        CliReporterKind::Default | CliReporterKind::Concise => {
             let reporter = ConsoleReporter {
                 summary,
                 diagnostics_payload,
@@ -187,9 +190,19 @@ fn print_to_reporter(params: PrintToReporter) -> Result<(), CliDiagnostic> {
                 evaluated_paths: evaluated_paths.clone(),
             };
             if cli_reporter.is_file_report() {
-                reporter.write(file_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    file_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             } else {
-                reporter.write(&mut console_reporter_writer, &mut ConsoleReporterVisitor)?;
+                reporter.write(
+                    &mut console_reporter_writer,
+                    &mut ConsoleReporterVisitor {
+                        concise: matches!(cli_reporter.kind, CliReporterKind::Concise),
+                    },
+                )?;
             }
         }
         CliReporterKind::Summary => {

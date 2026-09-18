@@ -1,6 +1,6 @@
 # Challenge report
 
-Challenge: https://console.algora.io/challenges/prettier
+Challenge: https://algora.io/challenges/prettier
 
 We provide two compatibility reports for the challenge:
 

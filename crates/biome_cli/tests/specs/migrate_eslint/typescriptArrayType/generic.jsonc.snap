@@ -26,7 +26,7 @@ expression: generic.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"style": {
 				"useConsistentArrayType": {
 					"level": "error",

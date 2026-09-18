@@ -1,4 +1,4 @@
-use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
+use crate::workspace::CheckFileSizeResult;
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{
     CantResolve, ConfigurationDiagnostic, EditorConfigDiagnostic,
@@ -6,7 +6,6 @@ use biome_configuration::diagnostics::{
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
-use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Severity, Visit, category,
@@ -15,7 +14,10 @@ use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 #[cfg(feature = "lang_grit")]
 use biome_grit_patterns::CompileError;
+#[cfg(feature = "lang_js")]
 use biome_js_analyze::utils::rename::RenameError;
+use biome_languages::DocumentFileSource;
+use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::PluginDiagnostic;
 use camino::Utf8Path;
@@ -74,6 +76,7 @@ pub enum WorkspaceError {
     ProtectedFile(ProtectedFile),
 
     /// Error thrown when Biome cannot rename a symbol.
+    #[cfg(feature = "lang_js")]
     RenameError(RenameError),
 
     /// The file could not be analyzed because a rule caused an error.
@@ -97,11 +100,28 @@ pub enum WorkspaceError {
     /// Error in the workspace watcher.
     WatchError(WatchError),
 
+    /// Go-to definition requires the linter or assist to be enabled.
+    GoToDefinitionDisabled(GoToDefinitionDisabled),
+
+    /// The database is not available or its lock is poisoned.
+    DbError(DbError),
+
     /// Emitted when the rust gate feature isn't enabled
     FeatureNotEnabled(FeatureNotEnabledDiagnostic),
 }
 
 impl WorkspaceError {
+    pub fn db_not_available() -> Self {
+        Self::DbError(DbError {
+            reason: "The database is not available for this workspace.".to_string(),
+        })
+    }
+
+    pub fn db_lock_poisoned() -> Self {
+        Self::DbError(DbError {
+            reason: "The database lock is poisoned. This is a bug in Biome.".to_string(),
+        })
+    }
     pub fn format_with_errors_disabled() -> Self {
         Self::FormatWithErrorsDisabled(FormatWithErrorsDisabled)
     }
@@ -163,6 +183,10 @@ impl WorkspaceError {
             file_path: file_path.into(),
             verbose_advice: ProtectedFileAdvice,
         })
+    }
+
+    pub fn go_to_definition_disabled() -> Self {
+        Self::GoToDefinitionDisabled(GoToDefinitionDisabled)
     }
 
     pub fn is_editor_config_error(&self) -> bool {
@@ -323,6 +347,14 @@ impl Panic {
     message = "Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option."
 )]
 pub struct FormatWithErrorsDisabled;
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "project",
+    severity = Warning,
+    message = "Go-to definition is available only when linting or assist are enabled, or the editor setting is enabled."
+)]
+pub struct GoToDefinitionDisabled;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
@@ -733,15 +765,29 @@ pub struct ConfigurationOutsideProject {
 )]
 pub struct FeatureNotEnabledDiagnostic;
 
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "internalError/db",
+    severity = Error,
+    message(
+        message("Database error: "<Info>{self.reason}</Info>),
+        description = "Database error: {reason}",
+    ),
+    tags(INTERNAL)
+)]
+pub struct DbError {
+    pub reason: String,
+}
+
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{CantReadFile, FileIgnored, SourceFileNotSupported};
-    use crate::file_handlers::DocumentFileSource;
     use crate::{TransportError, WorkspaceError};
     use biome_diagnostics::{DiagnosticExt, Error, print_diagnostic_to_string};
     use biome_formatter::FormatError;
     use biome_fs::BiomePath;
-    use biome_module_graph::{JsModuleInfoDiagnostic, ModuleDiagnostic};
+    use biome_languages::DocumentFileSource;
+    use biome_module_graph::JsModuleInfoDiagnostic;
     use std::ffi::OsString;
 
     fn snap_diagnostic(test_name: &str, diagnostic: Error) {
@@ -852,8 +898,8 @@ mod test {
 
     #[test]
     fn module_diagnostic() {
-        let diagnostics = ModuleDiagnostic::JsInfo(JsModuleInfoDiagnostic::exceeded_types_limit())
-            .with_file_path("example.js");
+        let diagnostics =
+            JsModuleInfoDiagnostic::exceeded_types_limit().with_file_path("example.js");
         snap_diagnostic("module_diagnostic", diagnostics);
     }
 }

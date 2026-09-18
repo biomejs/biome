@@ -1,0 +1,102 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+---
+import "./styles.css";
+---
+
+<!-- class:list: .card is defined, .missing is not -->
+<div class:list={["card", "missing"]}>class:list</div>
+
+<!-- class={expr}: .hero is defined, .missing is not -->
+<div class={"hero missing"}>class expression</div>
+
+<!-- plain class: .container is defined, .unknown is not -->
+<div class="container unknown">plain class</div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:13:23 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class unknown is not defined in any available stylesheet.
+  
+    12 │ <!-- plain class: .container is defined, .unknown is not -->
+  > 13 │ <div class="container unknown">plain class</div>
+       │                       ^^^^^^^
+    14 │ 
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.astro (this file) -> which imports styles.css
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:28 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class missing is not defined in any imported stylesheet.
+  
+    6 │ <!-- class:list: .card is defined, .missing is not -->
+  > 7 │ <div class:list={["card", "missing"]}>class:list</div>
+      │                            ^^^^^^^
+    8 │ 
+    9 │ <!-- class={expr}: .hero is defined, .missing is not -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.astro (this file) -> which imports styles.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:10:19 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class missing is not defined in any imported stylesheet.
+  
+     9 │ <!-- class={expr}: .hero is defined, .missing is not -->
+  > 10 │ <div class={"hero missing"}>class expression</div>
+       │                   ^^^^^^^
+    11 │ 
+    12 │ <!-- plain class: .container is defined, .unknown is not -->
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.astro (this file) -> which imports styles.css
+  
+  
+  i Either import a CSS file that defines this class or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

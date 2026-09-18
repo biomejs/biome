@@ -1,9 +1,9 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_syntax_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsFileSource, JsNamedImportSpecifiers,
-    JsSyntaxToken,
+    AnyJsExportClause, AnyJsImportClause, AnyJsModuleItem, JsNamedImportSpecifiers, JsSyntaxToken,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
 use crate::services::manifest::Manifest;

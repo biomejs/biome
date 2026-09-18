@@ -1,24 +1,23 @@
 #![cfg(test)]
 #![expect(unused_mut, unused_variables)]
 
-use crate::lexer::CssLexContext;
+use super::{
+    CssLexer, TextSize,
+    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
+    source_cursor::SourceCursor,
+};
 use crate::CssParserOptions;
-use biome_css_syntax::CssFileSource;
+use crate::lexer::CssLexContext;
 use biome_css_syntax::{
     CssSyntaxKind::{self, EOF},
     T, TextRange,
 };
+use biome_languages::CssFileSource;
 use biome_parser::lexer::{Lexer, LexerWithCheckpoint};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
-
-use super::{
-    source_cursor::SourceCursor,
-    scan_cursor::{CssScanCursor, StringBodyScanStop, UrlBodyStartScan},
-    CssLexer, TextSize,
-};
 
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
@@ -298,9 +297,8 @@ fn url_body_context_skips_scss_line_comment_trivia_before_interpolated_function(
 
 #[test]
 fn url_body_context_preserves_protocol_relative_url_in_scss() {
-    let mut lexer =
-        CssLexer::from_str("url(//cdn.example.com/app.css)\n")
-            .with_source_type(CssFileSource::scss());
+    let mut lexer = CssLexer::from_str("url(//cdn.example.com/app.css)\n")
+        .with_source_type(CssFileSource::scss());
 
     assert_eq!(
         lexer.next_token(CssLexContext::Regular),
@@ -534,10 +532,7 @@ fn css_scan_cursor_scans_plain_string_without_interpolation_mode() {
     let cursor = CssScanCursor::new(SourceCursor::new("\"a#{b}\"", 1), true, true);
     let scan = cursor.scan_plain_string_body(super::CssStringQuote::Double);
 
-    assert!(matches!(
-        scan.stop,
-        StringBodyScanStop::ClosingQuote { .. }
-    ));
+    assert!(matches!(scan.stop, StringBodyScanStop::ClosingQuote { .. }));
 }
 
 #[test]
@@ -646,8 +641,7 @@ fn css_lexer_consumes_identifier_sequence_with_escape() {
     let mut lexer = CssLexer::from_str(r#"\66 oo-bar"#);
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert!(count > 0);
     assert!(only_ascii_used);
@@ -661,8 +655,7 @@ fn css_lexer_consumes_identifier_sequence_with_slash_mode() {
     let mut lexer = CssLexer::from_str("w/2");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, true);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, true);
 
     assert_eq!(&buf[..count], b"w/2");
     assert!(only_ascii_used);
@@ -675,8 +668,7 @@ fn css_lexer_consumes_identifier_sequence_stops_before_slash_when_disabled() {
     let mut lexer = CssLexer::from_str("w/2");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert_eq!(&buf[..count], b"w");
     assert!(only_ascii_used);
@@ -689,8 +681,7 @@ fn css_lexer_consumes_identifier_sequence_tracks_non_ascii_transition() {
     let mut lexer = CssLexer::from_str("abécd ");
     let mut buf = [0u8; 16];
 
-    let (count, only_ascii_used) =
-        lexer.consume_ident_sequence(&mut buf, false);
+    let (count, only_ascii_used) = lexer.consume_ident_sequence(&mut buf, false);
 
     assert_eq!(&buf[..count], b"ab");
     assert!(!only_ascii_used);
@@ -757,8 +748,7 @@ fn css_lexer_tailwind_identifier_sequence_keeps_count_when_buffer_fills_before_s
 
 #[test]
 fn lexer_scan_cursor_at_detects_interpolated_function_from_offset() {
-    let lexer =
-        CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());
+    let lexer = CssLexer::from_str("xxfoo#{1 + 1}(bar)").with_source_type(CssFileSource::scss());
 
     assert!(lexer.scan_cursor_at(2).is_at_scss_interpolated_function());
 }
@@ -864,9 +854,7 @@ fn css_scan_cursor_consumes_identifier_escape_as_a_single_part() {
 #[test]
 fn css_scan_cursor_scans_raw_url_value_until_closing_paren() {
     let cursor = CssScanCursor::new(SourceCursor::new(r"foo\)bar)", 0), false, false);
-    let scan = cursor
-        .scan_url_raw_value()
-        .expect("expected raw url scan");
+    let scan = cursor.scan_url_raw_value().expect("expected raw url scan");
 
     assert_eq!(scan.start, 0);
     assert_eq!(scan.end, 8);

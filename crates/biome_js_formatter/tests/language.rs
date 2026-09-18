@@ -3,12 +3,10 @@ use biome_fs::BiomePath;
 use biome_js_formatter::JsFormatLanguage;
 use biome_js_formatter::context::JsFormatContext;
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::JsLanguage;
+use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
-use biome_service::{
-    settings::{ServiceLanguage, Settings},
-    workspace::DocumentFileSource,
-};
+use biome_service::settings::{ServiceLanguage, Settings};
 
 pub struct JsTestFormatLanguage {
     source_type: JsFileSource,

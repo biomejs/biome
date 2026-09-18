@@ -50,7 +50,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -84,7 +83,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -112,7 +110,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@25..26 "\n" [] [],
@@ -152,7 +149,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@35..36 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -180,7 +176,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@46..47 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -217,7 +212,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@58..59 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -256,7 +250,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@71..72 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -289,7 +282,6 @@ MdDocument {
                                                             value_token: MD_TEXTUAL_LITERAL@82..83 "\n" [] [],
                                                         },
                                                     ],
-                                                    hard_line: missing (optional),
                                                 },
                                             ],
                                         },
@@ -330,7 +322,6 @@ MdDocument {
                                             value_token: MD_TEXTUAL_LITERAL@95..96 "\n" [] [],
                                         },
                                     ],
-                                    hard_line: missing (optional),
                                 },
                                 MdQuotePrefix {
                                     pre_marker_indent: MdQuoteIndentList [],
@@ -363,7 +354,6 @@ MdDocument {
                                                             value_token: MD_TEXTUAL_LITERAL@107..108 "\n" [] [],
                                                         },
                                                     ],
-                                                    hard_line: missing (optional),
                                                 },
                                             ],
                                         },
@@ -401,7 +391,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@3..6 "foo" [] []
                 1: MD_TEXTUAL@6..7
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@7..10
               0: MD_INDENT_TOKEN_LIST@7..10
                 0: MD_INDENT_TOKEN@7..8
@@ -425,7 +414,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@12..15 "bar" [] []
                         1: MD_TEXTUAL@15..16
                           0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
-                      1: (empty)
             3: MD_NEWLINE@16..17
               0: NEWLINE@16..17 "\n" [] []
         1: MD_BULLET@17..37
@@ -441,7 +429,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@21..24 "foo" [] []
                 1: MD_TEXTUAL@24..25
                   0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@25..26
               0: NEWLINE@25..26 "\n" [] []
             2: MD_CONTINUATION_INDENT@26..30
@@ -469,7 +456,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@32..35 "bar" [] []
                         1: MD_TEXTUAL@35..36
                           0: MD_TEXTUAL_LITERAL@35..36 "\n" [] []
-                      1: (empty)
             4: MD_NEWLINE@36..37
               0: NEWLINE@36..37 "\n" [] []
         2: MD_BULLET@37..59
@@ -485,7 +471,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@41..46 "outer" [] []
                 1: MD_TEXTUAL@46..47
                   0: MD_TEXTUAL_LITERAL@46..47 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@47..51
               0: MD_INDENT_TOKEN_LIST@47..51
                 0: MD_INDENT_TOKEN@47..48
@@ -511,7 +496,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@53..58 "inner" [] []
                         1: MD_TEXTUAL@58..59
                           0: MD_TEXTUAL_LITERAL@58..59 "\n" [] []
-                      1: (empty)
     1: MD_NEWLINE@59..60
       0: NEWLINE@59..60 "\n" [] []
     2: MD_QUOTE@60..83
@@ -535,7 +519,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@65..71 "quoted" [] []
                     1: MD_TEXTUAL@71..72
                       0: MD_TEXTUAL_LITERAL@71..72 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@72..74
                   0: MD_QUOTE_INDENT_LIST@72..72
                   1: R_ANGLE@72..73 ">" [] []
@@ -559,7 +542,6 @@ MdDocument {
                               0: MD_TEXTUAL_LITERAL@79..82 "sub" [] []
                             1: MD_TEXTUAL@82..83
                               0: MD_TEXTUAL_LITERAL@82..83 "\n" [] []
-                          1: (empty)
     3: MD_NEWLINE@83..84
       0: NEWLINE@83..84 "\n" [] []
     4: MD_QUOTE@84..108
@@ -583,7 +565,6 @@ MdDocument {
                       0: MD_TEXTUAL_LITERAL@89..95 "quoted" [] []
                     1: MD_TEXTUAL@95..96
                       0: MD_TEXTUAL_LITERAL@95..96 "\n" [] []
-                  1: (empty)
                 1: MD_QUOTE_PREFIX@96..98
                   0: MD_QUOTE_INDENT_LIST@96..96
                   1: R_ANGLE@96..97 ">" [] []
@@ -607,7 +588,6 @@ MdDocument {
                               0: MD_TEXTUAL_LITERAL@104..107 "sub" [] []
                             1: MD_TEXTUAL@107..108
                               0: MD_TEXTUAL_LITERAL@107..108 "\n" [] []
-                          1: (empty)
   2: EOF@108..108 "" [] []
 
 ```

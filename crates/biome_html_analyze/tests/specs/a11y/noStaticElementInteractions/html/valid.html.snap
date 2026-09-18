@@ -1,0 +1,180 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<div></div>
+<div class="foo"></div>
+<div onclick="() => void 0" aria-hidden="true"></div>
+<input type="button" onclick="() => void 0" />
+<input type="checkbox" onclick="() => void 0" />
+<input type="color" onclick="() => void 0" />
+<input type="date" onclick="() => void 0" />
+<input type="datetime" onclick="() => void 0" />
+<input type="datetime-local" onclick="() => void 0" />
+<input type="email" onclick="() => void 0" />
+<input type="file" onclick="() => void 0" />
+<input type="hidden" onclick="() => void 0" />
+<input type="image" onclick="() => void 0" />
+<input type="month" onclick="() => void 0" />
+<input type="number" onclick="() => void 0" />
+<input type="password" onclick="() => void 0" />
+<input type="radio" onclick="() => void 0" />
+<input type="range" onclick="() => void 0" />
+<input type="reset" onclick="() => void 0" />
+<input type="search" onclick="() => void 0" />
+<input type="submit" onclick="() => void 0" />
+<input type="tel" onclick="() => void 0" />
+<input type="text" onclick="() => void 0" />
+<input type="time" onclick="() => void 0" />
+<input type="url" onclick="() => void 0" />
+<input type="week" onclick="() => void 0" />
+<button onclick="() => void 0" class="foo"></button>
+<datalist onclick="() => {}"></datalist>
+<option onclick="() => void 0" class="foo"></option>
+<select onclick="() => void 0" class="foo"></select>
+<textarea onclick="() => void 0" class="foo"></textarea>
+<a onclick="() => void 0" href="http://x.y.z"></a>
+<a onclick="() => void 0" href="http://x.y.z" tabindex="0"></a>
+<audio onclick="() => {}"></audio>
+<form onclick="() => {}"></form>
+<form onsubmit="() => {}"></form>
+
+<div role="button" onclick="() => {}"></div>
+<div role="checkbox" onclick="() => {}"></div>
+<div role="combobox" onclick="() => {}"></div>
+<div role="gridcell" onclick="() => {}"></div>
+<div role="link" onclick="() => {}"></div>
+<div role="menuitem" onclick="() => {}"></div>
+<div role="menuitemcheckbox" onclick="() => {}"></div>
+<div role="menuitemradio" onclick="() => {}"></div>
+<div role="option" onclick="() => {}"></div>
+<div role="radio" onclick="() => {}"></div>
+<div role="searchbox" onclick="() => {}"></div>
+<div role="slider" onclick="() => {}"></div>
+<div role="spinbutton" onclick="() => {}"></div>
+<div role="switch" onclick="() => {}"></div>
+<div role="tab" onclick="() => {}"></div>
+<div role="textbox" onclick="() => {}"></div>
+<div oncopy="() => {}"></div>
+<div oncut="() => {}"></div>
+<div onpaste="() => {}"></div>
+<div oncompositionend="() => {}"></div>
+<div oncompositionstart="() => {}"></div>
+<div oncompositionupdate="() => {}"></div>
+<div onchange="() => {}"></div>
+<div oninput="() => {}"></div>
+<div onsubmit="() => {}"></div>
+<div onselect="() => {}"></div>
+<div ontouchcancel="() => {}"></div>
+<div ontouchend="() => {}"></div>
+<div ontouchmove="() => {}"></div>
+<div ontouchstart="() => {}"></div>
+<div onscroll="() => {}"></div>
+<div onwheel="() => {}"></div>
+<div onabort="() => {}"></div>
+<div oncanplay="() => {}"></div>
+<div oncanplaythrough="() => {}"></div>
+<div ondurationchange="() => {}"></div>
+<div onemptied="() => {}"></div>
+<div onencrypted="() => {}"></div>
+<div onended="() => {}"></div>
+<div onerror="() => {}"></div>
+<div onloadeddata="() => {}"></div>
+<div onloadedmetadata="() => {}"></div>
+<div onloadstart="() => {}"></div>
+<div onpause="() => {}"></div>
+<div onplay="() => {}"></div>
+<div onplaying="() => {}"></div>
+<div onprogress="() => {}"></div>
+<div onratechange="() => {}"></div>
+<div onseeked="() => {}"></div>
+<div onseeking="() => {}"></div>
+<div onstalled="() => {}"></div>
+<div onsuspend="() => {}"></div>
+<div ontimeupdate="() => {}"></div>
+<div onvolumechange="() => {}"></div>
+<div onwaiting="() => {}"></div>
+<div onload="() => {}"></div>
+<div onerror="() => {}"></div>
+<div onanimationstart="() => {}"></div>
+<div onanimationend="() => {}"></div>
+<div onanimationiteration="() => {}"></div>
+<div ontransitionend="() => {}"></div>
+
+<!-- HTML elements with an inherent, non-interactive role -->
+<address onclick="() => {}"></address>
+<article onclick="() => {}"></article>
+<article ondblclick="() => void 0"></article>
+<aside onclick="() => {}"></aside>
+<blockquote onclick="() => {}"></blockquote>
+<br onclick="() => {}" />
+<canvas onclick="() => {}"></canvas>
+<caption onclick="() => {}"></caption>
+<code onclick="() => {}"></code>
+<details onclick="() => {}"></details>
+<dd onclick="() => {}"></dd>
+<del onclick="() => {}"></del>
+<dfn onclick="() => {}"></dfn>
+
+<dl onclick="() => {}"></dl>
+<dt onclick="() => {}"></dt>
+<em onclick="() => {}"></em>
+<embed onclick="() => {}" />
+<fieldset onclick="() => {}"></fieldset>
+<figcaption onclick="() => {}"></figcaption>
+<figure onclick="() => {}"></figure>
+<h1 onclick="() => {}"></h1>
+<h2 onclick="() => {}"></h2>
+<h3 onclick="() => {}"></h3>
+<h4 onclick="() => {}"></h4>
+<h5 onclick="() => {}"></h5>
+<h6 onclick="() => {}"></h6>
+<hr onclick="() => {}" />
+<html onclick="() => {}">
+
+</html>
+<iframe onclick="() => {}"></iframe>
+<img onclick="() => {}" />
+<ins onclick="() => {}"></ins>
+<label onclick="() => {}"></label>
+<legend onclick="() => {}"></legend>
+<li onclick="() => {}"></li>
+<main onclick="() => void 0"></main>
+<mark onclick="() => {}"></mark>
+<menu onclick="() => {}"></menu>
+<meter onclick="() => {}"></meter>
+<nav onclick="() => {}"></nav>
+<ol onclick="() => {}"></ol>
+<optgroup onclick="() => {}"></optgroup>
+<output onclick="() => {}"></output>
+<p onclick="() => {}"></p>
+<pre onclick="() => {}"></pre>
+<progress onclick="() => {}"></progress>
+<ruby onclick="() => {}"></ruby>
+<section onclick="() => {}" aria-label="Aa"></section>
+<section onclick="() => {}" aria-labelledby="js_1"></section>
+<strong onclick="() => {}"></strong>
+<sub onclick="() => {}"></sub>
+<sup onclick="() => {}"></sup>
+<table onclick="() => {}"></table>
+<tbody onclick="() => {}"></tbody>
+<tfoot onclick="() => {}"></tfoot>
+<th onclick="() => {}"></th>
+<thead onclick="() => {}"></thead>
+<time onclick="() => {}"></time>
+<tr onclick="() => {}"></tr>
+<video onclick="() => {}"></video>
+<ul onclick="() => {}"></ul>
+
+<!-- HTML elements attributed with a non-interactive role -->
+<div role="listbox" onclick="() => {}"></div>
+<div role="progressbar" onclick="() => {}"></div>
+<div role="row" onclick="() => {}"></div>
+<div role="separator" onclick="() => {}"></div>
+<div role="scrollbar" onclick="() => {}"></div>
+<td onclick="() => {}"></td>
+
+```

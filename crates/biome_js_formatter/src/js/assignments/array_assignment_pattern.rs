@@ -23,7 +23,14 @@ impl FormatNodeRule<JsArrayAssignmentPattern> for FormatJsArrayAssignmentPattern
                 [format_dangling_comments(node.syntax()).with_block_indent()]
             )?;
         } else {
-            write!(f, [group(&soft_block_indent(&elements.format()))])?;
+            let should_insert_space_around_brackets = f.options().delimiter_spacing().value();
+            write!(
+                f,
+                [group(&soft_block_indent_with_maybe_space(
+                    &elements.format(),
+                    should_insert_space_around_brackets
+                ))]
+            )?;
         }
 
         write!(f, [r_brack_token.format()])

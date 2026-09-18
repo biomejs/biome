@@ -1,0 +1,8 @@
+records
+DeclarationRecord { file_repo_relative: "collector.recursive-scope-accounting.d.ts", scope: Namespace(["Outer", "Inner"]), declared_name: "Deep", kind: Interface, text_range: 56..73, syntax_kind: TS_INTERFACE_DECLARATION }
+coverage
+EnteredScope { scope: Namespace(["Outer"]), file: "collector.recursive-scope-accounting.d.ts", range: 8..81 }
+EnteredScope { scope: Namespace(["Outer", "Inner"]), file: "collector.recursive-scope-accounting.d.ts", range: 30..79 }
+Collected(0)
+ExitedScope { scope: Namespace(["Outer", "Inner"]), file: "collector.recursive-scope-accounting.d.ts", range: 30..79 }
+ExitedScope { scope: Namespace(["Outer"]), file: "collector.recursive-scope-accounting.d.ts", range: 8..81 }

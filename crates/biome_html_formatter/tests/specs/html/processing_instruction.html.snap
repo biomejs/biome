@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: processing_instruction.html
+---
+
+# Input
+
+```html
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+```
+
+
+# Formatted
+
+```html
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+```

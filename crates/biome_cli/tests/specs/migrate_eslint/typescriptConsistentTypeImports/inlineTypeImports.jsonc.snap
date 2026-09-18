@@ -29,7 +29,7 @@ expression: inlineTypeImports.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"style": {
 				"useImportType": {
 					"level": "error",

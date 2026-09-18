@@ -28,6 +28,11 @@ impl ImportGroups {
             .unwrap_or(self.0.len()) as u16
     }
 
+    /// Is there a group that match or unmatch explicitly bare imports?
+    pub fn has_bare_matchers(&self) -> bool {
+        self.0.iter().any(|group| group.has_bare_matchers())
+    }
+
     /// Returns how many blank lines must separate `first_group` and `second_group`.
     pub fn separated_by_blank_line(&self, first_group: u16, second_group: u16) -> bool {
         self.0
@@ -47,6 +52,8 @@ impl biome_deserialize::Merge for ImportGroups {
 
 pub struct ImportCandidate<'a> {
     pub has_type_token: bool,
+    /// Whether the underlying import is a bare (side-effect) import, e.g. `import "polyfill"`.
+    pub is_bare: bool,
     pub source: Option<ImportSourceCandidate<'a>>,
 }
 impl ImportCandidate<'_> {
@@ -82,6 +89,16 @@ impl ImportGroup {
             Self::BlankLine => false,
             Self::Matcher(matcher) => matcher.is_match(candidate),
             Self::MatcherList(matchers) => candidate.matches_with_exceptions(matchers.iter()),
+        }
+    }
+
+    fn has_bare_matchers(&self) -> bool {
+        match self {
+            Self::BlankLine => false,
+            Self::Matcher(group_matcher) => group_matcher.has_bare_matchers(),
+            Self::MatcherList(group_matchers) => group_matchers
+                .iter()
+                .any(|group_matcher| group_matcher.has_bare_matchers()),
         }
     }
 }
@@ -129,6 +146,15 @@ impl GroupMatcher {
         }
     }
 
+    pub fn has_bare_matchers(&self) -> bool {
+        match self {
+            Self::Import(import_matcher) => import_matcher
+                .kind
+                .is_some_and(|kind_matcher| kind_matcher.kind.is_bare()),
+            Self::Source(_source_matcher) => false,
+        }
+    }
+
     pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
         match self {
             Self::Import(matcher) => matcher.is_match(candidate),
@@ -168,21 +194,156 @@ impl Deserializable for GroupMatcher {
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ImportMatcher {
+    kind: Option<NegatableImportKindMatcher>,
     r#type: Option<bool>,
     source: Option<SourcesMatcher>,
 }
 impl ImportMatcher {
     pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        let matches_kind = self
+            .kind
+            .as_ref()
+            .is_none_or(|kind| kind.is_match(candidate));
         let matches_type = self
             .r#type
             .is_none_or(|r#type| candidate.has_type_token == r#type);
-        matches_type
+        matches_kind
+            && matches_type
             && self.source.as_ref().is_none_or(|src| {
                 candidate
                     .source
                     .as_ref()
                     .is_some_and(|candidate_source| src.is_match(candidate_source))
             })
+    }
+}
+
+/// Kind matcher for [`ImportMatcher::kind`].
+///
+/// Accepts a plain kind (e.g. `"bare"`) or a negated kind (e.g. `"!bare"`).
+#[derive(Clone, Copy, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[serde(try_from = "String", into = "String")]
+pub struct NegatableImportKindMatcher {
+    is_negated: bool,
+    kind: ImportKindMatcher,
+}
+impl NegatableImportKindMatcher {
+    pub fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        self.kind.is_match(candidate) != self.is_negated
+    }
+}
+impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
+    fn deserialize(
+        ctx: &mut impl DeserializationContext,
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        let text = Text::deserialize(ctx, value, name)?;
+        match text.text().parse() {
+            Ok(matcher) => Some(matcher),
+            Err(error) => {
+                ctx.report(
+                    biome_deserialize::DeserializationDiagnostic::new(error)
+                        .with_range(value.range()),
+                );
+                None
+            }
+        }
+    }
+}
+impl std::fmt::Display for NegatableImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let negation = if self.is_negated { "!" } else { "" };
+        let kind = &self.kind;
+        write!(f, "{negation}{kind}")
+    }
+}
+impl std::fmt::Debug for NegatableImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self, f)
+    }
+}
+impl From<NegatableImportKindMatcher> for String {
+    fn from(value: NegatableImportKindMatcher) -> Self {
+        value.to_string()
+    }
+}
+impl std::str::FromStr for NegatableImportKindMatcher {
+    type Err = &'static str;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
+            (true, stripped)
+        } else {
+            (false, value)
+        };
+        let kind = ImportKindMatcher::from_str(value)?;
+        Ok(Self { is_negated, kind })
+    }
+}
+impl TryFrom<String> for NegatableImportKindMatcher {
+    type Error = &'static str;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        value.parse()
+    }
+}
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for NegatableImportKindMatcher {
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("NegatableImportKindMatcher")
+    }
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        let schema = ImportKindMatcher::json_schema(generator);
+        if let Some(obj) = schema.as_object() {
+            let mut new_obj = obj.clone();
+            if let Some(enum_values) = new_obj.get_mut("enum").and_then(|v| v.as_array_mut()) {
+                let original_len = enum_values.len();
+                for index in 0..original_len {
+                    if let Some(val) = enum_values[index].as_str() {
+                        enum_values.push(serde_json::Value::from(format!("!{val}")));
+                    }
+                }
+            }
+            schemars::Schema::from(new_obj)
+        } else {
+            schema
+        }
+    }
+}
+
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ImportKindMatcher {
+    #[serde(rename = "bare")]
+    Bare,
+}
+impl ImportKindMatcher {
+    fn is_match(&self, candidate: &ImportCandidate<'_>) -> bool {
+        match self {
+            Self::Bare => candidate.is_bare,
+        }
+    }
+
+    pub const fn is_bare(&self) -> bool {
+        matches!(self, Self::Bare)
+    }
+}
+impl std::fmt::Display for ImportKindMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let repr = match self {
+            Self::Bare => "bare",
+        };
+        f.write_str(repr)
+    }
+}
+impl std::str::FromStr for ImportKindMatcher {
+    type Err = &'static str;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "bare" => Ok(Self::Bare),
+            _ => Err("invalid import kind matcher"),
+        }
     }
 }
 
@@ -382,6 +543,8 @@ pub enum PredefinedSourceMatcher {
     ProtocolPackage,
     #[serde(rename = ":PATH:")]
     Path,
+    #[serde(rename = ":STYLE:")]
+    Style,
     #[serde(rename = ":URL:")]
     Url,
 }
@@ -403,6 +566,14 @@ impl PredefinedSourceMatcher {
             Self::Package => source_kind == ImportSourceKind::Package,
             Self::Path => source_kind == ImportSourceKind::Path,
             Self::ProtocolPackage => source_kind == ImportSourceKind::ProtocolPackage,
+            Self::Style => std::path::Path::new(source)
+                .extension()
+                .is_some_and(|extension| {
+                    matches!(
+                        extension.as_encoded_bytes(),
+                        b"css" | b"less" | b"pcss" | b"sass" | b"scss" | b"sss" | b"styl"
+                    )
+                }),
             Self::Url => source_kind == ImportSourceKind::Url,
         }
     }
@@ -417,6 +588,7 @@ impl std::fmt::Display for PredefinedSourceMatcher {
             Self::Package => ":PACKAGE:",
             Self::ProtocolPackage => ":PACKAGE_WITH_PROTOCOL:",
             Self::Path => ":PATH:",
+            Self::Style => ":STYLE:",
             Self::Url => ":URL:",
         };
         f.write_str(repr)
@@ -432,6 +604,7 @@ impl std::str::FromStr for PredefinedSourceMatcher {
             ":PACKAGE:" => Ok(Self::Package),
             ":PACKAGE_WITH_PROTOCOL:" => Ok(Self::ProtocolPackage),
             ":PATH:" => Ok(Self::Path),
+            ":STYLE:" => Ok(Self::Style),
             ":URL:" => Ok(Self::Url),
             _ => Err("invalid predefined group"),
         }

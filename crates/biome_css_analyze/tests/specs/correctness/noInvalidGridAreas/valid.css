@@ -27,3 +27,7 @@ a { grid-template-areas: "s s s"
     @apply bg-base-content absolute bottom-3 start-0 top-3 w-px opacity-10;
     content: "";
 }
+
+/* Do not treat other grid-template-* properties as grid area declarations */
+a { grid-template-rows: "a a" "b b b"; }
+a { grid-templatefoo: "a a" "b b b"; }

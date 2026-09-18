@@ -1,7 +1,8 @@
 use crate::{
-    AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttribute, HtmlAttributeList,
-    HtmlAttributeName, inner_string_text, static_value::StaticValue,
+    AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, HtmlAttribute,
+    HtmlAttributeList, HtmlAttributeName, inner_string_text, static_value::StaticValue,
 };
+use biome_aria::Attribute;
 use biome_rowan::{AstNodeList, Text, TokenText};
 
 impl AnyHtmlAttributeInitializer {
@@ -15,6 +16,24 @@ impl AnyHtmlAttributeInitializer {
                     .map(|token| inner_string_text(&token).into())
                     .unwrap_or_default(),
             ),
+            // When all elements are plain text chunks (no {expression} interpolations),
+            // the static text can be recovered by concatenating the chunk tokens.
+            Self::SvelteTemplateAttributeValue(value) => {
+                let elements = value.elements();
+                let mut text = String::new();
+                for element in elements.iter() {
+                    match element {
+                        AnySvelteTemplateElement::SvelteTemplateChunkElement(chunk) => {
+                            text.push_str(chunk.html_template_chunk_token().ok()?.text_trimmed());
+                        }
+                        AnySvelteTemplateElement::HtmlAttributeSingleTextExpression(_) => {
+                            // Dynamic interpolation — no static value available.
+                            return None;
+                        }
+                    }
+                }
+                Some(Text::from(text))
+            }
             Self::VueVForValue(_) => None,
         }
     }
@@ -23,6 +42,8 @@ impl AnyHtmlAttributeInitializer {
         match self {
             Self::HtmlAttributeSingleTextExpression(_) => None,
             Self::HtmlString(value) => Some(StaticValue::String(value.value_token().ok()?)),
+            // No single token to wrap — static values with interpolations are not representable.
+            Self::SvelteTemplateAttributeValue(_) => None,
             Self::VueVForValue(_) => None,
         }
     }
@@ -64,5 +85,45 @@ impl HtmlAttributeName {
         self.value_token()
             .ok()
             .map(|token| token.token_text_trimmed())
+    }
+}
+
+impl Attribute for AnyHtmlAttribute {
+    fn name(&self) -> Option<impl AsRef<str>> {
+        self.name()
+    }
+
+    fn value(&self) -> Option<impl AsRef<str>> {
+        self.value()
+    }
+}
+
+impl AnyHtmlAttribute {
+    pub fn name(&self) -> Option<TokenText> {
+        match self {
+            Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::AnySvelteDirective(_)
+            | Self::AnyVueDirective(_)
+            | Self::HtmlAttributeDoubleTextExpression(_)
+            | Self::HtmlAttributeSingleTextExpression(_)
+            | Self::HtmlBogusAttribute(_)
+            | Self::HtmlSpreadAttribute(_)
+            | Self::AnyAstroDirective(_)
+            | Self::SvelteAttachAttribute(_) => None,
+        }
+    }
+
+    pub fn value(&self) -> Option<StaticValue> {
+        match self {
+            Self::HtmlAttribute(attr) => attr.initializer()?.value().ok()?.as_static_value(),
+            Self::AnySvelteDirective(_)
+            | Self::AnyVueDirective(_)
+            | Self::HtmlAttributeDoubleTextExpression(_)
+            | Self::HtmlAttributeSingleTextExpression(_)
+            | Self::HtmlBogusAttribute(_)
+            | Self::HtmlSpreadAttribute(_)
+            | Self::AnyAstroDirective(_)
+            | Self::SvelteAttachAttribute(_) => None,
+        }
     }
 }

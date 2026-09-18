@@ -57,7 +57,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@43..44 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@44..45 "\n" [] [],
@@ -80,7 +79,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@80..81 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@81..82 "\n" [] [],
@@ -129,7 +127,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@130..131 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@131..132 "\n" [] [],
@@ -184,7 +181,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@188..189 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@189..190 "\n" [] [],
@@ -222,7 +218,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@236..237 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@237..238 "\n" [] [],
@@ -259,7 +254,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@282..283 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@283..284 "\n" [] [],
@@ -297,7 +291,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@324..325 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@325..326 "\n" [] [],
@@ -336,7 +329,6 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@357..358 "\n" [] [],
                 },
             ],
-            hard_line: missing (optional),
         },
         MdNewline {
             value_token: NEWLINE@358..359 "\n" [] [],
@@ -395,7 +387,6 @@ MdDocument {
           2: BACKTICK@42..43 "`" [] []
         2: MD_TEXTUAL@43..44
           0: MD_TEXTUAL_LITERAL@43..44 "\n" [] []
-      1: (empty)
     1: MD_NEWLINE@44..45
       0: NEWLINE@44..45 "\n" [] []
     2: MD_PARAGRAPH@45..81
@@ -410,7 +401,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@78..80 "\\*" [] []
         4: MD_TEXTUAL@80..81
           0: MD_TEXTUAL_LITERAL@80..81 "\n" [] []
-      1: (empty)
     3: MD_NEWLINE@81..82
       0: NEWLINE@81..82 "\n" [] []
     4: MD_PARAGRAPH@82..131
@@ -441,7 +431,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@129..130 ">" [] []
         4: MD_TEXTUAL@130..131
           0: MD_TEXTUAL_LITERAL@130..131 "\n" [] []
-      1: (empty)
     5: MD_NEWLINE@131..132
       0: NEWLINE@131..132 "\n" [] []
     6: MD_PARAGRAPH@132..189
@@ -476,7 +465,6 @@ MdDocument {
               0: MD_TEXTUAL_LITERAL@187..188 ">" [] []
         4: MD_TEXTUAL@188..189
           0: MD_TEXTUAL_LITERAL@188..189 "\n" [] []
-      1: (empty)
     7: MD_NEWLINE@189..190
       0: NEWLINE@189..190 "\n" [] []
     8: MD_PARAGRAPH@190..237
@@ -501,7 +489,6 @@ MdDocument {
           2: R_ANGLE@235..236 ">" [] []
         2: MD_TEXTUAL@236..237
           0: MD_TEXTUAL_LITERAL@236..237 "\n" [] []
-      1: (empty)
     9: MD_NEWLINE@237..238
       0: NEWLINE@237..238 "\n" [] []
     10: MD_PARAGRAPH@238..283
@@ -526,7 +513,6 @@ MdDocument {
           6: R_PAREN@281..282 ")" [] []
         2: MD_TEXTUAL@282..283
           0: MD_TEXTUAL_LITERAL@282..283 "\n" [] []
-      1: (empty)
     11: MD_NEWLINE@283..284
       0: NEWLINE@283..284 "\n" [] []
     12: MD_PARAGRAPH@284..325
@@ -551,7 +537,6 @@ MdDocument {
             2: R_BRACK@323..324 "]" [] []
         2: MD_TEXTUAL@324..325
           0: MD_TEXTUAL_LITERAL@324..325 "\n" [] []
-      1: (empty)
     13: MD_NEWLINE@325..326
       0: NEWLINE@325..326 "\n" [] []
     14: MD_PARAGRAPH@326..358
@@ -577,7 +562,6 @@ MdDocument {
             2: R_BRACK@356..357 "]" [] []
         2: MD_TEXTUAL@357..358
           0: MD_TEXTUAL_LITERAL@357..358 "\n" [] []
-      1: (empty)
     15: MD_NEWLINE@358..359
       0: NEWLINE@358..359 "\n" [] []
     16: MD_LINK_REFERENCE_DEFINITION@359..387

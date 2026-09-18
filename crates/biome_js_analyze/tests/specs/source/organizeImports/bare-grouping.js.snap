@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: bare-grouping.js
+---
+# Input
+```js
+import "./register-my-component";
+import { render } from "react-dom";
+import "./polyfill";
+import { Button } from "@/components/Button";
+
+```
+
+# Diagnostics
+```
+bare-grouping.js:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Sort these imports.
+  
+  > 1 │ import "./register-my-component";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ import { render } from "react-dom";
+  > 3 │ import "./polyfill";
+  > 4 │ import { Button } from "@/components/Button";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - import·"./register-my-component";
+    2   │ - import·{·render·}·from·"react-dom";
+      1 │ + import·{·render·}·from·"react-dom";
+      2 │ + import·{·Button·}·from·"@/components/Button";
+      3 │ + 
+    3 4 │   import "./polyfill";
+    4   │ - import·{·Button·}·from·"@/components/Button";
+      5 │ + import·"./register-my-component";
+    5 6 │   
+  
+
+```

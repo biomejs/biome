@@ -1,0 +1,11 @@
+@keyframes fade {
+  $stop: 50%;
+
+  #{$stop} {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

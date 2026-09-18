@@ -41,5 +41,29 @@ debugger;
 # Emitted Messages
 
 ```block
+biome.json:2:23 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+  > 2 │             "linter": {
+      │                       ^
+  > 3 │                 "rules": {
+  > 4 │                     "recommended": true
+  > 5 │                 }
+  > 6 │             },
+      │             ^
+    7 │             "overrides": [
+    8 │                 {
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 Checked 3 files in <TIME>. Fixed 1 file.
+Found 1 info.
 ```

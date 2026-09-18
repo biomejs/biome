@@ -40,7 +40,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@7..8 "\n" [] [],
@@ -110,7 +109,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..6 "item" [] []
                 1: MD_TEXTUAL@6..7
                   0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
-              1: (empty)
             1: MD_NEWLINE@7..8
               0: NEWLINE@7..8 "\n" [] []
             2: MD_CONTINUATION_INDENT@8..9

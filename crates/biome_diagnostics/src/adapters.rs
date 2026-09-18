@@ -165,14 +165,14 @@ impl Diagnostic for CaminoError {
         write!(fmt, "{}", self.error)
     }
 
-    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
     }
 }
 
 #[cfg(feature = "camino")]
 impl biome_console::fmt::Display for CaminoError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
         write!(fmt, "{:?}", self.error)
     }
 }
@@ -180,6 +180,38 @@ impl biome_console::fmt::Display for CaminoError {
 #[cfg(feature = "camino")]
 impl From<camino::FromPathBufError> for CaminoError {
     fn from(error: camino::FromPathBufError) -> Self {
+        Self { error }
+    }
+}
+
+#[cfg(feature = "notify")]
+#[derive(Debug)]
+pub struct NotifyError {
+    error: notify::Error,
+}
+
+#[cfg(feature = "notify")]
+impl Diagnostic for NotifyError {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("internalError/fs"))
+    }
+
+    fn severity(&self) -> crate::Severity {
+        crate::Severity::Error
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(fmt, "{}", self.error)
+    }
+
+    fn message(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        fmt.write_markup(markup!({ AsConsoleDisplay(&self.error) }))
+    }
+}
+
+#[cfg(feature = "notify")]
+impl From<notify::Error> for NotifyError {
+    fn from(error: notify::Error) -> Self {
         Self { error }
     }
 }

@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_10492.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+function f(visitor) {
+	let ctrl = visitor();
+	for (const x of [0]) ctrl = ctrl();
+}
+
+```

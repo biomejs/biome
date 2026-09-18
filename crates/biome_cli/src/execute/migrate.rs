@@ -13,7 +13,8 @@ use biome_diagnostics::{
 };
 use biome_fs::{BiomePath, ConfigName, OpenOptions};
 use biome_json_parser::{JsonParserOptions, parse_json_with_cache};
-use biome_json_syntax::{JsonFileSource, JsonRoot};
+use biome_json_syntax::JsonRoot;
+use biome_languages::JsonFileSource;
 use biome_migrate::{ControlFlow, migrate_configuration};
 use biome_rowan::{AstNode, NodeCache};
 use biome_service::Workspace;
@@ -201,6 +202,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
         ),
         persist_node_cache: false,
         inline_config: None,
+        editor_features: None,
     })?;
     let parsed = parse_json_with_cache(&biome_config_content, &mut cache, parse_options);
 
@@ -254,6 +256,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     content: new_content,
                     version: 1,
                     inline_config: None,
+                    editor_features: None,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
@@ -333,6 +336,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                     content: new_content,
                     version: 1,
                     inline_config: None,
+                    editor_features: None,
                 })?;
                 let printed = workspace.format_file(FormatFileParams {
                     project_key,
@@ -421,6 +425,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                         content: new_configuration_content,
                         version: 1,
                         inline_config: None,
+                        editor_features: None,
                     })?;
                     let printed = workspace.format_file(FormatFileParams {
                         project_key,

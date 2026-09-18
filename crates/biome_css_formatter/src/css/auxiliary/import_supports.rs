@@ -13,13 +13,15 @@ impl FormatNodeRule<CssImportSupports> for FormatCssImportSupports {
             r_paren_token,
         } = node.as_fields();
 
+        let should_insert_space = f.options().delimiter_spacing().value();
+
         write!(
             f,
             [
                 supports_token.format(),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent(&condition.format()),
+                    soft_block_indent_with_maybe_space(&condition.format(), should_insert_space),
                     r_paren_token.format()
                 ])
             ]

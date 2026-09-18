@@ -46,7 +46,6 @@ MdDocument {
                                     value_token: MD_HARD_LINE_LITERAL@13..16 "  \n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@16..17 "\n" [] [],
@@ -70,7 +69,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@22..23 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdNewline {
                             value_token: NEWLINE@23..24 "\n" [] [],
@@ -91,7 +89,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@26..32 "simple" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                     ],
                 },
@@ -127,7 +124,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@8..13 "bar" [Whitespace(" "), Whitespace(" ")] []
                 3: MD_HARD_LINE@13..16
                   0: MD_HARD_LINE_LITERAL@13..16 "  \n" [] []
-              1: (empty)
             1: MD_NEWLINE@16..17
               0: NEWLINE@16..17 "\n" [] []
             2: MD_CONTINUATION_INDENT@17..19
@@ -142,7 +138,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@19..22 "baz" [] []
                 1: MD_TEXTUAL@22..23
                   0: MD_TEXTUAL_LITERAL@22..23 "\n" [] []
-              1: (empty)
             4: MD_NEWLINE@23..24
               0: NEWLINE@23..24 "\n" [] []
         1: MD_BULLET@24..32
@@ -156,7 +151,6 @@ MdDocument {
               0: MD_INLINE_ITEM_LIST@26..32
                 0: MD_TEXTUAL@26..32
                   0: MD_TEXTUAL_LITERAL@26..32 "simple" [] []
-              1: (empty)
   2: EOF@32..32 "" [] []
 
 ```

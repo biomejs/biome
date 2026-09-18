@@ -1,0 +1,52 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div>
+	<div role="button"></div>
+	<div role="tab"></div>
+</div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element with the interactive role "button" is not focusable.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div>
+  > 3 │ 	<div role="button"></div>
+      │ 	^^^^^^^^^^^^^^^^^^^
+    4 │ 	<div role="tab"></div>
+    5 │ </div>
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "button".
+  
+  i Add a tabindex attribute to make this element focusable.
+  
+
+```
+
+```
+invalid.astro:4:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The HTML element with the interactive role "tab" is not focusable.
+  
+    2 │ <div>
+    3 │ 	<div role="button"></div>
+  > 4 │ 	<div role="tab"></div>
+      │ 	^^^^^^^^^^^^^^^^
+    5 │ </div>
+    6 │ 
+  
+  i A non-interactive HTML element that is not focusable may not be reachable for users that rely on keyboard navigation, even with an added role like "tab".
+  
+  i Add a tabindex attribute to make this element focusable.
+  
+
+```

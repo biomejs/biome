@@ -80,7 +80,13 @@ fn is_var_function_parameter_list(node: &CssParameterList) -> bool {
 
 /// Keeps a blank line after SCSS keyword parameters.
 ///
-/// Example: `foo($a: 1,\n\n$b: 2)` keeps the empty line before `$b`.
+/// ```scss
+/// foo(
+///   $a: 1,
+///
+///   $b: 2
+/// )
+/// ```
 fn should_preserve_blank_line_before_parameter(
     parameter: Option<&AnyCssExpression>,
     previous_was_keyword_argument: bool,
@@ -96,7 +102,10 @@ fn is_scss_keyword_parameter(parameter: Option<&AnyCssExpression>) -> bool {
 
 /// Keeps a closing line comment attached to a final SCSS spread argument.
 ///
-/// Example: `@include mix($args... // comment\n)`.
+/// ```scss
+/// @include mix($args... // comment
+/// );
+/// ```
 fn should_inline_arbitrary_argument_closing_comment(
     node: &CssParameterList,
     f: &CssFormatter,

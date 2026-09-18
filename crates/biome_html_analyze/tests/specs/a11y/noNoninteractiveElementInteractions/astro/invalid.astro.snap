@@ -1,0 +1,1575 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div onclick="() => { }"></div>
+<main onclick="()=> void 0"></main>
+<article onclick="() => { }"></article>
+<aside onclick="() => { }"></aside>
+<blockquote onclick="() => { }"></blockquote>
+
+<body onclick="() => { }"></body>
+<br onclick="() => { }" />
+<caption onclick="() => { }"></caption>
+<dd onclick="() => { }"></dd>
+<details onclick="() => { }"></details>
+<dfn onclick="() => { }"></dfn>
+<dl onclick="() => { }"></dl>
+<dir onclick="() => { }"></dir>
+<dt onclick="() => { }"></dt>
+<fieldset onclick="() => { }"></fieldset>
+<figcaption onclick="() => { }"></figcaption>
+<figure onclick="() => { }"></figure>
+<footer onclick="() => { }"></footer>
+<form onclick="() => { }"></form>
+<frame onclick="() => { }" />
+<h1 onclick="() => { }"></h1>
+<h2 onclick="() => { }"></h2>
+<h3 onclick="() => { }"></h3>
+<h4 onclick="() => { }"></h4>
+<h5 onclick="() => { }"></h5>
+<h6 onclick="() => { }"></h6>
+<iframe onclick="() => { }"></iframe>
+<img onclick="() => { }" />
+<label onclick="() => { }"></label>
+<legend onclick="() => { }"></legend>
+<li onclick="() => { }"></li>
+<mark onclick="() => { }"></mark>
+<marquee onclick="() => { }"></marquee>
+<menu onclick="() => { }"></menu>
+<meter onclick="() => { }"></meter>
+<nav onclick="() => { }"></nav>
+<ol onclick="() => { }"></ol>
+<optgroup onclick="() => { }"></optgroup>
+<output onclick="() => { }"></output>
+<p onclick="() => { }"></p>
+<pre onclick="() => { }"></pre>
+<progress onclick="() => { }"></progress>
+<ruby onclick="() => { }"></ruby>
+<section onclick="() => { }" aria-label="Aardvark"></section>
+<section onclick="() => { }" aria-labelledby="js_1"></section>
+<table onclick="() => { }"></table>
+<tbody onclick="() => { }"></tbody>
+<td onclick="() => { }"></td>
+<tfoot onclick="() => { }"></tfoot>
+<thead onclick="() => { }"></thead>
+<time onclick="() => { }"></time>
+<ul onclick="() => { }"></ul>
+<ul contenteditable="false" onclick="() => { }"></ul>
+<div role="alert" onclick="() => { }"></div>
+<div role="alertdialog" onclick="() => { }"></div>
+<div role="application" onclick="() => { }"></div>
+<div role="banner" onclick="() => { }"></div>
+<div role="cell" onclick="() => { }"></div>
+<div role="complementary" onclick="() => { }"></div>
+<div role="contentinfo" onclick="() => { }"></div>
+<div role="definition" onclick="() => { }"></div>
+<div role="dialog" onclick="() => { }"></div>
+<div role="directory" onclick="() => { }"></div>
+<div role="document" onclick="() => { }"></div>
+<div role="feed" onclick="() => { }"></div>
+<div role="figure" onclick="() => { }"></div>
+<div role="form" onclick="() => { }"></div>
+<div role="group" onclick="() => { }"></div>
+<div role="heading" onclick="() => { }"></div>
+<div role="img" onclick="() => { }"></div>
+<div role="list" onclick="() => { }"></div>
+<div role="listitem" onclick="() => { }"></div>
+<div role="log" onclick="() => { }"></div>
+<div role="main" onclick="() => { }"></div>
+<div role="marquee" onclick="() => { }"></div>
+<div role="math" onclick="() => { }"></div>
+<div role="navigation" onclick="() => { }"></div>
+<div role="note" onclick="() => { }"></div>
+<div role="region" onclick="() => { }"></div>
+<div role="rowgroup" onclick="() => { }"></div>
+<div role="search" onclick="() => { }"></div>
+<div role="status" onclick="() => { }"></div>
+<div role="table" onclick="() => { }"></div>
+<div role="tabpanel" onclick="() => { }"></div>
+<div role="term" onclick="() => { }"></div>
+<div role="timer" onclick="() => { }"></div>
+<div role="tooltip" onclick="() => { }"></div>
+<div role="progressbar" onclick="() => { }"></div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div onclick="() => { }"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <main onclick="()=> void 0"></main>
+    4 │ <article onclick="() => { }"></article>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div onclick="() => { }"></div>
+  > 3 │ <main onclick="()=> void 0"></main>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <article onclick="() => { }"></article>
+    5 │ <aside onclick="() => { }"></aside>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    2 │ <div onclick="() => { }"></div>
+    3 │ <main onclick="()=> void 0"></main>
+  > 4 │ <article onclick="() => { }"></article>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <aside onclick="() => { }"></aside>
+    6 │ <blockquote onclick="() => { }"></blockquote>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    3 │ <main onclick="()=> void 0"></main>
+    4 │ <article onclick="() => { }"></article>
+  > 5 │ <aside onclick="() => { }"></aside>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <blockquote onclick="() => { }"></blockquote>
+    7 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    4 │ <article onclick="() => { }"></article>
+    5 │ <aside onclick="() => { }"></aside>
+  > 6 │ <blockquote onclick="() => { }"></blockquote>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ <body onclick="() => { }"></body>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+     6 │ <blockquote onclick="() => { }"></blockquote>
+     7 │ 
+   > 8 │ <body onclick="() => { }"></body>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <br onclick="() => { }" />
+    10 │ <caption onclick="() => { }"></caption>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:9:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+     8 │ <body onclick="() => { }"></body>
+   > 9 │ <br onclick="() => { }" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <caption onclick="() => { }"></caption>
+    11 │ <dd onclick="() => { }"></dd>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:10:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+     8 │ <body onclick="() => { }"></body>
+     9 │ <br onclick="() => { }" />
+  > 10 │ <caption onclick="() => { }"></caption>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <dd onclick="() => { }"></dd>
+    12 │ <details onclick="() => { }"></details>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:11:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+     9 │ <br onclick="() => { }" />
+    10 │ <caption onclick="() => { }"></caption>
+  > 11 │ <dd onclick="() => { }"></dd>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <details onclick="() => { }"></details>
+    13 │ <dfn onclick="() => { }"></dfn>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:12:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    10 │ <caption onclick="() => { }"></caption>
+    11 │ <dd onclick="() => { }"></dd>
+  > 12 │ <details onclick="() => { }"></details>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <dfn onclick="() => { }"></dfn>
+    14 │ <dl onclick="() => { }"></dl>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:13:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    11 │ <dd onclick="() => { }"></dd>
+    12 │ <details onclick="() => { }"></details>
+  > 13 │ <dfn onclick="() => { }"></dfn>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <dl onclick="() => { }"></dl>
+    15 │ <dir onclick="() => { }"></dir>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    13 │ <dfn onclick="() => { }"></dfn>
+    14 │ <dl onclick="() => { }"></dl>
+  > 15 │ <dir onclick="() => { }"></dir>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <dt onclick="() => { }"></dt>
+    17 │ <fieldset onclick="() => { }"></fieldset>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:16:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    14 │ <dl onclick="() => { }"></dl>
+    15 │ <dir onclick="() => { }"></dir>
+  > 16 │ <dt onclick="() => { }"></dt>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <fieldset onclick="() => { }"></fieldset>
+    18 │ <figcaption onclick="() => { }"></figcaption>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:17:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    15 │ <dir onclick="() => { }"></dir>
+    16 │ <dt onclick="() => { }"></dt>
+  > 17 │ <fieldset onclick="() => { }"></fieldset>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <figcaption onclick="() => { }"></figcaption>
+    19 │ <figure onclick="() => { }"></figure>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:18:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    16 │ <dt onclick="() => { }"></dt>
+    17 │ <fieldset onclick="() => { }"></fieldset>
+  > 18 │ <figcaption onclick="() => { }"></figcaption>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <figure onclick="() => { }"></figure>
+    20 │ <footer onclick="() => { }"></footer>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:19:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    17 │ <fieldset onclick="() => { }"></fieldset>
+    18 │ <figcaption onclick="() => { }"></figcaption>
+  > 19 │ <figure onclick="() => { }"></figure>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <footer onclick="() => { }"></footer>
+    21 │ <form onclick="() => { }"></form>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:20:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    18 │ <figcaption onclick="() => { }"></figcaption>
+    19 │ <figure onclick="() => { }"></figure>
+  > 20 │ <footer onclick="() => { }"></footer>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <form onclick="() => { }"></form>
+    22 │ <frame onclick="() => { }" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:21:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    19 │ <figure onclick="() => { }"></figure>
+    20 │ <footer onclick="() => { }"></footer>
+  > 21 │ <form onclick="() => { }"></form>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ <frame onclick="() => { }" />
+    23 │ <h1 onclick="() => { }"></h1>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:22:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    20 │ <footer onclick="() => { }"></footer>
+    21 │ <form onclick="() => { }"></form>
+  > 22 │ <frame onclick="() => { }" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ <h1 onclick="() => { }"></h1>
+    24 │ <h2 onclick="() => { }"></h2>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:23:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    21 │ <form onclick="() => { }"></form>
+    22 │ <frame onclick="() => { }" />
+  > 23 │ <h1 onclick="() => { }"></h1>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <h2 onclick="() => { }"></h2>
+    25 │ <h3 onclick="() => { }"></h3>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:24:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    22 │ <frame onclick="() => { }" />
+    23 │ <h1 onclick="() => { }"></h1>
+  > 24 │ <h2 onclick="() => { }"></h2>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ <h3 onclick="() => { }"></h3>
+    26 │ <h4 onclick="() => { }"></h4>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:25:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    23 │ <h1 onclick="() => { }"></h1>
+    24 │ <h2 onclick="() => { }"></h2>
+  > 25 │ <h3 onclick="() => { }"></h3>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ <h4 onclick="() => { }"></h4>
+    27 │ <h5 onclick="() => { }"></h5>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:26:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    24 │ <h2 onclick="() => { }"></h2>
+    25 │ <h3 onclick="() => { }"></h3>
+  > 26 │ <h4 onclick="() => { }"></h4>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ <h5 onclick="() => { }"></h5>
+    28 │ <h6 onclick="() => { }"></h6>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:27:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    25 │ <h3 onclick="() => { }"></h3>
+    26 │ <h4 onclick="() => { }"></h4>
+  > 27 │ <h5 onclick="() => { }"></h5>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ <h6 onclick="() => { }"></h6>
+    29 │ <iframe onclick="() => { }"></iframe>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:28:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    26 │ <h4 onclick="() => { }"></h4>
+    27 │ <h5 onclick="() => { }"></h5>
+  > 28 │ <h6 onclick="() => { }"></h6>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ <iframe onclick="() => { }"></iframe>
+    30 │ <img onclick="() => { }" />
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:29:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    27 │ <h5 onclick="() => { }"></h5>
+    28 │ <h6 onclick="() => { }"></h6>
+  > 29 │ <iframe onclick="() => { }"></iframe>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ <img onclick="() => { }" />
+    31 │ <label onclick="() => { }"></label>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:30:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    28 │ <h6 onclick="() => { }"></h6>
+    29 │ <iframe onclick="() => { }"></iframe>
+  > 30 │ <img onclick="() => { }" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ <label onclick="() => { }"></label>
+    32 │ <legend onclick="() => { }"></legend>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:31:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    29 │ <iframe onclick="() => { }"></iframe>
+    30 │ <img onclick="() => { }" />
+  > 31 │ <label onclick="() => { }"></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <legend onclick="() => { }"></legend>
+    33 │ <li onclick="() => { }"></li>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:32:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    30 │ <img onclick="() => { }" />
+    31 │ <label onclick="() => { }"></label>
+  > 32 │ <legend onclick="() => { }"></legend>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <li onclick="() => { }"></li>
+    34 │ <mark onclick="() => { }"></mark>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:33:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    31 │ <label onclick="() => { }"></label>
+    32 │ <legend onclick="() => { }"></legend>
+  > 33 │ <li onclick="() => { }"></li>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <mark onclick="() => { }"></mark>
+    35 │ <marquee onclick="() => { }"></marquee>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:34:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    32 │ <legend onclick="() => { }"></legend>
+    33 │ <li onclick="() => { }"></li>
+  > 34 │ <mark onclick="() => { }"></mark>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <marquee onclick="() => { }"></marquee>
+    36 │ <menu onclick="() => { }"></menu>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:35:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    33 │ <li onclick="() => { }"></li>
+    34 │ <mark onclick="() => { }"></mark>
+  > 35 │ <marquee onclick="() => { }"></marquee>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ <menu onclick="() => { }"></menu>
+    37 │ <meter onclick="() => { }"></meter>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:36:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    34 │ <mark onclick="() => { }"></mark>
+    35 │ <marquee onclick="() => { }"></marquee>
+  > 36 │ <menu onclick="() => { }"></menu>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ <meter onclick="() => { }"></meter>
+    38 │ <nav onclick="() => { }"></nav>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:37:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    35 │ <marquee onclick="() => { }"></marquee>
+    36 │ <menu onclick="() => { }"></menu>
+  > 37 │ <meter onclick="() => { }"></meter>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ <nav onclick="() => { }"></nav>
+    39 │ <ol onclick="() => { }"></ol>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:38:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    36 │ <menu onclick="() => { }"></menu>
+    37 │ <meter onclick="() => { }"></meter>
+  > 38 │ <nav onclick="() => { }"></nav>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ <ol onclick="() => { }"></ol>
+    40 │ <optgroup onclick="() => { }"></optgroup>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:39:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    37 │ <meter onclick="() => { }"></meter>
+    38 │ <nav onclick="() => { }"></nav>
+  > 39 │ <ol onclick="() => { }"></ol>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ <optgroup onclick="() => { }"></optgroup>
+    41 │ <output onclick="() => { }"></output>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:40:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    38 │ <nav onclick="() => { }"></nav>
+    39 │ <ol onclick="() => { }"></ol>
+  > 40 │ <optgroup onclick="() => { }"></optgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ <output onclick="() => { }"></output>
+    42 │ <p onclick="() => { }"></p>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:41:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    39 │ <ol onclick="() => { }"></ol>
+    40 │ <optgroup onclick="() => { }"></optgroup>
+  > 41 │ <output onclick="() => { }"></output>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ <p onclick="() => { }"></p>
+    43 │ <pre onclick="() => { }"></pre>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:42:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    40 │ <optgroup onclick="() => { }"></optgroup>
+    41 │ <output onclick="() => { }"></output>
+  > 42 │ <p onclick="() => { }"></p>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ <pre onclick="() => { }"></pre>
+    44 │ <progress onclick="() => { }"></progress>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:43:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    41 │ <output onclick="() => { }"></output>
+    42 │ <p onclick="() => { }"></p>
+  > 43 │ <pre onclick="() => { }"></pre>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ <progress onclick="() => { }"></progress>
+    45 │ <ruby onclick="() => { }"></ruby>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:44:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    42 │ <p onclick="() => { }"></p>
+    43 │ <pre onclick="() => { }"></pre>
+  > 44 │ <progress onclick="() => { }"></progress>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ <ruby onclick="() => { }"></ruby>
+    46 │ <section onclick="() => { }" aria-label="Aardvark"></section>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:45:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    43 │ <pre onclick="() => { }"></pre>
+    44 │ <progress onclick="() => { }"></progress>
+  > 45 │ <ruby onclick="() => { }"></ruby>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ <section onclick="() => { }" aria-label="Aardvark"></section>
+    47 │ <section onclick="() => { }" aria-labelledby="js_1"></section>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:46:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    44 │ <progress onclick="() => { }"></progress>
+    45 │ <ruby onclick="() => { }"></ruby>
+  > 46 │ <section onclick="() => { }" aria-label="Aardvark"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ <section onclick="() => { }" aria-labelledby="js_1"></section>
+    48 │ <table onclick="() => { }"></table>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:47:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    45 │ <ruby onclick="() => { }"></ruby>
+    46 │ <section onclick="() => { }" aria-label="Aardvark"></section>
+  > 47 │ <section onclick="() => { }" aria-labelledby="js_1"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ <table onclick="() => { }"></table>
+    49 │ <tbody onclick="() => { }"></tbody>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:48:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    46 │ <section onclick="() => { }" aria-label="Aardvark"></section>
+    47 │ <section onclick="() => { }" aria-labelledby="js_1"></section>
+  > 48 │ <table onclick="() => { }"></table>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ <tbody onclick="() => { }"></tbody>
+    50 │ <td onclick="() => { }"></td>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:49:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    47 │ <section onclick="() => { }" aria-labelledby="js_1"></section>
+    48 │ <table onclick="() => { }"></table>
+  > 49 │ <tbody onclick="() => { }"></tbody>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ <td onclick="() => { }"></td>
+    51 │ <tfoot onclick="() => { }"></tfoot>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:50:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    48 │ <table onclick="() => { }"></table>
+    49 │ <tbody onclick="() => { }"></tbody>
+  > 50 │ <td onclick="() => { }"></td>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ <tfoot onclick="() => { }"></tfoot>
+    52 │ <thead onclick="() => { }"></thead>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:51:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    49 │ <tbody onclick="() => { }"></tbody>
+    50 │ <td onclick="() => { }"></td>
+  > 51 │ <tfoot onclick="() => { }"></tfoot>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ <thead onclick="() => { }"></thead>
+    53 │ <time onclick="() => { }"></time>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:52:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    50 │ <td onclick="() => { }"></td>
+    51 │ <tfoot onclick="() => { }"></tfoot>
+  > 52 │ <thead onclick="() => { }"></thead>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ <time onclick="() => { }"></time>
+    54 │ <ul onclick="() => { }"></ul>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:53:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    51 │ <tfoot onclick="() => { }"></tfoot>
+    52 │ <thead onclick="() => { }"></thead>
+  > 53 │ <time onclick="() => { }"></time>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ <ul onclick="() => { }"></ul>
+    55 │ <ul contenteditable="false" onclick="() => { }"></ul>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:54:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    52 │ <thead onclick="() => { }"></thead>
+    53 │ <time onclick="() => { }"></time>
+  > 54 │ <ul onclick="() => { }"></ul>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ <ul contenteditable="false" onclick="() => { }"></ul>
+    56 │ <div role="alert" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:55:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    53 │ <time onclick="() => { }"></time>
+    54 │ <ul onclick="() => { }"></ul>
+  > 55 │ <ul contenteditable="false" onclick="() => { }"></ul>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ <div role="alert" onclick="() => { }"></div>
+    57 │ <div role="alertdialog" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:56:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    54 │ <ul onclick="() => { }"></ul>
+    55 │ <ul contenteditable="false" onclick="() => { }"></ul>
+  > 56 │ <div role="alert" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ <div role="alertdialog" onclick="() => { }"></div>
+    58 │ <div role="application" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:57:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    55 │ <ul contenteditable="false" onclick="() => { }"></ul>
+    56 │ <div role="alert" onclick="() => { }"></div>
+  > 57 │ <div role="alertdialog" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ <div role="application" onclick="() => { }"></div>
+    59 │ <div role="banner" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:58:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    56 │ <div role="alert" onclick="() => { }"></div>
+    57 │ <div role="alertdialog" onclick="() => { }"></div>
+  > 58 │ <div role="application" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ <div role="banner" onclick="() => { }"></div>
+    60 │ <div role="cell" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:59:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    57 │ <div role="alertdialog" onclick="() => { }"></div>
+    58 │ <div role="application" onclick="() => { }"></div>
+  > 59 │ <div role="banner" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ <div role="cell" onclick="() => { }"></div>
+    61 │ <div role="complementary" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:60:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    58 │ <div role="application" onclick="() => { }"></div>
+    59 │ <div role="banner" onclick="() => { }"></div>
+  > 60 │ <div role="cell" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ <div role="complementary" onclick="() => { }"></div>
+    62 │ <div role="contentinfo" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:61:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    59 │ <div role="banner" onclick="() => { }"></div>
+    60 │ <div role="cell" onclick="() => { }"></div>
+  > 61 │ <div role="complementary" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ <div role="contentinfo" onclick="() => { }"></div>
+    63 │ <div role="definition" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:62:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    60 │ <div role="cell" onclick="() => { }"></div>
+    61 │ <div role="complementary" onclick="() => { }"></div>
+  > 62 │ <div role="contentinfo" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ <div role="definition" onclick="() => { }"></div>
+    64 │ <div role="dialog" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:63:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    61 │ <div role="complementary" onclick="() => { }"></div>
+    62 │ <div role="contentinfo" onclick="() => { }"></div>
+  > 63 │ <div role="definition" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ <div role="dialog" onclick="() => { }"></div>
+    65 │ <div role="directory" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:64:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    62 │ <div role="contentinfo" onclick="() => { }"></div>
+    63 │ <div role="definition" onclick="() => { }"></div>
+  > 64 │ <div role="dialog" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ <div role="directory" onclick="() => { }"></div>
+    66 │ <div role="document" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:65:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    63 │ <div role="definition" onclick="() => { }"></div>
+    64 │ <div role="dialog" onclick="() => { }"></div>
+  > 65 │ <div role="directory" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ <div role="document" onclick="() => { }"></div>
+    67 │ <div role="feed" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:66:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    64 │ <div role="dialog" onclick="() => { }"></div>
+    65 │ <div role="directory" onclick="() => { }"></div>
+  > 66 │ <div role="document" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ <div role="feed" onclick="() => { }"></div>
+    68 │ <div role="figure" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:67:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    65 │ <div role="directory" onclick="() => { }"></div>
+    66 │ <div role="document" onclick="() => { }"></div>
+  > 67 │ <div role="feed" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ <div role="figure" onclick="() => { }"></div>
+    69 │ <div role="form" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:68:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    66 │ <div role="document" onclick="() => { }"></div>
+    67 │ <div role="feed" onclick="() => { }"></div>
+  > 68 │ <div role="figure" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ <div role="form" onclick="() => { }"></div>
+    70 │ <div role="group" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:69:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    67 │ <div role="feed" onclick="() => { }"></div>
+    68 │ <div role="figure" onclick="() => { }"></div>
+  > 69 │ <div role="form" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ <div role="group" onclick="() => { }"></div>
+    71 │ <div role="heading" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:70:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    68 │ <div role="figure" onclick="() => { }"></div>
+    69 │ <div role="form" onclick="() => { }"></div>
+  > 70 │ <div role="group" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ <div role="heading" onclick="() => { }"></div>
+    72 │ <div role="img" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:71:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    69 │ <div role="form" onclick="() => { }"></div>
+    70 │ <div role="group" onclick="() => { }"></div>
+  > 71 │ <div role="heading" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ <div role="img" onclick="() => { }"></div>
+    73 │ <div role="list" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:72:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    70 │ <div role="group" onclick="() => { }"></div>
+    71 │ <div role="heading" onclick="() => { }"></div>
+  > 72 │ <div role="img" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ <div role="list" onclick="() => { }"></div>
+    74 │ <div role="listitem" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:73:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    71 │ <div role="heading" onclick="() => { }"></div>
+    72 │ <div role="img" onclick="() => { }"></div>
+  > 73 │ <div role="list" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ <div role="listitem" onclick="() => { }"></div>
+    75 │ <div role="log" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:74:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    72 │ <div role="img" onclick="() => { }"></div>
+    73 │ <div role="list" onclick="() => { }"></div>
+  > 74 │ <div role="listitem" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ <div role="log" onclick="() => { }"></div>
+    76 │ <div role="main" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:75:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    73 │ <div role="list" onclick="() => { }"></div>
+    74 │ <div role="listitem" onclick="() => { }"></div>
+  > 75 │ <div role="log" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ <div role="main" onclick="() => { }"></div>
+    77 │ <div role="marquee" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:76:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    74 │ <div role="listitem" onclick="() => { }"></div>
+    75 │ <div role="log" onclick="() => { }"></div>
+  > 76 │ <div role="main" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ <div role="marquee" onclick="() => { }"></div>
+    78 │ <div role="math" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:77:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    75 │ <div role="log" onclick="() => { }"></div>
+    76 │ <div role="main" onclick="() => { }"></div>
+  > 77 │ <div role="marquee" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    78 │ <div role="math" onclick="() => { }"></div>
+    79 │ <div role="navigation" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:78:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    76 │ <div role="main" onclick="() => { }"></div>
+    77 │ <div role="marquee" onclick="() => { }"></div>
+  > 78 │ <div role="math" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ <div role="navigation" onclick="() => { }"></div>
+    80 │ <div role="note" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:79:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    77 │ <div role="marquee" onclick="() => { }"></div>
+    78 │ <div role="math" onclick="() => { }"></div>
+  > 79 │ <div role="navigation" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ <div role="note" onclick="() => { }"></div>
+    81 │ <div role="region" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:80:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    78 │ <div role="math" onclick="() => { }"></div>
+    79 │ <div role="navigation" onclick="() => { }"></div>
+  > 80 │ <div role="note" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ <div role="region" onclick="() => { }"></div>
+    82 │ <div role="rowgroup" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:81:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    79 │ <div role="navigation" onclick="() => { }"></div>
+    80 │ <div role="note" onclick="() => { }"></div>
+  > 81 │ <div role="region" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ <div role="rowgroup" onclick="() => { }"></div>
+    83 │ <div role="search" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:82:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    80 │ <div role="note" onclick="() => { }"></div>
+    81 │ <div role="region" onclick="() => { }"></div>
+  > 82 │ <div role="rowgroup" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ <div role="search" onclick="() => { }"></div>
+    84 │ <div role="status" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:83:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    81 │ <div role="region" onclick="() => { }"></div>
+    82 │ <div role="rowgroup" onclick="() => { }"></div>
+  > 83 │ <div role="search" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ <div role="status" onclick="() => { }"></div>
+    85 │ <div role="table" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:84:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    82 │ <div role="rowgroup" onclick="() => { }"></div>
+    83 │ <div role="search" onclick="() => { }"></div>
+  > 84 │ <div role="status" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ <div role="table" onclick="() => { }"></div>
+    86 │ <div role="tabpanel" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:85:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    83 │ <div role="search" onclick="() => { }"></div>
+    84 │ <div role="status" onclick="() => { }"></div>
+  > 85 │ <div role="table" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ <div role="tabpanel" onclick="() => { }"></div>
+    87 │ <div role="term" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:86:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    84 │ <div role="status" onclick="() => { }"></div>
+    85 │ <div role="table" onclick="() => { }"></div>
+  > 86 │ <div role="tabpanel" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ <div role="term" onclick="() => { }"></div>
+    88 │ <div role="timer" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:87:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    85 │ <div role="table" onclick="() => { }"></div>
+    86 │ <div role="tabpanel" onclick="() => { }"></div>
+  > 87 │ <div role="term" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ <div role="timer" onclick="() => { }"></div>
+    89 │ <div role="tooltip" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:88:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    86 │ <div role="tabpanel" onclick="() => { }"></div>
+    87 │ <div role="term" onclick="() => { }"></div>
+  > 88 │ <div role="timer" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ <div role="tooltip" onclick="() => { }"></div>
+    90 │ <div role="progressbar" onclick="() => { }"></div>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:89:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    87 │ <div role="term" onclick="() => { }"></div>
+    88 │ <div role="timer" onclick="() => { }"></div>
+  > 89 │ <div role="tooltip" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ <div role="progressbar" onclick="() => { }"></div>
+    91 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.astro:90:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    88 │ <div role="timer" onclick="() => { }"></div>
+    89 │ <div role="tooltip" onclick="() => { }"></div>
+  > 90 │ <div role="progressbar" onclick="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    91 │ 
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```

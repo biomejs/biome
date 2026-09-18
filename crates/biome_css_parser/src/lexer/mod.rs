@@ -11,9 +11,10 @@ use self::scan_cursor::{
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
-    CssFileSource, CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange,
-    TextSize, scan_css_number,
+    CssNumberScanOptions, CssSyntaxKind, CssSyntaxKind::*, T, TextLen, TextRange, TextSize,
+    scan_css_number,
 };
+use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,

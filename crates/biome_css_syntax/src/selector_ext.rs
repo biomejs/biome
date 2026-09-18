@@ -1,4 +1,8 @@
-use crate::{CssComplexSelector, CssCompoundSelector};
+use crate::{
+    CssComplexSelector, CssCompoundSelector, CssPseudoClassFunctionSelector,
+    CssPseudoClassFunctionSelectorList,
+};
+use biome_rowan::declare_node_union;
 
 impl CssComplexSelector {
     ///
@@ -35,6 +39,23 @@ impl Iterator for CssComplexSelectorIterator {
             .right()
             .ok()
             .and_then(|r| r.as_css_compound_selector().cloned())
+    }
+}
+
+declare_node_union! {
+    pub AnyCssPseudoClassFunctionSelector = CssPseudoClassFunctionSelector | CssPseudoClassFunctionSelectorList
+}
+
+impl AnyCssPseudoClassFunctionSelector {
+    /// Returns `true` if the given pseudo-class function selector is `:global(...)`.
+    pub fn is_global_pseudo(&self) -> bool {
+        let name = match self {
+            Self::CssPseudoClassFunctionSelector(node) => node.name(),
+            Self::CssPseudoClassFunctionSelectorList(node) => node.name(),
+        };
+        name.ok()
+            .and_then(|name| name.value_token().ok())
+            .is_some_and(|token| token.text_trimmed().eq_ignore_ascii_case("global"))
     }
 }
 

@@ -1,0 +1,47 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<!-- .ghost is not defined in any <style> block (scoped or global). -->
+<template>
+	<div class="ghost">Undefined class</div>
+	<div class="title">Defined in scoped style — valid</div>
+</template>
+
+<style scoped>
+	.title { font-size: 2rem; }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.vue:4:14 lint/nursery/noUndeclaredClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The CSS class ghost is not defined in any available stylesheet.
+  
+    2 │ <!-- .ghost is not defined in any <style> block (scoped or global). -->
+    3 │ <template>
+  > 4 │ 	<div class="ghost">Undefined class</div>
+      │ 	            ^^^^^
+    5 │ 	<div class="title">Defined in scoped style — valid</div>
+    6 │ </template>
+  
+  i Referencing undefined classes often indicates a typo or a missing stylesheet, and will result in elements not being styled as intended.
+  
+  i Checked import tree:
+    
+    invalid.vue (this file)
+  
+  
+  i Either define this class in a `<style>` block, import a CSS file that contains it, or remove this class name.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9156 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

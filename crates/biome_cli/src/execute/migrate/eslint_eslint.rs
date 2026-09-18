@@ -535,6 +535,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "array-callback-return" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ArrayCallbackReturn(conf));
+                            }
+                        }
                         "class-methods-use-this" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::ClassMethodsUseThis(conf));
@@ -596,9 +601,19 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptNoBaseToString(conf));
                             }
                         }
+                        "svelte/no-unnecessary-state-wrap" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
+                            }
+                        }
+                        "unicorn/numeric-separators-style" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornNumericSeparatorsStyle(conf));
                             }
                         }
                         // Other rules
@@ -681,6 +696,25 @@ impl From<MaxNestedCallbacksOptions>
                     .max
                     .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
             ),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct ArrayCallbackReturnOptions {
+    #[deserializable(rename = "allowImplicit")]
+    allow_implicit: Option<bool>,
+    #[deserializable(rename = "checkForEach")]
+    check_for_each: Option<bool>,
+}
+
+impl From<ArrayCallbackReturnOptions>
+    for biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions
+{
+    fn from(value: ArrayCallbackReturnOptions) -> Self {
+        Self {
+            allow_implicit: value.allow_implicit,
+            check_for_each: value.check_for_each,
         }
     }
 }
@@ -779,6 +813,7 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
@@ -794,13 +829,16 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
+    UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Self::Any(name, _) => name.clone(),
+            Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
@@ -821,7 +859,13 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::SvelteNoUnnecessaryStateWrap(_) => {
+                Cow::Borrowed("svelte/no-unnecessary-state-wrap")
+            }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
+            Self::UnicornNumericSeparatorsStyle(_) => {
+                Cow::Borrowed("unicorn/numeric-separators-style")
+            }
         }
     }
 }
@@ -834,5 +878,25 @@ impl PartialEq for Rule {
 impl Hash for Rule {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.name().hash(state);
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct SvelteNoUnnecessaryStateWrapOptions {
+    #[deserializable(rename = "additionalReactiveClasses")]
+    pub(crate) additional_reactive_classes: Box<[Box<str>]>,
+    #[deserializable(rename = "allowReassign")]
+    pub(crate) allow_reassign: Option<bool>,
+}
+
+impl From<SvelteNoUnnecessaryStateWrapOptions>
+    for biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions
+{
+    fn from(value: SvelteNoUnnecessaryStateWrapOptions) -> Self {
+        Self {
+            additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
+                .then_some(value.additional_reactive_classes),
+            allow_reassign: value.allow_reassign,
+        }
     }
 }

@@ -1,6 +1,9 @@
 use biome_cli::CliDiagnostic;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::{BufferConsole, Markup, markup};
+use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::format_node as format_css_node;
+use biome_css_parser::{CssParserOptions, parse_css};
 use biome_diagnostics::termcolor::NoColor;
 use biome_diagnostics::{Error, print_diagnostic_to_string};
 use biome_formatter::{IndentStyle, IndentWidth};
@@ -8,6 +11,7 @@ use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_languages::CssFileSource;
 use camino::{Utf8Path, Utf8PathBuf};
 use directories::ProjectDirs;
 use regex::Regex;
@@ -38,7 +42,7 @@ pub(crate) struct CliSnapshot {
     /// the configuration, if set
     /// First string is the content
     /// Second string is the name
-    pub configuration_list: Vec<(String, String)>,
+    pub configuration_list: BTreeMap<String, String>,
     /// file name -> content
     pub files: BTreeMap<String, String>,
     /// messages written in console
@@ -51,7 +55,7 @@ impl CliSnapshot {
     pub fn from_result(result: Result<(), CliDiagnostic>) -> Self {
         Self {
             in_messages: InMessages::default(),
-            configuration_list: vec![],
+            configuration_list: BTreeMap::default(),
             files: BTreeMap::default(),
             messages: Vec::new(),
             termination: result.err().map(Error::from),
@@ -63,7 +67,7 @@ impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
 
-        for (configuration, file_name) in &self.configuration_list {
+        for (file_name, configuration) in &self.configuration_list {
             let file_name = redact_snapshot(file_name).unwrap_or(file_name.into());
             let redacted = redact_snapshot(configuration).unwrap_or(String::new().into());
             let parsed = parse_json(
@@ -100,12 +104,37 @@ impl CliSnapshot {
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
                 let _ = write!(content, "## `{redacted_name}`\n\n");
-                let _ = write!(content, "```{extension}");
-                content.push('\n');
-                content.push_str(&redacted_content);
-                content.push('\n');
-                content.push_str("```");
-                content.push_str("\n\n")
+
+                if extension == "css" {
+                    // Format CSS with the same pipeline used for biome.json.
+                    let parsed = parse_css(
+                        &redacted_content,
+                        CssFileSource::css(),
+                        CssParserOptions::default(),
+                    );
+                    let formatted = format_css_node(
+                        CssFormatOptions::default()
+                            .with_indent_style(IndentStyle::Space)
+                            .with_indent_width(IndentWidth::default()),
+                        &parsed.syntax(),
+                    )
+                    .expect("formatted CSS")
+                    .print()
+                    .expect("printed CSS");
+
+                    content.push_str("```css");
+                    content.push('\n');
+                    content.push_str(formatted.as_code());
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                } else {
+                    let _ = write!(content, "```{extension}");
+                    content.push('\n');
+                    content.push_str(&redacted_content);
+                    content.push('\n');
+                    content.push_str("```");
+                    content.push_str("\n\n");
+                }
             }
         }
 
@@ -430,7 +459,7 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             {
                 cli_snapshot
                     .configuration_list
-                    .push((content.to_string(), file.to_string()));
+                    .insert(file.to_string(), content.to_string());
             } else {
                 cli_snapshot
                     .files

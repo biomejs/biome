@@ -39,7 +39,6 @@ MdDocument {
                                     value_token: MD_TEXTUAL_LITERAL@7..8 "\n" [] [],
                                 },
                             ],
-                            hard_line: missing (optional),
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -88,7 +87,6 @@ MdDocument {
                                                     value_token: MD_TEXTUAL_LITERAL@36..37 "\n" [] [],
                                                 },
                                             ],
-                                            hard_line: missing (optional),
                                         },
                                     ],
                                 },
@@ -124,7 +122,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@2..7 "outer" [] []
                 1: MD_TEXTUAL@7..8
                   0: MD_TEXTUAL_LITERAL@7..8 "\n" [] []
-              1: (empty)
             1: MD_CONTINUATION_INDENT@8..10
               0: MD_INDENT_TOKEN_LIST@8..10
                 0: MD_INDENT_TOKEN@8..9
@@ -158,7 +155,6 @@ MdDocument {
                           0: MD_TEXTUAL_LITERAL@31..36 "hello" [] []
                         7: MD_TEXTUAL@36..37
                           0: MD_TEXTUAL_LITERAL@36..37 "\n" [] []
-                      1: (empty)
   2: EOF@37..37 "" [] []
 
 ```

@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/spec/example-223.md
+---
+
+# Input
+
+```md
+1.  foo
+
+    ```
+    bar
+    ```
+
+    baz
+
+    > bam
+
+```
+
+
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,7 +3,6 @@
+     ```
+     bar
+     ```
+-
+     
+ 
+     baz
+
+IR differences:
+--- re-formatted IR
++++ formatted IR
+@@ -19,20 +19,20 @@
+     hard_line_break,
+     source_position(29),
+     "```",
+-    empty_line,
+-    source_position(37),
++    hard_line_break,
++    source_position(32),
+     "
+ ",
+     empty_line,
+-    source_position(43),
++    source_position(38),
+     "baz",
+     hard_line_break,
+     empty_line,
+-    source_position(52),
++    source_position(47),
+     ">",
+-    source_position(53),
++    source_position(48),
+     " bam",
+-    source_position(57),
++    source_position(52),
+     "
+ ",
+     hard_line_break
+
+```

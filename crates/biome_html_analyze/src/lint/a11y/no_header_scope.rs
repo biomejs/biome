@@ -2,8 +2,9 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::HtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_html_syntax::{HtmlAttribute, HtmlFileSource};
+use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_header_scope::NoHeaderScopeOptions;
 
@@ -44,7 +45,7 @@ declare_lint_rule! {
         version: "2.3.0",
         name: "noHeaderScope",
         language: "html",
-        sources: &[RuleSource::EslintJsxA11y("scope").same()],
+        sources: &[RuleSource::EslintJsxA11y("scope").inspired()],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

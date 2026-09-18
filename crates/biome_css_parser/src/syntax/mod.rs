@@ -24,10 +24,10 @@ use crate::syntax::scss::{
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
     is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
-    parse_scss_function, parse_scss_interpolated_dashed_identifier,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_variable,
-    parse_scss_variable_declaration,
+    parse_scss_bracketed_value_expression_item, parse_scss_function,
+    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string, parse_scss_module_member_access,
+    parse_scss_parent_selector_value, parse_scss_variable, parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -37,7 +37,8 @@ use crate::syntax::value::function::{
     parse_tailwind_value_theme_reference,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, EmbeddingKind, T};
+use biome_css_syntax::{CssSyntaxKind, T};
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -79,12 +80,12 @@ impl SyntaxFeature for CssSyntaxFeatures {
 pub(crate) fn parse_root(p: &mut CssParser) {
     let m = p.start();
     match p.source_type.as_embedding_kind() {
-        EmbeddingKind::Styled => {
+        CssEmbeddingKind::Styled => {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
             m.complete(p, CSS_SNIPPET_ROOT);
         }
-        EmbeddingKind::None | EmbeddingKind::Html(_) => {
+        CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
 
             RootItemList.parse_list(p);
@@ -527,10 +528,37 @@ pub(crate) fn parse_any_value_with_context(
 
 #[inline]
 fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
+    // Keep ratio before plain numbers so CSS values still parse `16 / 9` as `CSS_RATIO`.
     if is_at_ratio(p) {
         parse_ratio(p)
+    } else if is_at_dashed_identifier(p) {
+        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
+            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
+                p,
+                parse_tailwind_value_theme_reference,
+                |p, m| tailwind_disabled(p, m.range(p)),
+            )
+        } else {
+            parse_dashed_identifier(p)
+        }
+    } else if is_at_unicode_range(p) {
+        parse_unicode_range(p)
+    } else if is_at_identifier(p) {
+        parse_regular_identifier(p)
+    } else if p.at(CSS_STRING_LITERAL) {
+        parse_string(p)
+    } else if is_at_any_dimension(p) {
+        parse_any_dimension(p)
+    } else if p.at(CSS_NUMBER_LITERAL) {
+        parse_regular_number(p)
+    } else if is_at_color(p) {
+        parse_color(p)
+    } else if is_at_bracketed_value(p) {
+        parse_bracketed_value(p)
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
     } else {
-        parse_any_non_function_css_value_atom(p)
+        Absent
     }
 }
 
@@ -567,44 +595,6 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
         parse_scss_parent_selector_value(p)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p)
-    } else {
-        Absent
-    }
-}
-
-/// Parses one non-function CSS value atom without claiming `number / number`
-/// as a ratio.
-///
-/// This split lets SCSS expression parsing own numeric heads directly while
-/// the regular CSS wrapper still preserves `number / number` as `CSS_RATIO`.
-#[inline]
-fn parse_any_non_function_css_value_atom(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_dashed_identifier(p) {
-        if p.nth_at(1, T![-]) && p.nth_at(2, T![*]) {
-            CssSyntaxFeatures::Tailwind.parse_exclusive_syntax(
-                p,
-                parse_tailwind_value_theme_reference,
-                |p, m| tailwind_disabled(p, m.range(p)),
-            )
-        } else {
-            parse_dashed_identifier(p)
-        }
-    } else if is_at_unicode_range(p) {
-        parse_unicode_range(p)
-    } else if is_at_identifier(p) {
-        parse_regular_identifier(p)
-    } else if p.at(CSS_STRING_LITERAL) {
-        parse_string(p)
-    } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
-    } else if p.at(CSS_NUMBER_LITERAL) {
-        parse_regular_number(p)
-    } else if is_at_color(p) {
-        parse_color(p)
-    } else if is_at_bracketed_value(p) {
-        parse_bracketed_value(p)
-    } else if is_at_metavariable(p) {
-        parse_metavariable(p)
     } else {
         Absent
     }
@@ -797,7 +787,7 @@ pub(crate) fn parse_bracketed_value(p: &mut CssParser) -> ParsedSyntax {
 
 /// The list parser for bracketed values.
 ///
-/// This parser is responsible for parsing a list of identifiers inside a bracketed value.
+/// This parser is responsible for parsing values and Sass separators inside a bracketed value.
 #[derive(Default)]
 pub(crate) struct BracketedValueList {
     separator: Option<BracketedValueSeparator>,
@@ -856,6 +846,10 @@ impl ParseNodeList for BracketedValueList {
 
         if let Some(separator) = BracketedValueSeparator::from_current_token(p) {
             return self.parse_scss_bracketed_value_delimiter(p, separator);
+        }
+
+        if let Present(expression) = parse_scss_bracketed_value_expression_item(p) {
+            return Present(expression);
         }
 
         parse_custom_identifier(p, CssLexContext::Regular)
@@ -965,7 +959,8 @@ pub(crate) fn try_parse<T, E>(
 #[cfg(test)]
 mod tests {
     use crate::{CssParserOptions, parser::CssParser};
-    use biome_css_syntax::{CssFileSource, CssSyntaxKind, T};
+    use biome_css_syntax::{CssSyntaxKind, T};
+    use biome_languages::CssFileSource;
     use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 

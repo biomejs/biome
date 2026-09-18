@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 149
+expression: invalid-svelte-type-in-template.svelte
+---
+# Input
+```svelte
+<script lang="ts">
+import { IconType } from "./icons";
+</script>
+
+{#snippet card(p: { icon: IconType })}
+  <span>{p.icon}</span>
+{/snippet}
+
+```
+
+# Diagnostics
+```
+invalid-svelte-type-in-template.svelte:2:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All these imports are only used as types.
+  
+    1 │ <script lang="ts">
+  > 2 │ import { IconType } from "./icons";
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ </script>
+    4 │ 
+  
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
+  
+  i Safe fix: Use import type.
+  
+    2 │ import·type·{·IconType·}·from·"./icons";
+      │        +++++                            
+
+```

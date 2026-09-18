@@ -22,7 +22,7 @@ expression: deprecated_maximum.jsonc
 {
 	"linter": {
 		"rules": {
-			"recommended": false,
+			"preset": "none",
 			"nursery": {
 				"noExcessiveNestedCallbacks": {
 					"level": "warn",

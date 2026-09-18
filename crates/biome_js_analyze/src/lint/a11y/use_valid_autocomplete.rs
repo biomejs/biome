@@ -154,7 +154,10 @@ impl Rule for UseValidAutocomplete {
             return None;
         }
 
-        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
+        let autocomplete_attribute = node
+            .attributes()
+            .find_by_name("autocomplete")
+            .or(node.attributes().find_by_name("autoComplete"))?;
         let autocomplete_val = autocomplete_attribute.as_static_value()?;
         let autocompletes = autocomplete_val
             .text()

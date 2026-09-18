@@ -5,3 +5,4 @@ pub(crate) mod binding_assignment_binding_list;
 pub(crate) mod binding_list;
 pub(crate) mod directive_modifier_list;
 pub(crate) mod else_if_clause_list;
+pub(crate) mod template_element_list;

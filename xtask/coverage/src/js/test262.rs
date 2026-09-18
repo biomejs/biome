@@ -2,7 +2,7 @@ use crate::runner::{
     TestCase, TestCaseFiles, TestRunOutcome, TestSuite, create_bogus_node_in_tree_diagnostic,
 };
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::JsFileSource;
+use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 use biome_rowan::syntax::SyntaxKind;
 use regex::Regex;

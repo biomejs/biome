@@ -1,0 +1,5 @@
+[data-smth="true"] {
+	h1& {
+		color: red;
+	}
+}

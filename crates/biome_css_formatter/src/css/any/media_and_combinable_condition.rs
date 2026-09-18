@@ -12,8 +12,11 @@ impl FormatRule<AnyCssMediaAndCombinableCondition> for FormatAnyCssMediaAndCombi
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
         match node {
-            AnyCssMediaAndCombinableCondition::AnyCssMediaInParens(node) => node.format().fmt(f),
+            AnyCssMediaAndCombinableCondition::AnyCssMediaConditionOperand(node) => {
+                node.format().fmt(f)
+            }
             AnyCssMediaAndCombinableCondition::CssMediaAndCondition(node) => node.format().fmt(f),
+            AnyCssMediaAndCombinableCondition::CssMediaNotCondition(node) => node.format().fmt(f),
         }
     }
 }

@@ -1,0 +1,8 @@
+/* .used is referenced in partial_invalid.jsx, .orphan is not. */
+.used {
+	color: green;
+}
+
+.orphan {
+	color: red;
+}
