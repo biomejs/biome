@@ -330,6 +330,50 @@ const props: Props = { title: "Hello" };
 }
 
 #[test]
+fn full_support_preserves_const_tag_assignments() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+            "html": {
+                "experimentalFullSupportEnabled": true,
+                "formatter": { "enabled": true }
+            },
+            "linter": { "rules": { "recommended": false } },
+            "assist": { "enabled": false }
+        }"#,
+    );
+    let path = Utf8Path::new("file.svelte");
+    fs.insert(
+        path.into(),
+        br#"{#if true}
+    {@const value=source}
+    {@const {property}=source}
+    {@const [item]=source}
+    {@const nested=(source=1)+2}
+    {@const callback=()=>source=1}
+{/if}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "full_support_preserves_const_tag_assignments",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn formats_declaration_tags() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
