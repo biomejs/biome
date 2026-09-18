@@ -4,7 +4,6 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
-use crate::lexer::html_comment_len;
 use crate::syntax::inline_span_crosses_setext;
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
@@ -30,10 +29,21 @@ pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
 
 /// HTML comment: `<!-- ... -->` per CommonMark §6.8.
 ///
-/// The body must not contain `--` or end with `-`, and `<!--` must not be
-/// immediately followed by `>` or `->`.
+/// CommonMark also accepts `<!-->`, `<!--->`, and internal `--` as raw HTML.
+/// These forms need not qualify as comment trivia.
 fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
-    bytes.starts_with(b"<!--").then(|| html_comment_len(text))?
+    if !bytes.starts_with(b"<!--") {
+        return None;
+    }
+    let rest = &text[4..];
+    if rest.starts_with('>') {
+        return Some(5);
+    }
+    if rest.starts_with("->") {
+        return Some(6);
+    }
+    let close = rest.find("-->")?;
+    (!rest[..close].ends_with('-')).then_some(4 + close + 3)
 }
 
 /// Processing instruction: `<? ... ?>` per CommonMark §6.8.
@@ -408,6 +418,7 @@ pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
     let end = p.cur_range().start() + TextSize::from(html_len as u32);
     p.re_lex_span(end, MD_HTML_LITERAL);
+    p.source_mut().record_html_comment_trivia();
     p.bump(MD_HTML_LITERAL);
 
     Present(m.complete(p, MD_INLINE_HTML))

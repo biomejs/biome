@@ -604,8 +604,11 @@ impl ListBlockList {
                     block.is_newline()
                         || block.is_continuation_indent()
                         || block.as_md_quote_prefix().is_some()
+                        || block.is_html_comment()
                 })
-                .any(|block| f.context().comments().has_comments(block.syntax()));
+                .any(|block| {
+                    block.is_html_comment() || f.context().comments().has_comments(block.syntax())
+                });
             if after_comment {
                 pending_breaks
             } else {

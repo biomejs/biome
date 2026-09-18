@@ -298,9 +298,11 @@ impl PreviousBlock {
             matches!(
                 block,
                 AnyMdBlock::AnyMdLeafBlock(
-                    AnyMdLeafBlock::MdHtmlBlock(_)
-                        | AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdIndentCodeBlock(_))
+                    AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdIndentCodeBlock(_))
                 )
+            ) || matches!(
+                block,
+                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
             ) || matches!(
                 block,
                 AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))
@@ -358,11 +360,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     joiner.entry(&newline.format());
                     previous_block.set(node.clone());
                     still_leading = false;
-                } else if previous_block
-                    .0
-                    .as_ref()
-                    .is_some_and(newline_block_has_comments)
-                {
+                } else if previous_block.0.as_ref().is_some_and(|block| {
+                    newline_block_has_comments(block) || block.is_html_comment()
+                }) {
                     joiner.entry(&newline.format());
                 } else if previous_block.is_link_reference_definition()
                     && !is_leading

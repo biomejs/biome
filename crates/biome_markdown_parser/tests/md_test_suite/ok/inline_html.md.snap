@@ -106,8 +106,11 @@ MdRoot {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@124..133 "Comment: " [] [],
                 },
+                MdInlineHtml {
+                    value_token: MD_HTML_LITERAL@133..149 "" [Comments("<!-- comment -->")] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@133..157 " inline." [Comments("<!-- comment -->")] [],
+                    value_token: MD_TEXTUAL_LITERAL@149..157 " inline." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@157..158 "\n" [] [],
@@ -115,8 +118,11 @@ MdRoot {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@158..177 "Literal: something " [] [],
                 },
+                MdInlineHtml {
+                    value_token: MD_HTML_LITERAL@177..194 "" [Comments("<!-- commenmt -->")] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@177..195 "\n" [Comments("<!-- commenmt -->")] [],
+                    value_token: MD_TEXTUAL_LITERAL@194..195 "\n" [] [],
                 },
             ],
         },
@@ -220,14 +226,18 @@ MdRoot {
       0: MD_INLINE_ITEM_LIST@124..195
         0: MD_TEXTUAL@124..133
           0: MD_TEXTUAL_LITERAL@124..133 "Comment: " [] []
-        1: MD_TEXTUAL@133..157
-          0: MD_TEXTUAL_LITERAL@133..157 " inline." [Comments("<!-- comment -->")] []
-        2: MD_TEXTUAL@157..158
+        1: MD_INLINE_HTML@133..149
+          0: MD_HTML_LITERAL@133..149 "" [Comments("<!-- comment -->")] []
+        2: MD_TEXTUAL@149..157
+          0: MD_TEXTUAL_LITERAL@149..157 " inline." [] []
+        3: MD_TEXTUAL@157..158
           0: MD_TEXTUAL_LITERAL@157..158 "\n" [] []
-        3: MD_TEXTUAL@158..177
+        4: MD_TEXTUAL@158..177
           0: MD_TEXTUAL_LITERAL@158..177 "Literal: something " [] []
-        4: MD_TEXTUAL@177..195
-          0: MD_TEXTUAL_LITERAL@177..195 "\n" [Comments("<!-- commenmt -->")] []
+        5: MD_INLINE_HTML@177..194
+          0: MD_HTML_LITERAL@177..194 "" [Comments("<!-- commenmt -->")] []
+        6: MD_TEXTUAL@194..195
+          0: MD_TEXTUAL_LITERAL@194..195 "\n" [] []
     7: MD_NEWLINE@195..196
       0: NEWLINE@195..196 "\n" [] []
     8: MD_PARAGRAPH@196..228

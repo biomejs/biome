@@ -52,8 +52,14 @@ MdRoot {
         MdNewline {
             value_token: NEWLINE@22..23 "\n" [] [],
         },
+        MdHtmlBlock {
+            indent: MdIndentTokenList [],
+            content: MdHtmlContent {
+                value_token: MD_HTML_LITERAL@23..37 "" [Comments("<!-- block -->")] [],
+            },
+        },
         MdNewline {
-            value_token: NEWLINE@23..38 "\n" [Comments("<!-- block -->")] [],
+            value_token: NEWLINE@37..38 "\n" [] [],
         },
         MdNewline {
             value_token: NEWLINE@38..39 "\n" [] [],
@@ -63,8 +69,11 @@ MdRoot {
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@39..46 "Before " [] [],
                 },
+                MdInlineHtml {
+                    value_token: MD_HTML_LITERAL@46..61 "" [Comments("<!-- inline -->")] [],
+                },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@46..68 " after." [Comments("<!-- inline -->")] [],
+                    value_token: MD_TEXTUAL_LITERAL@61..68 " after." [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@68..69 "\n" [] [],
@@ -81,8 +90,14 @@ MdRoot {
                 post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@71..72 " " [] [],
             },
             content: MdBlockList [
+                MdHtmlBlock {
+                    indent: MdIndentTokenList [],
+                    content: MdHtmlContent {
+                        value_token: MD_HTML_LITERAL@72..87 "" [Comments("<!-- quoted -->")] [],
+                    },
+                },
                 MdNewline {
-                    value_token: NEWLINE@72..88 "\n" [Comments("<!-- quoted -->")] [],
+                    value_token: NEWLINE@87..88 "\n" [] [],
                 },
                 MdQuotePrefix {
                     pre_marker_indent: MdQuoteIndentList [],
@@ -114,8 +129,14 @@ MdRoot {
                         content_indent: MdIndentTokenList [],
                     },
                     content: MdBlockList [
+                        MdHtmlBlock {
+                            indent: MdIndentTokenList [],
+                            content: MdHtmlContent {
+                                value_token: MD_HTML_LITERAL@98..113 "" [Comments("<!-- listed -->")] [],
+                            },
+                        },
                         MdNewline {
-                            value_token: NEWLINE@98..114 "\n" [Comments("<!-- listed -->")] [],
+                            value_token: NEWLINE@113..114 "\n" [] [],
                         },
                         MdContinuationIndent {
                             indent: MdIndentTokenList [
@@ -141,8 +162,14 @@ MdRoot {
         MdNewline {
             value_token: NEWLINE@121..122 "\n" [] [],
         },
+        MdHtmlBlock {
+            indent: MdIndentTokenList [],
+            content: MdHtmlContent {
+                value_token: MD_HTML_LITERAL@122..142 "" [Comments("<!-- only at EOF -->")] [],
+            },
+        },
         MdNewline {
-            value_token: NEWLINE@122..143 "\n" [Comments("<!-- only at EOF -->")] [],
+            value_token: NEWLINE@142..143 "\n" [] [],
         },
     ],
     eof_token: EOF@143..143 "" [] [],
@@ -170,41 +197,51 @@ MdRoot {
       0: NEWLINE@21..22 "\n" [] []
     2: MD_NEWLINE@22..23
       0: NEWLINE@22..23 "\n" [] []
-    3: MD_NEWLINE@23..38
-      0: NEWLINE@23..38 "\n" [Comments("<!-- block -->")] []
-    4: MD_NEWLINE@38..39
+    3: MD_HTML_BLOCK@23..37
+      0: MD_INDENT_TOKEN_LIST@23..23
+      1: MD_HTML_CONTENT@23..37
+        0: MD_HTML_LITERAL@23..37 "" [Comments("<!-- block -->")] []
+    4: MD_NEWLINE@37..38
+      0: NEWLINE@37..38 "\n" [] []
+    5: MD_NEWLINE@38..39
       0: NEWLINE@38..39 "\n" [] []
-    5: MD_PARAGRAPH@39..69
+    6: MD_PARAGRAPH@39..69
       0: MD_INLINE_ITEM_LIST@39..69
         0: MD_TEXTUAL@39..46
           0: MD_TEXTUAL_LITERAL@39..46 "Before " [] []
-        1: MD_TEXTUAL@46..68
-          0: MD_TEXTUAL_LITERAL@46..68 " after." [Comments("<!-- inline -->")] []
-        2: MD_TEXTUAL@68..69
+        1: MD_INLINE_HTML@46..61
+          0: MD_HTML_LITERAL@46..61 "" [Comments("<!-- inline -->")] []
+        2: MD_TEXTUAL@61..68
+          0: MD_TEXTUAL_LITERAL@61..68 " after." [] []
+        3: MD_TEXTUAL@68..69
           0: MD_TEXTUAL_LITERAL@68..69 "\n" [] []
-    6: MD_NEWLINE@69..70
+    7: MD_NEWLINE@69..70
       0: NEWLINE@69..70 "\n" [] []
-    7: MD_QUOTE@70..95
+    8: MD_QUOTE@70..95
       0: MD_QUOTE_PREFIX@70..72
         0: MD_QUOTE_INDENT_LIST@70..70
         1: R_ANGLE@70..71 ">" [] []
         2: MD_QUOTE_POST_MARKER_SPACE@71..72 " " [] []
       1: MD_BLOCK_LIST@72..95
-        0: MD_NEWLINE@72..88
-          0: NEWLINE@72..88 "\n" [Comments("<!-- quoted -->")] []
-        1: MD_QUOTE_PREFIX@88..90
+        0: MD_HTML_BLOCK@72..87
+          0: MD_INDENT_TOKEN_LIST@72..72
+          1: MD_HTML_CONTENT@72..87
+            0: MD_HTML_LITERAL@72..87 "" [Comments("<!-- quoted -->")] []
+        1: MD_NEWLINE@87..88
+          0: NEWLINE@87..88 "\n" [] []
+        2: MD_QUOTE_PREFIX@88..90
           0: MD_QUOTE_INDENT_LIST@88..88
           1: R_ANGLE@88..89 ">" [] []
           2: MD_QUOTE_POST_MARKER_SPACE@89..90 " " [] []
-        2: MD_PARAGRAPH@90..95
+        3: MD_PARAGRAPH@90..95
           0: MD_INLINE_ITEM_LIST@90..95
             0: MD_TEXTUAL@90..94
               0: MD_TEXTUAL_LITERAL@90..94 "text" [] []
             1: MD_TEXTUAL@94..95
               0: MD_TEXTUAL_LITERAL@94..95 "\n" [] []
-    8: MD_NEWLINE@95..96
+    9: MD_NEWLINE@95..96
       0: NEWLINE@95..96 "\n" [] []
-    9: MD_BULLET_LIST_ITEM@96..121
+    10: MD_BULLET_LIST_ITEM@96..121
       0: MD_BULLET_LIST@96..121
         0: MD_BULLET@96..121
           0: MD_LIST_MARKER_PREFIX@96..98
@@ -213,22 +250,30 @@ MdRoot {
             2: MD_LIST_POST_MARKER_SPACE@97..98 " " [] []
             3: MD_INDENT_TOKEN_LIST@98..98
           1: MD_BLOCK_LIST@98..121
-            0: MD_NEWLINE@98..114
-              0: NEWLINE@98..114 "\n" [Comments("<!-- listed -->")] []
-            1: MD_CONTINUATION_INDENT@114..116
+            0: MD_HTML_BLOCK@98..113
+              0: MD_INDENT_TOKEN_LIST@98..98
+              1: MD_HTML_CONTENT@98..113
+                0: MD_HTML_LITERAL@98..113 "" [Comments("<!-- listed -->")] []
+            1: MD_NEWLINE@113..114
+              0: NEWLINE@113..114 "\n" [] []
+            2: MD_CONTINUATION_INDENT@114..116
               0: MD_INDENT_TOKEN_LIST@114..116
                 0: MD_INDENT_TOKEN@114..116
                   0: MD_INDENT_CHAR@114..116 "  " [] []
-            2: MD_PARAGRAPH@116..121
+            3: MD_PARAGRAPH@116..121
               0: MD_INLINE_ITEM_LIST@116..121
                 0: MD_TEXTUAL@116..120
                   0: MD_TEXTUAL_LITERAL@116..120 "text" [] []
                 1: MD_TEXTUAL@120..121
                   0: MD_TEXTUAL_LITERAL@120..121 "\n" [] []
-    10: MD_NEWLINE@121..122
+    11: MD_NEWLINE@121..122
       0: NEWLINE@121..122 "\n" [] []
-    11: MD_NEWLINE@122..143
-      0: NEWLINE@122..143 "\n" [Comments("<!-- only at EOF -->")] []
+    12: MD_HTML_BLOCK@122..142
+      0: MD_INDENT_TOKEN_LIST@122..122
+      1: MD_HTML_CONTENT@122..142
+        0: MD_HTML_LITERAL@122..142 "" [Comments("<!-- only at EOF -->")] []
+    13: MD_NEWLINE@142..143
+      0: NEWLINE@142..143 "\n" [] []
   3: EOF@143..143 "" [] []
 
 ```

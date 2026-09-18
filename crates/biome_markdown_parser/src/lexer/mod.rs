@@ -288,10 +288,6 @@ impl<'src> MarkdownLexer<'src> {
         self.end
     }
 
-    pub(crate) fn set_after_newline(&mut self, after_newline: bool) {
-        self.after_newline = after_newline;
-    }
-
     pub fn has_frontmatter_closing_fence(&self) -> bool {
         if self
             .frontmatter_fence

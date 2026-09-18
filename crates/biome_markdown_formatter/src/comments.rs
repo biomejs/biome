@@ -60,11 +60,8 @@ impl CommentStyle for MarkdownCommentStyle {
                         continue;
                     };
                     // Markdown keeps blank lines as nodes; frontmatter is outside the body list.
-                    let first_content_start = root
-                        .value()
-                        .iter()
-                        .find(|block| !block.is_newline() && !block.is_continuation_indent())
-                        .map_or_else(
+                    let first_content_start =
+                        root.value().iter().find(is_suppressible_block).map_or_else(
                             || {
                                 root.eof_token().map_or_else(
                                     |_| root.range().end(),
@@ -116,6 +113,11 @@ impl CommentStyle for MarkdownCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         let token = comment.piece().as_piece().token();
+        if token.kind() == MarkdownSyntaxKind::MD_HTML_LITERAL
+            && let Some(parent) = token.parent()
+        {
+            return CommentPlacement::leading(parent, comment);
+        }
         if token.kind() == MarkdownSyntaxKind::NEWLINE
             && let Some(newline) = token.parent().and_then(MdNewline::cast)
         {
@@ -142,7 +144,10 @@ fn has_following_newline(comment: &SyntaxTriviaPieceComments<MarkdownLanguage>) 
 }
 
 fn is_suppressible_block(block: &AnyMdBlock) -> bool {
-    !block.is_newline() && !block.is_continuation_indent() && block.as_md_quote_prefix().is_none()
+    !block.is_newline()
+        && !block.is_continuation_indent()
+        && block.as_md_quote_prefix().is_none()
+        && !block.is_html_comment()
 }
 
 fn strip_quote_prefix(mut line: &str) -> &str {

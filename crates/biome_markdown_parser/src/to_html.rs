@@ -53,7 +53,7 @@ use biome_markdown_syntax::{
     MdReferenceLinkLabel, MdRoot, MdSetextHeader, MdTextual, MdThematicBreakBlock,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, Direction, SyntaxNode, TextRange, TextSize, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, Direction, SyntaxNode, TextRange, WalkEvent,
 };
 use percent_encoding::{AsciiSet, CONTROLS, utf8_percent_encode};
 use std::collections::HashMap;
@@ -531,14 +531,6 @@ struct HtmlRenderer<'a> {
     opaque_depth: Option<usize>,
     skip_children_depth: Option<usize>,
     suppressed_inline_nodes: Vec<Vec<SyntaxNode<MarkdownLanguage>>>,
-    comments: Vec<SourceHtmlComment>,
-    next_comment: usize,
-}
-
-struct SourceHtmlComment {
-    range: TextRange,
-    text: String,
-    line_break_after: bool,
 }
 
 struct Buffer {
@@ -611,43 +603,13 @@ impl<'a> HtmlRenderer<'a> {
             opaque_depth: None,
             skip_children_depth: None,
             suppressed_inline_nodes: Vec::new(),
-            comments: Vec::new(),
-            next_comment: 0,
         }
     }
 
     fn render(mut self, root: &SyntaxNode<MarkdownLanguage>) -> String {
-        let source = root.to_string();
-        self.comments = root
-            .descendants_with_tokens(Direction::Next)
-            .filter_map(|element| element.into_token())
-            .flat_map(|token| {
-                token
-                    .leading_trivia()
-                    .pieces()
-                    .chain(token.trailing_trivia().pieces())
-                    .filter(|piece| piece.is_comments())
-                    .map(|piece| {
-                        let range = piece.text_range();
-                        let line_break_after = source
-                            .as_bytes()
-                            .get(usize::from(range.end()))
-                            .is_some_and(|byte| matches!(byte, b'\n' | b'\r'));
-                        SourceHtmlComment {
-                            range,
-                            text: piece.text().to_owned(),
-                            line_break_after,
-                        }
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect();
-        self.comments.sort_by_key(|comment| comment.range.start());
-
         for event in root.preorder() {
             match event {
                 WalkEvent::Enter(node) => {
-                    self.emit_comments_before(node.text_trimmed_range().start());
                     if self.opaque_depth.is_some() {
                         self.depth += 1;
                         continue;
@@ -676,39 +638,21 @@ impl<'a> HtmlRenderer<'a> {
                             continue;
                         }
                         if self.depth == skip {
-                            self.emit_comments_before(node.text_range_with_trivia().end());
                             self.leave(node);
                             self.skip_children_depth = None;
                             continue;
                         }
                     }
 
-                    self.emit_comments_before(node.text_range_with_trivia().end());
                     self.leave(node);
                 }
             }
         }
 
-        self.emit_comments_before(TextSize::from(u32::MAX));
-
         self.buffers
             .pop()
             .map(|buffer| buffer.content)
             .unwrap_or_default()
-    }
-
-    fn emit_comments_before(&mut self, position: TextSize) {
-        while let Some(comment) = self.comments.get(self.next_comment)
-            && comment.range.end() <= position
-        {
-            let text = comment.text.clone();
-            let line_break_after = comment.line_break_after;
-            self.next_comment += 1;
-            self.push_str(&text);
-            if line_break_after {
-                self.push_str("\n");
-            }
-        }
     }
 
     fn enter(&mut self, node: SyntaxNode<MarkdownLanguage>) {
@@ -1790,7 +1734,14 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
 /// Render inline HTML.
 fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
     if let Ok(token) = html.value_token() {
-        out.push_str(token.text());
+        for comment in token
+            .leading_trivia()
+            .pieces()
+            .filter_map(|piece| piece.as_comments())
+        {
+            out.push_str(comment.text());
+        }
+        out.push_str(token.text_trimmed());
     }
 }
 

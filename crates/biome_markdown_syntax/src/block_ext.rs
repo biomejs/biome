@@ -113,6 +113,10 @@ impl MdParagraph {
                     let Ok(token) = html.value_token() else {
                         return false;
                     };
+                    if token.text_trimmed().trim().is_empty() && token.has_leading_comments() {
+                        has_comment = true;
+                        continue;
+                    }
                     let text = normalize_quote_prefixes(token.text_trimmed(), quote_depth);
                     if html_comment_ranges(&text).is_none() {
                         return false;
@@ -167,6 +171,9 @@ impl MdHtmlBlock {
         let Ok(token) = content.value_token() else {
             return false;
         };
+        if token.text_trimmed().trim().is_empty() && token.has_leading_comments() {
+            return true;
+        }
 
         let quote_depth = self
             .syntax()
