@@ -24,14 +24,16 @@ pub struct FormatMarkdownVerbatimNode<'node> {
 impl Format<MarkdownFormatContext> for FormatMarkdownVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
         let comments = f.context().comments().clone();
-        let (source, source_range) = if self.node.parent().is_none() {
-            (
-                self.node.text_with_trivia(),
-                self.node.text_range_with_trivia(),
-            )
-        } else {
-            (self.node.text_trimmed(), self.node.text_trimmed_range())
-        };
+        // Comment-only HTML tokens have no trimmed text; trimming can drop their comments.
+        let (source, source_range) =
+            if self.node.parent().is_none() || self.node.has_comments_descendants() {
+                (
+                    self.node.text_with_trivia(),
+                    self.node.text_range_with_trivia(),
+                )
+            } else {
+                (self.node.text_trimmed(), self.node.text_trimmed_range())
+            };
         let leading_comments = comments.leading_comments(self.node);
         let outside_leading = leading_comments
             .partition_point(|comment| comment.piece().text_range().end() <= source_range.start());

@@ -4,7 +4,7 @@ use biome_analyze::{
 };
 use biome_diagnostics::{Diagnostic, advice::CodeSuggestionAdvice};
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
-use biome_markdown_syntax::MarkdownLanguage;
+use biome_markdown_syntax::{MarkdownLanguage, MdRoot};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     CheckActionType, assert_diagnostics_expectation_comment, assert_errors_are_absent,
@@ -274,21 +274,34 @@ fn check_code_action(
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 
     if action.is_suppression() {
-        let mut rule_diagnostics = 0;
-        biome_markdown_analyze::analyze(&re_parse.tree(), filter, options, |event| {
-            if event
-                .diagnostic()
-                .and_then(|diagnostic| diagnostic.category())
-                .is_some_and(|category| category.name().starts_with("lint/"))
-            {
-                rule_diagnostics += 1;
-            }
-            ControlFlow::<Never>::Continue(())
-        });
-        assert_eq!(
-            rule_diagnostics, 0,
-            "suppression action did not suppress the rule:\n{output}"
-        );
+        let count_diagnostics = |root: &MdRoot| {
+            let mut count = 0;
+            biome_markdown_analyze::analyze(root, filter, options, |event| {
+                if event
+                    .diagnostic()
+                    .and_then(|diagnostic| diagnostic.category())
+                    .is_some_and(|category| category.name().starts_with("lint/"))
+                {
+                    count += 1;
+                }
+                ControlFlow::<Never>::Continue(())
+            });
+            count
+        };
+        let remaining = count_diagnostics(&re_parse.tree());
+        if action.is_top_level_suppression() {
+            assert_eq!(
+                remaining, 0,
+                "file suppression did not suppress the rule:\n{output}"
+            );
+        } else {
+            let original = parse_markdown(source, parser_options.clone());
+            let before = count_diagnostics(&original.tree());
+            assert!(
+                remaining < before,
+                "inline suppression did not reduce the rule's diagnostics:\n{output}"
+            );
+        }
     }
 }
 

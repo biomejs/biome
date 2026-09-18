@@ -78,7 +78,11 @@ impl SyntaxKind for MarkdownSyntaxKind {
     fn is_allowed_before_suppressions(&self) -> bool {
         matches!(
             self,
-            Self::UNICODE_BOM | Self::FENCE | Self::MD_FRONTMATTER_LITERAL | Self::NEWLINE
+            Self::UNICODE_BOM
+                | Self::FENCE
+                | Self::MD_FRONTMATTER_LITERAL
+                | Self::NEWLINE
+                | Self::MD_INDENT_CHAR
         )
     }
 }

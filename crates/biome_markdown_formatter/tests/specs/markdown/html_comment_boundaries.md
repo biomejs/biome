@@ -34,3 +34,9 @@ Paragraph:
 - <!-- comment-only bullet -->
 
 1. <!-- comment-only ordered item -->
+
+# Heading <!-- note -->
+
+##   Heading <!-- note -->  ##
+
+> # Heading <!-- note -->

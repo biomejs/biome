@@ -1,6 +1,6 @@
 use biome_analyze::{AnalyzerSuppression, Suppression, to_analyzer_suppressions};
 use biome_markdown_syntax::{MdQuote, MdRoot};
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_rowan::{AstNode, Direction, SyntaxElement, TextRange, WalkEvent};
 use biome_suppression::{
     SuppressionDiagnostic, parse_suppression_comment, parse_suppression_comment_with_line_prefix,
 };
@@ -26,22 +26,26 @@ pub struct MarkdownSuppression {
 impl MarkdownSuppression {
     pub fn new(root: &MdRoot) -> Self {
         let mut quoted_comments = Vec::new();
-        for token in root
-            .syntax()
-            .descendants_with_tokens(Direction::Next)
-            .filter_map(|element| element.into_token())
-        {
-            let in_quote = token.ancestors().any(|node| MdQuote::can_cast(node.kind()));
-            for comment in token
-                .leading_trivia()
-                .pieces()
-                .chain(token.trailing_trivia().pieces())
-                .filter_map(|piece| piece.as_comments())
-            {
-                let range = comment.text_range();
-                if in_quote {
-                    quoted_comments.push(range);
+        let mut preorder = root.syntax().preorder_with_tokens(Direction::Next);
+        while let Some(event) = preorder.next() {
+            match event {
+                WalkEvent::Enter(SyntaxElement::Node(node)) if !node.has_comments_descendants() => {
+                    preorder.skip_subtree();
                 }
+                WalkEvent::Enter(SyntaxElement::Token(token))
+                    if (token.has_leading_comments() || token.has_trailing_comments())
+                        && token.ancestors().any(|node| MdQuote::can_cast(node.kind())) =>
+                {
+                    quoted_comments.extend(
+                        token
+                            .leading_trivia()
+                            .pieces()
+                            .chain(token.trailing_trivia().pieces())
+                            .filter_map(|piece| piece.as_comments())
+                            .map(|comment| comment.text_range()),
+                    );
+                }
+                _ => {}
             }
         }
 

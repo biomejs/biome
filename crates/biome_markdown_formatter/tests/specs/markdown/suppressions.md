@@ -26,3 +26,14 @@ Mixed    paragraph <!-- biome-ignore format: preserve the following heading -->
 > biome-ignore format: preserve multiline quoted heading spacing
 > -->
 > ##    multiline quoted heading
+
+<!-- biome-ignore format: preserve raw HTML -->
+<!-- ordinary -->*literal*
+
+<!-- biome-ignore format: preserve indented raw HTML -->
+  <!-- ordinary -->*literal*
+
+> Text before <!--
+> biome-ignore format: preserve heading after an inline comment
+> -->
+> ##    inline quoted heading

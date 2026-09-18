@@ -1,1 +1,10 @@
 <h1><!-- heading --> <a href="/target">text</a></h1>
+<p><a href="/target">foo <!-- > ] --> bar</a></p>
+<p><img src="/target" alt="foo  bar" /></p>
+<p><a href="/url">foo [<!-- ]( -->] bar</a></p>
+<p>[outer <a href="/inner">inner <!-- ]( --></a> tail](/outer)</p>
+<p>[outer <a href="/inner"><code>&lt;!--</code></a>](/outer) --&gt;</p>
+<p>[outer <a href="/inner"><span title="<!--"></a>](/outer) --&gt;</p>
+<p>[outer <a href="/inner"><code>\</code></a>](/outer) `</p>
+<p>[outer <a href="/inner"><code>x``\</code></a>](/outer) `</p>
+<p>[outer <a href="/inner"><code>x ](dummy)  \</code></a>](/outer) `</p>

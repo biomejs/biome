@@ -4,7 +4,7 @@ use biome_parser::prelude::ParsedSyntax::{self, *};
 use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
-use crate::syntax::inline_span_crosses_setext;
+use crate::syntax::{inline_span_crosses_block_boundary, inline_span_crosses_setext};
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
 
@@ -44,6 +44,18 @@ fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
     }
     let close = rest.find("-->")?;
     (!rest[..close].ends_with('-')).then_some(4 + close + 3)
+}
+
+/// Consumes a complete inline HTML span during token lookahead.
+pub(super) fn skip_inline_html_in_lookahead(p: &mut MarkdownParser) -> bool {
+    let Some(len) = inline_html_len(p) else {
+        return false;
+    };
+    let end = p.cur_range().start() + TextSize::from(len as u32);
+    while !p.at(EOF) && p.cur_range().start() < end {
+        p.bump_any();
+    }
+    true
 }
 
 /// Processing instruction: `<? ... ?>` per CommonMark §6.8.
@@ -381,6 +393,37 @@ fn is_html_attr_name_continue(b: u8) -> bool {
 
 // #region parse_inline_html — CST node construction
 
+fn inline_html_len(p: &mut MarkdownParser) -> Option<usize> {
+    if !p.at(L_ANGLE) {
+        return None;
+    }
+
+    // Check if this is valid inline HTML and whether it crosses a blockquote
+    // marker. Both checks use the source text, so scope the borrow here.
+    let html_len = {
+        let source = p.source_after_current();
+        let len = is_inline_html(source)?;
+        // Comments can contain existing quote prefixes; an open tag cannot use
+        // a quote prefix as its closing bracket.
+        if !source.starts_with("<!--") && inline_html_crosses_blockquote_marker(&source[..len]) {
+            return None;
+        }
+        len
+    };
+
+    // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
+    // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
+    let crosses_boundary = if p.source_after_current().starts_with("<!--") {
+        inline_span_crosses_block_boundary(p, html_len)
+    } else {
+        inline_span_crosses_setext(p, html_len)
+    };
+    if crosses_boundary {
+        return None;
+    }
+    Some(html_len)
+}
+
 /// Parse raw inline HTML per CommonMark §6.8.
 ///
 /// Grammar: MdInlineHtml = value: 'md_html_literal'
@@ -388,32 +431,9 @@ fn is_html_attr_name_continue(b: u8) -> bool {
 /// Includes: open tags, close tags, comments, processing instructions,
 /// declarations, and CDATA sections.
 pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
-    if !p.at(L_ANGLE) {
+    let Some(html_len) = inline_html_len(p) else {
         return Absent;
-    }
-
-    // Check if this is valid inline HTML and whether it crosses a blockquote
-    // marker. Both checks use the source text, so scope the borrow here.
-    let html_len = {
-        let source = p.source_after_current();
-        let len = match is_inline_html(source) {
-            Some(len) => len,
-            None => return Absent,
-        };
-        // Reject spans where `>` immediately follows a newline (optionally
-        // preceded by 0-3 spaces). In that position `>` is a blockquote
-        // marker per §5.1, not the closing bracket of an open tag.
-        if inline_html_crosses_blockquote_marker(&source[..len]) {
-            return Absent;
-        }
-        len
     };
-
-    // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
-    // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
-    if inline_span_crosses_setext(p, html_len) {
-        return Absent;
-    }
 
     let m = p.start();
     let end = p.cur_range().start() + TextSize::from(html_len as u32);
