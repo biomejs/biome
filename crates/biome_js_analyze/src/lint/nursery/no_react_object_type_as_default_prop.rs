@@ -113,6 +113,36 @@ enum ForbiddenDefaultKind {
     Symbol,
 }
 
+impl ForbiddenDefaultKind {
+    fn from_expression(expression: &AnyJsExpression) -> Option<Self> {
+        let kind = match expression {
+            AnyJsExpression::JsObjectExpression(_) => Self::ObjectLiteral,
+            AnyJsExpression::JsArrayExpression(_) => Self::ArrayLiteral,
+            AnyJsExpression::JsArrowFunctionExpression(_) => Self::ArrowFunction,
+            AnyJsExpression::JsFunctionExpression(_) => Self::FunctionExpression,
+            AnyJsExpression::JsClassExpression(_) => Self::ClassExpression,
+            AnyJsExpression::JsNewExpression(_) => Self::NewExpression,
+            AnyJsExpression::JsxTagExpression(_) => Self::JsxElement,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsRegexLiteralExpression(_),
+            ) => Self::RegexLiteral,
+            _ => {
+                let is_symbol_call = expression
+                    .as_js_call_expression()
+                    .and_then(|call| call.callee().ok())
+                    .and_then(|callee| callee.as_js_reference_identifier())
+                    .is_some_and(|ident| ident.has_name("Symbol"));
+                if is_symbol_call {
+                    Self::Symbol
+                } else {
+                    return None;
+                }
+            }
+        };
+        Some(kind)
+    }
+}
+
 impl biome_console::fmt::Display for ForbiddenDefaultKind {
     fn fmt(&self, f: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         let repr = match self {
@@ -135,34 +165,6 @@ pub struct ForbiddenDefault {
     kind: ForbiddenDefaultKind,
 }
 
-fn forbidden_default_kind(expression: &AnyJsExpression) -> Option<ForbiddenDefaultKind> {
-    let kind = match expression {
-        AnyJsExpression::JsObjectExpression(_) => ForbiddenDefaultKind::ObjectLiteral,
-        AnyJsExpression::JsArrayExpression(_) => ForbiddenDefaultKind::ArrayLiteral,
-        AnyJsExpression::JsArrowFunctionExpression(_) => ForbiddenDefaultKind::ArrowFunction,
-        AnyJsExpression::JsFunctionExpression(_) => ForbiddenDefaultKind::FunctionExpression,
-        AnyJsExpression::JsClassExpression(_) => ForbiddenDefaultKind::ClassExpression,
-        AnyJsExpression::JsNewExpression(_) => ForbiddenDefaultKind::NewExpression,
-        AnyJsExpression::JsxTagExpression(_) => ForbiddenDefaultKind::JsxElement,
-        AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsRegexLiteralExpression(_),
-        ) => ForbiddenDefaultKind::RegexLiteral,
-        _ => {
-            let is_symbol_call = expression
-                .as_js_call_expression()
-                .and_then(|call| call.callee().ok())
-                .and_then(|callee| callee.as_js_reference_identifier())
-                .is_some_and(|ident| ident.has_name("Symbol"));
-            if is_symbol_call {
-                ForbiddenDefaultKind::Symbol
-            } else {
-                return None;
-            }
-        }
-    };
-    Some(kind)
-}
-
 fn collect_forbidden_defaults(object_pattern: &JsObjectBindingPattern) -> Vec<ForbiddenDefault> {
     object_pattern
         .properties()
@@ -174,7 +176,7 @@ fn collect_forbidden_defaults(object_pattern: &JsObjectBindingPattern) -> Vec<Fo
                 return None;
             };
             let default_value = shorthand.init()?.expression().ok()?;
-            let kind = forbidden_default_kind(&default_value)?;
+            let kind = ForbiddenDefaultKind::from_expression(&default_value)?;
             Some(ForbiddenDefault {
                 range: default_value.range(),
                 kind,
