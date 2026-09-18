@@ -302,11 +302,8 @@ define_categories! {
     "lint/nursery/useImportsFirst": "https://biomejs.dev/linter/rules/use-imports-first",
     "lint/nursery/useIncludes": "https://biomejs.dev/linter/rules/use-includes",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
-<<<<<<< HEAD
     "lint/nursery/useLogicalProperties": "https://biomejs.dev/linter/rules/use-logical-properties",
-=======
     "lint/nursery/useLayeredStyles": "https://biomejs.dev/linter/rules/use-layered-styles",
->>>>>>> upstream/main
     "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useModernMathApis": "https://biomejs.dev/linter/rules/use-modern-math-apis",

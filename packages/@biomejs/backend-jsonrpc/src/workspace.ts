@@ -2803,17 +2803,15 @@ See https://biomejs.dev/linter/rules/use-includes
 	 */
 	useIncludes?: UseIncludesConfiguration;
 	/**
-<<<<<<< HEAD
-	* Enforce logical properties over physical properties.
-See https://biomejs.dev/linter/rules/use-logical-properties 
-	 */
-	useLogicalProperties?: UseLogicalPropertiesConfiguration;
-=======
 	* Enforce style rules to be defined within a cascade layer.
 See https://biomejs.dev/linter/rules/use-layered-styles 
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
->>>>>>> upstream/main
+	/**
+	* Enforce logical properties over physical properties.
+See https://biomejs.dev/linter/rules/use-logical-properties
+	 */
+	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
@@ -5084,15 +5082,12 @@ export type UseImportsFirstConfiguration =
 export type UseIncludesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIncludesOptions;
-<<<<<<< HEAD
-export type UseLogicalPropertiesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseLogicalPropertiesOptions;
-=======
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
->>>>>>> upstream/main
+export type UseLogicalPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLogicalPropertiesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -7149,15 +7144,13 @@ export interface RuleWithUseIncludesOptions {
 	level: RulePlainConfiguration;
 	options?: UseIncludesOptions;
 }
-<<<<<<< HEAD
-export interface RuleWithUseLogicalPropertiesOptions {
-	level: RulePlainConfiguration;
-	options?: UseLogicalPropertiesOptions;
-=======
 export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
->>>>>>> upstream/main
+}
+export interface RuleWithUseLogicalPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: UseLogicalPropertiesOptions;
 }
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
@@ -9028,16 +9021,18 @@ export type UseImportsFirstOptions = {};
  * Options for the `useIncludes` rule.
  */
 export type UseIncludesOptions = {};
-<<<<<<< HEAD
-export type UseLogicalPropertiesOptions = {};
-=======
 export interface UseLayeredStylesOptions {
 	/**
 	 * Require `@import` rules to have a cascade layer. Defaults to `true`.
 	 */
 	requireImportLayers?: boolean;
 }
->>>>>>> upstream/main
+export interface UseLogicalPropertiesOptions {
+	/**
+	 * The text direction used to map physical inline properties. Defaults to `"ltr"`.
+	 */
+	direction?: UseLogicalPropertiesDirection;
+}
 export type UseMathMinMaxOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
@@ -9862,6 +9857,7 @@ export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type UseLogicalPropertiesDirection = "ltr" | "rtl";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
@@ -10418,11 +10414,8 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-<<<<<<< HEAD
 	| "lint/nursery/useLogicalProperties"
-=======
 	| "lint/nursery/useLayeredStyles"
->>>>>>> upstream/main
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"

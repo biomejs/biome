@@ -7524,17 +7524,17 @@
 						{ "type": "null" }
 					]
 				},
-<<<<<<< HEAD
-				"useLogicalProperties": {
-					"description": "Enforce logical properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseLogicalPropertiesConfiguration" },
-=======
 				"useLayeredStyles": {
 					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layered-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLayeredStylesConfiguration" },
->>>>>>> upstream/main
+						{ "type": "null" }
+					]
+				},
+				"useLogicalProperties": {
+					"description": "Enforce logical properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLogicalPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16715,8 +16715,21 @@
 				{ "$ref": "#/$defs/RuleWithUseLogicalPropertiesOptions" }
 			]
 		},
+		"UseLogicalPropertiesDirection": {
+			"type": "string",
+			"enum": ["ltr", "rtl"]
+		},
 		"UseLogicalPropertiesOptions": {
 			"type": "object",
+			"properties": {
+				"direction": {
+					"description": "The text direction used to map physical inline properties. Defaults to `\"ltr\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLogicalPropertiesDirection" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseLoneAnonymousOperationConfiguration": {
