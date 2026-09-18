@@ -7406,6 +7406,13 @@
 						{ "type": "null" }
 					]
 				},
+				"usePromiseRejectErrors": {
+					"description": "Require Error objects as Promise rejection reasons.\nSee https://biomejs.dev/linter/rules/use-promise-reject-errors",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePromiseRejectErrorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useQwikLoaderLocation": {
 					"description": "Enforce that Qwik loader functions are declared in the correct location.\nSee https://biomejs.dev/linter/rules/use-qwik-loader-location",
 					"anyOf": [
@@ -12512,6 +12519,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUsePromiseRejectErrorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePromiseRejectErrorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseQwikClasslistOptions": {
 			"type": "object",
 			"properties": {
@@ -16653,6 +16669,16 @@
 			]
 		},
 		"UsePlaywrightValidDescribeCallbackOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePromiseRejectErrorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePromiseRejectErrorsOptions" }
+			]
+		},
+		"UsePromiseRejectErrorsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
