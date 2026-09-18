@@ -1,13 +1,12 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsBinding, AnyJsExpression, AnyJsFormalParameter,
-    AnyJsFunction, AnyJsParameter, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause, JsExtendsClause,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
-    JsObjectBindingPattern, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
-    JsSyntaxToken, JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsParameter,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxResult, TextRange, declare_node_union,
@@ -392,7 +391,7 @@ impl ReactComponentInfo {
         let ReactComponentKind::Function(info) = &self.kind else {
             return None;
         };
-        let parameters = function_parameters(info.function.as_ref()?)?;
+        let parameters = info.function.as_ref()?.parenthesized_parameters()?;
         let first_parameter = parameters.items().into_iter().next()?.ok()?;
         first_parameter
             .as_any_js_formal_parameter()?
@@ -401,18 +400,6 @@ impl ReactComponentInfo {
             .ok()?
             .as_js_object_binding_pattern()
             .cloned()
-    }
-}
-
-fn function_parameters(function: &AnyJsFunction) -> Option<JsParameters> {
-    match function {
-        AnyJsFunction::JsArrowFunctionExpression(arrow) => match arrow.parameters().ok()? {
-            AnyJsArrowFunctionParameters::JsParameters(parameters) => Some(parameters),
-            AnyJsArrowFunctionParameters::AnyJsBinding(_) => None,
-        },
-        AnyJsFunction::JsFunctionDeclaration(function) => function.parameters().ok(),
-        AnyJsFunction::JsFunctionExportDefaultDeclaration(function) => function.parameters().ok(),
-        AnyJsFunction::JsFunctionExpression(function) => function.parameters().ok(),
     }
 }
 
