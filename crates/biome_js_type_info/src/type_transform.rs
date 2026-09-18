@@ -372,9 +372,7 @@ impl<'db> TypeTransform<'db> for TypeEnvironmentSubstituter<'_, 'db> {
         }
         let is_unknown = |ty| match ty {
             TypeData::Unknown => true,
-            TypeData::InstanceOf(instance) => {
-                instance.ty(db) == TypeData::Unknown && instance.type_parameters(db).is_empty()
-            }
+            TypeData::InstanceOf(instance) => instance.ty(db) == TypeData::Unknown,
             _ => false,
         };
         match ty {
@@ -725,6 +723,26 @@ mod tests {
             (t, u),
             (u, TypeData::Number),
         ] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_propagates_unknown_instances_with_type_arguments() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let instance = TypeData::instance_of(&db, t, vec![TypeData::String].into_boxed_slice());
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: TypeData::Unknown,
+        }];
+        for (object, index) in [(instance, TypeData::Number), (array, instance)] {
             let source =
                 TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
             assert_eq!(
