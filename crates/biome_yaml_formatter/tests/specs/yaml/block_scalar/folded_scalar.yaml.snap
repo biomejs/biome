@@ -24,21 +24,13 @@ info: yaml/block_scalar/folded_scalar.yaml
 
 ```yaml
 - >
- hello
- world
+  hello
+  world
 
 - >-
- stripped
+  stripped
 
 - >+
- kept
+  kept
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" >\n hello\n worl" => 1..16
-" >-\n strippe" => 20..32
-" >+\n kep" => 36..44

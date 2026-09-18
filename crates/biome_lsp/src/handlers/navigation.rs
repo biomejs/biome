@@ -6,6 +6,7 @@ use biome_fs::BiomePath;
 use biome_line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::TextRange;
+use biome_service::Workspace;
 use biome_service::settings::EditorFeature;
 use std::str::FromStr;
 use tower_lsp_server::ls_types::*;
@@ -44,7 +45,7 @@ pub(crate) fn goto_definition(
 
     let result =
         session
-            .workspace
+            .workspace()
             .go_to_definition(biome_service::workspace::GoToDefinitionParams {
                 project_key: doc.project_key,
                 path: path.clone(),
@@ -112,13 +113,12 @@ fn to_location(
     let target_range = if definition_path == original_path {
         to_proto::range(&doc.line_index, *definition_range, position_encoding)?
     } else {
-        let content =
-            session
-                .workspace
-                .get_file_content(biome_service::workspace::GetFileContentParams {
-                    project_key: doc.project_key,
-                    path: definition_path.clone(),
-                })?;
+        let content = session.workspace_for_request().get_file_content(
+            biome_service::workspace::GetFileContentParams {
+                project_key: doc.project_key,
+                path: definition_path.clone(),
+            },
+        )?;
         let target_line_index = LineIndex::new(&content);
         to_proto::range(&target_line_index, *definition_range, position_encoding)?
     };

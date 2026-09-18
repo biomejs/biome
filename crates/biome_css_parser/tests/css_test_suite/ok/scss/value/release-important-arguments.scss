@@ -1,0 +1,22 @@
+$enabled: true;
+
+@function identity($value) {
+  @return $value;
+}
+
+.enabled {
+  color: red if($enabled, !important, null);
+}
+
+.disabled {
+  color: red if(false, !important, null);
+}
+
+.ordinary {
+  color: red identity(!important);
+}
+
+.controls {
+  color: red !important;
+  color: if(style(--enabled: true): red; else: blue) !important;
+}

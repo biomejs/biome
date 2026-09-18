@@ -195,11 +195,11 @@ fn handle_object_assign(node: &JsStaticMemberExpression, model: &SemanticModel) 
     let object = node.object().ok()?;
 
     let object_name = object.as_js_identifier_expression()?.name().ok()?;
-    if object_name.to_trimmed_text() != "Object" {
+    if object_name.value_token().ok()?.text_trimmed() != "Object" {
         return None;
     }
     let operator = node.member().ok()?;
-    if operator.to_trimmed_text() != "assign" {
+    if operator.as_js_name()?.value_token().ok()?.text_trimmed() != "assign" {
         return None;
     }
 

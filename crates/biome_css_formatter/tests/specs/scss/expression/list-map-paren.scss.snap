@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: css/scss/expression/list-map-paren.scss
+info: scss/expression/list-map-paren.scss
 ---
 
 # Input
@@ -22,7 +22,7 @@ emptyMap:fn(());
 ```scss
 .test {
 	list: fn((1, 2, 3));
-	spaceList: fn((1 2));
+	spacelist: fn((1 2));
 	map: fn(
 		(
 			primary: red,
@@ -34,7 +34,7 @@ emptyMap:fn(());
 			primary: red,
 		)
 	);
-	emptyMap: fn(());
+	emptymap: fn(());
 }
 
 ```

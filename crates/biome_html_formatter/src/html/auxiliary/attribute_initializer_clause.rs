@@ -1,13 +1,13 @@
-use std::fmt::Debug;
-
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
+use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, write};
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlAttributeInitializerClause,
     HtmlAttributeInitializerClauseFields,
 };
 use biome_rowan::TokenText;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeInitializerClause {
@@ -141,6 +141,46 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                                         write!(f, [if_group_breaks(&token(";"))])?;
                                         Ok(())
                                     }))),
+                                    token("\"")
+                                ]
+                            )
+                        }
+                        // Prettier lays a `srcset` out as the list of candidates
+                        // it is, one per line when they do not all fit, with the
+                        // descriptors aligned on their decimal point so the
+                        // sizes can be read down the column.
+                        //
+                        // Before:
+                        // ```html
+                        // <img srcset="a@0.5.png  400w, a.png      805w">
+                        // ```
+                        //
+                        // After:
+                        // ```html
+                        // <img srcset="a@0.5.png 400w, a.png 805w" />
+                        // ```
+                        (Some("img" | "source"), Some("srcset")) => {
+                            let content = html_string.inner_string_text()?;
+                            let value_token = html_string.value_token()?;
+
+                            let Some(candidates) = parse_srcset(content.text()) else {
+                                // The value holds nothing to lay out, or
+                                // something this formatter should not second
+                                // guess. Leave it exactly as written.
+                                return write!(f, [fmt_eq_token, value.format()]);
+                            };
+
+                            write!(
+                                f,
+                                [
+                                    fmt_eq_token,
+                                    format_removed(&value_token),
+                                    token("\""),
+                                    group(&soft_block_indent(&FormatSrcsetCandidates {
+                                        candidates: &candidates,
+                                        content: &content,
+                                        value_token: &value_token,
+                                    })),
                                     token("\"")
                                 ]
                             )

@@ -68,6 +68,32 @@ let Component = ({ ["a" + ""]: A = 5, ...rest }) => <div a={A} b={rest.b} />;
 
 let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
 
+function Component({ a }) {
+	return <div a={a} />;
+}
+
+let Component = ({ a }) => <div>{a}</div>;
+
+function Component({ a }) {
+	return <div>{a}</div>;
+}
+
+let Component = function ({ a }) {
+	return <div>{a}</div>;
+};
+
+let Component = function ({ a }) {
+	return <div a={a} />;
+};
+
+export function Component({ a }) {
+	return <div>{a}</div>;
+}
+
+export default function Component({ a }) {
+	return <div>{a}</div>;
+}
+
 ```
 
 # Diagnostics
@@ -1047,6 +1073,7 @@ invalid.tsx:63:55 lint/correctness/noSolidDestructuredProps ━━━━━━�
   > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
        │                                                       ^^^^^
     64 │ 
+    65 │ function Component({ a }) {
   
   i This is where the props were destructured.
   
@@ -1055,6 +1082,7 @@ invalid.tsx:63:55 lint/correctness/noSolidDestructuredProps ━━━━━━�
   > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
        │                  ^^^^^^^^^^^^^^^^
     64 │ 
+    65 │ function Component({ a }) {
   
   i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
   
@@ -1073,6 +1101,7 @@ invalid.tsx:63:66 lint/correctness/noSolidDestructuredProps ━━━━━━�
   > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
        │                                                                  ^^^^^
     64 │ 
+    65 │ function Component({ a }) {
   
   i This is where the props were destructured.
   
@@ -1081,6 +1110,197 @@ invalid.tsx:63:66 lint/correctness/noSolidDestructuredProps ━━━━━━�
   > 63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
        │                  ^^^^^^^^^^^^^^^^
     64 │ 
+    65 │ function Component({ a }) {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:66:17 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    65 │ function Component({ a }) {
+  > 66 │ 	return <div a={a} />;
+       │ 	               ^
+    67 │ }
+    68 │ 
+  
+  i This is where the props were destructured.
+  
+    63 │ let Component = ({ prop1, prop2 }: Props) => <div p1={prop1} p2={prop2} />;
+    64 │ 
+  > 65 │ function Component({ a }) {
+       │                    ^^^^^
+    66 │ 	return <div a={a} />;
+    67 │ }
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:69:34 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    67 │ }
+    68 │ 
+  > 69 │ let Component = ({ a }) => <div>{a}</div>;
+       │                                  ^
+    70 │ 
+    71 │ function Component({ a }) {
+  
+  i This is where the props were destructured.
+  
+    67 │ }
+    68 │ 
+  > 69 │ let Component = ({ a }) => <div>{a}</div>;
+       │                  ^^^^^
+    70 │ 
+    71 │ function Component({ a }) {
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:72:15 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    71 │ function Component({ a }) {
+  > 72 │ 	return <div>{a}</div>;
+       │ 	             ^
+    73 │ }
+    74 │ 
+  
+  i This is where the props were destructured.
+  
+    69 │ let Component = ({ a }) => <div>{a}</div>;
+    70 │ 
+  > 71 │ function Component({ a }) {
+       │                    ^^^^^
+    72 │ 	return <div>{a}</div>;
+    73 │ }
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:76:15 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    75 │ let Component = function ({ a }) {
+  > 76 │ 	return <div>{a}</div>;
+       │ 	             ^
+    77 │ };
+    78 │ 
+  
+  i This is where the props were destructured.
+  
+    73 │ }
+    74 │ 
+  > 75 │ let Component = function ({ a }) {
+       │                           ^^^^^
+    76 │ 	return <div>{a}</div>;
+    77 │ };
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:80:17 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    79 │ let Component = function ({ a }) {
+  > 80 │ 	return <div a={a} />;
+       │ 	               ^
+    81 │ };
+    82 │ 
+  
+  i This is where the props were destructured.
+  
+    77 │ };
+    78 │ 
+  > 79 │ let Component = function ({ a }) {
+       │                           ^^^^^
+    80 │ 	return <div a={a} />;
+    81 │ };
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:84:15 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    83 │ export function Component({ a }) {
+  > 84 │ 	return <div>{a}</div>;
+       │ 	             ^
+    85 │ }
+    86 │ 
+  
+  i This is where the props were destructured.
+  
+    81 │ };
+    82 │ 
+  > 83 │ export function Component({ a }) {
+       │                           ^^^^^
+    84 │ 	return <div>{a}</div>;
+    85 │ }
+  
+  i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
+  
+  i Remove the destructuring and use props.foo instead.
+  
+
+```
+
+```
+invalid.tsx:88:15 lint/correctness/noSolidDestructuredProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This variable shouldn't be destructured.
+  
+    87 │ export default function Component({ a }) {
+  > 88 │ 	return <div>{a}</div>;
+       │ 	             ^
+    89 │ }
+    90 │ 
+  
+  i This is where the props were destructured.
+  
+    85 │ }
+    86 │ 
+  > 87 │ export default function Component({ a }) {
+       │                                   ^^^^^
+    88 │ 	return <div>{a}</div>;
+    89 │ }
   
   i In Solid, props must be used with property accesses (props.foo) to preserve reactivity.
   

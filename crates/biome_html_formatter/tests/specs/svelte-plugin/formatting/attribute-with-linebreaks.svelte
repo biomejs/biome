@@ -1,0 +1,8 @@
+<div
+    class=" {longExpressionThatForcesLinebreaks} longExpressionThatForcesLinebreaks longExpressionThatForcesLinebreaks  "
+    alt="When reformatting class attributes it is fine to trim and add new line breaks. 
+That's not the case with other attributes. "
+    data-value={array.map((item) => {
+        return item + 1
+    })}
+></div>

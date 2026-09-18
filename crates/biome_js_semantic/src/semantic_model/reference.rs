@@ -1,4 +1,4 @@
-use biome_js_syntax::{AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression};
+use biome_js_syntax::{AnyJsFunction, AnyJsIdentifierReference, JsCallExpression};
 
 use super::*;
 use std::sync::Arc;
@@ -193,8 +193,8 @@ impl UnresolvedReference {
             .to_node(self.data.to_root().syntax())
     }
 
-    pub fn tree(&self) -> AnyJsIdentifierUsage {
-        AnyJsIdentifierUsage::unwrap_cast(self.syntax().clone())
+    pub fn tree(&self) -> AnyJsIdentifierReference {
+        AnyJsIdentifierReference::unwrap_cast(self.syntax().clone())
     }
 
     pub fn range(&self) -> TextRange {
@@ -213,6 +213,7 @@ pub trait HasDeclarationAstNode: AstNode<Language = JsLanguage> {
 impl HasDeclarationAstNode for JsReferenceIdentifier {}
 impl HasDeclarationAstNode for JsIdentifierAssignment {}
 impl HasDeclarationAstNode for JsxReferenceIdentifier {}
+impl HasDeclarationAstNode for AnyJsIdentifierReference {}
 
 /// Extension method to allow any node that is a declaration to easily
 /// get all of its references.

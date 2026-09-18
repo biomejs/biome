@@ -185,7 +185,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@52..53 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@53..56 "\n  " [] [],
                         },
@@ -915,7 +915,7 @@ JsModule {
                                     attributes: JsxAttributeList [],
                                     r_angle_token: R_ANGLE@583..584 ">" [] [],
                                 },
-                                children: JsxChildList [
+                                elements: JsxChildList [
                                     JsxText {
                                         value_token: JSX_TEXT_LITERAL@584..593 "\n        " [] [],
                                     },

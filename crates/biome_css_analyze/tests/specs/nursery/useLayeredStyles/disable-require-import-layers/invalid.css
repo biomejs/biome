@@ -1,0 +1,18 @@
+/* should generate diagnostics */
+p {
+	color: red;
+}
+
+@media (min-width: 600px) {
+	a {
+		color: bar
+	}
+}
+
+.parent {
+	color: red;
+
+	& .child {
+		color: blue;
+	}
+}

@@ -1,0 +1,23 @@
+<script>
+    const a = true;
+</script>
+
+<div>
+    
+    I need to adhere sadly</div>
+
+<!-- prettier-ignore-start -->
+
+<div      > format madness here </div>
+
+<p>
+    I'm
+    freeeee!
+</p>
+
+<!-- prettier-ignore-end -->
+
+<div>I need to adhere sadly
+
+    
+</div>

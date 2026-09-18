@@ -35,7 +35,7 @@ impl biome_deserialize::Merge for AvailabilityTarget {
 
 impl Deserializable for AvailabilityTarget {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

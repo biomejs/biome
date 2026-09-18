@@ -1,4 +1,10 @@
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{
+    JsRuleAction,
+    ast_utils::dom::{
+        LegacyDomQueryMethod as QueryMethod, is_definitely_not_dom_node, legacy_dom_query_call,
+    },
+    services::semantic::Semantic,
+};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
@@ -10,9 +16,9 @@ use biome_js_factory::make::{
 };
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsTemplateElement, JsCallExpression,
-    JsTemplateExpression, T, static_value::StaticValue,
+    JsTemplateExpression, T, global_identifier,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
+use biome_rowan::{AstNodeList, BatchMutationExt, TextRange};
 use biome_rule_options::use_dom_query_selector::UseDomQuerySelectorOptions;
 
 declare_lint_rule! {
@@ -52,6 +58,31 @@ declare_lint_rule! {
     /// document.querySelectorAll(".foo.bar");
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignore`
+    ///
+    /// Allow specific variables to use the older DOM query APIs.
+    /// This is useful if your application has APIs that expose methods with
+    /// the same names as DOM query APIs.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignore": ["store", "customApi"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// These are ignored, so they are not flagged.
+    ///
+    /// ```js,use_options
+    /// store.getElementById("COVER_IMAGE");
+    /// customApi.getElementsByClassName("item");
+    /// ```
+    ///
     pub UseDomQuerySelector {
         version: "2.4.13",
         name: "useDomQuerySelector",
@@ -80,29 +111,18 @@ impl Rule for UseDomQuerySelector {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let call = ctx.query();
 
-        if call.is_optional() || call.is_optional_chain() {
-            return None;
-        }
-
-        let callee = call.callee().ok()?.omit_parentheses();
-        let member = AnyJsMemberExpression::cast(callee.into_syntax())?;
-        if member.is_optional_chain()
-            || matches!(member, AnyJsMemberExpression::JsComputedMemberExpression(_))
-        {
-            return None;
-        }
-
-        let method_name = member.member_name()?;
-        let method = QueryMethod::from_name(method_name.text())?;
-
-        let argument = first_and_only_argument(call)?;
-        if is_definitely_not_dom_node(&member.object().ok()?.omit_parentheses()) {
+        let (method, query) = legacy_dom_query_call(call)?;
+        let member = query.member;
+        let method_name = member.member().ok()?.as_js_name()?.value_token().ok()?;
+        let argument = query.argument;
+        let object = member.object().ok()?.omit_parentheses();
+        if is_ignored(&object, ctx.options()) || is_definitely_not_dom_node(&object) {
             return None;
         }
 
         Some(RuleState {
             method,
-            range: method_name.range(),
+            range: method_name.text_trimmed_range(),
             fixable: can_fix_argument(&argument, method),
         })
     }
@@ -132,9 +152,9 @@ impl Rule for UseDomQuerySelector {
         }
 
         let call = ctx.query();
-        let callee = call.callee().ok()?.omit_parentheses();
-        let member = AnyJsMemberExpression::cast(callee.into_syntax())?;
-        let argument = first_and_only_argument(call)?;
+        let (_, query) = legacy_dom_query_call(call)?;
+        let member = AnyJsMemberExpression::from(query.member);
+        let argument = query.argument;
 
         let mut mutation = ctx.root().begin();
         replace_method_name(
@@ -168,89 +188,19 @@ impl Rule for UseDomQuerySelector {
     }
 }
 
-/// Legacy DOM query methods recognized by this rule.
-#[derive(Clone, Copy, Debug)]
-enum QueryMethod {
-    /// `getElementById()`.
-    ElementById,
-    /// `getElementsByClassName()`.
-    ElementsByClassName,
-    /// `getElementsByTagName()`.
-    ElementsByTagName,
-    /// `getElementsByName()`.
-    ElementsByName,
-}
+fn is_ignored(expr: &AnyJsExpression, options: &UseDomQuerySelectorOptions) -> bool {
+    let Some(ignore) = &options.ignore else {
+        return false;
+    };
 
-impl QueryMethod {
-    /// Maps the legacy DOM query method name to the corresponding enum variant.
-    fn from_name(name: &str) -> Option<Self> {
-        Some(match name {
-            "getElementById" => Self::ElementById,
-            "getElementsByClassName" => Self::ElementsByClassName,
-            "getElementsByTagName" => Self::ElementsByTagName,
-            "getElementsByName" => Self::ElementsByName,
-            _ => return None,
-        })
-    }
+    let Some((_, name)) = expr
+        .as_any_global_identifier_expression()
+        .and_then(|expr| global_identifier(&expr))
+    else {
+        return false;
+    };
 
-    /// Returns the preferred `querySelector*` replacement for this legacy method.
-    fn preferred_name(self) -> &'static str {
-        match self {
-            Self::ElementById => "querySelector",
-            Self::ElementsByClassName | Self::ElementsByTagName | Self::ElementsByName => {
-                "querySelectorAll"
-            }
-        }
-    }
-}
-
-/// Returns the only argument passed to `call`.
-///
-/// Calls with zero arguments or more than one argument are ignored because this
-/// rule only rewrites the single-selector form.
-///
-/// The source rule ignores spread arguments, so they are also ignored here.
-fn first_and_only_argument(call: &JsCallExpression) -> Option<AnyJsExpression> {
-    let mut args = call.arguments().ok()?.args().into_iter();
-    let argument = args.next()?.ok()?.as_any_js_expression()?.clone();
-
-    if args.next().is_none() {
-        Some(argument)
-    } else {
-        None
-    }
-}
-
-/// Returns `true` when the object of a legacy DOM query call is syntactically
-/// incapable of being a DOM node. It's a mechanism to avoid obvious false positives.
-///
-/// This rule is supposed to report nearly any call shape like `value.getElementById(...)`
-/// and only excludes receivers whose syntax guarantees they are not DOM nodes,
-/// such as:
-///
-/// - literals like `"text"`, `null`, and `1`
-/// - array and object literals like `[]` and `{}`
-/// - function and class expressions
-/// - template literals like `` `text` ``
-/// - the global `undefined` value
-///
-/// Everything else is treated as potentially DOM-like, including identifiers,
-/// member expressions, and other unknown expressions.
-fn is_definitely_not_dom_node(expr: &AnyJsExpression) -> bool {
-    let expr = expr.clone().omit_parentheses();
-
-    matches!(
-        expr,
-        AnyJsExpression::AnyJsLiteralExpression(_)
-            | AnyJsExpression::JsArrayExpression(_)
-            | AnyJsExpression::JsArrowFunctionExpression(_)
-            | AnyJsExpression::JsClassExpression(_)
-            | AnyJsExpression::JsFunctionExpression(_)
-            | AnyJsExpression::JsObjectExpression(_)
-            | AnyJsExpression::JsTemplateExpression(_)
-    ) || expr
-        .as_static_value()
-        .is_some_and(|value| matches!(value, StaticValue::Undefined(_)))
+    ignore.iter().any(|ignored| ignored.as_ref() == name.text())
 }
 
 /// Returns `true` when the query argument can be safely converted into a CSS

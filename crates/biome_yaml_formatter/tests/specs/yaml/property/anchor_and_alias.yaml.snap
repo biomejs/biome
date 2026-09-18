@@ -17,9 +17,3 @@ info: yaml/property/anchor_and_alias.yaml
 &anchor key: value
 
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"&anchor key" => 0..11

@@ -50,8 +50,8 @@ pub(crate) use keyframes::{
 };
 pub(crate) use media::{
     is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
-    parse_scss_interpolated_media_in_parens, parse_scss_media_condition, parse_scss_media_query,
-    parse_scss_media_query_or_condition_query,
+    parse_scss_interpolated_media_in_parens, parse_scss_media_condition,
+    parse_scss_media_condition_from_query, parse_scss_media_query,
 };
 pub(crate) use mixin_at_rule::parse_scss_mixin_at_rule;
 pub(crate) use query_feature::parse_scss_interpolated_query_feature;
@@ -93,7 +93,7 @@ pub(super) fn parse_scss_expression_at_rule(
 /// @mixin x { @include button }
 /// ```
 #[inline]
-pub(super) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
+pub(crate) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
     // Dart Sass allows omitting the final semicolon only at the end of the
     // current block or file, not before the next statement.
     if p.eat(T![;]) || p.at(T!['}']) || p.at(EOF) {

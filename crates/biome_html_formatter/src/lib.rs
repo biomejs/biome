@@ -1,4 +1,8 @@
 #![deny(clippy::use_self)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Formatting Svelte expressions requires complete node text."
+)]
 
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
@@ -13,6 +17,7 @@ use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
 
+mod angular;
 mod astro;
 mod comments;
 pub mod context;

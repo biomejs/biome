@@ -16,9 +16,11 @@ aria-[foo:text-sm
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..4 "aria" [] [],
@@ -33,8 +35,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@17..18 "\n" [] [],
     ],
-    eof_token: EOF@17..18 "" [Newline("\n")] [],
+    eof_token: EOF@18..18 "" [] [],
 }
 ```
 
@@ -43,19 +46,22 @@ TwRoot {
 ```
 0: TW_ROOT@0..18
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..17
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..18
     0: TW_FULL_CANDIDATE@0..17
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..17
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..17
         0: TW_BASE@0..4 "aria" [] []
         1: DASH@4..5 "-" [] []
         2: TW_BOGUS_VALUE@5..17
           0: L_BRACKET@5..6 "[" [] []
           1: TW_SELECTOR@6..17 "foo:text-sm" [] []
         3: (empty)
-      3: (empty)
-  2: EOF@17..18 "" [Newline("\n")] []
+      4: (empty)
+    1: WHITESPACE@17..18 "\n" [] []
+  3: EOF@18..18 "" [] []
 
 ```
 

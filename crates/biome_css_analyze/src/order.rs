@@ -547,13 +547,13 @@ mod tests {
     use std::collections::HashSet;
 
     use crate::{
-        keywords::VENDOR_PREFIXES,
         order::PROPERTY_ORDER_MAP,
         utils::{
             get_longhand_sub_properties, get_reset_to_initial_properties, is_known_properties,
             vendor_prefixed,
         },
     };
+    use biome_css_syntax::keywords::VENDOR_PREFIXES;
 
     use super::PROPERTY_ORDER;
 

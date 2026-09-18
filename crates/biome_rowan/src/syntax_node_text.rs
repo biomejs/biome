@@ -148,13 +148,28 @@ impl SyntaxNodeText {
         SyntaxNodeTextChars::new(self)
     }
 
-    /// Converts the node text into `Text`, attempting to avoid an allocation if
-    /// the node consists of a single token.
+    /// Converts the node text into `Text`, attempting to avoid a string allocation
+    /// when the selected range is contained in the first token.
     pub fn into_text(self) -> Text {
-        match self.node.first_token() {
-            Some(token) if token.text_range() == self.range => token.token_text().into(),
-            _ => self.to_string().into(),
+        if let Some(token) = self.node.first_token() {
+            let token_range = token.text_range();
+            if token_range == self.range {
+                return token.token_text().into();
+            }
+
+            if token_range.contains_range(self.range) && !self.range.is_empty() {
+                let range = self.range - token_range.start();
+                let text = token.text();
+                // TokenText slices defer UTF-8 checks; invalid ranges use the string fallback.
+                if text.is_char_boundary(usize::from(range.start()))
+                    && text.is_char_boundary(usize::from(range.end()))
+                {
+                    return token.token_text().slice(range).into();
+                }
+            }
         }
+
+        self.to_string().into()
     }
 }
 
@@ -399,8 +414,9 @@ mod private {
 
 #[cfg(test)]
 mod tests {
-    use crate::SyntaxNode;
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    use crate::{SyntaxNode, TextRange, TriviaPiece};
+    use std::panic::{AssertUnwindSafe, catch_unwind};
 
     fn build_tree(chunks: &[&str]) -> SyntaxNode<RawLanguage> {
         let mut builder = RawSyntaxTreeBuilder::new();
@@ -461,5 +477,127 @@ mod tests {
         check(&["{", "abc", "}"], "{abc}");
         check(&["{", "abc", "}", "{"], "{abc}{");
         check(&["{", "abc", "}ab"], "{abc}ab");
+    }
+
+    #[test]
+    fn test_into_text_first_token_ranges() {
+        let node = build_tree(&["hello", "world"]);
+        for (start, end, expected) in [(0, 5, "hello"), (0, 2, "he"), (1, 4, "ell"), (3, 5, "lo")] {
+            let text = node
+                .text_with_trivia()
+                .slice(TextRange::new(start.into(), end.into()))
+                .into_text();
+            assert_eq!(text, expected);
+            assert!(!text.is_string());
+        }
+    }
+
+    #[test]
+    fn test_into_text_trivia_ranges() {
+        let trivia = [
+            TriviaPiece::whitespace(1),
+            TriviaPiece::single_line_comment(5),
+            TriviaPiece::whitespace(1),
+        ];
+        let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                " /*a*/ hello /*b*/ ",
+                &trivia,
+                &trivia,
+            );
+        });
+
+        for (selection, expected) in [
+            (node.text_with_trivia(), " /*a*/ hello /*b*/ "),
+            (node.text_trimmed(), "hello"),
+            (
+                node.text_with_trivia()
+                    .slice(TextRange::new(1.into(), 18.into())),
+                "/*a*/ hello /*b*/",
+            ),
+            (
+                node.text_with_trivia()
+                    .slice(TextRange::new(6.into(), 13.into())),
+                " hello ",
+            ),
+        ] {
+            let text = selection.into_text();
+            assert_eq!(text, expected);
+            assert!(!text.is_string());
+        }
+    }
+
+    #[test]
+    fn test_into_text_nested_subtree() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "prefix");
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            " hello ",
+            &[TriviaPiece::whitespace(1)],
+            &[TriviaPiece::whitespace(1)],
+        );
+        builder.finish_node();
+        builder.token(RawLanguageKind::STRING_TOKEN, "suffix");
+        builder.finish_node();
+        let node = builder.finish().first_child().unwrap();
+        assert_eq!(node.text_range_with_trivia().start(), 6.into());
+
+        let text = node.text_trimmed().into_text();
+        assert_eq!(text, "hello");
+        assert!(!text.is_string());
+    }
+
+    #[test]
+    fn test_into_text_fallbacks() {
+        let node = build_tree(&["hello", "world"]);
+        for (start, end, expected) in [
+            (0, 10, "helloworld"),
+            (5, 10, "world"),
+            (6, 9, "orl"),
+            (3, 7, "lowo"),
+            (0, 0, ""),
+            (1, 1, ""),
+            (5, 5, ""),
+            (10, 10, ""),
+        ] {
+            let text = node
+                .text_with_trivia()
+                .slice(TextRange::new(start.into(), end.into()))
+                .into_text();
+            assert_eq!(text, expected);
+            assert!(text.is_string());
+        }
+
+        let missing_token = build_tree(&[]).text_with_trivia().into_text();
+        assert_eq!(missing_token, "");
+        assert!(missing_token.is_string());
+
+        let empty_token = build_tree(&[""]).text_with_trivia().into_text();
+        assert_eq!(empty_token, "");
+        assert!(!empty_token.is_string());
+    }
+
+    #[test]
+    fn test_into_text_utf8_ranges() {
+        let node = build_tree(&["aé界z"]);
+        for (start, end) in [(1, 2), (2, 3), (2, 2)] {
+            let selection = node
+                .text_with_trivia()
+                .slice(TextRange::new(start.into(), end.into()));
+            assert!(catch_unwind(AssertUnwindSafe(|| selection.into_text())).is_err());
+        }
+
+        for (start, end, expected) in [(1, 3, "é"), (3, 6, "界"), (1, 6, "é界")] {
+            let text = node
+                .text_with_trivia()
+                .slice(TextRange::new(start.into(), end.into()))
+                .into_text();
+            assert_eq!(text, expected);
+            assert!(!text.is_string());
+        }
     }
 }

@@ -27,8 +27,8 @@ impl FormatRule<CssParameterList> for FormatCssParameterList {
         let mut is_first = true;
         let mut previous_was_keyword_argument = false;
 
-        for (element, formatted) in node.elements().zip(separated) {
-            let element_node = element.node().ok();
+        for formatted in separated {
+            let element_node = formatted.node().ok();
 
             if is_first {
                 is_first = false;
@@ -115,7 +115,7 @@ fn should_inline_arbitrary_argument_closing_comment(
             .dangling_comments(node.syntax())
             .iter()
             .all(|comment| comment.kind().is_line())
-        && node.iter().last().is_some_and(|parameter| {
+        && node.iter().next_back().is_some_and(|parameter| {
             parameter.is_ok_and(|node| expression_ends_with_arbitrary_argument(&node))
         })
 }

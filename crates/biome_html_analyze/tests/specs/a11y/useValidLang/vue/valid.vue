@@ -7,3 +7,8 @@
 <html lang="nn"></html>
 <html lang="zh-Hant"></html>
 <html lang="zh-Hans-CN"></html>
+<html v-bind:lang="langValue"></html>
+<html :lang="langValue"></html>
+<!-- Static Vue bindings with valid language codes are valid -->
+<html :lang="'en'"></html>
+<html v-bind:lang="'en-US'"></html>

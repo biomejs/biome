@@ -14,7 +14,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::parse_error::{
-    expected_any_rule, expected_non_css_wide_keyword_identifier,
+    expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::property::color::{is_at_color, parse_color};
@@ -23,11 +23,13 @@ use crate::syntax::scss::{
     add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
-    is_at_scss_parent_selector_value, is_at_scss_variable, is_at_scss_variable_declaration,
-    parse_scss_bracketed_value_expression_item, parse_scss_function,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_string, parse_scss_module_member_access,
-    parse_scss_parent_selector_value, parse_scss_variable, parse_scss_variable_declaration,
+    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
+    is_at_scss_variable_declaration, parse_scss_bracketed_value_expression_item,
+    parse_scss_function, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_module_member_access, parse_scss_parent_selector_value,
+    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
+    parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -84,6 +86,11 @@ pub(crate) fn parse_root(p: &mut CssParser) {
             DeclarationOrRuleList::new(EOF).parse_list(p);
 
             m.complete(p, CSS_SNIPPET_ROOT);
+        }
+        CssEmbeddingKind::HtmlStyleAttribute => {
+            DeclarationList::new(EOF).parse_list(p);
+
+            m.complete(p, CSS_DECLARATION_SNIPPET_ROOT);
         }
         CssEmbeddingKind::None | CssEmbeddingKind::Html(_) => {
             p.eat(UNICODE_BOM);
@@ -162,7 +169,7 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
 }
 
 struct RuleListParseRecovery {
@@ -193,6 +200,14 @@ impl ParseNodeList for RuleList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if is_at_at_rule(p) {
             parse_at_rule(p)
+        } else if is_at_scss_variable_declaration(p) {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_variable_declaration,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS variable declarations", marker.range(p))
+                },
+            )
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
@@ -212,7 +227,7 @@ impl ParseNodeList for RuleList {
         parsed_element.or_recover(
             p,
             &RuleListParseRecovery::new(self.end_kind),
-            expected_any_rule,
+            expected_any_rule_list_item,
         )
     }
 }
@@ -222,6 +237,17 @@ pub(crate) fn is_at_qualified_rule(p: &mut CssParser) -> bool {
     is_nth_at_selector(p, 0)
 }
 
+/// Parses a qualified rule.
+///
+/// Its selector list accepts a partial `>`, `+`, or `~` combinator only when
+/// parsing SCSS immediately before the rule's opening block. The nested rule
+/// supplies the required right selector:
+///
+/// ```scss
+/// .sidebar > {
+///   .error {}
+/// }
+/// ```
 #[inline]
 pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_qualified_rule(p) {
@@ -230,7 +256,9 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    SelectorList::default().parse_list(p);
+    SelectorList::default()
+        .allow_partial_combinator_nesting()
+        .parse_list(p);
 
     parse_declaration_or_rule_list_block(p);
 
@@ -281,6 +309,22 @@ pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
     })
 }
 
+/// Parses a nested qualified rule with the requested selector recovery policy.
+///
+/// In SCSS style-rule blocks, both recovery policies accept a partial `>`, `+`,
+/// or `~` combinator immediately before the opening block. The nested rule
+/// supplies the required right selector:
+///
+/// ```scss
+/// .card {
+///   + {
+///     .media {}
+///   }
+/// }
+/// ```
+///
+/// When selector recovery is disabled, parsing succeeds only when the selector
+/// list reaches the opening block.
 #[inline]
 fn parse_nested_qualified_rule_with_selector_recovery(
     p: &mut CssParser,
@@ -294,6 +338,7 @@ fn parse_nested_qualified_rule_with_selector_recovery(
 
     if disable_selector_recovery {
         RelativeSelectorList::new(T!['{'])
+            .allow_partial_combinator_nesting()
             .disable_recovery()
             .parse_list(p);
 
@@ -303,7 +348,9 @@ fn parse_nested_qualified_rule_with_selector_recovery(
             return None;
         }
     } else {
-        RelativeSelectorList::new(T!['{']).parse_list(p);
+        RelativeSelectorList::new(T!['{'])
+            .allow_partial_combinator_nesting()
+            .parse_list(p);
     }
 
     let block = parse_declaration_or_rule_list_block(p);
@@ -351,9 +398,34 @@ pub(crate) fn is_at_any_value_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> bool {
-    (context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p))
-        || is_at_any_function_with_context(p, context)
+    is_at_any_function_with_context(p, context)
         || is_at_any_non_function_css_value(p)
+        || is_at_exclusive_scss_value_with_context(p, context)
+}
+
+#[inline]
+fn is_at_exclusive_scss_value_with_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> bool {
+    if context.is_full_scss_parsing_allowed() {
+        is_at_any_scss_value(p)
+    } else if context.is_scss_exclusive_syntax_allowed() {
+        is_at_fast_scss_exclusive_value(p)
+    } else {
+        false
+    }
+}
+
+#[inline]
+fn is_at_fast_scss_exclusive_value(p: &mut CssParser) -> bool {
+    is_at_scss_variable(p)
+        || is_at_scss_module_member_access(p)
+        || is_at_scss_suffixed_interpolated_value(p)
+        || is_at_scss_interpolated_dashed_identifier(p)
+        || is_at_scss_interpolated_function_or_value(p)
+        || is_at_scss_parent_selector_value(p)
+        || is_at_scss_interpolated_string(p)
 }
 
 #[inline]
@@ -389,8 +461,8 @@ pub(crate) enum ValueParsingMode {
     ScssAware,
     /// Restricts parsing to CSS syntax branches only.
     ///
-    /// Used by `<general-enclosed>` fallbacks to avoid SCSS-only diagnostics
-    /// for unknown-but-valid CSS constructs.
+    /// Used by `<general-enclosed>` fallbacks to avoid SCSS-only recovery for
+    /// unknown-but-valid CSS constructs.
     CssOnly,
 }
 
@@ -398,15 +470,15 @@ pub(crate) enum ValueParsingMode {
 ///
 /// Shared value parsing distinguishes between:
 /// - CSS-only parsing with no SCSS branches
-/// - SCSS-exclusive routing for diagnostics and recovery, without committing to
-///   full SCSS semantics for ambiguous syntax
+/// - SCSS-exclusive routing and recovery, without committing to full SCSS
+///   semantics for ambiguous syntax
 /// - full SCSS parsing where ambiguous syntax may be interpreted as SCSS
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) enum ScssCapability {
     /// Shared parsing must stay on CSS-only branches.
     Disabled,
-    /// SCSS-exclusive syntax may be recognized for routing, diagnostics, and
-    /// recovery, but ambiguous syntax must not commit to full SCSS semantics.
+    /// SCSS-exclusive syntax may be recognized for routing and recovery, but
+    /// ambiguous syntax must not commit to full SCSS semantics.
     ExclusiveOnly,
     /// Full SCSS parsing is enabled.
     Full,
@@ -424,16 +496,24 @@ pub(crate) enum FunctionCallContext {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) struct ValueParsingContext {
     mode: ValueParsingMode,
-    scss_feature_supported: bool,
+    scss_capability: ScssCapability,
     function_call_context: FunctionCallContext,
 }
 
 impl ValueParsingContext {
     #[inline]
     pub(crate) fn new(p: &CssParser, mode: ValueParsingMode) -> Self {
+        let scss_capability = match mode {
+            ValueParsingMode::CssOnly => ScssCapability::Disabled,
+            ValueParsingMode::ScssAware if CssSyntaxFeatures::Scss.is_supported(p) => {
+                ScssCapability::Full
+            }
+            ValueParsingMode::ScssAware => ScssCapability::ExclusiveOnly,
+        };
+
         Self {
             mode,
-            scss_feature_supported: CssSyntaxFeatures::Scss.is_supported(p),
+            scss_capability,
             function_call_context: FunctionCallContext::LooseRecovery,
         }
     }
@@ -451,23 +531,19 @@ impl ValueParsingContext {
     /// Returns the current SCSS capability level for shared value parsing.
     #[inline]
     pub(crate) const fn scss_capability(self) -> ScssCapability {
-        match (self.mode, self.scss_feature_supported) {
-            (ValueParsingMode::CssOnly, _) => ScssCapability::Disabled,
-            (ValueParsingMode::ScssAware, false) => ScssCapability::ExclusiveOnly,
-            (ValueParsingMode::ScssAware, true) => ScssCapability::Full,
-        }
+        self.scss_capability
     }
 
-    /// Returns whether SCSS-exclusive branches may be used for routing,
-    /// diagnostics, and recovery.
+    /// Returns whether SCSS-exclusive branches may be used for routing and
+    /// recovery.
     ///
     /// Use this at mixed CSS/SCSS boundaries when the parser needs to:
     /// - recognize SCSS-only syntax so it can route into
     ///   `parse_exclusive_syntax(...)`
     /// - build a more accurate recovery tree for unsupported SCSS syntax in a
     ///   CSS file
-    /// - emit an SCSS-only diagnostic instead of falling through to a generic
-    ///   CSS error
+    /// - report unsupported SCSS syntax without falling through to unrelated CSS
+    ///   errors
     ///
     /// This is the right check for exclusive SCSS forms such as qualified
     /// names, interpolation-led values, or SCSS-only URL modifiers. It should
@@ -476,6 +552,18 @@ impl ValueParsingContext {
     #[inline]
     pub(crate) const fn is_scss_exclusive_syntax_allowed(self) -> bool {
         !matches!(self.scss_capability(), ScssCapability::Disabled)
+    }
+
+    /// Returns whether shared value parsing may recover a Sass qualified function
+    /// head such as `color.adjust(...)`.
+    ///
+    /// This stays enabled in normal CSS parsing so qualified Sass function heads
+    /// produce one unsupported-syntax diagnostic instead of cascading through the
+    /// regular CSS value parser. It is still disabled for explicit CSS-only
+    /// fallback parsing.
+    #[inline]
+    pub(crate) const fn is_scss_qualified_function_recovery_allowed(self) -> bool {
+        matches!(self.mode, ValueParsingMode::ScssAware)
     }
 
     /// Returns whether ambiguous syntax may commit to full SCSS semantics.
@@ -514,12 +602,9 @@ pub(crate) fn parse_any_value_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> ParsedSyntax {
-    if context.is_scss_exclusive_syntax_allowed() && is_at_any_scss_value(p) {
+    if is_at_exclusive_scss_value_with_context(p, context) {
         parse_any_exclusive_scss_value(p)
     } else if is_at_any_function_with_context(p, context) {
-        // CSS functions stay on this branch. SCSS-only function heads
-        // (`namespace.fn(...)`, interpolation-led heads, etc.) are claimed above
-        // so CSS mode still rejects them while SCSS mode parses them as functions.
         parse_any_function_with_context(p, context)
     } else {
         parse_any_non_function_css_value(p)
@@ -548,7 +633,7 @@ fn parse_any_non_function_css_value(p: &mut CssParser) -> ParsedSyntax {
     } else if p.at(CSS_STRING_LITERAL) {
         parse_string(p)
     } else if is_at_any_dimension(p) {
-        parse_any_dimension(p)
+        parse_any_dimension(p, CssLexContext::Regular)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_regular_number(p)
     } else if is_at_color(p) {
@@ -570,6 +655,16 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_function, |p, m| {
             scss_only_syntax_error(p, "SCSS qualified function names", m.range(p))
         })
+    } else if is_at_scss_suffixed_interpolated_value(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| {
+                parse_scss_suffixed_interpolated_value_until(p, |p| {
+                    p.has_preceding_whitespace() || p.has_preceding_line_break()
+                })
+            },
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated values", m.range(p)),
+        )
     } else if is_at_scss_variable(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(p, parse_scss_variable, |p, m| {
             scss_only_syntax_error(p, "SCSS variables", m.range(p))
@@ -584,7 +679,11 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
                 add_scss_variable_member_function_name_diagnostic(p, has_dollar_member, marker)
             })
     } else if is_at_scss_interpolated_dashed_identifier(p) {
-        parse_scss_interpolated_dashed_identifier(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_dashed_identifier,
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated dashed identifiers", m.range(p)),
+        )
     } else if is_at_scss_interpolated_function_or_value(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -592,9 +691,17 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             |p, m| scss_only_syntax_error(p, "SCSS interpolated values", m.range(p)),
         )
     } else if is_at_scss_parent_selector_value(p) {
-        parse_scss_parent_selector_value(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_parent_selector_value,
+            |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
+        )
     } else if is_at_scss_interpolated_string(p) {
-        parse_scss_interpolated_string(p)
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_string(p, CssLexContext::Regular),
+            |p, m| scss_only_syntax_error(p, "SCSS interpolated strings", m.range(p)),
+        )
     } else {
         Absent
     }
@@ -964,7 +1071,52 @@ mod tests {
     use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 
-    use super::{parse_regular_identifier, parse_regular_number, try_parse};
+    use super::{
+        ScssCapability, ValueParsingContext, ValueParsingMode, parse_regular_identifier,
+        parse_regular_number, try_parse,
+    };
+
+    #[test]
+    fn css_parser_context_allows_scss_exclusive_value_recovery() {
+        let css_parser = CssParser::new(
+            ".selector { width: 10px; }",
+            CssFileSource::css(),
+            CssParserOptions::default(),
+        );
+        assert_eq!(
+            ValueParsingContext::new(&css_parser, ValueParsingMode::ScssAware).scss_capability(),
+            ScssCapability::ExclusiveOnly
+        );
+        assert!(
+            ValueParsingContext::new(&css_parser, ValueParsingMode::ScssAware)
+                .is_scss_qualified_function_recovery_allowed()
+        );
+        assert!(
+            !ValueParsingContext::new(&css_parser, ValueParsingMode::CssOnly)
+                .is_scss_qualified_function_recovery_allowed()
+        );
+
+        let reporting_css_parser = CssParser::new(
+            ".selector { color: $color; }",
+            CssFileSource::css(),
+            CssParserOptions::default().report_scss_exclusive_syntax(),
+        );
+        assert_eq!(
+            ValueParsingContext::new(&reporting_css_parser, ValueParsingMode::ScssAware)
+                .scss_capability(),
+            ScssCapability::ExclusiveOnly
+        );
+
+        let scss_parser = CssParser::new(
+            ".selector { color: $color; }",
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+        assert_eq!(
+            ValueParsingContext::new(&scss_parser, ValueParsingMode::ScssAware).scss_capability(),
+            ScssCapability::Full
+        );
+    }
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {

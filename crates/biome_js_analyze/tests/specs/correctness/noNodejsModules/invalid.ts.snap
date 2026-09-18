@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+import { type AssertionErrorOptions, equal } from "assert";
+
+```
+
+# Diagnostics
+```
+invalid.ts:1:51 lint/correctness/noNodejsModules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import references a Node.js builtin module.
+  
+  > 1 │ import { type AssertionErrorOptions, equal } from "assert";
+      │                                                   ^^^^^^^^
+    2 │ 
+  
+  i Node.js builtin modules are unavailable outside the Node.js runtime, so this import breaks client-side and other non-Node.js environments.
+  
+  i Remove this import or replace it with a runtime-agnostic alternative.
+  
+
+```

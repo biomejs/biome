@@ -4,6 +4,7 @@ mod presets;
 mod sort;
 mod sort_config;
 pub mod sort_v4;
+mod sort_v4_variants;
 mod tailwind_preset;
 mod tailwind_preset_v4;
 mod tailwind_preset_v4_types;
@@ -48,9 +49,8 @@ declare_lint_rule! {
     /// Notably, keep in mind that the following features are not supported yet:
     ///
     /// - Screen variant sorting (e.g. `md:`, `max-lg:`). Only static, dynamic and arbitrary variants are supported.
-    /// - Custom utilitites and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
+    /// - Custom utilities and variants (such as ones introduced by Tailwind CSS plugins). Only the default Tailwind CSS configuration is supported.
     /// - Options such as `prefix` and `separator`.
-    /// - Object properties (e.g. in `clsx` calls).
     ///
     /// Please don't report issues about these features.
     /// :::

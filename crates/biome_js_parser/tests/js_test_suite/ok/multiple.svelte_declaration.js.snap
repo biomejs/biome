@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+const first = 1, second = { value: "}" };
+
+```
+
+
+## AST
+
+```
+JsSvelteDeclarationRoot {
+    declaration: JsVariableDeclaration {
+        await_token: missing (optional),
+        kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+        declarators: JsVariableDeclaratorList [
+            JsVariableDeclarator {
+                id: JsIdentifierBinding {
+                    name_token: IDENT@6..12 "first" [] [Whitespace(" ")],
+                },
+                variable_annotation: missing (optional),
+                initializer: JsInitializerClause {
+                    eq_token: EQ@12..14 "=" [] [Whitespace(" ")],
+                    expression: JsNumberLiteralExpression {
+                        value_token: JS_NUMBER_LITERAL@14..15 "1" [] [],
+                    },
+                },
+            },
+            COMMA@15..17 "," [] [Whitespace(" ")],
+            JsVariableDeclarator {
+                id: JsIdentifierBinding {
+                    name_token: IDENT@17..24 "second" [] [Whitespace(" ")],
+                },
+                variable_annotation: missing (optional),
+                initializer: JsInitializerClause {
+                    eq_token: EQ@24..26 "=" [] [Whitespace(" ")],
+                    expression: JsObjectExpression {
+                        l_curly_token: L_CURLY@26..28 "{" [] [Whitespace(" ")],
+                        members: JsObjectMemberList [
+                            JsPropertyObjectMember {
+                                name: JsLiteralMemberName {
+                                    value: IDENT@28..33 "value" [] [],
+                                },
+                                colon_token: COLON@33..35 ":" [] [Whitespace(" ")],
+                                value: JsStringLiteralExpression {
+                                    value_token: JS_STRING_LITERAL@35..39 "\"}\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                        r_curly_token: R_CURLY@39..40 "}" [] [],
+                    },
+                },
+            },
+        ],
+    },
+    semicolon_token: SEMICOLON@40..41 ";" [] [],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_DECLARATION_ROOT@0..42
+  0: JS_VARIABLE_DECLARATION@0..40
+    0: (empty)
+    1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+    2: JS_VARIABLE_DECLARATOR_LIST@6..40
+      0: JS_VARIABLE_DECLARATOR@6..15
+        0: JS_IDENTIFIER_BINDING@6..12
+          0: IDENT@6..12 "first" [] [Whitespace(" ")]
+        1: (empty)
+        2: JS_INITIALIZER_CLAUSE@12..15
+          0: EQ@12..14 "=" [] [Whitespace(" ")]
+          1: JS_NUMBER_LITERAL_EXPRESSION@14..15
+            0: JS_NUMBER_LITERAL@14..15 "1" [] []
+      1: COMMA@15..17 "," [] [Whitespace(" ")]
+      2: JS_VARIABLE_DECLARATOR@17..40
+        0: JS_IDENTIFIER_BINDING@17..24
+          0: IDENT@17..24 "second" [] [Whitespace(" ")]
+        1: (empty)
+        2: JS_INITIALIZER_CLAUSE@24..40
+          0: EQ@24..26 "=" [] [Whitespace(" ")]
+          1: JS_OBJECT_EXPRESSION@26..40
+            0: L_CURLY@26..28 "{" [] [Whitespace(" ")]
+            1: JS_OBJECT_MEMBER_LIST@28..39
+              0: JS_PROPERTY_OBJECT_MEMBER@28..39
+                0: JS_LITERAL_MEMBER_NAME@28..33
+                  0: IDENT@28..33 "value" [] []
+                1: COLON@33..35 ":" [] [Whitespace(" ")]
+                2: JS_STRING_LITERAL_EXPRESSION@35..39
+                  0: JS_STRING_LITERAL@35..39 "\"}\"" [] [Whitespace(" ")]
+            2: R_CURLY@39..40 "}" [] []
+  1: SEMICOLON@40..41 ";" [] []
+  2: EOF@41..42 "" [Newline("\n")] []
+
+```

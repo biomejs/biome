@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/issue-17746-fenced-code-then-nested-list.md
+---
+
+# Input
+
+```md
+- ```
+  a
+  ```
+
+  - b
+- c
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,5 +3,4 @@
+   ```
+ 
+   - b
+-
+ - c
+```
+
+# Output
+
+```md
+- ```
+  a
+  ```
+
+  - b
+- c
+```

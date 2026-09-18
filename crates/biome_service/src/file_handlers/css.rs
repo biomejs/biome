@@ -2,11 +2,13 @@ mod go_to;
 
 use super::{
     AnalyzerVisitorBuilder, AnalyzerVisitorResult, CodeActionsParams, EditorCapabilities,
-    EnabledForPath, ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult,
-    ProcessFixAll, ProcessLint, SearchCapabilities,
+    EnabledForPath, ExtensionHandler, FixAllParams, FixedFileResult, LintParams, LintResults,
+    ParseResult, ProcessFixAll, ProcessLint, SearchCapabilities, format_on_type_noop,
+    matches_on_type_char,
 };
 use crate::WorkspaceError;
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
+use crate::db::WorkspaceDb;
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::css::go_to::resolve_definition;
 use crate::file_handlers::{
@@ -14,11 +16,10 @@ use crate::file_handlers::{
 };
 use crate::settings::{
     FormatSettings, LanguageListSettings, LanguageSettings, OverrideSettings, ServiceLanguage,
-    Settings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    Settings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
-use crate::workspace::{
-    CodeAction, FixFileResult, GetSyntaxTreeResult, PatternId, PullActionsResult,
-};
+use crate::workspace::{CodeAction, GetSyntaxTreeResult, PatternId, PullActionsResult};
 use crate::workspace::{FixFileMode, SearchQuery};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
@@ -33,7 +34,6 @@ use biome_css_analyze::{CssAnalyzerServices, analyze};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
-use biome_css_semantic::db::css_semantic_model;
 use biome_css_semantic::semantic_model;
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssRoot, CssSyntaxNode};
 use biome_db::AnyParsedSource;
@@ -43,11 +43,10 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
-use biome_rowan::{AstNode, NodeCache};
+use biome_languages::css::CssEmbeddingKind;
+use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use biome_workspace_db::WorkspaceDb;
 use camino::Utf8Path;
-use either::Either;
 use std::borrow::Cow;
 use tracing::{error, info};
 
@@ -171,6 +170,11 @@ impl ServiceLanguage for CssLanguage {
         path: &BiomePath,
         file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
+        let report_scss_exclusive_syntax = cfg!(feature = "report_scss_exclusive_syntax")
+            && file_source
+                .to_css_file_source()
+                .is_some_and(|source| matches!(source.as_embedding_kind(), CssEmbeddingKind::None));
+
         let mut options = CssParserOptions {
             allow_wrong_line_comments: language
                 .allow_wrong_line_comments
@@ -197,6 +201,7 @@ impl ServiceLanguage for CssLanguage {
                 .unwrap_or_default(),
             grit_metavariables: false,
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
+            report_scss_exclusive_syntax,
         };
 
         overrides.apply_override_css_parser_options(path, &mut options);
@@ -208,51 +213,50 @@ impl ServiceLanguage for CssLanguage {
         global: &FormatSettings,
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &BiomePath,
-        document_file_source: &DocumentFileSource,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
-        let indent_style = language
-            .indent_style
-            .or(global.indent_style)
-            .unwrap_or_default();
-        let line_width = language
-            .line_width
-            .or(global.line_width)
-            .unwrap_or_default();
-        let indent_width = language
-            .indent_width
-            .or(global.indent_width)
-            .unwrap_or_default();
+        let source = file_source.to_css_file_source().unwrap_or_default();
+        let mut options = CssFormatOptions::new(source)
+            .with_indent_style(
+                language
+                    .indent_style
+                    .or(global.indent_style)
+                    .unwrap_or_default(),
+            )
+            .with_indent_width(
+                language
+                    .indent_width
+                    .or(global.indent_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_width(
+                language
+                    .line_width
+                    .or(global.line_width)
+                    .unwrap_or_default(),
+            )
+            .with_line_ending(
+                language
+                    .line_ending
+                    .or(global.line_ending)
+                    .unwrap_or_default(),
+            )
+            .with_quote_style(language.quote_style.unwrap_or_default())
+            .with_delimiter_spacing(
+                language
+                    .delimiter_spacing
+                    .or(global.delimiter_spacing)
+                    .unwrap_or_default(),
+            )
+            .with_trailing_newline(
+                language
+                    .trailing_newline
+                    .or(global.trailing_newline)
+                    .unwrap_or_default(),
+            );
 
-        let line_ending = language
-            .line_ending
-            .or(global.line_ending)
-            .unwrap_or_default();
-
-        let trailing_newline = language
-            .trailing_newline
-            .or(global.trailing_newline)
-            .unwrap_or_default();
-
-        let mut options = CssFormatOptions::new(
-            document_file_source
-                .to_css_file_source()
-                .unwrap_or_default(),
-        )
-        .with_indent_style(indent_style)
-        .with_indent_width(indent_width)
-        .with_line_width(line_width)
-        .with_line_ending(line_ending)
-        .with_quote_style(language.quote_style.unwrap_or_default())
-        .with_delimiter_spacing(
-            language
-                .delimiter_spacing
-                .or(global.delimiter_spacing)
-                .unwrap_or_default(),
-        )
-        .with_trailing_newline(trailing_newline);
-
-        overrides.apply_override_css_format_options(path, &mut options);
+        overrides.apply_override_css_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -261,9 +265,8 @@ impl ServiceLanguage for CssLanguage {
         global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        file_path: &BiomePath,
+        override_indices: &[usize],
         _file_source: &DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
         let preferred_quote = global
             .languages
@@ -280,13 +283,10 @@ impl ServiceLanguage for CssLanguage {
             .unwrap_or_default();
 
         let configuration = AnalyzerConfiguration::default()
-            .with_rules(to_analyzer_rules(global, file_path.as_path()))
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
             .with_preferred_quote(preferred_quote);
 
-        AnalyzerOptions::default()
-            .with_file_path(file_path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn linter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -369,6 +369,98 @@ impl ServiceLanguage for CssLanguage {
             .unwrap_or_default()
             .into()
     }
+}
+
+#[salsa::interned]
+struct CssFormatOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_css_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: CssFormatOptionsInput<'db>,
+) -> CssFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<CssLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+#[salsa::interned]
+struct CssAnalyzerOptionsInput {
+    #[returns(ref)]
+    settings: SettingsIdentity,
+    #[returns(ref)]
+    override_indices: Box<[usize]>,
+    #[returns(ref)]
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_css_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: CssAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<CssLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> CssFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<CssLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = CssFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_css_format_options(&query_db, input)
+}
+
+fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<CssLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = CssAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_css_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -474,7 +566,7 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -497,11 +589,11 @@ fn debug_semantic_model(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let formatted = format_node(options, &tree)?;
@@ -520,7 +612,7 @@ fn format_range(
     range: TextRange,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
     let printed = biome_css_formatter::format_range(options, &tree, range)?;
@@ -535,7 +627,7 @@ fn format_on_type(
     offset: TextSize,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<CssLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
 
@@ -556,12 +648,28 @@ fn format_on_type(
         TokenAtOffset::Between(token, _) => token,
     };
 
+    if token.text_trimmed_range().end() != offset {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    if !matches_on_type_char(token.text_trimmed()) {
+        return Ok(format_on_type_noop(offset));
+    }
+
     let root_node = match token.parent() {
         Some(node) => node,
         None => panic!("found a token with no parent"),
     };
 
-    let printed = biome_css_formatter::format_sub_tree(options, &root_node)?;
+    if root_node
+        .ancestors()
+        .any(|node: CssSyntaxNode| node.kind().is_bogus())
+    {
+        return Ok(format_on_type_noop(offset));
+    }
+
+    let printed =
+        biome_css_formatter::format_range(options, &tree, root_node.text_trimmed_range())?;
     Ok(printed)
 }
 
@@ -576,12 +684,14 @@ fn lint(params: LintParams) -> LintResults {
         };
     };
 
-    let settings = &params.settings;
-    let analyzer_options = settings.analyzer_options::<CssLanguage>(
+    let settings = params.settings;
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        settings,
+        &params.workspace_db,
     );
     let tree = params.parsed_source.tree(&params.workspace_db);
 
@@ -590,13 +700,12 @@ fn lint(params: LintParams) -> LintResults {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -608,15 +717,16 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(
-            &params.workspace_db,
-            &params.parsed_source,
-        )),
+        language_db: Some(params.workspace_db.rc_language_db()),
+        parsed_source: match &params.parsed_source {
+            super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+            super::ParsedOrigin::Interned { .. } => None,
+        },
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
             {
-                Some(params.workspace_db.rc_module_db())
+                Some(params.module_db.clone())
             }
             #[cfg(not(feature = "module_graph"))]
             {
@@ -658,7 +768,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let tree = parsed_source.tree(&workspace_db);
     let Some(file_source) = language.to_css_file_source() else {
@@ -668,11 +777,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         };
     };
 
-    let analyzer_options = settings.analyzer_options::<CssLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -680,13 +791,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -700,7 +810,8 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
     info!("CSS runs the analyzer");
     let css_services = CssAnalyzerServices {
-        semantic_model: Some(css_semantic_model(&workspace_db, &parsed_source)),
+        language_db: Some(workspace_db.rc_language_db()),
+        parsed_source: Some(parsed_source),
         file_source,
         module_db: {
             #[cfg(feature = "module_graph")]
@@ -759,29 +870,30 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 /// Applies all the safe fixes to the given syntax tree.
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyCssRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut parsed_source = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+        super::ParsedOrigin::Interned { .. } => None,
+    };
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
         error!("Could not determine the file source of the file");
-        return Ok(FixFileResult::default());
+        return Ok(None);
     };
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
-    let analyzer_options = params.settings.analyzer_options::<CssLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -796,21 +908,19 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
             let css_services = CssAnalyzerServices {
-                semantic_model: None,
+                language_db: Some(params.workspace_db.rc_language_db()),
+                parsed_source: parsed_source.clone(),
                 file_source,
                 module_db: {
                     #[cfg(feature = "module_graph")]
                     {
-                        Some(params.workspace_db.rc_module_db())
+                        Some(params.module_db.clone())
                     }
                     #[cfg(not(feature = "module_graph"))]
                     {
@@ -828,7 +938,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 &analyzer_options,
                 css_services,
                 &params.plugins,
-                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+                |signal| {
+                    if params.collect_final_diagnostics {
+                        process_fix_all.collect_signal(signal, &mut pending_actions)
+                    } else {
+                        process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                    }
+                },
             );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -836,26 +952,14 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     Some(tree) => tree,
                     None => return None,
                 };
+                parsed_source = None;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
             if result.is_none() {
-                return process_fix_all.finish(
-                    || {
-                        Ok(if params.should_format {
-                            Either::Left(format_node(
-                                params.settings.format_options::<CssLanguage>(
-                                    params.biome_path,
-                                    &params.document_file_source,
-                                ),
-                                tree.syntax(),
-                            ))
-                        } else {
-                            Either::Right(tree.syntax().to_string())
-                        })
-                    },
-                    params.embeds_initial_indent,
-                );
+                return Ok(Some(
+                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
+                ));
             }
         }
     }
@@ -870,12 +974,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
     loop {
         let css_services = CssAnalyzerServices {
-            semantic_model: None,
+            language_db: Some(params.workspace_db.rc_language_db()),
+            parsed_source: parsed_source.clone(),
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -896,28 +1001,40 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
-        let plugin_text_edit = pending_actions
-            .iter()
-            .find_map(|action| action.text_edit.clone());
-        pending_actions.retain(|action| action.text_edit.is_none());
+        let mut plugin_text_edit = None;
+        pending_actions.retain_mut(|action| {
+            if let Some(text_edit) = action.text_edit.take() {
+                plugin_text_edit.get_or_insert(text_edit);
+                false
+            } else {
+                true
+            }
+        });
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match AnyCssRoot::cast(root) {
                 Some(tree) => tree,
                 None => return None,
             };
+            parsed_source = None;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
         if result.is_none() {
-            if let Some(new_text) = process_fix_all
-                .apply_plugin_text_edit(plugin_text_edit, &tree.syntax().to_string())?
-            {
-                let options = params
-                    .settings
-                    .parse_options::<CssLanguage>(params.biome_path, &params.document_file_source);
-                let parse = biome_css_parser::parse_css(&new_text, file_source, options);
-                tree = parse.tree();
-                continue;
+            if let Some(plugin_text_edit) = plugin_text_edit {
+                let new_text = {
+                    let current_text = tree.syntax().to_string();
+                    process_fix_all.apply_plugin_text_edit(plugin_text_edit, &current_text)?
+                };
+                if let Some(new_text) = new_text {
+                    let options = params.settings.parse_options::<CssLanguage>(
+                        params.biome_path,
+                        &params.document_file_source,
+                    );
+                    let parse = biome_css_parser::parse_css(&new_text, file_source, options);
+                    tree = parse.tree();
+                    parsed_source = None;
+                    continue;
+                }
             }
 
             break;
@@ -925,14 +1042,15 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     }
 
     // Phase 2: all rules for final diagnostics
-    {
+    if params.collect_final_diagnostics {
         let css_services = CssAnalyzerServices {
-            semantic_model: None,
+            language_db: Some(params.workspace_db.rc_language_db()),
+            parsed_source,
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -952,22 +1070,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         );
     }
 
-    process_fix_all.finish(
-        || {
-            Ok(if params.should_format {
-                Either::Left(format_node(
-                    params.settings.format_options::<CssLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    ),
-                    tree.syntax(),
-                ))
-            } else {
-                Either::Right(tree.syntax().to_string())
-            })
-        },
-        params.embeds_initial_indent,
-    )
+    Ok(Some(
+        process_fix_all.finish(tree.syntax().as_send().unwrap()),
+    ))
 }
 
 fn search(
@@ -987,6 +1092,7 @@ fn search(
 mod test {
     use super::*;
     use biome_languages::CssFileSource;
+    use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind};
 
     #[test]
     fn inherit_global_format_settings() {
@@ -994,7 +1100,7 @@ mod test {
             &FormatSettings::default(),
             &OverrideSettings::default(),
             &CssFormatterSettings::default(),
-            &BiomePath::new(""),
+            &[],
             &DocumentFileSource::Css(CssFileSource::css()),
         );
         assert_eq!(
@@ -1005,5 +1111,35 @@ mod test {
                 .with_line_ending(LineEnding::default())
                 .with_line_width(LineWidth::default())
         );
+    }
+
+    #[test]
+    fn resolve_parse_options_maps_scss_reporting_feature() {
+        let parse_options = CssLanguage::resolve_parse_options(
+            &OverrideSettings::default(),
+            &CssParserSettings::default(),
+            &BiomePath::new("test.css"),
+            &DocumentFileSource::Css(CssFileSource::css()),
+        );
+
+        assert_eq!(
+            parse_options.report_scss_exclusive_syntax,
+            cfg!(feature = "report_scss_exclusive_syntax")
+        );
+    }
+
+    #[test]
+    fn resolve_parse_options_disables_scss_reporting_for_embedded_css() {
+        let parse_options = CssLanguage::resolve_parse_options(
+            &OverrideSettings::default(),
+            &CssParserSettings::default(),
+            &BiomePath::new("test.html"),
+            &DocumentFileSource::Css(
+                CssFileSource::css()
+                    .with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html)),
+            ),
+        );
+
+        assert!(!parse_options.report_scss_exclusive_syntax);
     }
 }

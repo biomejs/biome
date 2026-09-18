@@ -1,0 +1,10 @@
+@media (min-width: tokens.$) {
+  .a { color: red; }
+}
+.after { color: blue; }
+
+@media (min-width: tokens.$tablet and ) { .a { color: red; } }
+.after-operator { color: blue; }
+
+@media (min-width: tokens.$tablet, ) { .a { color: red; } }
+.after-comma { color: blue; }

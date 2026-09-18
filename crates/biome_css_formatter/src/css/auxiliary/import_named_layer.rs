@@ -18,7 +18,7 @@ impl FormatNodeRule<CssImportNamedLayer> for FormatCssImportNamedLayer {
         write!(
             f,
             [
-                layer_token.format(),
+                layer_token.format()?.with_text_case(CssCase::Preserve),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(&name.format(), should_insert_space),

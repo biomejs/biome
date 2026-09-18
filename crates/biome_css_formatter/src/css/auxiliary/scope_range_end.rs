@@ -8,6 +8,13 @@ impl FormatNodeRule<CssScopeRangeEnd> for FormatCssScopeRangeEnd {
     fn fmt_fields(&self, node: &CssScopeRangeEnd, f: &mut CssFormatter) -> FormatResult<()> {
         let CssScopeRangeEndFields { to_token, end } = node.as_fields();
 
-        write!(f, [to_token.format(), space(), end.format()])
+        write!(
+            f,
+            [
+                to_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                end.format()
+            ]
+        )
     }
 }

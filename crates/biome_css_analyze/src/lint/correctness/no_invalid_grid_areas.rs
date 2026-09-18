@@ -115,6 +115,12 @@ impl Rule for NoInvalidGridAreas {
                     Err(_) => return Vec::new(),
                 };
                 let list = match value {
+                    AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => {
+                        return Vec::new();
+                    }
+                    AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => {
+                        return Vec::new();
+                    }
                     AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => {
                         list
                     }

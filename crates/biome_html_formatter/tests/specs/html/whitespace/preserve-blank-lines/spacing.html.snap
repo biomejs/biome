@@ -1,0 +1,84 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: whitespace/preserve-blank-lines/spacing.html
+---
+
+# Input
+
+```html
+<div>
+  <span>before text</span> 
+  text
+</div>
+<div>
+  <span>before element</span> 
+
+  <strong>after blank line</strong>
+</div>
+<svg>
+  <defs /> 
+
+  <g></g>
+</svg>
+<div>
+  <span>before comment</span> 
+
+  <!-- grouped comment -->
+</div>
+
+<div><span>before text</span> 
+text</div>
+<div><span>before element</span> 
+
+<strong>after blank line</strong></div>
+<svg><defs /> 
+
+<g></g></svg>
+<div><span>before comment</span> 
+
+<!-- grouped comment --></div>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	<span>before text</span>
+	text
+</div>
+<div>
+	<span>before element</span>
+
+	<strong>after blank line</strong>
+</div>
+<svg>
+	<defs />
+
+	<g></g>
+</svg>
+<div>
+	<span>before comment</span>
+
+	<!-- grouped comment -->
+</div>
+
+<div><span>before text</span> text</div>
+<div>
+	<span>before element</span>
+
+	<strong>after blank line</strong>
+</div>
+<svg>
+	<defs />
+
+	<g></g>
+</svg>
+<div>
+	<span>before comment</span>
+
+	<!-- grouped comment -->
+</div>
+
+```

@@ -9,6 +9,6 @@ impl FormatNodeRule<CssElseKeyword> for FormatCssElseKeyword {
     fn fmt_fields(&self, node: &CssElseKeyword, f: &mut CssFormatter) -> FormatResult<()> {
         let CssElseKeywordFields { else_token } = node.as_fields();
 
-        write!(f, [else_token.format()])
+        write!(f, [else_token.format()?.with_text_case(CssCase::Preserve)])
     }
 }

@@ -12,4 +12,8 @@
   <area href="/" aria-hidden="true" />
   <details aria-hidden="true">details</details>
   <summary aria-hidden="true">summary</summary>
+  <!-- static Vue bindings with truthy aria-hidden on focusable elements should also be flagged -->
+  <button :aria-hidden="'true'">Click me</button>
+  <button v-bind:aria-hidden="'true'">Click me</button>
+  <a href="/" :aria-hidden="'true'">link</a>
 </template>

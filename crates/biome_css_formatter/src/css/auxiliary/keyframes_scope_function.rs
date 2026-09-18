@@ -27,7 +27,7 @@ impl FormatNodeRule<CssKeyframesScopeFunction> for FormatCssKeyframesScopeFuncti
         write!(
             f,
             [
-                scope.format(),
+                scope.format()?.with_text_case(CssCase::Preserve),
                 l_paren_token.format(),
                 maybe_space,
                 name.format(),

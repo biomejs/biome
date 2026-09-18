@@ -1,0 +1,13 @@
+leading-blanks: |
+
+
+  text after two blank lines
+gaps: |
+  first
+
+
+  second
+only-blanks: |
+
+
+next: value

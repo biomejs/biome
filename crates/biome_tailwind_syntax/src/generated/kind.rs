@@ -109,7 +109,7 @@ pub enum TailwindSyntaxKind {
     CSS_URL_VALUE_RAW_LITERAL,
     ERROR_TOKEN,
     IDENT,
-    NEWLINE,
+    CSS_WHITESPACE,
     TW_ROOT,
     TW_CANDIDATE_LIST,
     TW_FULL_CANDIDATE,

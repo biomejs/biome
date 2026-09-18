@@ -1,0 +1,229 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+const el = <script>{code}</script>; const code = 1;
+const el2 = <div>hi</div>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@6..9 "el" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@9..11 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: TsTypeAssertionExpression {
+                                    l_angle_token: L_ANGLE@11..12 "<" [] [],
+                                    ty: TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@12..18 "script" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                    r_angle_token: R_ANGLE@18..19 ">" [] [],
+                                    expression: JsObjectExpression {
+                                        l_curly_token: L_CURLY@19..20 "{" [] [],
+                                        members: JsObjectMemberList [
+                                            JsShorthandPropertyObjectMember {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@20..24 "code" [] [],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@24..25 "}" [] [],
+                                    },
+                                },
+                                operator_token: L_ANGLE@25..26 "<" [] [],
+                                right: JsRegexLiteralExpression {
+                                    value_token: JS_REGEX_LITERAL@26..51 "/script>; const code = 1;" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@51..58 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@58..62 "el2" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@62..64 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: TsTypeAssertionExpression {
+                                    l_angle_token: L_ANGLE@64..65 "<" [] [],
+                                    ty: TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@65..68 "div" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                    r_angle_token: R_ANGLE@68..69 ">" [] [],
+                                    expression: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@69..71 "hi" [] [],
+                                        },
+                                    },
+                                },
+                                operator_token: L_ANGLE@71..72 "<" [] [],
+                                right: JsRegexLiteralExpression {
+                                    value_token: JS_REGEX_LITERAL@72..78 "/div>;" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..79
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
+    0: JS_VARIABLE_STATEMENT@0..51
+      0: JS_VARIABLE_DECLARATION@0..51
+        0: (empty)
+        1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@6..51
+          0: JS_VARIABLE_DECLARATOR@6..51
+            0: JS_IDENTIFIER_BINDING@6..9
+              0: IDENT@6..9 "el" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@9..51
+              0: EQ@9..11 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@11..51
+                0: TS_TYPE_ASSERTION_EXPRESSION@11..25
+                  0: L_ANGLE@11..12 "<" [] []
+                  1: TS_REFERENCE_TYPE@12..18
+                    0: JS_REFERENCE_IDENTIFIER@12..18
+                      0: IDENT@12..18 "script" [] []
+                    1: (empty)
+                  2: R_ANGLE@18..19 ">" [] []
+                  3: JS_OBJECT_EXPRESSION@19..25
+                    0: L_CURLY@19..20 "{" [] []
+                    1: JS_OBJECT_MEMBER_LIST@20..24
+                      0: JS_SHORTHAND_PROPERTY_OBJECT_MEMBER@20..24
+                        0: JS_REFERENCE_IDENTIFIER@20..24
+                          0: IDENT@20..24 "code" [] []
+                    2: R_CURLY@24..25 "}" [] []
+                1: L_ANGLE@25..26 "<" [] []
+                2: JS_REGEX_LITERAL_EXPRESSION@26..51
+                  0: JS_REGEX_LITERAL@26..51 "/script>; const code = 1;" [] []
+      1: (empty)
+    1: JS_VARIABLE_STATEMENT@51..78
+      0: JS_VARIABLE_DECLARATION@51..78
+        0: (empty)
+        1: CONST_KW@51..58 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@58..78
+          0: JS_VARIABLE_DECLARATOR@58..78
+            0: JS_IDENTIFIER_BINDING@58..62
+              0: IDENT@58..62 "el2" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@62..78
+              0: EQ@62..64 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@64..78
+                0: TS_TYPE_ASSERTION_EXPRESSION@64..71
+                  0: L_ANGLE@64..65 "<" [] []
+                  1: TS_REFERENCE_TYPE@65..68
+                    0: JS_REFERENCE_IDENTIFIER@65..68
+                      0: IDENT@65..68 "div" [] []
+                    1: (empty)
+                  2: R_ANGLE@68..69 ">" [] []
+                  3: JS_IDENTIFIER_EXPRESSION@69..71
+                    0: JS_REFERENCE_IDENTIFIER@69..71
+                      0: IDENT@69..71 "hi" [] []
+                1: L_ANGLE@71..72 "<" [] []
+                2: JS_REGEX_LITERAL_EXPRESSION@72..78
+                  0: JS_REGEX_LITERAL@72..78 "/div>;" [] []
+      1: (empty)
+  4: EOF@78..79 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+astro_frontmatter_jsx_elements.astro_frontmatter.tsx:1:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+  > 1 │ const el = <script>{code}</script>; const code = 1;
+      │                                                    
+    2 │ const el2 = <div>hi</div>;
+    3 │ 
+  
+  i ...but the line ends here
+  
+  > 1 │ const el = <script>{code}</script>; const code = 1;
+      │                                                    
+    2 │ const el2 = <div>hi</div>;
+    3 │ 
+  
+  i a regex literal starts there...
+  
+  > 1 │ const el = <script>{code}</script>; const code = 1;
+      │                           ^
+    2 │ const el2 = <div>hi</div>;
+    3 │ 
+  
+astro_frontmatter_jsx_elements.astro_frontmatter.tsx:2:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated regex literal
+  
+    1 │ const el = <script>{code}</script>; const code = 1;
+  > 2 │ const el2 = <div>hi</div>;
+      │                           
+    3 │ 
+  
+  i ...but the line ends here
+  
+    1 │ const el = <script>{code}</script>; const code = 1;
+  > 2 │ const el2 = <div>hi</div>;
+      │                           
+    3 │ 
+  
+  i a regex literal starts there...
+  
+    1 │ const el = <script>{code}</script>; const code = 1;
+  > 2 │ const el2 = <div>hi</div>;
+      │                     ^
+    3 │ 
+  
+```

@@ -88,7 +88,7 @@ pub fn generate_group_struct(
         );
         let rule_base_name = Ident::new(&Case::Snake.convert(rule), Span::call_site());
         let rule_name = Ident::new(
-            &format!("{}Options", &to_capitalized(rule)),
+            &format!("{}Options", to_capitalized(rule)),
             Span::call_site(),
         );
         // Populate the preset map from both `metadata.recommended` (legacy)

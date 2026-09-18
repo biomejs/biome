@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
 publish              = true
 
 [[bench]]
@@ -28,7 +29,7 @@ tracing                = { workspace = true }
 [dev-dependencies]
 biome_test_utils  = { path = "../biome_test_utils" }
 camino            = { workspace = true }
-criterion         = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true }
 quickcheck        = { workspace = true }
 quickcheck_macros = { workspace = true }

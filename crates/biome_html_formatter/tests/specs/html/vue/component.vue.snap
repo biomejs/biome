@@ -6,8 +6,10 @@ info: vue/component.vue
 # Input
 
 ```vue
-<Base title="500">
-</Base>
+<template>
+	<Base title="500">
+	</Base>
+</template>
 
 ```
 
@@ -15,6 +17,8 @@ info: vue/component.vue
 # Formatted
 
 ```vue
-<Base title="500"> </Base>
+<template>
+	<Base title="500"> </Base>
+</template>
 
 ```

@@ -8,6 +8,7 @@ pub mod generate_analyzer_rule_options;
 #[cfg(feature = "global_types")]
 pub mod generate_global_types;
 mod generate_grit_mappings;
+mod generate_js_plugin_ast;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
@@ -129,6 +130,9 @@ pub enum TaskCommand {
     /// Generates Baseline data for CSS features from web-features
     #[bpaf(command, long("css-baseline"))]
     CssBaseline,
+    /// Generates CSS keywords from @webref/css
+    #[bpaf(command, long("css-keywords"))]
+    CssKeywords,
     /// Generates e18e module replacement data
     #[bpaf(command, long("module-replacements"))]
     ModuleReplacements,

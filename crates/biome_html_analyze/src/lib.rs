@@ -1,49 +1,79 @@
 #![deny(clippy::use_self)]
+#![expect(clippy::too_many_arguments)]
 
 mod a11y;
 mod assist;
 mod lint;
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
-mod utils;
+mod tailwind;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
+use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
+use biome_analyze::{
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleAction, RuleRegistry, Suppression,
+};
+use biome_aria::AriaRoles;
+use biome_diagnostics::Error;
+use biome_embeds::EmbeddedData;
+use biome_html_syntax::HtmlLanguage;
+use biome_languages::{HtmlFileSource, LanguageDb};
+use biome_module_graph::ModuleDb;
+use biome_project_layout::ProjectLayout;
+use biome_suppression::SuppressionDiagnostic;
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
+use std::ops::Deref;
+use std::rc::Rc;
+use std::sync::{Arc, LazyLock};
 
 /// Services available to HTML lint rules.
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
     pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub language_db: Option<Rc<dyn LanguageDb>>,
+    pub embedded_data: Option<Arc<EmbeddedData>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+impl HtmlAnalyzerServices {
+    pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
+        self.module_db = Some(module_db);
+        self
+    }
+
+    pub fn with_project_layout(mut self, project_layout: Arc<ProjectLayout>) -> Self {
+        self.project_layout = Some(project_layout);
+        self
+    }
+
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
+        self
+    }
 }
 
 impl std::fmt::Debug for HtmlAnalyzerServices {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("HtmlAnalyzerServices")
             .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("language_db", &self.language_db.as_ref().map(|_| "..."))
+            .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
             .field("project_layout", &self.project_layout)
             .finish()
     }
 }
-use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression, ControlFlow,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    to_analyzer_suppressions,
-};
-use biome_aria::AriaRoles;
-use biome_deserialize::TextRange;
-use biome_diagnostics::Error;
-use biome_html_syntax::HtmlLanguage;
-use biome_languages::HtmlFileSource;
-use biome_module_graph::ModuleDb;
-use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
-use std::ops::Deref;
-use std::rc::Rc;
-use std::sync::{Arc, LazyLock};
 
 pub(crate) type HtmlRuleAction = RuleAction<HtmlLanguage>;
 
@@ -62,19 +92,26 @@ pub fn analyze<'a, F, B>(
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = html_services.module_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         source_type,
         html_services,
+        suppression,
         emit_signal,
     )
 }
@@ -92,6 +129,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -99,32 +137,6 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -136,9 +148,15 @@ where
     }
 
     services.insert_service(source_type);
+    services.insert_service(TwSyntaxService::default());
     services.insert_service(Arc::new(AriaRoles));
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
+    }
+    if let Some(embedded_data) = html_services.embedded_data {
+        services.insert_service(EmbeddedService::from_data(embedded_data));
+    } else if let Some(language_db) = html_services.language_db {
+        services.insert_service(EmbeddedService::new(language_db, options.file_path.clone()));
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);
@@ -147,7 +165,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        suppression.unwrap_or_else(|| Box::new(HtmlSuppression)),
         Box::new(HtmlSuppressionAction),
         &mut emit_signal,
     );
@@ -210,6 +228,7 @@ mod tests {
             &options,
             HtmlFileSource::html(),
             crate::HtmlAnalyzerServices::default(),
+            None,
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

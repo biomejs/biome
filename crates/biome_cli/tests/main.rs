@@ -339,7 +339,7 @@ pub(crate) fn run_cli_with_dyn_fs(
     use biome_service::{WorkspaceRef, workspace};
     use tokio::io::{duplex, split};
 
-    let factory = ServerFactory::new_with_fs(Arc::new(OsFileSystem::new(
+    let factory = ServerFactory::new_cli_test_with_fs(Arc::new(OsFileSystem::new(
         fs.working_directory().unwrap_or_default(),
     )));
     let connection = factory.create();

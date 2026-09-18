@@ -9,6 +9,9 @@ mod tables;
 
 pub use crate::bytes::Dispatch;
 pub use crate::punctuation::is_unicode_punctuation;
+pub use crate::tables::html::{
+    is_cjk_punctuation, is_cjk_segment_break_character, is_default_ignorable_code_point,
+};
 
 /// Tests if `c` is a valid start of a CSS identifier
 #[inline]

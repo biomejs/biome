@@ -8,6 +8,8 @@
 
 <input role="button" />
 <input type="button" role="button" />
+<input type="button" role={roleValue} />
+<input type="button" {role} />
 <input type="checkbox" role="button" />
 <input type="color" role="button" />
 <input type="date" role="button" />

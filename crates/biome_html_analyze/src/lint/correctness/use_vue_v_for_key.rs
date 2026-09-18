@@ -114,7 +114,7 @@ impl Rule for UseVueVForKey {
 }
 
 fn is_v_bind_key_argument(arg: &VueDirectiveArgument) -> bool {
-    let Ok(arg) = arg.arg() else {
+    let Some(arg) = arg.arg() else {
         return false;
     };
     let Some(static_arg) = arg.as_vue_static_argument() else {

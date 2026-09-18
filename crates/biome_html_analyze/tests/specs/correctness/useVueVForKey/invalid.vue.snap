@@ -4,31 +4,33 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
-<ul>
-  <li v-for="item in items">{{ item }}</li>
-</ul>
+<template>
+	<!-- should generate diagnostics -->
+	<ul>
+	  <li v-for="item in items">{{ item }}</li>
+	</ul>
 
-<div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+	<div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
 
-<template v-for="item in items">
-  <li>{{ item }}</li>
+	<template v-for="item in items">
+	  <li>{{ item }}</li>
+	</template>
 </template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:3:7 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:8 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element is using v-for, but the key attribute is missing.
   
-    1 │ <!-- should generate diagnostics -->
-    2 │ <ul>
-  > 3 │   <li v-for="item in items">{{ item }}</li>
-      │       ^^^^^^^^^^^^^^^^^^^^^
-    4 │ </ul>
-    5 │ 
+    2 │ 	<!-- should generate diagnostics -->
+    3 │ 	<ul>
+  > 4 │ 	  <li v-for="item in items">{{ item }}</li>
+      │ 	      ^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	</ul>
+    6 │ 
   
   i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
   
@@ -38,16 +40,16 @@ invalid.vue:3:7 lint/correctness/useVueVForKey ━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:6:22 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:23 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element is using v-for, but the key attribute is missing.
   
-    4 │ </ul>
-    5 │ 
-  > 6 │ <div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
-      │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
-    8 │ <template v-for="item in items">
+    5 │ 	</ul>
+    6 │ 
+  > 7 │ 	<div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+      │ 	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ 	<template v-for="item in items">
   
   i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
   
@@ -57,16 +59,16 @@ invalid.vue:6:22 lint/correctness/useVueVForKey ━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:8:11 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:12 lint/correctness/useVueVForKey ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element is using v-for, but the key attribute is missing.
   
-     6 │ <div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
-     7 │ 
-   > 8 │ <template v-for="item in items">
-       │           ^^^^^^^^^^^^^^^^^^^^^
-     9 │   <li>{{ item }}</li>
-    10 │ </template>
+     7 │ 	<div class="wrapper" v-for="(item, i) in items" data-id="foo"></div>
+     8 │ 
+   > 9 │ 	<template v-for="item in items">
+       │ 	          ^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	  <li>{{ item }}</li>
+    11 │ 	</template>
   
   i Using a unique key with v-for helps Vue optimize rendering and track elements efficiently. Failing to provide a key can result in unexpected behavior during updates. See the Vue docs for more info.
   

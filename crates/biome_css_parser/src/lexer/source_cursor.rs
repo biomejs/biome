@@ -1,3 +1,5 @@
+use biome_css_syntax::is_css_newline_byte;
+
 /// Shared source-only navigation primitive for CSS cursor helpers.
 #[derive(Debug, Copy, Clone)]
 pub(crate) struct SourceCursor<'src> {
@@ -93,12 +95,8 @@ impl<'src> SourceCursor<'src> {
     /// Returns true when a backslash escape starting at `offset` is valid.
     pub(crate) fn is_valid_escape_at(&self, offset: usize) -> bool {
         self.byte_at(offset)
-            .is_some_and(|byte| !is_newline_byte(byte))
+            .is_some_and(|byte| !is_css_newline_byte(byte))
     }
-}
-
-pub(super) const fn is_newline_byte(byte: u8) -> bool {
-    matches!(byte, b'\n' | b'\r' | 0x0C)
 }
 
 #[cfg(test)]

@@ -1,0 +1,34 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidSkipBlankLines.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query Foo { id }
+
+
+query Bar { id }
+
+
+```
+
+# Diagnostics
+```
+invalidSkipBlankLines.graphql:2:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file has too many lines (3). Maximum allowed is 2.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query Foo { id }
+      │ ^^^^^^^^^^^^^^^^
+  > 3 │ 
+  > 4 │ 
+  > 5 │ query Bar { id }
+      │ ^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Consider splitting this file into smaller files.
+  
+
+```

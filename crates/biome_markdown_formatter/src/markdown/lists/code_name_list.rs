@@ -13,6 +13,7 @@ impl FormatRule<MdCodeNameList> for FormatMdCodeNameList {
         for entry in node.iter() {
             joiner.entry(&entry.format().with_options(FormatMdTextualOptions {
                 print_mode: TextPrintMode::trim_all(),
+                ..FormatMdTextualOptions::default()
             }));
         }
 

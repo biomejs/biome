@@ -14,6 +14,10 @@ text with [inline][ref] in the middle
 
 [link with **bold**][ref]
 
+# *[heading*][ref]
+
+> - [nested][ref]
+
 [world]: https://example.com "World"
 [  label  ]: https://example.com "Label"
 [*foo* bar]: https://example.com "Foo Bar"

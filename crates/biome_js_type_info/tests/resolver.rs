@@ -1,8 +1,14 @@
 mod utils;
 
+use std::sync::Arc;
+
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsExpressionStatement};
-use biome_js_type_info::{GlobalsResolver, Resolvable, TypeData};
+use biome_js_type_info::{
+    GlobalsResolver, Resolvable, Type, TypeData, TypeMemberKind, TypeReference,
+    TypeReferenceQualifier, TypeResolver,
+};
+use biome_rowan::Text;
 
 use utils::{
     HardcodedSymbolResolver, assert_type_data_snapshot, assert_typed_bindings_snapshot,
@@ -265,6 +271,34 @@ fn infer_resolved_type_of_async_disposable_object() {
 }
 
 #[test]
+fn disposable_detection_relies_on_the_symbol_key() {
+    // A value-returning `[Symbol.dispose]` is still disposable: TypeScript
+    // accepts any return type through void assignability.
+    let ty = inferred_variable_type(
+        r#"const a = {
+            [Symbol.dispose]() { return 1; }
+        };"#,
+    );
+    assert!(ty.is_disposable());
+
+    // `[Symbol.asyncDispose]` marks an async disposable regardless of how the
+    // return type is spelled, including the `PromiseLike<void>` lib signature.
+    let ty = inferred_variable_type(
+        r#"const a = {
+            [Symbol.asyncDispose](): PromiseLike<void> { throw 0; }
+        };"#,
+    );
+    assert!(ty.is_async_disposable());
+
+    let ty = inferred_variable_type(
+        r#"const a = {
+            async [Symbol.asyncDispose]() {}
+        };"#,
+    );
+    assert!(ty.is_async_disposable());
+}
+
+#[test]
 fn infer_resolved_type_of_disposable_returning_function() {
     const CODE: &str = r#"function returnsDisposable(): Disposable {
     return {};
@@ -302,6 +336,54 @@ fn infer_resolved_type_of_async_disposable_returning_function() {
         &resolver,
         "infer_resolved_type_of_async_disposable_returning_function",
     )
+}
+
+#[test]
+fn generated_disposable_globals_use_computed_symbol_members() {
+    let resolver = GlobalsResolver::default();
+
+    assert_global_has_computed_member(&resolver, "Disposable");
+    assert_global_has_computed_member(&resolver, "AsyncDisposable");
+}
+
+fn assert_global_has_computed_member(resolver: &GlobalsResolver, name: &'static str) {
+    let reference = TypeReference::from(
+        TypeReferenceQualifier::from_path(ScopeId::GLOBAL, Text::new_static(name)).with_type_only(),
+    );
+    let resolved = resolver
+        .resolve_and_get(&reference)
+        .expect("global should resolve");
+    let TypeData::Interface(interface) = resolved.as_raw_data() else {
+        panic!("{name} should resolve to generated interface data");
+    };
+    let [member] = interface.members.as_ref() else {
+        panic!("{name} should have exactly one generated member");
+    };
+    assert!(matches!(member.kind, TypeMemberKind::ComputedValue(_)));
+}
+
+fn inferred_variable_type(code: &str) -> Type {
+    let root = parse_ts(code);
+    let decl = get_variable_declaration(&root);
+    let mut resolver = GlobalsResolver::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut resolver,
+        ScopeId::GLOBAL,
+        &decl,
+    );
+    resolver.run_inference();
+
+    let [(name, reference)] = bindings.as_ref() else {
+        panic!("expected exactly one binding");
+    };
+    assert_eq!(name.text(), "a");
+
+    let reference = reference.clone();
+    let resolver = Arc::new(resolver);
+    let id = resolver
+        .resolve_reference(&reference)
+        .expect("binding should resolve");
+    Type::from_id(resolver, id)
 }
 
 pub fn get_expression_statement(root: &AnyJsRoot) -> JsExpressionStatement {

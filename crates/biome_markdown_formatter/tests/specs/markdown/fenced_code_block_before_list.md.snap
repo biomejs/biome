@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/fenced_code_block_before_list.md
+---
+
+# Input
+
+```md
+```js
+a
+```
+1. one
+1. two
+
+```js
+b
+```
+
+- alpha
+
+```js
+c
+```
+
+
+
+1. one
+1. two
+
+```
+
+
+# Formatted
+
+```md
+```js
+a
+```
+
+1. one
+1. two
+
+```js
+b
+```
+
+- alpha
+
+```js
+c
+```
+
+1. one
+1. two
+
+```

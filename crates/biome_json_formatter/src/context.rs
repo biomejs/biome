@@ -59,7 +59,7 @@ impl CstFormatContext for JsonFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct JsonFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,

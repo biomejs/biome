@@ -1,0 +1,120 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+-		foo
+
+1.		bar
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdIndentCodeBlock {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@1..6 "\t\tfoo" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@6..7 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@7..8 "\n" [] [],
+        },
+        MdOrderedListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MD_ORDERED_LIST_MARKER@8..10 "1." [] [],
+                        post_marker_space_token: missing (optional),
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdIndentCodeBlock {
+                            content: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@10..15 "\t\tbar" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@15..16 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@16..16 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..16
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..16
+    0: MD_BULLET_LIST_ITEM@0..7
+      0: MD_BULLET_LIST@0..7
+        0: MD_BULLET@0..7
+          0: MD_LIST_MARKER_PREFIX@0..1
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@1..1
+          1: MD_BLOCK_LIST@1..7
+            0: MD_INDENT_CODE_BLOCK@1..7
+              0: MD_INLINE_ITEM_LIST@1..7
+                0: MD_TEXTUAL@1..6
+                  0: MD_TEXTUAL_LITERAL@1..6 "\t\tfoo" [] []
+                1: MD_TEXTUAL@6..7
+                  0: MD_TEXTUAL_LITERAL@6..7 "\n" [] []
+    1: MD_NEWLINE@7..8
+      0: NEWLINE@7..8 "\n" [] []
+    2: MD_ORDERED_LIST_ITEM@8..16
+      0: MD_BULLET_LIST@8..16
+        0: MD_BULLET@8..16
+          0: MD_LIST_MARKER_PREFIX@8..10
+            0: MD_INDENT_TOKEN_LIST@8..8
+            1: MD_ORDERED_LIST_MARKER@8..10 "1." [] []
+            2: (empty)
+            3: MD_INDENT_TOKEN_LIST@10..10
+          1: MD_BLOCK_LIST@10..16
+            0: MD_INDENT_CODE_BLOCK@10..16
+              0: MD_INLINE_ITEM_LIST@10..16
+                0: MD_TEXTUAL@10..15
+                  0: MD_TEXTUAL_LITERAL@10..15 "\t\tbar" [] []
+                1: MD_TEXTUAL@15..16
+                  0: MD_TEXTUAL_LITERAL@15..16 "\n" [] []
+  3: EOF@16..16 "" [] []
+
+```

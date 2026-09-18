@@ -6,8 +6,9 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern,
-    AnyJsObjectBindingPatternMember, JsArrowFunctionExpression, JsLanguage, JsObjectBindingPattern,
-    JsParameters, JsVariableDeclarator, JsxExpressionAttributeValue,
+    AnyJsObjectBindingPatternMember, JsArrowFunctionExpression, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsLanguage, JsObjectBindingPattern,
+    JsParameters, JsVariableDeclarator, JsxExpressionAttributeValue, JsxExpressionChild,
 };
 use biome_rowan::{AstNode, AstSeparatedList, AstSeparatedListNodesIterator, TextRange};
 use biome_rule_options::no_solid_destructured_props::NoSolidDestructuredPropsOptions;
@@ -110,7 +111,7 @@ impl Rule for NoSolidDestructuredProps {
                     binding_pattern.properties().iter(),
                 ));
                 for binding in iter {
-                    if let Some(range) = is_binding_a_jsx_prop(&binding, model) {
+                    if let Some(range) = is_binding_used_in_jsx(&binding, model) {
                         bindings.push(Violation::WithProps(range))
                     }
                 }
@@ -160,25 +161,60 @@ impl Rule for NoSolidDestructuredProps {
 }
 
 fn is_inside_jsx_component(parameters: &JsParameters) -> Option<bool> {
-    let arrow_function_expression = parameters
-        .syntax()
-        .parent()
-        .and_then(JsArrowFunctionExpression::cast)?;
+    let parent = parameters.syntax().parent()?;
 
-    let variable_declarator = arrow_function_expression
-        .syntax()
-        .grand_parent()
-        .and_then(JsVariableDeclarator::cast)?;
+    if let Some(arrow_function_expression) = JsArrowFunctionExpression::cast(parent.clone()) {
+        let variable_declarator = arrow_function_expression
+            .syntax()
+            .grand_parent()
+            .and_then(JsVariableDeclarator::cast)?;
 
-    let name = variable_declarator.id().ok()?;
-    let name = name.as_any_js_binding()?.as_js_identifier_binding()?;
+        return is_variable_declarator_pascal_case(&variable_declarator);
+    }
 
-    let text = name.name_token().ok()?;
+    if let Some(function_declaration) = JsFunctionDeclaration::cast(parent.clone()) {
+        let id = function_declaration.id().ok()?;
+        let id = id.as_js_identifier_binding()?;
+        let text = id.name_token().ok()?;
 
-    Some(Case::identify(text.text_trimmed(), false) == Case::Pascal)
+        return Some(is_pascal_case(text.text_trimmed()));
+    }
+
+    if let Some(function_declaration) = JsFunctionExportDefaultDeclaration::cast(parent.clone()) {
+        let Some(id) = function_declaration.id() else {
+            return Some(true);
+        };
+        let id = id.as_js_identifier_binding()?;
+        let text = id.name_token().ok()?;
+
+        return Some(is_pascal_case(text.text_trimmed()));
+    }
+
+    if let Some(function_expression) = JsFunctionExpression::cast(parent) {
+        let variable_declarator = function_expression
+            .syntax()
+            .grand_parent()
+            .and_then(JsVariableDeclarator::cast)?;
+
+        return is_variable_declarator_pascal_case(&variable_declarator);
+    }
+
+    None
 }
 
-fn is_binding_a_jsx_prop(binding: &AnyJsBinding, model: &SemanticModel) -> Option<TextRange> {
+fn is_variable_declarator_pascal_case(variable_declarator: &JsVariableDeclarator) -> Option<bool> {
+    let name = variable_declarator.id().ok()?;
+    let name = name.as_any_js_binding()?.as_js_identifier_binding()?;
+    let text = name.name_token().ok()?;
+
+    Some(is_pascal_case(text.text_trimmed()))
+}
+
+fn is_pascal_case(name: &str) -> bool {
+    Case::identify(name, false) == Case::Pascal
+}
+
+fn is_binding_used_in_jsx(binding: &AnyJsBinding, model: &SemanticModel) -> Option<TextRange> {
     if let Some(binding) = binding
         .as_js_identifier_binding()
         .map(|b| model.as_binding(b))
@@ -188,8 +224,10 @@ fn is_binding_a_jsx_prop(binding: &AnyJsBinding, model: &SemanticModel) -> Optio
                 .syntax()
                 .ancestors()
                 .skip(1)
-                .find_map(JsxExpressionAttributeValue::cast)
-                .is_some()
+                .any(|ancestor| {
+                    JsxExpressionAttributeValue::can_cast(ancestor.kind())
+                        || JsxExpressionChild::can_cast(ancestor.kind())
+                })
             {
                 return Some(reference.syntax().text_trimmed_range());
             }

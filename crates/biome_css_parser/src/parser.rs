@@ -39,6 +39,13 @@ pub struct CssParserOptions {
     /// Enables parsing of Tailwind CSS 4.0 directives and functions.
     /// Defaults to `false`.
     pub tailwind_directives: bool,
+
+    /// Reports SCSS-exclusive syntax diagnostics in CSS files.
+    ///
+    /// This is an internal option for parser/formatter tests and callers that
+    /// want to report SCSS-specific diagnostics in CSS files.
+    #[doc(hidden)]
+    pub report_scss_exclusive_syntax: bool,
 }
 
 #[derive(Default, Debug, Clone, Copy, Eq, PartialEq)]
@@ -76,6 +83,13 @@ impl CssParserOptions {
         self
     }
 
+    /// Enables reporting of SCSS-exclusive syntax diagnostics in CSS files.
+    #[doc(hidden)]
+    pub fn report_scss_exclusive_syntax(mut self) -> Self {
+        self.report_scss_exclusive_syntax = true;
+        self
+    }
+
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.is_css_modules_enabled()
@@ -89,6 +103,10 @@ impl CssParserOptions {
     /// Checks if parsing of Tailwind CSS 4.0 directives is enabled.
     pub fn is_tailwind_directives_enabled(&self) -> bool {
         self.tailwind_directives
+    }
+
+    pub(crate) fn should_report_scss_exclusive_syntax(&self) -> bool {
+        self.report_scss_exclusive_syntax
     }
 
     pub fn is_css_modules_enabled(&self) -> bool {

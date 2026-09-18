@@ -297,3 +297,16 @@ function nullishUnion(arg: string | null | undefined) {
 function doubleNotCoerce(user: { name: string } | undefined) {
   return !!user;
 }
+
+//`Types.Result<T>` (default type-only namespace import) 
+// is a discriminated union, so `.success` is a necessary check 
+// and must NOT be flagged.
+import type Types from "./typeOnlyDefaultImportType";
+
+function parseQualifiedDefaultImport(): Types.Result<string> {
+  throw new Error();
+}
+
+const qualifiedDefaultImportResult = parseQualifiedDefaultImport();
+if (!qualifiedDefaultImportResult.success) {
+}

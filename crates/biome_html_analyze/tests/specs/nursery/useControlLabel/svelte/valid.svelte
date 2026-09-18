@@ -1,0 +1,12 @@
+<!-- should not generate diagnostics -->
+<Button />
+<Menuitem />
+<button><Icon /></button>
+<button><Icon></Icon></button>
+
+<!-- A dynamic value is assumed to supply a label. -->
+<button>{ label }</button>
+<button><span>{ label }</span></button>
+<button aria-label={labelValue}></button>
+<button aria-labelledby={labelId}></button>
+<button title={titleValue}></button>

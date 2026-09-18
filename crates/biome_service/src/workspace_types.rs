@@ -172,13 +172,9 @@ fn instance_type<'a>(
             });
 
             // Don't use `additionalProperties: false` here.
-            let additional_properties = schema.get("additionalProperties").and_then(|v| {
-                if v.as_bool() == Some(false) {
-                    None
-                } else {
-                    Some(v)
-                }
-            });
+            let additional_properties = schema
+                .get("additionalProperties")
+                .filter(|&v| v.as_bool() != Some(false));
 
             // If `additionalProperties` is not empty, add a mapped or record type.
             let additional_properties_type = additional_properties.map(|add_props| {
@@ -446,7 +442,8 @@ fn schema_object_type<'a>(
             } else if let Some(key) = reference.strip_prefix("#/definitions/") {
                 let def = root_schema.get("definitions")?.as_object()?.get(key)?;
                 (key, def)
-            } else if let Some(key) = reference.strip_prefix("#/components/schemas/") {
+            } else {
+                let key = reference.strip_prefix("#/components/schemas/")?;
                 let def = root_schema
                     .get("components")?
                     .as_object()?
@@ -454,8 +451,6 @@ fn schema_object_type<'a>(
                     .as_object()?
                     .get(key)?;
                 (key, def)
-            } else {
-                return None;
             };
 
             queue.push_back((key, def_schema));
@@ -776,7 +771,7 @@ macro_rules! workspace_method {
 }
 
 /// Returns a list of signature for all the methods in the [Workspace] trait
-pub fn methods() -> [WorkspaceMethod; 30] {
+pub fn methods() -> [WorkspaceMethod; 31] {
     [
         workspace_method!(file_features),
         workspace_method!(update_settings),
@@ -798,6 +793,7 @@ pub fn methods() -> [WorkspaceMethod; 30] {
         workspace_method!(get_semantic_model),
         workspace_method!(get_module_graph),
         workspace_method!(pull_diagnostics),
+        workspace_method!(process_file),
         workspace_method!(pull_actions),
         workspace_method!(pull_diagnostics_and_actions),
         workspace_method!(format_file),

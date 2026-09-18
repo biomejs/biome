@@ -2,12 +2,14 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-use boa_engine::module::{ModuleLoader, Referrer};
+use boa_engine::module::{ModuleLoader, ModuleRequest, Referrer};
 use boa_engine::{JsNativeError, JsResult, JsString, Module, Source};
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 
 use biome_resolver::{FsWithResolverProxy, ResolveOptions, resolve};
+
+use crate::source::read_module_source;
 
 pub struct JsModuleLoader {
     fs: Arc<dyn FsWithResolverProxy>,
@@ -33,10 +35,11 @@ impl ModuleLoader for JsModuleLoader {
     async fn load_imported_module(
         self: Rc<JsModuleLoader>,
         referrer: Referrer,
-        specifier: JsString,
+        request: ModuleRequest,
         context: &RefCell<&mut boa_engine::Context>,
     ) -> JsResult<Module> {
-        if let Some(module) = self.builtins.borrow().get(&specifier) {
+        let specifier = request.specifier();
+        if let Some(module) = self.builtins.borrow().get(specifier) {
             return Ok(module.clone());
         }
 
@@ -60,22 +63,16 @@ impl ModuleLoader for JsModuleLoader {
                     return Ok(module);
                 }
 
-                let source = self.fs.read_file_from_path(&path);
-                match source {
-                    Ok(source) => {
-                        let source = source.as_bytes();
-                        let source = Source::from_bytes(source).with_path(path.as_std_path());
-                        let module = Module::parse(source, None, &mut context.borrow_mut());
+                let source = read_module_source(&self.fs, &path)?;
+                let source = Source::from_bytes(source.as_bytes()).with_path(path.as_std_path());
+                let module = Module::parse(source, None, &mut context.borrow_mut());
 
-                        // Insert the parsed module into the cache.
-                        if let Ok(module) = &module {
-                            self.modules.borrow_mut().insert(path, module.clone());
-                        }
-
-                        module
-                    }
-                    Err(err) => Err(JsNativeError::error().with_message(err.to_string()).into()),
+                // Insert the parsed module into the cache.
+                if let Ok(module) = &module {
+                    self.modules.borrow_mut().insert(path, module.clone());
                 }
+
+                module
             }
             Err(err) => Err(JsNativeError::error().with_message(err.to_string()).into()),
         }

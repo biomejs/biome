@@ -18,7 +18,7 @@ parentNode.parentNode;
 ## Result
 
 ```
-Global TypeId(0) | Global TypeId(1) | Global TypeId(2)
+Global TypeId(0) | Global TypeId(1)
 ```
 
 ## Registered types

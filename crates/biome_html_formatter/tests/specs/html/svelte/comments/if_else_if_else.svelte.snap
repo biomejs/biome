@@ -51,4 +51,5 @@ info: svelte/comments/if_else_if_else.svelte
 <!-- 9 -->
 {/if}
 <!-- 10 -->
+
 ```

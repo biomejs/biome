@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/heading/setext/definition-before.md
+---
+
+# Input
+
+```md
+<!-- https://spec.commonmark.org/0.31.2/#example-215 -->
+[foo]: /url1
+[foo]: /url2
+bar
+===
+
+[foo]: /url1
+[foo]: /url2
+
+bar
+===
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,6 @@
+ <!-- https://spec.commonmark.org/0.31.2/#example-215 -->
+-
+ [foo]: /url1
+ [foo]: /url2
+-
+ # bar
+ 
+ [foo]: /url1
+```
+
+# Output
+
+```md
+<!-- https://spec.commonmark.org/0.31.2/#example-215 -->
+[foo]: /url1
+[foo]: /url2
+# bar
+
+[foo]: /url1
+[foo]: /url2
+
+# bar
+```

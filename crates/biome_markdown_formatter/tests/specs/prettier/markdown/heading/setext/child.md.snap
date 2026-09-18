@@ -1,0 +1,53 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/heading/setext/child.md
+---
+
+# Input
+
+```md
+>>> bar
+>>> ===
+
+- in list
+    - in list
+      heading
+      =======
+    - in list
+      >>> heading
+      >>> =======
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
+ > > > # bar
+-
+ - in list
+   - in list
+     heading
+     =======
+-  - in list
+-    > > > # heading
++    - in list
++      > > > heading
++      > > > =======
+```
+
+# Output
+
+```md
+> > > # bar
+- in list
+  - in list
+    heading
+    =======
+    - in list
+      > > > heading
+      > > > =======
+```

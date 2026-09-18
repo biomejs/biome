@@ -1,0 +1,4 @@
+planets: !!seq
+  - Mercury   # Rotates
+  - Pluto     # You call this a planet?
+after: value

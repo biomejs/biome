@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/blockquote_list_stability.md
+---
+
+# Input
+
+```md
+> - list
+>   - nested
+>     > quote
+>     > continuation
+
+```
+
+
+# Formatted
+
+```md
+> - list
+>   - nested
+>     > quote
+>     > continuation
+
+```

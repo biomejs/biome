@@ -1,5 +1,20 @@
+/* should generate diagnostics */
+class A {
+    constructor() {}
+}
+
 class B extends A {
-    constructor(foo: number) {
-        super(foo);
+    constructor() {
+        super();
+    }
+}
+
+class ProtectedBase {
+    protected constructor() {}
+}
+
+class Public extends ProtectedBase {
+    constructor() {
+        super();
     }
 }

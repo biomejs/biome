@@ -50,7 +50,7 @@ impl Default for DependencyAvailability {
 
 impl Deserializable for DependencyAvailability {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

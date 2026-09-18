@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS, SymbolFromModuleInfo,
-    find_js_exported_symbol,
+    JsExportedSymbolLookup, JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS,
+    SymbolFromModuleInfo, find_js_exported_symbol,
 };
 use biome_resolver::ResolveError;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
@@ -114,9 +114,11 @@ impl Rule for NoUnresolvedImports {
         let resolved_path = match resolved_path.as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
-                // Node.js built-ins (e.g. `node:fs`, `node:path`) are valid
+                // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) are valid
                 // imports — they simply cannot be resolved to a file path.
-                if *resolve_error == ResolveError::NodeBuiltIn {
+                if *resolve_error == ResolveError::NodeBuiltIn
+                    || *resolve_error == ResolveError::BunBuiltIn
+                {
                     return Vec::new();
                 }
 
@@ -268,9 +270,11 @@ fn get_unresolved_imports_from_module_source(
 }
 
 fn has_exported_symbol(import_name: &Text, options: &GetUnresolvedImportsOptions) -> bool {
-    find_js_exported_symbol(
+    let lookup = find_js_exported_symbol(
         options.module_db,
         SymbolFromModuleInfo::new(options.module_db, import_name.text(), options.target_info),
-    )
-    .is_some()
+    );
+    // `Unknown` means a re-export target could not be resolved, so the symbol
+    // may exist. Only report symbols that are missing for certain.
+    !matches!(lookup, JsExportedSymbolLookup::Missing)
 }

@@ -184,6 +184,22 @@ function setup() {
   return Tooltip;
 }
 
+// Hook defined with a function expression initializer
+function createStoredHook(key) {
+  const useStored = function () {
+    return useState(key);
+  };
+  return useStored;
+}
+
+// Hook defined with a parenthesized arrow initializer
+function createWrappedHook(key) {
+  const useWrapped = (() => {
+    return useState(key);
+  });
+  return useWrapped;
+}
+
 ```
 
 # Diagnostics
@@ -599,6 +615,44 @@ invalid.jsx:175:12 lint/nursery/noComponentHookFactories ━━━━━━━�
     177 │   }
   
   i React treats components defined inside functions as completely different on each call, destroying the entire subtree and losing all state. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:183:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useStored inside a function.
+  
+    181 │ // Hook defined with a function expression initializer
+    182 │ function createStoredHook(key) {
+  > 183 │   const useStored = function () {
+        │         ^^^^^^^^^
+    184 │     return useState(key);
+    185 │   };
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:191:9 lint/nursery/noComponentHookFactories ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not define hook useWrapped inside a function.
+  
+    189 │ // Hook defined with a parenthesized arrow initializer
+    190 │ function createWrappedHook(key) {
+  > 191 │   const useWrapped = (() => {
+        │         ^^^^^^^^^^
+    192 │     return useState(key);
+    193 │   });
+  
+  i Each call creates a new hook identity, causing React to lose its state across renders. Move it to the module level.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

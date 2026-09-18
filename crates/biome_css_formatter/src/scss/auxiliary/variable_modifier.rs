@@ -9,6 +9,12 @@ impl FormatNodeRule<ScssVariableModifier> for FormatScssVariableModifier {
     fn fmt_fields(&self, node: &ScssVariableModifier, f: &mut CssFormatter) -> FormatResult<()> {
         let ScssVariableModifierFields { excl_token, value } = node.as_fields();
 
-        write!(f, [excl_token.format(), value.format()])
+        write!(
+            f,
+            [
+                excl_token.format(),
+                value.format()?.with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

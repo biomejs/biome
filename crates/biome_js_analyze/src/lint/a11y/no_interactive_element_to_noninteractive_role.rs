@@ -38,6 +38,14 @@ declare_lint_rule! {
     /// <canvas role="img" />;
     /// ```
     ///
+    /// Custom elements (a tag name containing a dash) may be given any role or none:
+    ///
+    /// ```jsx
+    /// <>
+    ///     <my-button role="img" />
+    /// </>;
+    /// ```
+    ///
     pub NoInteractiveElementToNoninteractiveRole {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
@@ -60,6 +68,11 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
         if !node.is_element() {
             return None;
         }
+
+        if node.is_custom_element() {
+            return None;
+        }
+
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_static_value = role_attribute.as_static_value()?;
         let role_attribute_value = role_attribute_static_value.text();

@@ -6,7 +6,7 @@ use biome_graphql_parser::parse_graphql;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_languages::{DocumentFileSource, GraphqlFileSource};
 use biome_parser::{AnyParse, NodeParse};
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 
 #[derive(Default)]
 pub struct GraphqlTestFormatLanguage {
@@ -29,12 +29,9 @@ impl TestFormatLanguage for GraphqlTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.graphql.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
+        let path = BiomePath::new("");
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
             file_source,
         );
         GraphqlFormatLanguage::new(options)

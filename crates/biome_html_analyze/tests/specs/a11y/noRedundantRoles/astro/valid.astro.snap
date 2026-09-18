@@ -4,10 +4,10 @@ expression: valid.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 // Astro frontmatter
 ---
+<!-- should not generate diagnostics -->
 
 <!-- Custom components should not trigger the rule -->
 <Button role="button"></Button>
@@ -24,6 +24,7 @@ expression: valid.astro
 
 <!-- Native elements with non-redundant roles -->
 <article role="presentation"></article>
+<article role={roleValue}></article>
 <span></span>
 <div></div>
 

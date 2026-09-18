@@ -1,0 +1,80 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+&first &second value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlFlowInBlockNode {
+                flow_start_token: FLOW_START@0..0 "" [] [],
+                flow: YamlFlowYamlNode {
+                    properties: YamlPropertyList [
+                        YamlAnchorProperty {
+                            value_token: ANCHOR_PROPERTY_LITERAL@0..7 "&first" [] [Whitespace(" ")],
+                        },
+                        YamlAnchorProperty {
+                            value_token: ANCHOR_PROPERTY_LITERAL@7..15 "&second" [] [Whitespace(" ")],
+                        },
+                    ],
+                    content: YamlPlainScalar {
+                        value_token: PLAIN_LITERAL@15..21 "value\n" [] [],
+                    },
+                },
+                flow_end_token: FLOW_END@21..21 "" [] [],
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@21..21 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..21
+  0: YAML_DOCUMENT_LIST@0..21
+    0: YAML_DOCUMENT@0..21
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_FLOW_IN_BLOCK_NODE@0..21
+        0: FLOW_START@0..0 "" [] []
+        1: YAML_FLOW_YAML_NODE@0..21
+          0: YAML_PROPERTY_LIST@0..15
+            0: YAML_ANCHOR_PROPERTY@0..7
+              0: ANCHOR_PROPERTY_LITERAL@0..7 "&first" [] [Whitespace(" ")]
+            1: YAML_ANCHOR_PROPERTY@7..15
+              0: ANCHOR_PROPERTY_LITERAL@7..15 "&second" [] [Whitespace(" ")]
+          1: YAML_PLAIN_SCALAR@15..21
+            0: PLAIN_LITERAL@15..21 "value\n" [] []
+        2: FLOW_END@21..21 "" [] []
+      4: (empty)
+  1: EOF@21..21 "" [] []
+
+```
+
+## Diagnostics
+
+```
+duplicate_anchor.yaml:1:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A YAML node can have only one anchor property.
+  
+  > 1 │ &first &second value
+      │        ^^^^^^^
+    2 │ 
+  
+```

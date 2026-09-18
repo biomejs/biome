@@ -1,0 +1,12 @@
+@variant 2xl {
+	max-width: 1400px;
+}
+
+@utility container {
+	padding-inline: 1rem;
+	margin-inline: auto;
+
+	@variant 2xl {
+		max-width: 1400px;
+	}
+}

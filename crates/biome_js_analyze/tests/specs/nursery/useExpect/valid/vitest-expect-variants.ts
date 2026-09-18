@@ -13,6 +13,10 @@ describe("math", () => {
   });
 });
 
+test("element assertion", async () => {
+  await expect.element(document.body).toBeVisible();
+});
+
 type MyType<T> = (arg: T) => void;
 
 describe("MyType", () => {

@@ -1,7 +1,7 @@
 #![deny(clippy::use_self)]
 
 use proc_macro::TokenStream;
-use proc_macro_error2::*;
+use proc_macro_error3::*;
 use syn::{DeriveInput, parse_macro_input};
 
 mod generate;

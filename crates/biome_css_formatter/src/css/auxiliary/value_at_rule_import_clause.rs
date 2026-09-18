@@ -21,9 +21,9 @@ impl FormatNodeRule<CssValueAtRuleImportClause> for FormatCssValueAtRuleImportCl
             [
                 specifiers.format(),
                 space(),
-                from_token.format(),
+                from_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
-                source.format()
+                source?.format().with_text_case(CssCase::Preserve)
             ]
         )
     }

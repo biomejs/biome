@@ -26,7 +26,7 @@ JsModule {
                         l_angle_token: L_ANGLE@0..1 "<" [] [],
                         r_angle_token: R_ANGLE@1..2 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxSelfClosingElement {
                             l_angle_token: L_ANGLE@2..3 "<" [] [],
                             name: JsxName {

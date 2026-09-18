@@ -1,6 +1,7 @@
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
+use biome_service::file_handlers::ON_TYPE_CHARS;
 use tower_lsp_server::ls_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
@@ -67,7 +68,12 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
             } else {
                 Some(DocumentOnTypeFormattingOptions {
                     first_trigger_character: String::from("}"),
-                    more_trigger_character: Some(vec![String::from("]"), String::from(")")]),
+                    more_trigger_character: Some(
+                        ON_TYPE_CHARS
+                            .iter()
+                            .map(|c| c.to_string())
+                            .collect::<Vec<_>>(),
+                    ),
                 })
             }
         });

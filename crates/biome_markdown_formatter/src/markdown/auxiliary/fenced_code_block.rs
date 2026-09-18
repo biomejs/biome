@@ -1,8 +1,9 @@
+use crate::markdown::auxiliary::code_content::FormatMdCodeContentOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
 use crate::shared::{TextContext, TextPrintMode};
 use biome_formatter::{FormatRuleWithOptions, write};
-use biome_markdown_syntax::{MdFencedCodeBlock, MdFencedCodeBlockFields};
+use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdFencedCodeBlockFields};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdFencedCodeBlock {
@@ -32,18 +33,20 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         let normalized_fence: String = std::iter::repeat_n('`', fence_len).collect();
 
         let inside_list = self.text_context.is_list();
-        let excess = if inside_list { indent.len() } else { 0 };
+        let has_code_content = content
+            .iter()
+            .any(|item| matches!(item, AnyMdInline::MdCodeContent(_)));
+        let opening_fence_indent = indent
+            .iter()
+            .map(|token| token.md_indent_char_token().map(|token| token.text().len()))
+            .sum::<Result<usize, _>>()?;
 
-        if excess > 0 {
-            for token in indent.iter() {
-                let char_token = token.md_indent_char_token()?;
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(token.syntax());
-                write!(f, [format_removed(&char_token)])?;
-            }
-        } else {
-            write!(f, [indent.format()])?;
+        for token in indent.iter() {
+            let char_token = token.md_indent_char_token()?;
+            f.context()
+                .comments()
+                .mark_suppression_checked(token.syntax());
+            write!(f, [format_removed(&char_token)])?;
         }
 
         write!(
@@ -58,31 +61,44 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                 ),
                 code_list.format(),
                 hard_line_break(),
-                content
-                    .format()
-                    .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: if inside_list {
-                            TextPrintMode::Fill
-                        } else {
-                            TextPrintMode::Clean
-                        },
-                        keep_fences_in_italics: false,
-                        text_context: self.text_context,
-                    }),
+                format_with(|f| {
+                    if !has_code_content {
+                        content
+                            .format()
+                            .with_options(FormatMdFormatInlineItemListOptions {
+                                print_mode: if inside_list {
+                                    TextPrintMode::Fill
+                                } else {
+                                    TextPrintMode::Clean
+                                },
+                                keep_fences_in_italics: false,
+                                text_context: self.text_context,
+                            })
+                            .fmt(f)
+                    } else {
+                        for item in content.iter() {
+                            match item {
+                                AnyMdInline::MdCodeContent(code) => code
+                                    .format()
+                                    .with_options(FormatMdCodeContentOptions {
+                                        opening_fence_indent,
+                                    })
+                                    .fmt(f)?,
+                                item => item.format().fmt(f)?,
+                            }
+                        }
+                        Ok(())
+                    }
+                }),
             ]
         )?;
 
-        let r_fence_excess = if inside_list { r_fence_indent.len() } else { 0 };
-        let r_fence_tokens: Vec<_> = r_fence_indent.iter().collect();
-        for token in r_fence_tokens.iter().take(r_fence_excess) {
+        for token in r_fence_indent.iter() {
             let char_token = token.md_indent_char_token()?;
             f.context()
                 .comments()
                 .mark_suppression_checked(token.syntax());
             write!(f, [format_removed(&char_token)])?;
-        }
-        for token in r_fence_tokens.iter().skip(r_fence_excess) {
-            write!(f, [token.format()])?;
         }
 
         if let Some(r_fence) = r_fence {
@@ -123,17 +139,24 @@ fn longest_fence_char_sequence(node: &MdFencedCodeBlock, fence_char: char) -> us
     let mut max_len = 0usize;
 
     for item in content.iter() {
-        if let Some(textual) = item.as_md_textual()
-            && let Ok(token) = textual.value_token()
-        {
-            let mut consecutive_count = 0usize;
-            for ch in token.text().chars() {
-                if ch == fence_char {
-                    consecutive_count += 1;
-                    max_len = max_len.max(consecutive_count);
-                } else {
-                    consecutive_count = 0;
-                }
+        // Document-level blocks store the whole content in one MdCodeContent
+        // literal; nested blocks keep per-line MdTextual nodes.
+        let token = match &item {
+            AnyMdInline::MdTextual(textual) => textual.value_token(),
+            AnyMdInline::MdCodeContent(code) => code.value_token(),
+            _ => continue,
+        };
+        let Ok(token) = token else {
+            continue;
+        };
+
+        let mut consecutive_count = 0usize;
+        for ch in token.text().chars() {
+            if ch == fence_char {
+                consecutive_count += 1;
+                max_len = max_len.max(consecutive_count);
+            } else {
+                consecutive_count = 0;
             }
         }
     }

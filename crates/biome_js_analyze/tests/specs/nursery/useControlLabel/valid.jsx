@@ -1,0 +1,64 @@
+/* should not generate diagnostics */
+<>
+	<button>Submit</button>
+	<button aria-label="Close" />
+	<button title="Close" />
+	<button aria-labelledby="save-label" />
+	<span id="save-label">Save</span>
+
+	{/* A dynamic labeling value is assumed to provide a label. */}
+	<button aria-label={label} />
+
+	{/* A number renders as its own text, `0` included, inline or through the
+	    `children` prop. */}
+	<button>{0}</button>
+	<button>{0n}</button>
+	<button children={0} />
+	<button children={0n} />
+
+	{/* Nested text is found however deep it sits. */}
+	<button><Icon /><span>Delete</span></button>
+	<button><span><em>Delete</em></span></button>
+	<button><>Save</></button>
+	<button>{label}</button>
+
+	{/* A labeling attribute on a descendant names the control. */}
+	<button><span aria-label="Delete" /></button>
+	<button><span><span aria-labelledby="save-label" /></span></button>
+	<button><span title="Delete" /></button>
+
+	{/* An image is named by its alt text, an icon button by its inline SVG. */}
+	<button><img src="save.png" alt="Save" /></button>
+	<button><svg><title>Save</title></svg></button>
+	<button><svg aria-label="Save" /></button>
+
+	{/* A custom component or spread descendant may render a label. */}
+	<button><Icon /></button>
+	<button><span {...props} /></button>
+
+	{/* A hidden child alongside real text still leaves the control named. */}
+	<button><span aria-hidden="true" />Save</button>
+
+	{/* Hidden from the accessibility tree; no label needed. A bare `aria-hidden`
+	    is shorthand for `{true}` in JSX, unlike in HTML where a valueless
+	    `aria-hidden` leaves the control exposed. */}
+	<button aria-hidden="true" />
+	<button aria-hidden />
+	<button aria-hidden={isHidden} />
+
+	{/* A spread may carry a labeling attribute, so the control is left alone. */}
+	<button {...props} />
+	<button aria-hidden {...props} />
+
+	{/* Props that inject children supply content the rule cannot read. */}
+	<button children="Save" />
+	<button dangerouslySetInnerHTML={{ __html: "Save" }} />
+	<button innerHTML={html} />
+	<button><span dangerouslySetInnerHTML={{ __html: "Save" }} /></button>
+
+	{/* Not a control this rule checks; `area` is covered by `useAltText`. */}
+	<area href="#" />
+
+	{/* Custom component, not a native control. */}
+	<Button />
+</>

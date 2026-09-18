@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/comments/component-value-boundary-comments.scss
+---
+
+# Input
+
+```scss
+a{box-shadow:$x/* long long long long long long long long long long long long comment */$y/* long long long long long long long long long comment */2px color(srgb 0.555555555 0.555555555 0.555555555),$z -1px 2px lightgray;}
+a{box-shadow:$x/* short */$y,$z;}
+a{box-shadow:$x/* first *//* second */$y,$z;}
+a{box-shadow:$x,/* after comma */$y 2px gray,$z;}
+a{box-shadow:$x,/* single item after comma */$y,$z;}
+a{box-shadow:$x/* before comma */,$y;}
+a{box-shadow:$x/* biome-ignore format: preserve this boundary */$y,$z;}
+a{box-shadow:$x // line comment
+$y,$z;}
+a{margin:$x/* boundary */$y;}
+a{grid-template-columns:$a/* boundary */$b,
+$c $d;}
+a{grid-template-columns:$a $b,
+$c $d;}
+a{box-shadow:$x $y gray,$z/* final boundary */$w black,;}
+a{box-shadow:$x $y gray,/* long long long long long long long long long long long long after comma */$z $w black,$a $b blue;}
+a{box-shadow:$x $y
+/* ordinary own-line block comment */
+$z gray,$a $b black;}
+a{box-shadow:$x+/* nested expression comment */$y,$z;}
+
+```
+
+
+# Formatted
+
+```scss
+a {
+	box-shadow:
+		$x /* long long long long long long long long long long long long comment */
+			$y /* long long long long long long long long long comment */ 2px
+			color(srgb 0.555555555 0.555555555 0.555555555),
+		$z -1px 2px lightgray;
+}
+a {
+	box-shadow: $x /* short */ $y, $z;
+}
+a {
+	box-shadow: $x /* first */ /* second */ $y, $z;
+}
+a {
+	box-shadow: $x, /* after comma */ $y 2px gray, $z;
+}
+a {
+	box-shadow: $x, /* single item after comma */ $y, $z;
+}
+a {
+	box-shadow: $x /* before comma */, $y;
+}
+a {
+	box-shadow: $x /* biome-ignore format: preserve this boundary */ $y, $z;
+}
+a {
+	box-shadow:
+		$x // line comment
+			$y,
+		$z;
+}
+a {
+	margin: $x /* boundary */ $y;
+}
+a {
+	grid-template-columns:
+		$a /* boundary */ $b,
+		$c $d;
+}
+a {
+	grid-template-columns: $a $b, $c $d;
+}
+a {
+	box-shadow: $x $y gray, $z /* final boundary */ $w black;
+}
+a {
+	box-shadow:
+		$x $y gray,
+		/* long long long long long long long long long long long long after comma */
+		$z $w black,
+		$a $b blue;
+}
+a {
+	box-shadow: $x $y /* ordinary own-line block comment */ $z gray, $a $b black;
+}
+a {
+	box-shadow: $x + /* nested expression comment */ $y, $z;
+}
+
+```

@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule needs the complete pseudo-element syntax.")]
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };

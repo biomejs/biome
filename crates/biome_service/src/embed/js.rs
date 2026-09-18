@@ -2,7 +2,7 @@ use super::EmbedContent;
 use biome_languages::{CssFileSource, DocumentFileSource, GraphqlFileSource};
 use biome_rowan::TokenText;
 
-/// Language that can be embedded inside JavaScript template literals.
+/// Language embedded in JavaScript source.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum GuestLanguage {
     Css,
@@ -24,12 +24,17 @@ pub(crate) enum EmbedCandidate {
         tag: TemplateTagKind,
         content: EmbedContent,
     },
+    JsxStyleAttribute {
+        content: EmbedContent,
+    },
 }
 
 impl EmbedCandidate {
     pub fn content(&self) -> EmbedContent {
         match self {
-            Self::TaggedTemplate { content, .. } => content.clone(),
+            Self::TaggedTemplate { content, .. } | Self::JsxStyleAttribute { content } => {
+                content.clone()
+            }
         }
     }
 }
@@ -59,6 +64,11 @@ impl EmbedDetectorsRegistry {
         candidate: &EmbedCandidate,
         file_source: &DocumentFileSource,
     ) -> Option<EmbedMatch> {
+        if matches!(candidate, EmbedCandidate::JsxStyleAttribute { .. }) {
+            return Some(EmbedMatch {
+                guest: GuestLanguage::Css,
+            });
+        }
         for detector in JS_DETECTORS.iter() {
             if let Some(guest) = detector.try_match(candidate, file_source) {
                 return Some(EmbedMatch { guest });

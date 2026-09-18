@@ -1,6 +1,7 @@
 use crate::{AnalyzerPlugin, PluginDiagnostic, file_matches_includes};
 use biome_analyze::{
-    PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage, RuleDiagnostic,
+    PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage,
+    RuleDiagnostic, ServiceBag,
 };
 use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
@@ -16,6 +17,7 @@ use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
 use biome_json_syntax::{JsonRoot, JsonSyntaxNode};
 use biome_parser::{AnyParse, NodeParse};
 use biome_rowan::{AnySyntaxNode, AstNode, RawSyntaxKind, SyntaxKind, TextRange};
+use biome_text_edit::TextEdit;
 use camino::{Utf8Path, Utf8PathBuf};
 use grit_pattern_matcher::{binding::Binding, pattern::ResolvedPattern};
 use grit_util::{AnalysisLogs, error::GritPatternError};
@@ -59,6 +61,10 @@ impl AnalyzerGritPlugin {
 }
 
 impl AnalyzerPlugin for AnalyzerGritPlugin {
+    fn name(&self) -> &str {
+        self.grit_query.name.as_deref().unwrap_or("anonymous")
+    }
+
     fn language(&self) -> PluginTargetLanguage {
         match &self.grit_query.language {
             GritTargetLanguage::JsTargetLanguage(_) => PluginTargetLanguage::JavaScript,
@@ -87,8 +93,13 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
         file_matches_includes(self.includes.as_deref(), path)
     }
 
-    fn evaluate(&self, node: AnySyntaxNode, path: Utf8PathBuf) -> PluginEvalResult {
-        let name: &str = self.grit_query.name.as_deref().unwrap_or("anonymous");
+    fn evaluate(
+        &self,
+        node: AnySyntaxNode,
+        path: Utf8PathBuf,
+        _services: &ServiceBag,
+    ) -> PluginEvalResult {
+        let name = self.name();
 
         let (root, source_range, original_text) = match self.language() {
             PluginTargetLanguage::JavaScript => node
@@ -141,8 +152,10 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                     .filter_map(|effect| match effect {
                         GritQueryEffect::Rewrite(rewrite) => Some(PluginActionData {
                             source_range,
-                            original_text: original_text.clone(),
-                            rewritten_text: rewrite.rewritten.content.clone(),
+                            text_edit: TextEdit::from_unicode_words(
+                                &original_text,
+                                &rewrite.rewritten.content,
+                            ),
                             message: format!("Rewrite suggested by plugin `{name}`"),
                             applicability: Applicability::MaybeIncorrect,
                         }),
@@ -296,6 +309,12 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert("/test.grit".into(), r#"`hello`"#);
         AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
+    }
+
+    #[test]
+    fn name_is_derived_from_the_pattern_file() {
+        let plugin = load_test_plugin(None);
+        assert_eq!(plugin.name(), "test");
     }
 
     #[test]

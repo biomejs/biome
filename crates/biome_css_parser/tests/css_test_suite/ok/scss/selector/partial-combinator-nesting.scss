@@ -1,0 +1,25 @@
+.sidebar > {
+  .error {
+    color: red;
+  }
+}
+
+.card {
+  + {
+    .media {
+      display: block;
+    }
+  }
+
+  > .existing-leading-form {
+    color: green;
+  }
+}
+
+.navbar {
+  & ~ {
+    .container {
+      width: 100%;
+    }
+  }
+}

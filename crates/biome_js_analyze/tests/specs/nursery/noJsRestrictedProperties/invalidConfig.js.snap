@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidConfig.js
+---
+# Input
+```js
+foo.bar
+
+```
+
+# Diagnostics
+```
+invalidConfig.options:10:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "Object.prototype" isn't a valid identifier.
+  
+     8 │           "options": {
+     9 │             "entries": [
+  > 10 │               {
+       │               ^
+  > 11 │                 "object": "Object.prototype",
+  > 12 │                 "allowObjects": ["globalThis.Object"]
+  > 13 │               },
+       │               ^
+    14 │               {
+    15 │                 "property": "kebab-case",
+  
+  i Valid identifiers must start with a letter, underscore, or dollar sign, and can only contain letters, digits, underscores, or dollar signs.
+  
+  i Use a plain identifier, such as "Foo", for object.
+  
+
+```
+
+```
+invalidConfig.options:10:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowObjects' cannot be used together with 'entries[].object'.
+  
+     8 │           "options": {
+     9 │             "entries": [
+  > 10 │               {
+       │               ^
+  > 11 │                 "object": "Object.prototype",
+  > 12 │                 "allowObjects": ["globalThis.Object"]
+  > 13 │               },
+       │               ^
+    14 │               {
+    15 │                 "property": "kebab-case",
+  
+  i Remove either object or allowObjects from this entry.
+  
+
+```
+
+```
+invalidConfig.options:10:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "globalThis.Object" isn't a valid identifier in allowObjects.
+  
+     8 │           "options": {
+     9 │             "entries": [
+  > 10 │               {
+       │               ^
+  > 11 │                 "object": "Object.prototype",
+  > 12 │                 "allowObjects": ["globalThis.Object"]
+  > 13 │               },
+       │               ^
+    14 │               {
+    15 │                 "property": "kebab-case",
+  
+  i Use plain identifiers, such as "Object", in allowObjects.
+  
+
+```
+
+```
+invalidConfig.options:14:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[].allowProperties' cannot be used together with 'entries[].property'.
+  
+    12 │                 "allowObjects": ["globalThis.Object"]
+    13 │               },
+  > 14 │               {
+       │               ^
+  > 15 │                 "property": "kebab-case",
+  > 16 │                 "allowProperties": ["not-valid"]
+  > 17 │               },
+       │               ^
+    18 │               {
+    19 │                 "allowObjects": ["Object"]
+  
+  i Remove either property or allowProperties from this entry.
+  
+
+```
+
+```
+invalidConfig.options:18:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[]' must define at least one of 'object' or 'property'.
+  
+    16 │                 "allowProperties": ["not-valid"]
+    17 │               },
+  > 18 │               {
+       │               ^
+  > 19 │                 "allowObjects": ["Object"]
+  > 20 │               },
+       │               ^
+    21 │               {
+    22 │                 "allowObjects": ["globalThis.Object"],
+  
+  i Add object, property, or both to this entry.
+  
+
+```
+
+```
+invalidConfig.options:21:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'entries[]' must define at least one of 'object' or 'property'.
+  
+    19 │                 "allowObjects": ["Object"]
+    20 │               },
+  > 21 │               {
+       │               ^
+  > 22 │                 "allowObjects": ["globalThis.Object"],
+  > 23 │                 "allowProperties": ["still-ok-as-a-property-name"]
+  > 24 │               }
+       │               ^
+    25 │             ]
+    26 │           }
+  
+  i Add object, property, or both to this entry.
+  
+
+```
+
+```
+invalidConfig.options:21:15 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "globalThis.Object" isn't a valid identifier in allowObjects.
+  
+    19 │                 "allowObjects": ["Object"]
+    20 │               },
+  > 21 │               {
+       │               ^
+  > 22 │                 "allowObjects": ["globalThis.Object"],
+  > 23 │                 "allowProperties": ["still-ok-as-a-property-name"]
+  > 24 │               }
+       │               ^
+    25 │             ]
+    26 │           }
+  
+  i Use plain identifiers, such as "Object", in allowObjects.
+  
+
+```

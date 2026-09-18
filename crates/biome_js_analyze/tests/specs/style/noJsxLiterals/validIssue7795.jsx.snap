@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIssue7795.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const inline = <div>allowed</div>;
+const multiline = <div>
+	allowed
+</div>;
+
+```

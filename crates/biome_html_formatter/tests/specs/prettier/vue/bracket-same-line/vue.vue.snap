@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/bracket-same-line/vue.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div>
+<div :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</div>
+<div v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></div>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+<img long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"/>
+<div class="a">
+text
+</div>
+<span  class="a">
+text
+</span>
+<img class="a"/>
+  </div>
+</template>
+
+<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">export default {}</script>
+<style  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">.a {color: #f00}</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -28,10 +28,12 @@
+ <script
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+ >
+-export default {}
++export default {};
+ </script>
+ <style
+   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+ >
+-.a {color: #f00}
++.a {
++  color: #f00;
++}
+ </style>
+```
+
+# Output
+
+```vue
+<template>
+  <div>
+    <div
+      :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    >
+      text
+    </div>
+    <div
+      v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    ></div>
+    <span
+      long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    >
+      text
+    </span>
+    <span
+      long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    ></span>
+    <img
+      long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    />
+    <div class="a">text</div>
+    <span class="a"> text </span>
+    <img class="a" />
+  </div>
+</template>
+
+<script
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+export default {};
+</script>
+<style
+  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+>
+.a {
+  color: #f00;
+}
+</style>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:       :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    9:       v-on:long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   12:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   17:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   20:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   29:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   34:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+```

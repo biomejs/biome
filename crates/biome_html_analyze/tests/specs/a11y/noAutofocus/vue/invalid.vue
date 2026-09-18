@@ -1,5 +1,8 @@
 <!-- should generate diagnostics -->
 <input autofocus />
+<input v-bind:autofocus="autofocusValue" />
+<input :autofocus="autofocusValue" />
+<input autofocus />
 <input autofocus="true" />
 <textarea autofocus>content</textarea>
 <button autofocus>Submit</button>

@@ -235,8 +235,9 @@ where
 /// Counts lines in a syntax tree, used by `noExcessiveLinesPerFile`.
 ///
 /// When `skip_blank_lines` is true, counts tokens with leading newlines (excluding blank lines).
-/// When false, counts all newline characters in leading trivia (trailing trivia is trimmed
-/// to prevent double-counting). Returns total + 1 to account for the first line.
+/// When false, counts all newline trivia pieces in leading trivia.
+/// EOF tokens and newlines inside comments or token text are excluded.
+/// Returns total + 1 to account for the first line.
 pub fn count_lines_in_file<L: Language>(
     node: &SyntaxNode<L>,
     is_eof_token: impl Fn(&SyntaxToken<L>) -> bool,
@@ -252,7 +253,6 @@ pub fn count_lines_in_file<L: Language>(
                 count += token.has_leading_newline() as usize;
             } else {
                 count += token
-                    .trim_trailing_trivia()
                     .leading_trivia()
                     .pieces()
                     .filter(|piece| piece.is_newline())
@@ -261,4 +261,69 @@ pub fn count_lines_in_file<L: Language>(
         }
     }
     count + 1
+}
+
+#[cfg(test)]
+mod tests {
+    use super::count_lines_in_file;
+    use biome_rowan::{
+        SyntaxNode, TriviaPiece,
+        raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder},
+    };
+
+    fn assert_line_counts(node: &SyntaxNode<RawLanguage>, all: usize, non_blank: usize) {
+        for (skip_blank_lines, expected) in [(false, all), (true, non_blank)] {
+            assert_eq!(
+                count_lines_in_file(
+                    node,
+                    |token| token.kind() == RawLanguageKind::EOF,
+                    skip_blank_lines,
+                ),
+                expected,
+                "skip_blank_lines={skip_blank_lines}, tree={node:#?}",
+            );
+        }
+    }
+
+    #[test]
+    fn count_lines_in_file_empty_tree() {
+        let root = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |_| {});
+        assert_line_counts(&root, 1, 1);
+    }
+
+    #[test]
+    fn count_lines_in_file_uses_only_non_eof_leading_newline_pieces() {
+        for (newline, len) in [("\n", 1), ("\r\n", 2)] {
+            let root = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+                builder.token(RawLanguageKind::NUMBER_TOKEN, "0");
+                for _ in 0..2 {
+                    builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+                    builder.token_with_trivia(
+                        RawLanguageKind::STRING_TOKEN,
+                        &format!("/*{newline}*/{newline}{newline} \"a{newline}b\" /*c*/{newline} "),
+                        &[
+                            TriviaPiece::multi_line_comment(4 + len),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::whitespace(1),
+                        ],
+                        &[
+                            TriviaPiece::whitespace(1),
+                            TriviaPiece::multi_line_comment(5),
+                            TriviaPiece::newline(len),
+                            TriviaPiece::whitespace(1),
+                        ],
+                    );
+                    builder.finish_node();
+                }
+                builder.token_with_trivia(
+                    RawLanguageKind::EOF,
+                    newline,
+                    &[TriviaPiece::newline(len)],
+                    &[],
+                );
+            });
+            assert_line_counts(&root, 5, 3);
+        }
+    }
 }

@@ -16,9 +16,11 @@ progress-50%
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..8 "progress" [] [],
@@ -31,8 +33,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@12..13 "\n" [] [],
     ],
-    eof_token: EOF@12..13 "" [Newline("\n")] [],
+    eof_token: EOF@13..13 "" [] [],
 }
 ```
 
@@ -41,18 +44,21 @@ TwRoot {
 ```
 0: TW_ROOT@0..13
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..12
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..13
     0: TW_FULL_CANDIDATE@0..12
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..12
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..12
         0: TW_BASE@0..8 "progress" [] []
         1: DASH@8..9 "-" [] []
         2: TW_PERCENTAGE_VALUE@9..12
           0: TW_NUMBER@9..11 "50" [] []
           1: PERCENT@11..12 "%" [] []
         3: (empty)
-      3: (empty)
-  2: EOF@12..13 "" [Newline("\n")] []
+      4: (empty)
+    1: WHITESPACE@12..13 "\n" [] []
+  3: EOF@13..13 "" [] []
 
 ```

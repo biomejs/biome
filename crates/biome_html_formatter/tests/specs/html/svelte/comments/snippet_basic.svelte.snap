@@ -27,4 +27,5 @@ info: svelte/comments/snippet_basic.svelte
 <!-- 3 -->
 {/snippet}
 <!-- 4 -->
+
 ```

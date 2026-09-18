@@ -20,8 +20,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdQuote {
             prefix: MdQuotePrefix {
@@ -48,16 +49,7 @@ MdDocument {
                             post_marker_space_token: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] [],
                         },
                         MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@12..19 "fn main" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@19..20 "(" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@20..21 ")" [] [],
-                        },
-                        MdTextual {
-                            value_token: MD_TEXTUAL_LITERAL@21..24 " {}" [] [],
+                            value_token: MD_TEXTUAL_LITERAL@12..24 "fn main() {}" [] [],
                         },
                         MdTextual {
                             value_token: MD_TEXTUAL_LITERAL@24..25 "\n" [] [],
@@ -146,9 +138,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..59
+0: MD_ROOT@0..59
   0: (empty)
-  1: MD_BLOCK_LIST@0..59
+  1: (empty)
+  2: MD_BLOCK_LIST@0..59
     0: MD_QUOTE@0..31
       0: MD_QUOTE_PREFIX@0..2
         0: MD_QUOTE_INDENT_LIST@0..0
@@ -168,17 +161,11 @@ MdDocument {
               0: MD_QUOTE_INDENT_LIST@10..10
               1: R_ANGLE@10..11 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@11..12 " " [] []
-            2: MD_TEXTUAL@12..19
-              0: MD_TEXTUAL_LITERAL@12..19 "fn main" [] []
-            3: MD_TEXTUAL@19..20
-              0: MD_TEXTUAL_LITERAL@19..20 "(" [] []
-            4: MD_TEXTUAL@20..21
-              0: MD_TEXTUAL_LITERAL@20..21 ")" [] []
-            5: MD_TEXTUAL@21..24
-              0: MD_TEXTUAL_LITERAL@21..24 " {}" [] []
-            6: MD_TEXTUAL@24..25
+            2: MD_TEXTUAL@12..24
+              0: MD_TEXTUAL_LITERAL@12..24 "fn main() {}" [] []
+            3: MD_TEXTUAL@24..25
               0: MD_TEXTUAL_LITERAL@24..25 "\n" [] []
-            7: MD_QUOTE_PREFIX@25..27
+            4: MD_QUOTE_PREFIX@25..27
               0: MD_QUOTE_INDENT_LIST@25..25
               1: R_ANGLE@25..26 ">" [] []
               2: MD_QUOTE_POST_MARKER_SPACE@26..27 " " [] []
@@ -231,6 +218,6 @@ MdDocument {
               5: TRIPLE_BACKTICK@55..58 "```" [] []
             1: MD_NEWLINE@58..59
               0: NEWLINE@58..59 "\n" [] []
-  2: EOF@59..59 "" [] []
+  3: EOF@59..59 "" [] []
 
 ```

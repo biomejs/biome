@@ -46,6 +46,7 @@ JsBogusAssignment = SyntaxElement*
 JsBogusParameter = SyntaxElement*
 JsBogusImportAssertionEntry = SyntaxElement*
 JsBogusNamedImportSpecifier = SyntaxElement*
+JsBogusVariableDeclaration = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
@@ -55,6 +56,7 @@ AnyJsRoot =
 	| TsDeclarationModule
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
+	| JsSvelteDeclarationRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -81,8 +83,10 @@ JsExpressionSnippet =
 	expression: AnyJsExpression
 	eof: 'EOF'
 
+// The expression is absent only in an Astro file, whose `{...}` may hold just a
+// comment. Every other embedding that uses this root requires an expression.
 JsExpressionTemplateRoot =
-	expression: AnyJsExpression
+	expression: AnyJsExpression?
 	eof: 'EOF'
 
 // Special root created for Svelte #snippet block
@@ -90,6 +94,16 @@ JsSvelteSnippetRoot =
 		name: AnyJsBinding
 		parameters: JsParameters
 		eof: 'EOF'
+
+// Special root created for Svelte declaration tags
+JsSvelteDeclarationRoot =
+		declaration: AnyJsSvelteDeclaration
+		semicolon: ';'?
+		eof: 'EOF'
+
+AnyJsSvelteDeclaration =
+	JsVariableDeclaration
+	| JsBogusVariableDeclaration
 
 JsDirective =
 	value: 'js_string_literal'
@@ -2048,7 +2062,8 @@ TsTypeList = (TsReferenceType (',' TsReferenceType)*)
 TsTypeMemberList = AnyTsTypeMember*
 
 AnyTsTypeMember =
-	TsCallSignatureTypeMember
+	JsMetavariable
+	| TsCallSignatureTypeMember
 	| TsPropertySignatureTypeMember
 	| TsConstructSignatureTypeMember
 	| TsMethodSignatureTypeMember
@@ -2314,19 +2329,26 @@ AnyJsxTag =
 	JsxElement
 	| JsxSelfClosingElement
 	| JsxFragment
+	| AstroImplicitFragment
 
-// <a />
+// {cond && <a /> <b />}
+//           ^^^^^^^^^^
+AstroImplicitFragment =
+	elements: JsxChildList
+
+// <a />, or <br> in Astro
+// ^^^^^      ^^^^
 JsxSelfClosingElement =
 	'<'
 	name: AnyJsxElementName
 	type_arguments: TsTypeArguments?
 	attributes: JsxAttributeList
-	'/'
+	'/'?
 	'>'
 
 JsxElement =
 	opening_element: JsxOpeningElement
-	children: JsxChildList
+	elements: JsxChildList
 	closing_element: JsxClosingElement
 
 JsxOpeningElement =
@@ -2345,7 +2367,7 @@ JsxClosingElement =
 // <>content</>
 JsxFragment =
 	opening_fragment: JsxOpeningFragment
-	children: JsxChildList
+	elements: JsxChildList
 	closing_fragment: JsxClosingFragment
 
 JsxOpeningFragment =
@@ -2412,10 +2434,12 @@ JsxAttributeInitializerClause =
 	'='
 	value: AnyJsxAttributeValue
 
+// JsTemplateExpression is only valid in Astro, e.g. `attr=`t${x}``
 AnyJsxAttributeValue =
 	AnyJsxTag
 	| JsxString
 	| JsxExpressionAttributeValue
+	| JsTemplateExpression
 
 JsxExpressionAttributeValue =
 	'{'

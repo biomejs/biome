@@ -8,6 +8,6 @@ impl FormatNodeRule<CssNamedNamespacePrefix> for FormatCssNamedNamespacePrefix {
     fn fmt_fields(&self, node: &CssNamedNamespacePrefix, f: &mut CssFormatter) -> FormatResult<()> {
         let CssNamedNamespacePrefixFields { name } = node.as_fields();
 
-        write!(f, [name.format()])
+        write!(f, [name?.format().with_text_case(CssCase::Preserve)])
     }
 }

@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/scalar/quote_normalization.yaml
+---
+
+# Input
+
+```yaml
+- 'plain text'
+- 'has ''single'' quotes'
+- "has \"double\" quotes"
+- '\n not an escape'
+- "tab\tescape"
+- "''"
+- '""'
+
+```
+
+
+# Formatted
+
+```yaml
+- "plain text"
+- "has 'single' quotes"
+- 'has "double" quotes'
+- '\n not an escape'
+- "tab\tescape"
+- "''"
+- '""'
+
+```

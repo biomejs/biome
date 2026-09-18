@@ -1,0 +1,87 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["detectButtonLinkImport.grit"],
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  }
+}
+```
+
+## `detectButtonLinkImport.grit`
+
+```grit
+language js
+
+`import { $imports } from "geist/components"` as $import where {
+    $imports <: contains `ButtonLink`,
+    register_diagnostic(
+        span = $import,
+        message = "ButtonLink import matched",
+        severity = "error"
+    )
+}
+
+```
+
+## `test.js`
+
+```js
+import { ButtonLink } from "geist/components";
+import { Button, ButtonLink, Card } from "geist/components";
+import { Button } from "geist/components";
+import { ButtonLink } from "other/components";
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ButtonLink import matched
+  
+  > 1 │ import { ButtonLink } from "geist/components";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { Button, ButtonLink, Card } from "geist/components";
+    3 │ import { Button } from "geist/components";
+  
+
+```
+
+```block
+test.js:2:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × ButtonLink import matched
+  
+    1 │ import { ButtonLink } from "geist/components";
+  > 2 │ import { Button, ButtonLink, Card } from "geist/components";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ import { Button } from "geist/components";
+    4 │ import { ButtonLink } from "other/components";
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

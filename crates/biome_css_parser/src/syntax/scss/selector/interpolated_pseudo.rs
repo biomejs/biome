@@ -1,6 +1,5 @@
 use super::pseudo_class_nth::is_nth_at_scss_pseudo_class_nth_value_with_interpolation;
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::scss::is_at_scss_interpolation;
 use crate::syntax::selector::relative_selector::{
     RelativeSelectorList, is_at_relative_selector_combinator,
@@ -21,15 +20,14 @@ use biome_css_syntax::T;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{Parser, SyntaxFeature, token_set};
+use biome_parser::{Parser, token_set};
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_pseudo_class_function_arguments(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_at_scss_interpolated_pseudo_relative_selector_arguments(p)
-            || is_at_scss_interpolated_pseudo_nth_arguments(p)
-            || is_at_scss_interpolated_pseudo_selector_arguments(p)
-            || is_at_scss_interpolated_pseudo_value_arguments(p))
+    is_at_scss_interpolated_pseudo_relative_selector_arguments(p)
+        || is_at_scss_interpolated_pseudo_nth_arguments(p)
+        || is_at_scss_interpolated_pseudo_selector_arguments(p)
+        || is_at_scss_interpolated_pseudo_value_arguments(p)
 }
 
 /// Parses typed arguments for an interpolated pseudo-class function.
@@ -135,9 +133,8 @@ fn parse_scss_interpolated_pseudo_class_value_arguments(p: &mut CssParser) -> Pa
 
 #[inline]
 pub(crate) fn is_at_scss_interpolated_pseudo_element_function_arguments(p: &mut CssParser) -> bool {
-    CssSyntaxFeatures::Scss.is_supported(p)
-        && (is_at_scss_interpolated_pseudo_selector_arguments(p)
-            || is_at_scss_interpolated_pseudo_value_arguments(p))
+    is_at_scss_interpolated_pseudo_selector_arguments(p)
+        || is_at_scss_interpolated_pseudo_value_arguments(p)
 }
 
 /// Parses typed arguments for an interpolated pseudo-element function.

@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promiseStaticMethodsInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+const promises = [Promise.resolve(1), Promise.resolve(2)];
+
+if (Promise.allSettled(promises)) {}
+if (Promise.any(promises)) {}
+if (Promise.race(promises)) {}
+if (Promise.try(() => 1)) {}
+
+```
+
+# Diagnostics
+```
+promiseStaticMethodsInvalid.ts:4:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    2 │ const promises = [Promise.resolve(1), Promise.resolve(2)];
+    3 │ 
+  > 4 │ if (Promise.allSettled(promises)) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ if (Promise.any(promises)) {}
+    6 │ if (Promise.race(promises)) {}
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:5:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    4 │ if (Promise.allSettled(promises)) {}
+  > 5 │ if (Promise.any(promises)) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^
+    6 │ if (Promise.race(promises)) {}
+    7 │ if (Promise.try(() => 1)) {}
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:6:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    4 │ if (Promise.allSettled(promises)) {}
+    5 │ if (Promise.any(promises)) {}
+  > 6 │ if (Promise.race(promises)) {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ if (Promise.try(() => 1)) {}
+    8 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:7:5 lint/nursery/noMisusedPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A Promise was found where a conditional was expected.
+  
+    5 │ if (Promise.any(promises)) {}
+    6 │ if (Promise.race(promises)) {}
+  > 7 │ if (Promise.try(() => 1)) {}
+      │     ^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i A Promise is always truthy, so this is most likely a mistake.
+  
+  i You may have intended to `await` the Promise instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

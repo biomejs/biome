@@ -9,10 +9,11 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
+    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
     JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    TsConditionalType, TsDeclarationModule, TsInferType, TsInterfaceDeclaration,
-    TsTypeAliasDeclaration,
+    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
+    TsInferType, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeParameterList,
+    TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -226,143 +227,6 @@ pub enum SuggestedFix {
     PrefixUnderscore,
 }
 
-/// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
-fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
-    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = decl
-    {
-        node.syntax()
-            .siblings(Direction::Next)
-            .last()
-            .is_some_and(|last_sibling| {
-                matches!(
-                    last_sibling.kind(),
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
-                )
-            })
-    } else {
-        false
-    }
-}
-
-fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
-    if binding.is_under_object_pattern_binding()? {
-        Some(SuggestedFix::NoSuggestion)
-    } else {
-        Some(SuggestedFix::PrefixUnderscore)
-    }
-}
-
-// It is ok in some Typescripts constructs for a parameter to be unused.
-// Returning None means is ok to be unused
-fn suggested_fix_if_unused(
-    binding: &AnyJsIdentifierBinding,
-    options: &NoUnusedVariablesOptions,
-) -> Option<SuggestedFix> {
-    let decl = binding.declaration()?;
-    // It is fine to ignore unused rest spread siblings if the option is enabled
-    if options.ignore_rest_siblings() && is_rest_spread_sibling(&decl) {
-        return None;
-    }
-
-    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
-        // ok to not be used
-        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-        | AnyJsBindingDeclaration::JsClassExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionExpression(_)
-        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
-
-        // Some parameters are ok to not be used
-        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
-        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
-            suggestion_for_binding(binding)
-        }
-        AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
-
-        // declarations need to be check if they are under `declare`
-        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
-            None
-        }
-        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                suggestion_for_binding(binding)
-            }
-        }
-        node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
-        | AnyJsBindingDeclaration::JsClassDeclaration(_)
-        | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
-        | AnyJsBindingDeclaration::TsEnumDeclaration(_)
-        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
-        | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                Some(SuggestedFix::NoSuggestion)
-            }
-        }
-
-        // Bindings under catch are never ok to be unused
-        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
-
-        // Type parameters are never ok to be unused unless they are declared in an ambient context
-        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
-            if is_in_ambient_context(node.syntax()) {
-                None
-            } else {
-                Some(SuggestedFix::PrefixUnderscore)
-            }
-        }
-
-        AnyJsBindingDeclaration::TsInferType(_) => {
-            let binding_name_token = binding.name_token().ok()?;
-            let binding_name = binding_name_token.text_trimmed();
-            let conditional_type = binding.syntax().ancestors().find_map(TsConditionalType::cast)?;
-            let last_binding_name_token = conditional_type.extends_type().ok()?.syntax()
-                .descendants()
-                .filter_map(TsInferType::cast)
-                .filter_map(|infer_type| infer_type.name().ok()?.ident_token().ok())
-                .filter(|infer_type_name| infer_type_name.text_trimmed() == binding_name)
-                .last()?;
-            // We ignore `infer T` that precedes another `infer T`.
-            // Thus, only the last `infer T` is considered.
-            // See https://github.com/biomejs/biome/issues/565
-            if binding_name_token.text_range() == last_binding_name_token.text_range() {
-                Some(SuggestedFix::NoSuggestion)
-            } else {
-                None
-            }
-        }
-
-        // Bindings under unknown parameter are never ok to be unused
-        AnyJsBindingDeclaration::JsBogusParameter(_)
-        // exports with binding are ok to be unused
-        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
-            Some(SuggestedFix::NoSuggestion)
-        }
-        // Imports are handled by `noUnusedImports`
-        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-        | AnyJsBindingDeclaration::JsFormalParameter(_)
-        | AnyJsBindingDeclaration::JsRestParameter(_)
-        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
-            None
-        }
-    }
-}
-
 impl Rule for NoUnusedVariables {
     type Query = Semantic<AnyJsIdentifierBinding>;
     type State = SuggestedFix;
@@ -405,11 +269,11 @@ impl Rule for NoUnusedVariables {
 
         // Ignore name prefixed with `_`
         let is_underscore_prefixed = binding_name.starts_with('_');
-        // Skip this for the `<script>` block itself: its own declarations are
-        // in the embedded-binding set, so the name check would always match and
-        // suppress every diagnostic. Template usage is handled by the
-        // reference check below.
+        // Source and declaration snippets contribute their own declarations to
+        // the embedded-binding set. Checking that set would make every local
+        // binding appear used. Template usage is handled by the reference check.
         let is_defined_in_embedded_binding = !file_source.is_embedded_source()
+            && !file_source.is_svelte_declaration()
             && embedded.contains_binding(binding_token_text.clone())
             && binding
                 .declaration()
@@ -424,7 +288,13 @@ impl Rule for NoUnusedVariables {
                             | AnyJsBindingDeclaration::JsVariableDeclarator(_)
                     )
                 });
-        let is_used_as_reference = embedded.is_used(binding_token_text);
+        let is_used_as_reference = embedded.is_used(binding_token_text.clone())
+            || matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && embedded.is_svelte_store_used(binding_token_text.clone())
+            || matches!(file_source.as_embedding_kind(), JsEmbeddingKind::Vue { .. })
+                && embedded.is_vue_directive_used(binding_token_text);
 
         if is_underscore_prefixed || is_defined_in_embedded_binding || is_used_as_reference {
             return None;
@@ -443,7 +313,17 @@ impl Rule for NoUnusedVariables {
         }
 
         if is_unused(model, binding) {
-            suggested_fix_if_unused(binding, ctx.options())
+            // In Svelte 5, assigning to a `$bindable()` prop reflects the value back to the
+            // parent component. Such a variable may be write-only in the script block but is
+            // still meaningful — suppress the diagnostic to avoid a false positive.
+            if matches!(
+                file_source.as_embedding_kind(),
+                JsEmbeddingKind::Svelte { .. }
+            ) && is_svelte_bindable_prop(binding)
+            {
+                return None;
+            }
+            suggested_fix_if_unused(model, binding, ctx.options())
         } else {
             None
         }
@@ -533,6 +413,193 @@ impl Rule for NoUnusedVariables {
                     mutation,
                 ))
             }
+        }
+    }
+}
+
+/// Returns `true` if the binding is part of an object pattern with a rest element as a sibling
+fn is_rest_spread_sibling(decl: &AnyJsBindingDeclaration) -> bool {
+    if let node @ (AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+    | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)) = decl
+    {
+        node.syntax()
+            .siblings(Direction::Next)
+            .last()
+            .is_some_and(|last_sibling| {
+                matches!(
+                    last_sibling.kind(),
+                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                )
+            })
+    } else {
+        false
+    }
+}
+
+fn is_implemented_overload_type_parameter(
+    model: &SemanticModel,
+    type_parameter: &JsSyntaxNode,
+) -> bool {
+    let Some(signature) = type_parameter
+        .parent()
+        .and_then(TsTypeParameterList::cast)
+        .and_then(|list| list.parent::<TsTypeParameters>())
+        .and_then(|parameters| parameters.parent::<TsDeclareFunctionDeclaration>())
+    else {
+        return false;
+    };
+    let Some(id) = signature
+        .id()
+        .ok()
+        .and_then(|id| id.as_js_identifier_binding().cloned())
+    else {
+        return false;
+    };
+    let Some(scope) = model.scope_hoisted_to(id.syntax()) else {
+        return false;
+    };
+    let signature_range = id.syntax().text_trimmed_range();
+
+    scope.overload_sets().into_iter().any(|set| {
+        let Some((implementation, signatures)) = set.split_last() else {
+            return false;
+        };
+        let Some(implementation) = model.binding_by_id(*implementation) else {
+            return false;
+        };
+        if !matches!(
+            implementation.tree().declaration(),
+            Some(AnyJsBindingDeclaration::JsFunctionDeclaration(_))
+        ) {
+            return false;
+        }
+
+        signatures.iter().any(|id| {
+            model
+                .binding_by_id(*id)
+                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
+        })
+    })
+}
+
+fn suggestion_for_binding(binding: &AnyJsIdentifierBinding) -> Option<SuggestedFix> {
+    if binding.is_under_object_pattern_binding()? {
+        Some(SuggestedFix::NoSuggestion)
+    } else {
+        Some(SuggestedFix::PrefixUnderscore)
+    }
+}
+
+// It is ok in some Typescripts constructs for a parameter to be unused.
+// Returning None means is ok to be unused
+fn suggested_fix_if_unused(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+    options: &NoUnusedVariablesOptions,
+) -> Option<SuggestedFix> {
+    let decl = binding.declaration()?;
+    // It is fine to ignore unused rest spread siblings if the option is enabled
+    if options.ignore_rest_siblings() && is_rest_spread_sibling(&decl) {
+        return None;
+    }
+
+    match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
+        // ok to not be used
+        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionExpression(_)
+        | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
+
+        // Some parameters are ok to not be used
+        AnyJsBindingDeclaration::JsArrowFunctionExpression(_)
+        | AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+            suggestion_for_binding(binding)
+        }
+        AnyJsBindingDeclaration::TsPropertyParameter(_) => None,
+
+        // declarations need to be check if they are under `declare`
+        AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+        | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
+            None
+        }
+        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                suggestion_for_binding(binding)
+            }
+        }
+        node @ (AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassDeclaration(_)
+        | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+        | AnyJsBindingDeclaration::TsExternalModuleDeclaration(_)
+        | AnyJsBindingDeclaration::TsModuleDeclaration(_)) => {
+            if is_in_ambient_context(node.syntax()) {
+                None
+            } else {
+                Some(SuggestedFix::NoSuggestion)
+            }
+        }
+
+        // Bindings under catch are never ok to be unused
+        AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(SuggestedFix::PrefixUnderscore),
+
+        // Type parameters are only ok to be unused in ambient contexts or implemented overload
+        // signatures.
+        node @ AnyJsBindingDeclaration::TsTypeParameter(_) => {
+            if is_in_ambient_context(node.syntax())
+                || is_implemented_overload_type_parameter(model, node.syntax())
+            {
+                None
+            } else {
+                Some(SuggestedFix::PrefixUnderscore)
+            }
+        }
+
+        AnyJsBindingDeclaration::TsInferType(_) => {
+            let binding_name_token = binding.name_token().ok()?;
+            let binding_name = binding_name_token.text_trimmed();
+            let conditional_type = binding.syntax().ancestors().find_map(TsConditionalType::cast)?;
+            let last_binding_name_token = conditional_type.extends_type().ok()?.syntax()
+                .descendants()
+                .filter_map(TsInferType::cast)
+                .filter_map(|infer_type| infer_type.name().ok()?.ident_token().ok())
+                .filter(|infer_type_name| infer_type_name.text_trimmed() == binding_name)
+                .last()?;
+            // We ignore `infer T` that precedes another `infer T`.
+            // Thus, only the last `infer T` is considered.
+            // See https://github.com/biomejs/biome/issues/565
+            if binding_name_token.text_range() == last_binding_name_token.text_range() {
+                Some(SuggestedFix::NoSuggestion)
+            } else {
+                None
+            }
+        }
+
+        // Bindings under unknown parameter are never ok to be unused
+        AnyJsBindingDeclaration::JsBogusParameter(_)
+        // exports with binding are ok to be unused
+        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_) => {
+            Some(SuggestedFix::NoSuggestion)
+        }
+        // Imports are handled by `noUnusedImports`
+        | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+        | AnyJsBindingDeclaration::JsFormalParameter(_)
+        | AnyJsBindingDeclaration::JsRestParameter(_)
+        | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_) => {
+            None
         }
     }
 }
@@ -631,7 +698,7 @@ fn is_namespace_merged_with_used_value(
     Some(false)
 }
 
-fn is_value_merged_with_exported_namespace(
+fn is_value_merged_with_used_namespace(
     model: &SemanticModel,
     binding: &AnyJsIdentifierBinding,
 ) -> Option<bool> {
@@ -656,7 +723,10 @@ fn is_value_merged_with_exported_namespace(
         return Some(false);
     }
 
-    Some(model.is_exported(&namespace))
+    Some(
+        model.is_exported(&namespace)
+            || !is_unused_by_references(model, &namespace, namespace_decl.syntax()),
+    )
 }
 
 fn is_declaration_merged_with_used(
@@ -665,39 +735,100 @@ fn is_declaration_merged_with_used(
 ) -> Option<bool> {
     let decl = binding.declaration()?;
     match decl {
+        AnyJsBindingDeclaration::TsInterfaceDeclaration(_) => {
+            is_interface_merged_with_used(model, binding)
+        }
         AnyJsBindingDeclaration::TsModuleDeclaration(_) => {
             is_namespace_merged_with_used_value(model, binding)
         }
         _ if is_namespace_merge_value_declaration(&decl) => {
-            is_value_merged_with_exported_namespace(model, binding)
+            is_value_merged_with_used_namespace(model, binding)
         }
         _ => None,
     }
 }
 
-/// Returns `true` if `binding` is considered as unused.
-pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
-    if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
-        // Enum members can be unused.
-        return false;
-    }
+fn is_interface_merged_with_used(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+) -> Option<bool> {
+    let name_token = binding.name_token().ok()?;
+    let name = name_token.text_trimmed();
+    let scope = model.scope_hoisted_to(binding.syntax())?;
 
-    // Ignore expressions
-    if binding.parent::<JsFunctionExpression>().is_some()
-        || binding.parent::<JsClassExpression>().is_some()
-    {
-        return false;
-    }
+    Some(scope.bindings().any(|scope_binding| {
+        let other = scope_binding.tree();
+        let Some(other_declaration) = other.declaration() else {
+            return false;
+        };
+        matches!(
+            other_declaration,
+            AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+        ) && other
+            .name_token()
+            .is_ok_and(|other_name| other_name.text_trimmed() == name)
+            && (model.is_exported(&other)
+                || !is_unused_by_references(model, &other, other_declaration.syntax()))
+    }))
+}
 
-    if model.is_exported(binding) {
-        return false;
-    }
-
-    let Some(declaration) = binding.declaration() else {
+/// Returns `true` if `call` is a call to a simple identifier named `name`.
+fn is_call_to(call: &JsCallExpression, name: &str) -> bool {
+    let Ok(AnyJsExpression::JsIdentifierExpression(ident)) = call.callee() else {
         return false;
     };
-    let declaration = declaration.syntax();
-    let unused_by_refs = binding
+    ident.name().is_ok_and(|n| n.has_name(name))
+}
+
+/// Returns `true` if the binding is a `$bindable()` shorthand property in a `$props()`
+/// destructuring in a Svelte 5 component.
+///
+/// In Svelte 5, assigning to a `$bindable()` prop reflects the new value back to the parent
+/// component. A variable that appears write-only in the script is therefore intentional and
+/// should not be flagged as unused.
+fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
+    // The binding must be declared as a shorthand property in an object destructuring pattern.
+    let Some(decl) = binding.declaration() else {
+        return false;
+    };
+    let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(shorthand) = decl else {
+        return false;
+    };
+
+    // The shorthand property must have a default initializer `= $bindable(...)`.
+    let Some(init) = shorthand.init() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(call)) = init.expression() else {
+        return false;
+    };
+    if !is_call_to(&call, "$bindable") {
+        return false;
+    }
+
+    // Walk up to find the enclosing `JsVariableDeclarator` whose rhs must be `$props()`.
+    let Some(declarator) = shorthand
+        .syntax()
+        .ancestors()
+        .find_map(JsVariableDeclarator::cast)
+    else {
+        return false;
+    };
+    let Some(declarator_init) = declarator.initializer() else {
+        return false;
+    };
+    let Ok(AnyJsExpression::JsCallExpression(props_call)) = declarator_init.expression() else {
+        return false;
+    };
+    is_call_to(&props_call, "$props")
+}
+
+fn is_unused_by_references(
+    model: &SemanticModel,
+    binding: &AnyJsIdentifierBinding,
+    declaration: &JsSyntaxNode,
+) -> bool {
+    binding
         .all_references(model)
         .filter_map(|reference| {
             let ref_parent = reference.syntax().parent()?;
@@ -761,8 +892,31 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
             }
             // Always false when the ref is outside the declaration
             false
-        });
-    if !unused_by_refs {
+        })
+}
+
+/// Returns `true` if `binding` is considered as unused.
+pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> bool {
+    if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+        // Enum members can be unused.
+        return false;
+    }
+
+    // Ignore expressions
+    if binding.parent::<JsFunctionExpression>().is_some()
+        || binding.parent::<JsClassExpression>().is_some()
+    {
+        return false;
+    }
+
+    if model.is_exported(binding) {
+        return false;
+    }
+
+    let Some(declaration) = binding.declaration() else {
+        return false;
+    };
+    if !is_unused_by_references(model, binding, declaration.syntax()) {
         return false;
     }
     !is_declaration_merged_with_used(model, binding).unwrap_or(false)

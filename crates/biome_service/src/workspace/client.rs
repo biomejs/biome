@@ -3,11 +3,11 @@ use super::{
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
     GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GoToDefinitionParams,
-    GoToDefinitionResult, OpenFileParams, OpenFileResult, PullActionsParams, PullActionsResult,
-    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
-    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
-    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
-    UpdateSettingsParams, UpdateSettingsResult,
+    GoToDefinitionResult, OpenFileParams, OpenFileResult, ProcessFileParams, ProcessFileResult,
+    PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
+    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
+    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -160,6 +160,10 @@ where
 
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError> {
         self.request("biome/change_file", params)
+    }
+
+    fn process_file(&self, params: ProcessFileParams) -> Result<ProcessFileResult, WorkspaceError> {
+        self.request("biome/process_file", params)
     }
 
     fn pull_diagnostics(

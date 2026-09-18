@@ -66,8 +66,8 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
                                         CssRegularDimension {
                                             value_token: CSS_NUMBER_LITERAL@20..22 "10" [] [],
                                             unit_token: IDENT@22..24 "px" [] [],
@@ -127,8 +127,8 @@ CssRoot {
                               0: IDENT@14..18 "prop" [] []
                       3: (empty)
                 1: COLON@18..20 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@20..24
-                  0: SCSS_EXPRESSION_ITEM_LIST@20..24
+                2: CSS_CUSTOM_PROPERTY_VALUE@20..24
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@20..24
                     0: CSS_REGULAR_DIMENSION@20..24
                       0: CSS_NUMBER_LITERAL@20..22 "10" [] []
                       1: IDENT@22..24 "px" [] []

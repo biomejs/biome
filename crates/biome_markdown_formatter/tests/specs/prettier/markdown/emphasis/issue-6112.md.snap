@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/emphasis/issue-6112.md
+---
+
+# Input
+
+```md
+*[Italic link](../_link_including_underscores_.md)*
+
+---
+
+_[Italic link](../_link_including_underscores_.md)_
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ 
+ ---
+ 
+-_[Italic link](../\_link_including_underscores_.md)\_
++_[Italic link](../_link_including_underscores_.md)_
+```
+
+# Output
+
+```md
+_[Italic link](../_link_including_underscores_.md)_
+
+---
+
+_[Italic link](../_link_including_underscores_.md)_
+```

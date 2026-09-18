@@ -100,8 +100,8 @@ pub trait JsBatchMutation {
     /// ```
     fn replace_jsx_element_with_own_children(&mut self, element: &AnyJsxChild) -> bool {
         let children = match element {
-            AnyJsxChild::JsxElement(element) => element.children(),
-            AnyJsxChild::JsxFragment(fragment) => fragment.children(),
+            AnyJsxChild::JsxElement(element) => element.elements(),
+            AnyJsxChild::JsxFragment(fragment) => fragment.elements(),
             _ => return false,
         };
         self.add_jsx_elements_replacing_element(element, children)

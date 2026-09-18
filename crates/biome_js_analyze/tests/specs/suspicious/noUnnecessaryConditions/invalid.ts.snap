@@ -304,6 +304,15 @@ function switchMixed(value: 'a' | 'b') {
 const date = new Date();
 if (date) console.log(date);
 
+// Types.Always.success` is always `true`, so `!...success` is always false and must be flagged.
+import type Types from "./typeOnlyDefaultImportType";
+
+declare function parseQualifiedDefaultImportAlways(): Types.Always;
+const qualifiedDefaultImportAlways = parseQualifiedDefaultImportAlways();
+
+if (!qualifiedDefaultImportAlways.truthy) {
+}
+
 ```
 
 # Diagnostics
@@ -1437,8 +1446,26 @@ invalid.ts:299:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
   > 299 │ if (date) console.log(date);
         │     ^^^^
     300 │ 
+    301 │ // Types.Always.success` is always `true`, so `!...success` is always false and must be flagged.
   
   i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+invalid.ts:307:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    305 │ const qualifiedDefaultImportAlways = parseQualifiedDefaultImportAlways();
+    306 │ 
+  > 307 │ if (!qualifiedDefaultImportAlways.truthy) {
+        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    308 │ }
+    309 │ 
+  
+  i The value's type can never be truthy, so this check is redundant.
   
 
 ```

@@ -1,0 +1,119 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/ordered_list_numbering.md
+---
+
+# Input
+
+```md
+1. foo
+2. bar
+
+1. foo
+1. bar
+
+---
+
+10. foo
+1. bar
+2. ff
+
+---
+
+5. foo
+7. bar
+
+---
+
+0. abc
+0. def
+0. ghi
+
+---
+
+0. abc
+1. def
+1. ghi
+
+---
+
+1. abc
+1. def
+1. ghi
+
+---
+
+999. abc
+145. def
+     continuation
+69. ghi
+
+---
+
+999. abc
+1. def
+
+---
+
+999. abc
+2. def
+
+```
+
+
+# Formatted
+
+```md
+1. foo
+2. bar
+
+3. foo
+4. bar
+
+---
+
+10. foo
+1. bar
+1. ff
+
+---
+
+5. foo
+6. bar
+
+---
+
+0. abc
+1. def
+2. ghi
+
+---
+
+0. abc
+1. def
+1. ghi
+
+---
+
+1. abc
+1. def
+1. ghi
+
+---
+
+999. abc
+1000. def
+      continuation
+1001. ghi
+
+---
+
+999. abc
+1. def
+
+---
+
+999. abc
+1000. def
+
+```

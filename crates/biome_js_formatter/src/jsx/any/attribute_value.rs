@@ -9,6 +9,7 @@ impl FormatRule<AnyJsxAttributeValue> for FormatAnyJsxAttributeValue {
     fn fmt(&self, node: &AnyJsxAttributeValue, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
             AnyJsxAttributeValue::AnyJsxTag(node) => node.format().fmt(f),
+            AnyJsxAttributeValue::JsTemplateExpression(node) => node.format().fmt(f),
             AnyJsxAttributeValue::JsxExpressionAttributeValue(node) => node.format().fmt(f),
             AnyJsxAttributeValue::JsxString(node) => node.format().fmt(f),
         }

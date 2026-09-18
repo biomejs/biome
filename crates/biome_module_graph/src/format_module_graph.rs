@@ -3,8 +3,8 @@ use crate::html_module_info::HtmlModuleInfoInner;
 use crate::js_module_info::{Exports, Imports, JsBindingData};
 use crate::module_graph::ModuleInfoKind;
 use crate::{
-    BindingTypeData, CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath,
-    JsImportPhase, JsModuleInfo, JsOwnExport, JsReexport,
+    CssModuleInfo, HtmlModuleInfo, JsExport, JsImport, JsImportPath, JsImportPhase, JsModuleInfo,
+    JsOwnExport, JsReexport,
 };
 use biome_formatter::prelude::*;
 use biome_formatter::{format_args, write};
@@ -23,29 +23,6 @@ impl std::fmt::Display for JsModuleInfo {
                 .expect("Expected a valid document")
                 .as_code(),
         )
-    }
-}
-
-impl Format<FormatTypeContext> for BindingTypeData {
-    fn fmt(
-        &self,
-        f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
-    ) -> FormatResult<()> {
-        write!(
-            f,
-            [
-                token("BindingTypeData {"),
-                &group(&block_indent(&format_args![
-                    token("Types "),
-                    &self.ty,
-                    token(","),
-                    hard_line_break(),
-                ])),
-                token("}")
-            ]
-        )?;
-
-        Ok(())
     }
 }
 
@@ -516,16 +493,16 @@ impl Format<FormatTypeContext> for CssImports {
         &self,
         f: &mut biome_formatter::formatter::Formatter<FormatTypeContext>,
     ) -> FormatResult<()> {
-        if self.0.is_empty() {
+        if self.is_empty() {
             return write!(f, [token("No imports")]);
         }
         let mut joiner = f.join();
-        for (specifier, import) in &self.0 {
+        for import in self.iter() {
             let entry = format_with(|f| {
                 write!(
                     f,
                     [&format_args![
-                        text(&std::format!("{:?}", specifier.text()), None),
+                        text(&std::format!("{:?}", import.specifier), None),
                         space(),
                         token("=>"),
                         space(),
@@ -772,8 +749,8 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
 
         let script_imports_section = format_with(|f| {
             let mut sorted: Vec<_> = self
-                .static_import_paths
-                .iter()
+                .import_paths
+                .named_iter()
                 .map(|(specifier, resolved)| {
                     let resolved_str = resolved.as_path().map_or("<unresolved>".to_string(), |p| {
                         p.as_str().replace('\\', "/")

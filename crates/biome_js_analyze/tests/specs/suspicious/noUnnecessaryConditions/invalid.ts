@@ -297,3 +297,12 @@ function switchMixed(value: 'a' | 'b') {
 
 const date = new Date();
 if (date) console.log(date);
+
+// Types.Always.success` is always `true`, so `!...success` is always false and must be flagged.
+import type Types from "./typeOnlyDefaultImportType";
+
+declare function parseQualifiedDefaultImportAlways(): Types.Always;
+const qualifiedDefaultImportAlways = parseQualifiedDefaultImportAlways();
+
+if (!qualifiedDefaultImportAlways.truthy) {
+}

@@ -1,0 +1,35 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  },
+  "linter": { "rules": { "recommended": false } },
+  "assist": { "enabled": false }
+}
+```
+
+## `file.svelte`
+
+```svelte
+{#if true}
+	{@const value = source}
+	{@const { property } = source}
+	{@const [item] = source}
+	{@const nested = (source = 1) + 2}
+	{@const callback = () => (source = 1)}
+{/if}
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

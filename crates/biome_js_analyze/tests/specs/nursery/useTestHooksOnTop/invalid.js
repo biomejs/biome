@@ -51,3 +51,9 @@ describe('mixed top level owner', () => {
     afterAll(() => {});
   });
 });
+
+// Hook after test in suite
+suite('my suite', () => {
+  it('does something', () => {});
+  beforeEach(() => {});
+});

@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/script-style-tags-multiple-nested.svelte
+---
+
+# Input
+
+```svelte
+<div>above</div>
+<script>
+    const hi = '';
+</script>
+<div>below</div>
+
+<div>
+    <div>above</div>
+    <script>
+        const hi = '';
+    </script>
+    <div>below</div>
+</div>
+
+<div>
+    <div>above</div>
+    <script>
+        const hi = '';
+    </script>
+    <style></style>
+</div>
+
+<!-- i stay above style -->
+
+
+<style>
+    .a {
+        color: blue;
+    }
+</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,13 @@
++<div>above</div>
+ <script>
+-    const hi = "";
++    const hi = '';
+ </script>
+-
+-<div>above</div>
+ <div>below</div>
+ 
+ <div>
+     <div>above</div>
+     <script>
+-        const hi = "";
++        const hi = '';
+     </script>
+     <div>below</div>
+ </div>
+@@ -16,7 +15,7 @@
+ <div>
+     <div>above</div>
+     <script>
+-        const hi = "";
++        const hi = '';
+     </script>
+     <style></style>
+ </div>
+```
+
+# Output
+
+```svelte
+<div>above</div>
+<script>
+    const hi = '';
+</script>
+<div>below</div>
+
+<div>
+    <div>above</div>
+    <script>
+        const hi = '';
+    </script>
+    <div>below</div>
+</div>
+
+<div>
+    <div>above</div>
+    <script>
+        const hi = '';
+    </script>
+    <style></style>
+</div>
+
+<!-- i stay above style -->
+
+<style>
+    .a {
+        color: blue;
+    }
+</style>
+```

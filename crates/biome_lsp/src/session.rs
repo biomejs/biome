@@ -11,11 +11,11 @@ use biome_diagnostics::{PrintDescription, Severity};
 use biome_fs::{BiomePath, normalize_path};
 use biome_line_index::WideEncoding;
 use biome_lsp_converters::{PositionEncoding, negotiated_encoding};
-use biome_service::Workspace;
 use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::db::DbState;
 use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
@@ -24,11 +24,12 @@ use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, SupportsFeatureParams,
+    PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
+use biome_service::{Workspace, WorkspaceServer};
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use futures::StreamExt;
@@ -117,7 +118,8 @@ pub(crate) struct Session {
     /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
-    pub(crate) workspace: Arc<dyn Workspace>,
+    pub(crate) workspace: Arc<WorkspaceServer>,
+    db_state: Arc<DbState>,
 
     /// Configuration status tracked independently per project key.
     configuration_status: HashMap<ProjectKey, ConfigurationStatus>,
@@ -248,7 +250,8 @@ impl Session {
     pub(crate) fn new(
         key: SessionKey,
         client: Client,
-        workspace: Arc<dyn Workspace>,
+        workspace: Arc<WorkspaceServer>,
+        db_state: Arc<DbState>,
         cancellation: Arc<Notify>,
         service_rx: watch::Receiver<ServiceNotification>,
     ) -> Self {
@@ -258,6 +261,7 @@ impl Session {
             client,
             initialize_params: OnceCell::default(),
             workspace,
+            db_state,
             configuration_status: Default::default(),
             projects: Default::default(),
             documents: Default::default(),
@@ -271,6 +275,46 @@ impl Session {
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
         }
+    }
+
+    /// Returns the workspace, wrapped so that any call interrupted by a
+    /// concurrent update to the workspace database is automatically retried.
+    ///
+    /// Use this accessor in code where nobody would re-send the work if we
+    /// dropped it:
+    ///
+    /// - **LSP notifications**, i.e. one-way messages from the editor, such
+    ///   as `textDocument/didOpen`, `textDocument/didChange` and
+    ///   `textDocument/didClose`. The editor sends them once and never asks
+    ///   again: dropping a `didChange` would leave our copy of the document
+    ///   permanently out of sync with the editor.
+    /// - **Background tasks** the server starts on its own, such as
+    ///   refreshing the diagnostics of the open documents or loading the
+    ///   configuration file. Project scans run inside an epoch that queues
+    ///   setter-based writes instead of retrying the traversal.
+    ///
+    /// LSP request handlers (formatting, code actions, ...) should use
+    /// [Self::workspace_for_request] instead.
+    pub(crate) fn workspace(&self) -> impl Workspace + '_ {
+        RetryingWorkspace::new(self.workspace.with_db_state(&self.db_state))
+    }
+
+    /// Returns the workspace without automatic retries.
+    ///
+    /// Use this accessor in **LSP request handlers**, i.e. handlers for
+    /// messages the editor sends and awaits an answer for, such as
+    /// `textDocument/formatting` or `textDocument/codeAction`. These handlers
+    /// run inside `catch_lsp_operation`, which turns an interrupted call into
+    /// a `ContentModified` response.
+    ///
+    /// Requests must not retry on their own, because their positions and
+    /// ranges are only meaningful for the document version the editor sent
+    /// them for. If the user types while we compute code actions for line 10,
+    /// a retry would compute them for whatever moved to line 10 after the
+    /// edit. Answering with `ContentModified` instead makes the editor
+    /// re-send the request with fresh positions, if it still needs it.
+    pub(crate) fn workspace_for_request(&self) -> impl Workspace + '_ {
+        self.workspace.with_db_state(&self.db_state)
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client
@@ -429,6 +473,7 @@ impl Session {
         }
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     pub(crate) fn schedule_diagnostics(self: &Arc<Self>, url: Uri, version: i32) {
         let entry = self.diagnostics_entry(url.clone(), version);
         entry.closed.store(false, Ordering::Release);
@@ -437,6 +482,7 @@ impl Session {
         self.spawn_delayed_diagnostics(url, entry, version);
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn spawn_delayed_diagnostics(
         self: &Arc<Self>,
         url: Uri,
@@ -450,6 +496,7 @@ impl Session {
         });
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     async fn run_debounced_diagnostics(
         self: Arc<Self>,
         url: Uri,
@@ -570,10 +617,9 @@ impl Session {
                 self.client.show_message(MessageType::WARNING, "The plugin loading has failed. Biome will report only parsing errors until the file is fixed or its usage is disabled.").await
             }
         }
-
         let FileFeaturesResult {
             features_supported: file_features,
-        } = self.workspace.file_features(SupportsFeatureParams {
+        } = self.workspace().file_features(SupportsFeatureParams {
             project_key: doc.project_key,
             features: FeaturesBuilder::new().with_linter().with_assist().build(),
             path: biome_path.clone(),
@@ -591,7 +637,6 @@ impl Session {
                 .await;
             return Ok(());
         }
-
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if configuration_status.is_loaded() {
@@ -602,7 +647,7 @@ impl Session {
                     categories = categories.with_assist();
                 }
             }
-            let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
+            let result = self.workspace().pull_diagnostics(PullDiagnosticsParams {
                 project_key: doc.project_key,
                 path: biome_path.clone(),
                 categories: categories.build(),
@@ -627,7 +672,7 @@ impl Session {
                 };
                 get_start.and_then(|f| {
                     let content = self
-                        .workspace
+                        .workspace()
                         .get_file_content(GetFileContentParams {
                             project_key: doc.project_key,
                             path: biome_path.clone(),
@@ -657,8 +702,6 @@ impl Session {
                 })
                 .collect()
         };
-
-        info!("Diagnostics sent to the client {}", diagnostics.len());
 
         if !self.can_publish_diagnostics(&url, doc.version, entry) {
             return Ok(());
@@ -1058,7 +1101,7 @@ impl Session {
         let session = self.clone();
 
         spawn_blocking(move || {
-            let result = session.workspace.scan_project(ScanProjectParams {
+            let result = session.workspace().scan_project(ScanProjectParams {
                 project_key,
                 watch: scan_kind.is_project() || scan_kind.is_type_aware(),
                 force,
@@ -1179,15 +1222,15 @@ impl Session {
         base_path: ConfigurationPathHint,
         force: bool,
     ) -> ConfigurationStatus {
-        let loaded_configuration = match load_configuration(self.workspace.fs(), base_path.clone())
-        {
-            Ok(loaded_configuration) => loaded_configuration,
-            Err(err) => {
-                error!("Couldn't load the configuration file, reason:\n {err}");
-                self.client.log_message(MessageType::ERROR, &err).await;
-                return ConfigurationStatus::Error;
-            }
-        };
+        let loaded_configuration =
+            match load_configuration(self.workspace().fs(), base_path.clone()) {
+                Ok(loaded_configuration) => loaded_configuration,
+                Err(err) => {
+                    error!("Couldn't load the configuration file, reason:\n {err}");
+                    self.client.log_message(MessageType::ERROR, &err).await;
+                    return ConfigurationStatus::Error;
+                }
+            };
         if !loaded_configuration.loaded_location.is_in_project() {
             let config_path = loaded_configuration
                 .file_path
@@ -1197,7 +1240,8 @@ impl Session {
                 ConfigurationPathHint::FromLsp(path)
                 | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
                 ConfigurationPathHint::FromUser(path) => {
-                    let fs = self.workspace.fs();
+                    let workspace = self.workspace();
+                    let fs = workspace.fs();
                     if fs.path_is_file(path) {
                         path.parent()
                             .map_or("<unknown>".to_string(), |p| p.to_string())
@@ -1240,7 +1284,8 @@ impl Session {
             return ConfigurationStatus::Missing;
         }
 
-        let fs = self.workspace.fs();
+        let workspace = self.workspace();
+        let fs = workspace.fs();
         let should_use_editorconfig = fs_configuration.use_editorconfig();
         let mut configuration = if should_use_editorconfig {
             let (editorconfig, editorconfig_diagnostics) = {
@@ -1314,7 +1359,7 @@ impl Session {
         let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
             None => {
-                let register_result = self.workspace.open_project(OpenProjectParams {
+                let register_result = self.workspace().open_project(OpenProjectParams {
                     path: project_path.as_path().into(),
                     open_uninitialized: true,
                 });
@@ -1331,8 +1376,10 @@ impl Session {
         };
 
         let scan_kind = ProjectScanComputer::new(&configuration).compute();
-        // We give the editor priority
-        let scan_kind = if !self.scan_kind_from_editor_features().is_none() {
+        // We give priority to the scan kind requested by the user.
+        let scan_kind = if scan_kind.is_project() || scan_kind.is_type_aware() {
+            scan_kind
+        } else if !self.scan_kind_from_editor_features().is_none() {
             self.scan_kind_from_editor_features()
         } else if scan_kind.is_none() {
             ScanKind::KnownFiles
@@ -1340,7 +1387,7 @@ impl Session {
             scan_kind
         };
 
-        let result = self.workspace.update_settings(UpdateSettingsParams {
+        let result = self.workspace().update_settings(UpdateSettingsParams {
             project_key,
             workspace_directory: configuration_path
                 .as_ref()
@@ -1428,16 +1475,23 @@ impl Session {
     }
 
     pub(crate) fn failsafe_rage(&self, params: RageParams) -> RageResult {
-        self.workspace.rage(params).unwrap_or_else(|err| {
-            let entries = vec![
-                RageEntry::section("Workspace"),
-                RageEntry::markup(markup! {
-                    <Error>"\u{2716} Rage command failed:"</Error> {&format!("{err}")}
-                }),
-            ];
+        let result = salsa::Cancelled::catch(std::panic::AssertUnwindSafe(|| {
+            self.workspace().rage(params)
+        }));
+        let err = match result {
+            Ok(Ok(result)) => return result,
+            Ok(Err(err)) => err.to_string(),
+            Err(cancelled) => cancelled.to_string(),
+        };
 
-            RageResult { entries }
-        })
+        let entries = vec![
+            RageEntry::section("Workspace"),
+            RageEntry::markup(markup! {
+                <Error>"\u{2716} Rage command failed:"</Error> {&err}
+            }),
+        ];
+
+        RageResult { entries }
     }
 
     /// Retrieves the configuration status of the given project, defaulting to
@@ -1558,6 +1612,7 @@ mod tests {
             Arc::new(NoopQueryProvider {}),
             None,
         ));
+        let db_state = Arc::new(DbState::lsp());
 
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));
@@ -1572,6 +1627,7 @@ mod tests {
                 SessionKey(0),
                 client,
                 workspace.clone(),
+                db_state.clone(),
                 cancellation.clone(),
                 service_rx.clone(),
             ));

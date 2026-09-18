@@ -47,7 +47,18 @@ if (foo.length === 0 || true) {}
 
 // Logical OR
 const x3 = foo.length || 2
-// TODO. Not supported yet.
-// const A_NUMBER = 2; const x = foo.length || A_NUMBER
+const A_NUMBER = 2; const x4 = foo.length || A_NUMBER
+const x5 = foo.length || "bar"
+const A_STRING = "bar"; const x6 = foo.length || A_STRING
+const x7 = foo.length || unknown
+const itemCount = result.totalCount || result.length
+
+let object = { index: 0 };
+let string = "test";
+const index = object?.index || string.length;
+
+if (foo?.length) {}
+if (!foo?.length) {}
+if (!foo?.bar.length) {}
 
 ```

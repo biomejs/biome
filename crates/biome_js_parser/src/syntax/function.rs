@@ -649,6 +649,7 @@ fn parse_parenthesized_arrow_function_expression(
     context: ExpressionContext,
 ) -> ParsedSyntax {
     let is_parenthesized = is_parenthesized_arrow_function_expression(p);
+    let is_bogus = p.at(T![=>]);
     match is_parenthesized {
         IsParenthesizedArrowFunctionExpression::True => {
             let (m, flags) =
@@ -656,7 +657,14 @@ fn parse_parenthesized_arrow_function_expression(
                     .expect("'CompletedMarker' because function should never return 'Err' if called with 'Ambiguity::Allowed'.");
             parse_arrow_body(p, flags, context)
                 .or_add_diagnostic(p, js_parse_error::expected_arrow_body);
-            Present(m.complete(p, JS_ARROW_FUNCTION_EXPRESSION))
+            Present(m.complete(
+                p,
+                if is_bogus {
+                    JS_BOGUS_EXPRESSION
+                } else {
+                    JS_ARROW_FUNCTION_EXPRESSION
+                },
+            ))
         }
         IsParenthesizedArrowFunctionExpression::Unknown => {
             parse_possible_parenthesized_arrow_function_expression(p, context)
@@ -736,7 +744,11 @@ fn is_parenthesized_arrow_function_expression_impl(
                 // Rest parameter '(...a' is certainly not a parenthesized expression
                 T![...] => IsParenthesizedArrowFunctionExpression::True,
                 // '([ ...', '({ ... } can either be a parenthesized object or array expression or a destructing parameter
-                T!['['] | T!['{'] => IsParenthesizedArrowFunctionExpression::Unknown,
+                T!['['] | T!['{'] => match token_after_parenthesized_group(p, n) {
+                    T![=>] => IsParenthesizedArrowFunctionExpression::True,
+                    T![:] => IsParenthesizedArrowFunctionExpression::Unknown,
+                    _ => IsParenthesizedArrowFunctionExpression::False,
+                },
 
                 // '(@' can be a decorator or a parenthesized arrow function
                 T![@] => IsParenthesizedArrowFunctionExpression::Unknown,
@@ -902,6 +914,35 @@ fn is_arrow_function_with_single_parameter(p: &mut JsParser) -> bool {
     }
 }
 
+// Returns the token after the `(...)` group at `start_offset`.
+//
+// Used to tell destructured arrow params apart from a parenthesized expression:
+//   ({ a, b }) =>   // followed by `=>` — these are params
+//   ({ key: val })  // no `=>` after `)` — this is an expression
+//
+// Tracks how many `(` are open at once so the first `)` that closes the outermost
+// paren is the one checked for `=>`. Without this, `(a: () => T) =>` would stop
+// at the inner `)` and return the wrong token.
+fn token_after_parenthesized_group(p: &mut JsParser, start_offset: usize) -> JsSyntaxKind {
+    debug_assert!(p.nth_at(start_offset, T!['(']));
+    let mut depth: u32 = 0;
+    let mut offset = start_offset;
+    loop {
+        match p.nth(offset) {
+            T!['('] => depth += 1,
+            T![')'] => {
+                depth -= 1;
+                if depth == 0 {
+                    return p.nth(offset + 1);
+                }
+            }
+            EOF => return EOF,
+            _ => {}
+        }
+        offset += 1;
+    }
+}
+
 fn parse_arrow_body(
     p: &mut JsParser,
     mut flags: SignatureFlags,
@@ -922,13 +963,28 @@ fn parse_arrow_body(
         parse_function_body(p, flags)
     } else {
         p.with_state(EnterFunction(flags), |p| {
+            // Clear in_conditional_consequent for the body. We are past the top of the
+            // ternary consequent now, so nested expressions don't need this guard.
+            //
+            // Special case: when the body starts with `({` or `([`, it is ambiguous:
+            //
+            //   cond ? x => ({ a, b }) => body : alt  // `({a,b})` is a destructured parameter
+            //   cond ? x => ({ key: val }) : alt      // `({key:val})` is an object expression
+            //
+            // In TypeScript mode, the speculative arrow parser can misread the ternary `:`
+            // as a return-type annotation and treat the alternate's `=>` as the arrow. To
+            // avoid this, we block speculative arrow parsing unless `=>` immediately follows
+            // the `)`. If `=>` is there, the `({` or `([` is a destructured parameter and
+            // we allow it.
+            let body_context = context.and_in_conditional_consequent(false);
             if context.is_in_conditional_consequent()
                 && matches!(p.cur(), T!['('])
                 && matches!(p.nth(1), T!['{'] | T!['['])
+                && token_after_parenthesized_group(p, 0) != T![=>]
             {
-                parse_assignment_expression_or_higher_no_arrow(p, context)
+                parse_assignment_expression_or_higher_no_arrow(p, body_context)
             } else {
-                parse_assignment_expression_or_higher(p, context)
+                parse_assignment_expression_or_higher(p, body_context)
             }
         })
     }

@@ -277,7 +277,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 17
+        "begin": 16
       }
     }
   },
@@ -289,7 +289,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 18
+        "begin": 17
       }
     }
   },
@@ -297,6 +297,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "7842353260163629265",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 18
+      }
+    }
+  },
+  {
+    "description": "'f' is redeclared in the same scope.",
+    "check_name": "lint/suspicious/noRedeclare",
+    "fingerprint": "4835254919265693190",
     "severity": "critical",
     "location": {
       "path": "index.ts",
@@ -313,18 +325,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 5
-      }
-    }
-  },
-  {
-    "description": "Using == may be unsafe if you are relying on type coercion.",
-    "check_name": "lint/suspicious/noDoubleEquals",
-    "fingerprint": "9497329216962766751",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
         "begin": 6
       }
     }
@@ -332,7 +332,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
   {
     "description": "Using == may be unsafe if you are relying on type coercion.",
     "check_name": "lint/suspicious/noDoubleEquals",
-    "fingerprint": "18366180239442454213",
+    "fingerprint": "9497329216962766751",
     "severity": "critical",
     "location": {
       "path": "index.ts",
@@ -474,6 +474,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
+    "description": "Using == may be unsafe if you are relying on type coercion.",
+    "check_name": "lint/suspicious/noDoubleEquals",
+    "fingerprint": "18366180239442454213",
+    "severity": "critical",
+    "location": {
+      "path": "index.ts",
+      "lines": {
+        "begin": 5
+      }
+    }
+  },
+  {
     "description": "'z' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "8595162422023295635",
@@ -488,24 +500,12 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
   {
     "description": "'f' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
-    "fingerprint": "4835254919265693190",
-    "severity": "critical",
-    "location": {
-      "path": "index.ts",
-      "lines": {
-        "begin": 15
-      }
-    }
-  },
-  {
-    "description": "'f' is redeclared in the same scope.",
-    "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "3103625193263367010",
     "severity": "critical",
     "location": {
       "path": "index.ts",
       "lines": {
-        "begin": 16
+        "begin": 15
       }
     }
   },
@@ -606,6 +606,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
     }
   },
   {
+    "description": "Sort these imports.",
+    "check_name": "assist/source/organizeImports",
+    "fingerprint": "15695086553598122883",
+    "severity": "critical",
+    "location": {
+      "path": "main.ts",
+      "lines": {
+        "begin": 1
+      }
+    }
+  },
+  {
     "description": "'z' is redeclared in the same scope.",
     "check_name": "lint/suspicious/noRedeclare",
     "fingerprint": "4177467054814594004",
@@ -674,18 +686,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
       "path": "main.ts",
       "lines": {
         "begin": 19
-      }
-    }
-  },
-  {
-    "description": "Sort these imports.",
-    "check_name": "assist/source/organizeImports",
-    "fingerprint": "15695086553598122883",
-    "severity": "critical",
-    "location": {
-      "path": "main.ts",
-      "lines": {
-        "begin": 1
       }
     }
   },

@@ -49,6 +49,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This let declares a variable that is only assigned once.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {

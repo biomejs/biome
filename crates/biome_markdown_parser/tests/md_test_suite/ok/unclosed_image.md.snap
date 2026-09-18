@@ -14,8 +14,9 @@ This has ![unclosed image
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -26,10 +27,7 @@ MdDocument {
                     value_token: MD_TEXTUAL_LITERAL@9..10 "!" [] [],
                 },
                 MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@10..11 "[" [] [],
-                },
-                MdTextual {
-                    value_token: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] [],
+                    value_token: MD_TEXTUAL_LITERAL@10..25 "[unclosed image" [] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
@@ -44,21 +42,20 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..26
+0: MD_ROOT@0..26
   0: (empty)
-  1: MD_BLOCK_LIST@0..26
+  1: (empty)
+  2: MD_BLOCK_LIST@0..26
     0: MD_PARAGRAPH@0..26
       0: MD_INLINE_ITEM_LIST@0..26
         0: MD_TEXTUAL@0..9
           0: MD_TEXTUAL_LITERAL@0..9 "This has " [] []
         1: MD_TEXTUAL@9..10
           0: MD_TEXTUAL_LITERAL@9..10 "!" [] []
-        2: MD_TEXTUAL@10..11
-          0: MD_TEXTUAL_LITERAL@10..11 "[" [] []
-        3: MD_TEXTUAL@11..25
-          0: MD_TEXTUAL_LITERAL@11..25 "unclosed image" [] []
-        4: MD_TEXTUAL@25..26
+        2: MD_TEXTUAL@10..25
+          0: MD_TEXTUAL_LITERAL@10..25 "[unclosed image" [] []
+        3: MD_TEXTUAL@25..26
           0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
-  2: EOF@26..26 "" [] []
+  3: EOF@26..26 "" [] []
 
 ```

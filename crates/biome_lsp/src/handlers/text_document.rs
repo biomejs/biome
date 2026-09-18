@@ -4,6 +4,7 @@ use crate::utils::apply_document_changes;
 use crate::{documents::Document, session::Session};
 use biome_configuration::ConfigurationPathHint;
 use biome_languages::DocumentFileSource;
+use biome_service::Workspace;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, FeaturesBuilder, FileContent, GetFileContentParams,
     IgnoreKind, OpenFileParams, PathIsIgnoredParams, ProjectKey,
@@ -43,7 +44,7 @@ pub(crate) async fn did_open(
     };
 
     let is_ignored = session
-        .workspace
+        .workspace()
         .is_path_ignored(PathIsIgnoredParams {
             project_key,
             path: path.clone(),
@@ -59,7 +60,7 @@ pub(crate) async fn did_open(
 
     let doc = Document::new(project_key, version, &content);
 
-    session.workspace.open_file(OpenFileParams {
+    session.workspace().open_file(OpenFileParams {
         project_key,
         path,
         content: FileContent::FromClient { content, version },
@@ -194,11 +195,11 @@ pub(crate) async fn did_change(
     let Some(doc) = session.document(&url) else {
         return Ok(());
     };
-    if !session.workspace.file_exists(path.clone().into())? {
+    if !session.workspace().file_exists(path.clone().into())? {
         return Ok(());
     }
     let features = FeaturesBuilder::new().build();
-    if session.workspace.is_path_ignored(PathIsIgnoredParams {
+    if session.workspace().is_path_ignored(PathIsIgnoredParams {
         path: path.clone(),
         is_dir: false,
         project_key: doc.project_key,
@@ -208,7 +209,7 @@ pub(crate) async fn did_change(
         return Ok(());
     }
 
-    let old_text = session.workspace.get_file_content(GetFileContentParams {
+    let old_text = session.workspace().get_file_content(GetFileContentParams {
         project_key: doc.project_key,
         path: path.clone(),
     })?;
@@ -223,7 +224,7 @@ pub(crate) async fn did_change(
 
     session.insert_document(url.clone(), Document::new(doc.project_key, version, &text));
 
-    session.workspace.change_file(ChangeFileParams {
+    session.workspace().change_file(ChangeFileParams {
         project_key: doc.project_key,
         path,
         version,
@@ -253,7 +254,7 @@ pub(crate) async fn did_save(
             return Ok(());
         };
 
-        session.workspace.change_file(ChangeFileParams {
+        session.workspace().change_file(ChangeFileParams {
             project_key: doc.project_key,
             path,
             content: text.clone(),
@@ -291,7 +292,7 @@ pub(crate) async fn did_close(
     };
 
     session
-        .workspace
+        .workspace()
         .close_file(CloseFileParams { project_key, path })?;
 
     session

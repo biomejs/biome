@@ -31,11 +31,11 @@ impl<'a> LineSuffixes<'a> {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub(super) enum LineSuffixEntry<'a> {
     /// A line suffix to print
     Suffix(&'a FormatElement),
 
-    /// Potentially changed call arguments that should be used to format any following items.  
+    /// Potentially changed call arguments that should be used to format any following items.
     Args(PrintElementArgs),
 }

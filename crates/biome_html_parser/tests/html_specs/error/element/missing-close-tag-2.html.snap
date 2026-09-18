@@ -17,13 +17,14 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlElement {
             opening_element: HtmlOpeningElement {
                 l_angle_token: L_ANGLE@0..1 "<" [] [],
                 name: HtmlTagName {
-                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                    value_token: DIV_KW@1..4 "div" [] [],
                 },
                 attributes: HtmlAttributeList [],
                 r_angle_token: R_ANGLE@4..5 ">" [] [],
@@ -43,17 +44,18 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..5
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..5
     0: HTML_ELEMENT@0..5
       0: HTML_OPENING_ELEMENT@0..5
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..4
-          0: HTML_LITERAL@1..4 "div" [] []
+          0: DIV_KW@1..4 "div" [] []
         2: HTML_ATTRIBUTE_LIST@4..4
         3: R_ANGLE@4..5 ">" [] []
       1: HTML_ELEMENT_LIST@5..5
       2: (empty)
-  4: EOF@5..6 "" [Newline("\n")] []
+  5: EOF@5..6 "" [Newline("\n")] []
 
 ```
 

@@ -17,6 +17,11 @@ impl FormatNodeRule<CssViewTransitionAtRuleDeclarator> for FormatCssViewTransiti
             view_transition_token,
         } = node.as_fields();
 
-        write!(f, [view_transition_token.format()])
+        write!(
+            f,
+            [view_transition_token
+                .format()?
+                .with_text_case(CssCase::Lowercase)]
+        )
     }
 }

@@ -1,12 +1,14 @@
-use biome_css_parser::{CssParserOptions, parse_css_with_cache};
+#[path = "css_parser/suites.rs"]
+mod suites;
+
+use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_cache};
 use biome_diagnostics::{DiagnosticExt, print_diagnostic_to_string};
-use biome_languages::CssFileSource;
 use biome_rowan::NodeCache;
-use biome_test_utils::BenchCase;
+use biome_test_utils::{BenchCase, assert_errors_are_absent, validate_eof_token};
 use criterion::{
     BatchSize, BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main,
 };
-use std::collections::HashMap;
+use suites::{ParserBenchmarkSuite, parser_benchmark_suites};
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -23,41 +25,41 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(target_env = "musl", target_os = "linux", target_arch = "aarch64"))]
 #[global_allocator]
 static GLOBAL: std::alloc::System = std::alloc::System;
-fn bench_css_parser(criterion: &mut Criterion) {
-    let mut all_suites = HashMap::new();
-    all_suites.insert("css", include_str!("libs-css.txt"));
-    let mut libs = vec![];
-    libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 
-    let mut group = criterion.benchmark_group("css_parser");
-    for lib in libs {
+fn bench_parser_suite(criterion: &mut Criterion, suite: ParserBenchmarkSuite) {
+    let mut group = criterion.benchmark_group(suite.group_name);
+    for lib in suite.libraries.lines() {
         let test_case = BenchCase::try_from(lib);
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let source_type = CssFileSource::css();
-                let mut diagnostics = vec![];
+                let parsed = parse_css(code, suite.source_type, CssParserOptions::default());
+                if suite.require_clean_parse {
+                    let syntax = parsed.syntax();
+                    validate_eof_token(syntax.clone());
+                    assert_errors_are_absent(&syntax, parsed.diagnostics(), test_case.path());
+                }
+                for diagnostic in parsed.into_diagnostics() {
+                    let diagnostic = diagnostic
+                        .with_file_source_code(code)
+                        .with_file_path(test_case.filename());
+                    println!("{}", print_diagnostic_to_string(&diagnostic));
+                }
+
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::new(test_case.filename(), "uncached"),
                     &code,
                     |b, _| {
                         b.iter(|| {
-                            let result = black_box(biome_css_parser::parse_css(
+                            black_box(parse_css(
                                 code,
-                                source_type,
+                                suite.source_type,
                                 CssParserOptions::default(),
                             ));
-                            diagnostics.extend(result.into_diagnostics());
                         })
                     },
                 );
-                for diagnostic in diagnostics {
-                    let diagnostic = diagnostic
-                        .with_file_source_code(code)
-                        .with_file_path(test_case.filename());
-                    println!("{}", print_diagnostic_to_string(&diagnostic));
-                }
                 group.bench_with_input(
                     BenchmarkId::new(test_case.filename(), "cached"),
                     &code,
@@ -67,7 +69,7 @@ fn bench_css_parser(criterion: &mut Criterion) {
                                 let mut cache = NodeCache::default();
                                 parse_css_with_cache(
                                     code,
-                                    source_type,
+                                    suite.source_type,
                                     &mut cache,
                                     CssParserOptions::default(),
                                 );
@@ -76,7 +78,7 @@ fn bench_css_parser(criterion: &mut Criterion) {
                             |mut cache| {
                                 black_box(parse_css_with_cache(
                                     code,
-                                    source_type,
+                                    suite.source_type,
                                     &mut cache,
                                     CssParserOptions::default(),
                                 ));
@@ -86,10 +88,16 @@ fn bench_css_parser(criterion: &mut Criterion) {
                     },
                 );
             }
-            Err(e) => println!("{e:?}"),
+            Err(error) => println!("{error:?}"),
         }
     }
     group.finish();
+}
+
+fn bench_css_parser(criterion: &mut Criterion) {
+    for suite in parser_benchmark_suites() {
+        bench_parser_suite(criterion, suite);
+    }
 }
 
 criterion_group!(css_parser, bench_css_parser);

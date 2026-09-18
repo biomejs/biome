@@ -77,7 +77,7 @@ impl FormatRule<SourceComment<GritLanguage>> for FormatGritLeadingComment {
             write!(
                 f,
                 [align(
-                    1,
+                    " ",
                     &format_once(|f| {
                         for line in lines {
                             write!(

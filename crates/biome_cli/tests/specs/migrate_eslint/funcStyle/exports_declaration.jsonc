@@ -1,0 +1,18 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "func-style": [
+        "error",
+        "expression",
+        {
+          "allowArrowFunctions": true,
+          "allowTypeAnnotation": true,
+          "overrides": {
+            "namedExports": "declaration"
+          }
+        }
+      ]
+    }
+  }
+}

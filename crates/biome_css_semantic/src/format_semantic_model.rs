@@ -1,5 +1,4 @@
 use crate::model::{Selector, SemanticModel, Specificity};
-use biome_css_syntax::AnyCssRoot;
 use biome_formatter::prelude::*;
 use biome_formatter::write;
 use biome_formatter::{
@@ -75,37 +74,32 @@ impl std::fmt::Display for SemanticModel {
 
 impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
-        let root = self.root();
         let mut selectors: Vec<Selector> = self
             .rules()
             .into_iter()
             .flat_map(|rule| rule.selectors().to_vec())
             .collect();
-        selectors.sort_by_key(|sel| sel.range(&root).start());
+        selectors.sort_by_key(|sel| sel.range().start());
 
         let mut builder = f.join_nodes_with_hardline();
         for selector in &selectors {
-            builder.entry(
-                selector.node(&root).syntax(),
-                &SelectorWithRoot(selector, &root),
-            );
+            builder.entry(selector.node().syntax(), &SelectorWithRoot(selector));
         }
         builder.finish()
     }
 }
 
-struct SelectorWithRoot<'a>(&'a Selector, &'a AnyCssRoot);
+struct SelectorWithRoot<'a>(&'a Selector);
 
 impl<'a> Format<FormatSemanticModelContext> for SelectorWithRoot<'a> {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let selector = self.0;
-        let root = self.1;
-        let range = std::format!("{:?}", selector.range(root));
+        let range = std::format!("{:?}", selector.range());
         let resolved = selector.resolved().to_string();
         write!(
             f,
             [
-                text(resolved.as_str(), Some(selector.range(root).start())),
+                text(resolved.as_str(), Some(selector.range().start())),
                 token(":"),
                 space(),
                 &selector.specificity(),

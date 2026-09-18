@@ -160,7 +160,8 @@ pub(crate) const fn is_delimiter(b: Dispatch) -> bool {
     // - whitespace
     // - '!' important modifier
     // - ':' variant separator
-    matches!(b, WHS | EXL | COL)
+    // - '/' modifier separator (`@container/sidebar`, `flex/50`)
+    matches!(b, WHS | EXL | COL | SLH)
 }
 
 #[inline]
@@ -168,8 +169,9 @@ const fn is_boundary_byte(b: Dispatch) -> bool {
     // Valid boundary after a dashed basename:
     // - '-' indicates a value follows
     // - ':' indicates a variant boundary
+    // - '/' indicates a modifier follows (`drop-shadow/50`)
     // - whitespace
-    matches!(b, WHS | MIN | COL)
+    matches!(b, WHS | MIN | COL | SLH)
 }
 
 #[cfg(test)]

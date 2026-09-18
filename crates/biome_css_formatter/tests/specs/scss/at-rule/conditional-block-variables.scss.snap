@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/conditional-block-variables.scss
+---
+
+# Input
+
+```scss
+@media(width >= 40rem){$gap:2rem;.before{margin:$gap}$columns:3;a:hover{margin:$gap}@supports(display:grid){$display:grid;.grid{display:$display}}}
+@supports(display:grid){.before{display:block}$display:grid;.after{display:$display}}
+.card{@media(width >= 60rem){$color:red;color:$color}}
+@document regexp(".*"){$theme:dark;.document{color:$theme}}
+
+```
+
+
+# Formatted
+
+```scss
+@media (width >= 40rem) {
+	$gap: 2rem;
+	.before {
+		margin: $gap;
+	}
+	$columns: 3;
+	a:hover {
+		margin: $gap;
+	}
+	@supports (display: grid) {
+		$display: grid;
+		.grid {
+			display: $display;
+		}
+	}
+}
+@supports (display: grid) {
+	.before {
+		display: block;
+	}
+	$display: grid;
+	.after {
+		display: $display;
+	}
+}
+.card {
+	@media (width >= 60rem) {
+		$color: red;
+		color: $color;
+	}
+}
+@document regexp(".*") {
+	$theme: dark;
+	.document {
+		color: $theme;
+	}
+}
+
+```

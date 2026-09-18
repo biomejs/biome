@@ -1,6 +1,8 @@
 <!-- should not generate diagnostics -->
 <div aria-activedescendant="some-id" tabindex="0"></div>
 <div aria-activedescendant="some-id" tabindex="-1"></div>
+<div aria-activedescendant="some-id" tabindex={tabindexValue}></div>
+<div aria-activedescendant="some-id" {tabindex}></div>
 <input aria-activedescendant="some-id" />
 <button aria-activedescendant="some-id"></button>
 <select aria-activedescendant="some-id"></select>

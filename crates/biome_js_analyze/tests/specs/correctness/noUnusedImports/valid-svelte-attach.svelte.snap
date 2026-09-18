@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-svelte-attach.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+import { myAttachment } from "./attachments.js";
+</script>
+
+<div {@attach myAttachment}>...</div>
+
+```

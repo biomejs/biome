@@ -1,0 +1,127 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/pre-child.vue
+---
+
+# Input
+
+```vue
+<template>
+<!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/ide/components/jobs/detail.vue -->
+<pre
+  ref="buildTrace"
+  class="build-trace mb-0 h-100"
+  @scroll="scrollBuildLog"
+>
+  <code
+    v-show="!detailJob.isLoading"
+    class="bash"
+    v-html="jobOutput"
+  >
+  </code>
+  <div
+    v-show="detailJob.isLoading"
+    class="build-loader-animation"
+  >
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</pre>
+</template>
+
+<!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/vue_shared/components/code_block.vue -->
+<template>
+  <pre class="code-block rounded">
+    <code class="d-block">{{ code }}</code>
+  </pre>
+</template>
+
+<template>
+<pre class='woot'>
+  {{ stuff }}
+  </pre>
+</template>
+
+<template>
+<pre class='woot'>
+  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+    </pre>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -33,10 +33,7 @@
+ 
+ <template>
+   <pre class="woot">
+-  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq
+-    }}123
+-  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq
+-    }}123
+-    </pre
+-  >
++  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
++  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
++    </pre>
+ </template>
+```
+
+# Output
+
+```vue
+<template>
+  <!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/ide/components/jobs/detail.vue -->
+  <pre ref="buildTrace" class="build-trace mb-0 h-100" @scroll="scrollBuildLog">
+  <code
+    v-show="!detailJob.isLoading"
+    class="bash"
+    v-html="jobOutput"
+  >
+  </code>
+  <div
+    v-show="detailJob.isLoading"
+    class="build-loader-animation"
+  >
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+</pre>
+</template>
+
+<!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/vue_shared/components/code_block.vue -->
+<template>
+  <pre class="code-block rounded">
+    <code class="d-block">{{ code }}</code>
+  </pre>
+</template>
+
+<template>
+  <pre class="woot">
+  {{ stuff }}
+  </pre>
+</template>
+
+<template>
+  <pre class="woot">
+  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+  123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+    </pre>
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   <!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/ide/components/jobs/detail.vue -->
+   21: <!-- copied from https://github.com/gitlabhq/gitlabhq/blob/master/app/assets/javascripts/vue_shared/components/code_block.vue -->
+   36:   123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+   37:   123{{ wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq || wqeqwwqwqweqweqwewwq }}123
+```

@@ -1,10 +1,10 @@
 #![deny(clippy::use_self)]
 
 mod errors;
-mod node_builtins;
 mod resolver_fs_proxy;
+mod runtime_builtins;
 
-use std::{borrow::Cow, cmp::Ordering, ops::Deref, sync::Arc};
+use std::{borrow::Cow, cmp::Ordering, collections::HashSet, ops::Deref, sync::Arc};
 
 use biome_fs::normalize_path;
 use biome_json_value::{JsonObject, JsonValue};
@@ -12,8 +12,8 @@ use biome_package::{PackageJson, TsConfigJson};
 use camino::{Utf8Path, Utf8PathBuf};
 
 pub use errors::*;
-pub use node_builtins::is_builtin_node_module;
 pub use resolver_fs_proxy::*;
+pub use runtime_builtins::{is_builtin_bun_module, is_builtin_node_module};
 
 /// Resolves the given `specifier` from the given `base_dir`.
 ///
@@ -34,10 +34,24 @@ pub fn resolve(
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
 ) -> Result<Utf8PathBuf, ResolveError> {
+    resolve_with_metadata(specifier, base_dir, fs, options).map(Resolution::into_path)
+}
+
+/// Resolves the given `specifier` and reports which resolver mechanism succeeded.
+pub fn resolve_with_metadata(
+    specifier: &str,
+    base_dir: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<Resolution, ResolveError> {
     let specifier = strip_query_and_fragment(specifier);
 
     if options.resolve_node_builtins && is_builtin_node_module(specifier) {
         return Err(ResolveError::NodeBuiltIn);
+    }
+
+    if options.resolve_bun_builtins && is_builtin_bun_module(specifier) {
+        return Err(ResolveError::BunBuiltIn);
     }
 
     if specifier.starts_with('/') {
@@ -45,17 +59,18 @@ pub fn resolve(
             Utf8PathBuf::from(specifier),
             fs,
             options,
-        );
+        )
+        .map(Resolution::other);
     }
 
     if is_relative_specifier(specifier) {
-        return resolve_relative_path(specifier, base_dir, fs, options);
+        return resolve_relative_path(specifier, base_dir, fs, options).map(Resolution::other);
     }
 
     if options.assume_relative {
         match resolve_relative_path(specifier, base_dir, fs, options) {
             Err(ResolveError::NotFound) => { /* continue below */ }
-            result => return result,
+            result => return result.map(Resolution::other),
         }
     }
 
@@ -190,19 +205,21 @@ fn resolve_module(
     base_dir: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
-) -> Result<Utf8PathBuf, ResolveError> {
+) -> Result<Resolution, ResolveError> {
     match &options.package_json {
         DiscoverableManifest::Auto => match fs.find_package_json(base_dir) {
             Ok((package_path, manifest)) => {
                 resolve_module_with_package_json(specifier, &package_path, &manifest, fs, options)
             }
-            Err(_) => resolve_dependency(specifier, base_dir, fs, options),
+            Err(_) => resolve_dependency(specifier, base_dir, fs, options).map(Resolution::other),
         },
         DiscoverableManifest::Explicit {
             package_path,
             manifest,
         } => resolve_module_with_package_json(specifier, package_path, manifest, fs, options),
-        DiscoverableManifest::Off => resolve_dependency(specifier, base_dir, fs, options),
+        DiscoverableManifest::Off => {
+            resolve_dependency(specifier, base_dir, fs, options).map(Resolution::other)
+        }
     }
 }
 
@@ -216,20 +233,28 @@ fn resolve_module_with_package_json(
     package_json: &PackageJson,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
-) -> Result<Utf8PathBuf, ResolveError> {
+) -> Result<Resolution, ResolveError> {
     // `tsconfig.json` may only be found in directories containing a
     // `package.json`, so this is the only place we need to attempt to use it.
+    let tsconfig_path = match &options.tsconfig {
+        DiscoverableManifest::Auto => package_path.join("tsconfig.json"),
+        DiscoverableManifest::Explicit { package_path, .. } => package_path.clone(),
+        DiscoverableManifest::Off => Utf8PathBuf::new(),
+    };
     let tsconfig = match &options.tsconfig {
         DiscoverableManifest::Auto => fs
-            .read_tsconfig_json(&package_path.join("tsconfig.json"))
+            .read_tsconfig_json_in_directory(package_path)
             .map(Cow::Owned),
         DiscoverableManifest::Explicit { manifest, .. } => Ok(Cow::Borrowed(*manifest)),
         DiscoverableManifest::Off => Err(ResolveError::NotFound),
     };
-    if let Some(path) = tsconfig.as_ref().ok().and_then(|tsconfig| {
-        resolve_paths_mapping(specifier, tsconfig, package_path, fs, options).ok()
+    if let Some(resolution) = tsconfig.as_ref().ok().and_then(|tsconfig| {
+        resolve_tsconfig_paths_mapping(specifier, tsconfig, &tsconfig_path, fs, options).ok()
     }) {
-        return Ok(path);
+        return Ok(Resolution::tsconfig_path_mapping(
+            resolution.path,
+            resolution.can_add_extension,
+        ));
     }
 
     // Initialise `type_roots` from the `tsconfig.json` if we have one.
@@ -245,10 +270,16 @@ fn resolve_module_with_package_json(
     };
 
     if specifier.starts_with('#') {
-        return resolve_import_alias(specifier, package_path, package_json, fs, options);
+        return resolve_import_alias(specifier, package_path, package_json, fs, options)
+            .map(Resolution::other);
     }
 
+    // A package may only reference itself by name when its `package.json` has
+    // an `exports` field (`PACKAGE_SELF_RESOLVE` step 4 in the Node.js
+    // resolution algorithm). Without one, the specifier falls through to the
+    // regular `node_modules` lookup below, which finds the package on disk.
     if let Some(package_name) = &package_json.name
+        && package_json.exports.is_some()
         && specifier.starts_with(package_name.as_ref())
         && specifier
             .as_bytes()
@@ -261,7 +292,8 @@ fn resolve_module_with_package_json(
             package_json,
             fs,
             options,
-        );
+        )
+        .map(Resolution::other);
     }
 
     if let Some(base_url) = tsconfig
@@ -271,11 +303,11 @@ fn resolve_module_with_package_json(
     {
         match resolve_relative_path(specifier, base_url, fs, options) {
             Err(ResolveError::NotFound) => { /* continue below */ }
-            result => return result,
+            result => return result.map(Resolution::other),
         }
     }
 
-    resolve_dependency(specifier, package_path, fs, options)
+    resolve_dependency(specifier, package_path, fs, options).map(Resolution::other)
 }
 
 /// Resolves the given alias `specifier`.
@@ -428,10 +460,9 @@ fn pattern_key_compare(key_a: &str, key_b: &str) -> Ordering {
 fn resolve_paths_mapping(
     specifier: &str,
     tsconfig_json: &TsConfigJson,
-    package_path: &Utf8Path,
     fs: &dyn ResolverFsProxy,
     options: &ResolveOptions,
-) -> Result<Utf8PathBuf, ResolveError> {
+) -> Result<TsConfigPathResolution, ResolveError> {
     let paths = tsconfig_json
         .compiler_options
         .paths
@@ -439,16 +470,12 @@ fn resolve_paths_mapping(
         .ok_or(ResolveError::NotFound)?;
 
     let resolve_specifier = |specifier: &str| {
-        if is_relative_specifier(specifier) {
-            resolve_relative_path(
-                specifier,
-                &tsconfig_json.compiler_options.paths_base,
-                fs,
-                options,
-            )
-        } else {
-            resolve_dependency(specifier, package_path, fs, options)
-        }
+        resolve_relative_path(
+            specifier,
+            &tsconfig_json.compiler_options.paths_base,
+            fs,
+            options,
+        )
     };
 
     let resolve_target = |target: &str, glob_replacement: Option<&str>| match glob_replacement {
@@ -456,30 +483,120 @@ fn resolve_paths_mapping(
         None => resolve_specifier(target),
     };
 
-    let resolve_targets = |targets: &[String], glob_replacement: Option<&str>| {
-        for target in targets {
-            match resolve_target(target, glob_replacement) {
-                Ok(path) => return Ok(path),
-                Err(ResolveError::NotFound) => { /* continue */ }
-                Err(error) => return Err(error),
+    let resolve_targets =
+        |targets: &[String], glob_replacement: Option<&str>, key_can_add_extension: bool| {
+            for target in targets {
+                match resolve_target(target, glob_replacement) {
+                    Ok(path) => {
+                        return Ok(TsConfigPathResolution {
+                            path,
+                            can_add_extension: key_can_add_extension
+                                && target.ends_with('*')
+                                && target.bytes().filter(|byte| *byte == b'*').count() == 1,
+                        });
+                    }
+                    Err(ResolveError::NotFound) => { /* continue */ }
+                    Err(error) => return Err(error),
+                }
             }
-        }
 
-        Err(ResolveError::NotFound)
-    };
+            Err(ResolveError::NotFound)
+        };
 
     for (key, targets) in paths {
         if let Some((start, end)) = key.split_once('*') {
-            if specifier.starts_with(start) && specifier.ends_with(end) {
+            if specifier.starts_with(start)
+                && specifier.ends_with(end)
+                && specifier.len() >= start.len() + end.len()
+            {
                 let glob_replacement = &specifier[start.len()..specifier.len() - end.len()];
-                return resolve_targets(targets, Some(glob_replacement));
+                return resolve_targets(
+                    targets,
+                    Some(glob_replacement),
+                    end.is_empty() && key.bytes().filter(|byte| *byte == b'*').count() == 1,
+                );
             }
         } else if key == specifier {
-            return resolve_targets(targets, None);
+            return resolve_targets(targets, None, false);
         }
     }
 
     Err(ResolveError::NotFound)
+}
+
+struct TsConfigPathResolution {
+    path: Utf8PathBuf,
+    can_add_extension: bool,
+}
+
+/// Resolves `specifier` against `root_config` and its project references.
+///
+/// The root config is checked first, followed by a depth-first traversal of
+/// references in declaration order. Each mapping is resolved relative to the
+/// config that declares it. Unreadable references are skipped, duplicate and
+/// cyclic references are visited once.
+fn resolve_tsconfig_paths_mapping(
+    specifier: &str,
+    root_config: &TsConfigJson,
+    root_config_path: &Utf8Path,
+    fs: &dyn ResolverFsProxy,
+    options: &ResolveOptions,
+) -> Result<TsConfigPathResolution, ResolveError> {
+    if let Ok(path) = resolve_paths_mapping(specifier, root_config, fs, options) {
+        return Ok(path);
+    }
+
+    let Some(root_directory) = root_config_path.parent() else {
+        return Err(ResolveError::NotFound);
+    };
+    let mut pending = root_config
+        .references
+        .iter()
+        .rev()
+        .map(|reference| normalize_path(&root_directory.join(&reference.path)))
+        .collect::<Vec<_>>();
+    let mut visited = HashSet::from([tsconfig_cycle_key(fs, root_config_path)]);
+
+    while let Some(reference_path) = pending.pop() {
+        let Ok(config) = fs
+            .read_tsconfig_json(&reference_path)
+            .or_else(|_| fs.read_tsconfig_json(&reference_path.join("tsconfig.json")))
+        else {
+            continue;
+        };
+        let config_path = normalize_path(&config.path);
+        if !visited.insert(tsconfig_cycle_key(fs, &config_path)) {
+            continue;
+        }
+
+        if let Ok(path) = resolve_paths_mapping(specifier, &config, fs, options) {
+            return Ok(path);
+        }
+
+        if let Some(config_directory) = config_path.parent() {
+            pending.extend(
+                config
+                    .references
+                    .iter()
+                    .rev()
+                    .map(|reference| normalize_path(&config_directory.join(&reference.path))),
+            );
+        }
+    }
+
+    Err(ResolveError::NotFound)
+}
+
+/// Returns the normalized path used to detect repeated configuration files.
+/// Direct symlinks use their canonical target so aliases do not evade cycle detection.
+fn tsconfig_cycle_key(fs: &dyn ResolverFsProxy, path: &Utf8Path) -> Utf8PathBuf {
+    let path = normalize_path(path);
+    match fs.path_info(&path) {
+        Ok(PathInfo::Symlink {
+            canonicalized_target,
+        }) => canonicalized_target,
+        _ => path,
+    }
 }
 
 /// Resolves the given `target` string from a target mapping.
@@ -815,6 +932,51 @@ fn strip_query_and_fragment(specifier: &str) -> &str {
     }
 }
 
+/// Identifies the mechanism that produced a resolved path.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ResolutionKind {
+    /// The path was resolved without a TypeScript `paths` mapping.
+    Other,
+    /// The path was resolved through a TypeScript `paths` mapping.
+    TsConfigPathMapping {
+        /// Whether appending to the wildcard preserves the resolved target.
+        can_add_extension: bool,
+    },
+}
+
+/// A resolved path and the mechanism that produced it.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Resolution {
+    path: Utf8PathBuf,
+    kind: ResolutionKind,
+}
+
+impl Resolution {
+    fn other(path: Utf8PathBuf) -> Self {
+        Self {
+            path,
+            kind: ResolutionKind::Other,
+        }
+    }
+
+    fn tsconfig_path_mapping(path: Utf8PathBuf, can_add_extension: bool) -> Self {
+        Self {
+            path,
+            kind: ResolutionKind::TsConfigPathMapping { can_add_extension },
+        }
+    }
+
+    /// Returns the mechanism that produced the resolved path.
+    pub const fn kind(&self) -> ResolutionKind {
+        self.kind
+    }
+
+    /// Returns the resolved path.
+    pub fn into_path(self) -> Utf8PathBuf {
+        self.path
+    }
+}
+
 /// Options to pass to the resolver.
 #[derive(Clone)]
 pub struct ResolveOptions<'a> {
@@ -876,6 +1038,16 @@ pub struct ResolveOptions<'a> {
     /// which will likely fail too, but will result in a different error.
     pub resolve_node_builtins: bool,
 
+    /// Whether Bun builtin modules should be resolved.
+    ///
+    /// Note that this setting primarily influences the kind of error returned
+    /// when attempting to resolve a Bun built-in. Built-ins cannot be
+    /// resolved to a path, so if this setting is `true`, any attempt to do so
+    /// will return an error of kind [`ResolveError::BunBuiltIn`]. If `false`,
+    /// the resolver may try to resolve the built-in as an ordinary dependency,
+    /// which will likely fail too, but will result in a different error.
+    pub resolve_bun_builtins: bool,
+
     /// If `true`, the resolver will attempt to resolve to a type definition
     /// (usually a `.d.ts` file) instead of a source path.
     ///
@@ -936,6 +1108,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: &[],
             package_json: DiscoverableManifest::Auto,
             resolve_node_builtins: false,
+            resolve_bun_builtins: false,
             resolve_types: false,
             tsconfig: DiscoverableManifest::Auto,
             type_roots: TypeRoots::Auto,
@@ -996,6 +1169,12 @@ impl<'a> ResolveOptions<'a> {
         self
     }
 
+    /// Sets [`Self::resolve_bun_builtins`] to `true` and returns this instance.
+    pub const fn with_resolve_bun_builtins(mut self) -> Self {
+        self.resolve_bun_builtins = true;
+        self
+    }
+
     /// Sets [`Self::resolve_types`] to `true` and returns this instance.
     pub const fn with_resolve_types(mut self) -> Self {
         self.resolve_types = true;
@@ -1023,6 +1202,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: self.extension_aliases,
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
+            resolve_bun_builtins: self.resolve_bun_builtins,
             resolve_types: self.resolve_types,
             tsconfig: DiscoverableManifest::Off,
             type_roots,
@@ -1038,6 +1218,7 @@ impl<'a> ResolveOptions<'a> {
             extension_aliases: &[],
             package_json: DiscoverableManifest::Off,
             resolve_node_builtins: self.resolve_node_builtins,
+            resolve_bun_builtins: self.resolve_bun_builtins,
             resolve_types: self.resolve_types,
             tsconfig: DiscoverableManifest::Off,
             type_roots: self.type_roots,

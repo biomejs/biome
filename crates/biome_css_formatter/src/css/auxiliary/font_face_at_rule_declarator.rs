@@ -13,6 +13,9 @@ impl FormatNodeRule<CssFontFaceAtRuleDeclarator> for FormatCssFontFaceAtRuleDecl
     ) -> FormatResult<()> {
         let CssFontFaceAtRuleDeclaratorFields { font_face_token } = node.as_fields();
 
-        write!(f, [font_face_token.format()])
+        write!(
+            f,
+            [font_face_token.format()?.with_text_case(CssCase::Lowercase)]
+        )
     }
 }

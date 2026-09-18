@@ -332,7 +332,7 @@ impl<L: Language> DecoratedComment<L> {
     /// The direct child node (ignoring lists) of the [`enclosing_node`](DecoratedComment::enclosing_node) that follows this comment.
     ///
     /// Returns [None] if the [`enclosing_node`](DecoratedComment::enclosing_node) only consists of tokens or if
-    /// all children children of the [`enclosing_node`](DecoratedComment::enclosing_node) following this comment are tokens.
+    /// all children of the [`enclosing_node`](DecoratedComment::enclosing_node) following this comment are tokens.
     ///
     /// The following node is guaranteed to be a sibling of [`preceding_node`](DecoratedComment::preceding_node).
     ///

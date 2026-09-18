@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+
+<div class="size-4"></div>
+<div class="truncate"></div>
+<div data-classes="px-2 py-2"></div>
+
+```

@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/release-final-statement-lists.scss
+---
+
+# Input
+
+```scss
+$target:base;
+%base{color:red}
+.target:not(.x) {color:red}
+.target[data-theme="dark"]{color:red}
+
+.media{@import "theme.css"  screen and (min-width:1px) /* media */
+}
+.modifiers {
+@import "theme.css" layer(theme) supports(display:grid) screen // media
+}
+.multiple{ @import "one.css" /* first */,  "two.css" /* last */ }
+.pseudo{@extend :not(.x) /* target */ }
+.attribute {
+@extend [data-theme="dark"] // target
+}
+.interpolation{@extend %#{$target}}
+.after{width:1px}
+
+```
+
+
+# Formatted
+
+```scss
+$target: base;
+%base {
+	color: red;
+}
+.target:not(.x) {
+	color: red;
+}
+.target[data-theme="dark"] {
+	color: red;
+}
+
+.media {
+	@import "theme.css" screen and (min-width: 1px) /* media */;
+}
+.modifiers {
+	@import "theme.css" layer(theme) supports(display: grid) screen; // media
+}
+.multiple {
+	@import "one.css" /* first */, "two.css" /* last */;
+}
+.pseudo {
+	@extend :not(.x) /* target */;
+}
+.attribute {
+	@extend [data-theme="dark"]; // target
+}
+.interpolation {
+	@extend %#{$target};
+}
+.after {
+	width: 1px;
+}
+
+```

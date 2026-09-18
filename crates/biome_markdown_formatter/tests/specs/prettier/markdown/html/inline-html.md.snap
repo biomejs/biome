@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/inline-html.md
+---
+
+# Input
+
+```md
+text
+<em>text</em>
+text
+
+text
+ <em>text</em>
+
+text
+  <em>text</em>
+
+![image](https://example.com)
+<img src="image.png" />
+
+Foo
+<div>
+bar
+</div>
+
+Foo
+
+<div>
+bar
+</div>
+
+Foo
+ <div>
+bar
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,7 +12,6 @@
+ <img src="image.png" />
+ 
+ Foo
+-
+ <div>
+ bar
+ </div>
+@@ -24,7 +23,6 @@
+ </div>
+ 
+ Foo
+-
+  <div>
+ bar
+ </div>
+```
+
+# Output
+
+```md
+text
+<em>text</em>
+text
+
+text
+<em>text</em>
+
+text
+<em>text</em>
+
+![image](https://example.com)
+<img src="image.png" />
+
+Foo
+<div>
+bar
+</div>
+
+Foo
+
+<div>
+bar
+</div>
+
+Foo
+ <div>
+bar
+</div>
+```

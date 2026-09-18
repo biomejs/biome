@@ -103,6 +103,7 @@ impl<'app> CliSession<'app> {
                 skip,
                 watch,
                 profile_rules,
+                profile_type_inference,
             } => run_command(
                 self,
                 &log_options,
@@ -127,6 +128,7 @@ impl<'app> CliSession<'app> {
                     only,
                     skip,
                     profile_rules,
+                    profile_type_inference,
                     watch,
                 }),
             ),
@@ -155,6 +157,7 @@ impl<'app> CliSession<'app> {
                 json_parser,
                 log_options,
                 profile_rules,
+                profile_type_inference,
                 watch,
             } => run_command(
                 self,
@@ -183,6 +186,7 @@ impl<'app> CliSession<'app> {
                     css_parser,
                     json_parser,
                     profile_rules,
+                    profile_type_inference,
                     watch,
                 }),
             ),

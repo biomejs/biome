@@ -1,0 +1,65 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/html/html/problematic-3.md
+---
+
+# Input
+
+```md
+<!--
+
+I guess it doesn't matter for new lines between anchor and title
+
+-->
+
+<a name="2.0.0-alpha.1"></a>
+# [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+
+---
+
+<a name="2.0.0-alpha.1"></a>
+
+# [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -5,7 +5,6 @@
+ -->
+ 
+ <a name="2.0.0-alpha.1"></a>
+-
+ # [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+ 
+ ---
+```
+
+# Output
+
+```md
+<!--
+
+I guess it doesn't matter for new lines between anchor and title
+
+-->
+
+<a name="2.0.0-alpha.1"></a>
+# [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+
+---
+
+<a name="2.0.0-alpha.1"></a>
+
+# [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8: # [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+   14: # [2.0.0-alpha.1](https://github.com/formio/angular-formio/compare/v2.0.0-alpha.1...v1.18.0) (2018-03-22)
+```

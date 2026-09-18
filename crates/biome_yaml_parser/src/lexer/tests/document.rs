@@ -9,6 +9,16 @@ fn lex_doc_end() {
 }
 
 #[test]
+fn lex_doc_end_prefix_as_plain_scalar() {
+    assert_lex!(
+        "...x",
+        FLOW_START:0,
+        PLAIN_LITERAL:4,
+        FLOW_END:0,
+    );
+}
+
+#[test]
 fn lex_doc_end_followed_by_trivia() {
     assert_lex!(
         "... # trivia",

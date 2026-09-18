@@ -6,14 +6,14 @@ mod transformers;
 
 use crate::registry::visit_transformation_registry;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ApplySuppression,
-    ControlFlow, InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleRegistry,
-    SuppressionAction,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal,
+    AnalyzerSuppression, ApplySuppression, ControlFlow, InspectMatcher, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, RuleRegistry, Suppression, SuppressionAction,
 };
 use biome_diagnostics::Error;
 use biome_js_syntax::JsLanguage;
 use biome_languages::JsFileSource;
-use biome_rowan::{BatchMutation, SyntaxToken};
+use biome_rowan::{BatchMutation, SyntaxToken, TextRange};
 use std::convert::Infallible;
 use std::ops::Deref;
 use std::sync::LazyLock;
@@ -54,6 +54,18 @@ where
     }
 
     struct TestAction;
+    impl Suppression for TestAction {
+        type Diagnostic = Infallible;
+
+        fn parse_comment<'a>(
+            &self,
+            _: &'a str,
+            _: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression<'a>, Infallible>> {
+            Vec::new()
+        }
+    }
+
     impl SuppressionAction for TestAction {
         type Language = JsLanguage;
 
@@ -79,6 +91,7 @@ where
             _: ApplySuppression<Self::Language>,
             _: &str,
             _: &str,
+            _: &TextRange,
         ) {
             unreachable!("")
         }
@@ -90,7 +103,8 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
+        // Transformations don't support suppression comments.
+        Box::new(TestAction),
         Box::new(TestAction),
         &mut emit_signal,
     );

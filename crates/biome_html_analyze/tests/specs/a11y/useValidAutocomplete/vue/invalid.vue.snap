@@ -11,6 +11,9 @@ expression: invalid.vue
 <input type="text" autocomplete="home url" />
 <Bar autocomplete="baz"></Bar>
 <Input type="text" autocomplete="baz" />
+<!-- static Vue bindings with invalid autocomplete values should also be flagged -->
+<input type="text" :autocomplete="'foo'" />
+<input type="text" v-bind:autocomplete="'invalid name'" />
 
 ```
 
@@ -112,7 +115,7 @@ invalid.vue:6:6 lint/a11y/useValidAutocomplete ━━━━━━━━━━━
   > 6 │ <Bar autocomplete="baz"></Bar>
       │      ^^^^^^^^^^^^^^^^^^
     7 │ <Input type="text" autocomplete="baz" />
-    8 │ 
+    8 │ <!-- static Vue bindings with invalid autocomplete values should also be flagged -->
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   
@@ -133,7 +136,51 @@ invalid.vue:7:20 lint/a11y/useValidAutocomplete ━━━━━━━━━━�
     6 │ <Bar autocomplete="baz"></Bar>
   > 7 │ <Input type="text" autocomplete="baz" />
       │                    ^^^^^^^^^^^^^^^^^^
-    8 │ 
+    8 │ <!-- static Vue bindings with invalid autocomplete values should also be flagged -->
+    9 │ <input type="text" :autocomplete="'foo'" />
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.vue:9:20 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+     7 │ <Input type="text" autocomplete="baz" />
+     8 │ <!-- static Vue bindings with invalid autocomplete values should also be flagged -->
+   > 9 │ <input type="text" :autocomplete="'foo'" />
+       │                    ^^^^^^^^^^^^^^^^^^^^^
+    10 │ <input type="text" v-bind:autocomplete="'invalid name'" />
+    11 │ 
+  
+  i The autocomplete attribute only accepts a certain number of specific fixed values.
+  
+  i Follow the links for more information,
+      WCAG 1.3.5
+      HTML Living Standard autofill
+      HTML attribute: autocomplete - HTML: HyperText Markup Language | MDN
+  
+
+```
+
+```
+invalid.vue:10:20 lint/a11y/useValidAutocomplete ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use valid values for the autocomplete attribute.
+  
+     8 │ <!-- static Vue bindings with invalid autocomplete values should also be flagged -->
+     9 │ <input type="text" :autocomplete="'foo'" />
+  > 10 │ <input type="text" v-bind:autocomplete="'invalid name'" />
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
   
   i The autocomplete attribute only accepts a certain number of specific fixed values.
   

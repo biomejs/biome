@@ -4,10 +4,7 @@ mod tests;
 mod scan_cursor;
 mod source_cursor;
 
-use self::scan_cursor::CssScanCursor;
-use self::scan_cursor::{
-    PendingUrlRawValueScan, StringBodyScan, StringBodyScanStop, UrlBodyStartScan,
-};
+use self::scan_cursor::{CssScanCursor, StringBodyScan, StringBodyScanStop};
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
 use biome_css_syntax::{
@@ -25,6 +22,32 @@ use biome_unicode_table::{
     lookup_byte,
 };
 
+/// Controls how `//` is classified in an SCSS custom-property value.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum CssCustomPropertyCommentMode {
+    /// Preserves `//` as raw content, as in `--value: // literal;`.
+    PreserveDoubleSlash,
+    /// Treats `//` as a comment, as in `@supports (--value: // comment\n token) {}`.
+    ScssLineComments,
+}
+
+#[derive(Debug, Copy, Clone)]
+enum TokenFallback {
+    Error,
+    Delimiter,
+}
+
+/// Byte range for a raw URL literal discovered by URL-body classification.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct UrlRawValueScan {
+    /// Absolute byte position where the raw value starts.
+    pub(crate) start: usize,
+    /// Absolute byte position immediately before the closing `)` or EOF.
+    pub(crate) end: usize,
+    /// Whether the scan stopped on a closing `)` instead of EOF.
+    pub(crate) terminated: bool,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
@@ -38,13 +61,23 @@ pub enum CssLexContext {
     /// Distinct '-' from identifiers and '+' from numbers.
     PseudoNthSelector,
 
-    /// Applied when lexing CSS url function.
-    /// Chooses whether the first body token should stay on regular tokenization
-    /// or become a raw URL literal.
-    UrlBody { scss_exclusive_syntax_allowed: bool },
-    /// Applied when lexing CSS url function raw bodies after classification.
-    /// Greedily consume tokens in the URL function until encountering `)`.
-    UrlRawValue,
+    /// Emits regular trivia until the precomputed raw URL body starts, then
+    /// commits the body without rescanning it.
+    ///
+    /// ```css
+    /// url(images/logo.png)
+    /// ```
+    UrlRawValue(UrlRawValueScan),
+    /// Emits regular trivia until the segmented SCSS URL body starts, then
+    /// lexes its text and interpolation boundaries.
+    ///
+    /// ```scss
+    /// url(images/#{$name}.png)
+    /// ```
+    ScssUrlValue {
+        /// Absolute byte position where segmented URL content starts.
+        start: usize,
+    },
 
     /// Applied when lexing CSS color literals.
     /// Starting from #
@@ -66,10 +99,14 @@ pub enum CssLexContext {
     /// quote for malformed recovery.
     ScssStringInterpolation(CssStringQuote),
 
+    /// Applied to the raw body of an SCSS custom property.
+    CustomPropertyValue(CssCustomPropertyCommentMode),
+
     /// Applied when lexing Tailwind CSS utility classes.
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
-    /// Applied when lexing Tailwind CSS utility names in `@utility`.
+    /// Applied when lexing Tailwind CSS utility and variant names in
+    /// `@utility` and `@variant`.
     TailwindUtilityName,
 }
 
@@ -149,7 +186,6 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
-    pending_url_raw_value_scan: Option<PendingUrlRawValueScan>,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -192,13 +228,16 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 }
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
-                CssLexContext::UrlBody {
-                    scss_exclusive_syntax_allowed,
-                } => self.consume_url_body_token(current, scss_exclusive_syntax_allowed),
-                CssLexContext::UrlRawValue => self.consume_url_raw_value_token(current),
+                CssLexContext::UrlRawValue(scan) => self.consume_url_raw_value_token(current, scan),
+                CssLexContext::ScssUrlValue { start } => {
+                    self.consume_scss_url_value_token(current, start)
+                }
                 CssLexContext::Color => self.consume_color_token(current),
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
+                CssLexContext::CustomPropertyValue(comment_mode) => {
+                    self.consume_custom_property_value_token(current, comment_mode)
+                }
                 CssLexContext::TailwindUtility => self.consume_token_tailwind_utility(current),
                 CssLexContext::TailwindUtilityName => {
                     self.consume_token_tailwind_utility_name(current)
@@ -256,7 +295,6 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
         self.unicode_bom_length = unicode_bom_length;
         self.diagnostics.truncate(diagnostics_pos as usize);
         self.pending_scss_string_start = None;
-        self.pending_url_raw_value_scan = None;
     }
 
     fn finish(self) -> Vec<ParseDiagnostic> {
@@ -322,7 +360,6 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
-            pending_url_raw_value_scan: None,
         }
     }
 
@@ -420,6 +457,14 @@ impl<'src> CssLexer<'src> {
     /// Guaranteed to not be at the end of the file
     // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
     fn consume_token(&mut self, current: u8) -> CssSyntaxKind {
+        self.consume_token_with_fallback(current, TokenFallback::Error)
+    }
+
+    fn consume_token_with_fallback(
+        &mut self,
+        current: u8,
+        fallback: TokenFallback,
+    ) -> CssSyntaxKind {
         // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
         // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
         // to do more aggressive optimizations on the match regarding how to map it to instructions
@@ -468,7 +513,7 @@ impl<'src> CssLexer<'src> {
                 } else if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
-                    self.consume_unexpected_character()
+                    self.consume_fallback(fallback)
                 }
             }
             UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
@@ -497,10 +542,40 @@ impl<'src> CssLexer<'src> {
             PRC => self.consume_byte(T![%]),
             Dispatch::AMP => self.consume_byte(T![&]),
 
-            UNI => self.consume_unexpected_character(),
-
-            _ => self.consume_unexpected_character(),
+            _ => self.consume_fallback(fallback),
         }
+    }
+
+    fn consume_fallback(&mut self, fallback: TokenFallback) -> CssSyntaxKind {
+        match fallback {
+            TokenFallback::Error => self.consume_unexpected_character(),
+            TokenFallback::Delimiter => self.consume_custom_property_delimiter(),
+        }
+    }
+
+    /// Lexes one token from an SCSS custom-property value.
+    #[inline]
+    fn consume_custom_property_value_token(
+        &mut self,
+        current: u8,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> CssSyntaxKind {
+        if comment_mode == CssCustomPropertyCommentMode::PreserveDoubleSlash
+            && current == b'/'
+            && self.peek_byte() == Some(b'/')
+        {
+            return self.consume_byte(T![/]);
+        }
+
+        self.consume_token_with_fallback(current, TokenFallback::Delimiter)
+    }
+
+    #[inline]
+    fn consume_custom_property_delimiter(&mut self) -> CssSyntaxKind {
+        self.assert_current_char_boundary();
+        let current = self.current_char_unchecked();
+        self.advance(current.len_utf8());
+        CSS_DELIM_LITERAL
     }
 
     fn consume_color_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -593,49 +668,9 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn consume_url_raw_value_token(&mut self, current: u8) -> CssSyntaxKind {
-        self.scan_cursor()
-            .scan_url_raw_value()
-            .and_then(|scan| self.consume_pending_url_raw_value(scan))
-            .unwrap_or_else(|| self.consume_token(current))
-    }
-
-    fn consume_url_body_token(
-        &mut self,
-        current: u8,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> CssSyntaxKind {
-        if let Some(scan) = self.take_pending_url_raw_value_scan_at_current_position() {
-            return self
-                .consume_pending_url_raw_value(scan)
-                .unwrap_or_else(|| self.consume_token(current));
-        }
-
-        match self.scan_url_body_start(self.position(), scss_exclusive_syntax_allowed) {
-            UrlBodyStartScan::InterpolatedFunction | UrlBodyStartScan::Other => {
-                self.consume_token(current)
-            }
-            UrlBodyStartScan::RawValue(scan) => {
-                if scan.start == self.position() {
-                    self.consume_pending_url_raw_value(scan)
-                        .unwrap_or_else(|| self.consume_token(current))
-                } else {
-                    // Leading trivia is still emitted as normal trivia tokens.
-                    // Cache the raw-value scan so the next non-trivia token can
-                    // commit the already-classified URL body in one step.
-                    self.pending_url_raw_value_scan = Some(scan);
-                    self.consume_token(current)
-                }
-            }
-        }
-    }
-
-    fn consume_pending_url_raw_value(
-        &mut self,
-        scan: PendingUrlRawValueScan,
-    ) -> Option<CssSyntaxKind> {
+    fn consume_url_raw_value_token(&mut self, current: u8, scan: UrlRawValueScan) -> CssSyntaxKind {
         if scan.start != self.position() {
-            return None;
+            return self.consume_token(current);
         }
 
         self.set_position(scan.end);
@@ -648,7 +683,28 @@ impl<'src> CssLexer<'src> {
             self.diagnostics.push(diagnostic);
         }
 
-        Some(CSS_URL_VALUE_RAW_LITERAL)
+        CSS_URL_VALUE_RAW_LITERAL
+    }
+
+    /// Emits `images/`, `#`, or `.png` from `url(images/#{$name}.png)`.
+    ///
+    /// Text stops before `#{` or `)`, and `#` leaves the cursor at `{`.
+    fn consume_scss_url_value_token(&mut self, current: u8, start: usize) -> CssSyntaxKind {
+        if self.position() < start {
+            return self.consume_token(current);
+        }
+
+        if self.is_at_scss_interpolation() {
+            return self.consume_byte(T![#]);
+        }
+
+        let end = self.scan_cursor().scan_scss_url_value_chunk();
+        if end > self.position() {
+            self.set_position(end);
+            SCSS_URL_CONTENT_LITERAL
+        } else {
+            self.consume_token(current)
+        }
     }
 
     fn consume_pseudo_nth_selector_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1189,6 +1245,9 @@ impl<'src> CssLexer<'src> {
             b"returns" => RETURNS_KW,
             b"use" => USE_KW,
             b"with" => WITH_KW,
+            b"custom-media" => CUSTOM_MEDIA_KW,
+            b"true" => TRUE_KW,
+            b"false" => FALSE_KW,
             // Tailwind CSS 4.0 keywords
             b"theme" => THEME_KW,
             b"utility" => UTILITY_KW,
@@ -1530,6 +1589,9 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
+            SLH if self.is_scss() && matches!(self.peek_byte(), Some(b'/' | b'*')) => {
+                self.consume_slash()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {
@@ -1547,6 +1609,40 @@ impl<'src> CssLexer<'src> {
     fn consume_token_tailwind_utility_name(&mut self, current: u8) -> CssSyntaxKind {
         if self.is_ident_start() {
             return self.consume_identifier_with_slash(true);
+        }
+
+        // Tailwind utility and variant names may start with a digit, such as
+        // the `2xl` breakpoint in `@utility 2xl` or `@variant 2xl`. The default
+        // CSS lexer would split that into a number and an identifier, so consume
+        // the whole run as a single identifier here.
+        let dispatched = lookup_byte(current);
+        if matches!(dispatched, DIG | ZER) {
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
+        }
+
+        // Tailwind variant names may be container-query variants, such as
+        // `@xl` in `@variant @xl`. The default CSS lexer would lex the
+        // leading `@` as its own token, so consume the `@`-prefixed run as
+        // a single identifier here.
+        if matches!(dispatched, AT_)
+            && self
+                .peek_byte()
+                .is_some_and(|byte| matches!(lookup_byte(byte), DIG | ZER | IDT | UNI | MIN))
+        {
+            self.advance(1);
+            while let Some(byte) = self.current_byte() {
+                match lookup_byte(byte) {
+                    DIG | ZER | IDT | UNI | MIN => self.advance_byte_or_char(byte),
+                    _ => break,
+                }
+            }
+            return T![ident];
         }
 
         self.consume_token(current)
@@ -1622,24 +1718,25 @@ impl<'src> CssLexer<'src> {
         self.scan_cursor_at(start).is_at_scss_concatenation_plus()
     }
 
-    fn take_pending_url_raw_value_scan_at_current_position(
-        &mut self,
-    ) -> Option<PendingUrlRawValueScan> {
-        let scan = self.pending_url_raw_value_scan?;
+    /// Returns whether a complete `url(...)` body at `start` uses Sass raw-URL syntax.
+    pub(crate) fn is_scss_raw_url_body(&self, start: usize) -> bool {
+        self.scan_cursor_at(start).is_scss_raw_url_body()
+    }
 
-        if scan.start == self.position() {
-            self.pending_url_raw_value_scan = None;
-            Some(scan)
-        } else {
-            if self.position() > scan.start {
-                // A fallback tokenization path already moved past the cached
-                // raw-literal start, so the speculative range is no longer
-                // aligned with the real lexer position.
-                self.pending_url_raw_value_scan = None;
-            }
-
-            None
-        }
+    /// Returns whether `start` begins a final custom-property `!important`.
+    ///
+    /// This uses the source scanner because buffered token lookahead always
+    /// uses regular lexing, which would drop declaration content such as
+    /// `// raw` before deciding whether `!important` is final.
+    pub(crate) fn is_at_final_custom_property_important(
+        &self,
+        start: usize,
+        comment_mode: CssCustomPropertyCommentMode,
+    ) -> bool {
+        self.scan_cursor_at(start)
+            .scan_final_custom_property_important(
+                comment_mode == CssCustomPropertyCommentMode::ScssLineComments,
+            )
     }
 
     fn consume_scss_expression_token(&mut self, current: u8) -> CssSyntaxKind {
@@ -1650,13 +1747,13 @@ impl<'src> CssLexer<'src> {
         }
     }
 
-    fn scan_url_body_start(
+    pub(crate) fn url_body_lex_context(
         &self,
         start: usize,
         scss_exclusive_syntax_allowed: bool,
-    ) -> UrlBodyStartScan {
+    ) -> CssLexContext {
         self.scan_cursor_at(start)
-            .scan_url_body_start(scss_exclusive_syntax_allowed)
+            .url_body_lex_context(scss_exclusive_syntax_allowed)
     }
 }
 

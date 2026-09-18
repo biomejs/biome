@@ -1,0 +1,5 @@
+.comments{
+value:outerFunctionWithAnExtremelyLongName(1,
+/* comment */
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+}

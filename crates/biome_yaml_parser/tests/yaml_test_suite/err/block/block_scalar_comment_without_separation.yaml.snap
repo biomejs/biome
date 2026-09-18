@@ -1,0 +1,116 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+block: ># comment
+  scalar
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..0 "" [] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@0..5 "block" [] [],
+                                },
+                            },
+                            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+                            value: YamlBlockInBlockNode {
+                                properties: YamlPropertyList [],
+                                content: YamlFoldedScalar {
+                                    r_angle_token: R_ANGLE@7..8 ">" [] [],
+                                    headers: YamlBlockHeaderList [
+                                        YamlBogusBlockHeader {
+                                            items: [
+                                                ERROR_TOKEN@8..17 "# comment" [] [],
+                                            ],
+                                        },
+                                    ],
+                                    content: YamlBlockContent {
+                                        value_token: BLOCK_CONTENT_LITERAL@17..26 "\n  scalar" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@26..27 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@27..27 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..27
+  0: YAML_DOCUMENT_LIST@0..27
+    0: YAML_DOCUMENT@0..27
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..27
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..27
+          0: MAPPING_START@0..0 "" [] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@0..26
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..26
+              0: YAML_FLOW_YAML_NODE@0..5
+                0: YAML_PROPERTY_LIST@0..0
+                1: YAML_PLAIN_SCALAR@0..5
+                  0: PLAIN_LITERAL@0..5 "block" [] []
+              1: COLON@5..7 ":" [] [Whitespace(" ")]
+              2: YAML_BLOCK_IN_BLOCK_NODE@7..26
+                0: YAML_PROPERTY_LIST@7..7
+                1: YAML_FOLDED_SCALAR@7..26
+                  0: R_ANGLE@7..8 ">" [] []
+                  1: YAML_BLOCK_HEADER_LIST@8..17
+                    0: YAML_BOGUS_BLOCK_HEADER@8..17
+                      0: ERROR_TOKEN@8..17 "# comment" [] []
+                  2: YAML_BLOCK_CONTENT@17..26
+                    0: BLOCK_CONTENT_LITERAL@17..26 "\n  scalar" [] []
+          2: MAPPING_END@26..27 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@27..27 "" [] []
+
+```
+
+## Diagnostics
+
+```
+block_scalar_comment_without_separation.yaml:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a block header but instead found '# comment'.
+  
+  > 1 │ block: ># comment
+      │         ^^^^^^^^^
+    2 │   scalar
+    3 │ 
+  
+  i Expected a block header here.
+  
+  > 1 │ block: ># comment
+      │         ^^^^^^^^^
+    2 │   scalar
+    3 │ 
+  
+```

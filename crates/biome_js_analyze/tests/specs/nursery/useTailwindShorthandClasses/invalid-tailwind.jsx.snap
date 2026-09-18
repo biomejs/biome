@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-tailwind.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+
+return <div className="bg-["></div>
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid-tailwind.jsx:3:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found '['.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ return <div className="bg-["></div>
+      │                           ^
+    4 │ 
+  
+  i Expected a value here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ 
+  > 3 │ return <div className="bg-["></div>
+      │                           ^
+    4 │ 
+  
+
+```

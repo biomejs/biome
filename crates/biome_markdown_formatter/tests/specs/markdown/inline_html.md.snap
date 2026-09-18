@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/inline_html.md
+---
+
+# Input
+
+```md
+Something <!-- comment --> inline.
+
+```
+
+
+# Formatted
+
+```md
+Something <!-- comment --> inline.
+
+```

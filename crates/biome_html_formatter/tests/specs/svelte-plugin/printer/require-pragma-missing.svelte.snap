@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: printer/require-pragma-missing.svelte
+---
+
+# Input
+
+```svelte
+<p>
+
+
+    nope
+</p>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,5 +1 @@
+-<p>
+-
+-
+-    nope
+-</p>
+\ No newline at end of file
++<p>nope</p>
+```
+
+# Output
+
+```svelte
+<p>nope</p>
+```

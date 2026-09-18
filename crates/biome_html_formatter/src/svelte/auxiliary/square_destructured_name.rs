@@ -19,9 +19,7 @@ impl FormatNodeRule<SvelteSquareDestructuredName> for FormatSvelteSquareDestruct
             f,
             [
                 l_brack_token.format(),
-                space(),
                 names.format(),
-                space(),
                 r_brack_token.format(),
             ]
         )

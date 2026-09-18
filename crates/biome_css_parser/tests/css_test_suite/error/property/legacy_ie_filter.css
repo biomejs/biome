@@ -1,0 +1,18 @@
+a {
+    filter: alpha(opacity=40
+    color: green;
+}
+
+b {
+    filter: alpha(opacity=40
+    @supports (display: grid) {
+        color: blue;
+    }
+    color: purple;
+}
+
+@supports (filter: alpha(opacity=40 {
+    a {
+        color: blue;
+    }
+}

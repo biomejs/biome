@@ -19,3 +19,6 @@
 <thead aria-expanded="true" />
 <input type="radio" aria-selected="true" />
 <menu type="toolbar" aria-expanded="true" />
+<!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
+<a :href="'#'" aria-checked="true" />
+<a v-bind:href="'http://x.y.z'" aria-checked="true" />

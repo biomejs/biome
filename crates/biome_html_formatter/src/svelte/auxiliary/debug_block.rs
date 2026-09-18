@@ -24,4 +24,13 @@ impl FormatNodeRule<SvelteDebugBlock> for FormatSvelteDebugBlock {
 
         write!(f, [r_curly_token.format()])
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteDebugBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

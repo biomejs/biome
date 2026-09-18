@@ -1,7 +1,7 @@
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
-    DeserializationDiagnostic, DeserializationVisitor, TextRange,
+    DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
 };
 use biome_deserialize_macros::Merge;
 use biome_rowan::Text;
@@ -20,7 +20,7 @@ pub struct UseHookAtTopLevelOptions {
 
 impl Deserializable for UseHookAtTopLevelOptions {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -37,8 +37,8 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        ctx: &mut dyn DeserializationContext,
+        members: &mut MapMembers<'_>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

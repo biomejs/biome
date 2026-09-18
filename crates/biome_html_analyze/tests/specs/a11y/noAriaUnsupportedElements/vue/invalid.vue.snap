@@ -9,6 +9,8 @@ expression: invalid.vue
   <meta charset="UTF-8" aria-hidden="false" />
   <meta charset="UTF-8" role="meta" />
   <script aria-label="script"></script>
+  <script v-bind:aria-label="ariaLabelValue"></script>
+  <script :aria-label="ariaLabelValue"></script>
   <style aria-labelledby="id"></style>
   <style role="style"></style>
 </template>
@@ -47,7 +49,7 @@ invalid.vue:4:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
   > 4 │   <meta charset="UTF-8" role="meta" />
       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │   <script aria-label="script"></script>
-    6 │   <style aria-labelledby="id"></style>
+    6 │   <script v-bind:aria-label="ariaLabelValue"></script>
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
@@ -67,8 +69,8 @@ invalid.vue:5:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
     4 │   <meta charset="UTF-8" role="meta" />
   > 5 │   <script aria-label="script"></script>
       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │   <style aria-labelledby="id"></style>
-    7 │   <style role="style"></style>
+    6 │   <script v-bind:aria-label="ariaLabelValue"></script>
+    7 │   <script :aria-label="ariaLabelValue"></script>
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
@@ -80,43 +82,77 @@ invalid.vue:5:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.vue:6:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:6:3 lint/a11y/noAriaUnsupportedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
     4 │   <meta charset="UTF-8" role="meta" />
     5 │   <script aria-label="script"></script>
-  > 6 │   <style aria-labelledby="id"></style>
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │   <style role="style"></style>
-    8 │ </template>
+  > 6 │   <script v-bind:aria-label="ariaLabelValue"></script>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <script :aria-label="ariaLabelValue"></script>
+    8 │   <style aria-labelledby="id"></style>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+
+```
+
+```
+invalid.vue:7:3 lint/a11y/noAriaUnsupportedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+    5 │   <script aria-label="script"></script>
+    6 │   <script v-bind:aria-label="ariaLabelValue"></script>
+  > 7 │   <script :aria-label="ariaLabelValue"></script>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │   <style aria-labelledby="id"></style>
+    9 │   <style role="style"></style>
+  
+  i Using aria-* on elements that do not support them can cause issues with screen readers.
+  
+
+```
+
+```
+invalid.vue:8:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
+  
+     6 │   <script v-bind:aria-label="ariaLabelValue"></script>
+     7 │   <script :aria-label="ariaLabelValue"></script>
+   > 8 │   <style aria-labelledby="id"></style>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <style role="style"></style>
+    10 │ </template>
   
   i Using aria-* on elements that do not support them can cause issues with screen readers.
   
   i Unsafe fix: Remove the aria-labelledby="id" attribute.
   
-    6 │ ··<style·aria-labelledby="id"></style>
+    8 │ ··<style·aria-labelledby="id"></style>
       │          --------------------         
 
 ```
 
 ```
-invalid.vue:7:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:3 lint/a11y/noAriaUnsupportedElements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the role attribute and aria-* attributes when using meta, html, script, and style elements.
   
-    5 │   <script aria-label="script"></script>
-    6 │   <style aria-labelledby="id"></style>
-  > 7 │   <style role="style"></style>
-      │   ^^^^^^^^^^^^^^^^^^^^
-    8 │ </template>
-    9 │ 
+     7 │   <script :aria-label="ariaLabelValue"></script>
+     8 │   <style aria-labelledby="id"></style>
+   > 9 │   <style role="style"></style>
+       │   ^^^^^^^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
   
   i Using role on elements that do not support them can cause issues with screen readers.
   
   i Unsafe fix: Remove the role="style" attribute.
   
-    7 │ ··<style·role="style"></style>
+    9 │ ··<style·role="style"></style>
       │          ------------         
 
 ```

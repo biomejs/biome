@@ -2,6 +2,7 @@
 <meta charset="UTF-8" />
 <div role="button"></div>
 <input aria-label="name" />
+<input aria-label={ariaLabelValue} />
 <meta charset="UTF-8" aria-foo="bar" />
 <Meta charset="UTF-8" role="meta" />
 <Script aria-label="script"></Script>

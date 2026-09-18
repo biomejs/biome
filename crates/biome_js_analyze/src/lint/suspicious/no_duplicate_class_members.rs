@@ -99,76 +99,8 @@ declare_lint_rule! {
     }
 }
 
-fn get_member_name(node: &AnyJsClassMemberName) -> Option<TokenText> {
-    match node {
-        AnyJsClassMemberName::JsLiteralMemberName(node) => node.name().ok(),
-        _ => None,
-    }
-}
-
-fn is_static_member(node: JsSyntaxList) -> bool {
-    node.into_iter().any(|m| {
-        if let biome_rowan::SyntaxSlot::Node(node) = m {
-            JsStaticModifier::can_cast(node.kind())
-        } else {
-            false
-        }
-    })
-}
-
 declare_node_union! {
     pub AnyClassMemberDefinition = JsGetterClassMember | JsMethodClassMember | JsPropertyClassMember | JsSetterClassMember
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-enum MemberType {
-    Normal,
-    Getter,
-    Setter,
-}
-
-impl AnyClassMemberDefinition {
-    fn name(&self) -> Option<AnyJsClassMemberName> {
-        match self {
-            Self::JsGetterClassMember(node) => node.name().ok(),
-            Self::JsMethodClassMember(node) => node.name().ok(),
-            Self::JsPropertyClassMember(node) => node.name().ok(),
-            Self::JsSetterClassMember(node) => node.name().ok(),
-        }
-    }
-
-    fn modifiers_list(&self) -> JsSyntaxList {
-        match self {
-            Self::JsGetterClassMember(node) => node.modifiers().into_syntax_list(),
-            Self::JsMethodClassMember(node) => node.modifiers().into_syntax_list(),
-            Self::JsPropertyClassMember(node) => node.modifiers().into_syntax_list(),
-            Self::JsSetterClassMember(node) => node.modifiers().into_syntax_list(),
-        }
-    }
-
-    fn range(&self) -> TextRange {
-        match self {
-            Self::JsGetterClassMember(node) => node.range(),
-            Self::JsMethodClassMember(node) => node.range(),
-            Self::JsPropertyClassMember(node) => node.range(),
-            Self::JsSetterClassMember(node) => node.range(),
-        }
-    }
-
-    fn member_type(&self) -> MemberType {
-        match self {
-            Self::JsGetterClassMember(_) => MemberType::Getter,
-            Self::JsMethodClassMember(_) => MemberType::Normal,
-            Self::JsPropertyClassMember(_) => MemberType::Normal,
-            Self::JsSetterClassMember(_) => MemberType::Setter,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-struct MemberState {
-    name: Box<str>,
-    is_static: bool,
 }
 
 impl Rule for NoDuplicateClassMembers {
@@ -226,4 +158,71 @@ impl Rule for NoDuplicateClassMembers {
 
         Some(diagnostic)
     }
+}
+fn get_member_name(node: &AnyJsClassMemberName) -> Option<TokenText> {
+    match node {
+        AnyJsClassMemberName::JsLiteralMemberName(node) => node.name().ok(),
+        _ => None,
+    }
+}
+
+fn is_static_member(node: JsSyntaxList) -> bool {
+    node.into_iter().any(|m| {
+        if let biome_rowan::SyntaxSlot::Node(node) = m {
+            JsStaticModifier::can_cast(node.kind())
+        } else {
+            false
+        }
+    })
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum MemberType {
+    Normal,
+    Getter,
+    Setter,
+}
+
+impl AnyClassMemberDefinition {
+    fn name(&self) -> Option<AnyJsClassMemberName> {
+        match self {
+            Self::JsGetterClassMember(node) => node.name().ok(),
+            Self::JsMethodClassMember(node) => node.name().ok(),
+            Self::JsPropertyClassMember(node) => node.name().ok(),
+            Self::JsSetterClassMember(node) => node.name().ok(),
+        }
+    }
+
+    fn modifiers_list(&self) -> JsSyntaxList {
+        match self {
+            Self::JsGetterClassMember(node) => node.modifiers().into_syntax_list(),
+            Self::JsMethodClassMember(node) => node.modifiers().into_syntax_list(),
+            Self::JsPropertyClassMember(node) => node.modifiers().into_syntax_list(),
+            Self::JsSetterClassMember(node) => node.modifiers().into_syntax_list(),
+        }
+    }
+
+    fn range(&self) -> TextRange {
+        match self {
+            Self::JsGetterClassMember(node) => node.range(),
+            Self::JsMethodClassMember(node) => node.range(),
+            Self::JsPropertyClassMember(node) => node.range(),
+            Self::JsSetterClassMember(node) => node.range(),
+        }
+    }
+
+    fn member_type(&self) -> MemberType {
+        match self {
+            Self::JsGetterClassMember(_) => MemberType::Getter,
+            Self::JsMethodClassMember(_) => MemberType::Normal,
+            Self::JsPropertyClassMember(_) => MemberType::Normal,
+            Self::JsSetterClassMember(_) => MemberType::Setter,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+struct MemberState {
+    name: Box<str>,
+    is_static: bool,
 }

@@ -346,7 +346,7 @@ impl TestReporter for SummaryReporter {
                 let program = file.parse();
                 self.writeln(&format!(
                     "RAST Output for {}:\n{:#?}\n",
-                    &file.name().bold(),
+                    file.name().bold(),
                     program.syntax()
                 ));
             }

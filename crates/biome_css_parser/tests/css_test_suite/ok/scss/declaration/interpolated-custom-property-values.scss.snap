@@ -77,8 +77,8 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
                                         CssRegularDimension {
                                             value_token: CSS_NUMBER_LITERAL@21..23 "10" [] [],
                                             unit_token: IDENT@23..25 "px" [] [],
@@ -434,9 +434,9 @@ CssRoot {
                                     ],
                                 },
                                 colon_token: COLON@208..210 ":" [] [Whitespace(" ")],
-                                value: ScssExpression {
-                                    items: ScssExpressionItemList [
-                                        CssIdentifier {
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomIdentifier {
                                             value_token: IDENT@210..215 "green" [] [],
                                         },
                                     ],
@@ -573,8 +573,8 @@ CssRoot {
                               0: IDENT@14..18 "prop" [] []
                       3: R_CURLY@18..19 "}" [] []
                 1: COLON@19..21 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@21..25
-                  0: SCSS_EXPRESSION_ITEM_LIST@21..25
+                2: CSS_CUSTOM_PROPERTY_VALUE@21..25
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@21..25
                     0: CSS_REGULAR_DIMENSION@21..25
                       0: CSS_NUMBER_LITERAL@21..23 "10" [] []
                       1: IDENT@23..25 "px" [] []
@@ -800,9 +800,9 @@ CssRoot {
                               0: IDENT@203..207 "prop" [] []
                       3: R_CURLY@207..208 "}" [] []
                 1: COLON@208..210 ":" [] [Whitespace(" ")]
-                2: SCSS_EXPRESSION@210..215
-                  0: SCSS_EXPRESSION_ITEM_LIST@210..215
-                    0: CSS_IDENTIFIER@210..215
+                2: CSS_CUSTOM_PROPERTY_VALUE@210..215
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@210..215
+                    0: CSS_CUSTOM_IDENTIFIER@210..215
                       0: IDENT@210..215 "green" [] []
               1: (empty)
             2: R_PAREN@215..217 ")" [] [Whitespace(" ")]

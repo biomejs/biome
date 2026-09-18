@@ -53,13 +53,13 @@ impl<'a, T> StackedStack<'a, T> {
 
 impl<T> Stack<T> for StackedStack<'_, T>
 where
-    T: Copy,
+    T: Clone,
 {
     fn pop(&mut self) -> Option<T> {
         self.stack.pop().or_else(|| match self.original {
             [rest @ .., last] => {
                 self.original = rest;
-                Some(*last)
+                Some(last.clone())
             }
             _ => None,
         })

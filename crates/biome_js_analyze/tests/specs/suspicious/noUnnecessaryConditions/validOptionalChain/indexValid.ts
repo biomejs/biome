@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+
+import { getLogs, getUsage } from "./dataValid";
+
+export async function usageRange(userId: string): Promise<string> {
+    const result = await getUsage(userId);
+    return result?.range.startDate ?? "N/A";
+}
+
+export async function logDetails(): Promise<string[]> {
+    const logs = await getLogs();
+    const byIndex = logs[0]?.id ?? "";
+
+    const [first] = logs;
+    const byDestructuring = first?.createdAt.toISOString() ?? "";
+
+    return [byIndex, byDestructuring];
+}

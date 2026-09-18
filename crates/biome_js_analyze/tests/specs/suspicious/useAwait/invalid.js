@@ -93,3 +93,8 @@ async function* yieldWithoutStar() {
 	yield 1;
 	yield 2;
 }
+
+async function withUsing() {
+	using resource = acquire();
+	consume(resource);
+}

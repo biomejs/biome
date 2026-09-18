@@ -53,25 +53,25 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-file.html:9:2 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.html:10:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
-     7 │ <style>#id .class div {
-     8 │ 	background-color: red;
-   > 9 │ 	background-color: red;
-       │ 	^^^^^^^^^^^^^^^^
-    10 │ } </style>
-    11 │ 
+     8 │ 	#id .class div {
+     9 │ 		background-color: red;
+  > 10 │ 		background-color: red;
+       │ 		^^^^^^^^^^^^^^^^
+    11 │ 	}
+    12 │ </style>
   
   i background-color is already defined here.
   
-     6 │         </script>
-     7 │ <style>#id .class div {
-   > 8 │ 	background-color: red;
-       │ 	^^^^^^^^^^^^^^^^
-     9 │ 	background-color: red;
-    10 │ } </style>
+     7 │ <style>
+     8 │ 	#id .class div {
+   > 9 │ 		background-color: red;
+       │ 		^^^^^^^^^^^^^^^^
+    10 │ 		background-color: red;
+    11 │ 	}
   
   i Remove or rename the duplicate property to ensure consistent styling.
   

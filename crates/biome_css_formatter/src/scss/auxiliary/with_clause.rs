@@ -15,7 +15,7 @@ impl FormatNodeRule<ScssWithClause> for FormatScssWithClause {
 
         let configurations = configurations?;
 
-        write!(f, [with_token.format()])?;
+        write!(f, [with_token.format()?.with_text_case(CssCase::Preserve)])?;
 
         if is_source_separated_with_configuration(&configurations) {
             write!(f, [space()])?;

@@ -1,16 +1,17 @@
 pub(crate) mod color;
+mod custom;
 pub(crate) mod unicode_range;
 
-use crate::lexer::CssLexContext;
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::css_modules::{
     composes_not_allowed, expected_classes_list, expected_composes_import_source,
 };
 use crate::syntax::parse_error::{
-    expected_component_value, expected_identifier, tailwind_disabled,
+    expected_component_value, expected_identifier, scss_only_syntax_error, tailwind_disabled,
 };
 use crate::syntax::scss::{
-    is_at_scss_interpolated_property, parse_required_scss_value_until,
+    is_at_scss_interpolated_property_name, parse_required_scss_value_until,
     parse_scss_interpolated_property_name,
 };
 use crate::syntax::{
@@ -20,14 +21,17 @@ use crate::syntax::{
     parse_regular_identifier, parse_string,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, T, decode_css_identifier};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{
     ParseRecovery, ParseRecoveryTokenSet, RecoveryError, RecoveryResult,
 };
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+pub(crate) use custom::{
+    parse_custom_property_value, parse_legacy_filter_value, parse_supports_custom_property_value,
+};
 
 #[inline]
 pub(crate) fn is_at_any_property(p: &mut CssParser) -> bool {
@@ -282,7 +286,7 @@ impl ParseRecovery for ComposesClassListParseRecovery {
 /// ```
 #[inline]
 pub(crate) fn is_at_generic_property(p: &mut CssParser) -> bool {
-    is_at_direct_generic_property(p) || is_at_scss_interpolated_property(p)
+    is_at_direct_generic_property(p) || is_at_scss_interpolated_property_name(p)
 }
 
 /// Detects the direct, non-interpolated property-name forms handled by the
@@ -339,8 +343,14 @@ pub(crate) fn parse_generic_property_name(p: &mut CssParser) -> ParsedSyntax {
         };
     }
 
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        return parse_scss_interpolated_property_name(p).or_else(|| parse_plain_property_name(p));
+    if is_at_scss_interpolated_property_name(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_property_name,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated property names", marker.range(p))
+            },
+        );
     }
 
     parse_plain_property_name(p)
@@ -370,14 +380,37 @@ fn parse_generic_property_with_value_end_set(
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    let m = p.start();
-    if parse_generic_property_name(p).is_absent() {
-        m.abandon(p);
+    if !is_at_generic_property(p) {
         return Absent;
     }
 
-    p.expect(T![:]);
-    parse_property_value_with_end_set(p, value_end_set, recovery_end_set);
+    let m = p.start();
+    let is_legacy_ie_filter_property = is_at_legacy_ie_filter_property(p);
+    let is_custom_property = parse_generic_property_name(p).ok().is_some_and(|name| {
+        matches!(
+            name.kind(p),
+            CSS_DASHED_IDENTIFIER | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+        )
+    });
+
+    if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
+        p.expect_with_context(
+            T![:],
+            CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::PreserveDoubleSlash),
+        );
+    } else {
+        p.expect(T![:]);
+    }
+    let use_raw_value_parser = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
+    parse_property_value_with_end_set(
+        p,
+        is_custom_property,
+        use_raw_value_parser,
+        value_end_set,
+        recovery_end_set,
+    );
 
     Present(m.complete(p, CSS_GENERIC_PROPERTY))
 }
@@ -385,14 +418,36 @@ fn parse_generic_property_with_value_end_set(
 #[inline]
 pub(crate) fn parse_property_value_with_end_set(
     p: &mut CssParser,
+    is_custom_property: bool,
+    is_legacy_filter_value: bool,
     value_end_set: TokenSet<CssSyntaxKind>,
     recovery_end_set: TokenSet<CssSyntaxKind>,
-) {
-    if CssSyntaxFeatures::Scss.is_supported(p) {
-        parse_required_scss_value_until(p, value_end_set);
+) -> CompletedMarker {
+    if is_legacy_filter_value {
+        parse_legacy_filter_value(p, value_end_set, recovery_end_set)
+    } else if CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property {
+        parse_custom_property_value(p, value_end_set)
+    } else if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_required_scss_value_until(p, value_end_set)
     } else {
-        GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p);
+        GenericComponentValueList::new(value_end_set, recovery_end_set).parse_list(p)
     }
+}
+
+#[inline]
+pub(crate) fn is_at_legacy_ie_filter_property(p: &mut CssParser) -> bool {
+    let text = p.cur_text();
+    let name = decode_css_identifier(text);
+    name.eq_ignore_ascii_case("filter") || name.eq_ignore_ascii_case("-ms-filter")
+}
+
+#[inline]
+pub(crate) fn is_at_legacy_ie_filter_value(p: &mut CssParser) -> bool {
+    let text = p.cur_text();
+    let name = decode_css_identifier(text);
+    let is_progid = name.eq_ignore_ascii_case("progid");
+    let is_alpha = name.eq_ignore_ascii_case("alpha");
+    (is_progid && p.nth_at(1, T![:])) || (is_alpha && p.nth_at(1, T!['(']))
 }
 
 pub(crate) const END_OF_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =

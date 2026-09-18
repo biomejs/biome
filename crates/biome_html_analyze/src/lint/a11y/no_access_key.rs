@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::HtmlAttribute;
+use biome_html_syntax::AnyHtmlAttribute;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_access_key::NoAccessKeyOptions;
 
@@ -50,14 +50,15 @@ declare_lint_rule! {
 }
 
 impl Rule for NoAccessKey {
-    type Query = Ast<HtmlAttribute>;
+    type Query = Ast<AnyHtmlAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = NoAccessKeyOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if is_accesskey_attribute(node) {
+
+        if node.is_attribute_or_vue_binding("accesskey") {
             return Some(());
         }
 
@@ -94,11 +95,4 @@ impl Rule for NoAccessKey {
             mutation,
         ))
     }
-}
-
-fn is_accesskey_attribute(node: &HtmlAttribute) -> bool {
-    node.name().is_ok_and(|name| {
-        name.value_token()
-            .is_ok_and(|value_token| value_token.text_trimmed() == "accesskey")
-    })
 }

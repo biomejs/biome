@@ -84,8 +84,14 @@ impl CommentStyle for HtmlCommentStyle {
             //
             // <!-- This comment gets assigned to the text node, despite it being actually attached to the EOF token. -->
             // ```
+            //
+            // Only a comment that sits on its own line is moved. One that ends
+            // the line of the element before it is already printed by the
+            // element list, which reads it out of that element's trailing
+            // trivia; moving it here as well would print it twice.
             if let Some(token) = comment.following_token()
                 && token.kind() == HtmlSyntaxKind::EOF
+                && !comment.text_position().is_end_of_line()
             {
                 return CommentPlacement::trailing(comment.enclosing_node().clone(), comment);
             }

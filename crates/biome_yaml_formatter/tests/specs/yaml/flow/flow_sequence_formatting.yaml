@@ -1,0 +1,15 @@
+formatted: [1, 'abc', "xyz", plain]
+unformatted: [  1  ,  'abc',"xyz"  , plain ]
+emptyLineCollapsedFormatted: [a, b]
+emptyLineCollapsedUnformatted: [ a,
+
+b ]
+emptyLineKeptFormatted:
+  [
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb,
+  ]
+emptyLineKeptUnformatted: [ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,
+
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb ]

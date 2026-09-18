@@ -1,0 +1,128 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+	<input type="file" accept="image/jpg" />
+	<input v-bind="props" type="file" accept="image/jpg" />
+	<input :[name]="value" type="file" accept="image/jpg" />
+	<input v-bind:[name]="value" type="file" accept="image/jpg" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:29 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ 	<input type="file" accept="image/jpg" />
+      │ 	                           ^^^^^^^^^
+    4 │ 	<input v-bind="props" type="file" accept="image/jpg" />
+    5 │ 	<input :[name]="value" type="file" accept="image/jpg" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    1 1 │   <!-- should generate diagnostics -->
+    2 2 │   <template>
+    3   │ - → <input·type="file"·accept="image/jpg"·/>
+      3 │ + → <input·type="file"·accept="image/jpeg"·/>
+    4 4 │     <input v-bind="props" type="file" accept="image/jpg" />
+    5 5 │     <input :[name]="value" type="file" accept="image/jpg" />
+  
+
+```
+
+```
+invalid.vue:4:44 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    2 │ <template>
+    3 │ 	<input type="file" accept="image/jpg" />
+  > 4 │ 	<input v-bind="props" type="file" accept="image/jpg" />
+      │ 	                                          ^^^^^^^^^
+    5 │ 	<input :[name]="value" type="file" accept="image/jpg" />
+    6 │ 	<input v-bind:[name]="value" type="file" accept="image/jpg" />
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    2 2 │   <template>
+    3 3 │     <input type="file" accept="image/jpg" />
+    4   │ - → <input·v-bind="props"·type="file"·accept="image/jpg"·/>
+      4 │ + → <input·v-bind="props"·type="file"·accept="image/jpeg"·/>
+    5 5 │     <input :[name]="value" type="file" accept="image/jpg" />
+    6 6 │     <input v-bind:[name]="value" type="file" accept="image/jpg" />
+  
+
+```
+
+```
+invalid.vue:5:45 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    3 │ 	<input type="file" accept="image/jpg" />
+    4 │ 	<input v-bind="props" type="file" accept="image/jpg" />
+  > 5 │ 	<input :[name]="value" type="file" accept="image/jpg" />
+      │ 	                                           ^^^^^^^^^
+    6 │ 	<input v-bind:[name]="value" type="file" accept="image/jpg" />
+    7 │ </template>
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    3 3 │     <input type="file" accept="image/jpg" />
+    4 4 │     <input v-bind="props" type="file" accept="image/jpg" />
+    5   │ - → <input·:[name]="value"·type="file"·accept="image/jpg"·/>
+      5 │ + → <input·:[name]="value"·type="file"·accept="image/jpeg"·/>
+    6 6 │     <input v-bind:[name]="value" type="file" accept="image/jpg" />
+    7 7 │   </template>
+  
+
+```
+
+```
+invalid.vue:6:51 lint/nursery/noInvalidFileInputAccept  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Use image/jpeg as the file input accept value.
+  
+    4 │ 	<input v-bind="props" type="file" accept="image/jpg" />
+    5 │ 	<input :[name]="value" type="file" accept="image/jpg" />
+  > 6 │ 	<input v-bind:[name]="value" type="file" accept="image/jpg" />
+      │ 	                                                 ^^^^^^^^^
+    7 │ </template>
+    8 │ 
+  
+  i File input accept values must contain comma-separated filename extensions or valid MIME types.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the normalized file input accept value.
+  
+    4 4 │     <input v-bind="props" type="file" accept="image/jpg" />
+    5 5 │     <input :[name]="value" type="file" accept="image/jpg" />
+    6   │ - → <input·v-bind:[name]="value"·type="file"·accept="image/jpg"·/>
+      6 │ + → <input·v-bind:[name]="value"·type="file"·accept="image/jpeg"·/>
+    7 7 │   </template>
+    8 8 │   
+  
+
+```

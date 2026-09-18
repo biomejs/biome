@@ -1,3 +1,4 @@
+use crate::list_ext::AnyListItem;
 use crate::{AnyMdInline, MdInlineItemList};
 use biome_rowan::AstNodeList;
 
@@ -44,6 +45,12 @@ impl AnyMdInline {
             Self::MdReferenceImage(node) => node.alt().will_break(),
             _ => false,
         }
+    }
+}
+
+impl AnyListItem {
+    pub const fn is_ordered(&self) -> bool {
+        matches!(self, Self::MdOrderedListItem(_))
     }
 }
 

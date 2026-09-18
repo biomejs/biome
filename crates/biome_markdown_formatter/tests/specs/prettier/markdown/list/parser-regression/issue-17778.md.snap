@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/parser-regression/issue-17778.md
+---
+
+# Input
+
+```md
+1. list item
+999999999. list item
+
+1. list item
+1000000000. ordered list marker can't have more than 9 digits
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,4 +2,4 @@
+ 2. list item
+ 
+ 3. list item
+-4. ordered list marker can't have more than 9 digits
++1000000000. ordered list marker can't have more than 9 digits
+```
+
+# Output
+
+```md
+1. list item
+2. list item
+
+3. list item
+1000000000. ordered list marker can't have more than 9 digits
+```

@@ -53,6 +53,33 @@ ns|foo-#{$name},
 color:red;
 }
 
+:#{$name}/* before opening parenthesis */(bar) {}
+
+:#{$name}(
+	/* inside empty function */
+) {}
+
+:#{$name}(/* inside empty function */) {}
+
+:#{$name}(/* argument */ bar) {}
+
+::#{$name}/* before opening parenthesis */(bar) {}
+
+::#{$name}(
+	/* inside function */
+	bar
+) {}
+
+::#{$name}(
+  /* inside function */
+  bar) {}
+
+::#{$name}(/* inside empty function */) {}
+
+::#{$name}(
+  /* inside empty function */
+) {}
+
 ```
 
 
@@ -104,6 +131,39 @@ ns|foo-#{$name},
 %#{$placeholder},
 %placeholder-#{$name} {
 	color: red;
+}
+
+:/* before opening parenthesis */ #{$name}(bar) {
+}
+
+:#{$name}(/* inside empty function */) {
+}
+
+:#{$name}(/* inside empty function */) {
+}
+
+:#{$name}(/* argument */ bar) {
+}
+
+::/* before opening parenthesis */ #{$name}(bar) {
+}
+
+::#{$name}(
+	/* inside function */
+	bar
+) {
+}
+
+::#{$name}(
+	/* inside function */
+	bar
+) {
+}
+
+::#{$name}(/* inside empty function */) {
+}
+
+::#{$name}(/* inside empty function */) {
 }
 
 ```

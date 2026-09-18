@@ -38,3 +38,9 @@
 <input role="textbox" type="text" />
 <th role="columnheader" scope="col"></th>
 <th role="rowheader" scope="row"></th>
+<th v-bind:role="roleValue" scope="row"></th>
+<th :role="roleValue" scope="row"></th>
+<!-- Static Vue bindings with matching semantic elements are valid -->
+<input :role="'checkbox'" type="checkbox" />
+<input v-bind:role="'radio'" type="radio" />
+<th :role="'columnheader'" scope="col"></th>

@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE", "README.md", "src/**/*"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -45,7 +46,7 @@ biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service", features = ["lang_json"] }
 biome_test_utils     = { path = "../biome_test_utils", features = ["lang_json"] }
 countme              = { workspace = true, features = ["enable"] }
-criterion            = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion            = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 serde_json           = { workspace = true }
 similar-asserts      = { workspace = true }
 tests_macros         = { path = "../tests_macros" }

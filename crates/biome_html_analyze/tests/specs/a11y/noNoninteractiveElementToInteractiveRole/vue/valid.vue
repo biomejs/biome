@@ -39,6 +39,9 @@
 <a href="http://x.y.z" role="img" />
 <a href="http://x.y.z" tabIndex="0" role="img" />
 <input role="img" />
+<a href="http://x.y.z" role="img" />
+<a href="http://x.y.z" tabIndex="0" role="img" />
+<input role="img" />
 <input type="img" role="img" />
 <input type="checkbox" role="img" />
 <input type="color" role="img" />

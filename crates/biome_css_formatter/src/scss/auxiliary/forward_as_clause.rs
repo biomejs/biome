@@ -16,9 +16,9 @@ impl FormatNodeRule<ScssForwardAsClause> for FormatScssForwardAsClause {
         write!(
             f,
             [group(&format_args![
-                as_token.format(),
+                as_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
-                prefix.format(),
+                prefix?.format().with_text_case(CssCase::Preserve),
                 star_token.format()
             ])]
         )

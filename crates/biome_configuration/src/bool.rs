@@ -44,7 +44,7 @@ impl<const D: bool> FromStr for Bool<D> {
 
 impl<const D: bool> Deserializable for Bool<D> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

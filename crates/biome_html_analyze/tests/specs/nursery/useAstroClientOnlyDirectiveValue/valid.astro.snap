@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<ReactComponent client:only="react" />
+<ReactComponent client:only="" />
+<DynamicComponent client:only={renderer} />
+<ReactComponent client:load />
+<ReactComponent client:idle />
+<ReactComponent client:visible />
+<ReactComponent client:media="(max-width: 50em)" />
+
+```

@@ -26,86 +26,87 @@ use biome_parser::{
 const THEMATIC_BREAK_MIN_CHARS: usize = 3;
 
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        if p.at_line_start() || p.at_start_of_input() {
-            if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
-                return false;
-            }
-            p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-            return p.at(MD_THEMATIC_BREAK_LITERAL) || is_thematic_break_pattern(p);
+    if p.is_at_line_start() || p.is_at_start_of_input() {
+        if p.line_start_leading_indent() > MAX_BLOCK_PREFIX_INDENT {
+            return false;
         }
+        let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+        return p.nth_at(indent.token_count, MD_THEMATIC_BREAK_LITERAL)
+            || is_thematic_break_pattern(p, indent.token_count);
+    }
 
-        // Special case: we may not be at line start if a list marker was consumed
-        // (e.g., `- * * *` where `-` was consumed as a list marker).
-        // Check if the remaining content is a thematic break pattern.
-        is_thematic_break_pattern(p)
-    })
+    // A list marker may already be consumed for input such as `- * * *`.
+    is_thematic_break_pattern(p, 0)
 }
 
 /// Check if the remaining content forms a thematic break pattern.
 ///
 /// Per CommonMark §4.1, a thematic break is 3 or more matching characters
 /// (`*`, `-`, or `_`) on a line by itself, optionally with spaces between them.
-fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
-    // Skip leading whitespace
-    while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-        p.bump(MD_TEXTUAL_LITERAL);
+fn is_thematic_break_pattern(p: &mut MarkdownParser, mut n: usize) -> bool {
+    while p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && p.nth_text(n)
+            .is_some_and(|text| !text.as_bytes().iter().any(|b| !matches!(b, b' ' | b'\t')))
+    {
+        n += 1;
     }
 
-    // Check for lexer-produced thematic break token
-    if p.at(MD_THEMATIC_BREAK_LITERAL) {
+    if p.nth_at(n, MD_THEMATIC_BREAK_LITERAL) {
         return true;
     }
 
-    // If the entire line segment is a single textual literal, validate it directly.
-    if p.at(MD_TEXTUAL_LITERAL)
-        && p.cur_text()
-            .chars()
-            .all(|c| matches!(c, ' ' | '\t' | '\n' | '\r' | '*' | '-' | '_'))
-    {
+    let textual_break_count = p.nth_text(n).and_then(|text| {
+        if text
+            .as_bytes()
+            .iter()
+            .any(|b| !matches!(b, b' ' | b'\t' | b'\n' | b'\r' | b'*' | b'-' | b'_'))
+        {
+            return None;
+        }
         let mut break_char = None;
         let mut break_count = 0usize;
-
-        for c in p.cur_text().chars() {
-            if matches!(c, ' ' | '\t' | '\n' | '\r') {
-                continue;
+        for &byte in text
+            .as_bytes()
+            .iter()
+            .filter(|byte| !matches!(byte, b' ' | b'\t' | b'\n' | b'\r'))
+        {
+            if break_char.is_some_and(|existing| existing != byte) {
+                return Some(0);
             }
-            if let Some(existing) = break_char {
-                if existing != c {
-                    return false;
-                }
-            } else {
-                break_char = Some(c);
-            }
+            break_char = Some(byte);
             break_count += 1;
         }
-
-        let has_eol = p.lookahead(|p| {
-            p.bump(MD_TEXTUAL_LITERAL);
-            while p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-                p.bump(MD_TEXTUAL_LITERAL);
-            }
-            p.at(NEWLINE) || p.at(T![EOF])
-        });
-
+        Some(break_count)
+    });
+    if p.nth_at(n, MD_TEXTUAL_LITERAL)
+        && let Some(break_count) = textual_break_count
+    {
+        n += 1;
+        while p.nth_at(n, MD_TEXTUAL_LITERAL)
+            && p.nth_text(n)
+                .is_some_and(|text| !text.as_bytes().iter().any(|b| !matches!(b, b' ' | b'\t')))
+        {
+            n += 1;
+        }
+        let has_eol = p.nth_at(n, NEWLINE) || p.nth_at(n, T![EOF]);
         return break_count >= THEMATIC_BREAK_MIN_CHARS && has_eol;
     }
 
-    // Get the break character from the first non-whitespace token.
-    // DOUBLE_STAR / DOUBLE_UNDERSCORE count as 2 of the underlying char.
-    let break_char = if p.at(T![*]) || p.at(T![**]) {
-        '*'
-    } else if p.at(T![-]) {
-        '-'
-    } else if p.at(UNDERSCORE) || p.at(DOUBLE_UNDERSCORE) {
-        '_'
-    } else if p.at(MD_TEXTUAL_LITERAL) {
-        let text = p.cur_text();
+    let break_char = if p.nth_at(n, T![*]) || p.nth_at(n, T![**]) {
+        b'*'
+    } else if p.nth_at(n, T![-]) {
+        b'-'
+    } else if p.nth_at(n, UNDERSCORE) || p.nth_at(n, DOUBLE_UNDERSCORE) {
+        b'_'
+    } else if p.nth_at(n, MD_TEXTUAL_LITERAL) {
+        let Some(text) = p.nth_text(n) else {
+            return false;
+        };
         if text.len() == 1 {
-            match text.chars().next() {
-                Some('*') => '*',
-                Some('-') => '-',
-                Some('_') => '_',
+            match text.as_bytes().first() {
+                Some(b'*') => b'*',
+                Some(b'-') => b'-',
+                Some(b'_') => b'_',
                 _ => return false,
             }
         } else {
@@ -115,17 +116,25 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
         return false;
     };
 
-    // Count matching characters.
-    // DOUBLE_STAR / DOUBLE_UNDERSCORE contribute 2 to the count.
     let mut count = 0usize;
 
     loop {
         let (is_break, char_count) = match break_char {
-            '*' if p.at(T![**]) => (true, 2),
-            '*' if p.at(T![*]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "*") => (true, 1),
-            '-' if p.at(T![-]) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "-") => (true, 1),
-            '_' if p.at(DOUBLE_UNDERSCORE) => (true, 2),
-            '_' if p.at(UNDERSCORE) || (p.at(MD_TEXTUAL_LITERAL) && p.cur_text() == "_") => {
+            b'*' if p.nth_at(n, T![**]) => (true, 2),
+            b'*' if p.nth_at(n, T![*])
+                || (p.nth_at(n, MD_TEXTUAL_LITERAL) && p.nth_text(n) == Some("*")) =>
+            {
+                (true, 1)
+            }
+            b'-' if p.nth_at(n, T![-])
+                || (p.nth_at(n, MD_TEXTUAL_LITERAL) && p.nth_text(n) == Some("-")) =>
+            {
+                (true, 1)
+            }
+            b'_' if p.nth_at(n, DOUBLE_UNDERSCORE) => (true, 2),
+            b'_' if p.nth_at(n, UNDERSCORE)
+                || (p.nth_at(n, MD_TEXTUAL_LITERAL) && p.nth_text(n) == Some("_")) =>
+            {
                 (true, 1)
             }
             _ => (false, 0),
@@ -133,25 +142,26 @@ fn is_thematic_break_pattern(p: &mut MarkdownParser) -> bool {
 
         if is_break {
             count += char_count;
-            p.bump_any();
+            n += 1;
             continue;
         }
 
-        // Skip whitespace between break characters
-        if p.at(MD_TEXTUAL_LITERAL) && p.cur_text().chars().all(|c| c == ' ' || c == '\t') {
-            p.bump(MD_TEXTUAL_LITERAL);
+        if p.nth_at(n, MD_TEXTUAL_LITERAL)
+            && p.nth_text(n)
+                .is_some_and(|text| !text.as_bytes().iter().any(|b| !matches!(b, b' ' | b'\t')))
+        {
+            n += 1;
             continue;
         }
-
-        // End of line or other content
         break;
     }
 
-    // Valid thematic break if 3+ characters followed by end of line
     count >= THEMATIC_BREAK_MIN_CHARS
-        && (p.at(NEWLINE)
-            || p.at(T![EOF])
-            || (p.at(MD_TEXTUAL_LITERAL) && matches!(p.cur_text(), "\n" | "\r\n" | "\r")))
+        && (p.nth_at(n, NEWLINE)
+            || p.nth_at(n, T![EOF])
+            || (p.nth_at(n, MD_TEXTUAL_LITERAL)
+                && p.nth_text(n)
+                    .is_some_and(|text| matches!(text, "\n" | "\r\n" | "\r"))))
 }
 
 pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax {

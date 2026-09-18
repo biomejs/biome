@@ -17,9 +17,9 @@ impl FormatNodeRule<ScssMixinAtRule> for FormatScssMixinAtRule {
         write!(
             f,
             [
-                mixin_token.format(),
+                mixin_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 parameters.format(),
                 space(),
                 block.format()

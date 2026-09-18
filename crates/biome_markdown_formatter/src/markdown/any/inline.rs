@@ -8,7 +8,10 @@ impl FormatRule<AnyMdInline> for FormatAnyMdInline {
     type Context = MarkdownFormatContext;
     fn fmt(&self, node: &AnyMdInline, f: &mut MarkdownFormatter) -> FormatResult<()> {
         match node {
+            AnyMdInline::GfmStrikethrough(node) => node.format().fmt(f),
+            AnyMdInline::GfmTaskListItem(node) => node.format().fmt(f),
             AnyMdInline::MdAutolink(node) => node.format().fmt(f),
+            AnyMdInline::MdCodeContent(node) => node.format().fmt(f),
             AnyMdInline::MdEntityReference(node) => node.format().fmt(f),
             AnyMdInline::MdHardLine(node) => node.format().fmt(f),
             AnyMdInline::MdHtmlBlock(node) => node.format().fmt(f),

@@ -6,6 +6,7 @@ expression: invalid.astro
 ```astro
 <!-- should generate diagnostics -->
 <div scope="col"></div>
+<div scope={scopeValue}></div>
 <div scope></div>
 <td scope="col"></td>
 <span scope="row"></span>
@@ -22,8 +23,8 @@ invalid.astro:2:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
     1 │ <!-- should generate diagnostics -->
   > 2 │ <div scope="col"></div>
       │      ^^^^^^^^^^^
-    3 │ <div scope></div>
-    4 │ <td scope="col"></td>
+    3 │ <div scope={scopeValue}></div>
+    4 │ <div scope></div>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -46,10 +47,10 @@ invalid.astro:3:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
   
     1 │ <!-- should generate diagnostics -->
     2 │ <div scope="col"></div>
-  > 3 │ <div scope></div>
-      │      ^^^^^
-    4 │ <td scope="col"></td>
-    5 │ <span scope="row"></span>
+  > 3 │ <div scope={scopeValue}></div>
+      │      ^^^^^^^^^^^^^^^^^^
+    4 │ <div scope></div>
+    5 │ <td scope="col"></td>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -60,22 +61,48 @@ invalid.astro:3:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Remove the scope attribute.
   
-    3 │ <div·scope></div>
+    3 │ <div·scope={scopeValue}></div>
+      │      ------------------       
+
+```
+
+```
+invalid.astro:4:6 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using the scope attribute on elements other than th elements.
+  
+    2 │ <div scope="col"></div>
+    3 │ <div scope={scopeValue}></div>
+  > 4 │ <div scope></div>
+      │      ^^^^^
+    5 │ <td scope="col"></td>
+    6 │ <span scope="row"></span>
+  
+  i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
+                so it should be placed on th elements to provide accessibility to screen readers.
+  
+  i Follow the links for more information,
+                WCAG 1.3.1
+                WCAG 4.1.1
+  
+  i Unsafe fix: Remove the scope attribute.
+  
+    4 │ <div·scope></div>
       │      -----       
 
 ```
 
 ```
-invalid.astro:4:5 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:5:5 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    2 │ <div scope="col"></div>
-    3 │ <div scope></div>
-  > 4 │ <td scope="col"></td>
+    3 │ <div scope={scopeValue}></div>
+    4 │ <div scope></div>
+  > 5 │ <td scope="col"></td>
       │     ^^^^^^^^^^^
-    5 │ <span scope="row"></span>
-    6 │ <p scope></p>
+    6 │ <span scope="row"></span>
+    7 │ <p scope></p>
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -86,22 +113,22 @@ invalid.astro:4:5 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Remove the scope attribute.
   
-    4 │ <td·scope="col"></td>
+    5 │ <td·scope="col"></td>
       │     -----------      
 
 ```
 
 ```
-invalid.astro:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:6:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    3 │ <div scope></div>
-    4 │ <td scope="col"></td>
-  > 5 │ <span scope="row"></span>
+    4 │ <div scope></div>
+    5 │ <td scope="col"></td>
+  > 6 │ <span scope="row"></span>
       │       ^^^^^^^^^^^
-    6 │ <p scope></p>
-    7 │ 
+    7 │ <p scope></p>
+    8 │ 
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -112,21 +139,21 @@ invalid.astro:5:7 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Remove the scope attribute.
   
-    5 │ <span·scope="row"></span>
+    6 │ <span·scope="row"></span>
       │       -----------        
 
 ```
 
 ```
-invalid.astro:6:4 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:7:4 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid using the scope attribute on elements other than th elements.
   
-    4 │ <td scope="col"></td>
-    5 │ <span scope="row"></span>
-  > 6 │ <p scope></p>
+    5 │ <td scope="col"></td>
+    6 │ <span scope="row"></span>
+  > 7 │ <p scope></p>
       │    ^^^^^
-    7 │ 
+    8 │ 
   
   i The scope attribute is used to associate a data cell with its corresponding header cell in a data table,
                 so it should be placed on th elements to provide accessibility to screen readers.
@@ -137,7 +164,7 @@ invalid.astro:6:4 lint/a11y/noHeaderScope  FIXABLE  ━━━━━━━━━�
   
   i Unsafe fix: Remove the scope attribute.
   
-    6 │ <p·scope></p>
+    7 │ <p·scope></p>
       │    -----     
 
 ```

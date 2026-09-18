@@ -47,7 +47,7 @@ class Foo {
 class Foo {
 	#usedOnlyInWriteStatement = 5;
 	method() {
-			this.#usedOnlyInWriteStatement += 42;
+			this.#usedOnlyInWriteStatement = 42;
 	}
 }
 
@@ -252,7 +252,7 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
   > 42 │ 	#usedOnlyInWriteStatement = 5;
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
     43 │ 	method() {
-    44 │ 			this.#usedOnlyInWriteStatement += 42;
+    44 │ 			this.#usedOnlyInWriteStatement = 42;
   
   i Unsafe fix: Remove unused declaration.
   
@@ -260,7 +260,7 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     41 41 │   class Foo {
     42    │ - → #usedOnlyInWriteStatement·=·5;
     43 42 │     method() {
-    44 43 │         this.#usedOnlyInWriteStatement += 42;
+    44 43 │         this.#usedOnlyInWriteStatement = 42;
   
 
 ```

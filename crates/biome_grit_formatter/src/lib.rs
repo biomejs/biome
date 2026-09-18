@@ -15,7 +15,6 @@ pub(crate) use crate::trivia::*;
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, FormatResult, Formatted, Printed,
     comments::Comments,
-    prelude::*,
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
     write,
 };

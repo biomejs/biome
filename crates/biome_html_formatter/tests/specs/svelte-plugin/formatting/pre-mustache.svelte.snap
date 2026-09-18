@@ -1,0 +1,84 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/pre-mustache.svelte
+---
+
+# Input
+
+```svelte
+<pre>Hello,
+  world!   {JSON.stringify({   foo:'bar'},null,
+  2)}Goodbye.
+  this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
+  <code>const asd = {
+    variable };</code>
+      <code>nested
+
+        should
+
+        stay
+
+        as is
+      </code>
+			this line is intended using tabs which should be preserved
+</pre>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,10 @@
+ <pre>Hello,
+-  world!   {JSON.stringify({ foo: "bar" }, null, 2)}Goodbye.
+-  this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{
+-        a: true,
+-    }} and the mustache should split it
+-  <code>const asd = {variable};</code>
+-      <code
+-        >nested
++  world!   {JSON.stringify({   foo:'bar'},null,
++  2)}Goodbye.
++  this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
++  <code>const asd = {
++    variable };</code>
++      <code>nested
+ 
+         should
+ 
+@@ -13,5 +12,4 @@
+ 
+         as is
+       </code>
+-			this line is intended using tabs which should be preserved
+-</pre>
++			this line is intended using tabs which should be preserved</pre>
+```
+
+# Output
+
+```svelte
+<pre>Hello,
+  world!   {JSON.stringify({   foo:'bar'},null,
+  2)}Goodbye.
+  this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
+  <code>const asd = {
+    variable };</code>
+      <code>nested
+
+        should
+
+        stay
+
+        as is
+      </code>
+			this line is intended using tabs which should be preserved</pre>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:   this text goes waaaaaaaaaaaaaaaaaaaaaaaaaaaaaayyyyyyyyyyyyyyyyyyyyyyyyyyy above the print width {{a: true}} and the mustache should split it
+```

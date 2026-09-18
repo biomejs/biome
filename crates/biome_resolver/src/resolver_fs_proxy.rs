@@ -53,7 +53,15 @@ pub trait ResolverFsProxy {
         dir_path: &Utf8Path,
     ) -> Result<PackageJson, ResolveError>;
 
-    /// Reads the `tsconfig.json` manifest at the given path.
+    /// Reads the root `tsconfig.json` manifest in the given directory.
+    fn read_tsconfig_json_in_directory(
+        &self,
+        dir_path: &Utf8Path,
+    ) -> Result<TsConfigJson, ResolveError> {
+        self.read_tsconfig_json(&dir_path.join("tsconfig.json"))
+    }
+
+    /// Reads a TypeScript configuration manifest at the exact given path.
     fn read_tsconfig_json(&self, path: &Utf8Path) -> Result<TsConfigJson, ResolveError>;
 }
 

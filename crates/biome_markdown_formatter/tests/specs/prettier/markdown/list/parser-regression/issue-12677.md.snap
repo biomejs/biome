@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list/parser-regression/issue-12677.md
+---
+
+# Input
+
+```md
+5.1 **Section 1**
+
+- apple
+- banana
+- cherry
+
+5.2 **Section 2**
+
+Why is this section indented?
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,9 +1,8 @@
+ 5.1 **Section 1**
+-
+ - apple
+ - banana
+ - cherry
+ 
+-  5.2 **Section 2**
++5.2 **Section 2**
+ 
+ Why is this section indented?
+```
+
+# Output
+
+```md
+5.1 **Section 1**
+- apple
+- banana
+- cherry
+
+5.2 **Section 2**
+
+Why is this section indented?
+```

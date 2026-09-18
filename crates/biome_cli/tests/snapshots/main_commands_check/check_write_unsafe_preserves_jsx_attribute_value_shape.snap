@@ -1,0 +1,22 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `fragment-attribute.tsx`
+
+```tsx
+const cases = (
+	<>
+		<Component selfClosing={<div />} />
+		<Component nested={<span />} />
+		<Component expression={value} />
+	</>
+);
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

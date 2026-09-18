@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-component-forms.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+  render() {
+    return this.$scopedSlots;
+  },
+});
+
+createApp({
+  render() {
+    this.$scopedSlots = {};
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-component-forms.js:6:17 lint/nursery/noVueDeprecatedScopedSlots  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  i The Vue $scopedSlots API is deprecated.
+  
+    4 │ defineComponent({
+    5 │   render() {
+  > 6 │     return this.$scopedSlots;
+      │                 ^^^^^^^^^^^^
+    7 │   },
+    8 │ });
+  
+  i Vue 3 exposes all slots through $slots. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace $scopedSlots with $slots.
+  
+     4  4 │   defineComponent({
+     5  5 │     render() {
+     6    │ - ····return·this.$scopedSlots;
+        6 │ + ····return·this.$slots;
+     7  7 │     },
+     8  8 │   });
+  
+
+```
+
+```
+invalid-component-forms.js:12:10 lint/nursery/noVueDeprecatedScopedSlots  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i The Vue $scopedSlots API is deprecated.
+  
+    10 │ createApp({
+    11 │   render() {
+  > 12 │     this.$scopedSlots = {};
+       │          ^^^^^^^^^^^^
+    13 │   },
+    14 │ });
+  
+  i Vue 3 exposes all slots through $slots. See the Vue 3 migration guide for more information.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace $scopedSlots with $slots.
+  
+    10 10 │   createApp({
+    11 11 │     render() {
+    12    │ - ····this.$scopedSlots·=·{};
+       12 │ + ····this.$slots·=·{};
+    13 13 │     },
+    14 14 │   });
+  
+
+```

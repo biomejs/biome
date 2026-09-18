@@ -1,0 +1,13 @@
+<script  lang="ts"module
+></script>
+
+<script  lang=ts boolean></script>
+
+<p class=foo>asd</p>
+<div>
+    <script  lang=ts>d</script>
+</div>
+
+<style lang="less
+
+"></style>

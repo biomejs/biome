@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/doctype.vue
+---
+
+# Input
+
+```vue
+<!DOCTYPE html>
+<template>
+  <div>The doctype keeps its case outside of a plain HTML file.</div>
+</template>
+
+```
+
+
+# Formatted
+
+```vue
+<!DOCTYPE html>
+<template>
+	<div>The doctype keeps its case outside of a plain HTML file.</div>
+</template>
+
+```

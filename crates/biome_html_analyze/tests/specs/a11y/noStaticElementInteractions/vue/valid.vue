@@ -7,6 +7,9 @@
 <div @click="() => void 0" aria-hidden="true"></div>
 <input type="button" @click="() => void 0" />
 <input type="button" v-on:click="() => void 0" />
+<!-- static Vue role binding with interactive role + event is valid -->
+<div :role="'button'" @click="() => {}"></div>
+<div v-bind:role="'link'" @click="() => {}"></div>
 <input type="checkbox" @click="() => void 0" />
 <input type="color" @click="() => void 0" />
 <input type="date" @click="() => void 0" />

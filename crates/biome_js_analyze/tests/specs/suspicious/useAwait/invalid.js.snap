@@ -100,6 +100,11 @@ async function* yieldWithoutStar() {
 	yield 2;
 }
 
+async function withUsing() {
+	using resource = acquire();
+	consume(resource);
+}
+
 ```
 
 # Diagnostics
@@ -609,6 +614,7 @@ invalid.js:92:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
   > 95 │ }
        │ ^
     96 │ 
+    97 │ async function withUsing() {
   
   i Remove this async modifier, or add an await expression in the function.
   
@@ -621,6 +627,39 @@ invalid.js:92:1 lint/suspicious/useAwait ━━━━━━━━━━━━━
   > 95 │ }
        │ ^
     96 │ 
+    97 │ async function withUsing() {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+```
+
+```
+invalid.js:97:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This async function lacks an await expression.
+  
+     95 │ }
+     96 │ 
+   > 97 │ async function withUsing() {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 98 │ 	using resource = acquire();
+   > 99 │ 	consume(resource);
+  > 100 │ }
+        │ ^
+    101 │ 
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+     95 │ }
+     96 │ 
+   > 97 │ async function withUsing() {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   > 98 │ 	using resource = acquire();
+   > 99 │ 	consume(resource);
+  > 100 │ }
+        │ ^
+    101 │ 
   
   i Async functions without await expressions may not need to be declared async.
   

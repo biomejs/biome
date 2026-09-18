@@ -12,3 +12,8 @@ bar with empty line after
 
 foo  
 bar without empty line after  
+
+backslash before list\
+line
+
+- list item

@@ -124,7 +124,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSvelteUnnecessaryStateWrap {
-        version: "next",
+        version: "2.5.2",
         name: "noSvelteUnnecessaryStateWrap",
         language: "js",
         domains: &[RuleDomain::Svelte],

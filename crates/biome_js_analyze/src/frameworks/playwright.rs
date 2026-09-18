@@ -236,7 +236,7 @@ fn is_expect_expression(expr: &AnyJsExpression) -> bool {
                     {
                         return matches!(
                             member_token.text_trimmed(),
-                            "soft" | "poll" | "assertions" | "hasAssertions"
+                            "soft" | "poll" | "element" | "assertions" | "hasAssertions"
                         );
                     }
                     return false;

@@ -3,7 +3,7 @@
 use case::CaseExt;
 use globwalk::{GlobWalker, GlobWalkerBuilder};
 use proc_macro::TokenStream;
-use proc_macro_error2::*;
+use proc_macro_error3::*;
 use proc_macro2::Span;
 use quote::*;
 use std::{

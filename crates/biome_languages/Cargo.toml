@@ -12,6 +12,7 @@ categories.workspace = true
 [dependencies]
 biome_console.workspace = true
 biome_db                = { workspace = true }
+biome_fs                = { workspace = true }
 biome_rowan             = { workspace = true }
 biome_string_case       = { workspace = true }
 camino                  = { workspace = true }

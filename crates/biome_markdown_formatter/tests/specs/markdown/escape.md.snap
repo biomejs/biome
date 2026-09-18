@@ -1,0 +1,103 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/escape.md
+---
+
+# Input
+
+```md
+\*\* is not an empty emphasis
+
+** is not an empty emphasis
+
+\_\_ is not an empty emphasis
+
+__ is not an empty emphasis
+
+\*\*\*\* is not an empty strong emphasis
+
+**** is not an empty strong emphasis
+
+\_\_\_\_ is not an empty strong emphasis
+
+____ is not an empty strong emphasis
+
+foo \*\*\*
+
+foo ***
+
+foo *\**
+
+foo *****
+
+foo _\__
+
+foo _*_
+
+foo _____
+
+foo __\___
+
+foo __*__
+
+__foo_
+
+_foo__
+
+___foo__
+
+____foo_
+
+__foo___
+
+```
+
+
+# Formatted
+
+```md
+\*\* is not an empty emphasis
+
+\*\* is not an empty emphasis
+
+\_\_ is not an empty emphasis
+
+\_\_ is not an empty emphasis
+
+\*\*\*\* is not an empty strong emphasis
+
+\*\*\*\* is not an empty strong emphasis
+
+\_\_\_\_ is not an empty strong emphasis
+
+\_\_\_\_ is not an empty strong emphasis
+
+foo \*\*\*
+
+foo \*\*\*
+
+foo \*\*\*
+
+foo **\***
+
+foo \_\_\_
+
+foo _\*_
+
+foo **\_**
+
+foo **\_**
+
+foo **\***
+
+\__foo_
+
+\_foo\_\_
+
+**\_foo**
+
+\__\_\_foo_
+
+**foo\_**
+
+```

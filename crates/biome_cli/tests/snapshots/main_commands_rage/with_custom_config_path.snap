@@ -25,6 +25,7 @@ Platform:
 
 Environment:
   BIOME_DISTRIBUTION:                unset
+  BIOME_LOG_FILE:                    unset
   BIOME_LOG_PATH:                    **PLACEHOLDER**
   BIOME_LOG_PREFIX_NAME:             unset
   BIOME_LOG_LEVEL:                   unset
@@ -33,6 +34,8 @@ Environment:
   BIOME_THREADS:                     unset
   BIOME_WATCHER_KIND:                unset
   BIOME_WATCHER_POLLING_INTERVAL:    unset
+  BIOME_BINARY:                      unset
+  RUST_BACKTRACE:                    **PLACEHOLDER**
   NO_COLOR:                     **PLACEHOLDER**
   TERM:                         **PLACEHOLDER**
   JS_RUNTIME_VERSION:           unset

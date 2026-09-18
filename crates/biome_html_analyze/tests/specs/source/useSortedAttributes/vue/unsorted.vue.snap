@@ -68,6 +68,9 @@ expression: unsorted.vue
 
 <div v-text="msg" v-html="html"></div>
 
+<!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+<div v-mycustomdirective v-if="awesome" :="props" ref="my-ref"></div>
+
 ```
 
 # Diagnostics
@@ -459,6 +462,7 @@ unsorted.vue:63:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
   > 63 │ <div v-text="msg" v-html="html"></div>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     64 │ 
+    65 │ <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
   
   i Safe fix: Sort the HTML attributes.
   
@@ -467,6 +471,28 @@ unsorted.vue:63:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━
     63    │ - <div·v-text="msg"·v-html="html"></div>
        63 │ + <div·v-html="html"·v-text="msg"·></div>
     64 64 │   
+    65 65 │   <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+  
+
+```
+
+```
+unsorted.vue:66:1 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The attributes are not sorted.
+  
+    65 │ <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+  > 66 │ <div v-mycustomdirective v-if="awesome" :="props" ref="my-ref"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ 
+  
+  i Safe fix: Sort the HTML attributes.
+  
+    64 64 │   
+    65 65 │   <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
+    66    │ - <div·v-mycustomdirective·v-if="awesome"·:="props"·ref="my-ref"></div>
+       66 │ + <div·v-if="awesome"·ref="my-ref"·v-mycustomdirective·:="props"·></div>
+    67 67 │   
   
 
 ```

@@ -1,2 +1,4 @@
-<!-- should generate diagnostics -->
-<CustomLabel aria-label="A label" />
+<template>
+	<!-- should generate diagnostics -->
+	<CustomLabel aria-label="A label" />
+</template>

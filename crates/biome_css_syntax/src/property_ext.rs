@@ -1,4 +1,25 @@
+use crate::AnyCssDeclarationName;
+use biome_rowan::TokenText;
 use biome_string_case::StrLikeExtension;
+
+impl AnyCssDeclarationName {
+    /// Returns the token text when this declaration name is an identifier or dashed identifier.
+    pub fn identifier_text(&self) -> Option<TokenText> {
+        match self {
+            Self::CssIdentifier(identifier) => {
+                Some(identifier.value_token().ok()?.token_text_trimmed())
+            }
+            Self::AnyCssDashedIdentifier(identifier) => Some(
+                identifier
+                    .as_css_dashed_identifier()?
+                    .value_token()
+                    .ok()?
+                    .token_text_trimmed(),
+            ),
+            _ => None,
+        }
+    }
+}
 
 /// Shared classification for CSS grid-template property names.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

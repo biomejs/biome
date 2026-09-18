@@ -21,7 +21,7 @@ impl FormatNodeRule<CssContainerStyleOrQuery> for FormatCssContainerStyleOrQuery
             [
                 left.format(),
                 space(),
-                or_token.format(),
+                or_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
                 right.format()
             ]

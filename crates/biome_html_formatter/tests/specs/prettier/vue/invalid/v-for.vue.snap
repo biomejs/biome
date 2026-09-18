@@ -1,0 +1,217 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/invalid/v-for.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div>
+    <div
+      v-for="    _       in          "
+      v-for="            in _        "
+      v-for="            in          "
+      v-for="    _,      in a        "
+      v-for="    ,_      in a        "
+
+      v-for="    a, b,      in a        "
+      v-for="    a,  , c     in a        "
+
+      v-for="     , b, c     in a        "
+      v-for="    a, b,       in a        "
+
+      v-for="     , b, c     in a        "
+      v-for="    a,  , c     in a        "
+      v-for="    (,a,b) of 'abcd'        "
+    ></div>
+  </div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -4,12 +4,15 @@
+       v-for="    _       in          "
+       v-for="            in _        "
+       v-for="            in          "
+-      v-for="_ in a"
++      v-for="    _,      in a        "
+       v-for="    ,_      in a        "
+-      v-for="(a, b) in a"
++
++      v-for="    a, b,      in a        "
+       v-for="    a,  , c     in a        "
++
+       v-for="     , b, c     in a        "
+-      v-for="(a, b) in a"
++      v-for="    a, b,       in a        "
++
+       v-for="     , b, c     in a        "
+       v-for="    a,  , c     in a        "
+       v-for="    (,a,b) of 'abcd'        "
+```
+
+# Output
+
+```vue
+<template>
+  <div>
+    <div
+      v-for="    _       in          "
+      v-for="            in _        "
+      v-for="            in          "
+      v-for="    _,      in a        "
+      v-for="    ,_      in a        "
+
+      v-for="    a, b,      in a        "
+      v-for="    a,  , c     in a        "
+
+      v-for="     , b, c     in a        "
+      v-for="    a, b,       in a        "
+
+      v-for="     , b, c     in a        "
+      v-for="    a,  , c     in a        "
+      v-for="    (,a,b) of 'abcd'        "
+    ></div>
+  </div>
+</template>
+```
+
+# Errors
+```
+v-for.vue:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a v-for binding but instead found 'in'.
+  
+    3 │     <div
+    4 │       v-for="    _       in          "
+  > 5 │       v-for="            in _        "
+      │                          ^^
+    6 │       v-for="            in          "
+    7 │       v-for="    _,      in a        "
+  
+  i Expected a v-for binding here.
+  
+    3 │     <div
+    4 │       v-for="    _       in          "
+  > 5 │       v-for="            in _        "
+      │                          ^^
+    6 │       v-for="            in          "
+    7 │       v-for="    _,      in a        "
+  
+v-for.vue:6:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a v-for binding but instead found 'in'.
+  
+    4 │       v-for="    _       in          "
+    5 │       v-for="            in _        "
+  > 6 │       v-for="            in          "
+      │                          ^^
+    7 │       v-for="    _,      in a        "
+    8 │       v-for="    ,_      in a        "
+  
+  i Expected a v-for binding here.
+  
+    4 │       v-for="    _       in          "
+    5 │       v-for="            in _        "
+  > 6 │       v-for="            in          "
+      │                          ^^
+    7 │       v-for="    _,      in a        "
+    8 │       v-for="    ,_      in a        "
+  
+v-for.vue:7:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected `in` or `of` in the v-for directive.
+  
+    5 │       v-for="            in _        "
+    6 │       v-for="            in          "
+  > 7 │       v-for="    _,      in a        "
+      │                   ^
+    8 │       v-for="    ,_      in a        "
+    9 │ 
+  
+  i Use in or of between the binding and iterable expression.
+  
+v-for.vue:7:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `"` but instead found `      in a        `
+  
+    5 │       v-for="            in _        "
+    6 │       v-for="            in          "
+  > 7 │       v-for="    _,      in a        "
+      │                    ^^^^^^^^^^^^^^^^^^
+    8 │       v-for="    ,_      in a        "
+    9 │ 
+  
+  i Remove       in a        
+  
+v-for.vue:7:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '"
+          v-for="    ,_      in a        "
+    
+          v-for="    a, b,      in a        "
+          v-for="    a,  , c     in a        "
+    
+          v-for="     , b, c     in a        "
+          v-for="    a, b,       in a        "
+    
+          v-for="     , b, c     in a        "
+          v-for="    a,  , c     in a        "
+          v-for="    (,a,b) of 'abcd'        "
+        >'.
+  
+     5 │       v-for="            in _        "
+     6 │       v-for="            in          "
+   > 7 │       v-for="    _,      in a        "
+       │                                      ^
+   > 8 │       v-for="    ,_      in a        "
+        ...
+  > 18 │       v-for="    (,a,b) of 'abcd'        "
+  > 19 │     ></div>
+       │     ^
+    20 │   </div>
+    21 │ </template>
+  
+  i Expected an attribute here.
+  
+     5 │       v-for="            in _        "
+     6 │       v-for="            in          "
+   > 7 │       v-for="    _,      in a        "
+       │                                      ^
+   > 8 │       v-for="    ,_      in a        "
+        ...
+  > 18 │       v-for="    (,a,b) of 'abcd'        "
+  > 19 │     ></div>
+       │     ^
+    20 │   </div>
+    21 │ </template>
+  
+v-for.vue:19:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    17 │       v-for="    a,  , c     in a        "
+    18 │       v-for="    (,a,b) of 'abcd'        "
+  > 19 │     ></div>
+       │      ^
+    20 │   </div>
+    21 │ </template>
+  
+  i Expected an attribute here.
+  
+    17 │       v-for="    a,  , c     in a        "
+    18 │       v-for="    (,a,b) of 'abcd'        "
+  > 19 │     ></div>
+       │      ^
+    20 │   </div>
+    21 │ </template>
+  
+
+```

@@ -1,26 +1,33 @@
 #![deny(clippy::use_self)]
 #![warn(clippy::needless_pass_by_value)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "Some analyses require complete syntax text that can span multiple tokens."
+)]
 
 pub use crate::registry::visit_registry;
 pub use crate::services::control_flow::ControlFlowGraph;
 use crate::services::embedded::EmbeddedService;
+pub use crate::services::react_compiler::{ReactCompilerResult, ReactCompilerServices};
+use crate::services::semantic::SemanticModelBuilderVisitor;
+use crate::services::typed::TypedModule;
+pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
-    AnalyzerSignal, AnalyzerSuppression, BatchPluginVisitor, ControlFlow, InspectMatcher,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
-    RuleRegistry, to_analyzer_suppressions,
+    AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
+    AnalyzerSignal, BatchPluginVisitor, ControlFlow, InspectMatcher, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_aria::AriaRoles;
+use biome_db::AnyParsedSource;
 use biome_diagnostics::Error as DiagnosticError;
-use biome_js_semantic::SemanticModel;
+use biome_embeds::EmbeddedData;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_module_graph::{ModuleDb, ModuleResolver};
+use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::TextRange;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
+use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -36,8 +43,10 @@ mod react;
 mod registry;
 mod services;
 pub mod shared;
+mod suppression;
 mod suppression_action;
 mod syntax;
+mod tailwind;
 pub mod utils;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
@@ -49,15 +58,16 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 });
 
 #[derive(Default)]
-pub struct JsAnalyzerServices<'a> {
+pub struct JsAnalyzerServices {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
+    parsed_source: Option<AnyParsedSource>,
+    embedded_data: Option<Arc<EmbeddedData>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-    semantic_model: Option<&'a SemanticModel>,
 }
 
-impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices<'_> {
+impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
     fn from(
         (module_db, project_layout, source_type): (
             Rc<dyn ModuleDb>,
@@ -68,33 +78,30 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
         Self {
             module_db: Some(module_db),
             language_db: None,
+            parsed_source: None,
+            embedded_data: None,
             project_layout,
             source_type,
-            semantic_model: None,
         }
     }
 }
 
-impl From<&AnyJsRoot> for JsAnalyzerServices<'_> {
+impl From<&AnyJsRoot> for JsAnalyzerServices {
     fn from(_value: &AnyJsRoot) -> Self {
         Self {
             module_db: None,
             language_db: None,
+            parsed_source: None,
+            embedded_data: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
-            semantic_model: None,
         }
     }
 }
 
-impl<'a> JsAnalyzerServices<'a> {
+impl JsAnalyzerServices {
     pub fn with_source_type(mut self, source_type: JsFileSource) -> Self {
         self.source_type = source_type;
-        self
-    }
-
-    pub fn with_semantic_model(mut self, model: &'a SemanticModel) -> Self {
-        self.semantic_model = Some(model);
         self
     }
 
@@ -105,6 +112,16 @@ impl<'a> JsAnalyzerServices<'a> {
 
     pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
         self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+        self.parsed_source = Some(source);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
         self
     }
 
@@ -134,44 +151,32 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for comment in parse_suppression_comment(text) {
-            let suppression = match comment {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
-
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
     let JsAnalyzerServices {
         module_db,
         language_db: embedded_db,
+        parsed_source,
+        embedded_data,
         project_layout,
         source_type,
-        semantic_model,
     } = services;
 
-    let (registry, mut services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+
+    let plugins: Vec<_> = plugins
+        .iter()
+        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
+        .cloned()
+        .collect();
+    if filter.match_plugins()
+        && plugins.iter().any(|plugin| {
+            plugin.requires_semantic_model() && plugin.applies_to_file(&options.file_path)
+        })
+    {
+        visitors.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+    }
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
@@ -181,7 +186,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(JsSuppression),
         Box::new(JsSuppressionAction),
         &mut emit_signal,
     );
@@ -190,18 +195,12 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    let js_plugins: Vec<_> = plugins
-        .iter()
-        .filter(|p| p.language() == PluginTargetLanguage::JavaScript)
-        .cloned()
-        .collect();
-
-    if filter.match_plugins() && !js_plugins.is_empty() {
+    if filter.match_plugins() && !plugins.is_empty() {
         // SAFETY: All plugins have been verified to target JavaScript above.
         unsafe {
             analyzer.add_visitor(
                 Phases::Syntax,
-                Box::new(BatchPluginVisitor::new_unchecked(&js_plugins)),
+                Box::new(BatchPluginVisitor::new_unchecked(&plugins)),
             );
         }
     }
@@ -216,12 +215,16 @@ where
         project_layout.find_all_turbo_json_for_path(file_path.as_ref());
 
     let type_resolver = module_db.as_ref().and_then(|db| {
-        db.js_module_info_for_path(file_path.as_ref())
-            .map(|module_info| ModuleResolver::for_module(module_info, db.clone()))
-            .map(Arc::new)
+        db.module_for_path(file_path.as_ref())
+            .map(|module| TypedModule::new(db.clone(), module))
     });
 
+    if let Some(parsed_source) = parsed_source {
+        services.insert_service(parsed_source);
+    }
+
     services.insert_service(Arc::new(AriaRoles));
+    services.insert_service(TwSyntaxService::default());
     services.insert_service(source_type);
     if let Some(module_db) = module_db {
         services.insert_service(module_db);
@@ -231,14 +234,13 @@ where
     services.insert_service(file_path);
     services.insert_service(type_resolver);
     services.insert_service(project_layout);
-    if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
+    if let Some(db) = &embedded_db {
+        services.insert_service(db.clone());
     }
-    // If a pre-built model is available (workspace open_file/change_file path),
-    // insert it now. Otherwise, SemanticModelBuilderVisitor will build it
-    // interleaved with the analyzer's syntax-phase traversal (single pass).
-    if let Some(semantic_model) = semantic_model {
-        services.insert_service(semantic_model.clone());
+    if let Some(embedded_data) = embedded_data {
+        services.insert_service(EmbeddedService::from_data(embedded_data));
+    } else if let Some(embedded_db) = embedded_db {
+        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
     }
 
     (
@@ -267,10 +269,19 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let module_db = services.module_db.clone();
+    let language_db = services.language_db.clone();
     analyze_with_inspect_matcher(
         root,
         filter,
-        |_| {},
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+            if let Some(db) = language_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
         options,
         plugins,
         services,

@@ -1,6 +1,12 @@
+@CHARSET   "UTF-8";
+
 /*
- * All values in CSS are case-insensitive except for Custom and Dashed
- * identifiers. Everything else can and will be re-written in lowercase.
+ * Role-based casing:
+ * - CSS-owned names such as declaration names, pseudo names, and query feature
+ *   names are normalized to lowercase.
+ * - Document-owned and author-owned names such as type and universal selectors,
+ *   classes, ids, attributes, custom properties, custom property values, custom
+ *   selector pseudo identifiers, and plain value function names preserve casing.
  */
 
 DIV { COLOR: BLUE; }
@@ -10,6 +16,10 @@ DIV.classNames#AND_Ids.ArePreserved {}
 [attr=IdentifierValuesPreserveWhenStringified] {}
 
 @MEDiA NoT SCReEN AND (  CoLOR  ), PRINT AND (COLOR) { }
+
+@MEDIA NOT (COLOR){A{COLOR:RED}}
+
+@MEDIA (COLOR) OR (HOVER){A{COLOR:RED}}
 
 DIV {
     --Preserved-Casing: BLUE;
@@ -27,3 +37,261 @@ DIV {
 @PAGE ThisIsPreserved:FIRST {
 
 }
+
+*|*.KeepUniversal,
+|*.KeepDefaultUniversal,
+HTML#KeepId.KeepClass,
+KeepNs | A.KeepClass,
+[KeepNs | viewBox],
+svg[viewBox][data-kind=KeepAttrValue I],
+svg[data-mode=KeepAttrValue S],
+a:HOVER::FIRST-letter,
+:--KeepCustom,
+:Not(:NTH-child(2n+1)),
+A:NTH-child(2n+1 OF .KeepClass:HOVER),
+html:ACTIVE-VIEW-TRANSITION-TYPE(KeepBack, KeepForward),
+A:DIR(RTL):LANG(EN):STATE(KeepState),
+:IS(.KeepClass:HOVER, A:FOCUS),
+:WHERE(.KeepOther:ACTIVE),
+:HOST(.KeepHost:HOVER),
+:HOST-CONTEXT(.KeepContext:FOCUS),
+:-WEBKIT-ANY(A:HOVER, .KeepAny:FOCUS),
+section:HAS(> .KeepClass:HOVER, + A:FOCUS, ~ A:ACTIVE)::SLOTTED(.KeepSlot:ACTIVE),
+button::PART(KeepPart KeepOtherPart),
+a::CUE(.KeepClass:HOVER),
+video::CUE-REGION(#KeepId > .KeepClass:FOCUS),
+A::VIEW-TRANSITION-GROUP(KeepView),
+a::HIGHLIGHT(KeepHighlight) {
+    COLOR: #AAbbCC;
+    -WEBKIT-USER-SELECT: none;
+    --Keep-custom-Prop: KeepValue;
+    background: Var(--Keep-custom-Prop);
+}
+
+A:NTH-CHILD(ODD),B:NTH-LAST-CHILD(EVEN){COLOR:RED}
+
+.Nested { & .KeepChild:HOVER { COLOR: RED; } > A:HOVER { COLOR: RED; } + A:HOVER { COLOR: RED; } ~ A:HOVER { COLOR: RED; } }
+
+@MEDIA ONLY SCReEN AND (MIN-WIDTH: 700PX) AND (ORIENTATION: LANDSCAPE) AND (150PX <= WIDTH) AND (400PX < WIDTH < 1000PX), NOT PRINT AND (COLOR) {
+    a::AFTER { COLOR: #AAbbCC; }
+}
+
+@MEDIA (--KeepCustomMedia) {
+    A:HOVER { COLOR: RED; }
+}
+
+@CONTAINER KeepContainer (WIDTH <= 150PX) {
+    a::AFTER { COLOR: #AAbbCC; }
+}
+
+@CONTAINER KeepContainer NOT (WIDTH <= 150PX) {
+    A:HOVER { COLOR: RED; }
+}
+
+@CONTAINER KeepContainer (WIDTH <= 150PX) OR (HEIGHT > 200PX) {
+    A:HOVER { COLOR: RED; }
+}
+
+@CONTAINER KeepAnd (WIDTH>1PX) AND (HEIGHT>2PX){A{COLOR:RED}}
+
+@CONTAINER scroll-state((SCROLLED: TOP) AND (STUCK)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@CONTAINER scroll-state(NOT (STUCK)){A{COLOR:RED}}
+
+@CONTAINER scroll-state((STUCK) OR (SCROLLED:BOTTOM)){A{COLOR:RED}}
+
+@SUPPORTS (COLOR: RED) {
+    a { COLOR: RED; }
+}
+
+@supports not (COLOR: RED) {
+    A:HOVER { COLOR: RED; }
+}
+
+@supports (COLOR: RED) or (DISPLAY: GRID) {
+    A:HOVER { COLOR: RED; }
+}
+
+@SUPPORTS(COLOR:RED)AND(DISPLAY:GRID){A{COLOR:RED}}
+
+@supports selector(A:HOVER) {
+    A { COLOR: RED; }
+}
+
+@supports SELECTOR(A:HOVER) {
+    A { COLOR: RED; }
+}
+
+@supports (FUTURE-FUNC(KeepValue / KeepOther)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@container style(COLOR: RED) {
+    a { COLOR: RED; }
+}
+
+@container style(not (COLOR: RED)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@container style((COLOR: RED) and (DISPLAY: GRID)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@container style((COLOR: RED) or (DISPLAY: GRID)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@container style(((COLOR: RED))) {
+    A:HOVER { COLOR: RED; }
+}
+
+@container KeepContainer (FUTURE-FUNC(KeepValue / KeepOther)) {
+    A:HOVER { COLOR: RED; }
+}
+
+@import "KeepImport.CSS" layer(Keep.Layer) supports(COLOR: RED) PRINT;
+
+@import "KeepImport.CSS" LAYER PRINT;
+
+@import "KeepImport.CSS" supports(selector(A:HOVER)) PRINT and (MIN-WIDTH: 700PX);
+
+@import "KeepImport.CSS" supports((COLOR: RED) or selector(A:HOVER)) PRINT and (MIN-WIDTH: 700PX);
+
+@import "KeepImport.CSS" supports(FUTURE-FUNC(KeepValue / KeepOther)) PRINT;
+
+@scope (HTML.KeepClass:HOVER) TO (.KeepEnd:FOCUS) {
+    A:HOVER { COLOR: RED; }
+}
+
+@SCOPE(SECTION.KeepStart:FOCUS){A:HOVER{COLOR:RED;}}
+
+@SCOPE TO(ASIDE.KeepEnd:ACTIVE){A:HOVER{COLOR:RED;}}
+
+@LAYER Keep.Layer { A:HOVER { COLOR: RED; } }
+
+@LAYER Keep.Layer, KeepOther;
+
+@NAMESPACE Keep url("HTTPS://KeepHost/Namespace");
+
+@NAMESPACE "HTTPS://KeepHost/DefaultNamespace";
+
+@NAMESPACE KeepString "HTTPS://KeepHost/StringNamespace";
+
+@FONT-FACE { FONT-FAMILY: KeepFont; SRC: URL("x.woff"); UNICODE-RANGE: U+ABCD-EFFF, U+FF??; }
+
+.grid { grid-template-columns: [FULL-Start MAIN-End] 1fr [SIDE-Bar]; }
+
+.raw-url { background: URL(HTTPS://EXAMPLE.COM/KeepPath.PNG); }
+
+.url-modifier { background: URL("x.png" KeepMod KeepFuncName(KeepArg)); mask: SRC("x.svg" KeepSrcMod); }
+
+.function-value { color: KeepFuncName(KeepArg); }
+
+.function-keyword-value { color: KeepFuncName(INHERIT); background: Var(--Keep-custom-Prop, INITIAL); }
+
+.var-empty-fallback { color: Var(--Keep-custom-Prop,); }
+
+.generic-value { --Keep-list: KeepOne, KeepTwo; FONT: 12PX/14PX KeepFont; }
+
+.custom-keyword-value { --Keep-keyword: INITIAL; }
+
+.keyword-value { COLOR: INITIAL; BACKGROUND-COLOR: REVERT-LAYER; BORDER-COLOR: DEFAULT; }
+
+.keyword-policy{COLOR:UNSET;BACKGROUND:REVERT;BORDER-COLOR:REVERT-RULE}
+
+.unknown-dimension{WIDTH:0UnKnOwN}
+
+.important-value { COLOR: RED !IMPORTANT; }
+
+@STARTING-STYLE {
+    A:HOVER { COLOR: RED; }
+}
+
+@VIEW-TRANSITION { NAVIGATION: AUTO; }
+
+@keyframes KeepFrames { FROM { COLOR: RED; } TO { COLOR: BLUE; } }
+
+@keyframes KeepTimeline { ENTRY 0% { COLOR: RED; } EXIT 100% { COLOR: BLUE; } }
+
+@keyframes "KeepFramesString" { TO { COLOR: RED; } }
+
+@KEYFRAMES :GLOBAL KeepFrames { FROM { COLOR: RED; } }
+
+@KEYFRAMES :LOCAL("KeepFrames") { TO { COLOR: BLUE; } }
+
+@COUNTER-STYLE KeepCounter { system: cyclic; symbols: "x"; suffix: " "; }
+
+@COLOR-PROFILE DEVICE-CMYK { SRC: URL("x"); }
+
+@color-profile KeepProfile { }
+
+@PROPERTY --Keep-custom-Prop { SYNTAX: "<color>"; INHERITS: false; INITIAL-VALUE: RED; }
+
+@FONT-FEATURE-VALUES KeepFont Family, "Keep Font" { @STYLISTIC { KeepFeatureName: 1; } @HISTORICAL-FORMS { KeepHist: 1; } @STYLESET { KeepSet: 1; } @CHARACTER-VARIANT { KeepChar: 1; } @SWASH { KeepSwash: 1; } @ORNAMENTS { KeepOrn: 1; } @ANNOTATION { KeepAnno: 1; } }
+
+@font-PALETTE-values --KeepPalette { font-family: KeepFont; }
+
+@POSITION-TRY --KeepPosition { COLOR: RED; }
+
+@FUNCTION --KeepFunc(--KeepParam type(<COLOR>): RED) RETURNS type(<COLOR>) { RESULT: RED; }
+
+@FUNCTION --KeepSyntax(--KeepParam <COLOR>#: RED) RETURNS <IDENT>+ { RESULT: RED; }
+
+@PAGE KeepPage:FIRST { ; COLOR: RED; @TOP-LEFT-CORNER { COLOR: RED; } @TOP-LEFT { COLOR: RED; } @TOP-CENTER { COLOR: RED; } @TOP-RIGHT { COLOR: RED; } @TOP-RIGHT-CORNER { COLOR: RED; } @BOTTOM-LEFT-CORNER { COLOR: RED; } @BOTTOM-LEFT { COLOR: RED; } @BOTTOM-CENTER { COLOR: RED; } @BOTTOM-RIGHT { COLOR: RED; } @BOTTOM-RIGHT-CORNER { COLOR: RED; } @LEFT-TOP { COLOR: RED; } @LEFT-MIDDLE { COLOR: RED; } @LEFT-BOTTOM { COLOR: RED; } @RIGHT-TOP { COLOR: RED; } @RIGHT-MIDDLE { COLOR: RED; } @RIGHT-BOTTOM { COLOR: RED; } }
+
+@PAGE KeepPageNested:FIRST { COLOR: RED; @MEDIA (WIDTH > 500PX) { A:HOVER { COLOR: RED; } } @TOP-LEFT { COLOR: RED; @MEDIA (WIDTH > 500PX) { COLOR: BLUE; } } }
+
+@DOCUMENT URL("HTTPS://KeepHost/Exact"), URL-PREFIX("HTTPS://KeepHost/Doc"), DOMAIN("KeepHost.COM"), MEDIA-DOCUMENT("KeepMedia"), REGEXP("Keep.*") { A { COLOR: RED; } }
+
+.attr { content: ATTR(DATA-KEEP REM); width: ATTR(DATA-KEEP type(<COLOR>), KeepFallback / KeepOther); list-style-type: ATTR(DATA-KEEP | ARIA-LABEL type(<STRING>), KeepFallback / KeepOther); height: ATTR(DATA-SIZE | DATA-WIDTH REM, KeepFallback); quotes: ATTR(DATA-RAW RAW-STRING, KeepFallback); order: ATTR(DATA-COUNT NUMBER, KeepFallback); transform: ATTR(DATA-SYNTAX type(<COLOR># | <STRING>+), KeepFallback); }
+
+.attr-unknown{width:ATTR(DATA-X FuTuRe,Keep)}
+
+.module { COMPOSES: KeepClass from global; }
+
+.module-typed { composes: KeepClass from global; }
+
+:EXPORT{KeepProp:KeepValue}
+
+.module-source { COMPOSES: KeepClass from KeepSource; }
+
+@value KeepName: Some-Value;
+
+@value KeepMedia: (MAX-WIDTH: 599PX), KeepColor: Some-Value;
+
+@value KeepBare, KeepImported as KeepLocal from KeepSource;
+
+@value KeepBareString, KeepImportedString as KeepLocalString from "KeepSource.css";
+
+@UNKNOWN KeepName;
+
+@UNKNOWN LAYER;
+
+@UNKNOWN KeepName { COLOR: RED; }
+
+.if-test {
+    color: if(media(WIDTH > 700PX): RED; else: BLUE);
+    outline-color: if(media(PREFERS-COLOR-SCHEME: DARK): BLUE; else: RED);
+    background: if(style(COLOR: RED): BLUE; else: RED);
+    border-color: if(supports(COLOR: RED): BLUE; else: RED);
+    border-style: if(supports(KeepSupportsIdent): solid; else: dashed);
+    text-decoration-color: if(not media(WIDTH > 700PX): RED; else: BLUE);
+    caret-color: if(media(WIDTH > 700PX) and (style(COLOR: RED) or supports(COLOR: RED)): BLUE; else: RED);
+    accent-color: if(not supports(COLOR: RED): BLUE; else: RED);
+    column-rule-color: if(supports((COLOR: RED) or (DISPLAY: GRID)): BLUE; else: RED);
+    text-emphasis-color: if(supports(selector(A:HOVER)): BLUE; else: RED);
+    text-shadow: if(supports(FUTURE-FUNC(KeepValue / KeepOther)): BLUE; else: RED);
+    outline-color: if(not style(COLOR: RED): BLUE; else: RED);
+    border-top-color: if(style((COLOR: RED) and (DISPLAY: GRID)): BLUE; else: RED);
+    box-shadow: if(style(COLOR: RED): KeepValue / KeepOther; else: KeepThird);
+    filter: if(style(((COLOR: RED))): KeepValue / KeepOther; else: KeepThird);
+}
+
+@IMPORT"KeepCase.CSS" LAYER(Keep.Layer) SUPPORTS(COLOR:RED) PRINT;
+.case-tokens[DATA-X=Keep I]{COMPOSES:KeepClass FROM global;a:ATTR(DATA-X RAW-STRING,Keep);b:ATTR(DATA-X NUMBER,Keep);c:ATTR(DATA-X TYPE(<COLOR>),Keep);COLOR:IF(MEDIA(WIDTH>1PX):RED;ELSE:BLUE)}
+@VALUE KeepImported AS KeepLocal FROM KeepSource;
+@CONTAINER STYLE(COLOR:RED){A:HOVER{COLOR:RED}}
+@FUNCTION --KeepCase(--Keep TYPE(<COLOR>):RED) RETURNS TYPE(<COLOR>){RESULT:RED}

@@ -20,6 +20,41 @@ use std::fmt::{Debug, Formatter};
 #[doc = r" the slots are not statically known."]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct AstroImplicitFragment {
+    pub(crate) syntax: SyntaxNode,
+}
+impl AstroImplicitFragment {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> AstroImplicitFragmentFields {
+        AstroImplicitFragmentFields {
+            elements: self.elements(),
+        }
+    }
+    pub fn elements(&self) -> JsxChildList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for AstroImplicitFragment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct AstroImplicitFragmentFields {
+    pub elements: JsxChildList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2522,8 +2557,8 @@ impl JsExpressionTemplateRoot {
             eof_token: self.eof_token(),
         }
     }
-    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
-        support::required_node(&self.syntax, 0usize)
+    pub fn expression(&self) -> Option<AnyJsExpression> {
+        support::node(&self.syntax, 0usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
@@ -2539,7 +2574,7 @@ impl Serialize for JsExpressionTemplateRoot {
 }
 #[derive(Serialize)]
 pub struct JsExpressionTemplateRootFields {
-    pub expression: SyntaxResult<AnyJsExpression>,
+    pub expression: Option<AnyJsExpression>,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -6474,6 +6509,51 @@ pub struct JsSuperExpressionFields {
     pub super_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsSvelteDeclarationRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsSvelteDeclarationRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsSvelteDeclarationRootFields {
+        JsSvelteDeclarationRootFields {
+            declaration: self.declaration(),
+            semicolon_token: self.semicolon_token(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn declaration(&self) -> SyntaxResult<AnyJsSvelteDeclaration> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for JsSvelteDeclarationRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsSvelteDeclarationRootFields {
+    pub declaration: SyntaxResult<AnyJsSvelteDeclaration>,
+    pub semicolon_token: Option<SyntaxToken>,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsSvelteSnippetRoot {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7485,14 +7565,14 @@ impl JsxElement {
     pub fn as_fields(&self) -> JsxElementFields {
         JsxElementFields {
             opening_element: self.opening_element(),
-            children: self.children(),
+            elements: self.elements(),
             closing_element: self.closing_element(),
         }
     }
     pub fn opening_element(&self) -> SyntaxResult<JsxOpeningElement> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_element(&self) -> SyntaxResult<JsxClosingElement> {
@@ -7510,7 +7590,7 @@ impl Serialize for JsxElement {
 #[derive(Serialize)]
 pub struct JsxElementFields {
     pub opening_element: SyntaxResult<JsxOpeningElement>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_element: SyntaxResult<JsxClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7620,14 +7700,14 @@ impl JsxFragment {
     pub fn as_fields(&self) -> JsxFragmentFields {
         JsxFragmentFields {
             opening_fragment: self.opening_fragment(),
-            children: self.children(),
+            elements: self.elements(),
             closing_fragment: self.closing_fragment(),
         }
     }
     pub fn opening_fragment(&self) -> SyntaxResult<JsxOpeningFragment> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_fragment(&self) -> SyntaxResult<JsxClosingFragment> {
@@ -7645,7 +7725,7 @@ impl Serialize for JsxFragment {
 #[derive(Serialize)]
 pub struct JsxFragmentFields {
     pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_fragment: SyntaxResult<JsxClosingFragment>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7939,8 +8019,8 @@ impl JsxSelfClosingElement {
     pub fn attributes(&self) -> JsxAttributeList {
         support::list(&self.syntax, 3usize)
     }
-    pub fn slash_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn slash_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
     }
     pub fn r_angle_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
@@ -7960,7 +8040,7 @@ pub struct JsxSelfClosingElementFields {
     pub name: SyntaxResult<AnyJsxElementName>,
     pub type_arguments: Option<TsTypeArguments>,
     pub attributes: JsxAttributeList,
-    pub slash_token: SyntaxResult<SyntaxToken>,
+    pub slash_token: Option<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15296,6 +15376,7 @@ pub enum AnyJsRoot {
     JsExpressionTemplateRoot(JsExpressionTemplateRoot),
     JsModule(JsModule),
     JsScript(JsScript),
+    JsSvelteDeclarationRoot(JsSvelteDeclarationRoot),
     JsSvelteSnippetRoot(JsSvelteSnippetRoot),
     TsDeclarationModule(TsDeclarationModule),
 }
@@ -15321,6 +15402,12 @@ impl AnyJsRoot {
     pub fn as_js_script(&self) -> Option<&JsScript> {
         match &self {
             Self::JsScript(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_svelte_declaration_root(&self) -> Option<&JsSvelteDeclarationRoot> {
+        match &self {
+            Self::JsSvelteDeclarationRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -15574,6 +15661,25 @@ impl AnyJsStatement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsSvelteDeclaration {
+    JsBogusVariableDeclaration(JsBogusVariableDeclaration),
+    JsVariableDeclaration(JsVariableDeclaration),
+}
+impl AnyJsSvelteDeclaration {
+    pub fn as_js_bogus_variable_declaration(&self) -> Option<&JsBogusVariableDeclaration> {
+        match &self {
+            Self::JsBogusVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_variable_declaration(&self) -> Option<&JsVariableDeclaration> {
+        match &self {
+            Self::JsVariableDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsSwitchClause {
     JsCaseClause(JsCaseClause),
     JsDefaultClause(JsDefaultClause),
@@ -15666,6 +15772,7 @@ impl AnyJsxAttributeName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttributeValue {
     AnyJsxTag(AnyJsxTag),
+    JsTemplateExpression(JsTemplateExpression),
     JsxExpressionAttributeValue(JsxExpressionAttributeValue),
     JsxString(JsxString),
 }
@@ -15673,6 +15780,12 @@ impl AnyJsxAttributeValue {
     pub fn as_any_jsx_tag(&self) -> Option<&AnyJsxTag> {
         match &self {
             Self::AnyJsxTag(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_template_expression(&self) -> Option<&JsTemplateExpression> {
+        match &self {
+            Self::JsTemplateExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -15830,11 +15943,18 @@ impl AnyJsxObjectName {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxTag {
+    AstroImplicitFragment(AstroImplicitFragment),
     JsxElement(JsxElement),
     JsxFragment(JsxFragment),
     JsxSelfClosingElement(JsxSelfClosingElement),
 }
 impl AnyJsxTag {
+    pub fn as_astro_implicit_fragment(&self) -> Option<&AstroImplicitFragment> {
+        match &self {
+            Self::AstroImplicitFragment(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_jsx_element(&self) -> Option<&JsxElement> {
         match &self {
             Self::JsxElement(item) => Some(item),
@@ -16499,6 +16619,7 @@ impl AnyTsType {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeMember {
     JsBogusMember(JsBogusMember),
+    JsMetavariable(JsMetavariable),
     TsCallSignatureTypeMember(TsCallSignatureTypeMember),
     TsConstructSignatureTypeMember(TsConstructSignatureTypeMember),
     TsGetterSignatureTypeMember(TsGetterSignatureTypeMember),
@@ -16511,6 +16632,12 @@ impl AnyTsTypeMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
             Self::JsBogusMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -16619,6 +16746,53 @@ impl AnyTsVariableAnnotation {
             Self::TsTypeAnnotation(item) => Some(item),
             _ => None,
         }
+    }
+}
+impl AstNode for AstroImplicitFragment {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(ASTRO_IMPLICIT_FRAGMENT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == ASTRO_IMPLICIT_FRAGMENT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for AstroImplicitFragment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("AstroImplicitFragment")
+                .field("elements", &self.elements())
+                .finish()
+        } else {
+            f.debug_struct("AstroImplicitFragment").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<AstroImplicitFragment> for SyntaxNode {
+    fn from(n: AstroImplicitFragment) -> Self {
+        n.syntax
+    }
+}
+impl From<AstroImplicitFragment> for SyntaxElement {
+    fn from(n: AstroImplicitFragment) -> Self {
+        n.syntax.into()
     }
 }
 impl AstNode for JsAccessorModifier {
@@ -19573,7 +19747,10 @@ impl std::fmt::Debug for JsExpressionTemplateRoot {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("JsExpressionTemplateRoot")
-                .field("expression", &support::DebugSyntaxResult(self.expression()))
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
                 .finish()
         } else {
@@ -24136,6 +24313,61 @@ impl From<JsSuperExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for JsSvelteDeclarationRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_SVELTE_DECLARATION_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_SVELTE_DECLARATION_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsSvelteDeclarationRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsSvelteDeclarationRoot")
+                .field(
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
+                )
+                .field(
+                    "semicolon_token",
+                    &support::DebugOptionalElement(self.semicolon_token()),
+                )
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsSvelteDeclarationRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsSvelteDeclarationRoot> for SyntaxNode {
+    fn from(n: JsSvelteDeclarationRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsSvelteDeclarationRoot> for SyntaxElement {
+    fn from(n: JsSvelteDeclarationRoot) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for JsSvelteSnippetRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25364,7 +25596,7 @@ impl std::fmt::Debug for JsxElement {
                     "opening_element",
                     &support::DebugSyntaxResult(self.opening_element()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_element",
                     &support::DebugSyntaxResult(self.closing_element()),
@@ -25532,7 +25764,7 @@ impl std::fmt::Debug for JsxFragment {
                     "opening_fragment",
                     &support::DebugSyntaxResult(self.opening_fragment()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_fragment",
                     &support::DebugSyntaxResult(self.closing_fragment()),
@@ -25910,7 +26142,7 @@ impl std::fmt::Debug for JsxSelfClosingElement {
                 .field("attributes", &self.attributes())
                 .field(
                     "slash_token",
-                    &support::DebugSyntaxResult(self.slash_token()),
+                    &support::DebugOptionalElement(self.slash_token()),
                 )
                 .field(
                     "r_angle_token",
@@ -37147,6 +37379,11 @@ impl From<JsScript> for AnyJsRoot {
         Self::JsScript(node)
     }
 }
+impl From<JsSvelteDeclarationRoot> for AnyJsRoot {
+    fn from(node: JsSvelteDeclarationRoot) -> Self {
+        Self::JsSvelteDeclarationRoot(node)
+    }
+}
 impl From<JsSvelteSnippetRoot> for AnyJsRoot {
     fn from(node: JsSvelteSnippetRoot) -> Self {
         Self::JsSvelteSnippetRoot(node)
@@ -37163,6 +37400,7 @@ impl AstNode for AnyJsRoot {
         .union(JsExpressionTemplateRoot::KIND_SET)
         .union(JsModule::KIND_SET)
         .union(JsScript::KIND_SET)
+        .union(JsSvelteDeclarationRoot::KIND_SET)
         .union(JsSvelteSnippetRoot::KIND_SET)
         .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -37172,6 +37410,7 @@ impl AstNode for AnyJsRoot {
                 | JS_EXPRESSION_TEMPLATE_ROOT
                 | JS_MODULE
                 | JS_SCRIPT
+                | JS_SVELTE_DECLARATION_ROOT
                 | JS_SVELTE_SNIPPET_ROOT
                 | TS_DECLARATION_MODULE
         )
@@ -37184,6 +37423,9 @@ impl AstNode for AnyJsRoot {
             }
             JS_MODULE => Self::JsModule(JsModule { syntax }),
             JS_SCRIPT => Self::JsScript(JsScript { syntax }),
+            JS_SVELTE_DECLARATION_ROOT => {
+                Self::JsSvelteDeclarationRoot(JsSvelteDeclarationRoot { syntax })
+            }
             JS_SVELTE_SNIPPET_ROOT => Self::JsSvelteSnippetRoot(JsSvelteSnippetRoot { syntax }),
             TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
@@ -37196,6 +37438,7 @@ impl AstNode for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => it.syntax(),
             Self::JsModule(it) => it.syntax(),
             Self::JsScript(it) => it.syntax(),
+            Self::JsSvelteDeclarationRoot(it) => it.syntax(),
             Self::JsSvelteSnippetRoot(it) => it.syntax(),
             Self::TsDeclarationModule(it) => it.syntax(),
         }
@@ -37206,6 +37449,7 @@ impl AstNode for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => it.into_syntax(),
             Self::JsModule(it) => it.into_syntax(),
             Self::JsScript(it) => it.into_syntax(),
+            Self::JsSvelteDeclarationRoot(it) => it.into_syntax(),
             Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
             Self::TsDeclarationModule(it) => it.into_syntax(),
         }
@@ -37218,6 +37462,7 @@ impl std::fmt::Debug for AnyJsRoot {
             Self::JsExpressionTemplateRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsModule(it) => std::fmt::Debug::fmt(it, f),
             Self::JsScript(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsSvelteDeclarationRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSvelteSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -37230,6 +37475,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsExpressionTemplateRoot(it) => it.into_syntax(),
             AnyJsRoot::JsModule(it) => it.into_syntax(),
             AnyJsRoot::JsScript(it) => it.into_syntax(),
+            AnyJsRoot::JsSvelteDeclarationRoot(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
             AnyJsRoot::TsDeclarationModule(it) => it.into_syntax(),
         }
@@ -37693,6 +37939,73 @@ impl From<AnyJsStatement> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsBogusVariableDeclaration> for AnyJsSvelteDeclaration {
+    fn from(node: JsBogusVariableDeclaration) -> Self {
+        Self::JsBogusVariableDeclaration(node)
+    }
+}
+impl From<JsVariableDeclaration> for AnyJsSvelteDeclaration {
+    fn from(node: JsVariableDeclaration) -> Self {
+        Self::JsVariableDeclaration(node)
+    }
+}
+impl AstNode for AnyJsSvelteDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsBogusVariableDeclaration::KIND_SET.union(JsVariableDeclaration::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            JS_BOGUS_VARIABLE_DECLARATION | JS_VARIABLE_DECLARATION
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_BOGUS_VARIABLE_DECLARATION => {
+                Self::JsBogusVariableDeclaration(JsBogusVariableDeclaration { syntax })
+            }
+            JS_VARIABLE_DECLARATION => {
+                Self::JsVariableDeclaration(JsVariableDeclaration { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => it.syntax(),
+            Self::JsVariableDeclaration(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => it.into_syntax(),
+            Self::JsVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsSvelteDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::JsBogusVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsSvelteDeclaration> for SyntaxNode {
+    fn from(n: AnyJsSvelteDeclaration) -> Self {
+        match n {
+            AnyJsSvelteDeclaration::JsBogusVariableDeclaration(it) => it.into_syntax(),
+            AnyJsSvelteDeclaration::JsVariableDeclaration(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyJsSvelteDeclaration> for SyntaxElement {
+    fn from(n: AnyJsSvelteDeclaration) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsCaseClause> for AnyJsSwitchClause {
     fn from(node: JsCaseClause) -> Self {
         Self::JsCaseClause(node)
@@ -37961,6 +38274,11 @@ impl From<AnyJsxAttributeName> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsTemplateExpression> for AnyJsxAttributeValue {
+    fn from(node: JsTemplateExpression) -> Self {
+        Self::JsTemplateExpression(node)
+    }
+}
 impl From<JsxExpressionAttributeValue> for AnyJsxAttributeValue {
     fn from(node: JsxExpressionAttributeValue) -> Self {
         Self::JsxExpressionAttributeValue(node)
@@ -37974,17 +38292,19 @@ impl From<JsxString> for AnyJsxAttributeValue {
 impl AstNode for AnyJsxAttributeValue {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyJsxTag::KIND_SET
+        .union(JsTemplateExpression::KIND_SET)
         .union(JsxExpressionAttributeValue::KIND_SET)
         .union(JsxString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
+            JS_TEMPLATE_EXPRESSION | JSX_EXPRESSION_ATTRIBUTE_VALUE | JSX_STRING => true,
             k if AnyJsxTag::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_TEMPLATE_EXPRESSION => Self::JsTemplateExpression(JsTemplateExpression { syntax }),
             JSX_EXPRESSION_ATTRIBUTE_VALUE => {
                 Self::JsxExpressionAttributeValue(JsxExpressionAttributeValue { syntax })
             }
@@ -38000,6 +38320,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.syntax(),
             Self::JsxExpressionAttributeValue(it) => it.syntax(),
             Self::JsxString(it) => it.syntax(),
             Self::AnyJsxTag(it) => it.syntax(),
@@ -38007,6 +38328,7 @@ impl AstNode for AnyJsxAttributeValue {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::JsTemplateExpression(it) => it.into_syntax(),
             Self::JsxExpressionAttributeValue(it) => it.into_syntax(),
             Self::JsxString(it) => it.into_syntax(),
             Self::AnyJsxTag(it) => it.into_syntax(),
@@ -38017,6 +38339,7 @@ impl std::fmt::Debug for AnyJsxAttributeValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyJsxTag(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsTemplateExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxExpressionAttributeValue(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxString(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38026,6 +38349,7 @@ impl From<AnyJsxAttributeValue> for SyntaxNode {
     fn from(n: AnyJsxAttributeValue) -> Self {
         match n {
             AnyJsxAttributeValue::AnyJsxTag(it) => it.into_syntax(),
+            AnyJsxAttributeValue::JsTemplateExpression(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxExpressionAttributeValue(it) => it.into_syntax(),
             AnyJsxAttributeValue::JsxString(it) => it.into_syntax(),
         }
@@ -38400,6 +38724,11 @@ impl From<AnyJsxObjectName> for SyntaxElement {
         node.into()
     }
 }
+impl From<AstroImplicitFragment> for AnyJsxTag {
+    fn from(node: AstroImplicitFragment) -> Self {
+        Self::AstroImplicitFragment(node)
+    }
+}
 impl From<JsxElement> for AnyJsxTag {
     fn from(node: JsxElement) -> Self {
         Self::JsxElement(node)
@@ -38417,14 +38746,21 @@ impl From<JsxSelfClosingElement> for AnyJsxTag {
 }
 impl AstNode for AnyJsxTag {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsxElement::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AstroImplicitFragment::KIND_SET
+        .union(JsxElement::KIND_SET)
         .union(JsxFragment::KIND_SET)
         .union(JsxSelfClosingElement::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JSX_ELEMENT | JSX_FRAGMENT | JSX_SELF_CLOSING_ELEMENT)
+        matches!(
+            kind,
+            ASTRO_IMPLICIT_FRAGMENT | JSX_ELEMENT | JSX_FRAGMENT | JSX_SELF_CLOSING_ELEMENT
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            ASTRO_IMPLICIT_FRAGMENT => {
+                Self::AstroImplicitFragment(AstroImplicitFragment { syntax })
+            }
             JSX_ELEMENT => Self::JsxElement(JsxElement { syntax }),
             JSX_FRAGMENT => Self::JsxFragment(JsxFragment { syntax }),
             JSX_SELF_CLOSING_ELEMENT => {
@@ -38436,6 +38772,7 @@ impl AstNode for AnyJsxTag {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::AstroImplicitFragment(it) => it.syntax(),
             Self::JsxElement(it) => it.syntax(),
             Self::JsxFragment(it) => it.syntax(),
             Self::JsxSelfClosingElement(it) => it.syntax(),
@@ -38443,6 +38780,7 @@ impl AstNode for AnyJsxTag {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::AstroImplicitFragment(it) => it.into_syntax(),
             Self::JsxElement(it) => it.into_syntax(),
             Self::JsxFragment(it) => it.into_syntax(),
             Self::JsxSelfClosingElement(it) => it.into_syntax(),
@@ -38452,6 +38790,7 @@ impl AstNode for AnyJsxTag {
 impl std::fmt::Debug for AnyJsxTag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AstroImplicitFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxElement(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxFragment(it) => std::fmt::Debug::fmt(it, f),
             Self::JsxSelfClosingElement(it) => std::fmt::Debug::fmt(it, f),
@@ -38461,6 +38800,7 @@ impl std::fmt::Debug for AnyJsxTag {
 impl From<AnyJsxTag> for SyntaxNode {
     fn from(n: AnyJsxTag) -> Self {
         match n {
+            AnyJsxTag::AstroImplicitFragment(it) => it.into_syntax(),
             AnyJsxTag::JsxElement(it) => it.into_syntax(),
             AnyJsxTag::JsxFragment(it) => it.into_syntax(),
             AnyJsxTag::JsxSelfClosingElement(it) => it.into_syntax(),
@@ -40082,6 +40422,11 @@ impl From<JsBogusMember> for AnyTsTypeMember {
         Self::JsBogusMember(node)
     }
 }
+impl From<JsMetavariable> for AnyTsTypeMember {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
 impl From<TsCallSignatureTypeMember> for AnyTsTypeMember {
     fn from(node: TsCallSignatureTypeMember) -> Self {
         Self::TsCallSignatureTypeMember(node)
@@ -40120,6 +40465,7 @@ impl From<TsSetterSignatureTypeMember> for AnyTsTypeMember {
 impl AstNode for AnyTsTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusMember::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(TsCallSignatureTypeMember::KIND_SET)
         .union(TsConstructSignatureTypeMember::KIND_SET)
         .union(TsGetterSignatureTypeMember::KIND_SET)
@@ -40131,6 +40477,7 @@ impl AstNode for AnyTsTypeMember {
         matches!(
             kind,
             JS_BOGUS_MEMBER
+                | JS_METAVARIABLE
                 | TS_CALL_SIGNATURE_TYPE_MEMBER
                 | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
                 | TS_GETTER_SIGNATURE_TYPE_MEMBER
@@ -40143,6 +40490,7 @@ impl AstNode for AnyTsTypeMember {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             TS_CALL_SIGNATURE_TYPE_MEMBER => {
                 Self::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
             }
@@ -40171,6 +40519,7 @@ impl AstNode for AnyTsTypeMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.syntax(),
+            Self::JsMetavariable(it) => it.syntax(),
             Self::TsCallSignatureTypeMember(it) => it.syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.syntax(),
@@ -40183,6 +40532,7 @@ impl AstNode for AnyTsTypeMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.into_syntax(),
+            Self::JsMetavariable(it) => it.into_syntax(),
             Self::TsCallSignatureTypeMember(it) => it.into_syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -40197,6 +40547,7 @@ impl std::fmt::Debug for AnyTsTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
@@ -40211,6 +40562,7 @@ impl From<AnyTsTypeMember> for SyntaxNode {
     fn from(n: AnyTsTypeMember) -> Self {
         match n {
             AnyTsTypeMember::JsBogusMember(it) => it.into_syntax(),
+            AnyTsTypeMember::JsMetavariable(it) => it.into_syntax(),
             AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -40642,6 +40994,11 @@ impl std::fmt::Display for AnyJsStatement {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsSvelteDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsSwitchClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -40788,6 +41145,11 @@ impl std::fmt::Display for AnyTsTypePredicateParameterName {
     }
 }
 impl std::fmt::Display for AnyTsVariableAnnotation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AstroImplicitFragment {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -41473,6 +41835,11 @@ impl std::fmt::Display for JsStringLiteralExpression {
     }
 }
 impl std::fmt::Display for JsSuperExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsSvelteDeclarationRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -42767,6 +43134,62 @@ impl From<JsBogusStatement> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct JsBogusVariableDeclaration {
+    syntax: SyntaxNode,
+}
+impl JsBogusVariableDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for JsBogusVariableDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_BOGUS_VARIABLE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_BOGUS_VARIABLE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsBogusVariableDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsBogusVariableDeclaration")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<JsBogusVariableDeclaration> for SyntaxNode {
+    fn from(n: JsBogusVariableDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<JsBogusVariableDeclaration> for SyntaxElement {
+    fn from(n: JsBogusVariableDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct TsBogusType {
     syntax: SyntaxNode,
 }
@@ -42822,7 +43245,7 @@ impl From<TsBogusType> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | TsBogusType }
+biome_rowan::declare_node_union! { pub AnyJsBogusNode = JsBogus | JsBogusAssignment | JsBogusBinding | JsBogusExpression | JsBogusImportAssertionEntry | JsBogusMember | JsBogusNamedImportSpecifier | JsBogusParameter | JsBogusStatement | JsBogusVariableDeclaration | TsBogusType }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct JsArrayAssignmentPatternElementList {
     syntax_list: SyntaxList,

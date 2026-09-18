@@ -3,15 +3,22 @@
 // Codegen scope is intentionally narrow — only the long phf maps,
 // sets, and arrays are emitted. Structural types (`NamedValueType`,
 // `CssDataType`, `ThemeNamespace`, `NamedBranch`, `ArbitraryBranch`,
-// `Negative`, `UtilityEntry`, `FunctionalEntry`) live in the hand-written
-// sibling `tailwind_preset_v4_types.rs` and are imported here.
+// `Negative`, `UtilityEntry`, `FunctionalEntry`, `VariantKind`,
+// `VariantCompare`, `VariantEntry`) live in the hand-written sibling
+// `tailwind_preset_v4_types.rs` and are imported here.
 
 import type {
 	ArbitraryBranch,
 	ExtractedUtilities,
 	FunctionalUtility,
 	NamedBranch,
+	PropertySort,
 } from "./extract-utilities.js";
+import type {
+	ExtractedVariant,
+	ExtractedVariants,
+	ThemeValue,
+} from "./extract-variants.js";
 import {
 	THEME_NAMESPACES,
 	type ThemeNamespacePrefix,
@@ -25,14 +32,15 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! Source references (Tailwind v4):
 //! - property-order:  https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/property-order.ts
 //! - utilities:       https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utilities.ts
+//! - variants:        https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/variants.ts
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
-    ArbitraryBranch, CssDataType, FunctionalEntry, NamedBranch, NamedValueType, Negative::*,
-    ThemeNamespace, UtilityEntry,
+    ArbitraryBranch, CssDataType, FunctionalEntry, ModifierKind, NamedBranch, NamedValueType,
+    Negative::*, ThemeNamespace, UtilityEntry, VariantCompare, VariantEntry, VariantKind,
 };
 `;
 
@@ -58,18 +66,77 @@ ${items}
 `;
 }
 
+// Build the deduplicated signature pool from every placement's
+// property-order list (statics, branches, and negative branches). Pool
+// entries are unique ascending index lists, addressed by the stable
+// index stored in each placement.
+function collectSignaturePool(utils: ExtractedUtilities): {
+	pool: number[][];
+	idxOf: (sort: PropertySort) => number;
+} {
+	const pool: number[][] = [];
+	const byKey = new Map<string, number>();
+	const intern = (sort: PropertySort): number => {
+		const key = sort.order.join(".");
+		let idx = byKey.get(key);
+		if (idx === undefined) {
+			idx = pool.length;
+			byKey.set(key, idx);
+			pool.push(sort.order);
+		}
+		return idx;
+	};
+	const internBranches = (
+		named: NamedBranch[],
+		arbitrary: ArbitraryBranch[],
+	) => {
+		for (const b of named) intern(b.sort);
+		for (const b of arbitrary) intern(b.sort);
+	};
+	for (const u of utils.static) intern(u.sort);
+	for (const u of utils.functional) {
+		internBranches(u.namedBranches, u.arbitraryBranches);
+		if (u.bare) intern(u.bare);
+		if (u.bareOpacity) intern(u.bareOpacity);
+		if (u.bareName) intern(u.bareName);
+		if (u.negative?.kind === "Distinct") {
+			internBranches(u.negative.namedBranches, u.negative.arbitraryBranches);
+		}
+	}
+	return { pool, idxOf: intern };
+}
+
+function checked(
+	sort: PropertySort,
+	idx: number,
+): { sig: number; count: number } {
+	if (idx > 0xffff) throw new Error(`signature pool index ${idx} exceeds u16`);
+	if (sort.count > 0xff)
+		throw new Error(`declaration count ${sort.count} exceeds u8`);
+	return { sig: idx, count: sort.count };
+}
+
+function renderSignaturePool(pool: number[][]): string {
+	const items = pool.map((order) => {
+		for (const i of order) {
+			if (i > 0xffff) throw new Error(`property-order index ${i} exceeds u16`);
+		}
+		return `    &[${order.join(", ")}],`;
+	});
+	return `pub(super) static SIGNATURE_POOL: &[&[u16]] = &[
+${items.join("\n")}
+];
+`;
+}
+
 function renderStaticUtilities(
 	utils: ExtractedUtilities,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
 	const lines = utils.static.map((u) => {
-		const idx = propIdx.get(u.sort_property) ?? propCount;
-		const negReg =
-			u.negative_registration_idx === null
-				? "None"
-				: `Some(${u.negative_registration_idx})`;
-		return `    ${rustString(u.name)} => UtilityEntry { property_idx: ${idx}, property_count: ${u.property_count}, registration_idx: ${u.registration_idx}, negative_registration_idx: ${negReg} },`;
+		const { sig, count } = checked(u.sort, sigIdx(u.sort));
+		const hasNegative = u.negative_registration_idx !== null;
+		return `    ${rustString(u.name)} => UtilityEntry { sig: ${sig}, count: ${count}, has_negative: ${hasNegative} },`;
 	});
 	return `pub static STATIC_UTILITIES: phf::Map<&'static str, UtilityEntry> = phf_map! {
 ${lines.join("\n")}
@@ -115,33 +182,27 @@ ${items.join("\n")}
 function renderNamedBranchList(
 	indent: string,
 	branches: NamedBranch[],
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	return branches
-		.map(
-			(b) =>
-				`${indent}${formatNamedBranch(b, propIdx, propCount, keywordIdx)},`,
-		)
+		.map((b) => `${indent}${formatNamedBranch(b, sigIdx, keywordIdx)},`)
 		.join("\n");
 }
 
 function renderArbitraryBranchList(
 	indent: string,
 	branches: ArbitraryBranch[],
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
 	return branches
-		.map((b) => `${indent}${formatArbitraryBranch(b, propIdx, propCount)},`)
+		.map((b) => `${indent}${formatArbitraryBranch(b, sigIdx)},`)
 		.join("\n");
 }
 
 function renderNegative(
 	u: FunctionalUtility,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	if (u.negative === null) {
@@ -149,23 +210,20 @@ function renderNegative(
 	}
 	switch (u.negative.kind) {
 		case "SameBranches":
-			return `        negative: Some(SameBranches { registration_idx: ${u.negative.registration_idx} }),`;
+			return "        negative: Some(SameBranches),";
 		case "Distinct": {
 			const namedItems = renderNamedBranchList(
 				"                ",
 				u.negative.namedBranches,
-				propIdx,
-				propCount,
+				sigIdx,
 				keywordIdx,
 			);
 			const arbitraryItems = renderArbitraryBranchList(
 				"                ",
 				u.negative.arbitraryBranches,
-				propIdx,
-				propCount,
+				sigIdx,
 			);
 			return `        negative: Some(Distinct {
-            registration_idx: ${u.negative.registration_idx},
 ${renderBranchSlice("            ", "named_branches", namedItems)}
 ${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
         }),`;
@@ -175,35 +233,42 @@ ${renderBranchSlice("            ", "arbitrary_branches", arbitraryItems)}
 
 function renderFunctionalUtilities(
 	utils: ExtractedUtilities,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
 	const populated = utils.functional.filter(
 		(u) =>
 			u.namedBranches.length > 0 ||
 			u.arbitraryBranches.length > 0 ||
+			u.bare !== null ||
+			u.bareOpacity !== null ||
+			u.bareName !== null ||
 			u.negative !== null,
 	);
 	const entries = populated.map((u) => {
 		const namedItems = renderNamedBranchList(
 			"            ",
 			u.namedBranches,
-			propIdx,
-			propCount,
+			sigIdx,
 			keywordIdx,
 		);
 		const arbitraryItems = renderArbitraryBranchList(
 			"            ",
 			u.arbitraryBranches,
-			propIdx,
-			propCount,
+			sigIdx,
 		);
-		const negative = renderNegative(u, propIdx, propCount, keywordIdx);
+		const renderPlacement = (sort: PropertySort | null) => {
+			if (!sort) return "None";
+			const { sig, count } = checked(sort, sigIdx(sort));
+			return `Some((${sig}, ${count}))`;
+		};
+		const negative = renderNegative(u, sigIdx, keywordIdx);
 		return `    ${rustString(u.basename)} => FunctionalEntry {
-        registration_idx: ${u.registration_idx},
 ${renderBranchSlice("        ", "named_branches", namedItems)}
 ${renderBranchSlice("        ", "arbitrary_branches", arbitraryItems)}
+        bare: ${renderPlacement(u.bare)},
+        bare_opacity: ${renderPlacement(u.bareOpacity)},
+        bare_name: ${renderPlacement(u.bareName)},
 ${negative}
     },`;
 	});
@@ -228,14 +293,14 @@ ${indent}],`;
 
 function formatNamedBranch(
 	b: NamedBranch,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 	keywordIdx: Map<string, number>,
 ): string {
-	const idx = propIdx.get(b.sort_property) ?? propCount;
+	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Theme":
-			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Theme(ThemeNamespace::${b.namespace}, ${m}, ${sig}, ${count})`;
 		case "Keyword": {
 			const key = b.keywords.join("\0");
 			const pool = keywordIdx.get(key);
@@ -244,24 +309,24 @@ function formatNamedBranch(
 					`keyword pool missing entry for: ${b.keywords.join(",")}`,
 				);
 			}
-			return `NamedBranch::Keyword(${pool}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Keyword(${pool}, ${m}, ${sig}, ${count})`;
 		}
 		case "Typed":
-			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${idx}, ${b.property_count})`;
+			return `NamedBranch::Typed(NamedValueType::${b.value_type}, ${m}, ${sig}, ${count})`;
 	}
 }
 
 function formatArbitraryBranch(
 	b: ArbitraryBranch,
-	propIdx: Map<string, number>,
-	propCount: number,
+	sigIdx: (sort: PropertySort) => number,
 ): string {
-	const idx = propIdx.get(b.sort_property) ?? propCount;
+	const { sig, count } = checked(b.sort, sigIdx(b.sort));
+	const m = `ModifierKind::${b.modifier}`;
 	switch (b.kind) {
 		case "Typed":
-			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${idx}, ${b.property_count})`;
+			return `ArbitraryBranch::Typed(CssDataType::${b.value_type}, ${m}, ${sig}, ${count})`;
 		case "Fallback":
-			return `ArbitraryBranch::Fallback(${idx}, ${b.property_count})`;
+			return `ArbitraryBranch::Fallback(${m}, ${sig}, ${count})`;
 	}
 }
 
@@ -282,16 +347,37 @@ function renderThemeKeys(keys: Map<ThemeNamespacePrefix, Set<string>>): string {
 	return blocks.join("");
 }
 
+function renderVariants(variants: ExtractedVariant[]): string {
+	const lines = variants.map(
+		(v) =>
+			`    ${rustString(v.name)} => VariantEntry { kind: VariantKind::${v.kind}, order: ${v.order}, compare: VariantCompare::${v.compare}, compounds: ${v.compounds}, compounds_with: ${v.compounds_with} },`,
+	);
+	return `pub(super) static VARIANTS: phf::Map<&'static str, VariantEntry> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
+function renderThemeValueMap(mapName: string, values: ThemeValue[]): string {
+	const lines = values.map(
+		({ name, value }) => `    ${rustString(name)} => ${rustString(value)},`,
+	);
+	return `pub(super) static ${mapName}: phf::Map<&'static str, &'static str> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
 export function renderRust(input: {
 	propertyOrder: string[];
 	themeKeys: Map<ThemeNamespacePrefix, Set<string>>;
 	utilities: ExtractedUtilities;
+	variants: ExtractedVariants;
 }): string {
-	// One Map<property, idx> built once and threaded through emitters,
-	// instead of repeated linear `Array.indexOf` lookups per branch.
-	const propIdx = new Map(input.propertyOrder.map((p, i) => [p, i] as const));
-	const propCount = input.propertyOrder.length;
 	const { pool: keywordPool, idxOf: keywordIdx } = collectKeywordPool(
+		input.utilities,
+	);
+	const { pool: signaturePool, idxOf: sigIdx } = collectSignaturePool(
 		input.utilities,
 	);
 
@@ -299,8 +385,12 @@ export function renderRust(input: {
 		HEADER,
 		renderPropertyIndex(input.propertyOrder),
 		renderKeywordPool(keywordPool),
-		renderStaticUtilities(input.utilities, propIdx, propCount),
-		renderFunctionalUtilities(input.utilities, propIdx, propCount, keywordIdx),
+		renderSignaturePool(signaturePool),
+		renderStaticUtilities(input.utilities, sigIdx),
+		renderFunctionalUtilities(input.utilities, sigIdx, keywordIdx),
+		renderVariants(input.variants.variants),
+		renderThemeValueMap("BREAKPOINT_VALUES", input.variants.breakpoints),
+		renderThemeValueMap("CONTAINER_VALUES", input.variants.containers),
 		renderThemeKeys(input.themeKeys),
 	].join("\n");
 }

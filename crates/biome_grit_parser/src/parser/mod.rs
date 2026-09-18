@@ -22,7 +22,8 @@ use literals::parse_double_literal;
 use patterns::parse_pattern;
 
 use self::parse_error::{
-    expected_engine_version, expected_language_flavor, expected_language_name, expected_variable,
+    expected_engine_version, expected_language_flavor, expected_language_name, expected_pattern,
+    expected_variable,
 };
 
 pub(crate) struct GritParser<'source> {
@@ -259,7 +260,7 @@ fn parse_language_flavor_kind(p: &mut GritParser) -> ParsedSyntax {
 fn parse_maybe_named_arg(p: &mut GritParser) -> ParsedSyntax {
     match p.cur() {
         T![')'] => Absent,
-        GRIT_NAME if p.lookahead() == T![=] => parse_named_arg(p),
+        GRIT_NAME | FUNCTION_KW if p.lookahead() == T![=] => parse_named_arg(p),
         _ => parse_pattern(p),
     }
 }
@@ -277,14 +278,29 @@ fn parse_name(p: &mut GritParser) -> ParsedSyntax {
 
 #[inline]
 fn parse_named_arg(p: &mut GritParser) -> ParsedSyntax {
-    if !p.at(GRIT_NAME) {
+    if !matches!(p.cur(), GRIT_NAME | FUNCTION_KW) {
         return Absent;
     }
 
     let m = p.start();
-    parse_name(p).ok();
+    if p.at(FUNCTION_KW) {
+        let name = p.start();
+        p.bump_remap(GRIT_NAME);
+        name.complete(p, GRIT_NAME);
+    } else {
+        parse_name(p).ok();
+    }
     p.eat(T![=]);
-    parse_pattern(p).ok();
+    if parse_pattern(p)
+        .or_recover_with_token_set(
+            p,
+            &ParseRecoveryTokenSet::new(GRIT_BOGUS_PATTERN, ARG_LIST_RECOVERY_SET),
+            expected_pattern,
+        )
+        .is_err()
+    {
+        p.start().complete(p, GRIT_BOGUS_PATTERN);
+    }
     Present(m.complete(p, GRIT_NAMED_ARG))
 }
 

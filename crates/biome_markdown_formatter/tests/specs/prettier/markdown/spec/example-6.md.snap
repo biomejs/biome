@@ -17,7 +17,7 @@ info: markdown/spec/example-6.md
 --- Prettier
 +++ Biome
 @@ -1 +1 @@
-->     	foo
+->       foo
 +>		foo
 ```
 

@@ -1,0 +1,136 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalid.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+```
+console.log(1)
+```
+
+~~~
+print(1)
+~~~
+
+- list item
+
+  ```
+  const a = 1;
+  ```
+
+> ```
+> fn main() {}
+> ```
+
+```
+unterminated fence
+
+```
+
+# Diagnostics
+```
+invalid.md:3:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ ```
+      │ ^^^
+    4 │ console.log(1)
+    5 │ ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:7:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    5 │ ```
+    6 │ 
+  > 7 │ ~~~
+      │ ^^^
+    8 │ print(1)
+    9 │ ~~~
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:13:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    11 │ - list item
+    12 │ 
+  > 13 │   ```
+       │   ^^^
+    14 │   const a = 1;
+    15 │   ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:17:3 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    15 │   ```
+    16 │ 
+  > 17 │ > ```
+       │   ^^^
+    18 │ > fn main() {}
+    19 │ > ```
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.md:21:1 lint/nursery/useFencedCodeLanguage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fenced code block is missing a language tag.
+  
+    19 │ > ```
+    20 │ 
+  > 21 │ ```
+       │ ^^^
+    22 │ unterminated fence
+    23 │ 
+  
+  i Renderers use language tags to select syntax highlighting for supported languages.
+  
+  i Add a language tag after the opening fence, such as js, or use text when highlighting is unwanted or unsupported.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

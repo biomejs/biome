@@ -46,3 +46,29 @@
 > another short
 
 > This is a long long long long long long long long long long long long long long long paragraph in a quote.
+
+> bar
+>
+baz
+
+> quote continuation
+line
+
+> quote continuation
+> line
+
+> > quote continuation
+line
+
+> > quote continuation
+> > line
+
+> > > quote continuation
+line
+
+> > > quote continuation
+> line
+
+>
+> trimmed quote boundaries
+>

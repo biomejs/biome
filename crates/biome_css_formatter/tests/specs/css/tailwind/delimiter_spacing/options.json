@@ -1,0 +1,10 @@
+{
+  "css": {
+    "formatter": {
+      "delimiterSpacing": true
+    },
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}
