@@ -12,7 +12,7 @@ use biome_rule_options::no_react_object_type_as_default_prop::NoReactObjectTypeA
 use crate::react::components::{AnyPotentialReactComponentDeclaration, ReactComponentInfo};
 
 declare_lint_rule! {
-    /// Disallow array, object, and function values as default props.
+    /// Disallow array, object, and function values as default props in React components.
     ///
     /// In React, a default prop value like `{ items = [] }` is created every
     /// time the component renders. Arrays, objects, and functions are new values
