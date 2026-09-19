@@ -5,12 +5,13 @@ use biome_configuration::Configuration;
 use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_diagnostics::DiagnosticExt;
+use biome_diagnostics::{Diagnostic, DiagnosticExt, advice::CodeSuggestionAdvice};
+use biome_embeds::{EmbeddedSnippet, collect_embedded_data};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_html_parser::HtmlParserOptions;
 use biome_html_syntax::{
     AnyAstroDirective, AstroEmbeddedContent, HtmlAttribute, HtmlElement, HtmlLanguage, HtmlRoot,
-    HtmlTextExpression,
+    HtmlTextExpression, ScriptType,
 };
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::JsLanguage;
@@ -24,9 +25,11 @@ use biome_languages::{
 use biome_markdown_parser::MarkdownParserOptions;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, Language, NodeCache, TextSize};
+use biome_rowan::{AstNode, AstNodeList, Language, NodeCache, TextRange, TextSize, TokenText};
+use biome_text_edit::TextEdit;
 use camino::Utf8PathBuf;
 use std::slice;
+use std::sync::Arc;
 
 /// Analyzes a documentation code block with a single rule enabled.
 ///
@@ -111,7 +114,9 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
 
             let snippets = extract_html_embedded_js(code, &html_root, &html_file_source);
 
-            for snippet in snippets {
+            let mut parsed_snippets: Vec<AnyParse> = Vec::with_capacity(snippets.len());
+            let mut has_parse_errors = false;
+            for snippet in &snippets {
                 let parse = biome_js_parser::parse_js_with_offset_and_cache(
                     snippet.text,
                     snippet.offset,
@@ -122,29 +127,68 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 let any_parse: AnyParse = parse.into();
 
                 if any_parse.has_errors() {
+                    has_parse_errors = true;
                     for diagnostic in any_parse.into_diagnostics() {
+                        let span = diagnostic.location().span.map(|s| s + snippet.offset);
                         writer.write_parse_error(
                             diagnostic
+                                .with_file_span(span)
                                 .with_file_path(&file_path)
                                 .with_file_source_code(code),
                         )?;
                     }
                 } else {
+                    parsed_snippets.push(any_parse);
+                }
+            }
+
+            if !has_parse_errors {
+                let embedded_snippets: Vec<EmbeddedSnippet> = parsed_snippets
+                    .iter()
+                    .zip(&snippets)
+                    .map(|(any_parse, snippet)| {
+                        EmbeddedSnippet::new(
+                            any_parse,
+                            TextRange::at(snippet.offset, TextSize::of(snippet.text)),
+                            DocumentFileSource::Js(snippet.file_source),
+                        )
+                    })
+                    .collect();
+
+                let html_any_parse: AnyParse = parse.into();
+                let embedded_data = Arc::new(collect_embedded_data(
+                    DocumentFileSource::Html(html_file_source),
+                    &html_any_parse,
+                    embedded_snippets,
+                ));
+
+                for (any_parse, snippet) in parsed_snippets.into_iter().zip(snippets) {
                     let root = any_parse.tree();
                     let options =
                         code_block.create_analyzer_options::<JsLanguage>(configuration.clone())?;
-                    let services = services_builder.build_for_js_any_parse(
-                        Utf8PathBuf::from(&file_path),
-                        any_parse,
-                        snippet.file_source,
-                    );
+                    let services = services_builder
+                        .build_for_js_any_parse(
+                            Utf8PathBuf::from(&file_path),
+                            any_parse,
+                            snippet.file_source,
+                        )
+                        .with_embedded_data(Some(embedded_data.clone()));
                     let result = biome_js_analyze::analyze(
                         &root,
                         filter,
                         &options,
                         &[],
                         services,
-                        |signal| process_signal(signal, code, &file_path, writer),
+                        |signal| {
+                            process_signal(
+                                signal,
+                                code,
+                                &file_path,
+                                writer,
+                                Some(snippet.offset),
+                                Some(snippet.text),
+                            )
+                        },
                     );
                     propagate_break(result)?;
                 }
@@ -201,7 +245,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 );
                 let result =
                     biome_js_analyze::analyze(&root, filter, &options, &[], services, |signal| {
-                        process_signal(signal, analysis_code, &file_path, writer)
+                        process_signal(signal, analysis_code, &file_path, writer, None, None)
                     });
                 propagate_break(result)?;
             }
@@ -227,7 +271,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 };
                 let result =
                     biome_json_analyze::analyze(&root, filter, &options, services, &[], |signal| {
-                        process_signal(signal, code, &file_path, writer)
+                        process_signal(signal, code, &file_path, writer, None, None)
                     });
                 propagate_break(result)?;
             }
@@ -250,7 +294,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 let services = CssAnalyzerServices::default().with_file_source(file_source);
                 let result =
                     biome_css_analyze::analyze(&root, filter, &options, services, &[], |signal| {
-                        process_signal(signal, code, &file_path, writer)
+                        process_signal(signal, code, &file_path, writer, None, None)
                     });
                 propagate_break(result)?;
             }
@@ -271,7 +315,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 let options =
                     code_block.create_analyzer_options::<GraphqlLanguage>(configuration)?;
                 let result = biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
-                    process_signal(signal, code, &file_path, writer)
+                    process_signal(signal, code, &file_path, writer, None, None)
                 });
                 propagate_break(result)?;
             }
@@ -302,7 +346,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                     file_source,
                     services,
                     None,
-                    |signal| process_signal(signal, code, &file_path, writer),
+                    |signal| process_signal(signal, code, &file_path, writer, None, None),
                 );
                 propagate_break(result)?;
             }
@@ -324,7 +368,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 let options =
                     code_block.create_analyzer_options::<MarkdownLanguage>(configuration)?;
                 let result = biome_markdown_analyze::analyze(&root, filter, &options, |signal| {
-                    process_signal(signal, code, &file_path, writer)
+                    process_signal(signal, code, &file_path, writer, None, None)
                 });
                 propagate_break(result)?;
             }
@@ -342,12 +386,49 @@ fn process_signal<L: Language>(
     source: &str,
     file_path: &str,
     writer: &mut dyn DiagnosticWriter,
+    snippet_offset: Option<TextSize>,
+    snippet_text: Option<&str>,
 ) -> ControlFlow<anyhow::Error> {
     let actions = signal.actions(ActionFilter::rule_fix()).collect::<Vec<_>>();
 
+    let mut full_edits = Vec::with_capacity(actions.len());
+    for action in &actions {
+        let edit = action
+            .text_edit
+            .clone()
+            .or_else(|| action.mutation.clone().to_text_range_and_edit())
+            .map(|(_, e)| e);
+        if let Some(edit) = edit {
+            if let (Some(offset), Some(snippet_text)) = (snippet_offset, snippet_text) {
+                let new_snippet = edit.new_string(snippet_text);
+                let start = u32::from(offset) as usize;
+                let end = start + snippet_text.len();
+                let mut new_source = source.to_string();
+                new_source.replace_range(start..end, &new_snippet);
+                let full_edit = TextEdit::from_unicode_words(source, &new_source);
+                full_edits.push(Some(full_edit));
+            } else {
+                full_edits.push(Some(edit));
+            }
+        } else {
+            full_edits.push(None);
+        }
+    }
+
     if let Some(mut diagnostic) = signal.diagnostic() {
-        for action in &actions {
-            diagnostic = diagnostic.add_code_suggestion(action.clone().into());
+        if let Some(offset) = snippet_offset {
+            diagnostic.add_diagnostic_offset(offset);
+        }
+        for (action, full_edit) in actions.iter().zip(&full_edits) {
+            if let Some(full_edit) = full_edit {
+                diagnostic = diagnostic.add_code_suggestion(CodeSuggestionAdvice {
+                    applicability: action.applicability,
+                    msg: action.message.clone(),
+                    suggestion: full_edit.clone(),
+                });
+            } else {
+                diagnostic = diagnostic.add_code_suggestion(action.clone().into());
+            }
         }
         if let Err(error) = writer.write_diagnostic(
             diagnostic
@@ -358,13 +439,7 @@ fn process_signal<L: Language>(
         }
     }
 
-    for action in actions {
-        let Some((_, edit)) = action
-            .text_edit
-            .or_else(|| action.mutation.to_text_range_and_edit())
-        else {
-            continue;
-        };
+    for edit in full_edits.into_iter().flatten() {
         if let Err(error) = writer.write_action(source, file_path, edit) {
             return ControlFlow::Break(error);
         }
@@ -413,48 +488,64 @@ fn extract_html_embedded_js<'a>(
                     .tag_name()
                     .is_some_and(|name| name.text().eq_ignore_ascii_case("script"))
             {
-                let is_ts = element
-                    .opening_element()
-                    .ok()
-                    .into_iter()
-                    .flat_map(|opening| opening.attributes())
-                    .any(|attr| {
-                        attr.as_html_attribute().is_some_and(|a| {
-                            a.name()
-                                .ok()
-                                .and_then(|n| n.value_token().ok())
-                                .is_some_and(|t| t.text_trimmed() == "lang")
-                                && a.initializer()
-                                    .and_then(|i| i.value().ok())
-                                    .is_some_and(|v| {
-                                        v.as_html_string().is_some_and(|s| {
-                                            s.inner_string_text().is_ok_and(|t| t.text() == "ts")
-                                        })
-                                    })
-                        })
-                    });
-                let base_source = if is_ts {
-                    JsFileSource::ts()
-                } else {
-                    JsFileSource::js_module()
+                let opening = element.opening_element().ok();
+                let find_attr = |name: &str| -> Option<TokenText> {
+                    opening.as_ref()?.attributes().into_iter().find_map(|attr| {
+                        let attr = attr.as_html_attribute()?;
+                        let attr_name = attr.name().ok()?.value_token().ok()?;
+                        if attr_name.text_trimmed().eq_ignore_ascii_case(name) {
+                            let value = attr.initializer()?.value().ok()?;
+                            let string_literal = value.as_html_string()?;
+                            string_literal.inner_string_text().ok()
+                        } else {
+                            None
+                        }
+                    })
                 };
+
+                let type_value = find_attr("type");
+                if let Some(ref type_val) = type_value {
+                    let script_type = ScriptType::from_type_value(type_val.text());
+                    if script_type.is_json() || !script_type.is_javascript() {
+                        continue;
+                    }
+                }
+
+                let lang_value = find_attr("lang");
+                let lang = lang_value.as_ref().map(|t| t.text());
+
+                let base_source = if host_file_source.is_vue() || host_file_source.is_svelte() {
+                    match lang {
+                        Some(l) if l.eq_ignore_ascii_case("ts") => JsFileSource::ts(),
+                        Some(l) if l.eq_ignore_ascii_case("tsx") => JsFileSource::tsx(),
+                        Some(l) if l.eq_ignore_ascii_case("jsx") => JsFileSource::jsx(),
+                        _ => JsFileSource::js_module(),
+                    }
+                } else if host_file_source.is_astro() {
+                    JsFileSource::ts()
+                } else if type_value
+                    .as_ref()
+                    .is_some_and(|t| t.text().eq_ignore_ascii_case("module"))
+                {
+                    JsFileSource::js_module()
+                } else {
+                    JsFileSource::js_script()
+                };
+
                 let file_source = if host_file_source.is_svelte() {
                     base_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                         file_kind: SvelteFileKind::Component,
                         embedding_kind: SvelteEmbeddingKind::Source,
                     })
                 } else if host_file_source.is_vue() {
-                    let is_setup = element
-                        .opening_element()
-                        .ok()
-                        .into_iter()
-                        .flat_map(|opening| opening.attributes())
-                        .any(|attr| {
+                    let is_setup = opening.as_ref().is_some_and(|o| {
+                        o.attributes().into_iter().any(|attr| {
                             attr.as_html_attribute()
                                 .and_then(|a| a.name().ok())
                                 .and_then(|n| n.value_token().ok())
-                                .is_some_and(|t| t.text_trimmed() == "setup")
-                        });
+                                .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case("setup"))
+                        })
+                    });
                     base_source.with_embedding_kind(JsEmbeddingKind::Vue {
                         setup: is_setup,
                         is_source: true,
@@ -927,7 +1018,7 @@ mod tests {
             .expect("diagnostic should be emitted");
         let span = diagnostic.location().span.expect("span should be present");
         let highlighted = &code[span];
-        assert!(highlighted.contains("<img"));
+        assert_eq!(highlighted, "<img src=\"avatar.png\" />");
         let printed = biome_test_utils::diagnostic_to_string("code-block.astro", code, diagnostic);
         assert!(printed.contains("Provide a text alternative"));
     }
@@ -1034,5 +1125,136 @@ mod tests {
 
         assert_eq!(writer.all_diagnostics.len(), 1);
         assert_eq!(writer.action_count, 1);
+
+        let diagnostic = &writer.all_diagnostics[0];
+        let span = diagnostic.location().span.expect("span should be present");
+        assert_eq!(&code[span], "var x = 1");
+
+        let action_edit = writer
+            .all_actions
+            .pop()
+            .expect("action edit should be present");
+        let new_code = action_edit.new_string(code);
+        assert_eq!(new_code, "---\nconst x = 1;\n---\n");
+    }
+
+    #[test]
+    fn recognizes_template_references_in_astro_embedded_code() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro").expect("valid code block");
+        let code = "---\nconst greeting = 'hello';\n---\n<h1>{greeting}</h1>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "correctness",
+            rule: "noUnusedVariables",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn reports_actual_unused_variables_in_astro_embedded_code() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro expect_diagnostic").expect("valid code block");
+        let code = "---\nconst greeting = 'hello';\nconst unused = 1;\n---\n<h1>{greeting}</h1>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "correctness",
+            rule: "noUnusedVariables",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert_eq!(writer.all_diagnostics.len(), 1);
+        let span = writer.all_diagnostics[0].location().span.unwrap();
+        assert_eq!(&code[span], "unused");
+    }
+
+    #[test]
+    fn parses_astro_script_as_typescript() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("astro").expect("valid code block");
+        let code = "<script>\nconst n: number = 1;\n</script>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "suspicious",
+            rule: "noVar",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn parses_vue_and_svelte_tsx_scripts() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("vue").expect("valid code block");
+        let code = "<script lang=\"tsx\">\nconst elem: JSX.Element = <div />;\n</script>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "suspicious",
+            rule: "noVar",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.all_diagnostics.len(), 0);
+    }
+
+    #[test]
+    fn ignores_json_script_blocks() {
+        let mut services_builder = AnalyzerServicesBuilder::from_files(HashMap::new(), false);
+        let code_block = CodeBlock::from_str("html").expect("valid code block");
+        let code = "<script type=\"application/json\">\n{\n  \"key\": \"value\"\n}\n</script>";
+        let mut writer = DiagnosticConsoleWriter::default();
+
+        RuleCodeAnalyzer {
+            group: "suspicious",
+            rule: "noVar",
+            rule_language: "js",
+            code_block: &code_block,
+            code,
+            configuration: None,
+            services_builder: &mut services_builder,
+            writer: &mut writer,
+        }
+        .analyze()
+        .unwrap();
+
+        assert!(!writer.has_parse_error);
+        assert_eq!(writer.all_diagnostics.len(), 0);
     }
 }
