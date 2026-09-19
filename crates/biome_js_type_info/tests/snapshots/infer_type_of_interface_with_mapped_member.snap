@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+interface Config {
+	flags: { [K in "A" | "B"]: boolean };
+}
+
+```
+
+## Result
+
+```
+interface "Config" {
+  extends: []
+  type_args: []
+  members: ["flags": Local TypeId(5)]
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => K
+
+Module TypeId(1) => string: A
+
+Module TypeId(2) => string: B
+
+Module TypeId(3) => Local TypeId(1) | Local TypeId(2)
+
+Module TypeId(4) => boolean
+
+Module TypeId(5) => MappedType {
+    type_parameter: Resolved(
+        Local TypeId(0),
+    ),
+    keys: Type(
+        Resolved(
+            Local TypeId(3),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(4),
+    ),
+    readonly_modifier: None,
+    optional_modifier: None,
+}
+```

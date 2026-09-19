@@ -1,4 +1,4 @@
-use super::{InferredModuleTypes, collected_type_result};
+use super::{InferredModuleTypes, collected_type_result, normalize_structural_type};
 use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
@@ -355,6 +355,22 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             continue;
         }
 
+        if let InferredTypeData::MappedType(_) = ty {
+            // The members of a mapped type depend on the type arguments
+            // collected from enclosing instances, so they are substituted
+            // before the mapped type is evaluated. A mapped type that cannot
+            // be evaluated has no members to search.
+            let mapped = apply_substitutions(db, ty, &state.substitutions);
+            let evaluated =
+                normalize_structural_type(db, mapped, |ty| resolver.resolve_type(db, ty))
+                    .unwrap_or(InferredTypeData::Unknown);
+            if matches!(evaluated, InferredTypeData::Object(_)) {
+                state.ty = evaluated;
+                pending.push(state);
+            }
+            continue;
+        }
+
         if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, name, state.mode) {
             let member_ty = resolver.finalize_member_type(
                 db,
@@ -454,6 +470,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             | InferredTypeData::Local(_)
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::IndexedAccess(_)
+            | InferredTypeData::MappedType(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::TypeofExpression(_)
@@ -538,6 +555,7 @@ fn declared_type_parameters<'db>(
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
+        | InferredTypeData::MappedType(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -611,6 +629,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
+        | InferredTypeData::MappedType(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -716,6 +735,7 @@ fn find_own_member_type<'db>(
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
+        | InferredTypeData::MappedType(_)
         | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)

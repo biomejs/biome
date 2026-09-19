@@ -7,7 +7,7 @@ use biome_rowan::AstNode;
 
 use utils::{
     TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
-    get_function_declaration, get_variable_declaration, parse_ts,
+    get_function_declaration, get_interface_declaration, get_variable_declaration, parse_ts,
 };
 
 #[test]
@@ -506,4 +506,225 @@ fn contextual_callback_parameter_requires_direct_call_argument() {
             "{param:?} must not be contextually typed"
         );
     }
+}
+
+#[test]
+fn infer_type_of_mapped_type_preserves_parts() {
+    const CODE: &str = "type Optional<T> = { [K in keyof T]?: T[K] };";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert!(matches!(ty, TypeData::InstanceOf(_)));
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_mapped_type_preserves_parts",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_literal_keys() {
+    const CODE: &str = "type Flags = { readonly [K in \"A\" | \"B\"]-?: boolean };";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert!(matches!(ty, TypeData::MappedType(_)));
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_mapped_type_with_literal_keys",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_as_clause_is_unknown() {
+    const CODE: &str = "type Remapped<T> = { [K in keyof T as Uppercase<K>]: T[K] };";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_mapped_type_with_as_clause_is_unknown",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_binding() {
+    const CODE: &str = "let flags: { [K in keyof Source]?: boolean };";
+    let root = parse_ts(CODE);
+    let decl = get_variable_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    let bindings = TypeData::typed_bindings_from_js_variable_declaration(
+        &mut collector,
+        ScopeId::GLOBAL,
+        &decl,
+    );
+    assert_typed_bindings_snapshot(
+        CODE,
+        &bindings,
+        &collector,
+        "infer_type_of_mapped_type_binding",
+    );
+}
+
+#[test]
+fn infer_type_of_function_with_mapped_types() {
+    const CODE: &str = r#"function nullable<T>(value: { readonly [K in keyof T]: T[K] }): { [K in keyof T]: T[K] | null } {
+    return value;
+}"#;
+    let root = parse_ts(CODE);
+    let decl = get_function_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    let ty = TypeData::from_js_function_declaration(&mut collector, ScopeId::GLOBAL, &decl);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_function_with_mapped_types",
+    );
+}
+
+#[test]
+fn infer_type_of_interface_with_mapped_member() {
+    const CODE: &str = r#"interface Config {
+    flags: { [K in "A" | "B"]: boolean };
+}"#;
+    let root = parse_ts(CODE);
+    let decl = get_interface_declaration(&root);
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_interface_declaration(&mut collector, ScopeId::GLOBAL, &decl).unwrap();
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_interface_with_mapped_member",
+    );
+}
+
+fn mapped_type_alias_snapshot(code: &str, test_name: &str) {
+    let root = parse_ts(code);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert_type_data_snapshot(code, &ty, &collector, test_name);
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_typeof_keys() {
+    mapped_type_alias_snapshot(
+        "type Keys = { [K in keyof typeof object]: K };",
+        "infer_type_of_mapped_type_with_typeof_keys",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_aliased_keys() {
+    mapped_type_alias_snapshot(
+        "type Flags = { [K in Keys]: boolean };",
+        "infer_type_of_mapped_type_with_aliased_keys",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_primitive_keys() {
+    mapped_type_alias_snapshot(
+        "type Dictionary = { [K in string]: number };",
+        "infer_type_of_mapped_type_with_primitive_keys",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_never_keys() {
+    mapped_type_alias_snapshot(
+        "type Empty = { [K in never]: number };",
+        "infer_type_of_mapped_type_with_never_keys",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_removed_modifiers() {
+    mapped_type_alias_snapshot(
+        "type Mutable<T> = { -readonly [K in keyof T]-?: T[K] };",
+        "infer_type_of_mapped_type_with_removed_modifiers",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_added_modifiers() {
+    mapped_type_alias_snapshot(
+        "type Frozen<T> = { +readonly [K in keyof T]+?: T[K] };",
+        "infer_type_of_mapped_type_with_added_modifiers",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_without_annotation() {
+    mapped_type_alias_snapshot(
+        "type Implicit = { [K in \"A\"] };",
+        "infer_type_of_mapped_type_without_annotation",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_shadowed_type_parameter() {
+    mapped_type_alias_snapshot(
+        "type Identities<T> = { [K in keyof T]: <K>(value: K) => K };",
+        "infer_type_of_mapped_type_with_shadowed_type_parameter",
+    );
+}
+
+#[test]
+fn infer_type_of_nested_mapped_types() {
+    mapped_type_alias_snapshot(
+        "type Nested<T> = { [K in keyof T]: { [P in keyof T[K]]: T[K][P] } };",
+        "infer_type_of_nested_mapped_types",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_over_intersection() {
+    mapped_type_alias_snapshot(
+        "type Merged<A, B> = { [K in keyof (A & B)]: (A & B)[K] };",
+        "infer_type_of_mapped_type_over_intersection",
+    );
+}
+
+#[test]
+fn infer_type_of_mapped_type_with_parenthesized_keys() {
+    mapped_type_alias_snapshot(
+        "type Copy<T> = { [K in (keyof T)]: T[K] };",
+        "infer_type_of_mapped_type_with_parenthesized_keys",
+    );
 }
