@@ -1255,6 +1255,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
                 | InferredTypeData::TypeofExpression(_),
                 _,
             )
@@ -1267,6 +1268,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
                 | InferredTypeData::TypeofExpression(_),
             )
             | (

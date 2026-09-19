@@ -7,7 +7,7 @@
 
 use crate::TypeOperator;
 use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
-use crate::type_operations::{indexed_access, keyof};
+use crate::type_operations::{indexed_access, keyof, mapped_type};
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
@@ -39,15 +39,24 @@ pub struct TypeSubstitution<'db> {
 }
 
 impl<'db> TypeSubstitution<'db> {
-    /// Removes an empty generic instantiation used as a substitution pattern.
+    /// Returns the generic whose declarations shadow this substitution.
+    ///
+    /// An empty generic instantiation is reduced to its generic. An indexed
+    /// access such as `T[K]` is shadowed by declarations of its index `K`, so
+    /// a mapped type replacing `T[K]` does not reach into a nested mapped type
+    /// that declares its own `K`.
     fn binder_generic(self, db: &'db dyn TypeDb) -> TypeData<'db> {
-        if let TypeData::InstanceOf(instance) = self.generic
+        let generic = match self.generic {
+            TypeData::IndexedAccess(access) => access.index(db),
+            generic => generic,
+        };
+        if let TypeData::InstanceOf(instance) = generic
             && instance.type_parameters(db).is_empty()
             && matches!(instance.ty(db), TypeData::Generic(_))
         {
             instance.ty(db)
         } else {
-            self.generic
+            generic
         }
     }
 }
@@ -383,7 +392,21 @@ where
                 keyof(db, operator.ty(db)).unwrap_or(TypeData::Unknown)
             }
             TypeData::IndexedAccess(access) => {
-                indexed_access(db, access.object(db), access.index(db)).unwrap_or(TypeData::Unknown)
+                indexed_access(db, access.object(db), access.index(db)).unwrap_or_else(|| {
+                    // `T[K]` with an unsubstituted `K` is not unknown: a
+                    // mapped type still substitutes its keys for `K` after
+                    // normalizing its property type.
+                    if access.index(db).is_generic_reference(db) {
+                        TypeData::IndexedAccess(access)
+                    } else {
+                        TypeData::Unknown
+                    }
+                })
+            }
+            // A mapped type whose keys are not resolved stays unevaluated so it
+            // can still be instantiated by a later substitution.
+            TypeData::MappedType(mapped) => {
+                mapped_type(db, mapped).unwrap_or(TypeData::MappedType(mapped))
             }
             ty => ty,
         }
@@ -471,15 +494,17 @@ impl<'db> TypeData<'db> {
 
     /// Returns the generic parameters declared directly by this type.
     ///
-    /// Classes, constructors, functions, and interfaces are generic binders.
-    /// `Some(&[])` identifies one of those binders without parameters, while
-    /// `None` identifies a type that cannot declare generic parameters.
+    /// Classes, constructors, functions, interfaces, and mapped types are
+    /// generic binders. `Some(&[])` identifies one of those binders without
+    /// parameters, while `None` identifies a type that cannot declare generic
+    /// parameters.
     fn declared_type_parameters(self, db: &'db dyn TypeDb) -> Option<&'db [Self]> {
         match self {
             Self::Class(class) => Some(class.type_parameters(db)),
             Self::Constructor(constructor) => Some(constructor.type_parameters(db)),
             Self::Function(function) => Some(function.type_parameters(db)),
             Self::Interface(interface) => Some(interface.type_parameters(db)),
+            Self::MappedType(mapped) => Some(std::slice::from_ref(mapped.type_parameter(db))),
             _ => None,
         }
     }

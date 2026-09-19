@@ -456,3 +456,123 @@ fn test_infer_call_expression_type_substitutes_generic_inside_intersection_retur
         &fs,
     );
 }
+
+#[test]
+fn test_infer_module_types_substitutes_mapped_type_alias_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Source = { A: number; B: string };
+            type Mapped<T> = { [K in keyof T]: T[K] };
+            type Boxed<T> = { [K in keyof T]: { value: T[K] } };
+
+            export function readMapped(value: Mapped<Source>) {
+                return value.B;
+            }
+
+            export function readBoxed(value: Boxed<Source>) {
+                return value.A.value;
+            }
+
+            declare function produce<T>(value: T): Mapped<T>;
+            export const produced = produce({ A: 1 }).A;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let mapped_ty = inferred_function_return_ty_by_name(&db, module, inferred, "readMapped")
+        .expect("readMapped return type must be inferred");
+    assert!(
+        is_inferred_string(&db, mapped_ty),
+        "{}",
+        format_inferred_type(&db, mapped_ty)
+    );
+
+    let boxed_ty = inferred_function_return_ty_by_name(&db, module, inferred, "readBoxed")
+        .expect("readBoxed return type must be inferred");
+    assert!(
+        is_inferred_number(&db, boxed_ty),
+        "{}",
+        format_inferred_type(&db, boxed_ty)
+    );
+
+    let produced_ty = inferred_binding_ty_by_name(&db, module, inferred, "produced")
+        .expect("produced binding type must be inferred");
+    let produced_ty = normalize_type(&db, module, produced_ty);
+    assert!(
+        is_inferred_number(&db, produced_ty),
+        "{}",
+        format_inferred_type(&db, produced_ty)
+    );
+}
+
+#[test]
+fn test_infer_call_expression_type_substitutes_inline_mapped_return_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare function nullable<T>(value: T): { [K in keyof T]: T[K] | null };
+            declare function optional<T>(value: T): { [K in keyof T]?: T[K] };
+            type Source = { A: number; B: string };
+            declare const source: Source;
+            export const nullableA = nullable(source).A;
+            export const optionalB = optional(source).B;
+            export const literalA = nullable({ A: true }).A;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let nullable_a = inferred_binding_ty_by_name(&db, module, inferred, "nullableA")
+        .expect("nullableA binding type must be inferred");
+    let nullable_a = normalize_type(&db, module, nullable_a);
+    assert!(
+        contains_inferred_number(&db, nullable_a),
+        "{}",
+        format_inferred_type(&db, nullable_a)
+    );
+    assert!(
+        contains_inferred_null(&db, nullable_a),
+        "{}",
+        format_inferred_type(&db, nullable_a)
+    );
+
+    let optional_b = inferred_binding_ty_by_name(&db, module, inferred, "optionalB")
+        .expect("optionalB binding type must be inferred");
+    let optional_b = normalize_type(&db, module, optional_b);
+    assert!(
+        contains_inferred_string(&db, optional_b),
+        "{}",
+        format_inferred_type(&db, optional_b)
+    );
+    assert!(
+        contains_inferred_undefined(&db, optional_b),
+        "{}",
+        format_inferred_type(&db, optional_b)
+    );
+
+    let literal_a = inferred_binding_ty_by_name(&db, module, inferred, "literalA")
+        .expect("literalA binding type must be inferred");
+    let literal_a = normalize_type(&db, module, literal_a);
+    assert!(
+        contains_inferred_boolean(&db, literal_a),
+        "{}",
+        format_inferred_type(&db, literal_a)
+    );
+    assert!(
+        contains_inferred_null(&db, literal_a),
+        "{}",
+        format_inferred_type(&db, literal_a)
+    );
+}
