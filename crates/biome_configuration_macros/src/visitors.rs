@@ -12,6 +12,8 @@ use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "lang_md")]
 use biome_markdown_syntax::MarkdownLanguage;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_syntax::YamlLanguage;
 
 // ======= LINT ======
 #[derive(Default)]
@@ -169,6 +171,28 @@ impl biome_analyze::RegistryVisitor<MarkdownLanguage> for LintRulesVisitor {
     }
 }
 
+#[cfg(feature = "lang_yaml")]
+impl biome_analyze::RegistryVisitor<YamlLanguage> for LintRulesVisitor {
+    fn record_category<C: biome_analyze::GroupCategory<Language = YamlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, biome_analyze::RuleCategory::Lint) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: biome_analyze::Rule<
+                Options: Default,
+                Query: biome_analyze::Queryable<Language = YamlLanguage, Output: Clone>,
+            > + 'static,
+    {
+        self.groups
+            .entry(<R::Group as biome_analyze::RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
 // ======= ASSIST ======
 #[derive(Default)]
 pub struct AssistActionsVisitor {
@@ -298,6 +322,28 @@ impl biome_analyze::RegistryVisitor<MarkdownLanguage> for AssistActionsVisitor {
         R: biome_analyze::Rule<
                 Options: Default,
                 Query: biome_analyze::Queryable<Language = MarkdownLanguage, Output: Clone>,
+            > + 'static,
+    {
+        self.groups
+            .entry(<R::Group as biome_analyze::RuleGroup>::NAME)
+            .or_default()
+            .insert(R::METADATA.name, R::METADATA);
+    }
+}
+
+#[cfg(feature = "lang_yaml")]
+impl biome_analyze::RegistryVisitor<YamlLanguage> for AssistActionsVisitor {
+    fn record_category<C: biome_analyze::GroupCategory<Language = YamlLanguage>>(&mut self) {
+        if matches!(C::CATEGORY, biome_analyze::RuleCategory::Action) {
+            C::record_groups(self);
+        }
+    }
+
+    fn record_rule<R>(&mut self)
+    where
+        R: biome_analyze::Rule<
+                Options: Default,
+                Query: biome_analyze::Queryable<Language = YamlLanguage, Output: Clone>,
             > + 'static,
     {
         self.groups

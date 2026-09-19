@@ -20,6 +20,13 @@ pub struct YamlConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<YamlFormatterConfiguration>,
+
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(external(yaml_linter_configuration), optional, hide)
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub linter: Option<YamlLinterConfiguration>,
 }
 
 pub type YamlFormatterEnabled = Bool<true>;
@@ -99,4 +106,16 @@ pub struct YamlFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
+}
+
+/// Options that change how the Yaml linter behaves
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
+#[cfg_attr(feature = "cli", derive(Bpaf))]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
+pub struct YamlLinterConfiguration {
+    /// Control the linter for Yaml files.
+    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<YamlLinterEnabled>,
 }

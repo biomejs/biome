@@ -51,6 +51,10 @@ use biome_resolver::{
     package_has_exported_subpath, package_specifier_parts, resolve, resolve_package_root,
 };
 use biome_rowan::Language;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_analyze::METADATA as yaml_lint_metadata;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::borrow::Cow;
@@ -601,6 +605,8 @@ pub(crate) fn to_analyzer_rules_by_indices(
         push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_md")]
         push_to_analyzer_rules(rules, md_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_yaml")]
+        push_to_analyzer_rules(rules, yaml_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -614,6 +620,8 @@ pub(crate) fn to_analyzer_rules_by_indices(
         push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_md")]
         push_to_analyzer_assist(rules, md_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_yaml")]
+        push_to_analyzer_assist(rules, yaml_lint_metadata.deref(), &mut analyzer_rules);
     }
     settings
         .override_settings
@@ -1800,6 +1808,18 @@ impl RegistryVisitor<MarkdownLanguage> for ProjectScanComputer<'_> {
         self.check_rule::<R, MarkdownLanguage>();
     }
 }
+
+#[cfg(feature = "lang_yaml")]
+impl RegistryVisitor<YamlLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, YamlLanguage>();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

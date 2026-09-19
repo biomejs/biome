@@ -10,6 +10,7 @@ use biome_html_syntax::HtmlLanguage;
 use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_markdown_syntax::MarkdownLanguage;
+use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Serialize;
 use std::collections::{BTreeMap, HashSet};
@@ -54,6 +55,7 @@ impl<'a> SarifReporterVisitor<'a> {
         biome_json_analyze::visit_registry(&mut visitor);
         biome_js_analyze::visit_registry(&mut visitor);
         biome_markdown_analyze::visit_registry(&mut visitor);
+        biome_yaml_analyze::visit_registry(&mut visitor);
 
         visitor
     }
@@ -142,6 +144,20 @@ impl RegistryVisitor<MarkdownLanguage> for SarifReporterVisitor<'_> {
     fn record_rule<R>(&mut self)
     where
         R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule(
+            <R::Group as RuleGroup>::Category::CATEGORY,
+            R::METADATA.name,
+            R::METADATA.docs,
+        );
+    }
+}
+
+impl RegistryVisitor<YamlLanguage> for SarifReporterVisitor<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
             + 'static,
     {
         self.store_rule(

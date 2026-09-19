@@ -21,6 +21,7 @@ use biome_languages::{
 use biome_markdown_parser::MarkdownParserOptions;
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
+use biome_yaml_syntax::YamlLanguage;
 use camino::Utf8PathBuf;
 use std::slice;
 
@@ -244,7 +245,26 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
             }
         }
         DocumentFileSource::Grit(_) => todo!("Grit analysis is not yet supported"),
-        DocumentFileSource::Yaml(_) => todo!("Yaml analysis is not yet supported"),
+        DocumentFileSource::Yaml(_) => {
+            let parse = biome_yaml_parser::parse_yaml(code);
+
+            if parse.has_errors() {
+                for diagnostic in parse.into_diagnostics() {
+                    writer.write_parse_error(
+                        diagnostic
+                            .with_file_path(&file_path)
+                            .with_file_source_code(code),
+                    )?;
+                }
+            } else {
+                let root = parse.tree();
+                let options = code_block.create_analyzer_options::<YamlLanguage>(configuration)?;
+                let result = biome_yaml_analyze::analyze(&root, filter, &options, |signal| {
+                    process_signal(signal, code, &file_path, writer)
+                });
+                propagate_break(result)?;
+            }
+        }
         DocumentFileSource::Unknown | DocumentFileSource::Ignore => {}
     }
 
