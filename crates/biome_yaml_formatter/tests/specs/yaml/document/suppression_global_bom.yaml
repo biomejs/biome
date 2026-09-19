@@ -1,0 +1,4 @@
+﻿# biome-ignore-all format: preserve content after the BOM
+first:    [1,2]
+---
+second:    [3,4]
