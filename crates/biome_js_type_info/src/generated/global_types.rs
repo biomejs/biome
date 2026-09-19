@@ -36,6 +36,7 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::ERROR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
     crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID,
+    crate::globals::MATH_ID_GLOBAL_TYPE_ID,
     crate::globals::ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID,
     crate::globals::ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID,
     crate::globals::ITERATOR_RESULT_ID_GLOBAL_TYPE_ID,
@@ -317,6 +318,18 @@ pub(crate) fn set_generated_global_type_data(
             crate::TypeMember {
                 kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("compile")),
                 ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("flags")),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("sticky")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::Named(biome_rowan::Text::new_static("unicode")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
             },
         ]),
     }));
@@ -827,6 +840,187 @@ pub(crate) fn set_generated_global_type_data(
         return_type: crate::ReturnType::Type(crate::globals::GLOBAL_INSTANCEOF_ERROR_ID.into()),
     }));
     builder.set_type_data(crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Class(Box::new(crate::Class {
+        name: Some(biome_rowan::Text::new_static("Math")),
+        type_parameters: Box::default(),
+        extends: None,
+        implements: Box::default(),
+        members: Box::new([
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("E")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("LN10")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("LN2")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("LOG2E")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("LOG10E")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("PI")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("SQRT1_2")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("SQRT2")),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("abs")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("acos")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("asin")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("atan")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("atan2")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("ceil")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("cos")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("exp")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("floor")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("log")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("max")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(11)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("min")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(12)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("pow")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(13)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("random")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(14)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("round")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(15)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("sin")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(16)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("sqrt")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(17)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("tan")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(18)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("clz32")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(19)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("imul")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(20)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("sign")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(21)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("log10")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(22)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("log2")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(23)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("log1p")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(24)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("expm1")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(25)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("cosh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(26)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("sinh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(27)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("tanh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(28)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("acosh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(29)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("asinh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(30)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("atanh")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(31)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("hypot")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(32)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("trunc")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(33)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("fround")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(34)).into(),
+            },
+            crate::TypeMember {
+                kind: crate::TypeMemberKind::NamedStatic(biome_rowan::Text::new_static("cbrt")),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(35)).into(),
+            },
+        ]),
+    }));
+    builder.set_type_data(crate::globals::MATH_ID_GLOBAL_TYPE_ID, data);
     let data = crate::TypeData::Interface(Box::new(crate::Interface {
         name: biome_rowan::Text::new_static("IteratorYieldResult"),
         type_parameters: Box::new([crate::RawTypeId::Local(crate::TypeId::new(0)).into()]),
@@ -1004,6 +1198,516 @@ pub(crate) static SYMBOL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 7]> 
                 return_type: crate::ReturnType::Type(
                     crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                 ),
+            })),
+        ]
+    });
+pub(crate) static MATH_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 36]> =
+    std::sync::LazyLock::new(|| {
+        [
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("abs")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("acos")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("asin")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("atan")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("atan2")),
+                parameters: Box::new([
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("y"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                ]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("ceil")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("cos")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("exp")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("floor")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("log")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::instance_of(crate::TypeInstance {
+                ty: crate::globals::GLOBAL_ARRAY_ID.into(),
+                type_parameters: Box::new([crate::globals::GLOBAL_NUMBER_ID.into()]),
+            }),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("max")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("values"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("min")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("values"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("pow")),
+                parameters: Box::new([
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("y"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                ]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("random")),
+                parameters: Box::new([]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("round")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("sin")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("sqrt")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("tan")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("clz32")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("imul")),
+                parameters: Box::new([
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                    crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("y"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    }),
+                ]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("sign")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("log10")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("log2")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("log1p")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("expm1")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("cosh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("sinh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("tanh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("acosh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("asinh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("atanh")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("hypot")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("values"),
+                        ty: crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                        is_optional: false,
+                        is_rest: true,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("trunc")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("fround")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+            })),
+            crate::TypeData::Function(Box::new(crate::Function {
+                is_async: false,
+                type_parameters: Box::default(),
+                name: Some(biome_rowan::Text::new_static("cbrt")),
+                parameters: Box::new([crate::FunctionParameter::Named(
+                    crate::NamedFunctionParameter {
+                        name: biome_rowan::Text::new_static("x"),
+                        ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                        is_optional: false,
+                        is_rest: false,
+                    },
+                )]),
+                return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
             })),
         ]
     });
@@ -2049,6 +2753,7 @@ pub(crate) fn generated_local_types(
     match owner {
         crate::globals::REGEXP_ID_GLOBAL_TYPE_ID => &*REGEXP_LOCAL_TYPES,
         crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID => &*SYMBOL_LOCAL_TYPES,
+        crate::globals::MATH_ID_GLOBAL_TYPE_ID => &*MATH_LOCAL_TYPES,
         crate::globals::WEAK_MAP_ID_GLOBAL_TYPE_ID => &*WEAK_MAP_LOCAL_TYPES,
         crate::globals::SET_ID_GLOBAL_TYPE_ID => &*SET_LOCAL_TYPES,
         crate::globals::MAP_ID_GLOBAL_TYPE_ID => &*MAP_LOCAL_TYPES,

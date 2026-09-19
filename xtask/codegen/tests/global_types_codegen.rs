@@ -1008,6 +1008,7 @@ mod tests {
             generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
         );
         assert!(generated.contains("crate::globals::DATE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::MATH_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("builder.set_type_data("));
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
