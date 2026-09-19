@@ -2054,12 +2054,14 @@ dependencies = [
  "biome_languages",
  "biome_parser",
  "biome_rowan",
+ "biome_rule_options",
  "biome_tailwind_factory",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
  "insta",
  "phf 0.13.1",
  "rustc-hash 2.1.3",
+ "smallvec",
 ]
 
 [[package]]

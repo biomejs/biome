@@ -1,0 +1,105 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHelperTemplates.js
+---
+# Input
+```js
+// should generate diagnostics
+clsx`bg-pink-500`;
+cn`text-white hover:border-black`;
+cn(`bg-pink-500${suffix}`);
+cn(`${prefix}bg-pink-500`);
+cn(`bg-${color}`);
+
+```
+
+# Diagnostics
+```
+invalidHelperTemplates.js:2:6 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ clsx`bg-pink-500`;
+      │      ^^^^^^^^^^^
+    3 │ cn`text-white hover:border-black`;
+    4 │ cn(`bg-pink-500${suffix}`);
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHelperTemplates.js:4:5 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    2 │ clsx`bg-pink-500`;
+    3 │ cn`text-white hover:border-black`;
+  > 4 │ cn(`bg-pink-500${suffix}`);
+      │     ^^^^^^^^^^^
+    5 │ cn(`${prefix}bg-pink-500`);
+    6 │ cn(`bg-${color}`);
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHelperTemplates.js:5:14 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │ cn`text-white hover:border-black`;
+    4 │ cn(`bg-pink-500${suffix}`);
+  > 5 │ cn(`${prefix}bg-pink-500`);
+      │              ^^^^^^^^^^^
+    6 │ cn(`bg-${color}`);
+    7 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHelperTemplates.js:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'bg-'.
+  
+    4 │ cn(`bg-pink-500${suffix}`);
+    5 │ cn(`${prefix}bg-pink-500`);
+  > 6 │ cn(`bg-${color}`);
+      │     ^^^
+    7 │ 
+  
+  i Expected a candidate here.
+  
+    4 │ cn(`bg-pink-500${suffix}`);
+    5 │ cn(`${prefix}bg-pink-500`);
+  > 6 │ cn(`bg-${color}`);
+      │     ^^^
+    7 │ 
+  
+
+```
