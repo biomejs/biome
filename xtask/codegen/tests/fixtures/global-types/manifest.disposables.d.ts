@@ -84,4 +84,11 @@ interface Map<K, V> {}
 
 interface Set<T> {}
 
+interface Math {
+    readonly PI: number;
+    floor(x: number): number;
+}
+
+declare var Math: Math;
+
 interface WeakMap<K, V> {}

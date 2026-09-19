@@ -228,6 +228,49 @@ fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
 }
 
 #[test]
+fn math_members_infer_as_statics_from_declarations() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const pi = Math.PI;
+        export const e = Math.E;
+        export const floored = Math.floor(1.5);
+        export const largest = Math.max(1, 2, 3);
+        export const power = Math.pow(2, 8);
+        export const random = Math.random();
+        export const truncated = Math.trunc(1.5);
+        export const sign = Math.sign(-1);
+        export const root = Math.cbrt(27);
+        export const distance = Math.hypot(3, 4);
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in [
+        "pi",
+        "e",
+        "floored",
+        "largest",
+        "power",
+        "random",
+        "truncated",
+        "sign",
+        "root",
+        "distance",
+    ] {
+        assert!(is_inferred_number(&db, binding(name)), "{name}");
+    }
+}
+
+#[test]
 fn weak_map_members_infer_calls_with_instance_arguments() {
     let fs = MemoryFileSystem::default();
     fs.insert(
