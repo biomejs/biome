@@ -441,6 +441,7 @@ export interface YamlConfiguration {
 	 * Formatter options
 	 */
 	formatter?: YamlFormatterConfiguration;
+	linter?: YamlLinterConfiguration;
 }
 export interface Actions {
 	/**
@@ -1251,6 +1252,15 @@ Disable the option at your own risk.
 Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
+}
+/**
+ * Options that change how the Yaml linter behaves
+ */
+export interface YamlLinterConfiguration {
+	/**
+	 * Control the linter for Yaml files.
+	 */
+	enabled?: Bool;
 }
 /**
  * A preset configuration for enabling a set of rules.
@@ -10562,6 +10572,7 @@ export type Category =
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"

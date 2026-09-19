@@ -1,0 +1,12 @@
+# should generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+person2: { name: John, age: 50, name: Jane }
+
+person3:
+  name: John Doe
+  "name": Jane Doe
+  'name': Baby Doe

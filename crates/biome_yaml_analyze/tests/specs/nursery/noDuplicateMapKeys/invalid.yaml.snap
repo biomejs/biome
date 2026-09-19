@@ -1,0 +1,113 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+assertion_line: 118
+expression: invalid.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+person2: { name: John, age: 50, name: Jane }
+
+person3:
+  name: John Doe
+  "name": Jane Doe
+  'name': Baby Doe
+
+```
+
+# Diagnostics
+```
+invalid.yaml:3:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    1 │ # should generate diagnostics
+    2 │ person:
+  > 3 │   name: John Doe
+      │   ^^^^
+    4 │   age: 50
+    5 │   name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    3 │   name: John Doe
+    4 │   age: 50
+  > 5 │   name: Jane Doe
+      │   ^^^^
+    6 │ 
+    7 │ person2: { name: John, age: 50, name: Jane }
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:7:12 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    5 │   name: Jane Doe
+    6 │ 
+  > 7 │ person2: { name: John, age: 50, name: Jane }
+      │            ^^^^
+    8 │ 
+    9 │ person3:
+  
+  i This is where a duplicated key was declared again.
+  
+    5 │   name: Jane Doe
+    6 │ 
+  > 7 │ person2: { name: John, age: 50, name: Jane }
+      │                                 ^^^^
+    8 │ 
+    9 │ person3:
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:10:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+     9 │ person3:
+  > 10 │   name: John Doe
+       │   ^^^^
+    11 │   "name": Jane Doe
+    12 │   'name': Baby Doe
+  
+  i This is where a duplicated key was declared again.
+  
+     9 │ person3:
+    10 │   name: John Doe
+  > 11 │   "name": Jane Doe
+       │   ^^^^^^
+    12 │   'name': Baby Doe
+    13 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    10 │   name: John Doe
+    11 │   "name": Jane Doe
+  > 12 │   'name': Baby Doe
+       │   ^^^^^^
+    13 │ 
+  
+  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

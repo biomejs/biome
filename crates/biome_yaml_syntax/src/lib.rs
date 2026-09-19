@@ -4,10 +4,11 @@
 mod generated;
 mod block_ext;
 mod flow_ext;
+mod map_ext;
 mod syntax_node;
 
 pub use self::generated::*;
-use biome_rowan::{AstNode, RawSyntaxKind};
+use biome_rowan::{AstNode, RawSyntaxKind, TokenText};
 pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent};
 pub use block_ext::{AnyYamlBlockScalar, AnyYamlEntryValue};
 pub use syntax_node::*;
@@ -88,4 +89,29 @@ impl TryFrom<YamlSyntaxKind> for TriviaPieceKind {
             _ => Err(()),
         }
     }
+}
+
+/// Similar to [YamlSyntaxToken::token_text_trimmed()], but removes the quotes of string literals.
+///
+/// ## Examples
+///
+/// ```
+/// use biome_yaml_syntax::{YamlSyntaxKind, YamlSyntaxToken, inner_string_text};
+///
+/// let a = YamlSyntaxToken::new_detached(YamlSyntaxKind::SINGLE_QUOTED_LITERAL, "'inner_string_text'", [], []);
+/// let b = YamlSyntaxToken::new_detached(YamlSyntaxKind::DOUBLE_QUOTED_LITERAL, "\"inner_string_text\"", [], []);
+/// assert_eq!(inner_string_text(&a), inner_string_text(&b));
+/// ```
+pub fn inner_string_text(token: &YamlSyntaxToken) -> TokenText {
+    let mut text = token.token_text_trimmed();
+    if matches!(
+        token.kind(),
+        YamlSyntaxKind::SINGLE_QUOTED_LITERAL | YamlSyntaxKind::DOUBLE_QUOTED_LITERAL
+    ) && text.starts_with(['"', '\''])
+    {
+        // SAFETY: a string literal that starts with a quote is terminated by its matching quote
+        let range = TextRange::new(1.into(), text.len() - TextSize::from(1));
+        text = text.slice(range);
+    }
+    text
 }
