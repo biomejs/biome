@@ -9086,8 +9086,8 @@ impl CssUnknownValueAtRule {
     pub fn components(&self) -> SyntaxResult<CssUnknownAtRuleComponentList> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for CssUnknownValueAtRule {
@@ -9102,7 +9102,7 @@ impl Serialize for CssUnknownValueAtRule {
 pub struct CssUnknownValueAtRuleFields {
     pub name: SyntaxResult<AnyCssUnknownAtRuleName>,
     pub components: SyntaxResult<CssUnknownAtRuleComponentList>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUrlFunction {
@@ -10078,8 +10078,8 @@ impl ScssExtendAtRule {
     pub fn optional_modifier(&self) -> Option<ScssExtendOptionalModifier> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 3usize)
     }
 }
 impl Serialize for ScssExtendAtRule {
@@ -10095,7 +10095,7 @@ pub struct ScssExtendAtRuleFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub css_selector_list: CssSelectorList,
     pub optional_modifier: Option<ScssExtendOptionalModifier>,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssExtendOptionalModifier {
@@ -10474,8 +10474,8 @@ impl ScssImportAtRule {
     pub fn imports(&self) -> ScssImportItemList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssImportAtRule {
@@ -10490,7 +10490,7 @@ impl Serialize for ScssImportAtRule {
 pub struct ScssImportAtRuleFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub imports: ScssImportItemList,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssIncludeArgumentList {
@@ -13025,8 +13025,8 @@ impl TwApplyAtRule {
     pub fn classes(&self) -> TwApplyClassList {
         support::list(&self.syntax, 1usize)
     }
-    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+    pub fn semicolon_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
     }
 }
 impl Serialize for TwApplyAtRule {
@@ -13041,7 +13041,7 @@ impl Serialize for TwApplyAtRule {
 pub struct TwApplyAtRuleFields {
     pub apply_token: SyntaxResult<SyntaxToken>,
     pub classes: TwApplyClassList,
-    pub semicolon_token: SyntaxResult<SyntaxToken>,
+    pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwConfigAtRule {
@@ -29265,7 +29265,7 @@ impl std::fmt::Debug for CssUnknownValueAtRule {
                 .field("components", &support::DebugSyntaxResult(self.components()))
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -30452,7 +30452,7 @@ impl std::fmt::Debug for ScssExtendAtRule {
                 )
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -30890,7 +30890,7 @@ impl std::fmt::Debug for ScssImportAtRule {
                 .field("imports", &self.imports())
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {
@@ -34059,7 +34059,7 @@ impl std::fmt::Debug for TwApplyAtRule {
                 .field("classes", &self.classes())
                 .field(
                     "semicolon_token",
-                    &support::DebugSyntaxResult(self.semicolon_token()),
+                    &support::DebugOptionalElement(self.semicolon_token()),
                 )
                 .finish()
         } else {

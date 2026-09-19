@@ -1,5 +1,7 @@
-use super::resolve_local_type_on_demand;
-use super::{apply_substitutions_to_root_body, substitutions_for_instance};
+use super::{
+    apply_substitutions_to_root_body, normalize_structural_type, resolve_local_type_on_demand,
+    substitutions_for_instance,
+};
 use crate::ModuleDb;
 use biome_js_type_info::interned_types::{
     InternedLiteral, Literal, TypeData, TypeMember, TypeMemberKind,
@@ -209,6 +211,17 @@ impl<'db> KeyofEvaluator<'db> {
                 TypeOperator::Unique => None,
                 TypeOperator::Keyof => None,
             },
+            TypeData::IndexedAccess(_) => {
+                let normalized = normalize_structural_type(self.db, ty, |ty| {
+                    resolve_local_type_on_demand(self.db, ty)
+                })
+                .ok()?;
+                if matches!(normalized, TypeData::Object(_)) {
+                    self.collect(normalized, class_side)
+                } else {
+                    None
+                }
+            }
             TypeData::Generic(_)
             | TypeData::Unknown
             | TypeData::Global
@@ -252,7 +265,7 @@ impl<'db> KeyofEvaluator<'db> {
     ) -> Option<KeyProjection<'db>> {
         let mut keys = Vec::new();
         for member in members {
-            if member.kind.is_constructor() {
+            if member.kind.is_constructor() || member.kind.is_call_signature() {
                 continue;
             }
             if member

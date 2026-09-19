@@ -1510,7 +1510,7 @@
 					]
 				},
 				"useUniqueElementIds": {
-					"description": "Prevent the usage of static string literal id attribute on elements.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
+					"description": "Prevent the usage of static string literal id attribute on elements outside SVG contexts.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueElementIdsConfiguration" },
 						{ "type": "null" }
@@ -4631,6 +4631,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoJsonUnsafeValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoJsonUnsafeValuesOptions" }
+			]
+		},
+		"NoJsonUnsafeValuesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsxLeakedDollarConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5677,6 +5687,16 @@
 			]
 		},
 		"NoSuspiciousSemicolonInJsxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoSvelteAtDebugTagsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteAtDebugTagsOptions" }
+			]
+		},
+		"NoSvelteAtDebugTagsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6764,6 +6784,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUndeclaredDirectivesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUndeclaredDirectivesOptions" }
+			]
+		},
+		"NoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"globals": {
+					"description": "Names of directives registered globally with `app.directive(...)`,\nwritten in kebab-case without the `v-` prefix, such as\n`click-outside` for `v-click-outside`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6810,6 +6847,30 @@
 		"NoYodaExpressionOptions": {
 			"type": "object",
 			"additionalProperties": false
+		},
+		"NormalizationForm": {
+			"oneOf": [
+				{
+					"description": "Canonical Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFC"
+				},
+				{
+					"description": "Canonical Decomposition",
+					"type": "string",
+					"const": "NFD"
+				},
+				{
+					"description": "Compatibility Decomposition followed by Canonical Composition",
+					"type": "string",
+					"const": "NFKC"
+				},
+				{
+					"description": "Compatibility Decomposition",
+					"type": "string",
+					"const": "NFKD"
+				}
+			]
 		},
 		"NormalizedGlob": {
 			"description": "Normalized Biome glob pattern that strips `./` from the pattern.",
@@ -6976,6 +7037,13 @@
 					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsRestrictedPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noJsonUnsafeValues": {
+					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7147,6 +7215,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteAtDebugTags": {
+					"description": "Disallow the use of Svelte's {@debug} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteAtDebugTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteAtHtmlTags": {
 					"description": "Disallow the use of Svelte's {@html} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
 					"anyOf": [
@@ -7280,6 +7355,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueUndeclaredDirectives": {
+					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueVOnNumberValues": {
 					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
 					"anyOf": [
@@ -7341,6 +7423,13 @@
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentFunctionStyleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentObjectKeys": {
+					"description": "Enforce JSON keys with consistent Unicode representation.\nSee https://biomejs.dev/linter/rules/use-consistent-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7429,7 +7518,7 @@
 					]
 				},
 				"useIncludes": {
-					"description": "Prefer Array#includes() over Array#indexOf() checks.\nSee https://biomejs.dev/linter/rules/use-includes",
+					"description": "Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.\nSee https://biomejs.dev/linter/rules/use-includes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseIncludesConfiguration" },
 						{ "type": "null" }
@@ -7611,6 +7700,13 @@
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useValidTestTitle": {
+					"description": "Enforce valid titles for unit test cases and test suites.\nSee https://biomejs.dev/linter/rules/use-valid-test-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseValidTestTitleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9684,6 +9780,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoJsonUnsafeValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoJsonUnsafeValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoJsxLeakedDollarOptions": {
 			"type": "object",
 			"properties": {
@@ -10591,6 +10696,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteAtDebugTagsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteAtDebugTagsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvelteAtHtmlTagsOptions": {
 			"type": "object",
 			"properties": {
@@ -11456,6 +11571,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueUndeclaredDirectivesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUndeclaredDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueVIfWithVForOptions": {
 			"type": "object",
 			"properties": {
@@ -11826,6 +11950,16 @@
 				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentObjectDefinitionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentObjectKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13135,6 +13269,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseValidTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseValidTestTitleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseValidTypeofOptions": {
 			"type": "object",
 			"properties": {
@@ -14288,7 +14432,7 @@
 					]
 				},
 				"useReadonlyClassProperties": {
-					"description": "Enforce marking members as readonly if they are never modified outside the constructor.\nSee https://biomejs.dev/linter/rules/use-readonly-class-properties",
+					"description": "Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.\nSee https://biomejs.dev/linter/rules/use-readonly-class-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseReadonlyClassPropertiesConfiguration" },
 						{ "type": "null" }
@@ -15748,6 +15892,22 @@
 			},
 			"additionalProperties": false
 		},
+		"UseConsistentObjectKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentObjectKeysOptions" }
+			]
+		},
+		"UseConsistentObjectKeysOptions": {
+			"type": "object",
+			"properties": {
+				"form": {
+					"description": "The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.",
+					"anyOf": [{ "$ref": "#/$defs/NormalizationForm" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentTestItConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15995,6 +16155,12 @@
 		},
 		"UseExhaustiveSwitchCasesOptions": {
 			"type": "object",
+			"properties": {
+				"requireExplicitCase": {
+					"description": "Require a `case` for each value in the union, even when the switch has a `default` clause.\nDefault: `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseExpectConfiguration": {
@@ -17521,6 +17687,23 @@
 			]
 		},
 		"UseValidLangOptions": { "type": "object", "additionalProperties": false },
+		"UseValidTestTitleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseValidTestTitleOptions" }
+			]
+		},
+		"UseValidTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"disallowedWords": {
+					"description": "A list of words that are disallowed in test titles.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseValidTypeofConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

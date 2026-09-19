@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/backend-jsonrpc",
-  "version": "2.0.67",
+  "version": "2.0.68",
   "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
@@ -36,7 +36,7 @@
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "24.13.3",
+    "@types/node": "24.13.4",
     "typescript": "5.9.3",
     "vite": "7.3.6",
     "vitest": "4.1.11"
@@ -45,13 +45,13 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "2.5.13",
-    "@biomejs/cli-win32-arm64": "2.5.13",
-    "@biomejs/cli-darwin-x64": "2.5.13",
-    "@biomejs/cli-darwin-arm64": "2.5.13",
-    "@biomejs/cli-linux-x64": "2.5.13",
-    "@biomejs/cli-linux-arm64": "2.5.13",
-    "@biomejs/cli-linux-x64-musl": "2.5.13",
-    "@biomejs/cli-linux-arm64-musl": "2.5.13"
+    "@biomejs/cli-win32-x64": "2.5.14",
+    "@biomejs/cli-win32-arm64": "2.5.14",
+    "@biomejs/cli-darwin-x64": "2.5.14",
+    "@biomejs/cli-darwin-arm64": "2.5.14",
+    "@biomejs/cli-linux-x64": "2.5.14",
+    "@biomejs/cli-linux-arm64": "2.5.14",
+    "@biomejs/cli-linux-x64-musl": "2.5.14",
+    "@biomejs/cli-linux-arm64-musl": "2.5.14"
   }
 }

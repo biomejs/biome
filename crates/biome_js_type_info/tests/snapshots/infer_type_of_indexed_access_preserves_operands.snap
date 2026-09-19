@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Element = (typeof values)[Index];
+
+```
+
+## Result
+
+```
+IndexedAccessType {
+    object: Resolved(
+        Local TypeId(0),
+    ),
+    index: Resolved(
+        Local TypeId(1),
+    ),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => typeof unresolved reference "values" (scope ID: 0)
+
+Module TypeId(1) => instanceof unresolved reference "Index" (scope ID: 0)
+```

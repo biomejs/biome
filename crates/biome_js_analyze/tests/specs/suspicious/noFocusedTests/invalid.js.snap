@@ -35,6 +35,12 @@ describe.only.each([["a"], ["b"]])("%s", (a) => {});
 it.only.each([["a"], ["b"]])("%s", (a) => {});
 test.only.each([["a"], ["b"]])("%s", (a) => {});
 
+fsuite("foo", () => {});
+suite.only("bar", () => {});
+suite["only"]("bar", function () {});
+suite.only.each([["a"], ["b"]])("%s", (a) => {});
+
+
 ```
 
 # Diagnostics
@@ -554,6 +560,7 @@ invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   > 30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
        │      ^^^^
     31 │ 
+    32 │ fsuite("foo", () => {});
   
   i The 'only' method is often used for debugging or during implementation.
   
@@ -563,5 +570,100 @@ invalid.js:30:6 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━�
   
     30 │ test.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
        │     -----                                       
+
+```
+
+```
+invalid.js:32:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    30 │ test.only.each([["a"], ["b"]])("%s", (a) => {});
+    31 │ 
+  > 32 │ fsuite("foo", () => {});
+       │ ^^^^^^
+    33 │ suite.only("bar", () => {});
+    34 │ suite["only"]("bar", function () {});
+  
+  i The 'fsuite' method is often used for debugging or during implementation.
+  
+  i Consider removing 'f' prefix from 'fsuite' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    30 30 │   test.only.each([["a"], ["b"]])("%s", (a) => {});
+    31 31 │   
+    32    │ - fsuite("foo",·()·=>·{});
+       32 │ + suite("foo",·()·=>·{});
+    33 33 │   suite.only("bar", () => {});
+    34 34 │   suite["only"]("bar", function () {});
+  
+
+```
+
+```
+invalid.js:33:7 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    32 │ fsuite("foo", () => {});
+  > 33 │ suite.only("bar", () => {});
+       │       ^^^^
+    34 │ suite["only"]("bar", function () {});
+    35 │ suite.only.each([["a"], ["b"]])("%s", (a) => {});
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    33 │ suite.only("bar",·()·=>·{});
+       │      -----                  
+
+```
+
+```
+invalid.js:34:1 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    32 │ fsuite("foo", () => {});
+    33 │ suite.only("bar", () => {});
+  > 34 │ suite["only"]("bar", function () {});
+       │ ^^^^^^^^^^^^^
+    35 │ suite.only.each([["a"], ["b"]])("%s", (a) => {});
+    36 │ 
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    34 │ suite["only"]("bar",·function·()·{});
+       │      --------                        
+
+```
+
+```
+invalid.js:35:7 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't focus the test.
+  
+    33 │ suite.only("bar", () => {});
+    34 │ suite["only"]("bar", function () {});
+  > 35 │ suite.only.each([["a"], ["b"]])("%s", (a) => {});
+       │       ^^^^
+    36 │ 
+  
+  i The 'only' method is often used for debugging or during implementation.
+  
+  i Consider removing 'only' to ensure all tests are executed.
+  
+  i Unsafe fix: Remove focus from test.
+  
+    35 │ suite.only.each([["a"],·["b"]])("%s",·(a)·=>·{});
+       │      -----                                       
 
 ```

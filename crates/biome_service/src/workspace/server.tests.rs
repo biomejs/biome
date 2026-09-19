@@ -4398,6 +4398,73 @@ fn go_to_definition_css_class_via_transitive_import() {
     // "card" in `.card` starts at offset 1 (after the dot)
     assert_eq!(range, &TextRange::new(TextSize::from(1), TextSize::from(5)));
 }
+
+#[test]
+fn fix_file_respects_inline_format_with_errors() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = "let a = 1; this is not valid javascript";
+    const FORMATTED: &str = "const a = 1;\nthis;\nis;\nnot;\nvalid;\njavascript;\n";
+
+    for (project_format_with_errors, inline_format_with_errors, expected) in [
+        (false, true, FORMATTED),
+        (true, false, "const a = 1; this is not valid javascript"),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    formatter: Some(FormatterConfiguration {
+                        format_with_errors: Some(project_format_with_errors.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                workspace_directory: Some(BiomePath::new("/project")),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let use_const = AnalyzerSelector::from_str("lint/style/useConst").unwrap();
+        let result = workspace
+            .fix_file(FixFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                fix_file_mode: FixFileMode::SafeFixes,
+                should_format: true,
+                only: vec![use_const],
+                skip: vec![],
+                enabled_rules: vec![use_const],
+                rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
+                suppression_reason: None,
+                inline_config: Some(Configuration {
+                    formatter: Some(FormatterConfiguration {
+                        format_with_errors: Some(inline_format_with_errors.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+            })
+            .unwrap();
+
+        assert_eq!(result.code, expected);
+    }
+}
+
 #[test]
 fn fix_file_is_idempotent_for_template_literals_and_css_block_comments() {
     // Regression: reindent_embedded_code was adding the host indentation prefix

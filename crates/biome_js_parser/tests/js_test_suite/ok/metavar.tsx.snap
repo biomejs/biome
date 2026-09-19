@@ -26,6 +26,10 @@ function µfunctionName() {}
 
 type µType = µOtherType;
 
+interface µInterface {
+    µbody
+}
+
 <µtag µ_>µ_</µtag>
 
 ```
@@ -243,52 +247,67 @@ JsModule {
             },
             semicolon_token: SEMICOLON@311..312 ";" [] [],
         },
+        TsInterfaceDeclaration {
+            interface_token: INTERFACE_KW@312..324 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            id: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@324..336 "µInterface" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            l_curly_token: L_CURLY@336..337 "{" [] [],
+            members: TsTypeMemberList [
+                JsMetavariable {
+                    value_token: GRIT_METAVARIABLE@337..348 "µbody" [Newline("\n"), Whitespace("    ")] [],
+                },
+            ],
+            r_curly_token: R_CURLY@348..350 "}" [Newline("\n")] [],
+        },
         JsExpressionStatement {
             expression: JsxTagExpression {
                 tag: JsxElement {
                     opening_element: JsxOpeningElement {
-                        l_angle_token: L_ANGLE@312..315 "<" [Newline("\n"), Newline("\n")] [],
+                        l_angle_token: L_ANGLE@350..353 "<" [Newline("\n"), Newline("\n")] [],
                         name: JsMetavariable {
-                            value_token: GRIT_METAVARIABLE@315..321 "µtag" [] [Whitespace(" ")],
+                            value_token: GRIT_METAVARIABLE@353..359 "µtag" [] [Whitespace(" ")],
                         },
                         type_arguments: missing (optional),
                         attributes: JsxAttributeList [
                             JsMetavariable {
-                                value_token: GRIT_METAVARIABLE@321..324 "µ_" [] [],
+                                value_token: GRIT_METAVARIABLE@359..362 "µ_" [] [],
                             },
                         ],
-                        r_angle_token: R_ANGLE@324..325 ">" [] [],
+                        r_angle_token: R_ANGLE@362..363 ">" [] [],
                     },
                     elements: JsxChildList [
                         JsMetavariable {
-                            value_token: GRIT_METAVARIABLE@325..328 "µ_" [] [],
+                            value_token: GRIT_METAVARIABLE@363..366 "µ_" [] [],
                         },
                     ],
                     closing_element: JsxClosingElement {
-                        l_angle_token: L_ANGLE@328..329 "<" [] [],
-                        slash_token: SLASH@329..330 "/" [] [],
+                        l_angle_token: L_ANGLE@366..367 "<" [] [],
+                        slash_token: SLASH@367..368 "/" [] [],
                         name: JsMetavariable {
-                            value_token: GRIT_METAVARIABLE@330..335 "µtag" [] [],
+                            value_token: GRIT_METAVARIABLE@368..373 "µtag" [] [],
                         },
-                        r_angle_token: R_ANGLE@335..336 ">" [] [],
+                        r_angle_token: R_ANGLE@373..374 ">" [] [],
                     },
                 },
             },
             semicolon_token: missing (optional),
         },
     ],
-    eof_token: EOF@336..337 "" [Newline("\n")] [],
+    eof_token: EOF@374..375 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..337
+0: JS_MODULE@0..375
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..336
+  3: JS_MODULE_ITEM_LIST@0..374
     0: JS_IMPORT@0..37
       0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
       1: JS_IMPORT_DEFAULT_CLAUSE@7..36
@@ -436,28 +455,39 @@ JsModule {
       4: JS_METAVARIABLE@300..311
         0: GRIT_METAVARIABLE@300..311 "µOtherType" [] []
       5: SEMICOLON@311..312 ";" [] []
-    8: JS_EXPRESSION_STATEMENT@312..336
-      0: JSX_TAG_EXPRESSION@312..336
-        0: JSX_ELEMENT@312..336
-          0: JSX_OPENING_ELEMENT@312..325
-            0: L_ANGLE@312..315 "<" [Newline("\n"), Newline("\n")] []
-            1: JS_METAVARIABLE@315..321
-              0: GRIT_METAVARIABLE@315..321 "µtag" [] [Whitespace(" ")]
+    8: TS_INTERFACE_DECLARATION@312..350
+      0: INTERFACE_KW@312..324 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: JS_METAVARIABLE@324..336
+        0: GRIT_METAVARIABLE@324..336 "µInterface" [] [Whitespace(" ")]
+      2: (empty)
+      3: (empty)
+      4: L_CURLY@336..337 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@337..348
+        0: JS_METAVARIABLE@337..348
+          0: GRIT_METAVARIABLE@337..348 "µbody" [Newline("\n"), Whitespace("    ")] []
+      6: R_CURLY@348..350 "}" [Newline("\n")] []
+    9: JS_EXPRESSION_STATEMENT@350..374
+      0: JSX_TAG_EXPRESSION@350..374
+        0: JSX_ELEMENT@350..374
+          0: JSX_OPENING_ELEMENT@350..363
+            0: L_ANGLE@350..353 "<" [Newline("\n"), Newline("\n")] []
+            1: JS_METAVARIABLE@353..359
+              0: GRIT_METAVARIABLE@353..359 "µtag" [] [Whitespace(" ")]
             2: (empty)
-            3: JSX_ATTRIBUTE_LIST@321..324
-              0: JS_METAVARIABLE@321..324
-                0: GRIT_METAVARIABLE@321..324 "µ_" [] []
-            4: R_ANGLE@324..325 ">" [] []
-          1: JSX_CHILD_LIST@325..328
-            0: JS_METAVARIABLE@325..328
-              0: GRIT_METAVARIABLE@325..328 "µ_" [] []
-          2: JSX_CLOSING_ELEMENT@328..336
-            0: L_ANGLE@328..329 "<" [] []
-            1: SLASH@329..330 "/" [] []
-            2: JS_METAVARIABLE@330..335
-              0: GRIT_METAVARIABLE@330..335 "µtag" [] []
-            3: R_ANGLE@335..336 ">" [] []
+            3: JSX_ATTRIBUTE_LIST@359..362
+              0: JS_METAVARIABLE@359..362
+                0: GRIT_METAVARIABLE@359..362 "µ_" [] []
+            4: R_ANGLE@362..363 ">" [] []
+          1: JSX_CHILD_LIST@363..366
+            0: JS_METAVARIABLE@363..366
+              0: GRIT_METAVARIABLE@363..366 "µ_" [] []
+          2: JSX_CLOSING_ELEMENT@366..374
+            0: L_ANGLE@366..367 "<" [] []
+            1: SLASH@367..368 "/" [] []
+            2: JS_METAVARIABLE@368..373
+              0: GRIT_METAVARIABLE@368..373 "µtag" [] []
+            3: R_ANGLE@373..374 ">" [] []
       1: (empty)
-  4: EOF@336..337 "" [Newline("\n")] []
+  4: EOF@374..375 "" [Newline("\n")] []
 
 ```

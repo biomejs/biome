@@ -18,4 +18,8 @@ function µfunctionName() {}
 
 type µType = µOtherType;
 
+interface µInterface {
+    µbody
+}
+
 <µtag µ_>µ_</µtag>

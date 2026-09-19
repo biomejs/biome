@@ -4338,6 +4338,7 @@ export type AnyTsType =
 	| TsVoidType;
 export type AnyTsTypeMember =
 	| JsBogusMember
+	| JsMetavariable
 	| TsCallSignatureTypeMember
 	| TsConstructSignatureTypeMember
 	| TsGetterSignatureTypeMember

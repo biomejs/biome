@@ -379,7 +379,7 @@ impl<'db> MergedType<'db> {
             | TypeData::Undefined => Some(Self::Primitive(ty)),
             TypeData::Class(class) => Some(Self::Object(
                 class_static_members(db, class.members(db)),
-                false,
+                true,
             )),
             TypeData::Function(function) => Some(Self::Function(function)),
             TypeData::InstanceOf(instance) => match instance.ty(db) {
@@ -402,7 +402,7 @@ impl<'db> MergedType<'db> {
             TypeData::NeverKeyword => Some(Self::Never),
             TypeData::Object(object) => Some(Self::Object(
                 object.members(db).to_vec(),
-                object.has_unknown_members(db),
+                object.has_unknown_members(db) || object.prototype(db).is_some(),
             )),
             TypeData::Unknown | TypeData::UnknownKeyword => Some(Self::Unknown),
             _ => None,
@@ -438,15 +438,15 @@ impl<'db> MergedType<'db> {
     /// Splits the merged type into the parts that intersection combines.
     ///
     /// The trailing flag reports whether the operand could hold members that
-    /// inference did not model. Only an object can carry it; every other kind
-    /// reports `false`.
+    /// inference did not model. Class, interface, and namespace member lists
+    /// may omit inherited or uncollected keys, so they also set this flag.
     fn into_kind_with_members(self) -> (MergedTypeKind, Vec<TypeMember<'db>>, bool) {
         match self {
             Self::Any => (MergedTypeKind::Any, Vec::new(), false),
-            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members, false),
+            Self::ClassInstance(members) => (MergedTypeKind::ClassInstance, members, true),
             Self::Function(_) => (MergedTypeKind::Function, Vec::new(), false),
-            Self::Interface(members) => (MergedTypeKind::Interface, members, false),
-            Self::Namespace(members) => (MergedTypeKind::Namespace, members, false),
+            Self::Interface(members) => (MergedTypeKind::Interface, members, true),
+            Self::Namespace(members) => (MergedTypeKind::Namespace, members, true),
             Self::Never => (MergedTypeKind::Never, Vec::new(), false),
             Self::Object(members, has_unknown_members) => {
                 (MergedTypeKind::Object, members, has_unknown_members)

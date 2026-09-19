@@ -124,6 +124,7 @@ pub enum TypeData<'db> {
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
+    IndexedAccess(InternedIndexedAccessType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -252,6 +253,7 @@ impl<'db> TypeData<'db> {
             Self::Unknown
                 | Self::Local(_)
                 | Self::TypeofExpression(_)
+                | Self::IndexedAccess(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -329,6 +331,7 @@ impl<'db> TypeData<'db> {
                 Self::Local(_) => "unresolved",
                 Self::MergedReference(_) => "merged type",
                 Self::TypeOperator(_) => "type operator",
+                Self::IndexedAccess(_) => "indexed access",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -595,6 +598,7 @@ impl<'db> TypeData<'db> {
             | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -640,6 +644,7 @@ impl<'db> TypeData<'db> {
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofExpression(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
@@ -897,6 +902,7 @@ impl<'db> TypeData<'db> {
             | Self::Intersection(_)
             | Self::Union(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1067,6 +1073,7 @@ impl<'db> TypeData<'db> {
                         is_rest: element.is_rest,
                     })
                     .collect::<Box<[_]>>(),
+                tuple.is_inferred_array,
             )),
             raw::TypeData::Generic(generic) => Self::Generic(InternedGenericTypeParameter::new(
                 db,
@@ -1093,6 +1100,13 @@ impl<'db> TypeData<'db> {
                     db,
                     resolve_reference(&type_operator.ty),
                     type_operator.operator,
+                ))
+            }
+            raw::TypeData::IndexedAccess(access) => {
+                Self::IndexedAccess(InternedIndexedAccessType::new(
+                    db,
+                    resolve_reference(&access.object),
+                    resolve_reference(&access.index),
                 ))
             }
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
@@ -1223,6 +1237,9 @@ impl<'db> TypeDataSlots<'db> {
             }
             TypeData::Union(union) => result.slots.extend_from_slice(union.types(db)),
             TypeData::TypeOperator(operator) => result.slots.push(operator.ty(db)),
+            TypeData::IndexedAccess(access) => {
+                result.slots.extend([access.object(db), access.index(db)])
+            }
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1510,6 +1527,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                         Some(element)
                     })
                     .collect::<Option<Box<[_]>>>()?,
+                tuple.is_inferred_array(db),
             )),
             TypeData::Generic(generic) => TypeData::Generic(InternedGenericTypeParameter::new(
                 db,
@@ -1527,6 +1545,11 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeData::TypeOperator(operator) => TypeData::TypeOperator(
                 InternedTypeOperatorType::new(db, self.take_type()?, operator.operator(db)),
             ),
+            TypeData::IndexedAccess(_) => TypeData::IndexedAccess(InternedIndexedAccessType::new(
+                db,
+                self.take_type()?,
+                self.take_type()?,
+            )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
@@ -2449,6 +2472,9 @@ pub struct InternedIntersection<'db> {
 pub struct InternedTuple<'db> {
     #[returns(ref)]
     pub elements: Box<[TupleElementType<'db>]>,
+    /// Whether these elements describe an ordinary mutable array expression.
+    /// See [`raw::Tuple::is_inferred_array`] for examples.
+    pub is_inferred_array: bool,
 }
 
 #[salsa::interned]
@@ -2526,6 +2552,15 @@ pub struct LocalTypeHandle<'db> {
 pub struct InternedTypeOperatorType<'db> {
     pub ty: TypeData<'db>,
     pub operator: raw::TypeOperator,
+}
+
+/// The object and index types of a TypeScript indexed access, stored in the
+/// database. See [`raw::IndexedAccessType`] for an example of the two operands.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedIndexedAccessType<'db> {
+    pub object: TypeData<'db>,
+    pub index: TypeData<'db>,
 }
 
 #[salsa::interned]
@@ -3462,6 +3497,7 @@ mod tests {
                         is_rest: true,
                     },
                 ]),
+                true,
             ))
         });
         assert_identity(&db, |s| {
@@ -3484,6 +3520,9 @@ mod tests {
                 s.next(),
                 raw::TypeOperator::Readonly,
             ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, s.next(), s.next()))
         });
         assert_identity(&db, |s| {
             TypeData::Literal(InternedLiteral::new(

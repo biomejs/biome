@@ -19,6 +19,13 @@ export function Component() {
 	);
 }
 
+<div className={"w-4 h-4 " + extra} />;
+<div className={cached = 'w-4 h-4'} />;
+clsx(cached = 'w-4 h-4');
+async function component() {
+    return <div className={await 'w-4 h-4'} />;
+}
+
 ```
 
 # Diagnostics
@@ -352,6 +359,160 @@ invalid.jsx:11:20 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━�
        11 │ + → → → <div·className="!place-content-center"·/>
     12 12 │       </>
     13 13 │     );
+  
+
+```
+
+```
+invalid.jsx:16:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    14 │ }
+    15 │ 
+  > 16 │ <div className={"w-4 h-4 " + extra} />;
+       │                  ^^^
+    17 │ <div className={cached = 'w-4 h-4'} />;
+    18 │ clsx(cached = 'w-4 h-4');
+  
+  i Compressible utility used here.
+  
+    14 │ }
+    15 │ 
+  > 16 │ <div className={"w-4 h-4 " + extra} />;
+       │                      ^^^
+    17 │ <div className={cached = 'w-4 h-4'} />;
+    18 │ clsx(cached = 'w-4 h-4');
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    14 14 │   }
+    15 15 │   
+    16    │ - <div·className={"w-4·h-4·"·+·extra}·/>;
+       16 │ + <div·className={"size-4·"·+·extra}·/>;
+    17 17 │   <div className={cached = 'w-4 h-4'} />;
+    18 18 │   clsx(cached = 'w-4 h-4');
+  
+
+```
+
+```
+invalid.jsx:17:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    16 │ <div className={"w-4 h-4 " + extra} />;
+  > 17 │ <div className={cached = 'w-4 h-4'} />;
+       │                           ^^^
+    18 │ clsx(cached = 'w-4 h-4');
+    19 │ async function component() {
+  
+  i Compressible utility used here.
+  
+    16 │ <div className={"w-4 h-4 " + extra} />;
+  > 17 │ <div className={cached = 'w-4 h-4'} />;
+       │                               ^^^
+    18 │ clsx(cached = 'w-4 h-4');
+    19 │ async function component() {
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    15 15 │   
+    16 16 │   <div className={"w-4 h-4 " + extra} />;
+    17    │ - <div·className={cached·=·'w-4·h-4'}·/>;
+       17 │ + <div·className={cached·=·'size-4'}·/>;
+    18 18 │   clsx(cached = 'w-4 h-4');
+    19 19 │   async function component() {
+  
+
+```
+
+```
+invalid.jsx:18:16 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    16 │ <div className={"w-4 h-4 " + extra} />;
+    17 │ <div className={cached = 'w-4 h-4'} />;
+  > 18 │ clsx(cached = 'w-4 h-4');
+       │                ^^^
+    19 │ async function component() {
+    20 │     return <div className={await 'w-4 h-4'} />;
+  
+  i Compressible utility used here.
+  
+    16 │ <div className={"w-4 h-4 " + extra} />;
+    17 │ <div className={cached = 'w-4 h-4'} />;
+  > 18 │ clsx(cached = 'w-4 h-4');
+       │                    ^^^
+    19 │ async function component() {
+    20 │     return <div className={await 'w-4 h-4'} />;
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    16 16 │   <div className={"w-4 h-4 " + extra} />;
+    17 17 │   <div className={cached = 'w-4 h-4'} />;
+    18    │ - clsx(cached·=·'w-4·h-4');
+       18 │ + clsx(cached·=·'size-4');
+    19 19 │   async function component() {
+    20 20 │       return <div className={await 'w-4 h-4'} />;
+  
+
+```
+
+```
+invalid.jsx:20:35 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    18 │ clsx(cached = 'w-4 h-4');
+    19 │ async function component() {
+  > 20 │     return <div className={await 'w-4 h-4'} />;
+       │                                   ^^^
+    21 │ }
+    22 │ 
+  
+  i Compressible utility used here.
+  
+    18 │ clsx(cached = 'w-4 h-4');
+    19 │ async function component() {
+  > 20 │     return <div className={await 'w-4 h-4'} />;
+       │                                       ^^^
+    21 │ }
+    22 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    18 18 │   clsx(cached = 'w-4 h-4');
+    19 19 │   async function component() {
+    20    │ - ····return·<div·className={await·'w-4·h-4'}·/>;
+       20 │ + ····return·<div·className={await·'size-4'}·/>;
+    21 21 │   }
+    22 22 │   
   
 
 ```

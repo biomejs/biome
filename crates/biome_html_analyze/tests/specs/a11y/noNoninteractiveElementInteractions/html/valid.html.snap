@@ -14,6 +14,7 @@ expression: valid.html
 <a onclick="()=> void 0"></a>
 <area onclick="() => { }" />
 <button onclick="()=> void 0"></button>
+<dialog onkeyup="() => { }"></dialog>
 <Button onclick="()=> void 0"></Button>
 <BUTTON onclick="()=> void 0"></BUTTON>
 <menuitem onclick="() => { }">

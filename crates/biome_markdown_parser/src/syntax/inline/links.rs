@@ -8,6 +8,8 @@ use biome_rowan::TextRange;
 use crate::MarkdownParser;
 use crate::lexer::MarkdownLexContext;
 use crate::parser::MarkdownParserCheckpoint;
+use crate::syntax::inline::code_span::skip_code_span_in_lookahead;
+use crate::syntax::inline::html::skip_inline_html_in_lookahead;
 use crate::syntax::inline::{parse_inline_item_list_until, parse_inline_item_list_until_no_links};
 use crate::syntax::parse_error::{unclosed_image, unclosed_link};
 use crate::syntax::reference::normalize_reference_label;
@@ -537,33 +539,16 @@ fn collect_link_text(p: &mut MarkdownParser) -> Option<TextRange> {
 
         // Code spans can contain `]` - skip them entirely.
         // Per CommonMark, `]` inside code spans doesn't terminate link text.
-        if p.at(BACKTICK) {
-            let opening_count = p.cur_text().len();
-            p.bump(p.cur());
-
-            // Find matching closing backticks
-            let mut found_close = false;
-            while !p.at(T![EOF]) && !p.at_inline_end() {
-                if p.at(NEWLINE) && p.is_at_blank_line() {
-                    break; // Blank line terminates
-                }
-                if p.at(BACKTICK) && p.cur_text().len() == opening_count {
-                    p.bump(p.cur());
-                    found_close = true;
-                    break;
-                }
-                p.bump(p.cur());
-            }
-            if !found_close {
-                // Unclosed code span - treat opening backticks as literal
-                // (already added to text, continue normally)
-            }
+        if skip_code_span_in_lookahead(p) {
             continue;
         }
 
         // Autolinks and inline HTML can contain `]` - skip them entirely.
         // Per CommonMark, `]` inside `<...>` constructs doesn't terminate link text.
         if p.at(L_ANGLE) {
+            if skip_inline_html_in_lookahead(p) {
+                continue;
+            }
             p.bump(p.cur());
 
             // Consume until `>` or newline

@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+@layer one {
+    b a {
+        color: green;
+    }
+
+    a {
+        color: blue;
+    }
+}

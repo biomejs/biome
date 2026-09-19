@@ -1,0 +1,104 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+foo <!--> foo -->
+
+foo <!---> foo -->
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..4 "foo " [] [],
+                },
+                MdInlineHtml {
+                    value_token: MD_HTML_LITERAL@4..9 "<!-->" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..16 " foo --" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@17..18 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@18..19 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@19..23 "foo " [] [],
+                },
+                MdInlineHtml {
+                    value_token: MD_HTML_LITERAL@23..29 "<!--->" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@29..36 " foo --" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@36..37 ">" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@37..38 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@38..38 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..38
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..38
+    0: MD_PARAGRAPH@0..18
+      0: MD_INLINE_ITEM_LIST@0..18
+        0: MD_TEXTUAL@0..4
+          0: MD_TEXTUAL_LITERAL@0..4 "foo " [] []
+        1: MD_INLINE_HTML@4..9
+          0: MD_HTML_LITERAL@4..9 "<!-->" [] []
+        2: MD_TEXTUAL@9..16
+          0: MD_TEXTUAL_LITERAL@9..16 " foo --" [] []
+        3: MD_TEXTUAL@16..17
+          0: MD_TEXTUAL_LITERAL@16..17 ">" [] []
+        4: MD_TEXTUAL@17..18
+          0: MD_TEXTUAL_LITERAL@17..18 "\n" [] []
+    1: MD_NEWLINE@18..19
+      0: NEWLINE@18..19 "\n" [] []
+    2: MD_PARAGRAPH@19..38
+      0: MD_INLINE_ITEM_LIST@19..38
+        0: MD_TEXTUAL@19..23
+          0: MD_TEXTUAL_LITERAL@19..23 "foo " [] []
+        1: MD_INLINE_HTML@23..29
+          0: MD_HTML_LITERAL@23..29 "<!--->" [] []
+        2: MD_TEXTUAL@29..36
+          0: MD_TEXTUAL_LITERAL@29..36 " foo --" [] []
+        3: MD_TEXTUAL@36..37
+          0: MD_TEXTUAL_LITERAL@36..37 ">" [] []
+        4: MD_TEXTUAL@37..38
+          0: MD_TEXTUAL_LITERAL@37..38 "\n" [] []
+  3: EOF@38..38 "" [] []
+
+```

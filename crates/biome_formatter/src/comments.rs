@@ -80,10 +80,12 @@ mod map;
 
 use self::{builder::CommentsBuilderVisitor, map::CommentsMap};
 use crate::formatter::Formatter;
-use crate::{CstFormatContext, FormatResult, FormatRule, TextSize, TransformSourceMap};
+use crate::{CstFormatContext, FormatResult, FormatRule, TextRange, TextSize, TransformSourceMap};
 use crate::{buffer::Buffer, write};
+use biome_diagnostics::category;
 use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, SyntaxTriviaPieceComments};
+use biome_suppression::{SuppressionKind, parse_suppression_comment};
 use rustc_hash::FxHashSet;
 #[cfg(debug_assertions)]
 use std::cell::{Cell, RefCell};
@@ -260,6 +262,7 @@ pub struct DecoratedComment<L: Language> {
     lines_after: u32,
     comment: SyntaxTriviaPieceComments<L>,
     kind: CommentKind,
+    suppression_kind: Option<SuppressionKind>,
 }
 
 impl<L: Language> DecoratedComment<L> {
@@ -436,6 +439,12 @@ impl<L: Language> DecoratedComment<L> {
     /// Returns the [CommentKind] of the comment.
     pub fn kind(&self) -> CommentKind {
         self.kind
+    }
+
+    /// Returns the suppression kind saved by the comment builder.
+    /// The kind is available before choosing the target and where to print the comment.
+    pub fn suppression_kind(&self) -> Option<&SuppressionKind> {
+        self.suppression_kind.as_ref()
     }
 
     /// The position of the comment in the text.
@@ -763,13 +772,64 @@ impl<L: Language> CommentPlacement<L> {
 pub trait CommentStyle: Default {
     type Language: Language;
 
-    /// Returns `true` if a comment with the given `text` is a `biome-ignore format:` suppression comment.
-    fn is_suppression(_text: &str) -> bool {
-        false
+    /// Reads the comment to determine whether it asks the formatter to skip formatting.
+    ///
+    /// Returns [`SuppressionKind::Classic`] to skip a node or [`SuppressionKind::All`]
+    /// to skip the file. Returns `None` if the comment does not suppress formatting,
+    /// uses an unsupported suppression kind, or is in a position where it cannot apply.
+    ///
+    /// The builder calls this once per comment and saves the kind. Later steps use
+    /// the saved kind instead of parsing the comment again.
+    fn suppression_kind(
+        &self,
+        comment: &DecoratedComment<Self::Language>,
+    ) -> Option<SuppressionKind> {
+        let mut kind = None;
+        for suppression in parse_suppression_comment(comment.piece().text()).filter_map(Result::ok)
+        {
+            if !suppression
+                .categories
+                .iter()
+                .any(|(key, ..)| *key == category!("format"))
+            {
+                continue;
+            }
+            match suppression.kind {
+                SuppressionKind::Classic => kind = Some(SuppressionKind::Classic),
+                SuppressionKind::All => {
+                    if comment
+                        .enclosing_node()
+                        .ancestors()
+                        .last()
+                        .is_some_and(|root| {
+                            comment.piece().text_range().end() <= root.text_trimmed_range().start()
+                        })
+                    {
+                        return Some(SuppressionKind::All);
+                    }
+                }
+                SuppressionKind::RangeStart | SuppressionKind::RangeEnd => {}
+            }
+        }
+        kind
     }
 
-    fn is_global_suppression(_text: &str) -> bool {
-        false
+    /// Chooses which node to skip for a classic formatter suppression.
+    ///
+    /// The node that prints a comment is not always the node that the comment
+    /// suppresses. For example, Markdown stores a comment on a newline, but the
+    /// comment suppresses formatting of the following block.
+    ///
+    /// Called only for [`SuppressionKind::Classic`]; implementations do not
+    /// need to parse the comment. Return [`CommentSuppressionTarget::Node`] for that
+    /// following node, or
+    /// [`CommentSuppressionTarget::CommentPlacement`] when the comment suppresses
+    /// the node selected by [`Self::place_comment`].
+    fn suppression_target(
+        &self,
+        _comment: &DecoratedComment<Self::Language>,
+    ) -> CommentSuppressionTarget<Self::Language> {
+        CommentSuppressionTarget::CommentPlacement
     }
 
     /// Returns the (kind)[CommentKind] of the comment
@@ -784,6 +844,12 @@ pub trait CommentStyle: Default {
     ) -> CommentPlacement<Self::Language> {
         CommentPlacement::Default(comment)
     }
+}
+
+#[derive(Debug, Clone)]
+pub enum CommentSuppressionTarget<L: Language> {
+    CommentPlacement,
+    Node(SyntaxNode<L>),
 }
 
 /// The comments of a syntax tree stored by node.
@@ -821,18 +887,8 @@ impl<L: Language> Comments<L> {
     {
         let builder = CommentsBuilderVisitor::new(style, source_map);
 
-        let (comments, skipped) = builder.visit(root);
-
         Self {
-            data: Rc::new(CommentsData {
-                root: Some(root.clone()),
-                is_node_suppression: Style::is_suppression,
-                is_global_suppression: Style::is_global_suppression,
-                comments,
-                with_skipped: skipped,
-                #[cfg(debug_assertions)]
-                checked_suppressions: RefCell::new(Default::default()),
-            }),
+            data: Rc::new(builder.visit(root)),
         }
     }
 
@@ -913,7 +969,7 @@ impl<L: Language> Comments<L> {
     /// Returns `true` if that node has skipped token trivia attached.
     #[inline]
     pub fn has_skipped(&self, token: &SyntaxToken<L>) -> bool {
-        self.data.with_skipped.contains(&token.key())
+        self.data.suppressed_or_skipped.contains(&token.key())
     }
 
     /// Returns `true` if `node` has a [leading](self#leading-comments), [dangling](self#dangling-comments), or [trailing](self#trailing-comments) suppression comment.
@@ -929,25 +985,23 @@ impl<L: Language> Comments<L> {
     /// call expression is nested inside of the expression statement.
     pub fn is_suppressed(&self, node: &SyntaxNode<L>) -> bool {
         self.mark_suppression_checked(node);
-        let is_suppression = self.data.is_node_suppression;
+        self.data.suppressed_or_skipped.contains(&node.key())
+    }
 
-        self.leading_dangling_trailing_comments(node)
-            .any(|comment| is_suppression(comment.piece().text()))
+    /// Returns the saved formatter suppression kind for the comment at `range`.
+    /// Use the comment's full range in the syntax tree passed to [`Self::from_node`].
+    /// This lookup does not parse the comment text.
+    pub fn suppression_kind(&self, range: TextRange) -> Option<&SuppressionKind> {
+        let comments = &self.data.suppression_comments;
+        let index = comments
+            .binary_search_by_key(&range, |(range, _)| *range)
+            .ok()?;
+        comments.get(index).map(|(_, kind)| kind)
     }
 
     pub fn is_global_suppressed(&self, node: &SyntaxNode<L>) -> bool {
         self.mark_suppression_checked(node);
-        let start = node.text_range_with_trivia().start();
-        // global suppression comments must start at the beginning of the file
-        if start >= TextSize::from(0) {
-            let is_global_suppression = self.data.is_global_suppression;
-            // only leading comments can be global suppression comments
-            return self
-                .leading_comments(node)
-                .iter()
-                .any(|comment| is_global_suppression(comment.piece().text()));
-        }
-        false
+        self.data.global_suppression
     }
 
     #[cfg(not(debug_assertions))]
@@ -1050,15 +1104,13 @@ Node:
 
 struct CommentsData<L: Language> {
     root: Option<SyntaxNode<L>>,
-    /// Returns true if the comment is node suppression
-    is_node_suppression: fn(&str) -> bool,
-
-    /// Returns true if the comment is global suppression
-    is_global_suppression: fn(&str) -> bool,
-
     /// Stores all leading node comments by node
     comments: CommentsMap<SyntaxElementKey, SourceComment<L>>,
-    with_skipped: FxHashSet<SyntaxElementKey>,
+    // Node and token keys refer to distinct green elements, so suppressed nodes
+    // and tokens with skipped trivia can share a set without a per-entry tag.
+    suppressed_or_skipped: FxHashSet<SyntaxElementKey>,
+    suppression_comments: Vec<(TextRange, SuppressionKind)>,
+    global_suppression: bool,
 
     /// Stores all nodes for which [Comments::is_suppressed] has been called.
     /// This index of nodes that have been checked if they have a suppression comments is used to
@@ -1076,10 +1128,10 @@ impl<L: Language> Default for CommentsData<L> {
     fn default() -> Self {
         Self {
             root: None,
-            is_node_suppression: |_| false,
-            is_global_suppression: |_| false,
             comments: Default::default(),
-            with_skipped: Default::default(),
+            suppressed_or_skipped: Default::default(),
+            suppression_comments: Default::default(),
+            global_suppression: false,
             #[cfg(debug_assertions)]
             checked_suppressions: Default::default(),
         }

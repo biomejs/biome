@@ -10,7 +10,9 @@ use crate::stringification::{
     StringificationAnalyzer, StringificationMode, StringificationUsefulness,
 };
 use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
-use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
+use biome_js_syntax::numbers::{
+    canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+};
 use biome_rowan::Text;
 use rustc_hash::FxHashSet;
 use std::{borrow::Cow, collections::VecDeque, fmt, ops::ControlFlow};
@@ -159,14 +161,26 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
-    pub fn is_all_integer_like(self) -> bool {
+    /// Returns whether `~~` leaves every possible value unchanged.
+    ///
+    /// Bigints are unchanged. Number literals must fit in a signed 32-bit integer
+    /// and must not be negative zero:
+    ///
+    /// ```ts
+    /// ~~(-1);          // -1: unchanged
+    /// ~~(-2147483649); // 2147483647: changed by 32-bit conversion
+    /// ~~(-0);          // 0: the sign is lost
+    /// ```
+    pub fn is_unchanged_by_double_bitwise_not(self) -> bool {
         self.try_all_variants_match(|data| match data {
             TypeData::BigInt => true,
             TypeData::Literal(literal) => match literal.literal(self.db) {
                 Literal::BigInt(_) => true,
-                Literal::Number(number) => {
-                    number.to_f64().is_some_and(|number| number.fract() == 0.0)
-                }
+                Literal::Number(number) => number.to_f64().is_some_and(|number| {
+                    number.fract() == 0.0
+                        && (f64::from(i32::MIN)..=f64::from(i32::MAX)).contains(&number)
+                        && (number != 0.0 || !number.is_sign_negative())
+                }),
                 _ => false,
             },
             _ => false,
@@ -182,6 +196,18 @@ impl<'db> InferredType<'db> {
                     TypeData::Literal(literal)
                         if matches!(literal.literal(self.db), Literal::String(_))
                 )
+                || matches!(
+                    data,
+                    TypeData::InstanceOf(instance)
+                        if instance.ty(self.db).is_array_class(self.db)
+                )
+        })
+        .unwrap_or(false)
+    }
+
+    pub fn is_all_array_or_tuple(self) -> bool {
+        self.try_all_variants_match(|data| {
+            matches!(data, TypeData::Tuple(_))
                 || matches!(
                     data,
                     TypeData::InstanceOf(instance)
@@ -276,6 +302,7 @@ impl<'db> InferredType<'db> {
                 TypeData::TypeofValue(typeof_value) => typeof_value.ty(self.db),
                 TypeData::Unknown
                 | TypeData::Local(_)
+                | TypeData::IndexedAccess(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword => return None,
@@ -540,6 +567,7 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword => {
                     indeterminate = true;
                 }
+                TypeData::IndexedAccess(_) => indeterminate = true,
             }
         }
 
@@ -1480,6 +1508,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
         match data {
             TypeData::Unknown
             | TypeData::Local(_)
+            | TypeData::IndexedAccess(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword
             | TypeData::UnknownKeyword => self.indeterminate = true,
@@ -1631,7 +1660,10 @@ where
 }
 
 fn canonicalize_js_number_literal(number: &NumberLiteral) -> Option<Text> {
-    let value = number.to_f64()?;
+    let value = match number.as_str().strip_prefix('-') {
+        Some(unsigned) => parse_js_number_with_single_rounding(unsigned).map(|value| -value),
+        None => parse_js_number_with_single_rounding(number.as_str()),
+    }?;
     if !value.is_finite() {
         return None;
     }
@@ -1724,6 +1756,10 @@ mod tests {
             ("1_000", "1000"),
             ("-0", "0"),
             ("0", "0"),
+            ("0b1", "1"),
+            ("0.1", "0.1"),
+            (".5", "0.5"),
+            ("-0x2", "-2"),
         ] {
             assert_eq!(
                 number(&db, text).try_switch_case_variants(),

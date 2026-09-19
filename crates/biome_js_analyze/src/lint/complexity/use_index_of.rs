@@ -6,9 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
-    AnyJsMemberExpression, JsArrowFunctionExpression, JsAssignmentExpression, JsBinaryExpression,
-    JsCallExpression, JsFunctionExpression, JsLogicalExpression, JsParameterList,
-    JsReturnStatement, JsSyntaxNode, JsSyntaxToken, JsVariableDeclaration, T,
+    AnyJsMemberExpression, JsArrowFunctionExpression, JsBinaryExpression, JsCallExpression,
+    JsFunctionExpression, JsParameterList, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxToken, Text};
 use biome_rule_options::use_index_of::UseIndexOfOptions;
@@ -257,42 +256,38 @@ fn find_index_comparable_expression(
     parameter_name: &Text,
     return_statement_required: bool,
 ) -> Option<JsSyntaxNode> {
-    let has_invalid_expression = body.syntax().descendants().find(|node| {
-        JsAssignmentExpression::can_cast(node.kind())
-            || JsVariableDeclaration::can_cast(node.kind())
-            || JsLogicalExpression::can_cast(node.kind())
-    });
+    // Walk the body once. The callback is only convertible when it contains
+    // exactly one binary expression, at most one return statement, and no
+    // assignment, variable declaration, or logical expression. Bail out as
+    // soon as any of these conditions can no longer hold.
+    let mut binary_expression = None;
+    let mut has_return_statement = false;
+    for node in body.syntax().descendants() {
+        match node.kind() {
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+            | JsSyntaxKind::JS_VARIABLE_DECLARATION
+            | JsSyntaxKind::JS_LOGICAL_EXPRESSION => return None,
+            JsSyntaxKind::JS_BINARY_EXPRESSION => {
+                if binary_expression.is_some() {
+                    return None;
+                }
+                binary_expression = JsBinaryExpression::cast(node);
+            }
+            JsSyntaxKind::JS_RETURN_STATEMENT => {
+                if has_return_statement {
+                    return None;
+                }
+                has_return_statement = true;
+            }
+            _ => {}
+        }
+    }
 
-    if has_invalid_expression.is_some() {
+    if return_statement_required && !has_return_statement {
         return None;
     }
 
-    let mut binary_expressions = body
-        .syntax()
-        .descendants()
-        .filter_map(JsBinaryExpression::cast);
-
-    let binary_expression = binary_expressions.next()?;
-    if binary_expressions.next().is_some() {
-        return None;
-    }
-
-    let mut return_statements = body
-        .syntax()
-        .descendants()
-        .filter_map(JsReturnStatement::cast);
-    let has_one_or_more_return_statements = return_statements.next().is_some();
-    let has_two_or_more_return_statements = return_statements.next().is_some();
-
-    if has_two_or_more_return_statements {
-        return None;
-    }
-
-    if return_statement_required && !has_one_or_more_return_statements {
-        return None;
-    }
-
-    extract_simple_compare_match(&binary_expression, parameter_name)
+    extract_simple_compare_match(&binary_expression?, parameter_name)
 }
 
 fn extract_function_parameter_name(parameters: &JsParameterList) -> Option<Text> {
@@ -313,11 +308,7 @@ fn callback_function_match(
 
     let function_parameters = function.parameters().ok()?.items();
     let parameter_name = extract_function_parameter_name(&function_parameters)?;
-    let binding = function.body().ok()?;
-    let body = binding
-        .syntax()
-        .descendants()
-        .find_map(AnyJsFunctionBody::cast)?;
+    let body = AnyJsFunctionBody::from(function.body().ok()?);
 
     let matched = find_index_comparable_expression(&body, &parameter_name, true);
 

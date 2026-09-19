@@ -1,0 +1,4 @@
+@import "theme.css";
+.a { @extend .base; color:red; }
+.b { @foo bar; width:1px; }
+@foo bar;

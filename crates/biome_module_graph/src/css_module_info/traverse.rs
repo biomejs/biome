@@ -310,12 +310,16 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         branch: CssPropertyBranch,
     ) -> Option<CssPropertyDefinition> {
         let mut stack = vec![ModuleContextFrame::Module(path.to_path_buf(), branch)];
+        // A search ends at its first definition, so an exhausted dependency need
+        // not be searched through another path. Keep this set local: separate
+        // importer branches exclude different ancestors and can resolve differently.
+        let mut visited = FxHashSet::default();
         while let Some(frame) = stack.pop() {
             let (path, branch) = match frame {
                 ModuleContextFrame::Module(path, branch) => (path, branch),
                 ModuleContextFrame::Definition(definition) => return Some(definition),
             };
-            if branch.contains(&path) {
+            if branch.contains(&path) || !visited.insert(path.clone()) {
                 continue;
             }
             let branch = branch.with_path(path.clone());

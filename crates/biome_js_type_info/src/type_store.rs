@@ -7,7 +7,7 @@ use hashbrown::{HashTable, hash_table::Entry};
 use rustc_hash::FxHasher;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::AnyJsExpression;
+use biome_js_syntax::{AnyJsExpression, JsSyntaxNode};
 
 use crate::{
     RawTypeId, TypeData, TypeId, TypeReference, Union, globals::GLOBAL_UNDEFINED_ID,
@@ -102,6 +102,11 @@ fn hash_data(data: &TypeData) -> u64 {
 
 /// Interface used while collecting a module's stable raw type table.
 pub trait RawTypeCollector {
+    /// Returns the node's lexical scope, or `None` for collectors without a semantic model.
+    fn scope_for_node(&self, _node: &JsSyntaxNode) -> Option<ScopeId> {
+        None
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId>;
     fn get_by_id(&self, id: TypeId) -> &TypeData;
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId;

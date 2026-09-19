@@ -149,7 +149,7 @@ declare_lint_rule! {
     /// - [useArrowFunction](https://biomejs.dev/linter/rules/use-arrow-function/)
     ///
     pub UseConsistentFunctionStyle {
-        version: "next",
+        version: "2.5.14",
         name: "useConsistentFunctionStyle",
         language: "js",
         recommended: false,

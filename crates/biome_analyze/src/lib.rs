@@ -63,7 +63,9 @@ pub use crate::signals::{
 };
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
-pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
+pub use crate::visitor::{
+    NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
+};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
@@ -153,6 +155,12 @@ where
         let mut suppressions = Suppressions::new(self.metadata);
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
+            for visitor in &mut visitors {
+                visitor.start(VisitorStartContext {
+                    root: &ctx.root,
+                    services: &mut ctx.services,
+                });
+            }
             let runner = PhaseRunner {
                 phase,
                 visitors: &mut visitors,
@@ -396,7 +404,7 @@ where
             &token.text()[remaining - token.text_range().start()],
             remaining,
         );
-        if !self.deny_top_level_suppressions {
+        if !self.deny_top_level_suppressions && !token_range.is_empty() {
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 

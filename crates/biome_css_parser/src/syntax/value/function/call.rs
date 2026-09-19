@@ -31,10 +31,14 @@ pub(crate) fn is_at_any_function_with_context(
     p: &mut CssParser,
     context: ValueParsingContext,
 ) -> bool {
-    is_at_url_function(p)
-        || is_at_css_if_function_in_context(p, context)
-        || is_at_attr_function(p)
-        || is_at_vue_v_bind_function(p)
+    (matches!(
+        context.function_call_context(),
+        FunctionCallContext::LooseRecovery
+    ) || is_nth_at_adjacent_l_paren(p, 1))
+        && (is_at_url_function(p)
+            || is_at_css_if_function_in_context(p, context)
+            || is_at_attr_function(p)
+            || is_at_vue_v_bind_function(p))
         || is_at_function_with_context(p, context)
 }
 
@@ -115,23 +119,32 @@ fn is_nth_at_function_with_context(
 ) -> bool {
     let is_function_paren = match context.function_call_context() {
         FunctionCallContext::LooseRecovery => p.nth_at(n + 1, T!['(']),
-        FunctionCallContext::SourceTight => is_nth_at_source_tight_l_paren(p, n + 1),
+        FunctionCallContext::SourceTight => is_nth_at_adjacent_l_paren(p, n + 1),
     };
 
     is_nth_at_identifier(p, n) && is_function_paren
         || (context.is_scss_qualified_function_recovery_allowed()
             // Sass module calls are always source-tight: `math.pow(...)`.
             && is_nth_at_scss_module_member_access(p, n)
-            && is_nth_at_source_tight_l_paren(p, n + 3))
+            && is_nth_at_adjacent_l_paren(p, n + 3))
 }
 
-/// Checks for `(` without source whitespace before it.
+/// Returns whether the `n`th non-trivia token is `(` directly attached to
+/// the preceding token, with no intervening whitespace or comments.
 ///
-/// Example: `fn(...)` is a function head, but Sass treats `fn (...)` as an
-/// identifier followed by a parenthesized value.
+/// `n == 0` checks the current token against the last consumed token.
+/// Whitespace inside an identifier escape remains part of that token.
+///
+/// Sass parses `fn(...)` as a call, but `fn (...)` and `fn/**/(...)` as
+/// an identifier followed by a parenthesized value.
 #[inline]
-pub(crate) fn is_nth_at_source_tight_l_paren(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T!['(']) && p.source_mut().is_nth_source_tight(n)
+pub(crate) fn is_nth_at_adjacent_l_paren(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, T!['('])
+        && if n == 0 {
+            p.last_end() == Some(p.cur_range().start())
+        } else {
+            p.source_mut().is_nth_source_tight(n)
+        }
 }
 
 #[inline]

@@ -3058,16 +3058,34 @@ pub fn css_unknown_syntax_type_name(name_token: SyntaxToken) -> CssUnknownSyntax
 pub fn css_unknown_value_at_rule(
     name: AnyCssUnknownAtRuleName,
     components: CssUnknownAtRuleComponentList,
-    semicolon_token: SyntaxToken,
-) -> CssUnknownValueAtRule {
-    CssUnknownValueAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_UNKNOWN_VALUE_AT_RULE,
-        [
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(components.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> CssUnknownValueAtRuleBuilder {
+    CssUnknownValueAtRuleBuilder {
+        name,
+        components,
+        semicolon_token: None,
+    }
+}
+pub struct CssUnknownValueAtRuleBuilder {
+    name: AnyCssUnknownAtRuleName,
+    components: CssUnknownAtRuleComponentList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl CssUnknownValueAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> CssUnknownValueAtRule {
+        CssUnknownValueAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_UNKNOWN_VALUE_AT_RULE,
+            [
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.components.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn css_url_function(
     name_token: SyntaxToken,
@@ -3444,24 +3462,27 @@ pub fn scss_expression(items: ScssExpressionItemList) -> ScssExpression {
 pub fn scss_extend_at_rule(
     extend_token: SyntaxToken,
     css_selector_list: CssSelectorList,
-    semicolon_token: SyntaxToken,
 ) -> ScssExtendAtRuleBuilder {
     ScssExtendAtRuleBuilder {
         extend_token,
         css_selector_list,
-        semicolon_token,
         optional_modifier: None,
+        semicolon_token: None,
     }
 }
 pub struct ScssExtendAtRuleBuilder {
     extend_token: SyntaxToken,
     css_selector_list: CssSelectorList,
-    semicolon_token: SyntaxToken,
     optional_modifier: Option<ScssExtendOptionalModifier>,
+    semicolon_token: Option<SyntaxToken>,
 }
 impl ScssExtendAtRuleBuilder {
     pub fn with_optional_modifier(mut self, optional_modifier: ScssExtendOptionalModifier) -> Self {
         self.optional_modifier = Some(optional_modifier);
+        self
+    }
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
         self
     }
     pub fn build(self) -> ScssExtendAtRule {
@@ -3472,7 +3493,8 @@ impl ScssExtendAtRuleBuilder {
                 Some(SyntaxElement::Node(self.css_selector_list.into_syntax())),
                 self.optional_modifier
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.semicolon_token)),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
             ],
         ))
     }
@@ -3668,16 +3690,34 @@ impl ScssIfAtRuleBuilder {
 pub fn scss_import_at_rule(
     import_token: SyntaxToken,
     imports: ScssImportItemList,
-    semicolon_token: SyntaxToken,
-) -> ScssImportAtRule {
-    ScssImportAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_IMPORT_AT_RULE,
-        [
-            Some(SyntaxElement::Token(import_token)),
-            Some(SyntaxElement::Node(imports.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> ScssImportAtRuleBuilder {
+    ScssImportAtRuleBuilder {
+        import_token,
+        imports,
+        semicolon_token: None,
+    }
+}
+pub struct ScssImportAtRuleBuilder {
+    import_token: SyntaxToken,
+    imports: ScssImportItemList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl ScssImportAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> ScssImportAtRule {
+        ScssImportAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_IMPORT_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.import_token)),
+                Some(SyntaxElement::Node(self.imports.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn scss_include_argument_list(
     l_paren_token: SyntaxToken,
@@ -4656,16 +4696,34 @@ pub fn scss_with_clause(
 pub fn tw_apply_at_rule(
     apply_token: SyntaxToken,
     classes: TwApplyClassList,
-    semicolon_token: SyntaxToken,
-) -> TwApplyAtRule {
-    TwApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::TW_APPLY_AT_RULE,
-        [
-            Some(SyntaxElement::Token(apply_token)),
-            Some(SyntaxElement::Node(classes.into_syntax())),
-            Some(SyntaxElement::Token(semicolon_token)),
-        ],
-    ))
+) -> TwApplyAtRuleBuilder {
+    TwApplyAtRuleBuilder {
+        apply_token,
+        classes,
+        semicolon_token: None,
+    }
+}
+pub struct TwApplyAtRuleBuilder {
+    apply_token: SyntaxToken,
+    classes: TwApplyClassList,
+    semicolon_token: Option<SyntaxToken>,
+}
+impl TwApplyAtRuleBuilder {
+    pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
+        self.semicolon_token = Some(semicolon_token);
+        self
+    }
+    pub fn build(self) -> TwApplyAtRule {
+        TwApplyAtRule::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::TW_APPLY_AT_RULE,
+            [
+                Some(SyntaxElement::Token(self.apply_token)),
+                Some(SyntaxElement::Node(self.classes.into_syntax())),
+                self.semicolon_token
+                    .map(|token| SyntaxElement::Token(token)),
+            ],
+        ))
+    }
 }
 pub fn tw_config_at_rule(
     config_token: SyntaxToken,

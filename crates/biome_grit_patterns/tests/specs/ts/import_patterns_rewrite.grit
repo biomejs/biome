@@ -1,0 +1,3 @@
+`import $what from $where` => `import $what from "bar"` where {
+  $where <: `"foo"`
+}

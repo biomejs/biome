@@ -84,6 +84,7 @@ impl VueFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Vue {
+                            is_class_attribute: false,
                             setup,
                             is_source: true,
                             event_handler: false,

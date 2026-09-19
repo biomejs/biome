@@ -31,10 +31,13 @@ Load [testing-codegen](./.claude/skills/testing-codegen/SKILL.md) for test fixtu
 
 Required generated artifacts:
 
-| Changed source               | Required command                              |
-|------------------------------|-----------------------------------------------|
-| Grammar `.ungram`            | `just gen-grammar <lang>`                     |
-| Change a rule or action name | `just gen-rules` and `just gen-configuration` |
+If you change an `.ungram` file, run:
+- `just gen-grammar <lang>`
+- `just gen-formatter --allow-dirty`
+
+If you change the name of a lint rule or assist action, run:
+- `just gen-rules`
+- `just gen-configuration`
 
 Bindings and other full analyzer outputs may be left to the CI Autofix job unless they are needed for local verification.
 

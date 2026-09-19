@@ -13,6 +13,7 @@ use biome_js_type_info::{
     RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
     TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
+use biome_resolver::ResolutionKind;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
@@ -164,13 +165,6 @@ impl JsModuleInfoCollector {
             let ty = TypeData::from_any_js_expression(self, scope_id, &expr);
             let id = self.register_type(Cow::Owned(ty));
             self.parsed_expressions.insert(range, id);
-        } else if let Some(decl) = JsForVariableDeclaration::cast_ref(node) {
-            let scope_id = self.semantic_model.scope(node).id();
-            let type_bindings =
-                TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
-                    .unwrap_or_default();
-            self.variable_declarations
-                .insert(decl.syntax().clone(), type_bindings);
         } else if let Some(param) = JsFormalParameter::cast_ref(node) {
             let scope_id = self.semantic_model.scope(node).id();
             let parsed_param = FunctionParameter::from_js_formal_parameter(self, scope_id, &param);
@@ -350,12 +344,14 @@ impl JsModuleInfoCollector {
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        resolution_kind: ResolutionKind,
         phase: JsImportPhase,
     ) {
         let import_path = JsImportPath {
             resolved_path,
             phase,
             kind: JsImportKind::Static,
+            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
@@ -365,12 +361,14 @@ impl JsModuleInfoCollector {
         &mut self,
         specifier: TokenText,
         resolved_path: ResolvedPath,
+        resolution_kind: ResolutionKind,
         phase: JsImportPhase,
     ) {
         let import_path = JsImportPath {
             resolved_path,
             phase,
             kind: JsImportKind::Dynamic,
+            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
@@ -526,7 +524,11 @@ impl JsModuleInfoCollector {
                     TypeData::from_any_js_export_default_declaration(self, scope_id, &declaration);
                 return self.reference_to_owned_data(data);
             } else if let Some(typed_bindings) = JsForVariableDeclaration::cast_ref(&ancestor)
-                .and_then(|decl| self.variable_declarations.get(decl.syntax()))
+                .and_then(|decl| {
+                    // The iterable follows the declaration in source order, so its
+                    // expressions are only cached after leaving the declaration.
+                    TypeData::typed_bindings_from_js_for_statement(self, scope_id, &decl)
+                })
             {
                 return typed_bindings
                     .iter()
@@ -856,6 +858,10 @@ impl JsModuleInfoCollector {
 }
 
 impl RawTypeCollector for JsModuleInfoCollector {
+    fn scope_for_node(&self, node: &JsSyntaxNode) -> Option<ScopeId> {
+        Some(self.semantic_model.scope(node).id())
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }

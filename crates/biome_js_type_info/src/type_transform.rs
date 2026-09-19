@@ -6,6 +6,7 @@
 //! callers use semantic operations such as generic substitution.
 
 use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
+use crate::type_operations::indexed_access;
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
@@ -383,6 +384,9 @@ where
             }
             TypeData::TypeofType(value) => value.ty(db),
             TypeData::TypeofValue(value) => value.ty(db),
+            TypeData::IndexedAccess(access) => {
+                indexed_access(db, access.object(db), access.index(db)).unwrap_or(TypeData::Unknown)
+            }
             ty => ty,
         }
     }

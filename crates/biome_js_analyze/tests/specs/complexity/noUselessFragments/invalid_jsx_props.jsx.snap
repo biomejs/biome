@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_jsx_props.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<Foo>
+  <Fragment slot="content">{text}</Fragment>
+</Foo>;
+
+```
+
+# Diagnostics
+```
+invalid_jsx_props.jsx:3:3 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    1 │ // should generate diagnostics
+    2 │ <Foo>
+  > 3 │   <Fragment slot="content">{text}</Fragment>
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </Foo>;
+    5 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    3 │ ··<Fragment·slot="content">{text}</Fragment>
+      │   -------------------------      -----------
+
+```

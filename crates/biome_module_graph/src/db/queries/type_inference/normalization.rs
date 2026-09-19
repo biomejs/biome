@@ -34,7 +34,7 @@ pub fn normalize_type<'db>(
         "normalize_type",
         || {
             let ty = input.ty(db);
-            if !type_needs_normalization(db, ty) {
+            if !type_needs_normalization(ty) {
                 return ty;
             }
             normalize_structural_type(db, ty, |ty| {
@@ -60,10 +60,12 @@ pub fn normalize_type<'db>(
 
 // #region QUERY HELPER FUNCTIONS
 
-fn type_needs_normalization(db: &dyn ModuleDb, ty: InferredTypeData<'_>) -> bool {
+fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
     matches!(
         ty,
         InferredTypeData::InstanceOf(_)
+            | InferredTypeData::IndexedAccess(_)
+            | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::MergedReference(_)
@@ -71,13 +73,6 @@ fn type_needs_normalization(db: &dyn ModuleDb, ty: InferredTypeData<'_>) -> bool
             | InferredTypeData::TypeofType(_)
             | InferredTypeData::TypeofValue(_)
             | InferredTypeData::Union(_)
-    ) || matches!(
-        ty,
-        InferredTypeData::TypeOperator(operator)
-            if matches!(
-                operator.operator(db),
-                biome_js_type_info::TypeOperator::Keyof
-            )
     )
 }
 

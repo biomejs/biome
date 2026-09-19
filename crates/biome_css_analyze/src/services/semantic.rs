@@ -1,13 +1,15 @@
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
-    VisitorFinishContext,
+    VisitorStartContext,
 };
-use biome_css_semantic::SemanticEventExtractor;
-use biome_css_semantic::builder::SemanticModelBuilder;
 use biome_css_semantic::model::SemanticModel;
+use biome_css_semantic::{db::css_semantic_model, semantic_model};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
+use biome_db::AnyParsedSource;
+use biome_languages::LanguageDb;
 use biome_rowan::{AstNode, WalkEvent};
+use std::rc::Rc;
 
 /// ## Warning
 ///
@@ -56,14 +58,12 @@ impl Queryable for SemanticServices {
     type Language = CssLanguage;
     type Services = Self;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<Self::Language>, root: &AnyCssRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<Self::Language>, _: &AnyCssRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, || SemanticModelVisitor);
     }
 
     fn unwrap_match(services: &ServiceBag, _: &SemanticModelEvent) -> Self::Output {
-        // SAFETY: `build_visitor` registers the model builder before the semantic visitor emits
-        // `SemanticModelEvent`, and the builder inserts the service when syntax traversal finishes.
         services
             .get_service::<SemanticModel>()
             .expect("SemanticModel service is not registered")
@@ -71,43 +71,30 @@ impl Queryable for SemanticServices {
     }
 }
 
-pub struct SemanticModelBuilderVisitor {
-    extractor: SemanticEventExtractor,
-    builder: SemanticModelBuilder,
-}
-
-impl SemanticModelBuilderVisitor {
-    pub(crate) fn new(root: &AnyCssRoot) -> Self {
-        Self {
-            extractor: SemanticEventExtractor::default(),
-            builder: SemanticModelBuilder::new(root.clone()),
-        }
-    }
-}
+pub(crate) struct SemanticModelBuilderVisitor;
 
 impl Visitor for SemanticModelBuilderVisitor {
     type Language = CssLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<CssSyntaxNode>, _ctx: VisitorContext<Self::Language>) {
-        match event {
-            WalkEvent::Enter(node) => self.extractor.enter(node),
-            WalkEvent::Leave(node) => self.extractor.leave(node),
-        }
-
-        while let Some(event) = self.extractor.pop() {
-            self.builder.push_event(event);
-        }
-    }
-
-    fn finish(self: Box<Self>, ctx: VisitorFinishContext<Self::Language>) {
-        // If a pre-built SemanticModel was already inserted (e.g. by the workspace
-        // open_file/change_file cycle), skip building a new one.
+    fn start(&mut self, ctx: VisitorStartContext<CssLanguage>) {
         if ctx.services.get_service::<SemanticModel>().is_some() {
             return;
         }
-        let model = self.builder.build();
-        ctx.services.insert_service(model);
+        if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
+            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+        {
+            let model = css_semantic_model(db.as_ref(), source);
+            // Semantic equality ignores trivia and locations; diagnostics must
+            // still use nodes from the syntax tree being analyzed.
+            if model.root().syntax().as_send() == ctx.root.syntax().as_send() {
+                ctx.services.insert_service(model.clone());
+                return;
+            }
+        }
+        ctx.services.insert_service(semantic_model(ctx.root));
     }
+
+    fn visit(&mut self, _: &WalkEvent<CssSyntaxNode>, _: VisitorContext<CssLanguage>) {}
 }
 
 pub struct SemanticModelVisitor;
@@ -172,8 +159,8 @@ where
     type Language = CssLanguage;
     type Services = SemanticServices;
 
-    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, root: &AnyCssRoot) {
-        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor::new(root));
+    fn build_visitor(analyzer: &mut impl AddVisitor<CssLanguage>, _: &AnyCssRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 

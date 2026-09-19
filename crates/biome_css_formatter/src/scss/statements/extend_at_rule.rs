@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::utils::statement_at_rule_ending::FormatStatementAtRuleEnding;
 use biome_css_syntax::{ScssExtendAtRule, ScssExtendAtRuleFields};
 use biome_formatter::write;
 
@@ -29,8 +30,16 @@ impl FormatNodeRule<ScssExtendAtRule> for FormatScssExtendAtRule {
                 extend_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 group(&target),
-                semicolon_token.format()
+                FormatStatementAtRuleEnding::new(node.syntax(), semicolon_token)
             ]
         )
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _node: &ScssExtendAtRule,
+        _f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        Ok(())
     }
 }

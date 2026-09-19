@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 65;
+const PREDEFINED_TYPE_COUNT: usize = 69;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -183,4 +183,8 @@ predefined_globals! {
     (BOOLEAN_ID, BOOLEAN_ID_NAME, BOOLEAN_ID_GLOBAL_TYPE_ID, _, "boolean", Primitive),
     (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME, ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CONSTRUCTOR_ID, "Error.constructor", ManualSynthetic),
     (ERROR_CALL_ID, ERROR_CALL_ID_NAME, ERROR_CALL_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CALL_ID, "Error.call", ManualSynthetic),
+    (ITERATOR_YIELD_RESULT_ID, ITERATOR_YIELD_RESULT_ID_NAME, ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_YIELD_RESULT_ID, "IteratorYieldResult", Helper),
+    (ITERATOR_RETURN_RESULT_ID, ITERATOR_RETURN_RESULT_ID_NAME, ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RETURN_RESULT_ID, "IteratorReturnResult", Helper),
+    (ITERATOR_RESULT_ID, ITERATOR_RESULT_ID_NAME, ITERATOR_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RESULT_ID, "IteratorResult", Helper),
+    (ITERATOR_ID, ITERATOR_ID_NAME, ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_ID, "Iterator", Helper),
 }

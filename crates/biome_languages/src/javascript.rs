@@ -186,6 +186,9 @@ pub enum JsEmbeddingKind {
         /// When `false`, the content is parsed as an expression via `parse_template_expression`.
         /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
         allow_statements: bool,
+        /// Whether this snippet is from a class-related attribute
+        /// (e.g. :class="...")
+        is_class_attribute: bool,
     },
     Svelte {
         /// `file_kind` models whether the Svelte file is a component document or a
@@ -194,6 +197,9 @@ pub enum JsEmbeddingKind {
         /// module.
         file_kind: SvelteFileKind,
         embedding_kind: SvelteEmbeddingKind,
+        /// Whether this snippet is from a class attribute
+        /// (e.g. class={...})
+        is_class_attribute: bool,
     },
     #[default]
     None,
@@ -246,6 +252,12 @@ impl JsEmbeddingKind {
         matches!(
             self,
             Self::Astro {
+                is_class_attribute: true,
+                ..
+            } | Self::Vue {
+                is_class_attribute: true,
+                ..
+            } | Self::Svelte {
                 is_class_attribute: true,
                 ..
             }
@@ -370,6 +382,7 @@ impl JsFileSource {
     /// Vue file definition
     pub fn vue() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: false,
             is_source: true,
             event_handler: false,
@@ -380,6 +393,7 @@ impl JsFileSource {
     /// Vue file definition with setup attribute
     pub fn vue_setup() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: true,
             is_source: true,
             event_handler: false,
@@ -390,6 +404,7 @@ impl JsFileSource {
     /// Svelte file definition
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_class_attribute: false,
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::Source,
         })
@@ -608,6 +623,7 @@ impl JsFileSource {
             };
 
             return Ok(source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_class_attribute: false,
                 file_kind: SvelteFileKind::SourceModule,
                 embedding_kind: SvelteEmbeddingKind::Source,
             }));
@@ -729,6 +745,41 @@ impl From<Language> for JsFileSource {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn class_attribute_context_follows_embedding_kind() {
+        for kind in [
+            JsEmbeddingKind::Astro {
+                frontmatter: false,
+                is_class_attribute: true,
+            },
+            JsEmbeddingKind::Vue {
+                setup: false,
+                is_source: false,
+                event_handler: false,
+                allow_statements: false,
+                is_class_attribute: true,
+            },
+            JsEmbeddingKind::Svelte {
+                is_class_attribute: true,
+                file_kind: SvelteFileKind::Component,
+                embedding_kind: SvelteEmbeddingKind::Expression,
+            },
+        ] {
+            let source = JsFileSource::js_module().with_embedding_kind(kind);
+            assert!(source.as_embedding_kind().is_class_attribute());
+            assert!(source.is_template_expression());
+            let source = source.with_embedding_kind(JsEmbeddingKind::None);
+            assert!(!source.as_embedding_kind().is_class_attribute());
+        }
+        for source in [
+            JsFileSource::astro(),
+            JsFileSource::vue(),
+            JsFileSource::svelte(),
+        ] {
+            assert!(!source.as_embedding_kind().is_class_attribute());
+        }
+    }
 
     #[test]
     fn detects_svelte_typescript_source_modules_case_insensitively() {

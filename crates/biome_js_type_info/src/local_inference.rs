@@ -44,17 +44,17 @@ use crate::literal::{
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
-    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallArgumentExpression, TypeofCallExpression, TypeofConditionalExpression,
-    TypeofDestructureExpression, TypeofExpression, TypeofIndexExpression,
-    TypeofIterableValueOfExpression, TypeofLogicalAndExpression, TypeofLogicalOrExpression,
-    TypeofNewExpression, TypeofNullishCoalescingExpression, TypeofParameterExpression,
-    TypeofStaticMemberExpression, TypeofThisOrSuperExpression, TypeofTypeofExpression,
-    TypeofUnaryMinusExpression, TypeofValue, Union,
+    IndexedAccessType, Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace,
+    Object, Path, PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId,
+    ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
+    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
+    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
+    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
+    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -439,8 +439,9 @@ impl TypeData {
             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                 Self::from_any_js_literal_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple(
-                expr.elements()
+            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple {
+                elements: expr
+                    .elements()
                     .into_iter()
                     .filter_map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => Some(TupleElementType {
@@ -467,7 +468,8 @@ impl TypeData {
                         }),
                     })
                     .collect(),
-            ))),
+                is_inferred_array: true,
+            })),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(collector, scope_id, expr)
             }
@@ -757,10 +759,13 @@ impl TypeData {
                 // TODO: Handle import types (`import("./module").T`).
                 Self::unknown()
             }
-            AnyTsType::TsIndexedAccessType(_) => {
-                // TODO: Handle type indexing (`T[U]`).
-                Self::unknown()
-            }
+            AnyTsType::TsIndexedAccessType(ty) => match (ty.object_type(), ty.index_type()) {
+                (Ok(object), Ok(index)) => Self::IndexedAccess(Box::new(IndexedAccessType {
+                    object: TypeReference::from_any_ts_type(collector, scope_id, &object),
+                    index: TypeReference::from_any_ts_type(collector, scope_id, &index),
+                })),
+                _ => Self::unknown(),
+            },
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
                 Self::unknown()
@@ -780,21 +785,34 @@ impl TypeData {
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Null,
             AnyTsType::TsNumberLiteralType(ty) => match ty.literal_token() {
+                Ok(token) if ty.minus_token().is_some() => Literal::Number(NumberLiteral::new(
+                    format!("-{}", token.text_trimmed()).into(),
+                ))
+                .into(),
                 Ok(token) => {
                     Literal::Number(NumberLiteral::new(token.token_text_trimmed().into())).into()
                 }
                 Err(_) => Self::unknown(),
             },
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
-            AnyTsType::TsObjectType(ty) => Self::object_with_members(
-                ty.members()
+            AnyTsType::TsObjectType(ty) => {
+                let mut has_unknown_members = false;
+                let members = ty
+                    .members()
                     .into_iter()
-                    .map(|member| {
-                        TypeMember::from_any_ts_type_member(collector, scope_id, &member)
-                            .unwrap_or_else(unknown_type_member)
+                    .filter_map(|member| {
+                        let member =
+                            TypeMember::from_any_ts_type_member(collector, scope_id, &member);
+                        has_unknown_members |= member.is_none();
+                        member
                     })
-                    .collect(),
-            ),
+                    .collect();
+                Self::Object(Box::new(Object {
+                    prototype: None,
+                    members,
+                    has_unknown_members,
+                }))
+            }
             AnyTsType::TsParenthesizedType(ty) => ty
                 .ty()
                 .map(|ty| Self::from_any_ts_type(collector, scope_id, &ty))
@@ -823,7 +841,10 @@ impl TypeData {
                     })
                     .collect();
                 match elements {
-                    Ok(elements) => Self::Tuple(Box::new(Tuple(elements))),
+                    Ok(elements) => Self::Tuple(Box::new(Tuple {
+                        elements,
+                        is_inferred_array: false,
+                    })),
                     Err(_) => Self::unknown(),
                 }
             }
@@ -1324,6 +1345,20 @@ impl TypeData {
         scope_id: ScopeId,
         expr: &JsUnaryExpression,
     ) -> Self {
+        if let Ok(operator @ (JsUnaryOperator::Minus | JsUnaryOperator::Plus)) = expr.operator()
+            && let Ok(argument) = expr.argument()
+            && let AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) = argument.omit_parentheses()
+            && let Some(text) = text_from_token(literal.value_token())
+        {
+            let text = if operator == JsUnaryOperator::Minus {
+                format!("-{text}").into()
+            } else {
+                text
+            };
+            return Literal::Number(NumberLiteral::new(text)).into();
+        }
         expr.operator()
             .map(|operator| match operator {
                 JsUnaryOperator::BitwiseNot => {
@@ -2404,6 +2439,7 @@ impl TypeMember {
     ) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_) => None,
+            AnyTsTypeMember::JsMetavariable(_) => None,
             AnyTsTypeMember::TsCallSignatureTypeMember(member) => {
                 let function = Function {
                     is_async: false,
@@ -2496,6 +2532,15 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                let scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| {
                     let kind = object_member_kind(collector, scope_id, name.clone())?;
                     let function_name = kind.name();
@@ -2504,7 +2549,7 @@ impl TypeMember {
                         type_parameters: generic_params_from_ts_type_params(
                             collector,
                             scope_id,
-                            member.type_parameters(),
+                            type_parameters,
                         ),
                         name: function_name,
                         parameters: function_params_from_js_params(
@@ -3730,7 +3775,10 @@ fn apply_deep_const_inner(
                     is_rest: element.is_rest,
                 })
                 .collect();
-            TypeData::Tuple(Box::new(Tuple(elements)))
+            TypeData::Tuple(Box::new(Tuple {
+                elements,
+                is_inferred_array: false,
+            }))
         }
         TypeData::Object(object) => TypeData::Object(Box::new(Object {
             prototype: object.prototype.clone(),

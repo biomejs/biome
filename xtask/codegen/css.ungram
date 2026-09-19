@@ -2137,7 +2137,7 @@ CssUnknownBlockAtRule =
 CssUnknownValueAtRule =
 	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
-	';'
+	';'?
 
 AnyCssUnknownAtRuleName =
 	CssIdentifier
@@ -2860,7 +2860,7 @@ TwCustomVariantShorthand =
 TwApplyAtRule =
   'apply'
   classes: TwApplyClassList
-  ';'
+  ';'?
 
 TwApplyClassList = CssIdentifier*
 
@@ -3033,7 +3033,7 @@ ScssHideClause =
 ScssImportAtRule =
 	'import'
 	imports: ScssImportItemList
-	';'
+	';'?
 
 ScssImportItemList =
 	AnyScssImportItem (',' AnyScssImportItem)*
@@ -3059,7 +3059,7 @@ ScssExtendAtRule =
 	'extend'
 	CssSelectorList
 	optional_modifier: ScssExtendOptionalModifier?
-	';'
+	';'?
 
 // @at-root { .root-only { color: red; } }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

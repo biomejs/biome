@@ -2270,7 +2270,7 @@ See https://biomejs.dev/linter/rules/use-single-js-doc-asterisk
 	 */
 	useSingleJsDocAsterisk?: UseSingleJsDocAsteriskConfiguration;
 	/**
-	* Prevent the usage of static string literal id attribute on elements.
+	* Prevent the usage of static string literal id attribute on elements outside SVG contexts.
 See https://biomejs.dev/linter/rules/use-unique-element-ids 
 	 */
 	useUniqueElementIds?: UseUniqueElementIdsConfiguration;
@@ -2455,6 +2455,11 @@ See https://biomejs.dev/linter/rules/no-js-restricted-properties
 	 */
 	noJsRestrictedProperties?: NoJsRestrictedPropertiesConfiguration;
 	/**
+	* Disallow unsafe JSON values that may cause interoperability issues.
+See https://biomejs.dev/linter/rules/no-json-unsafe-values 
+	 */
+	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
+	/**
 	* Flags text nodes with a trailing $ before a JSX expression.
 See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
 	 */
@@ -2575,6 +2580,11 @@ See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	* Disallow the use of Svelte's {@debug} tag.
+See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
+	 */
+	noSvelteAtDebugTags?: NoSvelteAtDebugTagsConfiguration;
+	/**
 	* Disallow the use of Svelte's {@html} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
 	 */
@@ -2670,6 +2680,11 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 	 */
 	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
 	/**
+	* Disallow custom Vue directives that are not declared.
+See https://biomejs.dev/linter/rules/no-vue-undeclared-directives 
+	 */
+	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
+	/**
 	* Disallow deprecated number modifiers on Vue v-on directives.
 See https://biomejs.dev/linter/rules/no-vue-v-on-number-values 
 	 */
@@ -2717,6 +2732,11 @@ See https://biomejs.dev/linter/rules/use-better-dom-traversing
 See https://biomejs.dev/linter/rules/use-consistent-function-style 
 	 */
 	useConsistentFunctionStyle?: UseConsistentFunctionStyleConfiguration;
+	/**
+	* Enforce JSON keys with consistent Unicode representation.
+See https://biomejs.dev/linter/rules/use-consistent-object-keys 
+	 */
+	useConsistentObjectKeys?: UseConsistentObjectKeysConfiguration;
 	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
@@ -2778,7 +2798,7 @@ See https://biomejs.dev/linter/rules/use-imports-first
 	 */
 	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
-	* Prefer Array#includes() over Array#indexOf() checks.
+	* Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.
 See https://biomejs.dev/linter/rules/use-includes 
 	 */
 	useIncludes?: UseIncludesConfiguration;
@@ -2907,6 +2927,11 @@ See https://biomejs.dev/linter/rules/use-this-in-class-methods
 See https://biomejs.dev/linter/rules/use-unicode-regex 
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
+	/**
+	* Enforce valid titles for unit test cases and test suites.
+See https://biomejs.dev/linter/rules/use-valid-test-title 
+	 */
+	useValidTestTitle?: UseValidTestTitleConfiguration;
 	/**
 	* Require var declarations to appear at the top of their containing scope.
 See https://biomejs.dev/linter/rules/use-vars-on-top 
@@ -3487,7 +3512,7 @@ See https://biomejs.dev/linter/rules/use-react-function-components
 	 */
 	useReactFunctionComponents?: UseReactFunctionComponentsConfiguration;
 	/**
-	* Enforce marking members as readonly if they are never modified outside the constructor.
+	* Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.
 See https://biomejs.dev/linter/rules/use-readonly-class-properties 
 	 */
 	useReadonlyClassProperties?: UseReadonlyClassPropertiesConfiguration;
@@ -4848,6 +4873,9 @@ export type NoInvalidPropertyInitValueConfiguration =
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
+export type NoJsonUnsafeValuesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoJsonUnsafeValuesOptions;
 export type NoJsxLeakedDollarConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsxLeakedDollarOptions;
@@ -4920,6 +4948,9 @@ export type NoRestrictedDependenciesConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoSvelteAtDebugTagsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAtDebugTagsOptions;
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
@@ -4977,6 +5008,9 @@ export type NoVueImportCompilerMacrosConfiguration =
 export type NoVueRefAsOperandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefAsOperandOptions;
+export type NoVueUndeclaredDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUndeclaredDirectivesOptions;
 export type NoVueVOnNumberValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVOnNumberValuesOptions;
@@ -5001,6 +5035,9 @@ export type UseBetterDomTraversingConfiguration =
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
+export type UseConsistentObjectKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentObjectKeysOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -5115,6 +5152,9 @@ export type UseThisInClassMethodsConfiguration =
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
+export type UseValidTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseValidTestTitleOptions;
 export type UseVarsOnTopConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVarsOnTopOptions;
@@ -6802,6 +6842,10 @@ export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsRestrictedPropertiesOptions;
 }
+export interface RuleWithNoJsonUnsafeValuesOptions {
+	level: RulePlainConfiguration;
+	options?: NoJsonUnsafeValuesOptions;
+}
 export interface RuleWithNoJsxLeakedDollarOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -6905,6 +6949,11 @@ export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
 }
+export interface RuleWithNoSvelteAtDebugTagsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteAtDebugTagsOptions;
+}
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
@@ -6984,6 +7033,10 @@ export interface RuleWithNoVueRefAsOperandOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRefAsOperandOptions;
 }
+export interface RuleWithNoVueUndeclaredDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUndeclaredDirectivesOptions;
+}
 export interface RuleWithNoVueVOnNumberValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVOnNumberValuesOptions;
@@ -7018,6 +7071,11 @@ export interface RuleWithUseBetterDomTraversingOptions {
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
+}
+export interface RuleWithUseConsistentObjectKeysOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentObjectKeysOptions;
 }
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
@@ -7189,6 +7247,11 @@ export interface RuleWithUseUnicodeRegexOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseUnicodeRegexOptions;
+}
+export interface RuleWithUseValidTestTitleOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseValidTestTitleOptions;
 }
 export interface RuleWithUseVarsOnTopOptions {
 	level: RulePlainConfiguration;
@@ -8708,6 +8771,7 @@ Each entry can describe one of these cases:
 	 */
 	entries?: RestrictedPropertyEntry[];
 }
+export type NoJsonUnsafeValuesOptions = {};
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
@@ -8737,6 +8801,7 @@ export interface NoReactNativeRawTextOptions {
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -8815,6 +8880,14 @@ export type NoUselessTypeConversionOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
+export interface NoVueUndeclaredDirectivesOptions {
+	/**
+	* Names of directives registered globally with `app.directive(...)`,
+written in kebab-case without the `v-` prefix, such as
+`click-outside` for `v-click-outside`. 
+	 */
+	globals?: string[];
+}
 export type NoVueVOnNumberValuesOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type UseArraySomeOptions = {};
@@ -8867,6 +8940,12 @@ export interface UseConsistentFunctionStyleOptions {
 	 */
 	style?: FunctionStyle;
 }
+export interface UseConsistentObjectKeysOptions {
+	/**
+	 * The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.
+	 */
+	form?: NormalizationForm;
+}
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -8896,7 +8975,13 @@ In the expression `document.querySelector('div')`, the receiver is `document`.
 	 */
 	ignore?: string[];
 }
-export type UseExhaustiveSwitchCasesOptions = {};
+export interface UseExhaustiveSwitchCasesOptions {
+	/**
+	* Require a `case` for each value in the union, even when the switch has a `default` clause.
+Default: `false`. 
+	 */
+	requireExplicitCase?: boolean;
+}
 export type UseExpectOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
@@ -9036,6 +9121,12 @@ Defaults to `false`.
 	ignoreOverrideMethods?: boolean;
 }
 export type UseUnicodeRegexOptions = {};
+export interface UseValidTestTitleOptions {
+	/**
+	 * A list of words that are disallowed in test titles.
+	 */
+	disallowedWords?: string[];
+}
 export type UseVarsOnTopOptions = {};
 export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
@@ -9743,6 +9834,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
+export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 /**
  * The function to use for tests
  */
@@ -10248,6 +10340,7 @@ export type Category =
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
@@ -10259,8 +10352,10 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
+	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -10269,6 +10364,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/useArraySome"
@@ -10290,6 +10386,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useFencedCodeLanguage"
 	| "lint/nursery/useFind"
 	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useGlobalThis"
@@ -10333,6 +10430,7 @@ export type Category =
 	| "lint/nursery/useUniqueGraphqlOperationName"
 	| "lint/nursery/useUniqueInputFieldNames"
 	| "lint/nursery/useUniqueVariableNames"
+	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
@@ -10900,6 +10998,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 */
 				event_handler: boolean;
 				/**
+	* Whether this snippet is from a class-related attribute
+(e.g. :class="...") 
+	 */
+				is_class_attribute: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
@@ -10919,6 +11022,11 @@ extracts `<script>` content or treats the file as a standalone JS/TS
 module. 
 	 */
 				file_kind: SvelteFileKind;
+				/**
+	* Whether this snippet is from a class attribute
+(e.g. class={...}) 
+	 */
+				is_class_attribute: boolean;
 			};
 	  };
 export type Language =

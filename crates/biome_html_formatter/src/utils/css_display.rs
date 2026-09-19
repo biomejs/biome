@@ -9,9 +9,209 @@
 //! - HTML WHATWG spec: <https://html.spec.whatwg.org/multipage/rendering.html#the-css-user-agent-style-sheet-and-presentational-hints>
 
 use crate::HtmlFormatter;
-use crate::utils::metadata::{MATHML_ALL_TAGS, SVG_ALL_TAGS};
-use biome_html_syntax::AnyHtmlTagName;
+use crate::utils::metadata::MATHML_ALL_TAGS;
+use biome_html_syntax::{
+    AnyHtmlTagName,
+    HtmlSyntaxKind::{self, *},
+};
+use biome_parser::{TokenSet, token_set};
 use biome_string_case::StrLikeExtension;
+
+const BLOCK_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    HTML_KW,
+    BODY_KW,
+    ADDRESS_KW,
+    BLOCKQUOTE_KW,
+    CENTER_KW,
+    DIALOG_KW,
+    DIV_KW,
+    FIGURE_KW,
+    FIGCAPTION_KW,
+    FOOTER_KW,
+    FORM_KW,
+    HEADER_KW,
+    HR_KW,
+    LEGEND_KW,
+    MAIN_KW,
+    P_KW,
+    PLAINTEXT_KW,
+    PRE_KW,
+    SEARCH_KW,
+    XMP_KW,
+    ARTICLE_KW,
+    ASIDE_KW,
+    H1_KW,
+    H2_KW,
+    H3_KW,
+    H4_KW,
+    H5_KW,
+    H6_KW,
+    HGROUP_KW,
+    NAV_KW,
+    SECTION_KW,
+    DIR_KW,
+    DD_KW,
+    DL_KW,
+    DT_KW,
+    MENU_KW,
+    OL_KW,
+    UL_KW,
+    DETAILS_KW,
+    SUMMARY_KW,
+    PARAM_KW,
+    SOURCE_KW,
+    TRACK_KW,
+    FIELDSET_KW,
+    OPTION_KW,
+    OPTGROUP_KW,
+    ANIMATE_KW,
+    ANIMATE_MOTION_KW,
+    ANIMATE_TRANSFORM_KW,
+    CIRCLE_KW,
+    CLIP_PATH_KW,
+    DEFS_KW,
+    DESC_KW,
+    ELLIPSE_KW,
+    FE_BLEND_KW,
+    FE_COLOR_MATRIX_KW,
+    FE_COMPONENT_TRANSFER_KW,
+    FE_COMPOSITE_KW,
+    FE_CONVOLVE_MATRIX_KW,
+    FE_DIFFUSE_LIGHTING_KW,
+    FE_DISPLACEMENT_MAP_KW,
+    FE_DISTANT_LIGHT_KW,
+    FE_DROP_SHADOW_KW,
+    FE_FLOOD_KW,
+    FE_FUNC_A_KW,
+    FE_FUNC_B_KW,
+    FE_FUNC_G_KW,
+    FE_FUNC_R_KW,
+    FE_GAUSSIAN_BLUR_KW,
+    FE_IMAGE_KW,
+    FE_MERGE_KW,
+    FE_MERGE_NODE_KW,
+    FE_MORPHOLOGY_KW,
+    FE_OFFSET_KW,
+    FE_POINT_LIGHT_KW,
+    FE_SPECULAR_LIGHTING_KW,
+    FE_SPOT_LIGHT_KW,
+    FE_TILE_KW,
+    FE_TURBULENCE_KW,
+    FILTER_KW,
+    FOREIGN_OBJECT_KW,
+    G_KW,
+    IMAGE_KW,
+    LINE_KW,
+    LINEAR_GRADIENT_KW,
+    MARKER_KW,
+    MASK_KW,
+    METADATA_KW,
+    MPATH_KW,
+    PATH_KW,
+    PATTERN_KW,
+    POLYGON_KW,
+    POLYLINE_KW,
+    RADIAL_GRADIENT_KW,
+    RECT_KW,
+    SET_KW,
+    STOP_KW,
+    SWITCH_KW,
+    SYMBOL_KW,
+    TEXT_KW,
+    TEXT_PATH_KW,
+    TSPAN_KW,
+    USE_KW,
+    VIEW_KW
+);
+
+const INLINE_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    IMG_KW,
+    EMBED_KW,
+    IFRAME_KW,
+    CANVAS_KW,
+    TEMPLATE_KW,
+    A_KW,
+    ABBR_KW,
+    ACRONYM_KW,
+    B_KW,
+    BDI_KW,
+    BDO_KW,
+    BIG_KW,
+    BR_KW,
+    CITE_KW,
+    CODE_KW,
+    DATA_KW,
+    DEL_KW,
+    DFN_KW,
+    EM_KW,
+    FONT_KW,
+    I_KW,
+    INS_KW,
+    KBD_KW,
+    LABEL_KW,
+    MAP_KW,
+    MARK_KW,
+    NOBR_KW,
+    OUTPUT_KW,
+    PICTURE_KW,
+    Q_KW,
+    S_KW,
+    SAMP_KW,
+    SLOT_KW,
+    SMALL_KW,
+    SPAN_KW,
+    STRIKE_KW,
+    STRONG_KW,
+    SUB_KW,
+    SUP_KW,
+    TIME_KW,
+    TT_KW,
+    U_KW,
+    VAR_KW,
+    WBR_KW,
+    AUDIO_KW,
+    BGSOUND_KW,
+    BLINK_KW,
+    COMPONENT_KW,
+    FRAME_KW,
+    FRAMESET_KW,
+    KEYGEN_KW,
+    MENUITEM_KW,
+    NOSCRIPT_KW,
+    OBJECT_KW,
+    VIDEO_KW
+);
+
+const HIDDEN_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    RP_KW,
+    AREA_KW,
+    BASE_KW,
+    BASEFONT_KW,
+    DATALIST_KW,
+    HEAD_KW,
+    LINK_KW,
+    META_KW,
+    NOEMBED_KW,
+    NOFRAMES_KW,
+    SCRIPT_KW,
+    STYLE_KW,
+    TITLE_KW
+);
+
+const INLINE_BLOCK_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(
+    SVG_KW,
+    BUTTON_KW,
+    TEXTAREA_KW,
+    INPUT_KW,
+    SELECT_KW,
+    METER_KW,
+    PROGRESS_KW,
+    MARQUEE_KW
+);
+
+const TABLE_CELL_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(TD_KW, TH_KW);
+
+const RUBY_TEXT_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(RT_KW, RTC_KW);
 
 /// CSS display values that are relevant for HTML formatting decisions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -149,98 +349,43 @@ impl CssDisplay {
     }
 }
 
-/// Gets the CSS display value for a given HTML tag name.
-///
-/// This returns the default display value from the browser's user-agent stylesheet.
-/// For unknown elements, returns `CssDisplay::Inline` (the CSS default).
-///
-/// Data source: `html-ua-styles` npm package and HTML WHATWG spec.
-/// Includes Prettier-specific adjustments for formatting purposes.
-pub fn get_css_display(tag_name: &str) -> CssDisplay {
-    // Use case-insensitive matching
-    let tag_lower = tag_name.to_ascii_lowercase_cow();
+fn get_unknown_css_display(tag_name: &str) -> CssDisplay {
+    let tag_name = tag_name.to_ascii_lowercase_cow();
+    if MATHML_ALL_TAGS.binary_search(&tag_name.as_ref()).is_ok() {
+        CssDisplay::Block
+    } else {
+        CssDisplay::Inline
+    }
+}
 
-    match tag_lower.as_ref() {
-        // Block elements
-        "html" | "body" | "address" | "blockquote" | "center" | "dialog" | "div" | "figure"
-        | "figcaption" | "footer" | "form" | "header" | "hr" | "legend" | "listing" | "main"
-        | "p" | "plaintext" | "pre" | "search" | "xmp" => CssDisplay::Block,
-
-        // Sections and headings (block)
-        "article" | "aside" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "hgroup" | "nav"
-        | "section" => CssDisplay::Block,
-
-        // Lists (block)
-        "dir" | "dd" | "dl" | "dt" | "menu" | "ol" | "ul" => CssDisplay::Block,
-
-        // List items
-        "li" => CssDisplay::ListItem,
-
-        // Details/summary (block)
-        "details" | "summary" => CssDisplay::Block,
-
-        // Table elements
-        "table" => CssDisplay::Table,
-        "caption" => CssDisplay::TableCaption,
-        "colgroup" => CssDisplay::TableColumnGroup,
-        "col" => CssDisplay::TableColumn,
-        "thead" => CssDisplay::TableHeaderGroup,
-        "tbody" => CssDisplay::TableRowGroup,
-        "tfoot" => CssDisplay::TableFooterGroup,
-        "tr" => CssDisplay::TableRow,
-        "td" | "th" => CssDisplay::TableCell,
-
-        // Ruby elements
-        "ruby" => CssDisplay::Ruby,
-        "rb" => CssDisplay::RubyBase,
-        "rt" | "rtc" => CssDisplay::RubyText,
-        "rp" => CssDisplay::None,
-
-        // Hidden elements
-        "area" | "base" | "basefont" | "datalist" | "head" | "link" | "meta" | "noembed"
-        | "noframes" | "script" | "style" | "title" => CssDisplay::None,
-
-        // Media elements
-        "svg" => CssDisplay::InlineBlock,
-        "param" => CssDisplay::Block,
-
-        // Form elements - inline-block
-        "button" | "textarea" | "input" | "select" | "meter" | "progress" => {
-            CssDisplay::InlineBlock
-        }
-
-        // https://html.spec.whatwg.org/multipage/rendering.html#the-marquee-element-2
-        "marquee" => CssDisplay::InlineBlock,
-
-        // Replaced/embedded content (inline or inline-block depending on context)
-        "img" | "embed" | "iframe" | "canvas" | "template" => CssDisplay::Inline,
-
-        // Other inline elements
-        "a" | "abbr" | "acronym" | "b" | "bdi" | "bdo" | "big" | "br" | "cite" | "code"
-        | "data" | "del" | "dfn" | "em" | "font" | "i" | "ins" | "kbd" | "label" | "map"
-        | "mark" | "nobr" | "output" | "picture" | "q" | "s" | "samp" | "slot" | "small"
-        | "span" | "strike" | "strong" | "sub" | "sup" | "time" | "tt" | "u" | "var" | "wbr" => {
-            CssDisplay::Inline
-        }
-
-        // Source and track are hidden, but prettier treats them as block for formatting purposes
-        "source" | "track" => CssDisplay::Block,
-
-        // Fieldset is block
-        "fieldset" => CssDisplay::Block,
-
-        // Option/optgroup have special handling in selects
-        "option" | "optgroup" => CssDisplay::Block,
-
-        // Unknown elements default to inline (CSS default behavior)
-        other => {
-            if SVG_ALL_TAGS.binary_search(&other).is_ok()
-                || MATHML_ALL_TAGS.binary_search(&other).is_ok()
-            {
-                CssDisplay::Block
-            } else {
-                CssDisplay::Inline
-            }
+fn get_css_display(kind: HtmlSyntaxKind, tag_name: &str) -> CssDisplay {
+    if INLINE_ELEMENTS.contains(kind) {
+        CssDisplay::Inline
+    } else if BLOCK_ELEMENTS.contains(kind) {
+        CssDisplay::Block
+    } else if HIDDEN_ELEMENTS.contains(kind) {
+        CssDisplay::None
+    } else if INLINE_BLOCK_ELEMENTS.contains(kind) {
+        CssDisplay::InlineBlock
+    } else if TABLE_CELL_ELEMENTS.contains(kind) {
+        CssDisplay::TableCell
+    } else if RUBY_TEXT_ELEMENTS.contains(kind) {
+        CssDisplay::RubyText
+    } else {
+        match kind {
+            LI_KW => CssDisplay::ListItem,
+            TABLE_KW => CssDisplay::Table,
+            CAPTION_KW => CssDisplay::TableCaption,
+            COLGROUP_KW => CssDisplay::TableColumnGroup,
+            COL_KW => CssDisplay::TableColumn,
+            THEAD_KW => CssDisplay::TableHeaderGroup,
+            TBODY_KW => CssDisplay::TableRowGroup,
+            TFOOT_KW => CssDisplay::TableFooterGroup,
+            TR_KW => CssDisplay::TableRow,
+            RUBY_KW => CssDisplay::Ruby,
+            RB_KW => CssDisplay::RubyBase,
+            HTML_UNKNOWN_TAG => get_unknown_css_display(tag_name),
+            _ => CssDisplay::Inline,
         }
     }
 }
@@ -254,7 +399,13 @@ pub fn get_css_display_from_tag(tag_name: &AnyHtmlTagName) -> CssDisplay {
             let Ok(token) = tag_name.value_token() else {
                 return CssDisplay::Inline;
             };
-            get_css_display(token.text_trimmed())
+            let kind = token.kind();
+            let tag_name = if kind == HTML_UNKNOWN_TAG {
+                token.text_trimmed()
+            } else {
+                ""
+            };
+            get_css_display(kind, tag_name)
         }
     }
 }
@@ -263,88 +414,114 @@ pub fn get_css_display_from_tag(tag_name: &AnyHtmlTagName) -> CssDisplay {
 mod tests {
     use super::*;
 
+    fn display(kind: HtmlSyntaxKind) -> CssDisplay {
+        get_css_display(kind, "")
+    }
+
     #[test]
     fn test_block_elements() {
         let block_tags = [
-            "div", "p", "h1", "ul", "ol", "section", "article", "header", "footer",
+            DIV_KW, P_KW, H1_KW, UL_KW, OL_KW, SECTION_KW, ARTICLE_KW, HEADER_KW, FOOTER_KW,
         ];
         for tag in block_tags {
             assert!(
-                get_css_display(tag).is_block_like(),
-                "Expected '{tag}' to be block-like"
+                display(tag).is_block_like(),
+                "Expected '{tag:?}' to be block-like"
             );
         }
     }
 
     #[test]
     fn test_inline_elements() {
-        let inline_tags = ["span", "a", "strong", "em", "b", "i", "code", "label"];
+        let inline_tags = [
+            SPAN_KW, A_KW, STRONG_KW, EM_KW, B_KW, I_KW, CODE_KW, LABEL_KW,
+        ];
         for tag in inline_tags {
             assert!(
-                get_css_display(tag).is_inline_like(),
-                "Expected '{tag}' to be inline-like"
+                display(tag).is_inline_like(),
+                "Expected '{tag:?}' to be inline-like"
             );
         }
     }
 
     #[test]
     fn test_tr_is_table_like() {
-        assert!(get_css_display("tr").is_table_like());
-    }
-
-    #[test]
-    fn test_case_insensitive() {
-        assert_eq!(get_css_display("DIV"), CssDisplay::Block);
-        assert_eq!(get_css_display("Span"), CssDisplay::Inline);
-        assert_eq!(get_css_display("TD"), CssDisplay::TableCell);
+        assert!(display(TR_KW).is_table_like());
     }
 
     #[test]
     fn test_hidden_elements() {
-        let hidden_tags = ["head", "script", "style", "meta", "link"];
+        let hidden_tags = [HEAD_KW, SCRIPT_KW, STYLE_KW, META_KW, LINK_KW];
         for tag in hidden_tags {
             assert_eq!(
-                get_css_display(tag),
+                display(tag),
                 CssDisplay::None,
-                "Expected '{tag}' to be display: none"
+                "Expected '{tag:?}' to be display: none"
             );
         }
     }
 
     #[test]
     fn test_form_elements_are_inline_block() {
-        let form_tags = ["button", "input", "select", "textarea"];
+        let form_tags = [BUTTON_KW, INPUT_KW, SELECT_KW, TEXTAREA_KW];
         for tag in form_tags {
             assert_eq!(
-                get_css_display(tag),
+                display(tag),
                 CssDisplay::InlineBlock,
-                "Expected '{tag}' to be inline-block"
+                "Expected '{tag:?}' to be inline-block"
             );
         }
     }
 
     #[test]
     fn test_whitespace_sensitive_display_classifications() {
-        assert_eq!(get_css_display("marquee"), CssDisplay::InlineBlock);
+        assert_eq!(display(MARQUEE_KW), CssDisplay::InlineBlock);
 
-        for tag in ["noscript", "video", "audio", "object"] {
+        for tag in [NOSCRIPT_KW, VIDEO_KW, AUDIO_KW, OBJECT_KW] {
             assert_eq!(
-                get_css_display(tag),
+                display(tag),
                 CssDisplay::Inline,
-                "Expected '{tag}' to be inline"
+                "Expected '{tag:?}' to be inline"
             );
         }
     }
 
     #[test]
     fn test_unknown_elements_default_to_inline() {
-        assert_eq!(get_css_display("custom-element"), CssDisplay::Inline);
-        assert_eq!(get_css_display("my-component"), CssDisplay::Inline);
+        assert_eq!(
+            get_css_display(HTML_UNKNOWN_TAG, "custom-element"),
+            CssDisplay::Inline
+        );
+        assert_eq!(
+            get_css_display(HTML_UNKNOWN_TAG, "my-component"),
+            CssDisplay::Inline
+        );
+        assert_eq!(
+            get_css_display(HTML_UNKNOWN_TAG, "foreignobject"),
+            CssDisplay::Inline
+        );
+    }
+
+    #[test]
+    fn test_svg_element_is_block() {
+        assert_eq!(display(IMAGE_KW), CssDisplay::Block);
+    }
+
+    #[test]
+    fn test_mathml_elements_are_block() {
+        assert_eq!(
+            get_css_display(HTML_UNKNOWN_TAG, "mfrac"),
+            CssDisplay::Block
+        );
+        assert_eq!(
+            get_css_display(HTML_UNKNOWN_TAG, "ANNOTATION-XML"),
+            CssDisplay::Block
+        );
     }
 
     #[test]
     fn test_list_item() {
-        assert_eq!(get_css_display("li"), CssDisplay::ListItem);
+        assert_eq!(display(LI_KW), CssDisplay::ListItem);
         // ListItem is block-like
         assert!(CssDisplay::ListItem.is_block_like());
     }

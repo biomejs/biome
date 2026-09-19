@@ -25,6 +25,7 @@ biome_console            = { workspace = true }
 biome_css_factory        = { workspace = true }
 biome_css_semantic       = { workspace = true }
 biome_css_syntax         = { workspace = true }
+biome_db                 = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
@@ -54,6 +55,7 @@ biome_test_utils = { path = "../biome_test_utils", features = ["html_embeds", "l
 camino       = { workspace = true }
 criterion    = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta        = { workspace = true, features = ["glob"] }
+salsa        = { workspace = true }
 tests_macros = { path = "../tests_macros" }
 
 [build-dependencies]

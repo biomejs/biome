@@ -6,6 +6,7 @@ use crate::syntax::scss::{
     parse_scss_namespaced_variable, parse_scss_regular_interpolation, parse_scss_variable,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
 use crate::syntax::{
     is_at_identifier, is_nth_at_identifier, parse_regular_identifier, parse_regular_number,
 };
@@ -13,7 +14,6 @@ use biome_css_syntax::CssSyntaxKind::{
     CSS_NUMBER_LITERAL, SCSS_INTERPOLATED_IDENTIFIER, SCSS_INTERPOLATED_IDENTIFIER_PART_LIST,
     SCSS_INTERPOLATED_VALUE, SCSS_INTERPOLATED_VALUE_PART_LIST, SCSS_INTERPOLATION,
 };
-use biome_css_syntax::T;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, ParserProgress};
@@ -62,7 +62,7 @@ fn is_nth_at_adjacent_interpolation_suffix(p: &mut CssParser, n: usize) -> bool 
 }
 
 /// Parses an SCSS interpolation-led value and upgrades it to a function call
-/// when the interpolation-shaped name is followed by `(`.
+/// when the interpolation-shaped name is directly followed by `(`.
 ///
 /// Examples:
 ///
@@ -110,7 +110,7 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
         SCSS_INTERPOLATED_IDENTIFIER => {
             // Adjacent identifier fragments are already part of the name; an
             // immediate `(` is the only remaining function-call signal.
-            if p.at(T!['(']) {
+            if is_nth_at_adjacent_l_paren(p, 0) {
                 parse_scss_function_call_from_name(p, head)
             } else {
                 Present(head)
@@ -119,7 +119,7 @@ pub(crate) fn parse_scss_interpolated_function_or_value_until(
         SCSS_INTERPOLATION => {
             // A bare interpolation needs one more decision point because it
             // can stand alone, become a function name, or start a value chain.
-            if p.at(T!['(']) {
+            if is_nth_at_adjacent_l_paren(p, 0) {
                 // `#{fn}(` needs an interpolated identifier as the function name.
                 let list = head
                     .precede(p)

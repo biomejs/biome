@@ -371,6 +371,16 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         }
 
         match ty {
+            InferredTypeData::Literal(literal)
+                if matches!(literal.literal(db), InferredLiteral::RegExp(_)) =>
+            {
+                state.ty = InferredTypeData::instance_of(
+                    db,
+                    InferredTypeData::regexp_class(),
+                    Box::default(),
+                );
+                pending.push(state);
+            }
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
                     if matches!(
@@ -443,6 +453,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             | InferredTypeData::Tuple(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::TypeofExpression(_)
@@ -476,6 +487,9 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     let mut substitutions = inherited.to_vec();
     for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
         let declared = apply_substitutions(db, *declared, inherited);
+        if !declared.is_generic_reference(db) {
+            continue;
+        }
         let replacement = apply_substitutions(db, *replacement, inherited);
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
         if declared_instance != declared {
@@ -523,6 +537,7 @@ fn declared_type_parameters<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -595,6 +610,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -699,6 +715,7 @@ fn find_own_member_type<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)

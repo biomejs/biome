@@ -331,7 +331,7 @@ MdRoot {
                     value_token: MD_TEXTUAL_LITERAL@334..341 "Simple " [] [],
                 },
                 MdInlineHtml {
-                    value_token: MD_HTML_LITERAL@341..357 "<!-- comment -->" [] [],
+                    value_token: MD_HTML_LITERAL@341..357 "" [Comments("<!-- comment -->")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@357..365 " inline." [] [],
@@ -343,7 +343,7 @@ MdRoot {
                     value_token: MD_TEXTUAL_LITERAL@366..372 "Empty " [] [],
                 },
                 MdInlineHtml {
-                    value_token: MD_HTML_LITERAL@372..380 "<!-- -->" [] [],
+                    value_token: MD_HTML_LITERAL@372..380 "" [Comments("<!-- -->")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@380..389 " comment." [] [],
@@ -355,7 +355,7 @@ MdRoot {
                     value_token: MD_TEXTUAL_LITERAL@390..402 "With dashes " [] [],
                 },
                 MdInlineHtml {
-                    value_token: MD_HTML_LITERAL@402..416 "<!--foo-bar-->" [] [],
+                    value_token: MD_HTML_LITERAL@402..416 "" [Comments("<!--foo-bar-->")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@416..422 " here." [] [],
@@ -367,7 +367,7 @@ MdRoot {
                     value_token: MD_TEXTUAL_LITERAL@423..436 "Leading dash " [] [],
                 },
                 MdInlineHtml {
-                    value_token: MD_HTML_LITERAL@436..445 "<!--- -->" [] [],
+                    value_token: MD_HTML_LITERAL@436..445 "" [Comments("<!--- -->")] [],
                 },
                 MdTextual {
                     value_token: MD_TEXTUAL_LITERAL@445..454 " allowed." [] [],
@@ -1195,7 +1195,7 @@ MdRoot {
         0: MD_TEXTUAL@334..341
           0: MD_TEXTUAL_LITERAL@334..341 "Simple " [] []
         1: MD_INLINE_HTML@341..357
-          0: MD_HTML_LITERAL@341..357 "<!-- comment -->" [] []
+          0: MD_HTML_LITERAL@341..357 "" [Comments("<!-- comment -->")] []
         2: MD_TEXTUAL@357..365
           0: MD_TEXTUAL_LITERAL@357..365 " inline." [] []
         3: MD_TEXTUAL@365..366
@@ -1203,7 +1203,7 @@ MdRoot {
         4: MD_TEXTUAL@366..372
           0: MD_TEXTUAL_LITERAL@366..372 "Empty " [] []
         5: MD_INLINE_HTML@372..380
-          0: MD_HTML_LITERAL@372..380 "<!-- -->" [] []
+          0: MD_HTML_LITERAL@372..380 "" [Comments("<!-- -->")] []
         6: MD_TEXTUAL@380..389
           0: MD_TEXTUAL_LITERAL@380..389 " comment." [] []
         7: MD_TEXTUAL@389..390
@@ -1211,7 +1211,7 @@ MdRoot {
         8: MD_TEXTUAL@390..402
           0: MD_TEXTUAL_LITERAL@390..402 "With dashes " [] []
         9: MD_INLINE_HTML@402..416
-          0: MD_HTML_LITERAL@402..416 "<!--foo-bar-->" [] []
+          0: MD_HTML_LITERAL@402..416 "" [Comments("<!--foo-bar-->")] []
         10: MD_TEXTUAL@416..422
           0: MD_TEXTUAL_LITERAL@416..422 " here." [] []
         11: MD_TEXTUAL@422..423
@@ -1219,7 +1219,7 @@ MdRoot {
         12: MD_TEXTUAL@423..436
           0: MD_TEXTUAL_LITERAL@423..436 "Leading dash " [] []
         13: MD_INLINE_HTML@436..445
-          0: MD_HTML_LITERAL@436..445 "<!--- -->" [] []
+          0: MD_HTML_LITERAL@436..445 "" [Comments("<!--- -->")] []
         14: MD_TEXTUAL@445..454
           0: MD_TEXTUAL_LITERAL@445..454 " allowed." [] []
         15: MD_TEXTUAL@454..455

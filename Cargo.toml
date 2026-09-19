@@ -59,6 +59,7 @@ biome_html_formatter         = { path = "./crates/biome_html_formatter", version
 biome_html_parser            = { path = "./crates/biome_html_parser", version = "0.0.1" }
 biome_html_syntax            = { path = "./crates/biome_html_syntax", version = "0.5.7" }
 biome_js_analyze             = { path = "./crates/biome_js_analyze", version = "0.5.7" }
+biome_js_control_flow        = { path = "./crates/biome_js_control_flow", version = "0.1.0" }
 biome_js_factory             = { path = "./crates/biome_js_factory", version = "0.5.7" }
 biome_js_formatter           = { path = "./crates/biome_js_formatter", version = "0.5.7" }
 biome_js_parser              = { path = "./crates/biome_js_parser", version = "0.5.7" }
@@ -113,7 +114,7 @@ biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.0.1" }
 biome_yaml_syntax            = { path = "./crates/biome_yaml_syntax", version = "0.0.1" }
 biome_languages              = { path = "./crates/biome_languages", version = "0.1.0" }
-boa_engine                   = "0.22.0"
+boa_engine                   = { version = "0.22.0", default-features = false, features = ["float16", "xsum"] }
 boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.27", features = ["derive"] }
 camino                       = "1.2.5"
@@ -132,7 +133,7 @@ hashbrown                    = { version = "0.15.5", default-features = false }
 ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.2" }
 insta                        = "1.48.0"
-jiff                         = "0.2.35"
+jiff                         = "0.2.37"
 libc                         = "0.2.189"
 # mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
 # See: https://github.com/biomejs/biome/issues/10270
@@ -173,8 +174,9 @@ tower-lsp-server             = "0.23.0"
 tracing                      = { version = "0.1.44", default-features = false, features = ["attributes", "std"] }
 tracing-subscriber           = "0.3.23"
 unicode-bom                  = "2.0.3"
+unicode-normalization        = "0.1.25"
 unicode-width                = "0.2.2"
-ureq                         = "3.4.0"
+ureq                         = "3.4.2"
 url                          = "2.5.8"
 uuid                         = "1.24.1"
 walkdir                      = "2.5.0"

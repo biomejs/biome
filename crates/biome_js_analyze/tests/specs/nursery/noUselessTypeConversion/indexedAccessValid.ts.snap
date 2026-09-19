@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: indexedAccessValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+declare const mixed: ["A", 1][number];
+String(mixed);
+Number(mixed);
+
+declare const optional: ["A"?][number];
+String(optional);
+
+declare const unknown: [unknown][number];
+String(unknown);
+
+~~-2147483649;
+~~-0;
+declare const outOfRange: [-2147483649, 2147483648][number];
+~~outOfRange;
+
+```

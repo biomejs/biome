@@ -1,0 +1,9 @@
+.a {
+  @extend %base !optional @debug "x";
+  width: 1px;
+}
+.b {
+  @import "theme.css" @warn "x";
+  width: 1px;
+}
+.after { height: 2px; }

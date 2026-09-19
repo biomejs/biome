@@ -1,5 +1,9 @@
 //! Lowers collected global declaration groups into a codegen-friendly model.
 
+pub(super) mod declarations;
+
+pub use declarations::{LoweredDeclarations, lower_interfaces};
+
 use anyhow::{Context, Result, bail};
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
@@ -43,9 +47,15 @@ pub struct LoweredGlobal {
     name: Text,
     id_constant: &'static str,
     data: LoweredTypeData,
+    local_types: Box<[LoweredTypeData]>,
 }
 
 impl LoweredGlobal {
+    /// Supporting types addressed by local references, with dependencies before users.
+    pub fn local_types(&self) -> &[LoweredTypeData] {
+        &self.local_types
+    }
+
     /// TypeScript global name.
     pub fn name(&self) -> &str {
         self.name.text()
@@ -65,11 +75,35 @@ impl LoweredGlobal {
 /// Lowered type data variants supported by the generator.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredTypeData {
+    AnyKeyword,
+    BigInt,
+    BigIntLiteral(Text),
+    Boolean,
+    BooleanLiteral(bool),
+    NeverKeyword,
+    Null,
+    NumberLiteral(Text),
+    ObjectKeyword,
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
     Interface(LoweredInterface),
     Symbol,
+    StringLiteral(Text),
+    Union(Box<[LoweredTypeReference]>),
+    Undefined,
+    UnknownKeyword,
+    ThisKeyword,
+    GenericParameter {
+        name: Text,
+        constraint: Option<LoweredTypeReference>,
+        default: Option<LoweredTypeReference>,
+    },
+    Tuple(Box<[LoweredTypeReference]>),
+    InstanceOf {
+        ty: LoweredTypeReference,
+        type_parameters: Box<[LoweredTypeReference]>,
+    },
 }
 
 /// Lowered class-like global.
@@ -108,10 +142,21 @@ impl LoweredClass {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredInterface {
     name: Text,
+    type_parameters: Box<[LoweredTypeReference]>,
+    extends: Box<[LoweredTypeReference]>,
     members: Box<[LoweredTypeMember]>,
 }
 
 impl LoweredInterface {
+    pub fn type_parameters(&self) -> &[LoweredTypeReference] {
+        &self.type_parameters
+    }
+
+    /// Base interfaces in declaration order.
+    pub fn extends(&self) -> &[LoweredTypeReference] {
+        &self.extends
+    }
+
     /// Interface name.
     pub fn name(&self) -> &str {
         self.name.text()
@@ -263,6 +308,7 @@ pub enum LoweredMemberKind {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LoweredTypeReference {
     Predefined(&'static str),
+    Local(usize),
 }
 
 /// Lowers supported global groups into generated global type definitions.
@@ -285,10 +331,43 @@ pub fn lower_global_types(
         &mut globals,
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, DATE_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, MAP_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, SET_GLOBAL)?;
-    lower_memberless_class_global(manifest, &mut source_cache, &mut globals, WEAK_MAP_GLOBAL)?;
+    for (name, id_constant, reference) in [
+        (
+            "WeakMap",
+            "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            "GLOBAL_WEAK_MAP_ID",
+        ),
+        ("Set", "SET_ID_GLOBAL_TYPE_ID", "GLOBAL_SET_ID"),
+        ("Map", "MAP_ID_GLOBAL_TYPE_ID", "GLOBAL_MAP_ID"),
+        ("Date", "DATE_ID_GLOBAL_TYPE_ID", "GLOBAL_DATE_ID"),
+        ("RegExp", "REGEXP_ID_GLOBAL_TYPE_ID", "GLOBAL_REGEXP_ID"),
+    ] {
+        if manifest.global_group(name).is_none() {
+            continue;
+        }
+        let index = if let Some(index) = globals.iter().position(|global| global.name() == name) {
+            index
+        } else {
+            globals.push(LoweredGlobal {
+                local_types: Box::default(),
+                name: Text::from(name),
+                id_constant,
+                data: LoweredTypeData::Class(LoweredClass {
+                    name: Text::from(name),
+                    type_parameters: Box::default(),
+                    members: Box::default(),
+                }),
+            });
+            globals.len() - 1
+        };
+        let LoweredTypeData::Class(class) = &mut globals[index].data else {
+            bail!("expected class data for {name}");
+        };
+        globals[index].local_types =
+            declarations::lower_class_members(manifest, source_files, class, reference)?;
+    }
+
+    declarations::lower_iterator_globals(manifest, source_files, &mut globals)?;
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
@@ -371,6 +450,7 @@ fn lower_error_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error"),
         id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -380,11 +460,13 @@ fn lower_error_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error.constructor"),
         id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Constructor(constructor),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Error.call"),
         id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(call),
@@ -466,38 +548,6 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     helper_id_constant: "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
     helper_type_id: "GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID",
     return_kind: DisposableReturnKind::PromiseLikeVoid,
-};
-
-/// Configuration for lowering a global interface to a class without members.
-#[derive(Clone, Copy)]
-struct MemberlessClassSpec {
-    name: &'static str,
-    id_constant: &'static str,
-    type_parameter_ids: &'static [&'static str],
-}
-
-const DATE_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Date",
-    id_constant: "DATE_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &[],
-};
-
-const MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Map",
-    id_constant: "MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
-};
-
-const SET_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "Set",
-    id_constant: "SET_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID"],
-};
-
-const WEAK_MAP_GLOBAL: MemberlessClassSpec = MemberlessClassSpec {
-    name: "WeakMap",
-    id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-    type_parameter_ids: &["GLOBAL_T_ID", "GLOBAL_U_ID"],
 };
 
 const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;
@@ -722,6 +772,7 @@ fn lower_array_globals(
                     reject_selected_array_accessor(setter.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -746,6 +797,7 @@ fn lower_array_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Array"),
         id_constant: "ARRAY_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -921,6 +973,7 @@ fn lower_promise_globals(
     .chain(PROMISE_METHOD_SPECIFICATIONS.map(promise_member))
     .collect();
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Promise"),
         id_constant: "PROMISE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -930,6 +983,7 @@ fn lower_promise_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Promise.constructor"),
         id_constant: "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(LoweredFunction {
@@ -982,6 +1036,7 @@ fn validate_promise_methods(
                 reject_selected_promise_non_method(setter.name()?, location)?;
             }
             AnyTsTypeMember::JsBogusMember(_)
+            | AnyTsTypeMember::JsMetavariable(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
             | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -1160,6 +1215,7 @@ fn promise_member(specification: PromiseMethodSpecification) -> LoweredTypeMembe
 /// Keeps the resolver's parameter-free callable projection for selected Promise methods.
 fn promise_method_global(specification: PromiseMethodSpecification) -> LoweredGlobal {
     LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(specification.global_name),
         id_constant: specification.id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1181,6 +1237,7 @@ fn array_method_global(
     return_type_id: &'static str,
 ) -> LoweredGlobal {
     LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(name),
         id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1555,7 +1612,7 @@ impl SelectedSymbolMember {
     }
 }
 
-/// Lowers the predefined `Symbol` projection and its two well-known symbol helpers.
+/// Lowers selected Symbol constructor members and the predefined disposable symbol helpers.
 fn lower_symbol_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
@@ -1571,44 +1628,51 @@ fn lower_symbol_globals(
         bail!("Symbol global must have a value-side declaration");
     }
 
-    validate_symbol_declarations(symbol_group.declarations(), source_cache)?;
-
-    let Some(constructor_group) = manifest.global_group("SymbolConstructor") else {
-        bail!("Symbol global value side references missing SymbolConstructor group");
-    };
+    let constructor_name =
+        resolve_constructor_name("Symbol", symbol_group.declarations(), source_cache)?;
+    let constructor_group = manifest
+        .global_group(constructor_name.text())
+        .with_context(|| {
+            format!("Symbol global references missing constructor {constructor_name}")
+        })?;
     if !constructor_group.has_role(GlobalDeclarationRole::Type) {
         bail!("SymbolConstructor must have a type-side declaration");
     }
+    // Disposable interface keys address predefined symbol IDs, so their declarations
+    // must exist and denote unique symbols before those IDs can be emitted.
     validate_symbol_constructor_members(constructor_group.declarations(), source_cache)?;
 
-    globals.push(LoweredGlobal {
+    let mut class = LoweredClass {
         name: Text::from("Symbol"),
+        type_parameters: Box::default(),
+        members: Box::default(),
+    };
+    let local_types = declarations::lower_constructor_members(
+        manifest,
+        source_cache.source_files,
+        constructor_group.declarations(),
+        &mut class,
+        "GLOBAL_SYMBOL_ID",
+        supports_symbol_constructor_member,
+        &[
+            ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
+            ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+        ],
+    )?;
+    globals.push(LoweredGlobal {
+        local_types,
+        name: class.name.clone(),
         id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
-        data: LoweredTypeData::Class(LoweredClass {
-            name: Text::from("Symbol"),
-            type_parameters: Box::default(),
-            members: Box::new([
-                LoweredTypeMember {
-                    name: Text::from("dispose"),
-                    kind: LoweredMemberKind::NamedStatic,
-                    type_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID"),
-                },
-                LoweredTypeMember {
-                    name: Text::from("asyncDispose"),
-                    kind: LoweredMemberKind::NamedStatic,
-                    type_reference: LoweredTypeReference::Predefined(
-                        "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID",
-                    ),
-                },
-            ]),
-        }),
+        data: LoweredTypeData::Class(class),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Symbol.dispose"),
         id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Symbol,
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("Symbol.asyncDispose"),
         id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Symbol,
@@ -1617,35 +1681,81 @@ fn lower_symbol_globals(
     Ok(())
 }
 
-fn validate_symbol_declarations(
+/// Selects call signatures, named unique-symbol properties, and the registry functions for/keyFor.
+/// Prototype properties, construct signatures, computed members, and other
+/// methods are outside this selection.
+fn supports_symbol_constructor_member(member: &AnyTsTypeMember) -> Result<bool> {
+    match member {
+        AnyTsTypeMember::TsCallSignatureTypeMember(_) => Ok(true),
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
+            if !matches!(
+                property.name()?,
+                AnyJsObjectMemberName::JsLiteralMemberName(_)
+            ) {
+                return Ok(false);
+            }
+            is_unique_symbol_property(property)
+        }
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
+            let AnyJsObjectMemberName::JsLiteralMemberName(name) = method.name()? else {
+                return Ok(false);
+            };
+            Ok(matches!(name.name()?.text(), "for" | "keyFor"))
+        }
+        _ => Ok(false),
+    }
+}
+
+fn is_unique_symbol_property(property: &TsPropertySignatureTypeMember) -> Result<bool> {
+    let Some(annotation) = property.type_annotation() else {
+        return Ok(false);
+    };
+    let AnyTsType::TsTypeOperatorType(operator) = annotation.ty()? else {
+        return Ok(false);
+    };
+    Ok(operator.operator_token()?.kind() == T![unique]
+        && matches!(operator.ty()?, AnyTsType::TsSymbolType(_)))
+}
+
+fn resolve_constructor_name(
+    global_name: &str,
     records: &[DeclarationRecord],
     source_cache: &mut ParsedSourceCache,
-) -> Result<()> {
+) -> Result<Text> {
+    let mut constructor = None;
     for record in records {
         match &record.kind {
             DeclarationKind::Interface => {}
             DeclarationKind::VariableDeclarator { .. } => {
-                validate_symbol_constructor_reference(record, source_cache)?;
+                let name = resolve_constructor_reference(record, source_cache)?;
+                if constructor
+                    .as_ref()
+                    .is_some_and(|previous| previous != &name)
+                {
+                    bail!("{global_name} value declarations reference different constructor types");
+                }
+                constructor = Some(name);
             }
             DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the Symbol global")
+                bail!("type aliases are not supported in the {global_name} global")
             }
             DeclarationKind::DeclareFunction | DeclarationKind::ImportEquals => {
                 bail!(
-                    "unsupported value-side Symbol declaration {:?}",
+                    "unsupported value-side {global_name} declaration {:?}",
                     record.kind
                 )
             }
         }
     }
 
-    Ok(())
+    constructor.with_context(|| format!("{global_name} is missing a value declaration"))
 }
 
-fn validate_symbol_constructor_reference(
+fn resolve_constructor_reference(
     record: &DeclarationRecord,
     source_cache: &mut ParsedSourceCache,
-) -> Result<()> {
+) -> Result<Text> {
+    let global_name = record.declared_name.text();
     let declarator = source_cache
         .find_variable_declarator(record)?
         .with_context(|| {
@@ -1656,28 +1766,24 @@ fn validate_symbol_constructor_reference(
             )
         })?;
     let Some(annotation) = declarator.variable_annotation() else {
-        bail!("declare var Symbol is missing a type annotation");
+        bail!("declare var {global_name} is missing a type annotation");
     };
     let AnyTsVariableAnnotation::TsTypeAnnotation(annotation) = annotation else {
-        bail!("declare var Symbol uses unsupported definite assignment annotation");
+        bail!("declare var {global_name} uses unsupported definite assignment annotation");
     };
     let AnyTsType::TsReferenceType(reference) = annotation.ty()? else {
-        bail!("declare var Symbol must reference SymbolConstructor");
+        bail!("{global_name} value declaration must reference a constructor interface");
     };
     if reference.type_arguments().is_some() {
-        bail!("declare var Symbol must reference SymbolConstructor without type arguments");
+        bail!("{global_name} constructor reference must not have type arguments");
     }
     let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = reference
         .name()
-        .context("declare var Symbol is missing a type reference name")?
+        .with_context(|| format!("declare var {global_name} is missing a type reference name"))?
     else {
-        bail!("declare var Symbol must reference SymbolConstructor");
+        bail!("{global_name} value declaration must reference a constructor interface");
     };
-    if identifier.value_token()?.token_text_trimmed().text() != "SymbolConstructor" {
-        bail!("declare var Symbol must reference SymbolConstructor");
-    }
-
-    Ok(())
+    Ok(Text::from(identifier.value_token()?.token_text_trimmed()))
 }
 
 /// Validates the TypeScript `exec` signature before emitting the predefined `RegExp` projection.
@@ -1753,6 +1859,7 @@ fn lower_regexp_globals(
                     reject_regexp_exec_non_method(setter.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -1768,6 +1875,7 @@ fn lower_regexp_globals(
     }
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("RegExp"),
         id_constant: "REGEXP_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Class(LoweredClass {
@@ -1781,6 +1889,7 @@ fn lower_regexp_globals(
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from("RegExp.exec"),
         id_constant: "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
         data: LoweredTypeData::Function(LoweredFunction {
@@ -1896,93 +2005,6 @@ fn validate_regexp_exec_parameter(parameters: JsParameters) -> Result<()> {
     Ok(())
 }
 
-fn lower_memberless_class_global(
-    manifest: &GlobalManifest,
-    source_cache: &mut ParsedSourceCache,
-    globals: &mut Vec<LoweredGlobal>,
-    spec: MemberlessClassSpec,
-) -> Result<()> {
-    let Some(group) = manifest.global_group(spec.name) else {
-        return Ok(());
-    };
-    if !group.has_role(GlobalDeclarationRole::Type) {
-        bail!("{} global must have a type-side declaration", spec.name);
-    }
-
-    let mut saw_interface = false;
-    for record in group.declarations() {
-        match &record.kind {
-            DeclarationKind::Interface => {
-                saw_interface = true;
-                let declaration = source_cache
-                    .find_interface_declaration(record)?
-                    .with_context(|| {
-                        format!(
-                            "failed to find interface declaration {} at {:?}",
-                            record.declared_name.text(),
-                            record.text_range
-                        )
-                    })?;
-                validate_memberless_class_interface(&declaration, spec)?;
-            }
-            DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the {} global", spec.name)
-            }
-            DeclarationKind::DeclareFunction
-            | DeclarationKind::VariableDeclarator { .. }
-            | DeclarationKind::ImportEquals => {}
-        }
-    }
-    if !saw_interface {
-        bail!("{} global must include an interface declaration", spec.name);
-    }
-
-    globals.push(LoweredGlobal {
-        name: Text::from(spec.name),
-        id_constant: spec.id_constant,
-        data: LoweredTypeData::Class(LoweredClass {
-            name: Text::from(spec.name),
-            type_parameters: spec
-                .type_parameter_ids
-                .iter()
-                .map(|id| LoweredTypeReference::Predefined(id))
-                .collect(),
-            members: Box::default(),
-        }),
-    });
-
-    Ok(())
-}
-
-fn validate_memberless_class_interface(
-    declaration: &TsInterfaceDeclaration,
-    spec: MemberlessClassSpec,
-) -> Result<()> {
-    if declaration.extends_clause().is_some() {
-        bail!("{} interface extends clauses are not supported", spec.name);
-    }
-
-    let mut type_parameter_count = 0;
-    if let Some(type_parameters) = declaration.type_parameters() {
-        for type_parameter in type_parameters.items() {
-            type_parameter.with_context(|| {
-                format!("{} interface has a malformed type parameter", spec.name)
-            })?;
-            type_parameter_count += 1;
-        }
-    }
-
-    let expected_type_parameter_count = spec.type_parameter_ids.len();
-    if type_parameter_count != expected_type_parameter_count {
-        bail!(
-            "{} interface has {type_parameter_count} type parameters, expected {expected_type_parameter_count}",
-            spec.name
-        );
-    }
-
-    Ok(())
-}
-
 /// Validates the two selected `unique symbol` properties across merged constructor interfaces.
 fn validate_symbol_constructor_members(
     records: &[DeclarationRecord],
@@ -2041,6 +2063,7 @@ fn validate_symbol_constructor_members(
                     reject_selected_symbol_non_property(member.name()?)?;
                 }
                 AnyTsTypeMember::JsBogusMember(_)
+                | AnyTsTypeMember::JsMetavariable(_)
                 | AnyTsTypeMember::TsCallSignatureTypeMember(_)
                 | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
                 | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
@@ -2129,6 +2152,9 @@ impl<'a> ParsedSourceCache<'a> {
         let source = std::str::from_utf8(&source_file.bytes)
             .with_context(|| format!("{} is not valid UTF-8", source_file.repo_relative))?;
         let parsed = parse(source, JsFileSource::d_ts(), JsParserOptions::default());
+        if parsed.has_errors() {
+            bail!("parser diagnostics in {}", source_file.repo_relative);
+        }
         let AnyJsRoot::TsDeclarationModule(module) = parsed.tree() else {
             bail!(
                 "{} is not a TypeScript declaration module",
@@ -2249,14 +2275,18 @@ fn lower_disposable_global(
         .with_context(|| format!("{} is missing {}", spec.interface_name, spec.member_name))?;
 
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(spec.interface_name),
         id_constant: spec.global_id_constant,
         data: LoweredTypeData::Interface(LoweredInterface {
             name: Text::from(spec.interface_name),
+            type_parameters: Box::default(),
+            extends: Box::default(),
             members: Box::new([lowered_member]),
         }),
     });
     globals.push(LoweredGlobal {
+        local_types: Box::default(),
         name: Text::from(spec.helper_name),
         id_constant: spec.helper_id_constant,
         data: LoweredTypeData::Function(LoweredFunction {
@@ -2290,6 +2320,9 @@ fn lower_disposable_type_member(
         }
         AnyTsTypeMember::JsBogusMember(_) => {
             bail!("bogus members are not supported in {}", spec.interface_name)
+        }
+        AnyTsTypeMember::JsMetavariable(_) => {
+            bail!("metavariables are not supported in {}", spec.interface_name)
         }
         AnyTsTypeMember::TsGetterSignatureTypeMember(_) => {
             bail!(
@@ -2522,6 +2555,9 @@ fn lower_error_type_member(member: AnyTsTypeMember) -> Result<Option<LoweredType
         AnyTsTypeMember::JsBogusMember(_) => {
             bail!("bogus members are not supported in the Error global")
         }
+        AnyTsTypeMember::JsMetavariable(_) => {
+            bail!("metavariable members are not supported in the Error global")
+        }
         AnyTsTypeMember::TsGetterSignatureTypeMember(_) => {
             bail!("getter signatures are not supported in the Error global")
         }
@@ -2663,6 +2699,9 @@ fn lower_error_constructor_signatures(
                 AnyTsTypeMember::TsSetterSignatureTypeMember(_) => {
                     bail!("setter signatures are not supported in ErrorConstructor")
                 }
+                AnyTsTypeMember::JsMetavariable(_) => {
+                    bail!("metavariables are not supported in ErrorConstructor")
+                }
             }
         }
     }
@@ -2743,21 +2782,31 @@ fn lower_call_signature(member: &TsCallSignatureTypeMember) -> Result<LoweredFun
 
 /// Lowers function-like parameters for the `ErrorConstructor`.
 fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionParameter]>> {
+    lower_parameters_with(parameters, &mut lower_type_reference)
+}
+
+fn lower_parameters_with(
+    parameters: JsParameters,
+    lower_reference: &mut impl FnMut(&AnyTsType) -> Result<LoweredTypeReference>,
+) -> Result<Box<[LoweredFunctionParameter]>> {
     let mut lowered = Vec::new();
     for parameter in parameters.items() {
         match parameter? {
             AnyJsParameter::AnyJsFormalParameter(parameter) => {
                 let AnyJsFormalParameter::JsFormalParameter(parameter) = parameter else {
-                    bail!("unsupported ErrorConstructor formal parameter");
+                    bail!("unsupported function formal parameter");
                 };
+                if !parameter.decorators().is_empty() || parameter.initializer().is_some() {
+                    bail!("unsupported function parameter");
+                }
                 let name = lower_binding_name(parameter.binding()?)?;
                 let is_optional = parameter.question_mark_token().is_some();
                 let type_reference = parameter
                     .type_annotation()
-                    .context("ErrorConstructor parameter is missing a type annotation")?
+                    .context("function parameter is missing a type annotation")?
                     .ty()
-                    .context("ErrorConstructor parameter has malformed type annotation")
-                    .and_then(|type_node| lower_type_reference(&type_node))?;
+                    .context("function parameter has malformed type annotation")
+                    .and_then(|type_node| lower_reference(&type_node))?;
                 lowered.push(LoweredFunctionParameter {
                     binding: LoweredFunctionParameterBinding::Named(name),
                     type_reference,
@@ -2766,22 +2815,27 @@ fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionPara
                 });
             }
             AnyJsParameter::JsRestParameter(parameter) => {
-                let name = lower_binding_name(parameter.binding()?)?;
+                let binding = match parameter.binding()? {
+                    AnyJsBindingPattern::JsArrayBindingPattern(_) => {
+                        LoweredFunctionParameterBinding::Pattern
+                    }
+                    binding => LoweredFunctionParameterBinding::Named(lower_binding_name(binding)?),
+                };
                 let type_reference = parameter
                     .type_annotation()
-                    .context("ErrorConstructor rest parameter is missing a type annotation")?
+                    .context("function rest parameter is missing a type annotation")?
                     .ty()
-                    .context("ErrorConstructor rest parameter has malformed type annotation")
-                    .and_then(|type_node| lower_type_reference(&type_node))?;
+                    .context("function rest parameter has malformed type annotation")
+                    .and_then(|type_node| lower_reference(&type_node))?;
                 lowered.push(LoweredFunctionParameter {
-                    binding: LoweredFunctionParameterBinding::Named(name),
+                    binding,
                     type_reference,
                     is_optional: false,
                     is_rest: true,
                 });
             }
             AnyJsParameter::TsThisParameter(_) => {
-                bail!("this parameters are not supported in ErrorConstructor")
+                bail!("this parameters are not supported in function")
             }
         }
     }
@@ -2792,10 +2846,10 @@ fn lower_parameters(parameters: JsParameters) -> Result<Box<[LoweredFunctionPara
 /// Extracts a simple identifier binding name.
 fn lower_binding_name(binding: AnyJsBindingPattern) -> Result<Text> {
     let Some(binding) = binding.as_any_js_binding() else {
-        bail!("unsupported destructured ErrorConstructor parameter");
+        bail!("unsupported destructured function parameter");
     };
     let Some(binding) = binding.as_js_identifier_binding() else {
-        bail!("unsupported ErrorConstructor parameter binding");
+        bail!("unsupported function parameter binding");
     };
     Ok(Text::from(binding.name_token()?.token_text_trimmed()))
 }
@@ -2806,16 +2860,17 @@ fn lower_object_member_name(name: AnyJsObjectMemberName) -> Result<Text> {
         AnyJsObjectMemberName::JsLiteralMemberName(name) => Ok(Text::from(name.name()?)),
         AnyJsObjectMemberName::JsComputedMemberName(_)
         | AnyJsObjectMemberName::JsMetavariable(_) => {
-            bail!("unsupported computed or metavariable member name in Error global")
+            bail!("unsupported computed or metavariable member name")
         }
     }
 }
 
 /// Maps a supported TypeScript type node to a lowered reference.
 fn lower_type_reference(type_node: &AnyTsType) -> Result<LoweredTypeReference> {
+    if let Some(reference) = lower_primitive_reference(type_node) {
+        return Ok(reference);
+    }
     match type_node {
-        AnyTsType::TsStringType(_) => Ok(LoweredTypeReference::Predefined("GLOBAL_STRING_ID")),
-        AnyTsType::TsVoidType(_) => Ok(LoweredTypeReference::Predefined("GLOBAL_VOID_ID")),
         AnyTsType::TsReferenceType(reference) => {
             let name = reference.name().context("missing type reference name")?;
             let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = name else {
@@ -2852,4 +2907,14 @@ fn instance_return_reference(reference: LoweredTypeReference) -> LoweredTypeRefe
         }
         reference => reference,
     }
+}
+
+fn lower_primitive_reference(type_node: &AnyTsType) -> Option<LoweredTypeReference> {
+    let id = match type_node {
+        AnyTsType::TsStringType(_) => "GLOBAL_STRING_ID",
+        AnyTsType::TsNumberType(_) => "GLOBAL_NUMBER_ID",
+        AnyTsType::TsVoidType(_) => "GLOBAL_VOID_ID",
+        _ => return None,
+    };
+    Some(LoweredTypeReference::Predefined(id))
 }

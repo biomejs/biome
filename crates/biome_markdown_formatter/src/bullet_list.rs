@@ -8,9 +8,10 @@ use crate::markdown::auxiliary::list_marker_prefix::{
 use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
+use crate::markdown::lists::block_list::list_ends_with_line_break;
 use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
-use crate::{AsFormat, MarkdownFormatter};
+use crate::{AsFormat, MarkdownFormatter, prelude::format_suppressed_node};
 use biome_formatter::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
@@ -20,7 +21,7 @@ use biome_markdown_syntax::{
     MdBullet, MdBulletFields, MdBulletList, MdBulletListItem, MdContinuationIndent,
     MdIndentTokenList, MdOrderedListItem, MdQuotePrefix,
 };
-use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction};
+use biome_rowan::{AstNode, AstNodeList, AstNodeListIterator, Direction, SyntaxError};
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::iter::FusedIterator;
@@ -38,7 +39,13 @@ impl FmtAnyList {
 
 impl Format<MarkdownFormatContext> for FmtAnyList {
     fn fmt(&self, f: &mut Formatter<MarkdownFormatContext>) -> FormatResult<()> {
-        f.context().comments().is_suppressed(self.node.syntax());
+        if f.context().comments().is_suppressed(self.node.syntax()) {
+            Format::fmt(&format_suppressed_node(self.node.syntax()), f)?;
+            if !list_ends_with_line_break(&self.node) {
+                write!(f, [hard_line_break()])?;
+            }
+            return Ok(());
+        }
         let list = self.node.list();
         BulletListPrinter::new(&list, list_sibling_index(&self.node)).fmt(f)
     }
@@ -123,6 +130,7 @@ impl OrderedMarkerPlan {
         let numbers = node
             .iter()
             .filter_map(|bullet| bullet.ordered_marker_number())
+            .take(3)
             .collect::<Vec<_>>();
         let start = numbers.first().copied()?;
         let use_git_diff_friendly_numbering = has_git_diff_friendly_ordered_list(&numbers);
@@ -253,10 +261,8 @@ fn should_keep_pre_marker(list: &MdBulletList) -> bool {
     false
 }
 
-impl Format<MarkdownFormatContext> for ListBullet {
-    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        f.context().comments().is_suppressed(self.node.syntax());
-
+impl ListBullet {
+    fn prefix_layout(&self) -> FormatResult<(FormatMdListMarkerPrefixOptions, usize)> {
         let MdBulletFields { content, prefix } = self.node.as_fields();
 
         let prefix = prefix?;
@@ -306,17 +312,6 @@ impl Format<MarkdownFormatContext> for ListBullet {
                 min_post_marker_len.max(source_content_column.saturating_sub(marker_width));
         }
 
-        write!(
-            f,
-            [prefix
-                .format()
-                .with_options(FormatMdListMarkerPrefixOptions {
-                    target_marker,
-                    keep_pre_marker,
-                    min_post_marker_len,
-                })]
-        )?;
-
         // The alignment is the sum of the pre-marker width, the marker width and the post-marker width.
         let post_marker_len = prefix
             .post_marker_len()
@@ -324,11 +319,45 @@ impl Format<MarkdownFormatContext> for ListBullet {
             .max(min_post_marker_len);
         let alignment = pre_marker_width + marker_width + post_marker_len;
 
+        Ok((
+            FormatMdListMarkerPrefixOptions {
+                target_marker,
+                keep_pre_marker,
+                min_post_marker_len,
+            },
+            alignment,
+        ))
+    }
+}
+
+impl Format<MarkdownFormatContext> for ListBullet {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        f.context().comments().is_suppressed(self.node.syntax());
+        let MdBulletFields { content, prefix } = self.node.as_fields();
+        let (prefix_options, alignment) = self.prefix_layout()?;
+        write!(f, [prefix?.format().with_options(prefix_options)])?;
+
         let content = ListBlockList {
             content: content.clone(),
         };
         write!(f, [align(" ".repeat(alignment), &content),])
     }
+}
+
+pub(crate) fn list_marker_alignment(bullet: &MdBullet) -> FormatResult<usize> {
+    let list = bullet
+        .parent::<MdBulletList>()
+        .ok_or(SyntaxError::MissingRequiredChild)?;
+    // Delimiter and unordered-marker replacements keep their width; ordered numbers do not.
+    let target_ordered_marker = OrderedMarkerPlan::from_list(&list, 0)
+        .map(|plan| TargetMarker::Ordered(plan.marker_for_index(bullet.syntax().index())));
+    let formatted = ListBullet {
+        node: bullet.clone(),
+        unordered_marker: bullet.prefix()?.list_marker()?,
+        target_ordered_marker,
+        keep_pre_marker: should_keep_pre_marker(&list),
+    };
+    formatted.prefix_layout().map(|(_, alignment)| alignment)
 }
 
 fn indent_width(indent: &MdIndentTokenList) -> FormatResult<usize> {
@@ -530,6 +559,19 @@ struct ListBlockList {
 }
 
 impl ListBlockList {
+    fn newline_has_comments(newline: &biome_markdown_syntax::MdNewline) -> bool {
+        newline.value_token().is_ok_and(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_comments())
+                || token
+                    .trailing_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments())
+        })
+    }
+
     /// Emits the normalized separation before `content`.
     ///
     /// When a preceding list continuation carried quote prefixes, the source
@@ -553,7 +595,25 @@ impl ListBlockList {
         {
             2
         } else if content.is_list() {
-            pending_breaks.min(1)
+            let after_comment = content
+                .syntax()
+                .siblings(Direction::Prev)
+                .skip(1)
+                .filter_map(AnyMdBlock::cast)
+                .take_while(|block| {
+                    block.is_newline()
+                        || block.is_continuation_indent()
+                        || block.as_md_quote_prefix().is_some()
+                        || block.is_html_comment()
+                })
+                .any(|block| {
+                    block.is_html_comment() || f.context().comments().has_comments(block.syntax())
+                });
+            if after_comment {
+                pending_breaks
+            } else {
+                pending_breaks.min(1)
+            }
         } else {
             pending_breaks
         };
@@ -810,6 +870,29 @@ impl Format<MarkdownFormatContext> for ListBlockList {
 
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
                     {
+                        if Self::newline_has_comments(newline) {
+                            Self::emit_pending_breaks(
+                                pending_breaks,
+                                &mut pending_quote_continuation,
+                                last_content_was_fenced_code_block,
+                                last_content_needs_blank_before_fenced_code_block,
+                                &content,
+                                f,
+                            )?;
+                            write!(f, [newline.format()])?;
+                            write!(
+                                f,
+                                [continuation.format().with_options(
+                                    FormatMdContinuationIndentOptions {
+                                        should_remove: true
+                                    }
+                                )]
+                            )?;
+                            pending_breaks = 0;
+                            at_line_terminator = false;
+                            pending_quote_continuation |= has_following_quote_prefix;
+                            continue;
+                        }
                         if at_line_terminator {
                             at_line_terminator = false;
                         } else {
@@ -876,6 +959,20 @@ impl Format<MarkdownFormatContext> for ListBlockList {
                     }
                     if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &content
                     {
+                        if Self::newline_has_comments(newline) {
+                            Self::emit_pending_breaks(
+                                pending_breaks,
+                                &mut pending_quote_continuation,
+                                last_content_was_fenced_code_block,
+                                last_content_needs_blank_before_fenced_code_block,
+                                &content,
+                                f,
+                            )?;
+                            write!(f, [newline.format()])?;
+                            pending_breaks = 0;
+                            at_line_terminator = false;
+                            continue;
+                        }
                         // A newline right after a block that doesn't carry
                         // its own trailing newline is that block's line
                         // terminator; only the newlines after it are blank

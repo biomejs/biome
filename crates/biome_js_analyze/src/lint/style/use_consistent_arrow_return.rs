@@ -259,5 +259,8 @@ fn needs_parens_in_concise_body(expr: &AnyJsExpression) -> bool {
             | TsAsExpression(_)
             | TsSatisfiesExpression(_)
             | TsTypeAssertionExpression(_)
-    )
+    ) || expr
+        .syntax()
+        .first_token()
+        .is_some_and(|token| token.kind() == T!['{'])
 }
