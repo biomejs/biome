@@ -4,3 +4,5 @@ person:
   age: 50
   nameA: Jane Doe
   NAME: John Smith
+  "quoted": value
+  'single': value

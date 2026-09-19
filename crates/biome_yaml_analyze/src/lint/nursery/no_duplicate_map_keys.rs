@@ -1,10 +1,11 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, AstNodeList, TokenText, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_map_keys::NoDuplicateMapKeysOptions;
 use biome_yaml_syntax::{
-    AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlMappingImplicitKey, TextRange, YamlBlockMapping,
+    AnyYamlBlockMapEntry, AnyYamlBlockNode, AnyYamlFlowMapEntry, AnyYamlMappingImplicitKey,
+    TextRange, YamlBlockMapping, YamlFlowMapping,
 };
 use rustc_hash::FxHashMap;
 
@@ -18,7 +19,12 @@ declare_lint_rule! {
     /// ```yaml,expect_diagnostic
     /// person:
     ///   name: John Doe
-    ///   name: Jane Doe
+    ///   'name': Jane Doe
+    ///   "name": John Smith
+    /// ```
+    ///
+    /// ```yaml,expect_diagnostic
+    /// person: { name: John Doe, name: Jane Doe }
     /// ```
     ///
     /// ### Valid
@@ -27,6 +33,11 @@ declare_lint_rule! {
     /// person:
     ///   name: John Doe
     /// ```
+    ///
+    /// ```yaml
+    /// person: { name: John Doe }
+    /// ```
+    ///
     pub NoDuplicateMapKeys {
         version: "next",
         name: "noDuplicateMapKeys",
@@ -37,19 +48,16 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDuplicateMapKeys {
-    type Query = Ast<YamlBlockMapping>;
-    type State = (YamlMappingKey, Vec<TextRange>);
+    type Query = Ast<AnyNoDuplicateMapKeysQuery>;
+    type State = (AnyYamlMappingKey, Vec<TextRange>);
     type Signals = Box<[Self::State]>;
     type Options = NoDuplicateMapKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mapping = ctx.query();
-        let mut names = FxHashMap::<YamlMappingKey, Vec<TextRange>>::default();
-        let mut keys_found = FxHashMap::<TokenText, YamlMappingKey>::default();
-        for entry in mapping.entries().iter() {
-            let Some(key) = mapping_key(&entry) else {
-                continue;
-            };
+        let mut names = FxHashMap::<AnyYamlMappingKey, Vec<TextRange>>::default();
+        let mut keys_found = FxHashMap::<TokenText, AnyYamlMappingKey>::default();
+        for key in mapping.keys() {
             let Some(text) = key.text() else {
                 continue;
             };
@@ -89,26 +97,60 @@ impl Rule for NoDuplicateMapKeys {
 }
 
 declare_node_union! {
-    pub YamlMappingKey = AnyYamlMappingImplicitKey | AnyYamlBlockNode
+    pub AnyNoDuplicateMapKeysQuery = YamlBlockMapping | YamlFlowMapping
 }
 
-impl YamlMappingKey {
-    /// Returns the token-backed text of the key when it is a single scalar token.
-    fn text(&self) -> Option<TokenText> {
-        let node = self.syntax();
-        let token = node.first_token()?;
-        (token == node.last_token()?).then(|| token.token_text_trimmed())
+impl AnyNoDuplicateMapKeysQuery {
+    /// Collects the keys of every entry, regardless of block or flow style.
+    fn keys(&self) -> Vec<AnyYamlMappingKey> {
+        match self {
+            Self::YamlBlockMapping(mapping) => mapping
+                .entries()
+                .iter()
+                .filter_map(|entry| block_mapping_key(&entry))
+                .collect(),
+            Self::YamlFlowMapping(mapping) => mapping
+                .entries()
+                .iter()
+                .filter_map(|entry| flow_mapping_key(&entry.ok()?))
+                .collect(),
+        }
     }
 }
 
-fn mapping_key(entry: &AnyYamlBlockMapEntry) -> Option<YamlMappingKey> {
+declare_node_union! {
+    pub AnyYamlMappingKey = AnyYamlMappingImplicitKey | AnyYamlBlockNode
+}
+
+impl AnyYamlMappingKey {
+    /// The key's text with surrounding quotes removed, when it is a scalar.
+    fn text(&self) -> Option<TokenText> {
+        match self {
+            Self::AnyYamlMappingImplicitKey(key) => key.inner_string_text().ok(),
+            Self::AnyYamlBlockNode(node) => node.inner_string_text().ok(),
+        }
+    }
+}
+
+fn block_mapping_key(entry: &AnyYamlBlockMapEntry) -> Option<AnyYamlMappingKey> {
     match entry {
         AnyYamlBlockMapEntry::YamlBlockMapImplicitEntry(entry) => {
-            entry.key().map(YamlMappingKey::from)
+            entry.key().map(AnyYamlMappingKey::from)
         }
         AnyYamlBlockMapEntry::YamlBlockMapExplicitEntry(entry) => {
-            entry.key().map(YamlMappingKey::from)
+            entry.key().map(AnyYamlMappingKey::from)
         }
         AnyYamlBlockMapEntry::YamlBogusBlockMapEntry(_) => None,
+    }
+}
+
+fn flow_mapping_key(entry: &AnyYamlFlowMapEntry) -> Option<AnyYamlMappingKey> {
+    match entry {
+        AnyYamlFlowMapEntry::YamlFlowMapImplicitEntry(entry) => {
+            entry.key().map(AnyYamlMappingKey::from)
+        }
+        AnyYamlFlowMapEntry::YamlFlowMapExplicitEntry(entry) => {
+            entry.key().map(AnyYamlMappingKey::from)
+        }
     }
 }

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_yaml_analyze/tests/spec_tests.rs
+assertion_line: 118
 expression: valid.yaml
 ---
 # Input
@@ -10,5 +11,7 @@ person:
   age: 50
   nameA: Jane Doe
   NAME: John Smith
+  "quoted": value
+  'single': value
 
 ```
