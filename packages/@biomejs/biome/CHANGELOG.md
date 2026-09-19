@@ -1,5 +1,49 @@
 # @biomejs/biome
 
+## 2.5.15
+
+### Patch Changes
+
+- [#10634](https://github.com/biomejs/biome/pull/10634) [`b436ba0`](https://github.com/biomejs/biome/commit/b436ba00de298d5002a3d3bb1fae1d2a882f6d58) Thanks [@subaru-hello](https://github.com/subaru-hello)! - Added the new nursery rule [`noReactObjectTypeAsDefaultProp`](https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop/), which disallows array, object, and function values as default props in React components.
+  
+  For example, the following snippet triggers the rule.
+  
+  ```jsx
+  function Component({ items = [] }) {
+    return items;
+  }
+  ```
+
+- [#11723](https://github.com/biomejs/biome/pull/11723) [`3b429d1`](https://github.com/biomejs/biome/commit/3b429d182588aa19d35190a935e4dcdc5b693e5e) Thanks [@m1handr](https://github.com/m1handr)! - Fixed [#11656](https://github.com/biomejs/biome/issues/11656): [`noAstroSetHtmlDirective`](https://biomejs.dev/linter/rules/no-astro-set-html-directive/) now correctly reports `set:html` directives inside Astro template expressions.
+
+- [#11761](https://github.com/biomejs/biome/pull/11761) [`a3462fe`](https://github.com/biomejs/biome/commit/a3462fee0a32a764dd30dbc01f24c072fafea75a) Thanks [@saberoueslati](https://github.com/saberoueslati)! - Fixed [#11351](https://github.com/biomejs/biome/issues/11351): [`useSimplifiedLogicExpression`](https://biomejs.dev/linter/rules/use-simplified-logic-expression/) no longer reports boolean literals on the right side of `||` and `&&` outside boolean contexts, because removing them can change the result of the expression. For example, `y = x || false` is no longer reported, while `if (x || false)` still is.
+
+- [#11802](https://github.com/biomejs/biome/pull/11802) [`7d1f37e`](https://github.com/biomejs/biome/commit/7d1f37ec11a58e2d972329cf89b5d91758b06f6b) Thanks [@dyc3](https://github.com/dyc3)! - Tailwind classes will now be detected in Svelte, Vue, and Astro class attribute expressions that don't use a class merging function.
+
+- [#11837](https://github.com/biomejs/biome/pull/11837) [`f5e249b`](https://github.com/biomejs/biome/commit/f5e249b27d2ddf21f92fdd3a531adfd6c411c633) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#11836](https://github.com/biomejs/biome/issues/11836): `biome check --write` no longer adds invalid parentheses around Svelte `{@const}` declarations when experimental HTML support and formatting are enabled.
+
+- [#11835](https://github.com/biomejs/biome/pull/11835) [`589ca1a`](https://github.com/biomejs/biome/commit/589ca1a0dd9f93a3ef3f3dac98d01720ae78bdcf) Thanks [@dyc3](https://github.com/dyc3)! - Updated [`useReactCompiler`](https://biomejs.dev/linter/rules/use-react-compiler/): Biome now reports React Compiler diagnostics regardless of the React version declared in `package.json`.
+
+- [#11827](https://github.com/biomejs/biome/pull/11827) [`31bb662`](https://github.com/biomejs/biome/commit/31bb6627e5c54c6840e51eb61c0aec9f0da6113e) Thanks [@dfedoryshchev](https://github.com/dfedoryshchev)! - Fixed [#11566](https://github.com/biomejs/biome/issues/11566): [`useNamingConvention`](https://biomejs.dev/linter/rules/use-naming-convention/) no longer reports a `namespace` declared inside `declare global` or inside an external module declaration. Both positions are documented as always ignored, and the rule offered a safe fix, so `biome check --write` renamed the declaration:
+  
+  ```ts
+  export {}
+  declare global {
+      // no longer renamed to `Jsx`
+      namespace JSX {}
+  }
+  ```
+
+- [#11814](https://github.com/biomejs/biome/pull/11814) [`23ba25f`](https://github.com/biomejs/biome/commit/23ba25f191eb8ff91114f6b44bdb81cab5d6900e) Thanks [@siketyan](https://github.com/siketyan)! - Fixed type inference through generic type aliases that instantiate another generic type with a nested generic argument, such as `type Nested<T> = Box<Wrapper<T>>`. Type-aware rules now resolve members of such types:
+  
+  ```ts
+  declare const nested: Nested<number>;
+  // noUnnecessaryConditions now reports that `??` is unnecessary.
+  const inner = nested.value.inner ?? 1;
+  ```
+
+- [#11814](https://github.com/biomejs/biome/pull/11814) [`23ba25f`](https://github.com/biomejs/biome/commit/23ba25f191eb8ff91114f6b44bdb81cab5d6900e) Thanks [@siketyan](https://github.com/siketyan)! - Fixed [#11810](https://github.com/biomejs/biome/issues/11810) and [#11813](https://github.com/biomejs/biome/issues/11813): type-aware rules such as [`noUnnecessaryConditions`](https://biomejs.dev/linter/rules/no-unnecessary-conditions/) and [`noFloatingPromises`](https://biomejs.dev/linter/rules/no-floating-promises/) no longer take several seconds when a member is accessed on a recursive generic type alias, such as react-hook-form's `FieldPathValue` or zustand's `Mutate`.
+
 ## 2.5.14
 
 ### Patch Changes
