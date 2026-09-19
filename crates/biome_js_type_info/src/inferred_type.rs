@@ -302,6 +302,7 @@ impl<'db> InferredType<'db> {
                 TypeData::Unknown
                 | TypeData::Local(_)
                 | TypeData::IndexedAccess(_)
+                | TypeData::MappedType(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword => return None,
@@ -566,7 +567,7 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword => {
                     indeterminate = true;
                 }
-                TypeData::IndexedAccess(_) => indeterminate = true,
+                TypeData::IndexedAccess(_) | TypeData::MappedType(_) => indeterminate = true,
             }
         }
 
@@ -1506,6 +1507,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
             TypeData::Unknown
             | TypeData::Local(_)
             | TypeData::IndexedAccess(_)
+            | TypeData::MappedType(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword
             | TypeData::UnknownKeyword => self.indeterminate = true,
