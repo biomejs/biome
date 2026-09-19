@@ -7671,6 +7671,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useStrictBooleanExpressions": {
+					"description": "Require unambiguous boolean expressions in conditions.\nSee https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseStrictBooleanExpressionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useStringStartsEndsWith": {
 					"description": "Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.\nSee https://biomejs.dev/linter/rules/use-string-starts-ends-with",
 					"anyOf": [
@@ -13078,6 +13085,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseStrictBooleanExpressionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseStrictBooleanExpressionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseStrictModeOptions": {
 			"type": "object",
 			"properties": {
@@ -17434,6 +17450,16 @@
 			]
 		},
 		"UseStaticResponseMethodsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseStrictBooleanExpressionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseStrictBooleanExpressionsOptions" }
+			]
+		},
+		"UseStrictBooleanExpressionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
