@@ -80,6 +80,17 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
     match document_file_source {
         DocumentFileSource::Js(file_source) => {
             let (analysis_code, file_source) = match file_source.as_embedding_kind() {
+                JsEmbeddingKind::Astro { .. }
+                    if biome_service::file_handlers::AstroFileHandler::start(code).is_none() =>
+                {
+                    (
+                        code,
+                        JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+                            frontmatter: false,
+                            is_class_attribute: false,
+                        }),
+                    )
+                }
                 JsEmbeddingKind::Astro { .. } => (
                     biome_service::file_handlers::AstroFileHandler::input(code),
                     JsFileSource::ts(),
