@@ -2813,6 +2813,11 @@ See https://biomejs.dev/linter/rules/use-layered-styles
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
+	* Enforce logical properties over physical properties.
+See https://biomejs.dev/linter/rules/use-logical-properties 
+	 */
+	useLogicalProperties?: UseLogicalPropertiesConfiguration;
+	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
 	 */
@@ -5088,6 +5093,9 @@ export type UseIncludesConfiguration =
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
+export type UseLogicalPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLogicalPropertiesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -7152,6 +7160,10 @@ export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
 }
+export interface RuleWithUseLogicalPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: UseLogicalPropertiesOptions;
+}
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -9028,6 +9040,12 @@ export interface UseLayeredStylesOptions {
 	 */
 	requireImportLayers?: boolean;
 }
+export interface UseLogicalPropertiesOptions {
+	/**
+	 * The text direction used to map physical inline properties. Defaults to `"ltr"`.
+	 */
+	direction?: UseLogicalPropertiesDirection;
+}
 export type UseMathMinMaxOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
@@ -9852,6 +9870,7 @@ export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type UseLogicalPropertiesDirection = "ltr" | "rtl";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
@@ -10409,6 +10428,7 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"

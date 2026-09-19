@@ -7548,6 +7548,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLogicalProperties": {
+					"description": "Enforce logical properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLogicalPropertiesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMathMinMax": {
 					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
 					"anyOf": [
@@ -12593,6 +12600,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLogicalPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLogicalPropertiesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseLoneAnonymousOperationOptions": {
 			"type": "object",
 			"properties": {
@@ -16717,6 +16733,29 @@
 		},
 		"UseLiteralKeysOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLogicalPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLogicalPropertiesOptions" }
+			]
+		},
+		"UseLogicalPropertiesDirection": {
+			"type": "string",
+			"enum": ["ltr", "rtl"]
+		},
+		"UseLogicalPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"direction": {
+					"description": "The text direction used to map physical inline properties. Defaults to `\"ltr\"`.",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLogicalPropertiesDirection" },
+						{ "type": "null" }
+					]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseLoneAnonymousOperationConfiguration": {

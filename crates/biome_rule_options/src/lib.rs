@@ -453,6 +453,7 @@ pub mod use_key_with_mouse_events;
 pub mod use_layered_styles;
 pub mod use_literal_enum_members;
 pub mod use_literal_keys;
+pub mod use_logical_properties;
 pub mod use_lone_anonymous_operation;
 pub mod use_lone_executable_definition;
 pub mod use_math_min_max;
