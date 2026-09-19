@@ -6,9 +6,8 @@
 // well-known sequence ("padding","padding-inline") and walking outward
 // to the enclosing `[ ... ]` literal, which is then JSON-parsed.
 //
-// The module holding the list moves between releases (a `chunk-*.mjs`
-// up to 4.2.x, `lib.mjs` from 4.3.0), so every ESM module in `dist` is
-// scanned.
+// The module holding the list moves between releases, so every ESM
+// module in `dist` is scanned.
 
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
