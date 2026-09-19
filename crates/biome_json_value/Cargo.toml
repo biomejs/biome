@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_json_value"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Mutable JSON values constructable from biome_json_syntax"

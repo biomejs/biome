@@ -539,6 +539,13 @@ When releasing a new **minor** or **major** version of a Biome, follow these ste
 
 **patch** releases only require a merging of the `ci: release` PR, and should leave the `next` branches untouched.
 
+### Crates releases
+
+1. [ ] Manually trigger the `Publish crates` workflow. Either choose a minor or patch based on the situation. The workflow will open
+an automated PR that will update the version of all publishable crates.
+
+2. [ ] Review and merge the PR at your own convenience. The same workflow will publish crates on `crates.io` and push a tag.
+
 ## Resources
 
 We have several resources explaining about Biome. They will help you understand the project and codebase.
