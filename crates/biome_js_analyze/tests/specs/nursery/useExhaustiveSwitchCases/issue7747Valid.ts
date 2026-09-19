@@ -105,7 +105,10 @@ function brandedEscapedCharacter(letter: ["A", "\u0042" & { brand: true }][numbe
 }
 
 function quotedKey(letter: keyof { 'a"b': number; C: number }) {
-	switch (letter) { case "C": break; }
+	switch (letter) {
+		case 'a"b': break;
+		case "C": break;
+	}
 }
 
 function negativeElement(value: [-1, 2][number]) {

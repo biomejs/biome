@@ -2,8 +2,9 @@ use std::hash::Hash;
 
 use crate::Path;
 use crate::interned_types::{
-    InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedNamespace,
-    InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember, TypeMemberKind,
+    InternedClass, InternedFunction, InternedInterface, InternedIntersection, InternedLiteral,
+    InternedNamespace, InternedObject, InternedUnion, Literal, TypeData, TypeDb, TypeMember,
+    TypeMemberKind,
 };
 use biome_rowan::Text;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -376,9 +377,10 @@ impl<'db> MergedType<'db> {
             | TypeData::String
             | TypeData::Symbol
             | TypeData::Undefined => Some(Self::Primitive(ty)),
-            TypeData::Class(class) => {
-                Some(Self::Object(class_static_members(class.members(db)), true))
-            }
+            TypeData::Class(class) => Some(Self::Object(
+                class_static_members(db, class.members(db)),
+                true,
+            )),
             TypeData::Function(function) => Some(Self::Function(function)),
             TypeData::InstanceOf(instance) => match instance.ty(db) {
                 TypeData::Class(class) => Some(Self::ClassInstance(class_instance_members(
@@ -539,7 +541,10 @@ fn class_instance_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'d
         .collect()
 }
 
-fn class_static_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>> {
+fn class_static_members<'db>(
+    db: &'db dyn TypeDb,
+    members: &[TypeMember<'db>],
+) -> Vec<TypeMember<'db>> {
     members
         .iter()
         .filter_map(|member| match &member.kind {
@@ -549,6 +554,19 @@ fn class_static_members<'db>(members: &[TypeMember<'db>]) -> Vec<TypeMember<'db>
             }),
             TypeMemberKind::ConstAssertedNamedStatic(name) => Some(TypeMember {
                 kind: TypeMemberKind::ConstAssertedNamed(name.clone()),
+                ty: member.ty,
+            }),
+            TypeMemberKind::NamedStaticNumber(number) => Some(TypeMember {
+                kind: TypeMemberKind::ComputedValue(TypeData::Literal(InternedLiteral::new(
+                    db,
+                    Literal::Number(number.clone()),
+                ))),
+                ty: member.ty,
+            }),
+            TypeMemberKind::ConstAssertedNamedStaticNumber(number) => Some(TypeMember {
+                kind: TypeMemberKind::ConstAssertedComputedValue(TypeData::Literal(
+                    InternedLiteral::new(db, Literal::Number(number.clone())),
+                )),
                 ty: member.ty,
             }),
             _ => None,
@@ -562,19 +580,82 @@ fn merge_members<'db>(
     members: &[TypeMember<'db>],
 ) {
     for member in members.iter().filter(|member| !member.kind.is_static()) {
-        let existing = member.name().and_then(|name| {
-            merged
-                .iter_mut()
-                .find(|merged_member| merged_member.kind.has_name(name.text()))
-        });
+        let Some(name) = member.name() else {
+            merged.push(member.clone());
+            continue;
+        };
 
-        match existing {
-            Some(existing) if existing.ty != member.ty => {
-                existing.ty = TypeData::union_from_types(db, Vec::from([existing.ty, member.ty]));
+        let key_domain = named_key_domain(&member.kind);
+        let mut has_matching_member = false;
+        let mut has_key_domain = false;
+        let mut merged_ty = member.ty;
+        for merged_member in merged.iter() {
+            if !merged_member.kind.has_name(name.text()) {
+                continue;
             }
-            Some(_) => {}
-            None => merged.push(member.clone()),
+            has_matching_member = true;
+            has_key_domain |= key_domain.is_some_and(|key_domain| {
+                named_key_domain(&merged_member.kind) == Some(key_domain)
+            });
+            if merged_member.ty != merged_ty {
+                merged_ty =
+                    TypeData::union_from_types(db, Vec::from([merged_member.ty, merged_ty]));
+            }
         }
+
+        if !has_matching_member {
+            merged.push(member.clone());
+            continue;
+        }
+
+        for merged_member in merged
+            .iter_mut()
+            .filter(|merged_member| merged_member.kind.has_name(name.text()))
+        {
+            merged_member.ty = merged_ty;
+        }
+        if key_domain.is_some() && !has_key_domain {
+            let mut member = member.clone();
+            member.ty = merged_ty;
+            merged.push(member);
+        }
+    }
+}
+
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum NamedKeyDomain {
+    Number,
+    String,
+}
+
+fn named_key_domain(kind: &TypeMemberKind<'_>) -> Option<NamedKeyDomain> {
+    match kind {
+        TypeMemberKind::Getter(_)
+        | TypeMemberKind::ConstAssertedGetter(_)
+        | TypeMemberKind::Named(_)
+        | TypeMemberKind::ConstAssertedNamed(_)
+        | TypeMemberKind::NamedOptional(_)
+        | TypeMemberKind::ConstAssertedNamedOptional(_)
+        | TypeMemberKind::NamedStatic(_)
+        | TypeMemberKind::ConstAssertedNamedStatic(_) => Some(NamedKeyDomain::String),
+        TypeMemberKind::GetterNumber(_)
+        | TypeMemberKind::ConstAssertedGetterNumber(_)
+        | TypeMemberKind::NamedNumber(_)
+        | TypeMemberKind::ConstAssertedNamedNumber(_)
+        | TypeMemberKind::NamedOptionalNumber(_)
+        | TypeMemberKind::ConstAssertedNamedOptionalNumber(_)
+        | TypeMemberKind::NamedStaticNumber(_)
+        | TypeMemberKind::ConstAssertedNamedStaticNumber(_) => Some(NamedKeyDomain::Number),
+        TypeMemberKind::CallSignature
+        | TypeMemberKind::ComputedValue(_)
+        | TypeMemberKind::ComputedValueNamed(_, _)
+        | TypeMemberKind::ConstAssertedCallSignature
+        | TypeMemberKind::ConstAssertedComputedValue(_)
+        | TypeMemberKind::ConstAssertedComputedValueNamed(_, _)
+        | TypeMemberKind::ConstAssertedConstructor
+        | TypeMemberKind::ConstAssertedIndexSignature(_)
+        | TypeMemberKind::Constructor
+        | TypeMemberKind::IndexSignature(_) => None,
     }
 }
 
@@ -673,7 +754,59 @@ impl<'db> UnionBuilder<'db> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CycleDetector, CycleEntry};
+    use super::{CycleDetector, CycleEntry, IntersectionBuilder};
+    use crate::interned_types::{InternedObject, TypeData, TypeDb, TypeMember, TypeMemberKind};
+    use crate::literal::NumberLiteral;
+    use biome_db::ParsedSource;
+    use biome_rowan::Text;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    fn object<'db>(db: &'db TestDb, kind: TypeMemberKind<'db>, ty: TypeData<'db>) -> TypeData<'db> {
+        TypeData::Object(InternedObject::new(
+            db,
+            None,
+            vec![TypeMember { kind, ty }].into_boxed_slice(),
+            false,
+        ))
+    }
+
+    fn mixed_intersection<'db>(
+        db: &'db TestDb,
+        third_kind: TypeMemberKind<'db>,
+        third_ty: TypeData<'db>,
+    ) -> TypeData<'db> {
+        IntersectionBuilder::new(db)
+            .add(object(
+                db,
+                TypeMemberKind::NamedNumber(NumberLiteral::new(Text::new_static("1"))),
+                TypeData::Number,
+            ))
+            .add(object(
+                db,
+                TypeMemberKind::Named(Text::new_static("1")),
+                TypeData::String,
+            ))
+            .add(object(db, third_kind, third_ty))
+            .build()
+    }
 
     #[test]
     fn cycle_detector_reports_reentry_before_finish() {
@@ -693,5 +826,42 @@ mod tests {
         assert!(matches!(detector.enter(1), CycleEntry::Entered));
         detector.finish(1, "cached");
         assert!(matches!(detector.enter(1), CycleEntry::Cached("cached")));
+    }
+
+    #[test]
+    fn mixed_named_key_merges_retain_domains_and_final_value_union() {
+        let db = TestDb::default();
+        let expected = TypeData::union_from_types(
+            &db,
+            Vec::from([TypeData::Number, TypeData::String, TypeData::Boolean]),
+        );
+
+        for (third_kind, third_ty) in [
+            (
+                TypeMemberKind::NamedNumber(NumberLiteral::new(Text::new_static("1"))),
+                TypeData::Boolean,
+            ),
+            (
+                TypeMemberKind::Named(Text::new_static("1")),
+                TypeData::Boolean,
+            ),
+        ] {
+            let TypeData::Object(object) = mixed_intersection(&db, third_kind, third_ty) else {
+                panic!("mixed intersection must remain an object");
+            };
+            let members = object.members(&db);
+            assert_eq!(members.len(), 2);
+            assert!(
+                members
+                    .iter()
+                    .any(|member| { matches!(member.kind, TypeMemberKind::NamedNumber(_)) })
+            );
+            assert!(
+                members
+                    .iter()
+                    .any(|member| matches!(member.kind, TypeMemberKind::Named(_)))
+            );
+            assert!(members.iter().all(|member| member.ty == expected));
+        }
     }
 }

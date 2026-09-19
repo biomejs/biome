@@ -1,68 +1,15 @@
-//! Evaluates types that select object keys or array elements.
+//! Evaluates types that select array elements.
 //!
 //! The operands must already be resolved and normalized: references point to
 //! their types, and wrappers such as `typeof` have been removed. An incomplete
 //! result stays unknown so a lint rule cannot mistake a partial list for every
-//! possible key or element. This does not depend on which branches execute.
+//! possible element. This does not depend on which branches execute.
 
 use crate::TypeOperator;
-use crate::interned_types::{InternedLiteral, Literal, TypeData, TypeDb, TypeMemberKind};
+use crate::interned_types::{Literal, TypeData, TypeDb};
 use rustc_hash::FxHashSet;
 
 const MAX_PROJECTION_MEMBERS: usize = 1024;
-
-/// Builds a union of the names of an object's properties.
-///
-/// For example, the keys of this object form the type `"A" | "B" | "C"`:
-///
-/// ```ts
-/// const values = { A: 1, B: 2, C: 3 } as const;
-/// type Letter = keyof typeof values;
-/// ```
-///
-/// Returns `None` if the object has uncollected or inherited members, numeric or
-/// computed keys, names requiring escape handling, or more than 1024 members.
-/// Reporting only the keys we know would incorrectly describe the whole object.
-pub(crate) fn keyof<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
-    let TypeData::Object(object) = ty else {
-        return None;
-    };
-    if object.has_unknown_members(db) || object.prototype(db).is_some() {
-        return None;
-    }
-    let members = object.members(db);
-    if members.len() > MAX_PROJECTION_MEMBERS {
-        return None;
-    }
-
-    let mut keys = Vec::with_capacity(members.len());
-    for member in members {
-        let name = match &member.kind {
-            TypeMemberKind::Named(name)
-            | TypeMemberKind::NamedOptional(name)
-            | TypeMemberKind::Getter(name)
-            | TypeMemberKind::ConstAssertedNamed(name)
-            | TypeMemberKind::ConstAssertedNamedOptional(name)
-            | TypeMemberKind::ConstAssertedGetter(name) => name,
-            TypeMemberKind::CallSignature | TypeMemberKind::ConstAssertedCallSignature => continue,
-            _ => return None,
-        };
-        // Named members do not retain whether a numeric key was quoted. Those
-        // spellings have different keyof types, so neither can be inferred here.
-        if name.text().contains(['\\', '"', '\n', '\r'])
-            || name
-                .text()
-                .starts_with(|c: char| c.is_ascii_digit() || matches!(c, '.' | '-' | '+'))
-        {
-            return None;
-        }
-        keys.push(TypeData::Literal(InternedLiteral::new(
-            db,
-            Literal::String(name.clone().into()),
-        )));
-    }
-    Some(TypeData::union_from_types(db, keys))
-}
 
 /// Combines the possible element types selected by `T[number]`.
 ///

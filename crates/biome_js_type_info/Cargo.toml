@@ -32,7 +32,9 @@ biome_rowan       = { workspace = true }
 camino            = { workspace = true }
 hashbrown         = { workspace = true }
 rustc-hash        = { workspace = true }
+ryu-js            = { workspace = true }
 salsa             = { workspace = true }
+serde_json        = { workspace = true }
 
 [dev-dependencies]
 biome_js_formatter = { path = "../biome_js_formatter" }

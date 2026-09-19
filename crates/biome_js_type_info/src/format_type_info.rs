@@ -352,6 +352,13 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                 let quoted = std::format!("get \"{name}\"");
                 write!(formatter, [text(&quoted, None)])
             }
+            Self::GetterNumber(number) | Self::ConstAssertedGetterNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                let quoted = std::format!("get \"{name}\"");
+                write!(formatter, [text(&quoted, None)])
+            }
             Self::IndexSignature(index_signature_type)
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 write!(formatter, [token("["), index_signature_type, token("]")])
@@ -366,11 +373,32 @@ impl Format<FormatTypeContext> for TypeMemberKind {
                 let quoted = std::format!("\"{name}\"");
                 write!(formatter, [text(&quoted, None)])
             }
+            Self::NamedNumber(number) | Self::ConstAssertedNamedNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                let quoted = std::format!("\"{name}\"");
+                write!(formatter, [text(&quoted, None)])
+            }
             Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 let quoted = std::format!("\"{name}\"?");
                 write!(formatter, [text(&quoted, None)])
             }
+            Self::NamedOptionalNumber(number) | Self::ConstAssertedNamedOptionalNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                let quoted = std::format!("\"{name}\"?");
+                write!(formatter, [text(&quoted, None)])
+            }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+                let quoted = std::format!("static \"{name}\"");
+                write!(formatter, [text(&quoted, None)])
+            }
+            Self::NamedStaticNumber(number) | Self::ConstAssertedNamedStaticNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
                 let quoted = std::format!("static \"{name}\"");
                 write!(formatter, [text(&quoted, None)])
             }

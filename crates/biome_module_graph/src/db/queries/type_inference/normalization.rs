@@ -8,7 +8,8 @@
 use super::NormalizeTypeInput;
 use crate::ModuleDb;
 use crate::db::type_inference::{
-    normalize_structural_type, normalize_type_cycle_result, resolve_local_type_on_demand,
+    evaluate_keyof, normalize_structural_type, normalize_type_cycle_result,
+    resolve_local_type_on_demand,
 };
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
@@ -36,8 +37,21 @@ pub fn normalize_type<'db>(
             if !type_needs_normalization(ty) {
                 return ty;
             }
-            normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
-                .unwrap_or(InferredTypeData::Unknown)
+            normalize_structural_type(db, ty, |ty| {
+                let ty = resolve_local_type_on_demand(db, ty);
+                match ty {
+                    InferredTypeData::TypeOperator(operator)
+                        if matches!(
+                            operator.operator(db),
+                            biome_js_type_info::TypeOperator::Keyof
+                        ) =>
+                    {
+                        evaluate_keyof(db, operator.ty(db)).unwrap_or(ty)
+                    }
+                    ty => ty,
+                }
+            })
+            .unwrap_or(InferredTypeData::Unknown)
         },
     )
 }

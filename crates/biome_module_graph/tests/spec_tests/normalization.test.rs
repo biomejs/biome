@@ -1,4 +1,5 @@
 use super::*;
+use biome_js_type_info::TypeOperator;
 use biome_module_graph::type_inference::{
     NormalizedBindingTypeRequest, TypeInferenceCaller, execute_type_inference_request,
 };
@@ -15,6 +16,23 @@ fn projected_binding<'db>(
         NormalizedBindingTypeRequest::new(module, range, range),
     )
     .expect("binding must be inferred")
+}
+
+fn is_indeterminate_keyof<'db>(db: &'db TestModuleDb, ty: InferredTypeData<'db>) -> bool {
+    let mut leaf = ty;
+    for _ in 0..16 {
+        match leaf {
+            InferredTypeData::Unknown => return true,
+            InferredTypeData::TypeOperator(operator)
+                if operator.operator(db) == TypeOperator::Keyof =>
+            {
+                return true;
+            }
+            InferredTypeData::InstanceOf(instance) => leaf = instance.ty(db),
+            _ => return false,
+        }
+    }
+    false
 }
 
 #[test]
@@ -37,6 +55,12 @@ fn test_normalize_type_projections() {
         declare const anyElement: ["A", any][number];
         declare const restElement: ["A", ...string[]][number];
         declare const unsupportedIndex: Values[string];
+        declare const indexedKey: keyof [{ A: number; B: string }][number];
+        declare class IndexedConstructor {
+            static staticKey: number;
+            instanceKey: string;
+        }
+        declare const indexedConstructorKey: keyof [typeof IndexedConstructor][number];
         const object = { A: 1, "B": 2, C: 3 } as const;
         type ObjectType = typeof object;
         declare const key: keyof ObjectType;
@@ -104,38 +128,25 @@ fn test_normalize_type_projections() {
         ("anyElement", "any"),
         ("restElement", "unknown"),
         ("unsupportedIndex", "unknown"),
+        ("indexedKey", "string: A | string: B"),
         ("key", "string: A | string: B | string: C"),
         ("plainKey", "string: A | string: B"),
         ("emptyKey", "never"),
-        ("numericKey", "unknown"),
-        ("quotedNumericKey", "unknown"),
-        ("indexSignatureKey", "unknown"),
-        ("incompleteKey", "unknown"),
-        ("computedKey", "unknown"),
-        ("computedSignatureKey", "unknown"),
-        ("setterKey", "unknown"),
-        ("escapedKey", "unknown"),
+        ("numericKey", "number: 1 | string: A"),
+        ("quotedNumericKey", "string: 1 | string: A"),
+        ("indexSignatureKey", "string | number"),
+        ("escapedKey", "string: A | string: B | string: C"),
         ("escapedElement", "unknown"),
         ("escapedTupleElement", "unknown"),
         ("controlElement", "unknown"),
         ("quotedElement", "unknown"),
         ("surrogateElement", "unknown"),
         ("brandedEscapedElement", "unknown"),
-        ("quotedKey", "unknown"),
-        ("readonlyKey", "unknown"),
-        ("partialKey", "unknown"),
-        ("requiredKey", "unknown"),
-        ("pickedKey", "unknown"),
-        ("omittedKey", "unknown"),
-        ("inheritedKey", "unknown"),
-        ("intersectedKey", "unknown"),
-        ("computedInterfaceKey", "unknown"),
+        ("quotedKey", "string: a\\\"b | string: C"),
+        ("intersectedKey", "string: A | string: C | string: B"),
         ("completeReadonlyKey", "string: A | string: B | string: C"),
         ("completePartialKey", "string: A | string: B | string: C"),
         ("completeRequiredKey", "string: A | string: B | string: C"),
-        ("pickedIndexedKey", "unknown"),
-        ("pickedMixedKey", "unknown"),
-        ("escapedOmitKey", "unknown"),
         ("negativeElement", "number: -1 | number: 2"),
         ("negativeConstElement", "number: -1 | number: 2"),
         ("negativeBigintElement", "unknown"),
@@ -143,6 +154,26 @@ fn test_normalize_type_projections() {
     ] {
         let ty = projected_binding(&db, module, name);
         assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+    for name in [
+        "incompleteKey",
+        "computedKey",
+        "indexedConstructorKey",
+        "setterKey",
+        "computedSignatureKey",
+        "readonlyKey",
+        "partialKey",
+        "requiredKey",
+        "pickedKey",
+        "omittedKey",
+        "inheritedKey",
+        "computedInterfaceKey",
+        "pickedIndexedKey",
+        "pickedMixedKey",
+        "escapedOmitKey",
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert!(is_indeterminate_keyof(&db, ty), "{name}");
     }
     assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
 }
@@ -228,7 +259,7 @@ fn test_type_projections_track_imports_without_whole_module_inference() {
 }
 
 #[test]
-fn test_type_projections_exceeding_normalization_budget_are_unknown() {
+fn test_type_projections_exceeding_normalization_budget_are_indeterminate() {
     let fs = MemoryFileSystem::default();
     let elements = "\"A\",".repeat(1100);
     let members = (0..1100)
@@ -243,12 +274,34 @@ fn test_type_projections_exceeding_normalization_budget_are_unknown() {
     );
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
-    for name in ["element", "key"] {
-        assert_eq!(
-            projected_binding(&db, module, name),
-            InferredTypeData::Unknown
-        );
-    }
+    assert_eq!(
+        projected_binding(&db, module, "element"),
+        InferredTypeData::Unknown
+    );
+    let key = projected_binding(&db, module, "key");
+    assert!(
+        is_indeterminate_keyof(&db, key),
+        "large keyof must remain indeterminate"
+    );
+}
+
+#[test]
+fn test_normalize_callable_object_keyof_skips_call_signature() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type CallableObject = { (): string; value: number };
+            declare const key: keyof CallableObject;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    assert_eq!(
+        format_inferred_type(&db, projected_binding(&db, module, "key")),
+        "string: value"
+    );
 }
 
 #[test]

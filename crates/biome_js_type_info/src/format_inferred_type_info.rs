@@ -409,6 +409,12 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::Getter(name) | Self::ConstAssertedGetter(name) => {
                 write!(f, [text(&std::format!("get \"{name}\""), None)])
             }
+            Self::GetterNumber(number) | Self::ConstAssertedGetterNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                write!(f, [text(&std::format!("get \"{name}\""), None)])
+            }
             Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
                 write!(f, [token("["), ty, token("]")])
             }
@@ -421,10 +427,28 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])
             }
+            Self::NamedNumber(number) | Self::ConstAssertedNamedNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                write!(f, [text(&std::format!("\"{name}\""), None)])
+            }
             Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 write!(f, [text(&std::format!("\"{name}\"?"), None)])
             }
+            Self::NamedOptionalNumber(number) | Self::ConstAssertedNamedOptionalNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
+                write!(f, [text(&std::format!("\"{name}\"?"), None)])
+            }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
+                write!(f, [text(&std::format!("static \"{name}\""), None)])
+            }
+            Self::NamedStaticNumber(number) | Self::ConstAssertedNamedStaticNumber(number) => {
+                let name = number
+                    .to_property_key()
+                    .unwrap_or_else(|| number.as_str().to_string());
                 write!(f, [text(&std::format!("static \"{name}\""), None)])
             }
         }

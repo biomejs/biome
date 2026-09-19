@@ -1127,26 +1127,32 @@ impl TypeMember {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TypeMemberKind {
     CallSignature,
-    /// A member keyed by a computed value, such as `[Symbol.dispose]`. The reference is the key's
-    /// type. Currently produced by the generated global types; local inference of source objects
-    /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
-    /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
+    /// A member keyed by a computed value, such as `[Symbol.dispose]`.
+    /// The reference is the key's type.
     ComputedValue(TypeReference),
     ConstAssertedCallSignature,
     /// A [`Self::ComputedValue`] carried through an `as const` assertion.
     ConstAssertedComputedValue(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
+    ConstAssertedGetterNumber(NumberLiteral),
     ConstAssertedIndexSignature(TypeReference),
     ConstAssertedNamed(Text),
+    ConstAssertedNamedNumber(NumberLiteral),
     ConstAssertedNamedOptional(Text),
+    ConstAssertedNamedOptionalNumber(NumberLiteral),
     ConstAssertedNamedStatic(Text),
+    ConstAssertedNamedStaticNumber(NumberLiteral),
     Constructor,
     Getter(Text),
+    GetterNumber(NumberLiteral),
     IndexSignature(TypeReference),
     Named(Text),
+    NamedNumber(NumberLiteral),
     NamedOptional(Text),
+    NamedOptionalNumber(NumberLiteral),
     NamedStatic(Text),
+    NamedStaticNumber(NumberLiteral),
 }
 
 impl TypeMemberKind {
@@ -1167,6 +1173,16 @@ impl TypeMemberKind {
             | Self::ConstAssertedNamedOptional(own_name)
             | Self::NamedStatic(own_name)
             | Self::ConstAssertedNamedStatic(own_name) => *own_name == name,
+            Self::NamedNumber(number)
+            | Self::ConstAssertedNamedNumber(number)
+            | Self::NamedOptionalNumber(number)
+            | Self::ConstAssertedNamedOptionalNumber(number)
+            | Self::GetterNumber(number)
+            | Self::ConstAssertedGetterNumber(number)
+            | Self::NamedStaticNumber(number)
+            | Self::ConstAssertedNamedStaticNumber(number) => number
+                .to_property_key()
+                .is_some_and(|own_name| own_name == name),
         }
     }
 
@@ -1175,7 +1191,10 @@ impl TypeMemberKind {
     pub fn is_optional(&self) -> bool {
         matches!(
             self,
-            Self::NamedOptional(_) | Self::ConstAssertedNamedOptional(_)
+            Self::NamedOptional(_)
+                | Self::ConstAssertedNamedOptional(_)
+                | Self::NamedOptionalNumber(_)
+                | Self::ConstAssertedNamedOptionalNumber(_)
         )
     }
 
@@ -1191,7 +1210,13 @@ impl TypeMemberKind {
 
     #[inline]
     pub fn is_getter(&self) -> bool {
-        matches!(self, Self::Getter(_) | Self::ConstAssertedGetter(_))
+        matches!(
+            self,
+            Self::Getter(_)
+                | Self::ConstAssertedGetter(_)
+                | Self::GetterNumber(_)
+                | Self::ConstAssertedGetterNumber(_)
+        )
     }
 
     #[inline]
@@ -1202,6 +1227,8 @@ impl TypeMemberKind {
                 | Self::ConstAssertedConstructor
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::NamedStaticNumber(_)
+                | Self::ConstAssertedNamedStaticNumber(_)
         )
     }
 
@@ -1213,10 +1240,14 @@ impl TypeMemberKind {
                 | Self::ConstAssertedComputedValue(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
+                | Self::ConstAssertedGetterNumber(_)
                 | Self::ConstAssertedIndexSignature(_)
                 | Self::ConstAssertedNamed(_)
+                | Self::ConstAssertedNamedNumber(_)
                 | Self::ConstAssertedNamedOptional(_)
+                | Self::ConstAssertedNamedOptionalNumber(_)
                 | Self::ConstAssertedNamedStatic(_)
+                | Self::ConstAssertedNamedStaticNumber(_)
         )
     }
 
@@ -1231,16 +1262,28 @@ impl TypeMemberKind {
             }
             Self::Constructor | Self::ConstAssertedConstructor => Self::ConstAssertedConstructor,
             Self::Getter(name) | Self::ConstAssertedGetter(name) => Self::ConstAssertedGetter(name),
+            Self::GetterNumber(number) | Self::ConstAssertedGetterNumber(number) => {
+                Self::ConstAssertedGetterNumber(number)
+            }
             Self::IndexSignature(index_signature_type)
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 Self::ConstAssertedIndexSignature(index_signature_type)
             }
             Self::Named(name) | Self::ConstAssertedNamed(name) => Self::ConstAssertedNamed(name),
+            Self::NamedNumber(number) | Self::ConstAssertedNamedNumber(number) => {
+                Self::ConstAssertedNamedNumber(number)
+            }
             Self::NamedOptional(name) | Self::ConstAssertedNamedOptional(name) => {
                 Self::ConstAssertedNamedOptional(name)
             }
+            Self::NamedOptionalNumber(number) | Self::ConstAssertedNamedOptionalNumber(number) => {
+                Self::ConstAssertedNamedOptionalNumber(number)
+            }
             Self::NamedStatic(name) | Self::ConstAssertedNamedStatic(name) => {
                 Self::ConstAssertedNamedStatic(name)
+            }
+            Self::NamedStaticNumber(number) | Self::ConstAssertedNamedStaticNumber(number) => {
+                Self::ConstAssertedNamedStaticNumber(number)
             }
         }
     }
@@ -1252,12 +1295,18 @@ impl TypeMemberKind {
             Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
+            Self::ConstAssertedGetterNumber(number) => Self::GetterNumber(number.clone()),
             Self::ConstAssertedIndexSignature(index_signature_type) => {
                 Self::IndexSignature(index_signature_type.clone())
             }
             Self::ConstAssertedNamed(name) => Self::Named(name.clone()),
+            Self::ConstAssertedNamedNumber(number) => Self::NamedNumber(number.clone()),
             Self::ConstAssertedNamedOptional(name) => Self::NamedOptional(name.clone()),
+            Self::ConstAssertedNamedOptionalNumber(number) => {
+                Self::NamedOptionalNumber(number.clone())
+            }
             Self::ConstAssertedNamedStatic(name) => Self::NamedStatic(name.clone()),
+            Self::ConstAssertedNamedStaticNumber(number) => Self::NamedStaticNumber(number.clone()),
             other => other.clone(),
         }
     }
@@ -1267,6 +1316,10 @@ impl TypeMemberKind {
         match self {
             Self::Named(name) => Self::NamedOptional(name),
             Self::ConstAssertedNamed(name) => Self::ConstAssertedNamedOptional(name),
+            Self::NamedNumber(number) => Self::NamedOptionalNumber(number),
+            Self::ConstAssertedNamedNumber(number) => {
+                Self::ConstAssertedNamedOptionalNumber(number)
+            }
             other => other,
         }
     }
@@ -1276,6 +1329,10 @@ impl TypeMemberKind {
         match self {
             Self::NamedOptional(name) => Self::Named(name),
             Self::ConstAssertedNamedOptional(name) => Self::ConstAssertedNamed(name),
+            Self::NamedOptionalNumber(number) => Self::NamedNumber(number),
+            Self::ConstAssertedNamedOptionalNumber(number) => {
+                Self::ConstAssertedNamedNumber(number)
+            }
             other => other,
         }
     }
@@ -1299,6 +1356,16 @@ impl TypeMemberKind {
             | Self::ConstAssertedNamedOptional(name)
             | Self::NamedStatic(name)
             | Self::ConstAssertedNamedStatic(name) => Some(name.clone()),
+            Self::NamedNumber(number)
+            | Self::ConstAssertedNamedNumber(number)
+            | Self::NamedOptionalNumber(number)
+            | Self::ConstAssertedNamedOptionalNumber(number)
+            | Self::GetterNumber(number)
+            | Self::ConstAssertedGetterNumber(number)
+            | Self::NamedStaticNumber(number)
+            | Self::ConstAssertedNamedStaticNumber(number) => {
+                number.to_property_key().map(Into::into)
+            }
         }
     }
 }
@@ -1906,7 +1973,7 @@ impl Union {
 
 #[cfg(test)]
 mod tests {
-    use super::{RawTypeId, TypeId};
+    use super::{NumberLiteral, RawTypeId, Text, TypeId, TypeMemberKind};
     use crate::globals_ids::{STRING_ID_GLOBAL_TYPE_ID, UNKNOWN_ID_GLOBAL_TYPE_ID};
 
     #[test]
@@ -1931,6 +1998,30 @@ mod tests {
     #[test]
     fn type_id_accepts_largest_index() {
         assert_eq!(TypeId::new(u32::MAX as usize).index(), u32::MAX as usize);
+    }
+
+    #[test]
+    fn numeric_member_kinds_preserve_name_and_provenance() {
+        let number = NumberLiteral::new(Text::new_static("0x1"));
+        let getter = TypeMemberKind::GetterNumber(number.clone());
+        let static_member = TypeMemberKind::NamedStaticNumber(number);
+
+        assert_eq!(getter.name(), Some(Text::new_static("1")));
+        assert!(getter.has_name("1"));
+        assert!(getter.is_getter());
+        assert!(!getter.is_static());
+        assert!(matches!(
+            getter.with_const_asserted(),
+            TypeMemberKind::ConstAssertedGetterNumber(_)
+        ));
+
+        assert_eq!(static_member.name(), Some(Text::new_static("1")));
+        assert!(static_member.has_name("1"));
+        assert!(static_member.is_static());
+        assert!(matches!(
+            static_member.with_const_asserted(),
+            TypeMemberKind::ConstAssertedNamedStaticNumber(_)
+        ));
     }
 
     #[cfg(target_pointer_width = "64")]

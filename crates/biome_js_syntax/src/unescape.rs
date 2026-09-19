@@ -87,12 +87,26 @@ fn hex_value(byte: u8) -> Option<u32> {
 ///
 /// This function must be called on the `inner_string_text()` of a token,
 /// meaning the outer quotes are already expected to be trimmed.
+/// Malformed or unsupported escape sequences leave `text` unchanged.
 pub fn unescape_js_string(text: TokenText) -> Text {
+    if !text.contains('\\') {
+        return text.into();
+    }
+    try_unescape_js_string_content(text.text()).unwrap_or_else(|| text.into())
+}
+
+/// Returns the decoded `text` when all JavaScript escape sequences are valid
+/// and supported.
+///
+/// Returns `None` when `text` contains a malformed or unsupported escape
+/// sequence.
+pub fn try_unescape_js_string_content(text: &str) -> Option<Text> {
     enum State {
         // Consume characters until an escape sequence is discovered.
         Normal,
         // `\u{...}`
-        Codepoint(u32),
+        CodepointStart,
+        Codepoint(u32, bool),
         // Start of an escape sequence (`\...`).
         Escaped,
         // `\uXXXX`
@@ -109,7 +123,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
         Some(index) => {
             let mut state = State::Escaped;
             let mut string = text[..index].to_string();
-            string.reserve(usize::from(text.len()) - string.len());
+            string.reserve(text.len() - string.len());
 
             let remainder = &text[(index + 1)..];
             let mut next_byte_index = 0;
@@ -117,22 +131,24 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                 next_byte_index += c.len_utf8();
 
                 match state {
-                    State::Codepoint(char) => {
+                    State::CodepointStart => state = State::Codepoint(0, false),
+                    State::Codepoint(char, has_digit) => {
                         let value = match c {
                             '}' => {
-                                string.push(char.try_into().unwrap_or('\u{fffd}'));
+                                if !has_digit {
+                                    return None;
+                                }
+                                string.push(std::char::from_u32(char)?);
                                 state = State::Normal;
                                 continue;
                             }
                             c if c.is_ascii_digit() => c as u32 - '0' as u32,
                             c if ('a'..='f').contains(&c) => c as u32 - 'a' as u32 + 10,
                             c if ('A'..='F').contains(&c) => c as u32 - 'A' as u32 + 10,
-                            _ => {
-                                continue;
-                            }
+                            _ => return None,
                         };
 
-                        state = State::Codepoint(16 * char + value);
+                        state = State::Codepoint(char.checked_mul(16)?.checked_add(value)?, true);
                     }
                     State::Escaped => {
                         let escaped = match c {
@@ -147,7 +163,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                                     .get(next_byte_index)
                                     .is_some_and(|lookahead| *lookahead == b'{')
                                 {
-                                    state = State::Codepoint(0);
+                                    state = State::CodepointStart;
                                 } else {
                                     state = State::Hex4Digits(0, 0);
                                 }
@@ -182,6 +198,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                                 state = State::Normal;
                                 continue;
                             }
+                            '1'..='7' => return None,
                             c => c,
                         };
                         string.push(escaped);
@@ -192,16 +209,12 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                             c if c.is_ascii_digit() => c as u32 - '0' as u32,
                             c if ('a'..='f').contains(&c) => c as u32 - 'a' as u32 + 10,
                             c if ('A'..='F').contains(&c) => c as u32 - 'A' as u32 + 10,
-                            _ => {
-                                string.push(c);
-                                state = State::Normal;
-                                continue;
-                            }
+                            _ => return None,
                         };
 
-                        let char = 16 * char + value;
+                        let char = char.checked_mul(16)?.checked_add(value)?;
                         if digit == 3 {
-                            string.push(char.try_into().unwrap_or('\u{fffd}'));
+                            string.push(std::char::from_u32(char)?);
                             state = State::Normal;
                         } else {
                             state = State::Hex4Digits(digit + 1, char);
@@ -212,11 +225,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                             c if c.is_ascii_digit() => c as u8 - b'0',
                             c if ('a'..='f').contains(&c) => c as u8 - b'a' + 10,
                             c if ('A'..='F').contains(&c) => c as u8 - b'A' + 10,
-                            _ => {
-                                string.push(c);
-                                state = State::Normal;
-                                continue;
-                            }
+                            _ => return None,
                         };
 
                         if digit == 1 {
@@ -228,9 +237,7 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                         }
                     }
                     State::LegacyOctal => {
-                        // legacy octals are not allowed in strict mode, and
-                        // so far we only use this function for modules...
-                        unimplemented!()
+                        return None;
                     }
                     State::Normal if c == '\\' => state = State::Escaped,
                     State::Normal => string.push(c),
@@ -239,9 +246,12 @@ pub fn unescape_js_string(text: TokenText) -> Text {
                     }
                 }
             }
-            string.into()
+            if !matches!(state, State::Normal) {
+                return None;
+            }
+            Some(string.into())
         }
-        None => text.into(),
+        None => Some(Text::new_owned(text.to_owned().into_boxed_str())),
     }
 }
 
@@ -270,6 +280,28 @@ mod test {
             let token = TokenText::new_raw(RawSyntaxKind(1), token_text);
             let actual = unescape_js_string(token);
             assert_eq!(actual.text(), *expected, "failed test case: {token_text}");
+        }
+    }
+
+    #[test]
+    fn test_try_unescape_rejects_unsupported_or_malformed_content() {
+        for content in [
+            r"\1",
+            r"\7",
+            r"\",
+            r"\u",
+            r"\u12",
+            r"\u12xz",
+            r"\u{}",
+            r"\u{{61}",
+            r"\u{",
+            r"\u{110000}",
+            r"\u{100000000000}",
+            r"\ud800",
+            r"\x4",
+            r"\xzz",
+        ] {
+            assert_eq!(try_unescape_js_string_content(content), None, "{content}");
         }
     }
 
