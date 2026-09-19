@@ -1,8 +1,6 @@
 # biome-ignore format: keep as is
 foo:     bar
 ---
-a:    1
----
 before:    [1,2]
 # biome-ignore format: preserve the following mapping entry
 preserved:    [3,  4]

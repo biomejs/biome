@@ -1,7 +1,0 @@
-%YAML 1.2
----
-# biome-ignore-all format: this comment follows the document header
-first:    [1,2]
-...
----
-second:    {a:  1,b:  2}

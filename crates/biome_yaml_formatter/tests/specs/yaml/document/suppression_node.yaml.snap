@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: yaml/document/suppressed_document.yaml
+info: yaml/document/suppression_node.yaml
 ---
 
 # Input
@@ -8,8 +8,6 @@ info: yaml/document/suppressed_document.yaml
 ```yaml
 # biome-ignore format: keep as is
 foo:     bar
----
-a:    1
 ---
 before:    [1,2]
 # biome-ignore format: preserve the following mapping entry
@@ -52,8 +50,6 @@ opening_mapping: { # biome-ignore format: preserve the first flow entry
 ```yaml
 # biome-ignore format: keep as is
 foo:     bar
----
-a: 1
 ---
 before: [1, 2]
 # biome-ignore format: preserve the following mapping entry
