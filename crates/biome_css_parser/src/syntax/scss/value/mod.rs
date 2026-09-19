@@ -13,11 +13,7 @@ use crate::syntax::{
     CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_at_any_value_with_context,
     is_at_css_wide_keyword, is_at_identifier,
 };
-use biome_css_syntax::{
-    CssSyntaxKind,
-    CssSyntaxKind::{CSS_BOGUS, CSS_BOGUS_CUSTOM_IDENTIFIER},
-    T,
-};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
@@ -64,19 +60,12 @@ pub(crate) fn parse_scss_bracketed_value_expression_item(p: &mut CssParser) -> P
         return Absent;
     }
 
-    CssSyntaxFeatures::Scss
-        .parse_exclusive_syntax(
-            p,
-            |p| parse_scss_expression_until(p, SCSS_BRACKETED_VALUE_EXPRESSION_END_SET),
-            |p, marker| scss_only_syntax_error(p, "SCSS bracketed expressions", marker.range(p)),
-        )
-        .map(|mut expression| {
-            // Keep unsupported items inside the CSS bracketed-value list.
-            if expression.kind(p) == CSS_BOGUS {
-                expression.change_kind(p, CSS_BOGUS_CUSTOM_IDENTIFIER);
-            }
-            expression
-        })
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+        p,
+        |p| parse_scss_expression_until(p, SCSS_BRACKETED_VALUE_EXPRESSION_END_SET),
+        |p, marker| scss_only_syntax_error(p, "SCSS bracketed expressions", marker.range(p)),
+        Some(CSS_BOGUS_CUSTOM_IDENTIFIER),
+    )
 }
 
 #[inline]

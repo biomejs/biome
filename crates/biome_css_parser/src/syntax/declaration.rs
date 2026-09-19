@@ -49,9 +49,9 @@ impl ParseNodeList for DeclarationList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {
             parse_scss_interpolated_property_declaration(p)
-        } else if let Present(mut declaration) = parse_exclusive_scss_nested_property_declaration(p)
+        } else if let Present(declaration) =
+            parse_exclusive_scss_nested_property_declaration(p, CSS_BOGUS_DECLARATION)
         {
-            declaration.change_kind(p, CSS_BOGUS_DECLARATION);
             Present(declaration)
         } else if is_at_scss_interpolated_property_name(p) {
             CssSyntaxFeatures::Scss.parse_exclusive_syntax(
