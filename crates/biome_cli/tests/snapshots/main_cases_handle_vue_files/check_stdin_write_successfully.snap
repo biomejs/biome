@@ -25,3 +25,47 @@ delete a.c;
 </script>
 <template></template>
 ```
+
+```block
+file.vue:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ import * as vueUse from "vue-use";
+      │             ^^^^^^
+    3 │ import { Button } from "./components/Button.vue";
+    4 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·*·as·vueUse·from·"vue-use";
+      │ ----------------------------------
+
+```
+
+```block
+file.vue:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ <script setup lang="ts">
+    2 │ import * as vueUse from "vue-use";
+  > 3 │ import { Button } from "./components/Button.vue";
+      │        ^^^^^^^^^^
+    4 │ 
+    5 │ delete a.c;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 1 │   import * as vueUse from "vue-use";
+    2   │ - import·{·Button·}·from·"./components/Button.vue";
+    3 2 │   
+    4 3 │   delete a.c;
+  
+
+```

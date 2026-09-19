@@ -9,4 +9,5 @@ mod migrate_eslint;
 mod migrate_prettier;
 mod rage;
 mod search;
+mod stdin;
 mod version;

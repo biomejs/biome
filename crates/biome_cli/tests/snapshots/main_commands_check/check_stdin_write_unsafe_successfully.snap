@@ -8,6 +8,17 @@ expression: redactor(content)
 import zod from 'zod'; import _ from 'lodash'; function f() {var x = 1; return{x}} class Foo {}
 ```
 
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -18,5 +29,32 @@ function f() {
 	return { x };
 }
 class Foo {}
+
+```
+
+```block
+mock.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This statement must be preceded by a blank line. Add a newline before this statement.
+  
+    1 │ import _ from "lodash";
+    2 │ import zod from "zod";
+  > 3 │ function f() {
+      │ ^^^^^^^^^^^^^^
+  > 4 │ 	var x = 1;
+  > 5 │ 	return { x };
+  > 6 │ }
+      │ ^
+    7 │ class Foo {}
+    8 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1 1 │   import _ from "lodash";
+    2 2 │   import zod from "zod";
+      3 │ + 
+    3 4 │   function f() {
+    4 5 │   	var x = 1;
+  
 
 ```
