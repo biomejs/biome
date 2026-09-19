@@ -536,6 +536,7 @@ fn extract_html_embedded_js<'a>(
                     base_source.with_embedding_kind(JsEmbeddingKind::Svelte {
                         file_kind: SvelteFileKind::Component,
                         embedding_kind: SvelteEmbeddingKind::Source,
+                        is_class_attribute: false,
                     })
                 } else if host_file_source.is_vue() {
                     let is_setup = opening.as_ref().is_some_and(|o| {
@@ -551,6 +552,7 @@ fn extract_html_embedded_js<'a>(
                         is_source: true,
                         event_handler: false,
                         allow_statements: true,
+                        is_class_attribute: false,
                     })
                 } else {
                     base_source
@@ -597,6 +599,7 @@ fn extract_html_embedded_js<'a>(
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Svelte {
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Expression,
+                    is_class_attribute,
                 })
             } else if host_file_source.is_vue() {
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Vue {
@@ -604,6 +607,7 @@ fn extract_html_embedded_js<'a>(
                     is_source: false,
                     event_handler: false,
                     allow_statements: false,
+                    is_class_attribute,
                 })
             } else {
                 JsFileSource::tsx()
