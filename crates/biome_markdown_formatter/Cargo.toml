@@ -1,14 +1,16 @@
 [package]
 name                 = "biome_markdown_formatter"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
+description          = "Biome's Markdown formatter"
 homepage.workspace   = true
 repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["src/**/*"]
+publish              = true
 
 [[bench]]
 harness = false

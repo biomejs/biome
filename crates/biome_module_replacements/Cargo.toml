@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_module_replacements"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Data for e18e's module replacements"
