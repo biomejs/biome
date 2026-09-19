@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_tailwind_factory"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Utilities to create Tailwind AST for biome_tailwind_factory"

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_fs"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "A small wrapper around std::path::PathBuf contains additional information and convenient methods"
