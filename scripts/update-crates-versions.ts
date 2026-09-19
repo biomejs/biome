@@ -161,9 +161,7 @@ function readCrates(): CrateInfo[] {
 			const publish = /^publish\s*=\s*(true|false)$/m.exec(manifest)?.[1] as
 				| PublishSetting
 				| undefined;
-			const description = /^description\s*=\s*"([^"]+)"$/m.exec(
-				manifest,
-			)?.[1];
+			const description = /^description\s*=\s*"([^"]+)"$/m.exec(manifest)?.[1];
 			if (!name) {
 				throw new Error(`Missing package name in ${manifestPath}`);
 			}
@@ -197,24 +195,20 @@ function validateRepository(): ValidationResult {
 	const errors: string[] = [];
 
 	for (const crate of crates) {
-		const relativeManifest = path.relative(
-			REPOSITORY_ROOT,
-			crate.manifestPath,
-		);
+		const relativeManifest = path.relative(REPOSITORY_ROOT, crate.manifestPath);
 		if (!crate.publish) {
 			errors.push(`${relativeManifest}: missing explicit publish field`);
 			continue;
 		}
 		if (crate.publish === "false" && crate.versionWorkspace) {
-			errors.push(`${relativeManifest}: private crate inherits release version`);
+			errors.push(
+				`${relativeManifest}: private crate inherits release version`,
+			);
 		}
 	}
 
 	for (const crate of publicCrates) {
-		const relativeManifest = path.relative(
-			REPOSITORY_ROOT,
-			crate.manifestPath,
-		);
+		const relativeManifest = path.relative(REPOSITORY_ROOT, crate.manifestPath);
 		if (!crate.versionWorkspace) {
 			errors.push(`${relativeManifest}: public crate must inherit its version`);
 		}
@@ -228,7 +222,9 @@ function validateRepository(): ValidationResult {
 		} else {
 			const readme = fs.readFileSync(readmePath, "utf8");
 			if (!readme.startsWith(readmeImage)) {
-				errors.push(`${relativeManifest}: README.md is missing the shared image`);
+				errors.push(
+					`${relativeManifest}: README.md is missing the shared image`,
+				);
 			}
 		}
 
@@ -291,10 +287,14 @@ function detect(reference: string): void {
 	const currentManifest = fs.readFileSync(ROOT_MANIFEST, "utf8");
 	let previousManifest: string;
 	try {
-		previousManifest = execFileSync("git", ["show", `${reference}:Cargo.toml`], {
-			cwd: REPOSITORY_ROOT,
-			encoding: "utf8",
-		});
+		previousManifest = execFileSync(
+			"git",
+			["show", `${reference}:Cargo.toml`],
+			{
+				cwd: REPOSITORY_ROOT,
+				encoding: "utf8",
+			},
+		);
 	} catch {
 		return;
 	}
@@ -316,13 +316,9 @@ function detect(reference: string): void {
 	}
 }
 
-function verify(allowDirty: boolean = false): void {
+function verify(allowDirty = false): void {
 	const { publicCrates } = validateRepository();
-	const args = [
-		"publish",
-		"--dry-run",
-		"--locked",
-	];
+	const args = ["publish", "--dry-run", "--locked"];
 	if (allowDirty) {
 		args.push("--allow-dirty");
 	}
@@ -359,11 +355,7 @@ function main(): void {
 	switch (command) {
 		case "bump": {
 			const [bumpType] = args;
-			if (
-				args.length !== 1 ||
-				!isBumpType(bumpType) ||
-				values["allow-dirty"]
-			) {
+			if (args.length !== 1 || !isBumpType(bumpType) || values["allow-dirty"]) {
 				usage();
 				process.exitCode = 1;
 				return;
