@@ -2054,6 +2054,7 @@ dependencies = [
  "biome_languages",
  "biome_parser",
  "biome_rowan",
+ "biome_rule_options",
  "biome_tailwind_factory",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",

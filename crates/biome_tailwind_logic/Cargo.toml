@@ -18,6 +18,7 @@ biome_js_syntax        = { workspace = true }
 biome_languages        = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
+biome_rule_options     = { workspace = true }
 biome_tailwind_factory = { workspace = true }
 biome_tailwind_parser  = { workspace = true }
 biome_tailwind_syntax  = { workspace = true }

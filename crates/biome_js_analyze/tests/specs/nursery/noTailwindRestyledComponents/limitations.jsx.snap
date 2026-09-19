@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: limitations.jsx
+---
+# Input
+```jsx
+<Button className={"rounded-none" && "mt-4"} />;
+<Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+<Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+<Button className={`${"rounded-none"}-custom`} />;
+<Button className={`${extra}${"rounded-none"}`} />;
+
+```
+
+# Diagnostics
+```
+limitations.jsx:1:21 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className={"rounded-none" && "mt-4"} />;
+      │                     ^^^^^^^^^^^^
+    2 │ <Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+    3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+limitations.jsx:2:45 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className={"rounded-none" && "mt-4"} />;
+  > 2 │ <Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+      │                                             ^^^^^^^^^^^^
+    3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+    4 │ <Button className={`${"rounded-none"}-custom`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+limitations.jsx:3:39 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className={"rounded-none" && "mt-4"} />;
+    2 │ <Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+  > 3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+      │                                       ^^^^^^^^^^^^
+    4 │ <Button className={`${"rounded-none"}-custom`} />;
+    5 │ <Button className={`${extra}${"rounded-none"}`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+limitations.jsx:3:56 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className={"rounded-none" && "mt-4"} />;
+    2 │ <Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+  > 3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+      │                                                        ^^^^^^^^^
+    4 │ <Button className={`${"rounded-none"}-custom`} />;
+    5 │ <Button className={`${extra}${"rounded-none"}`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+limitations.jsx:4:24 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className={clsx({ "mt-4": tone === "rounded-none" })} />;
+    3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+  > 4 │ <Button className={`${"rounded-none"}-custom`} />;
+      │                        ^^^^^^^^^^^^
+    5 │ <Button className={`${extra}${"rounded-none"}`} />;
+    6 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+limitations.jsx:5:32 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    3 │ <Button className={`custom${active ? "rounded-none" : "shadow-lg"}`} />;
+    4 │ <Button className={`${"rounded-none"}-custom`} />;
+  > 5 │ <Button className={`${extra}${"rounded-none"}`} />;
+      │                                ^^^^^^^^^^^^
+    6 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

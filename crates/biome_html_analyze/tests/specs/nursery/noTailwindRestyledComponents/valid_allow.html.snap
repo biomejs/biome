@@ -1,0 +1,24 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_allow.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<custom-button class="rounded-none hover:rounded-lg font-bold"></custom-button>
+<my-card class="shadow-lg hover:rounded-none"></my-card>
+<ui-button class="shadow-lg"></ui-button>
+<my-button class="shadow-lg"></my-button>
+<my-other class="animate-spin"></my-other>
+<button class="font-bold"></button>
+<my-text class="text-sm leading-6"></my-text>
+<my-panel class="shadow-lg opacity-50"></my-panel>
+<custom-button class="hover:[border-radius:0]"></custom-button>
+<my-spacing class="p-4 gap-2"></my-spacing>
+<my-color class="bg-red-500"></my-color>
+<my-spacing class="[padding:0]"></my-spacing>
+<my-color class="[color:red]"></my-color>
+<my-color class="stroke-none"></my-color>
+<custom-button class="stroke-2"></custom-button>
+
+```

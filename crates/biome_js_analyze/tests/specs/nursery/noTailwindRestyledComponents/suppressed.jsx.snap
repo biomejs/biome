@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: suppressed.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+// biome-ignore lint/nursery/noTailwindRestyledComponents: intentional local override
+<Button className="rounded-none" />;
+
+```
