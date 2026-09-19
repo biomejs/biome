@@ -1,12 +1,12 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsParameter, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsCallArgumentList, JsCallArguments, JsCallExpression,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause,
-    JsExtendsClause, JsFunctionDeclaration, JsFunctionExportDefaultDeclaration,
-    JsFunctionExpression, JsInitializerClause, JsLanguage, JsMethodClassMember,
-    JsMethodObjectMember, JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxToken,
-    JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsParameter,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, SyntaxNode, SyntaxResult, TextRange, declare_node_union,
@@ -97,6 +97,7 @@ impl ReactComponentInfo {
             start_range: function_declaration.start_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: Box::new([]),
+                function: AnyJsFunction::cast_ref(function_declaration.syntax()),
             }),
         })
     }
@@ -270,6 +271,7 @@ impl ReactComponentInfo {
             start_range: expression.syntax().first_token()?.text_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: wrappers.into_boxed_slice(),
+                function: AnyJsFunction::cast_ref(expression.syntax()),
             }),
         })
     }
@@ -373,6 +375,7 @@ impl ReactComponentInfo {
                 start_range: expression.syntax().first_token()?.text_range(),
                 kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                     wrappers: wrappers.into_boxed_slice(),
+                    function: AnyJsFunction::cast_ref(function_expression.syntax()),
                 }),
             })
         } else if let Some(function_or_method) = AnyJsFunctionOrMethodDeclaration::cast_ref(syntax)
@@ -381,6 +384,22 @@ impl ReactComponentInfo {
         } else {
             None
         }
+    }
+
+    /// Returns the object binding pattern of the component's props parameter, if any.
+    pub(crate) fn props_object_pattern(&self) -> Option<JsObjectBindingPattern> {
+        let ReactComponentKind::Function(info) = &self.kind else {
+            return None;
+        };
+        let parameters = info.function.as_ref()?.parenthesized_parameters()?;
+        let first_parameter = parameters.items().into_iter().next()?.ok()?;
+        first_parameter
+            .as_any_js_formal_parameter()?
+            .as_js_formal_parameter()?
+            .binding()
+            .ok()?
+            .as_js_object_binding_pattern()
+            .cloned()
     }
 }
 
@@ -652,6 +671,8 @@ declare_node_union! {
 pub(crate) struct ReactFunctionComponentInfo {
     /// List of wrappers that was used to wrap the component.
     pub(crate) wrappers: Box<[ReactFunctionComponentWrapper]>,
+    /// The function that implements the component, when it is a function or arrow.
+    function: Option<AnyJsFunction>,
 }
 
 /// Represents a React class component.
@@ -752,6 +773,33 @@ mod test {
         }
 
         source
+    }
+
+    fn function_of(component: &ReactComponentInfo) -> Option<AnyJsFunction> {
+        match &component.kind {
+            ReactComponentKind::Function(info) => info.function.clone(),
+            _ => None,
+        }
+    }
+
+    fn props_object_pattern(code: &str) -> Option<JsObjectBindingPattern> {
+        let source = parse_jsx(code);
+        let declaration = source
+            .syntax()
+            .descendants()
+            .find_map(AnyPotentialReactComponentDeclaration::cast)?;
+        ReactComponentInfo::from_declaration(declaration.syntax())?.props_object_pattern()
+    }
+
+    #[test]
+    fn props_object_pattern_returns_destructured_props() {
+        assert!(props_object_pattern("function C({ a }) { return null; }").is_some());
+        assert!(props_object_pattern("const C = ({ a }) => null;").is_some());
+        assert!(props_object_pattern("const C = memo(({ a }) => null);").is_some());
+        // Not destructured.
+        assert!(props_object_pattern("function C(props) { return null; }").is_none());
+        // No parameters.
+        assert!(props_object_pattern("function C() { return null; }").is_none());
     }
 
     #[test]
@@ -1976,6 +2024,7 @@ mod test {
                         start_range: func.start_range(),
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                             wrappers: Box::new([]),
+                            function: AnyJsFunction::cast_ref(func.syntax()),
                         }),
                     })
                 )
@@ -2220,6 +2269,7 @@ mod test {
                                 ]),
                                 _ => Box::new([]),
                             },
+                            function: function_of(&component_info),
                         }),
                     }
                 )
@@ -2333,7 +2383,8 @@ mod test {
                         name_hint: None,
                         start_range: component_info.start_range,
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
-                            wrappers: Box::new([])
+                            wrappers: Box::new([]),
+                            function: function_of(&component_info),
                         }),
                     }
                 )

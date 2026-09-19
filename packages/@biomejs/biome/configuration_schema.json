@@ -5308,6 +5308,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoReactObjectTypeAsDefaultPropConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactObjectTypeAsDefaultPropOptions" }
+			]
+		},
+		"NoReactObjectTypeAsDefaultPropOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7191,6 +7201,13 @@
 					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactObjectTypeAsDefaultProp": {
+					"description": "Disallow array, object, and function values as default props in React components.\nSee https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10377,6 +10394,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoReactNativeRawTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoReactObjectTypeAsDefaultPropOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
