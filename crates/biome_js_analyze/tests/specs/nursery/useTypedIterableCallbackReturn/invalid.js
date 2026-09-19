@@ -1,0 +1,25 @@
+/* should generate diagnostics */
+[1].every(() => {});
+[1].filter(() => {});
+[1].find(() => {});
+[1].findIndex(() => {});
+[1].findLast(() => {});
+[1].findLastIndex(() => {});
+[1].flatMap(() => {});
+[1].map(() => {});
+[1].reduce(() => {});
+[1].reduceRight(() => {});
+[1].some(() => {});
+[1].sort(() => {});
+[1].toSorted(() => {});
+Array.from([1], () => {});
+globalThis.Array.from([1], () => {});
+[1].forEach(() => 42);
+[1].forEach(function() { return 42; });
+[1].forEach(() => { if (condition) return 42; });
+[1].map(() => { if (condition) return 42; });
+[1].map(() => { if (condition) return; return 42; });
+[1].map(() => void 0);
+[1].map(() => { return void 0; });
+[1].map(() => { try { return 42; } catch (error) {} });
+[1].map(() => { function nested() { return 42; } });

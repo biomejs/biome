@@ -1,0 +1,548 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function foo(x: number): void { console.log(x); }
+[1, 2, 3].map(x => foo(x));
+[1, 2, 3].map(x => { return foo(x); });
+[1, 2, 3].map(function(x) { return foo(x); });
+[1, 2, 3].forEach(x => x * 2);
+[1, 2, 3].forEach((x => 42));
+
+type NoResult = void;
+declare function alias(): NoResult;
+declare function number(): number;
+declare function mixed(): number | void;
+declare function optional(): number | undefined;
+[1].map(() => alias());
+[1].forEach(() => number());
+[1].map(() => mixed());
+[1].forEach(() => mixed());
+[1].forEach(() => optional());
+
+declare function overloaded(value: string): void;
+declare function overloaded(value: number): number;
+[1].forEach(() => overloaded(1));
+declare function identity<T>(value: T): T;
+[1].forEach(() => identity(42));
+[1].map(() => identity(foo(1)));
+
+declare const numbers: number[];
+declare const tuple: [number, string];
+declare const map: Map<string, number>;
+declare const set: Set<number>;
+numbers.map(() => {});
+tuple.map(() => {});
+map.forEach(() => 42);
+set.forEach(() => 42);
+
+[1].map((): number => { if (condition) return 42; });
+[1].map(() => { if (condition) return unknownCall(); });
+
+```
+
+# Diagnostics
+```
+invalid.ts:3:11 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function foo(x: number): void { console.log(x); }
+  > 3 │ [1, 2, 3].map(x => foo(x));
+      │           ^^^
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    1 │ /* should generate diagnostics */
+    2 │ function foo(x: number): void { console.log(x); }
+  > 3 │ [1, 2, 3].map(x => foo(x));
+      │                    ^^^^^^
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:11 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    2 │ function foo(x: number): void { console.log(x); }
+    3 │ [1, 2, 3].map(x => foo(x));
+  > 4 │ [1, 2, 3].map(x => { return foo(x); });
+      │           ^^^
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+    6 │ [1, 2, 3].forEach(x => x * 2);
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    2 │ function foo(x: number): void { console.log(x); }
+    3 │ [1, 2, 3].map(x => foo(x));
+  > 4 │ [1, 2, 3].map(x => { return foo(x); });
+      │                      ^^^^^^^^^^^^^^
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+    6 │ [1, 2, 3].forEach(x => x * 2);
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:11 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    3 │ [1, 2, 3].map(x => foo(x));
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+  > 5 │ [1, 2, 3].map(function(x) { return foo(x); });
+      │           ^^^
+    6 │ [1, 2, 3].forEach(x => x * 2);
+    7 │ [1, 2, 3].forEach((x => 42));
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    3 │ [1, 2, 3].map(x => foo(x));
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+  > 5 │ [1, 2, 3].map(function(x) { return foo(x); });
+      │                             ^^^^^^^^^^^^^^
+    6 │ [1, 2, 3].forEach(x => x * 2);
+    7 │ [1, 2, 3].forEach((x => 42));
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:6:11 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+  > 6 │ [1, 2, 3].forEach(x => x * 2);
+      │           ^^^^^^^
+    7 │ [1, 2, 3].forEach((x => 42));
+    8 │ 
+  
+  i This returned value is not used.
+  
+    4 │ [1, 2, 3].map(x => { return foo(x); });
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+  > 6 │ [1, 2, 3].forEach(x => x * 2);
+      │                        ^^^^^
+    7 │ [1, 2, 3].forEach((x => 42));
+    8 │ 
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:7:11 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+    6 │ [1, 2, 3].forEach(x => x * 2);
+  > 7 │ [1, 2, 3].forEach((x => 42));
+      │           ^^^^^^^
+    8 │ 
+    9 │ type NoResult = void;
+  
+  i This returned value is not used.
+  
+    5 │ [1, 2, 3].map(function(x) { return foo(x); });
+    6 │ [1, 2, 3].forEach(x => x * 2);
+  > 7 │ [1, 2, 3].forEach((x => 42));
+      │                         ^^
+    8 │ 
+    9 │ type NoResult = void;
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:14:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    12 │ declare function mixed(): number | void;
+    13 │ declare function optional(): number | undefined;
+  > 14 │ [1].map(() => alias());
+       │     ^^^
+    15 │ [1].forEach(() => number());
+    16 │ [1].map(() => mixed());
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    12 │ declare function mixed(): number | void;
+    13 │ declare function optional(): number | undefined;
+  > 14 │ [1].map(() => alias());
+       │               ^^^^^^^
+    15 │ [1].forEach(() => number());
+    16 │ [1].map(() => mixed());
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:15:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    13 │ declare function optional(): number | undefined;
+    14 │ [1].map(() => alias());
+  > 15 │ [1].forEach(() => number());
+       │     ^^^^^^^
+    16 │ [1].map(() => mixed());
+    17 │ [1].forEach(() => mixed());
+  
+  i This returned value is not used.
+  
+    13 │ declare function optional(): number | undefined;
+    14 │ [1].map(() => alias());
+  > 15 │ [1].forEach(() => number());
+       │                   ^^^^^^^^
+    16 │ [1].map(() => mixed());
+    17 │ [1].forEach(() => mixed());
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:16:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    14 │ [1].map(() => alias());
+    15 │ [1].forEach(() => number());
+  > 16 │ [1].map(() => mixed());
+       │     ^^^
+    17 │ [1].forEach(() => mixed());
+    18 │ [1].forEach(() => optional());
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    14 │ [1].map(() => alias());
+    15 │ [1].forEach(() => number());
+  > 16 │ [1].map(() => mixed());
+       │               ^^^^^^^
+    17 │ [1].forEach(() => mixed());
+    18 │ [1].forEach(() => optional());
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    15 │ [1].forEach(() => number());
+    16 │ [1].map(() => mixed());
+  > 17 │ [1].forEach(() => mixed());
+       │     ^^^^^^^
+    18 │ [1].forEach(() => optional());
+    19 │ 
+  
+  i This returned value is not used.
+  
+    15 │ [1].forEach(() => number());
+    16 │ [1].map(() => mixed());
+  > 17 │ [1].forEach(() => mixed());
+       │                   ^^^^^^^
+    18 │ [1].forEach(() => optional());
+    19 │ 
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:18:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    16 │ [1].map(() => mixed());
+    17 │ [1].forEach(() => mixed());
+  > 18 │ [1].forEach(() => optional());
+       │     ^^^^^^^
+    19 │ 
+    20 │ declare function overloaded(value: string): void;
+  
+  i This returned value is not used.
+  
+    16 │ [1].map(() => mixed());
+    17 │ [1].forEach(() => mixed());
+  > 18 │ [1].forEach(() => optional());
+       │                   ^^^^^^^^^^
+    19 │ 
+    20 │ declare function overloaded(value: string): void;
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    20 │ declare function overloaded(value: string): void;
+    21 │ declare function overloaded(value: number): number;
+  > 22 │ [1].forEach(() => overloaded(1));
+       │     ^^^^^^^
+    23 │ declare function identity<T>(value: T): T;
+    24 │ [1].forEach(() => identity(42));
+  
+  i This returned value is not used.
+  
+    20 │ declare function overloaded(value: string): void;
+    21 │ declare function overloaded(value: number): number;
+  > 22 │ [1].forEach(() => overloaded(1));
+       │                   ^^^^^^^^^^^^^
+    23 │ declare function identity<T>(value: T): T;
+    24 │ [1].forEach(() => identity(42));
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:24:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    22 │ [1].forEach(() => overloaded(1));
+    23 │ declare function identity<T>(value: T): T;
+  > 24 │ [1].forEach(() => identity(42));
+       │     ^^^^^^^
+    25 │ [1].map(() => identity(foo(1)));
+    26 │ 
+  
+  i This returned value is not used.
+  
+    22 │ [1].forEach(() => overloaded(1));
+    23 │ declare function identity<T>(value: T): T;
+  > 24 │ [1].forEach(() => identity(42));
+       │                   ^^^^^^^^^^^^
+    25 │ [1].map(() => identity(foo(1)));
+    26 │ 
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:25:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    23 │ declare function identity<T>(value: T): T;
+    24 │ [1].forEach(() => identity(42));
+  > 25 │ [1].map(() => identity(foo(1)));
+       │     ^^^
+    26 │ 
+    27 │ declare const numbers: number[];
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    23 │ declare function identity<T>(value: T): T;
+    24 │ [1].forEach(() => identity(42));
+  > 25 │ [1].map(() => identity(foo(1)));
+       │               ^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ declare const numbers: number[];
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:31:9 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    29 │ declare const map: Map<string, number>;
+    30 │ declare const set: Set<number>;
+  > 31 │ numbers.map(() => {});
+       │         ^^^
+    32 │ tuple.map(() => {});
+    33 │ map.forEach(() => 42);
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:32:7 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    30 │ declare const set: Set<number>;
+    31 │ numbers.map(() => {});
+  > 32 │ tuple.map(() => {});
+       │       ^^^
+    33 │ map.forEach(() => 42);
+    34 │ set.forEach(() => 42);
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:33:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    31 │ numbers.map(() => {});
+    32 │ tuple.map(() => {});
+  > 33 │ map.forEach(() => 42);
+       │     ^^^^^^^
+    34 │ set.forEach(() => 42);
+    35 │ 
+  
+  i This returned value is not used.
+  
+    31 │ numbers.map(() => {});
+    32 │ tuple.map(() => {});
+  > 33 │ map.forEach(() => 42);
+       │                   ^^
+    34 │ set.forEach(() => 42);
+    35 │ 
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:34:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    32 │ tuple.map(() => {});
+    33 │ map.forEach(() => 42);
+  > 34 │ set.forEach(() => 42);
+       │     ^^^^^^^
+    35 │ 
+    36 │ [1].map((): number => { if (condition) return 42; });
+  
+  i This returned value is not used.
+  
+    32 │ tuple.map(() => {});
+    33 │ map.forEach(() => 42);
+  > 34 │ set.forEach(() => 42);
+       │                   ^^
+    35 │ 
+    36 │ [1].map((): number => { if (condition) return 42; });
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    34 │ set.forEach(() => 42);
+    35 │ 
+  > 36 │ [1].map((): number => { if (condition) return 42; });
+       │     ^^^
+    37 │ [1].map(() => { if (condition) return unknownCall(); });
+    38 │ 
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:37:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    36 │ [1].map((): number => { if (condition) return 42; });
+  > 37 │ [1].map(() => { if (condition) return unknownCall(); });
+       │     ^^^
+    38 │ 
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

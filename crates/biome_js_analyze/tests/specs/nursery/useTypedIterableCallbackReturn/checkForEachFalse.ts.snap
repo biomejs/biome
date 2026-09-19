@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: checkForEachFalse.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+[1].forEach(() => 42);
+[1].forEach(() => { return 42; });
+
+```
