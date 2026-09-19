@@ -582,6 +582,27 @@ sorted: flex! w-full! p-4!
 input:  flex [color:red]!
 sorted: flex [color:red]!
 ---
+input:  tab-8 tab-4 tab-2 flex
+sorted: flex tab-2 tab-4 tab-8
+---
+input:  flex zoom-2 p-4
+sorted: flex zoom-2 p-4
+---
+input:  scrollbar-none scrollbar-auto scrollbar-thin flex
+sorted: flex scrollbar-auto scrollbar-none scrollbar-thin
+---
+input:  scrollbar-gutter-both scrollbar-gutter-auto scrollbar-gutter-stable flex
+sorted: flex scrollbar-gutter-auto scrollbar-gutter-both scrollbar-gutter-stable
+---
+input:  flex scrollbar-track-red-500 scrollbar-thumb-blue-500 p-4
+sorted: flex scrollbar-thumb-blue-500 scrollbar-track-red-500 p-4
+---
+input:  flex scrollbar-thumb-red-500/50 p-4
+sorted: flex scrollbar-thumb-red-500/50 p-4
+---
+input:  flex auto-cols-2 auto-rows-2 p-4
+sorted: flex auto-cols-2 auto-rows-2 p-4
+---
 input:  shadow-sm text-card-foreground border bg-card gap-6 py-6 rounded-xl flex flex-col
 sorted: text-card-foreground bg-card flex flex-col gap-6 rounded-xl border py-6 shadow-sm
 ---

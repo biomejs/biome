@@ -5,6 +5,10 @@
 // but only ships in minified form. We locate it by anchoring on a
 // well-known sequence ("padding","padding-inline") and walking outward
 // to the enclosing `[ ... ]` literal, which is then JSON-parsed.
+//
+// The module holding the list moves between releases (a `chunk-*.mjs`
+// up to 4.2.x, `lib.mjs` from 4.3.0), so every ESM module in `dist` is
+// scanned.
 
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -18,11 +22,11 @@ export async function extractPropertyOrder(): Promise<string[]> {
 		require.resolve("tailwindcss/package.json"),
 	);
 	const distDir = path.join(tailwindRoot, "dist");
-	const chunkFiles = (await fs.readdir(distDir)).filter(
-		(f) => f.startsWith("chunk-") && f.endsWith(".mjs"),
-	);
+	const moduleFiles = (await fs.readdir(distDir))
+		.filter((f) => f.endsWith(".mjs"))
+		.sort();
 
-	for (const file of chunkFiles) {
+	for (const file of moduleFiles) {
 		const content = await fs.readFile(path.join(distDir, file), "utf8");
 		const anchorIdx = content.indexOf(ANCHOR);
 		if (anchorIdx === -1) continue;
@@ -46,6 +50,6 @@ export async function extractPropertyOrder(): Promise<string[]> {
 	}
 
 	throw new Error(
-		`property-order array not found in any tailwindcss/dist/chunk-*.mjs (anchor: ${ANCHOR})`,
+		`property-order array not found in any tailwindcss/dist/*.mjs (anchor: ${ANCHOR})`,
 	);
 }
