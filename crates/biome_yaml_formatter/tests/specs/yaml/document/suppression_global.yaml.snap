@@ -7,13 +7,17 @@ info: yaml/document/suppression_global.yaml
 
 ```yaml
 # License header
-# biome-ignore-all format: preserve every document
+# biome-ignore-all format: preserve all documents in this file
 %YAML 1.2
 ---
 first:    [1,2]
 ...
 ---
 second:    {a:  1,b:  2}
+---
+third:
+     - [5,6]
+     - {x:  1,y:  2}
 # Trailing comment
 
 ```
@@ -23,13 +27,17 @@ second:    {a:  1,b:  2}
 
 ```yaml
 # License header
-# biome-ignore-all format: preserve every document
+# biome-ignore-all format: preserve all documents in this file
 %YAML 1.2
 ---
 first:    [1,2]
 ...
 ---
 second:    {a:  1,b:  2}
+---
+third:
+     - [5,6]
+     - {x:  1,y:  2}
 # Trailing comment
 
 ```

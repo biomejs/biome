@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/suppression_global_not_at_top.yaml
+---
+
+# Input
+
+```yaml
+first:    [1,2]
+---
+# biome-ignore-all format: misplaced in the second document
+second:    {a:  1,b:  2}
+---
+third:
+     - [5,6]
+     - {x:  1,y:  2}
+
+```
+
+
+# Formatted
+
+```yaml
+first: [1, 2]
+---
+# biome-ignore-all format: misplaced in the second document
+second: { a: 1, b: 2 }
+---
+third:
+  - [5, 6]
+  - { x: 1, y: 2 }
+
+```

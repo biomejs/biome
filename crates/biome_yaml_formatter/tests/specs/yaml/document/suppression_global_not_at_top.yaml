@@ -1,0 +1,8 @@
+first:    [1,2]
+---
+# biome-ignore-all format: misplaced in the second document
+second:    {a:  1,b:  2}
+---
+third:
+     - [5,6]
+     - {x:  1,y:  2}
