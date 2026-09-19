@@ -146,6 +146,7 @@ pub enum TypeData<'db> {
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
     IndexedAccess(InternedIndexedAccessType<'db>),
+    MappedType(InternedMappedType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -275,6 +276,7 @@ impl<'db> TypeData<'db> {
                 | Self::Local(_)
                 | Self::TypeofExpression(_)
                 | Self::IndexedAccess(_)
+                | Self::MappedType(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -357,6 +359,7 @@ impl<'db> TypeData<'db> {
                 Self::MergedReference(_) => "merged type",
                 Self::TypeOperator(_) => "type operator",
                 Self::IndexedAccess(_) => "indexed access",
+                Self::MappedType(_) => "mapped type",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -617,6 +620,7 @@ impl<'db> TypeData<'db> {
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
+            | Self::MappedType(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -653,6 +657,7 @@ impl<'db> TypeData<'db> {
             | Self::InstanceOf(_)
             | Self::Interface(_)
             | Self::Intersection(_)
+            | Self::MappedType(_)
             | Self::Object(_)
             | Self::Tuple(_)
             | Self::Union(_) => type_parameters.is_empty(),
@@ -943,6 +948,7 @@ impl<'db> TypeData<'db> {
             | Self::Union(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
+            | Self::MappedType(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1162,6 +1168,17 @@ impl<'db> TypeData<'db> {
                     resolve_reference(&access.index),
                 ))
             }
+            raw::TypeData::MappedType(mapped) => Self::MappedType(InternedMappedType::new(
+                db,
+                resolve_reference(&mapped.type_parameter),
+                match &mapped.keys {
+                    raw::MappedTypeKeys::Keyof(ty) => MappedTypeKeys::Keyof(resolve_reference(ty)),
+                    raw::MappedTypeKeys::Type(ty) => MappedTypeKeys::Type(resolve_reference(ty)),
+                },
+                resolve_reference(&mapped.ty),
+                mapped.readonly_modifier,
+                mapped.optional_modifier,
+            )),
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
                 db,
                 convert_literal(db, literal.as_ref(), resolve_reference),
@@ -1293,6 +1310,13 @@ impl<'db> TypeDataSlots<'db> {
             TypeData::IndexedAccess(access) => {
                 result.slots.extend([access.object(db), access.index(db)])
             }
+            // The type parameter comes first so root-body substitution can
+            // skip the declared parameter like it does for other binders.
+            TypeData::MappedType(mapped) => result.slots.extend([
+                *mapped.type_parameter(db),
+                mapped.keys(db).ty(),
+                mapped.ty(db),
+            ]),
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1651,6 +1675,17 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     TypeData::IndexedAccess(InternedIndexedAccessType::new(db, object, index))
                 }
             }
+            TypeData::MappedType(mapped) => TypeData::MappedType(InternedMappedType::new(
+                db,
+                self.take_type()?,
+                match mapped.keys(db) {
+                    MappedTypeKeys::Keyof(_) => MappedTypeKeys::Keyof(self.take_type()?),
+                    MappedTypeKeys::Type(_) => MappedTypeKeys::Type(self.take_type()?),
+                },
+                self.take_type()?,
+                mapped.readonly_modifier(db),
+                mapped.optional_modifier(db),
+            )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
@@ -2669,6 +2704,38 @@ impl<'db> InternedIndexedAccessType<'db> {
             .iter()
             .map(|member| matches!(member.kind, TypeMemberKind::Named(_)).then_some(member.ty))
             .collect()
+    }
+}
+
+/// The parts of a TypeScript mapped type, stored in the database. See
+/// [`raw::MappedType`] for an example of the parts.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedMappedType<'db> {
+    #[returns(ref)]
+    pub type_parameter: TypeData<'db>,
+    #[returns(copy)]
+    pub keys: MappedTypeKeys<'db>,
+    #[returns(copy)]
+    pub ty: TypeData<'db>,
+    #[returns(copy)]
+    pub readonly_modifier: Option<raw::MappedTypeModifier>,
+    #[returns(copy)]
+    pub optional_modifier: Option<raw::MappedTypeModifier>,
+}
+
+/// The keys iterated by a mapped type. See [`raw::MappedTypeKeys`].
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub enum MappedTypeKeys<'db> {
+    Keyof(TypeData<'db>),
+    Type(TypeData<'db>),
+}
+
+impl<'db> MappedTypeKeys<'db> {
+    pub fn ty(self) -> TypeData<'db> {
+        match self {
+            Self::Keyof(ty) | Self::Type(ty) => ty,
+        }
     }
 }
 
