@@ -2848,6 +2848,11 @@ See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
+	* Require Error objects as Promise rejection reasons.
+See https://biomejs.dev/linter/rules/use-promise-reject-errors 
+	 */
+	usePromiseRejectErrors?: UsePromiseRejectErrorsConfiguration;
+	/**
 	* Enforce that Qwik loader functions are declared in the correct location.
 See https://biomejs.dev/linter/rules/use-qwik-loader-location 
 	 */
@@ -5114,6 +5119,9 @@ export type UseNullishCoalescingConfiguration =
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
+export type UsePromiseRejectErrorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePromiseRejectErrorsOptions;
 export type UseQwikLoaderLocationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikLoaderLocationOptions;
@@ -7191,6 +7199,10 @@ export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
 }
+export interface RuleWithUsePromiseRejectErrorsOptions {
+	level: RulePlainConfiguration;
+	options?: UsePromiseRejectErrorsOptions;
+}
 export interface RuleWithUseQwikLoaderLocationOptions {
 	level: RulePlainConfiguration;
 	options?: UseQwikLoaderLocationOptions;
@@ -9061,6 +9073,7 @@ export interface UseNullishCoalescingOptions {
 	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
+export type UsePromiseRejectErrorsOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
 export interface UseReactCompilerOptions {
@@ -10417,6 +10430,7 @@ export type Category =
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
