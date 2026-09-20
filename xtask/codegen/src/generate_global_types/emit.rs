@@ -72,8 +72,10 @@ fn generated_body(
     let registrations = render_registrations(lowered)?;
     let local_types = render_local_types(lowered.globals());
     let mut names = String::new();
-    for (name, _, reference) in super::lower::declarations::ITERATOR_DECLARATIONS {
-        if let Some(global) = lowered.global(name) {
+    for (name, _, reference) in super::lower::declarations::PREDEFINED_DECLARATIONS {
+        if let Some(global) = lowered.global(name)
+            && !matches!(global.data(), LoweredTypeData::Class(_))
+        {
             names.push_str(&format!(
                 "({:?}, crate::globals::{}),\n",
                 global.name(),
@@ -470,7 +472,7 @@ fn for_each_global_in_emit_order(
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
             && global.id_constant() != "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID"
-            && !super::lower::declarations::ITERATOR_DECLARATIONS
+            && !super::lower::declarations::PREDEFINED_DECLARATIONS
                 .iter()
                 .any(|(_, id, _)| *id == global.id_constant())
         {
@@ -485,7 +487,10 @@ fn for_each_global_in_emit_order(
     for id_constant in GLOBAL_ID_EMIT_ORDER {
         visit(global_with_id_constant(lowered, id_constant)?);
     }
-    for (_, id, _) in super::lower::declarations::ITERATOR_DECLARATIONS {
+    for (_, id, _) in super::lower::declarations::PREDEFINED_DECLARATIONS {
+        if GLOBAL_ID_EMIT_ORDER.contains(id) {
+            continue;
+        }
         if let Some(global) = lowered
             .globals()
             .iter()

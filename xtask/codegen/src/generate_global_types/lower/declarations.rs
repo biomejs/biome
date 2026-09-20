@@ -37,7 +37,8 @@ impl LoweredDeclarations {
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Computed methods support declared predefined Symbol keys; other computed names are errors.
-/// Type aliases, type arguments, qualified references, object and template literal types,
+/// References to selected predefined types preserve type arguments and require declarations.
+/// Type aliases, type arguments on other references, qualified references, object and template literal types,
 /// and other type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
     manifest: &GlobalManifest,
@@ -102,22 +103,18 @@ impl DeclarationLowerer<'_> {
         if let Some(reference) = self.declaration_parameters.get(name) {
             return Ok(reference.clone());
         }
-        if self.predefined_declarations {
-            self.manifest
-                .global_group(name)
-                .with_context(|| format!("missing declaration dependency {name}"))?;
-            return ITERATOR_DECLARATIONS
-                .iter()
-                .find(|(declared, _, _)| *declared == name)
-                .map(|(_, _, reference)| LoweredTypeReference::Predefined(reference))
-                .with_context(|| format!("unsupported declaration dependency {name}"));
+        if let Some(reference) = self
+            .class_scope
+            .as_ref()
+            .and_then(|scope| scope.parameters.get(name))
+        {
+            return Ok(reference.clone());
         }
-        if let Some(scope) = &self.class_scope {
-            return scope
-                .parameters
-                .get(name)
-                .cloned()
-                .with_context(|| format!("unsupported class member type reference {name}"));
+        if self.predefined_declarations {
+            return self.predefined_reference(name);
+        }
+        if self.class_scope.is_some() {
+            bail!("unsupported class member type reference {name}");
         }
         if let Some(index) = self.interfaces.get(name) {
             return Ok(LoweredTypeReference::Local(*index));
@@ -138,6 +135,15 @@ impl DeclarationLowerer<'_> {
         self.interfaces.insert(name.to_owned(), index);
         self.pending.push((name.to_owned(), index));
         Ok(LoweredTypeReference::Local(index))
+    }
+
+    fn predefined_reference(&self, name: &str) -> Result<LoweredTypeReference> {
+        self.manifest
+            .global_group(name)
+            .with_context(|| format!("missing declaration dependency {name}"))?;
+        predefined_type_reference(name)
+            .map(LoweredTypeReference::Predefined)
+            .with_context(|| format!("unsupported declaration dependency {name}"))
     }
 
     /// Reuses structurally equal entries without changing existing local indices.
@@ -489,8 +495,14 @@ impl DeclarationLowerer<'_> {
                         type_parameters,
                     }));
                 }
-                if self.predefined_declarations && !self.declaration_parameters.contains_key(name) {
-                    let ty = self.named_reference(name)?;
+                if (self.predefined_declarations || predefined_type_reference(name).is_some())
+                    && !self.declaration_parameters.contains_key(name)
+                    && !self
+                        .class_scope
+                        .as_ref()
+                        .is_some_and(|scope| scope.parameters.contains_key(name))
+                {
+                    let ty = self.predefined_reference(name)?;
                     let type_parameters = reference
                         .type_arguments()
                         .map(|arguments| {
@@ -601,8 +613,8 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 /// Value-side declarations, computed members, methods returning `MapIterator` or
 /// `SetIterator`, and methods referencing Intl types
 /// are excluded. References to the
-/// enclosing class may carry type arguments. Other external references and unsupported
-/// member shapes are errors.
+/// enclosing class and selected predefined types may carry type arguments.
+/// Other external references and unsupported member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
 /// Existing class members retain their projections; their declarations are not lowered again.
 /// Only construct signatures are selected from the supplied constructor declarations.
@@ -924,8 +936,15 @@ fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> 
     Ok(false)
 }
 
-/// Named protocol declarations with stable runtime identities. Member selection is syntax-driven.
-pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str, &str)] = &[
+fn predefined_type_reference(name: &str) -> Option<&'static str> {
+    PREDEFINED_DECLARATIONS
+        .iter()
+        .find_map(|&(declared, _, reference)| (declared == name).then_some(reference))
+}
+
+/// Selected declaration names and their existing runtime identities.
+pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &str, &str)] = &[
+    ("Array", "ARRAY_ID_GLOBAL_TYPE_ID", "GLOBAL_ARRAY_ID"),
     (
         "IteratorYieldResult",
         "ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID",
@@ -955,7 +974,7 @@ pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str,
 
 /// Lowers the synchronous iterator protocol, including its result dependencies.
 /// Constraints use supported member types and earlier type parameters.
-/// Merged declarations and dependencies outside this selection are errors.
+/// Merged declarations and dependencies without predefined identities are errors.
 /// Computed methods support declared predefined Symbol keys. Tuples support required unnamed elements.
 pub(super) fn lower_iterator_globals(
     manifest: &GlobalManifest,
@@ -973,7 +992,17 @@ pub(super) fn lower_iterator_globals(
         unbound_parameters: BTreeSet::new(),
         predefined_declarations: true,
     };
-    for &(name, id_constant, _) in ITERATOR_DECLARATIONS {
+    for &(name, id_constant, _) in PREDEFINED_DECLARATIONS {
+        if !matches!(
+            name,
+            "IteratorYieldResult"
+                | "IteratorReturnResult"
+                | "IteratorResult"
+                | "Iterator"
+                | "Iterable"
+        ) {
+            continue;
+        }
         let Some(group) = manifest.global_group(name) else {
             continue;
         };
