@@ -19,21 +19,9 @@ expression: redactor(content)
 # Emitted Messages
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:6:18 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key plugins has the value ["base.grit","override.grit"].
-  
-  i This value is defined across 2 configuration files.
-  
-  i The highlighted value is configured in the root configuration biome.json.
-  
-    1 │ {
-  > 2 │   "plugins": ["base.grit"],
-      │              ^^^^^^^^^^^^^
-    3 │   "overrides": [
-    4 │     {
-  
-  i The highlighted value is configured by override 0 in biome.json.
+  i The key plugins has the following value.
   
     4 │     {
     5 │       "includes": ["**/*.test.js"],
@@ -42,7 +30,17 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
     7 │     }
     8 │   ]
   
+  i This value is defined across 2 configuration files.
+  
   i The override matched file.test.js using **/*.test.js.
+  
+  i The highlighted value is configured in the root configuration biome.json.
+  
+    1 │ {
+  > 2 │   "plugins": ["base.grit"],
+      │              ^^^^^^^^^^^^^
+    3 │   "overrides": [
+    4 │     {
   
 
 ```

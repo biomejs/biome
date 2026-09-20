@@ -22,7 +22,7 @@ expression: redactor(content)
 ```block
 biome.json:3:27 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key files.includes.1 has the value tests/**.
+  i The key files.includes.1 has the following value.
   
     1 │ {
     2 │   "extends": ["base.json"],

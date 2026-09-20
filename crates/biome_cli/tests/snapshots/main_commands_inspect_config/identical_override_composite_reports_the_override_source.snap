@@ -21,7 +21,7 @@ expression: redactor(content)
 ```block
 biome.json:6:20 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key formatter has the value {"lineWidth":100}.
+  i The key formatter has the following value.
   
     4 │     {
     5 │       "includes": ["**/*.js"],

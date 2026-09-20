@@ -25,7 +25,7 @@ expression: redactor(content)
 ```block
 biome.json:2:38 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key formatter.formatWithErrors has the value false.
+  i The key formatter.formatWithErrors has the following value.
   
     1 │ {
   > 2 │   "formatter": { "formatWithErrors": false },

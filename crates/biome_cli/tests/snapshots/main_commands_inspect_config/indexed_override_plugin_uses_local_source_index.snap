@@ -21,7 +21,7 @@ expression: redactor(content)
 ```block
 biome.json:6:19 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key plugins.1 has the value override.grit.
+  i The key plugins.1 has the following value.
   
     4 │     {
     5 │       "includes": ["**/*.test.js"],

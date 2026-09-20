@@ -20,7 +20,6 @@ use biome_diagnostics::{
 };
 use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
 use camino::{Utf8Path, Utf8PathBuf};
-use serde_json::Value;
 use std::{borrow::Cow, io, sync::Arc};
 
 fn display_path(path: &Utf8Path) -> Cow<'_, str> {
@@ -161,10 +160,9 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
 
         let diagnostic = inspection.value.as_ref().map_or_else(
             || InspectionDiagnostic::absent(key.as_str().to_string()),
-            |value| {
+            |_| {
                 InspectionDiagnostic::configured(
-                    key.as_str().to_string(),
-                    value,
+                    key.as_str(),
                     &inspection.sources,
                     configuration_path.as_deref(),
                 )
@@ -295,41 +293,24 @@ impl InspectionDiagnostic {
     /// Builds a configured-value diagnostic using the last contributor as its primary location.
     ///
     /// The advice identifies composite values as assembled from multiple sources.
-    fn configured(
-        key: String,
-        value: &Value,
-        sources: &[SourceReference],
-        root_path: Option<&Utf8Path>,
-    ) -> Self {
-        let value = Self::display_value(value);
-        let location = if sources.len() == 1 {
-            sources.first().map(|source| {
-                (
-                    display_path(source.path).into_owned(),
-                    source.range,
-                    source.source.to_string(),
-                )
-            })
-        } else {
-            None
-        };
+    fn configured(key: &str, sources: &[SourceReference], root_path: Option<&Utf8Path>) -> Self {
+        let location = sources.last().map(|source| {
+            (
+                display_path(source.path).into_owned(),
+                source.range,
+                source.source.to_string(),
+            )
+        });
         let advice = Self::source_advices(sources, root_path);
         Self {
             message: markup! {
-                "The key "<Emphasis>{key}</Emphasis>" has the value "<Emphasis>{value}</Emphasis>"."
+                "The key "<Emphasis>{key}</Emphasis>" has the following value."
             }
             .to_owned(),
             path: location.as_ref().map(|(path, _, _)| path.clone()),
             span: location.as_ref().and_then(|(_, span, _)| *span),
             source_code: location.map(|(_, _, source)| source),
             advice: InspectionAdvice(advice),
-        }
-    }
-
-    fn display_value(value: &Value) -> String {
-        match value {
-            Value::String(value) => value.clone(),
-            _ => serde_json::to_string(value).unwrap_or_else(|_| "<unknown>".to_string()),
         }
     }
 
@@ -341,6 +322,7 @@ impl InspectionDiagnostic {
     ) -> Vec<AdviceLine> {
         if sources.len() > 1 {
             let source_count = sources.len();
+            let (primary_source, additional_sources) = sources.split_last().unwrap();
             let mut advice = vec![AdviceLine::Info(
                 markup! {
                     "This value is defined across "<Emphasis>{source_count}</Emphasis>
@@ -348,7 +330,10 @@ impl InspectionDiagnostic {
                 }
                 .to_owned(),
             )];
-            for source in sources {
+            if let Some(match_advice) = Self::override_match_advice(primary_source) {
+                advice.push(match_advice);
+            }
+            for source in additional_sources {
                 advice.push(Self::composite_source_advice(source));
                 advice.push(AdviceLine::Frame {
                     path: display_path(source.path).into_owned(),

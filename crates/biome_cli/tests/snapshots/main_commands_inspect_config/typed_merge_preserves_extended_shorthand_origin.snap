@@ -30,7 +30,7 @@ expression: redactor(content)
 ```block
 base.json:3:30 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key linter.rules.suspicious.noConsole has the value error.
+  i The key linter.rules.suspicious.noConsole has the following value.
   
     1 │ {
     2 │   "linter": {

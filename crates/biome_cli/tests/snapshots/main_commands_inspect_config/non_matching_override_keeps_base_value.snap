@@ -21,7 +21,7 @@ expression: redactor(content)
 ```block
 biome.json:2:31 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key formatter.lineWidth has the value 100.
+  i The key formatter.lineWidth has the following value.
   
     1 │ {
   > 2 │   "formatter": { "lineWidth": 100 },

@@ -23,7 +23,7 @@ expression: redactor(content)
 ```block
 base.json:3:18 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key formatter.lineWidth has the value 100.
+  i The key formatter.lineWidth has the following value.
   
     1 │ {
     2 │   "formatter": {

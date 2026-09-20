@@ -20,7 +20,7 @@ expression: redactor(content)
 ```block
 biome.json:3:5 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key markdown.linter has the value {"enabled":false}.
+  i The key markdown.linter has the following value.
   
     1 │ {
     2 │   "overrides": [

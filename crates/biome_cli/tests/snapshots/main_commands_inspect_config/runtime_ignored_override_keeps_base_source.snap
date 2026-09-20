@@ -25,7 +25,7 @@ expression: redactor(content)
 ```block
 biome.json:3:47 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key javascript.resolver.experimentalPnpmCatalogs has the value false.
+  i The key javascript.resolver.experimentalPnpmCatalogs has the following value.
   
     1 │ {
     2 │   "javascript": {

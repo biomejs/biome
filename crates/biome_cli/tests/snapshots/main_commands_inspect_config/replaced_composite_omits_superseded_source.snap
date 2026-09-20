@@ -37,7 +37,7 @@ expression: redactor(content)
 ```block
 biome.json:6:22 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The key linter.rules.suspicious.noConsole has the value {"level":"warn","options":{"allow":["error"]}}.
+  i The key linter.rules.suspicious.noConsole has the following value.
   
      4 │     "rules": {
      5 │       "suspicious": {
