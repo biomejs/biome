@@ -607,6 +607,8 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
     }
 }
 
+pub(super) type MemberSelector = fn(&AnyTsTypeMember) -> Result<bool>;
+
 /// Lowers named instance properties and methods with declaration-derived
 /// generic parameters. Constraints and defaults use supported member types and earlier parameters;
 /// the first interface supplies them for merged declarations.
@@ -617,7 +619,7 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 /// Other external references and unsupported member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
 /// Existing class members retain their projections; their declarations are not lowered again.
-/// Only construct signatures are selected from the supplied constructor declarations.
+/// The caller selects members from the supplied constructor declarations.
 /// They share the instance members' local type table and may reference predefined iterator
 /// protocol types. Class type parameters are not in scope on the constructor side.
 /// Local types are registered after their dependencies for runtime conversion in one pass.
@@ -626,7 +628,7 @@ pub(super) fn lower_class_members(
     source_files: &[DiscoveredFile],
     class: &mut LoweredClass,
     class_reference: &'static str,
-    constructors: Option<&[DeclarationRecord]>,
+    constructors: Option<(&[DeclarationRecord], MemberSelector)>,
 ) -> Result<Box<[LoweredTypeData]>> {
     let mut lowerer = DeclarationLowerer {
         manifest,
@@ -745,28 +747,63 @@ pub(super) fn lower_class_members(
     class.type_parameters =
         class_parameters.context("class must include an interface declaration")?;
     class.members = members.into_boxed_slice();
-    if let Some(records) = constructors {
+    if let Some((records, select_member)) = constructors {
         lowerer.predefined_declarations = true;
         if let Some(scope) = &mut lowerer.class_scope {
             scope.parameters.clear();
         }
-        lowerer.lower_constructor_members(
-            records,
-            class,
-            |member| {
-                Ok(matches!(
-                    member,
-                    AnyTsTypeMember::TsConstructSignatureTypeMember(_)
-                ))
-            },
-            &[],
-        )?;
+        lowerer.lower_constructor_members(records, class, select_member, &[])?;
     }
     lowerer
         .types
         .into_iter()
         .collect::<Option<Box<[_]>>>()
         .context("unfilled class member type")
+}
+
+pub(super) fn lower_method_global(
+    manifest: &GlobalManifest,
+    source_files: &[DiscoveredFile],
+    owner: &str,
+    owner_reference: &'static str,
+    id_constant: &'static str,
+    method: TsMethodSignatureTypeMember,
+) -> Result<LoweredGlobal> {
+    let mut lowerer = DeclarationLowerer {
+        manifest,
+        sources: ParsedSourceCache::new(source_files),
+        interfaces: BTreeMap::new(),
+        pending: Vec::new(),
+        types: Vec::new(),
+        class_scope: Some(ClassScope {
+            name: Text::from(owner.to_owned()),
+            reference: owner_reference,
+            parameters: BTreeMap::new(),
+        }),
+        declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
+        predefined_declarations: true,
+    };
+    let name = lower_object_member_name(method.name()?)?;
+    let function = lowerer.lower_signature(
+        Some(name.clone()),
+        method.type_parameters(),
+        method.parameters()?,
+        method
+            .return_type_annotation()
+            .with_context(|| format!("method {name} is missing a return type"))?
+            .ty()?,
+    )?;
+    Ok(LoweredGlobal {
+        name: Text::from(format!("{owner}.{name}")),
+        id_constant,
+        data: LoweredTypeData::Function(function),
+        local_types: lowerer
+            .types
+            .into_iter()
+            .collect::<Option<Box<[_]>>>()
+            .context("unfilled method type")?,
+    })
 }
 
 fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
@@ -810,7 +847,7 @@ pub(super) fn lower_constructor_members(
     records: &[DeclarationRecord],
     class: &mut LoweredClass,
     class_reference: &'static str,
-    select_member: fn(&AnyTsTypeMember) -> Result<bool>,
+    select_member: MemberSelector,
     predefined_symbols: &[(&str, &'static str)],
 ) -> Result<Box<[LoweredTypeData]>> {
     let mut lowerer = DeclarationLowerer {
@@ -841,7 +878,7 @@ impl DeclarationLowerer<'_> {
         &mut self,
         records: &[DeclarationRecord],
         class: &mut LoweredClass,
-        select_member: fn(&AnyTsTypeMember) -> Result<bool>,
+        select_member: MemberSelector,
         predefined_symbols: &[(&str, &'static str)],
     ) -> Result<()> {
         let mut members = class.members.to_vec();
@@ -970,13 +1007,23 @@ pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &st
         "ITERABLE_ID_GLOBAL_TYPE_ID",
         "GLOBAL_ITERABLE_ID",
     ),
+    (
+        "Symbol.iterator",
+        "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_ITERATOR_ID",
+    ),
+    (
+        "RegExpExecArray",
+        "REGEXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_REGEXP_EXEC_ARRAY_ID",
+    ),
 ];
 
-/// Lowers the synchronous iterator protocol, including its result dependencies.
+/// Lowers selected type-only declarations and their declared bases and members.
 /// Constraints use supported member types and earlier type parameters.
 /// Merged declarations and dependencies without predefined identities are errors.
 /// Computed methods support declared predefined Symbol keys. Tuples support required unnamed elements.
-pub(super) fn lower_iterator_globals(
+pub(super) fn lower_predefined_declarations(
     manifest: &GlobalManifest,
     sources: &[DiscoveredFile],
     globals: &mut Vec<LoweredGlobal>,
@@ -995,7 +1042,8 @@ pub(super) fn lower_iterator_globals(
     for &(name, id_constant, _) in PREDEFINED_DECLARATIONS {
         if !matches!(
             name,
-            "IteratorYieldResult"
+            "RegExpExecArray"
+                | "IteratorYieldResult"
                 | "IteratorReturnResult"
                 | "IteratorResult"
                 | "Iterator"
@@ -1291,7 +1339,7 @@ mod tests {
             let files = [file];
             let manifest = build_global_manifest(collect(&files[0]).records);
             let mut globals = Vec::new();
-            lower_iterator_globals(&manifest, &files, &mut globals)?;
+            lower_predefined_declarations(&manifest, &files, &mut globals)?;
             let global = globals
                 .iter()
                 .find(|global| global.name() == "Iterable")
@@ -1340,7 +1388,15 @@ mod tests {
                 &files,
                 &mut class,
                 "GLOBAL_TEST_OWNER_ID",
-                Some(manifest.global_group("Factory").unwrap().declarations()),
+                Some((
+                    manifest.global_group("Factory").unwrap().declarations(),
+                    |member| {
+                        Ok(matches!(
+                            member,
+                            AnyTsTypeMember::TsConstructSignatureTypeMember(_)
+                        ))
+                    },
+                )),
             )?;
             let constructor = types
                 .iter()

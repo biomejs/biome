@@ -863,3 +863,95 @@ fn iterator_declarations_reject_unsupported_dependencies_and_shapes() -> Result<
     }
     Ok(())
 }
+
+#[test]
+fn regexp_signatures_follow_declarations() -> Result<()> {
+    use xtask_codegen::generate_global_types::lower::lower_global_types;
+    let mut file = fixture("manifest.disposables.d.ts")?;
+    file.bytes = String::from_utf8(file.bytes)?
+        .replace(
+            "interface RegExpExecArray {}",
+            "interface RegExpExecArray extends Array<number> {}",
+        )
+        .replace(
+            "exec(string: string): RegExpExecArray | null;",
+            "exec<T>(value?: T): T;",
+        )
+        .into_bytes();
+    file.bytes.extend_from_slice(
+        b"
+        declare var RegExp: Factory;
+        interface Factory {
+            new<T>(value?: T): RegExp;
+            <T>(value?: T): RegExp;
+            new(value: RegExp, flag?: boolean): RegExp;
+            (value: RegExp, flag?: boolean): RegExp;
+        }
+    ",
+    );
+    let manifest = build_global_manifest(collect(&file).records);
+    let lowered = lower_global_types(&manifest, &[file])?;
+    let result = lowered.global("RegExpExecArray").unwrap();
+    let LoweredTypeData::Interface(interface) = result.data() else {
+        panic!("expected interface")
+    };
+    let LoweredTypeReference::Local(index) = &interface.extends()[0] else {
+        panic!("expected applied base")
+    };
+    let LoweredTypeData::InstanceOf {
+        ty,
+        type_parameters,
+    } = &result.local_types()[*index]
+    else {
+        panic!("expected applied base")
+    };
+    assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+    assert_eq!(
+        type_parameters.as_ref(),
+        &[LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")]
+    );
+    let LoweredTypeData::Function(exec) = lowered.global("RegExp.exec").unwrap().data() else {
+        panic!("expected exec function")
+    };
+    assert_eq!(
+        exec.parameters()[0].type_reference(),
+        &exec.type_parameters()[0]
+    );
+    assert_eq!(exec.return_type(), &exec.type_parameters()[0]);
+    assert!(exec.parameters()[0].is_optional());
+    let regexp = lowered.global("RegExp").unwrap();
+    let LoweredTypeData::Class(class) = regexp.data() else {
+        panic!("expected class")
+    };
+    let mut calls = Vec::new();
+    let mut constructors = Vec::new();
+    for member in class.members() {
+        let LoweredTypeReference::Local(index) = member.type_reference() else {
+            continue;
+        };
+        match &regexp.local_types()[*index] {
+            LoweredTypeData::Function(function)
+                if member.kind() == &LoweredMemberKind::CallSignature =>
+            {
+                calls.push((function.parameters(), function.return_type()));
+            }
+            LoweredTypeData::Constructor(constructor) => {
+                constructors.push((constructor.parameters(), constructor.return_type().unwrap()));
+            }
+            _ => {}
+        }
+    }
+    assert_eq!(calls, constructors);
+    assert_eq!(calls.len(), 2, "both distinct overloads must survive");
+    for (parameters, result) in calls {
+        assert!(parameters.last().unwrap().is_optional());
+        let LoweredTypeReference::Local(index) = result else {
+            panic!("expected self instance")
+        };
+        let LoweredTypeData::InstanceOf { ty, .. } = &regexp.local_types()[*index] else {
+            panic!("expected self instance")
+        };
+        assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_REGEXP_ID"));
+    }
+    Ok(())
+}

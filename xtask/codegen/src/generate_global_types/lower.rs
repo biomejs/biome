@@ -354,7 +354,7 @@ pub fn lower_global_types(
         let Some(group) = manifest.global_group(name) else {
             continue;
         };
-        let constructors = if matches!(name, "Map" | "Set" | "WeakMap" | "Date")
+        let constructors = if matches!(name, "Map" | "Set" | "WeakMap" | "Date" | "RegExp")
             && group.has_role(GlobalDeclarationRole::Value)
         {
             let constructor_name =
@@ -393,11 +393,20 @@ pub fn lower_global_types(
             source_files,
             class,
             reference,
-            constructors,
+            constructors.map(|records| {
+                (
+                    records,
+                    if name == "RegExp" {
+                        select_call_and_construct_signatures as fn(&AnyTsTypeMember) -> Result<bool>
+                    } else {
+                        select_construct_signatures
+                    },
+                )
+            }),
         )?;
     }
 
-    declarations::lower_iterator_globals(manifest, source_files, &mut globals)?;
+    declarations::lower_predefined_declarations(manifest, source_files, &mut globals)?;
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
@@ -579,8 +588,6 @@ const ASYNC_DISPOSABLE_GLOBAL: DisposableGlobalSpec = DisposableGlobalSpec {
     helper_type_id: "GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID",
     return_kind: DisposableReturnKind::PromiseLikeVoid,
 };
-
-const REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT: usize = 2;
 
 /// Array members retained in the resolver's reduced projection.
 #[derive(Clone, Copy)]
@@ -1942,94 +1949,64 @@ fn resolve_constructor_reference(
     Ok(Text::from(identifier.value_token()?.token_text_trimmed()))
 }
 
-/// Validates the TypeScript `exec` signature before emitting the predefined `RegExp` projection.
+fn select_construct_signatures(member: &AnyTsTypeMember) -> Result<bool> {
+    Ok(matches!(
+        member,
+        AnyTsTypeMember::TsConstructSignatureTypeMember(_)
+    ))
+}
+
+fn select_call_and_construct_signatures(member: &AnyTsTypeMember) -> Result<bool> {
+    Ok(matches!(
+        member,
+        AnyTsTypeMember::TsCallSignatureTypeMember(_)
+            | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
+    ))
+}
+
+/// Selects the `exec` method for its predefined function identity.
 fn lower_regexp_globals(
     manifest: &GlobalManifest,
     source_cache: &mut ParsedSourceCache,
     globals: &mut Vec<LoweredGlobal>,
 ) -> Result<()> {
-    let Some(regexp_group) = manifest.global_group("RegExp") else {
+    let Some(group) = manifest.global_group("RegExp") else {
         return Ok(());
     };
-    if !regexp_group.has_role(GlobalDeclarationRole::Type) {
-        bail!("RegExp global must have a type-side declaration");
-    }
-
-    let Some(exec_array_group) = manifest.global_group("RegExpExecArray") else {
-        bail!("RegExp.exec references missing RegExpExecArray global");
-    };
-    if !exec_array_group.has_role(GlobalDeclarationRole::Type) {
-        bail!("RegExpExecArray must have a type-side declaration");
-    }
-
-    let mut saw_interface = false;
-    let mut saw_exec = false;
-    for record in regexp_group.declarations() {
-        match &record.kind {
-            DeclarationKind::Interface => {
-                saw_interface = true;
-            }
-            DeclarationKind::TypeAlias => {
-                bail!("type aliases are not supported in the RegExp global")
-            }
-            DeclarationKind::VariableDeclarator { .. } => continue,
-            DeclarationKind::DeclareFunction | DeclarationKind::ImportEquals => {
-                bail!("unsupported value-side RegExp declaration")
-            }
-        }
-
+    let mut selected = None;
+    for record in group
+        .declarations()
+        .iter()
+        .filter(|record| record.kind == DeclarationKind::Interface)
+    {
         let declaration = source_cache
             .find_interface_declaration(record)?
-            .with_context(|| {
-                format!(
-                    "failed to find interface declaration {} at {:?}",
-                    record.declared_name.text(),
-                    record.text_range
-                )
-            })?;
-        if declaration.extends_clause().is_some() {
-            bail!("RegExp interface extends clauses are not supported");
-        }
-        if declaration.type_parameters().is_some() {
-            bail!("RegExp interface type parameters are not supported");
-        }
-
+            .context("missing RegExp interface declaration")?;
         for member in declaration.members() {
-            match member {
-                AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
-                    if is_regexp_exec_member(method.name()?)? {
-                        if saw_exec {
-                            bail!("RegExp has multiple exec methods");
-                        }
-                        validate_regexp_exec_method(&method)?;
-                        saw_exec = true;
-                    }
+            let AnyTsTypeMember::TsMethodSignatureTypeMember(method) = member else {
+                continue;
+            };
+            if is_regexp_exec_member(method.name()?)? {
+                if selected.is_some() {
+                    bail!(
+                        "multiple RegExp.exec methods cannot share one predefined function identity"
+                    );
                 }
-                AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
-                    reject_regexp_exec_non_method(property.name()?)?;
-                }
-                AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => {
-                    reject_regexp_exec_non_method(getter.name()?)?;
-                }
-                AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => {
-                    reject_regexp_exec_non_method(setter.name()?)?;
-                }
-                AnyTsTypeMember::JsBogusMember(_)
-                | AnyTsTypeMember::JsMetavariable(_)
-                | AnyTsTypeMember::TsCallSignatureTypeMember(_)
-                | AnyTsTypeMember::TsConstructSignatureTypeMember(_)
-                | AnyTsTypeMember::TsIndexSignatureTypeMember(_) => {}
+                let optional = method.optional_token().is_some();
+                let function = declarations::lower_method_global(
+                    manifest,
+                    source_cache.source_files,
+                    "RegExp",
+                    "GLOBAL_REGEXP_ID",
+                    "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
+                    method,
+                )
+                .with_context(|| format!("in RegExp.exec from {}", record.file_repo_relative))?;
+                selected = Some((function, optional));
             }
         }
     }
-
-    if !saw_interface {
-        bail!("RegExp global must include an interface declaration");
-    }
-    if !saw_exec {
-        bail!("RegExp is missing exec");
-    }
-
+    let (function, optional) = selected.context("RegExp is missing exec method")?;
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("RegExp"),
@@ -2039,24 +2016,12 @@ fn lower_regexp_globals(
             type_parameters: Box::default(),
             members: Box::new([LoweredTypeMember {
                 name: Text::from("exec"),
-                kind: LoweredMemberKind::Named { optional: false },
+                kind: LoweredMemberKind::Named { optional },
                 type_reference: LoweredTypeReference::Predefined("GLOBAL_REGEXP_EXEC_ID"),
             }]),
         }),
     });
-    globals.push(LoweredGlobal {
-        local_types: Box::default(),
-        name: Text::from("RegExp.exec"),
-        id_constant: "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
-        data: LoweredTypeData::Function(LoweredFunction {
-            is_async: false,
-            type_parameters: Box::default(),
-            name: Some(Text::from("RegExp.exec")),
-            parameters: Box::default(),
-            return_type: LoweredTypeReference::Predefined("GLOBAL_INSTANCEOF_REGEXP_ID"),
-        }),
-    });
-
+    globals.push(function);
     Ok(())
 }
 
@@ -2066,99 +2031,6 @@ fn is_regexp_exec_member(name: AnyJsObjectMemberName) -> Result<bool> {
         return Ok(false);
     };
     Ok(name.name()?.text() == "exec")
-}
-
-/// Prevents a property or accessor named `exec` from being silently ignored.
-fn reject_regexp_exec_non_method(name: AnyJsObjectMemberName) -> Result<()> {
-    if is_regexp_exec_member(name)? {
-        bail!("RegExp.exec must be a method");
-    }
-    Ok(())
-}
-
-/// Accepts a required, non-generic `exec(string): RegExpExecArray | null` declaration.
-fn validate_regexp_exec_method(method: &TsMethodSignatureTypeMember) -> Result<()> {
-    if method.optional_token().is_some() {
-        bail!("RegExp.exec must not be optional");
-    }
-    if method.type_parameters().is_some() {
-        bail!("RegExp.exec must not be generic");
-    }
-    validate_regexp_exec_parameter(method.parameters()?)?;
-
-    let return_type = method
-        .return_type_annotation()
-        .context("RegExp.exec is missing a return type")?
-        .ty()
-        .context("RegExp.exec has a malformed return type")?;
-    let AnyTsReturnType::AnyTsType(AnyTsType::TsUnionType(union)) = return_type else {
-        bail!("RegExp.exec must return RegExpExecArray | null");
-    };
-
-    let mut saw_exec_array = false;
-    let mut saw_null = false;
-    let mut return_type_variant_count = 0;
-    for variant in union.types() {
-        let variant = variant.context("RegExp.exec has a malformed return type variant")?;
-        return_type_variant_count += 1;
-        match variant {
-            AnyTsType::TsNullLiteralType(_) => saw_null = true,
-            AnyTsType::TsReferenceType(reference) => {
-                if reference.type_arguments().is_some() {
-                    bail!("RegExp.exec must return RegExpExecArray | null");
-                }
-                let biome_js_syntax::AnyTsName::JsReferenceIdentifier(identifier) = reference
-                    .name()
-                    .context("RegExp.exec return type is missing a reference name")?
-                else {
-                    bail!("RegExp.exec must return RegExpExecArray | null");
-                };
-                if identifier.value_token()?.token_text_trimmed().text() != "RegExpExecArray" {
-                    bail!("RegExp.exec must return RegExpExecArray | null");
-                }
-                saw_exec_array = true;
-            }
-            _ => bail!("RegExp.exec must return RegExpExecArray | null"),
-        }
-    }
-    if return_type_variant_count != REGEXP_EXEC_RETURN_TYPE_VARIANT_COUNT
-        || !saw_exec_array
-        || !saw_null
-    {
-        bail!("RegExp.exec must return RegExpExecArray | null");
-    }
-
-    Ok(())
-}
-
-/// Requires exactly one non-optional `string` parameter.
-fn validate_regexp_exec_parameter(parameters: JsParameters) -> Result<()> {
-    let mut parameters = parameters.items().into_iter();
-    let Some(parameter) = parameters.next() else {
-        bail!("RegExp.exec must have one required string parameter");
-    };
-    if parameters.next().is_some() {
-        bail!("RegExp.exec must have one required string parameter");
-    }
-
-    let AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(parameter)) =
-        parameter.context("RegExp.exec has a malformed parameter")?
-    else {
-        bail!("RegExp.exec must have one required string parameter");
-    };
-    if parameter.question_mark_token().is_some() {
-        bail!("RegExp.exec must have one required string parameter");
-    }
-    let type_node = parameter
-        .type_annotation()
-        .context("RegExp.exec parameter is missing a type annotation")?
-        .ty()
-        .context("RegExp.exec parameter has a malformed type annotation")?;
-    if !matches!(type_node, AnyTsType::TsStringType(_)) {
-        bail!("RegExp.exec must have one required string parameter");
-    }
-
-    Ok(())
 }
 
 /// Validates the two selected `unique symbol` properties across merged constructor interfaces.
