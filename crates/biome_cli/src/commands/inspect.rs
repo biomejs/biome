@@ -322,7 +322,9 @@ impl InspectionDiagnostic {
     ) -> Vec<AdviceLine> {
         if sources.len() > 1 {
             let source_count = sources.len();
-            let (primary_source, additional_sources) = sources.split_last().unwrap();
+            let Some((primary_source, additional_sources)) = sources.split_last() else {
+                return Vec::new();
+            };
             let mut advice = vec![AdviceLine::Info(
                 markup! {
                     "This value is defined across "<Emphasis>{source_count}</Emphasis>
