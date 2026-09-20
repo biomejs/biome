@@ -1134,6 +1134,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_self_compare::NoSelfCompareOptions>(),
     ));
     result.push((
+        "nursery",
+        "noSelfImport",
+        TypeId::of::<biome_rule_options::no_self_import::NoSelfImportOptions>(),
+    ));
+    result.push((
         "correctness",
         "noSetterReturn",
         TypeId::of::<biome_rule_options::no_setter_return::NoSetterReturnOptions>(),
