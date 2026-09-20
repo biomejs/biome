@@ -2585,7 +2585,7 @@ See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Forbid a module from importing itself.
 See https://biomejs.dev/linter/rules/no-self-import 
 	 */
 	noSelfImport?: NoSelfImportConfiguration;

@@ -7240,7 +7240,7 @@
 					]
 				},
 				"noSelfImport": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-self-import",
+					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
 						{ "type": "null" }
