@@ -5566,6 +5566,13 @@
 			]
 		},
 		"NoSelfCompareOptions": { "type": "object", "additionalProperties": false },
+		"NoSelfImportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSelfImportOptions" }
+			]
+		},
+		"NoSelfImportOptions": { "type": "object", "additionalProperties": false },
 		"NoSetterReturnConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7216,6 +7223,13 @@
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSelfImport": {
+					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10583,6 +10597,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSelfCompareOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSelfImportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSelfImportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

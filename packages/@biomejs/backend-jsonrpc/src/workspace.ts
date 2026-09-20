@@ -2585,6 +2585,11 @@ See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	* Forbid a module from importing itself.
+See https://biomejs.dev/linter/rules/no-self-import 
+	 */
+	noSelfImport?: NoSelfImportConfiguration;
+	/**
 	* Disallow the use of Svelte's {@debug} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
 	 */
@@ -4956,6 +4961,9 @@ export type NoRestrictedDependenciesConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoSelfImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfImportOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
@@ -6961,6 +6969,10 @@ export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
 }
+export interface RuleWithNoSelfImportOptions {
+	level: RulePlainConfiguration;
+	options?: NoSelfImportOptions;
+}
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8814,6 +8826,7 @@ export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
@@ -10314,6 +10327,7 @@ export type Category =
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
+	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
@@ -10340,6 +10354,7 @@ export type Category =
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
@@ -10352,10 +10367,8 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
-	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
-	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -10376,6 +10389,7 @@ export type Category =
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
