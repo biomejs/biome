@@ -4,6 +4,7 @@ expression: index.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 import self from ".";
 
 export default self;
@@ -12,14 +13,15 @@ export default self;
 
 # Diagnostics
 ```
-index.js:1:18 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.js:2:18 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This module imports itself.
   
-  > 1 │ import self from ".";
+    1 │ /* should generate diagnostics */
+  > 2 │ import self from ".";
       │                  ^^^
-    2 │ 
-    3 │ export default self;
+    3 │ 
+    4 │ export default self;
   
   i A module that imports itself is a circular dependency, which can leave the imported value undefined during evaluation and cause some bundlers to warn or fail.
   

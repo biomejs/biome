@@ -5,25 +5,23 @@ expression: invalid.js
 # Input
 ```js
 /* should generate diagnostics */
-import { foo } from "./invalid.js";
+import self from "../parentRelativeSelfImport/invalid.js";
 
-export function foo() {
-	return 1;
-}
+export default self;
 
 ```
 
 # Diagnostics
 ```
-invalid.js:2:21 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:18 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This module imports itself.
   
     1 │ /* should generate diagnostics */
-  > 2 │ import { foo } from "./invalid.js";
-      │                     ^^^^^^^^^^^^^^
+  > 2 │ import self from "../parentRelativeSelfImport/invalid.js";
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
-    4 │ export function foo() {
+    4 │ export default self;
   
   i A module that imports itself is a circular dependency, which can leave the imported value undefined during evaluation and cause some bundlers to warn or fail.
   

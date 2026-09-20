@@ -5,7 +5,6 @@ expression: bar.js
 # Input
 ```js
 /* should not generate diagnostics */
-
 export function bar() {
 	return 1;
 }

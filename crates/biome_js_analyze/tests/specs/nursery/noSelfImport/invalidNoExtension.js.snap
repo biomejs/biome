@@ -4,6 +4,7 @@ expression: invalidNoExtension.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 import bar from "./invalidNoExtension";
 
 export default bar;
@@ -12,14 +13,15 @@ export default bar;
 
 # Diagnostics
 ```
-invalidNoExtension.js:1:17 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoExtension.js:2:17 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This module imports itself.
   
-  > 1 │ import bar from "./invalidNoExtension";
+    1 │ /* should generate diagnostics */
+  > 2 │ import bar from "./invalidNoExtension";
       │                 ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-    3 │ export default bar;
+    3 │ 
+    4 │ export default bar;
   
   i A module that imports itself is a circular dependency, which can leave the imported value undefined during evaluation and cause some bundlers to warn or fail.
   

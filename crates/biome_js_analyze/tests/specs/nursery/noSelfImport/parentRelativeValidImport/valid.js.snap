@@ -5,8 +5,8 @@ expression: valid.js
 # Input
 ```js
 /* should not generate diagnostics */
-import { bar } from "./bar.js";
+import self from "../parentRelativeSelfImport/invalid.js";
 
-bar();
+export default self;
 
 ```

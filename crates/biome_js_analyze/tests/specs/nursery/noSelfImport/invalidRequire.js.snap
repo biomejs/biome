@@ -4,6 +4,7 @@ expression: invalidRequire.js
 ---
 # Input
 ```js
+/* should generate diagnostics */
 const self = require("./invalidRequire.js");
 
 module.exports = self;
@@ -12,14 +13,15 @@ module.exports = self;
 
 # Diagnostics
 ```
-invalidRequire.js:1:14 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRequire.js:2:14 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This module imports itself.
   
-  > 1 │ const self = require("./invalidRequire.js");
+    1 │ /* should generate diagnostics */
+  > 2 │ const self = require("./invalidRequire.js");
       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-    3 │ module.exports = self;
+    3 │ 
+    4 │ module.exports = self;
   
   i A module that imports itself is a circular dependency, which can leave the imported value undefined during evaluation and cause some bundlers to warn or fail.
   
