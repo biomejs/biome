@@ -16,6 +16,7 @@ use biome_service::workspace::{
 };
 use biome_service::{Watcher, WatcherOptions};
 use futures::channel::mpsc::channel;
+use serde_json::from_value;
 use std::collections::{BTreeMap, HashMap};
 use std::str::FromStr;
 use std::sync::Arc;
@@ -6118,6 +6119,9 @@ fn assert_diagnostic_code(server_notification: &ServerNotification, code: &str) 
         ServerNotification::ShowMessage(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
+        ServerNotification::RegisterCapability(_) => {
+            panic!("Unexpected notification: {server_notification:?}",);
+        }
     }
 }
 
@@ -6127,6 +6131,9 @@ fn assert_diagnostics_count(server_notification: &ServerNotification, expected_c
             assert_eq!(publish.diagnostics.len(), expected_count)
         }
         ServerNotification::ShowMessage(_) => {
+            panic!("Unexpected notification: {server_notification:?}",);
+        }
+        ServerNotification::RegisterCapability(_) => {
             panic!("Unexpected notification: {server_notification:?}",);
         }
     }
@@ -6206,19 +6213,18 @@ async fn change_document_inverted_range_does_not_panic() -> Result<()> {
     Ok(())
 }
 
-/// Regression test: the LSP server should not crash when the client sends
-/// `didChangeWatchedFiles.dynamicRegistration: true` but no `workspaceFolders`
-/// in `InitializeParams`. This is valid per the LSP spec — `workspaceFolders`
-/// is optional and some clients only send `rootUri`.
-#[tokio::test]
 #[expect(deprecated)]
-async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
+async fn registered_watched_files(
+    root_uri: Option<Uri>,
+    workspace_folders: Option<Vec<WorkspaceFolder>>,
+    relative_pattern_support: Option<bool>,
+) -> Result<lsp::DidChangeWatchedFilesRegistrationOptions> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
     let reader = tokio::spawn(client_handler(stream, sink, sender));
 
     let _res: InitializeResult = server
@@ -6228,14 +6234,14 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
             InitializeParams {
                 process_id: None,
                 root_path: None,
-                root_uri: Some(uri!("")),
+                root_uri,
                 initialization_options: None,
                 capabilities: ClientCapabilities {
                     workspace: Some(lsp::WorkspaceClientCapabilities {
                         did_change_watched_files: Some(
                             lsp::DidChangeWatchedFilesClientCapabilities {
                                 dynamic_registration: Some(true),
-                                relative_pattern_support: None,
+                                relative_pattern_support,
                             },
                         ),
                         ..Default::default()
@@ -6243,7 +6249,7 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
                     ..Default::default()
                 },
                 trace: None,
-                workspace_folders: None,
+                workspace_folders,
                 client_info: None,
                 locale: None,
                 work_done_progress_params: Default::default(),
@@ -6252,13 +6258,197 @@ async fn initialize_without_workspace_folders_does_not_panic() -> Result<()> {
         .await?
         .context("initialize returned None")?;
 
-    // `initialized` triggers `setup_capabilities` which registers file watchers.
-    // Before the fix, this panicked because it tried to parse a filesystem path as a URI.
     server.initialized().await?;
+
+    let notification = wait_for_notification(&mut receiver, |notification| {
+        matches!(notification, ServerNotification::RegisterCapability(_))
+    })
+    .await;
+    let Some(ServerNotification::RegisterCapability(params)) = notification else {
+        panic!("Expected a watched-file registration, got {notification:?}");
+    };
+    let registration = params
+        .registrations
+        .into_iter()
+        .find(|registration| registration.id == "biome_did_change_watched_files")
+        .context("watched-file registration not found")?;
+    let options = from_value(
+        registration
+            .register_options
+            .context("watched-file registration has no options")?,
+    )?;
 
     server.shutdown().await?;
     reader.abort();
 
+    Ok(options)
+}
+
+fn assert_relative_watched_files(
+    options: lsp::DidChangeWatchedFilesRegistrationOptions,
+    expected_bases: &[lsp::OneOf<WorkspaceFolder, Uri>],
+) {
+    let expected_patterns = [
+        "**/biome.{json,jsonc}",
+        "**/.biome.{json,jsonc}",
+        ".editorconfig",
+        "pnpm-workspace.yaml",
+        "**/.gitignore",
+        "**/.ignore",
+    ];
+    assert_eq!(
+        options.watchers.len(),
+        expected_bases.len() * expected_patterns.len()
+    );
+
+    for (watchers, expected_base) in options
+        .watchers
+        .chunks_exact(expected_patterns.len())
+        .zip(expected_bases)
+    {
+        for (watcher, expected_pattern) in watchers.iter().zip(expected_patterns) {
+            assert_eq!(watcher.kind, Some(lsp::WatchKind::all()));
+            assert_eq!(
+                watcher.glob_pattern,
+                lsp::GlobPattern::Relative(lsp::RelativePattern {
+                    base_uri: expected_base.clone(),
+                    pattern: expected_pattern.to_string(),
+                })
+            );
+        }
+    }
+}
+
+fn assert_string_watched_files(
+    options: lsp::DidChangeWatchedFilesRegistrationOptions,
+    expected_bases: &[Uri],
+) {
+    let expected_patterns = [
+        "**/biome.{json,jsonc}",
+        "**/.biome.{json,jsonc}",
+        ".editorconfig",
+        "pnpm-workspace.yaml",
+        "**/.gitignore",
+        "**/.ignore",
+    ];
+    assert_eq!(
+        options.watchers.len(),
+        expected_bases.len() * expected_patterns.len()
+    );
+
+    for (watchers, expected_base) in options
+        .watchers
+        .chunks_exact(expected_patterns.len())
+        .zip(expected_bases)
+    {
+        let base_path = expected_base.to_file_path().unwrap();
+        let base_path = base_path.to_string_lossy();
+        let separator = if base_path.ends_with('/') || base_path.ends_with('\\') {
+            ""
+        } else {
+            "/"
+        };
+        for (watcher, expected_pattern) in watchers.iter().zip(expected_patterns) {
+            assert_eq!(watcher.kind, Some(lsp::WatchKind::all()));
+            assert_eq!(
+                watcher.glob_pattern,
+                lsp::GlobPattern::String(format!("{base_path}{separator}{expected_pattern}"))
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn registers_relative_watched_files_for_workspace_folders() -> Result<()> {
+    let folders = vec![
+        WorkspaceFolder {
+            name: "test_one".to_string(),
+            uri: uri!("test_one"),
+        },
+        WorkspaceFolder {
+            name: "test_two".to_string(),
+            uri: uri!("test_two"),
+        },
+    ];
+    let options =
+        registered_watched_files(Some(uri!("fallback")), Some(folders.clone()), Some(true)).await?;
+
+    assert_relative_watched_files(
+        options,
+        &folders
+            .into_iter()
+            .map(lsp::OneOf::Left)
+            .collect::<Vec<_>>(),
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn registers_relative_watched_files_from_root_uri() -> Result<()> {
+    let root_uri = uri!("root");
+    for workspace_folders in [None, Some(Vec::new())] {
+        let options =
+            registered_watched_files(Some(root_uri.clone()), workspace_folders, Some(true)).await?;
+        assert_relative_watched_files(options, &[lsp::OneOf::Right(root_uri.clone())]);
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn registers_string_watched_files_without_relative_pattern_support() -> Result<()> {
+    let folders = vec![
+        WorkspaceFolder {
+            name: "test_one".to_string(),
+            uri: uri!("test_one"),
+        },
+        WorkspaceFolder {
+            name: "test_two".to_string(),
+            uri: uri!("test_two"),
+        },
+    ];
+    let expected_bases = folders
+        .iter()
+        .map(|folder| folder.uri.clone())
+        .collect::<Vec<_>>();
+
+    for relative_pattern_support in [None, Some(false)] {
+        let options = registered_watched_files(
+            Some(uri!("fallback")),
+            Some(folders.clone()),
+            relative_pattern_support,
+        )
+        .await?;
+        assert_string_watched_files(options, &expected_bases);
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn escapes_workspace_paths_in_string_watched_files() -> Result<()> {
+    let folder_uri = Uri::from_str(if cfg!(windows) {
+        "file:///z%3A/workspace/%5Btest%5D"
+    } else {
+        "file:///workspace/%5Btest%5D%5Cdir"
+    })?;
+    let options = registered_watched_files(
+        None,
+        Some(vec![WorkspaceFolder {
+            name: "test".to_string(),
+            uri: folder_uri,
+        }]),
+        None,
+    )
+    .await?;
+
+    let expected = if cfg!(windows) {
+        "z:/workspace/[[]test[]]/**/biome.{json,jsonc}"
+    } else {
+        "/workspace/[[]test[]]\\dir/**/biome.{json,jsonc}"
+    };
+    assert_eq!(
+        options.watchers[0].glob_pattern,
+        lsp::GlobPattern::String(expected.to_string())
+    );
     Ok(())
 }
 
