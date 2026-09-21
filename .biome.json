@@ -4,7 +4,8 @@
     "enabled": true,
     "includes": [
       "**",
-      "!./packages/@biomejs/biome/configuration_schema.json"
+      "!./packages/@biomejs/biome/configuration_schema.json",
+      "!./packages/@biomejs/biome/manifest_schema.json"
     ],
     "actions": {
       "source": {
