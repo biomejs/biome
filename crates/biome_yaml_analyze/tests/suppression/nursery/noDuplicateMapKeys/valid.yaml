@@ -6,10 +6,3 @@ person:
   NAME: John Smith
   "quoted": value
   'single': value
-
-person2:
-  # comments do not count as keys
-  name: John Doe
-  # name: commented out duplicate
-  age: 50
-

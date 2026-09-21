@@ -10,3 +10,36 @@ person3:
   name: John Doe
   "name": Jane Doe
   'name': Baby Doe
+
+person4:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+  age: 51
+
+person5:
+  # a comment before the first key
+  name: John Doe
+  age: 50
+  # a comment before the duplicate key
+  name: Jane Doe
+
+person6: { name: John, age: 50, name: Jane } # trailing comment
+
+parent:
+  child:
+    name: John Doe
+    name: Jane Doe
+  child: first
+  child: second
+
+# sequence of mappings, each with duplicates
+people:
+  - id: 1
+    id: 2
+  - name: a
+    role: admin
+    role: guest
+
+# nested flow mappings, duplicates at both levels
+config: { a: { x: 1, x: 2 }, a: 3 }

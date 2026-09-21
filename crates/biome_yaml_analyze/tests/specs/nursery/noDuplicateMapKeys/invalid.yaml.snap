@@ -1,6 +1,5 @@
 ---
 source: crates/biome_yaml_analyze/tests/spec_tests.rs
-assertion_line: 118
 expression: invalid.yaml
 ---
 # Input
@@ -17,6 +16,39 @@ person3:
   name: John Doe
   "name": Jane Doe
   'name': Baby Doe
+
+person4:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+  age: 51
+
+person5:
+  # a comment before the first key
+  name: John Doe
+  age: 50
+  # a comment before the duplicate key
+  name: Jane Doe
+
+person6: { name: John, age: 50, name: Jane } # trailing comment
+
+parent:
+  child:
+    name: John Doe
+    name: Jane Doe
+  child: first
+  child: second
+
+# sequence of mappings, each with duplicates
+people:
+  - id: 1
+    id: 2
+  - name: a
+    role: admin
+    role: guest
+
+# nested flow mappings, duplicates at both levels
+config: { a: { x: 1, x: 2 }, a: 3 }
 
 ```
 
@@ -42,7 +74,9 @@ invalid.yaml:3:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━�
     6 │ 
     7 │ person2: { name: John, age: 50, name: Jane }
   
-  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -70,7 +104,9 @@ invalid.yaml:7:12 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━
     8 │ 
     9 │ person3:
   
-  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -104,8 +140,310 @@ invalid.yaml:10:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━
   > 12 │   'name': Baby Doe
        │   ^^^^^^
     13 │ 
+    14 │ person4:
   
-  i If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored.
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:15:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    14 │ person4:
+  > 15 │   name: John Doe
+       │   ^^^^
+    16 │   age: 50
+    17 │   name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    15 │   name: John Doe
+    16 │   age: 50
+  > 17 │   name: Jane Doe
+       │   ^^^^
+    18 │   age: 51
+    19 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:16:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key age was already declared.
+  
+    14 │ person4:
+    15 │   name: John Doe
+  > 16 │   age: 50
+       │   ^^^
+    17 │   name: Jane Doe
+    18 │   age: 51
+  
+  i This is where a duplicated key was declared again.
+  
+    16 │   age: 50
+    17 │   name: Jane Doe
+  > 18 │   age: 51
+       │   ^^^
+    19 │ 
+    20 │ person5:
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:22:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    20 │ person5:
+    21 │   # a comment before the first key
+  > 22 │   name: John Doe
+       │   ^^^^
+    23 │   age: 50
+    24 │   # a comment before the duplicate key
+  
+  i This is where a duplicated key was declared again.
+  
+    23 │   age: 50
+    24 │   # a comment before the duplicate key
+  > 25 │   name: Jane Doe
+       │   ^^^^
+    26 │ 
+    27 │ person6: { name: John, age: 50, name: Jane } # trailing comment
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:27:12 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    25 │   name: Jane Doe
+    26 │ 
+  > 27 │ person6: { name: John, age: 50, name: Jane } # trailing comment
+       │            ^^^^
+    28 │ 
+    29 │ parent:
+  
+  i This is where a duplicated key was declared again.
+  
+    25 │   name: Jane Doe
+    26 │ 
+  > 27 │ person6: { name: John, age: 50, name: Jane } # trailing comment
+       │                                 ^^^^
+    28 │ 
+    29 │ parent:
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:30:3 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key child was already declared.
+  
+    29 │ parent:
+  > 30 │   child:
+       │   ^^^^^
+    31 │     name: John Doe
+    32 │     name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    31 │     name: John Doe
+    32 │     name: Jane Doe
+  > 33 │   child: first
+       │   ^^^^^
+    34 │   child: second
+    35 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    32 │     name: Jane Doe
+    33 │   child: first
+  > 34 │   child: second
+       │   ^^^^^
+    35 │ 
+    36 │ # sequence of mappings, each with duplicates
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:31:5 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    29 │ parent:
+    30 │   child:
+  > 31 │     name: John Doe
+       │     ^^^^
+    32 │     name: Jane Doe
+    33 │   child: first
+  
+  i This is where a duplicated key was declared again.
+  
+    30 │   child:
+    31 │     name: John Doe
+  > 32 │     name: Jane Doe
+       │     ^^^^
+    33 │   child: first
+    34 │   child: second
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:38:5 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key id was already declared.
+  
+    36 │ # sequence of mappings, each with duplicates
+    37 │ people:
+  > 38 │   - id: 1
+       │     ^^
+    39 │     id: 2
+    40 │   - name: a
+  
+  i This is where a duplicated key was declared again.
+  
+    37 │ people:
+    38 │   - id: 1
+  > 39 │     id: 2
+       │     ^^
+    40 │   - name: a
+    41 │     role: admin
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:41:5 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key role was already declared.
+  
+    39 │     id: 2
+    40 │   - name: a
+  > 41 │     role: admin
+       │     ^^^^
+    42 │     role: guest
+    43 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    40 │   - name: a
+    41 │     role: admin
+  > 42 │     role: guest
+       │     ^^^^
+    43 │ 
+    44 │ # nested flow mappings, duplicates at both levels
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:45:11 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key a was already declared.
+  
+    44 │ # nested flow mappings, duplicates at both levels
+  > 45 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │           ^
+    46 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    44 │ # nested flow mappings, duplicates at both levels
+  > 45 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                              ^
+    46 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.yaml:45:16 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key x was already declared.
+  
+    44 │ # nested flow mappings, duplicates at both levels
+  > 45 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                ^
+    46 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    44 │ # nested flow mappings, duplicates at both levels
+  > 45 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                      ^
+    46 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

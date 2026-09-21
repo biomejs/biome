@@ -12,6 +12,15 @@ use rustc_hash::FxHashMap;
 declare_lint_rule! {
     /// Disallow two keys with the same name inside YAML maps.
     ///
+    /// The YAML specification requires mapping keys to be unique. When a key is
+    /// repeated, the document becomes ambiguous: tooling disagree on which value
+    /// wins, with some keeping the first entry, some the last, and others
+    /// rejecting the document entirely. Duplicate keys are therefore usually a
+    /// mistake, such as a copy-paste error or an unintended override.
+    ///
+    /// Keys are compared by their resolved scalar value, so quoted and unquoted
+    /// forms of the same key are treated as duplicates.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -88,11 +97,15 @@ impl Rule for NoDuplicateMapKeys {
                 },
             );
         }
-        Some(diagnostic.note(
-            markup! {
-                "If a key is defined multiple times, only the last definition takes effect. Previous definitions are ignored."
-            },
-        ))
+        Some(
+            diagnostic
+                .note(markup! {
+                    "Duplicate keys make the mapping ambiguous, and tools disagree on which value wins."
+                })
+                .note(markup! {
+                    "Remove or rename the duplicate keys."
+                }),
+        )
     }
 }
 

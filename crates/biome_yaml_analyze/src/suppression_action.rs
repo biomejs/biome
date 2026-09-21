@@ -52,30 +52,25 @@ impl SuppressionAction for YamlSuppressionAction {
         } = apply_suppression;
 
         let mut new_token = token_to_apply_suppression.clone();
-        let leading_whitespaces: Vec<_> = new_token
-            .leading_trivia()
-            .pieces()
-            .filter(|trivia| trivia.is_whitespace())
+        let pieces: Vec<_> = new_token.leading_trivia().pieces().collect();
+        let indentation: Vec<_> = pieces
+            .iter()
+            .rposition(|piece| piece.is_newline())
+            .map_or(&pieces[..], |last_newline| &pieces[last_newline + 1..])
+            .iter()
+            .filter(|piece| piece.is_whitespace())
             .collect();
 
         let suppression_comment = format!("# {suppression_text}: {suppression_reason}");
         let suppression_comment = suppression_comment.as_str();
-        let trivia = [
+        let mut trivia = vec![
             (TriviaPieceKind::SingleLineComment, suppression_comment),
             (TriviaPieceKind::Newline, "\n"),
         ];
-        if leading_whitespaces.is_empty() {
-            new_token = new_token.with_leading_trivia(trivia);
+        for piece in &indentation {
+            trivia.push((TriviaPieceKind::Whitespace, piece.text()));
         }
-        // Token is indented
-        else {
-            let mut trivia = trivia.to_vec();
-
-            for w in leading_whitespaces.iter() {
-                trivia.push((TriviaPieceKind::Whitespace, w.text()));
-            }
-            new_token = new_token.with_leading_trivia(trivia);
-        }
+        new_token = new_token.with_leading_trivia(trivia);
         mutation.replace_token_transfer_trivia(token_to_apply_suppression, new_token);
     }
 }
