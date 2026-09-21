@@ -52,6 +52,92 @@ where
     }))
 }
 
+const WATCHED_FILE_PATTERNS: [&str; 6] = [
+    "**/biome.{json,jsonc}",
+    "**/.biome.{json,jsonc}",
+    ".editorconfig",
+    "pnpm-workspace.yaml",
+    "**/.gitignore",
+    "**/.ignore",
+];
+
+/// Escapes a filesystem path before embedding it in an LSP string glob.
+///
+/// A [`RelativePattern`] keeps its base URI separate from its glob, but clients
+/// without relative-pattern support receive one string containing both. Glob
+/// metacharacters in the base path must therefore be represented as
+/// single-character ranges, and Windows separators must be converted to `/`.
+/// See the [LSP glob syntax] and [VS Code's escaping rules].
+///
+/// [LSP glob syntax]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#globPattern
+/// [VS Code's escaping rules]: https://code.visualstudio.com/docs/editor/glob-patterns#_common-questions
+fn escape_string_glob_base(path: &str) -> String {
+    let mut escaped = String::with_capacity(path.len());
+    for char in path.chars() {
+        match char {
+            '\\' if cfg!(windows) => escaped.push('/'),
+            '[' => escaped.push_str("[[]"),
+            ']' => escaped.push_str("[]]"),
+            '*' | '?' | '{' | '}' => {
+                escaped.push('[');
+                escaped.push(char);
+                escaped.push(']');
+            }
+            _ => escaped.push(char),
+        }
+    }
+    escaped
+}
+
+fn watched_file_watchers(
+    base_uri: OneOf<WorkspaceFolder, Uri>,
+    relative_pattern_support: bool,
+) -> Option<Vec<FileSystemWatcher>> {
+    if relative_pattern_support {
+        return Some(
+            WATCHED_FILE_PATTERNS
+                .into_iter()
+                .map(|pattern| FileSystemWatcher {
+                    glob_pattern: GlobPattern::Relative(RelativePattern {
+                        base_uri: base_uri.clone(),
+                        pattern: pattern.to_string(),
+                    }),
+                    kind: Some(WatchKind::all()),
+                })
+                .collect(),
+        );
+    }
+
+    let uri = match &base_uri {
+        OneOf::Left(folder) => &folder.uri,
+        OneOf::Right(uri) => uri,
+    };
+    if !uri.scheme().as_str().eq_ignore_ascii_case("file") {
+        warn!("Unable to register file watchers for non-file URI {uri:?}.");
+        return None;
+    }
+    let Some(path) = uri.to_file_path() else {
+        warn!("Unable to convert {uri:?} to a file path for file watchers.");
+        return None;
+    };
+    let base_path = escape_string_glob_base(&path.to_string_lossy());
+    let separator = if base_path.ends_with('/') || base_path.ends_with('\\') {
+        ""
+    } else {
+        "/"
+    };
+
+    Some(
+        WATCHED_FILE_PATTERNS
+            .into_iter()
+            .map(|pattern| FileSystemWatcher {
+                glob_pattern: GlobPattern::String(format!("{base_path}{separator}{pattern}")),
+                kind: Some(WatchKind::all()),
+            })
+            .collect(),
+    )
+}
+
 impl LSPServer {
     fn new(session: SessionHandle, sessions: Sessions, lifecycle: Arc<SessionLifecycle>) -> Self {
         Self {
@@ -139,105 +225,30 @@ impl LSPServer {
         );
 
         let watched_files_capability = if self.session.can_register_did_change_watched_files() {
-            if let Some(folders) = self.session.get_workspace_folders() {
-                let watchers = folders
-                    .iter()
-                    .flat_map(|folder| {
-                        vec![
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/biome.{json,jsonc}".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.biome.{json,jsonc}".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: ".editorconfig".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "pnpm-workspace.yaml".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.gitignore".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.ignore".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                        ]
-                    })
-                    .collect();
+            let base_uris: Vec<_> = match self.session.get_workspace_folders() {
+                Some(folders) if !folders.is_empty() => {
+                    folders.into_iter().map(OneOf::Left).collect()
+                }
+                _ => self
+                    .session
+                    .root_uri()
+                    .map(OneOf::Right)
+                    .into_iter()
+                    .collect(),
+            };
+            let relative_pattern_support = self.session.supports_relative_watched_file_patterns();
+            let watchers: Vec<_> = base_uris
+                .into_iter()
+                .filter_map(|base_uri| watched_file_watchers(base_uri, relative_pattern_support))
+                .flatten()
+                .collect();
+
+            if watchers.is_empty() {
+                CapabilityStatus::Disable
+            } else {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
-            } else if let Some(base_uri) = self.session.base_uri() {
-                let base_path = self.session.base_path();
-                let value = DidChangeWatchedFilesRegistrationOptions {
-                    watchers: vec![
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::Relative(RelativePattern {
-                                pattern: "**/biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(base_uri.clone()),
-                            }),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::Relative(RelativePattern {
-                                pattern: "**/.biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(base_uri),
-                            }),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
-                                || "**/.editorconfig".to_string(),
-                                |p| format!("{}/.editorconfig", p.as_path().as_str()),
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
-                                || "**/pnpm-workspace.yaml".to_string(),
-                                |p| format!("{}/pnpm-workspace.yaml", p.as_path().as_str()),
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String("**/.gitignore".to_string()),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String("**/.ignore".to_string()),
-
-                            kind: Some(WatchKind::all()),
-                        },
-                    ],
-                };
-                CapabilityStatus::Enable(Some(json!(value)))
-            } else {
-                CapabilityStatus::Disable
             }
         } else {
             CapabilityStatus::Disable
