@@ -88,12 +88,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```css,use_options
-    /// p {
-    ///   right: 0;
-    /// }
-    /// ```
-    ///
     pub UseLogicalProperties {
         version: "next",
         name: "useLogicalProperties",
