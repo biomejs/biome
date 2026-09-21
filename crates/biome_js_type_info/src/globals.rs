@@ -209,6 +209,8 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
         SYMBOL_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_date() {
         DATE_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_math() {
+        MATH_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_map() {
         MAP_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_set() {

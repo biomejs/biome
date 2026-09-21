@@ -1811,6 +1811,11 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Date")
     }
 
+    /// Checks whether this type qualifier references the `Math` namespace object.
+    pub fn is_math(&self) -> bool {
+        self.path.is_identifier("Math")
+    }
+
     /// Checks whether this type qualifier references the `Map` type.
     pub fn is_map(&self) -> bool {
         self.path.is_identifier("Map")

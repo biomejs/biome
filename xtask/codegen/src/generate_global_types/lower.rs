@@ -324,6 +324,7 @@ pub fn lower_global_types(
     lower_error_globals(manifest, &mut source_cache, &mut globals)?;
     lower_regexp_globals(manifest, &mut source_cache, &mut globals)?;
     lower_symbol_globals(manifest, &mut source_cache, &mut globals)?;
+    lower_namespace_object_globals(manifest, &mut source_cache, &mut globals)?;
     lower_disposable_global(manifest, &mut source_cache, &mut globals, DISPOSABLE_GLOBAL)?;
     lower_disposable_global(
         manifest,
@@ -1704,6 +1705,123 @@ fn supports_symbol_constructor_member(member: &AnyTsTypeMember) -> Result<bool> 
         }
         _ => Ok(false),
     }
+}
+
+/// Globals whose value declaration references their own interface (`declare var X: X`).
+///
+/// Each entry is `(global name, GlobalTypeId constant, raw GLOBAL_* alias)`. The alias is
+/// only emitted when a member refers back to the global; declare it in `globals_ids.rs`
+/// before adding such a member.
+///
+/// TODO: Derive this set from the source definitions instead of listing it by hand. The
+/// shape is detectable: the value-side `declare var` annotation names the group's own
+/// interface. The table remains only because every global needs a hand-written ID row in
+/// `globals_ids.rs`; once IDs are generated too, the manifest can drive selection directly.
+const NAMESPACE_OBJECT_GLOBALS: &[(&str, &str, &str)] =
+    &[("Math", "MATH_ID_GLOBAL_TYPE_ID", "GLOBAL_MATH_ID")];
+
+/// Lowers every namespace object listed in [`NAMESPACE_OBJECT_GLOBALS`] present in the manifest.
+fn lower_namespace_object_globals(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    globals: &mut Vec<LoweredGlobal>,
+) -> Result<()> {
+    for &(name, id_constant, reference) in NAMESPACE_OBJECT_GLOBALS {
+        if manifest.global_group(name).is_none() {
+            continue;
+        }
+        let global = lower_namespace_object_global(manifest, source_cache, name, reference)?;
+        globals.push(LoweredGlobal {
+            local_types: global.local_types,
+            name: global.name,
+            id_constant,
+            data: global.data,
+        });
+    }
+    Ok(())
+}
+
+/// Lowered namespace object before its `GlobalTypeId` constant is attached.
+struct LoweredNamespaceObject {
+    name: Text,
+    data: LoweredTypeData,
+    local_types: Box<[LoweredTypeData]>,
+}
+
+/// Lowers one global declared as `interface X { ... }` plus `declare var X: X`.
+///
+/// The value declaration references the interface directly rather than a separate
+/// constructor interface, so the value is the object itself and every interface member is
+/// accessed as `X.<member>`. Lowering the interface as instance members would hide them
+/// from the value; they are lowered as static members of the class instead.
+fn lower_namespace_object_global(
+    manifest: &GlobalManifest,
+    source_cache: &mut ParsedSourceCache,
+    name: &str,
+    class_reference: &'static str,
+) -> Result<LoweredNamespaceObject> {
+    let group = manifest
+        .global_group(name)
+        .with_context(|| format!("missing declaration group for {name}"))?;
+    if !group.has_role(GlobalDeclarationRole::Type) {
+        bail!("{name} global must have a type-side declaration");
+    }
+    if !group.has_role(GlobalDeclarationRole::Value) {
+        bail!("{name} global must have a value-side declaration");
+    }
+    let value_type = resolve_constructor_name(name, group.declarations(), source_cache)?;
+    if value_type.text() != name {
+        bail!("declare var {name} must reference the {name} interface, found {value_type}");
+    }
+    let interface_records: Vec<DeclarationRecord> = group
+        .declarations()
+        .iter()
+        .filter(|record| record.kind == DeclarationKind::Interface)
+        .cloned()
+        .collect();
+    if interface_records.is_empty() {
+        bail!("{name} global must include an interface declaration");
+    }
+
+    let mut class = LoweredClass {
+        name: Text::from(name.to_owned()),
+        type_parameters: Box::default(),
+        members: Box::default(),
+    };
+    let local_types = declarations::lower_constructor_members(
+        manifest,
+        source_cache.source_files,
+        &interface_records,
+        &mut class,
+        class_reference,
+        supports_namespace_object_member,
+        &[],
+    )?;
+    Ok(LoweredNamespaceObject {
+        name: class.name.clone(),
+        data: LoweredTypeData::Class(class),
+        local_types,
+    })
+}
+
+/// Selects literal-named properties and methods of a namespace object interface.
+///
+/// Computed members such as `[Symbol.toStringTag]` are excluded: a static member cannot
+/// carry a computed key. Any other member shape is an error so new syntax in the
+/// TypeScript sources is surfaced instead of silently dropped.
+fn supports_namespace_object_member(member: &AnyTsTypeMember) -> Result<bool> {
+    let name = match member {
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        _ => bail!(
+            "unsupported namespace object member: {:?}",
+            member.syntax().kind()
+        ),
+    };
+    Ok(matches!(
+        name,
+        AnyJsObjectMemberName::JsLiteralMemberName(_)
+    ))
 }
 
 fn is_unique_symbol_property(property: &TsPropertySignatureTypeMember) -> Result<bool> {
