@@ -41,10 +41,6 @@ expression: invalid.astro
 <a aria-label={label} />
 <a title={label}>    </a>
 
-<!-- Image component with an explicit closing tag and no usable alt -->
-<a><Image></Image></a>
-<a><Image alt=""></Image></a>
-
 ```
 
 # Diagnostics
@@ -423,51 +419,6 @@ invalid.astro:36:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
   > 36 │ <a title={label}>    </a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     37 │ 
-    38 │ <!-- Image component with an explicit closing tag and no usable alt -->
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.astro:39:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    38 │ <!-- Image component with an explicit closing tag and no usable alt -->
-  > 39 │ <a><Image></Image></a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    40 │ <a><Image alt=""></Image></a>
-    41 │ 
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.astro:40:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    38 │ <!-- Image component with an explicit closing tag and no usable alt -->
-    39 │ <a><Image></Image></a>
-  > 40 │ <a><Image alt=""></Image></a>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

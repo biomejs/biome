@@ -259,22 +259,6 @@ pub(crate) fn html_self_closing_element_has_non_empty_attribute(
     false
 }
 
-/// Checks if an [`HtmlElement`] has the named attribute with a non-empty value.
-///
-/// [`HtmlElement`]: biome_html_syntax::HtmlElement
-pub(crate) fn html_element_has_non_empty_attribute(
-    element: &biome_html_syntax::HtmlElement,
-    name: &str,
-) -> bool {
-    if let Some(attr) = element.find_attribute_or_vue_binding(name)
-        && has_non_empty_value(&attr)
-    {
-        return true;
-    }
-
-    false
-}
-
 /// Check if the element is `contentEditable`
 ///
 /// Ref:
