@@ -52,23 +52,8 @@ declare_lint_rule! {
     /// ```css
     /// p {
     ///   inline-size: 100%;
-    /// }
-    /// ```
-    ///
-    /// ```css
-    /// p {
     ///   inset-block-start: 0;
-    /// }
-    /// ```
-    ///
-    /// ```css
-    /// p {
     ///   margin-inline-start: 1rem;
-    /// }
-    /// ```
-    ///
-    /// ```css
-    /// p {
     ///   border-inline-start: 1px solid;
     /// }
     /// ```
