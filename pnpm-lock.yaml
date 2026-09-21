@@ -125,8 +125,8 @@ importers:
         specifier: 0.31.2
         version: 0.31.2
       tombi:
-        specifier: 1.5.4
-        version: 1.5.4
+        specifier: 1.5.5
+        version: 1.5.5
 
   crates/biome_formatter_test/src/prettier:
     dependencies:
@@ -924,60 +924,60 @@ packages:
     peerDependencies:
       acorn: ^8.9.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.4':
-    resolution: {integrity: sha512-J8ppYaHt83UEM8qOQLcVkvHPFN+BKuDrPpfaX1dRd3+Ir56+BB9E2HTUQxxb4UCk0rskQo96ONNGrEWN4IFNqA==}
+  '@tombi-toml/cli-darwin-arm64@1.5.5':
+    resolution: {integrity: sha512-pIlEbOYN3RPF5usGwMisDJbEln+etzbTTc5BRZfbCgOU1ZA2Zn3ZY88cGwHXayc8be3USdlEu24l45af5XO9+A==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@1.5.4':
-    resolution: {integrity: sha512-nZDd/jFGaQMTRhLymE3/Ptu1jaBFFjvxv/opB26Zl2XaJv8ndQBhCiFq1EBoQt8I8gTEttR7DXD8vwf/1sm3/w==}
+  '@tombi-toml/cli-darwin-x64@1.5.5':
+    resolution: {integrity: sha512-bDMZrYAltRtn1V1cNxgFIUdp9MX+Z+9zhRFsDrKFQQoflhPEr3Bqbru52LHdFhTCb2zCvf8ir1VnHnu2gE8BrA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.4':
-    resolution: {integrity: sha512-03g9GT+tOF8rsMG1gcDeyqRGVFh5gNDqUizxWT6/uHn7UlB/mp9yMGEwzn2xAPOo5HHguDK7Jk/GhPeIyPADAA==}
+  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
+    resolution: {integrity: sha512-Y8WPHVFHv6Zf9DisrP+bQUH+Vzs6UgxJxAYDG8zCTtpnxJFqVmHgrRPebv+X/TkCJYgznDxU41Q0cMNJ68jRnw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@1.5.4':
-    resolution: {integrity: sha512-4eVM+U6DDSWsFmJFxITmTcR6NWsu92o2TDBVD+fe1yVwYdEn9C7ryvWG/NSZHYT4VRZ9hqhc5MbSWN0g4isIEA==}
+  '@tombi-toml/cli-linux-arm64@1.5.5':
+    resolution: {integrity: sha512-yixZSwfMIizfOfljU+HO4G1Jt+prHz1Rud3UbOEnw1hF2rAej/CfPIZN2xoT62MFvj9F5RlHOHMjXBdZRx4cGQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.4':
-    resolution: {integrity: sha512-tAjufBrG05GWSfwautBCX2B5FJcwb3XuCGKi17yek7TxokuysIvV7gqryzPPGvPjXQfbCfQwX+O/b/OOsCGgXg==}
+  '@tombi-toml/cli-linux-x64-musl@1.5.5':
+    resolution: {integrity: sha512-c9sGm5LZWxVT2IQUjwRI5Ql8d5pE6ahtwA+6brmVikXvWsfu7SsmnhxrN0VtHZf50/bHirXyuArIxCc3L6Wy9w==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@1.5.4':
-    resolution: {integrity: sha512-YR0mt+aw78HSpBAtzcIL5kbsEb4BqEGxlPmAueMZkNYHRuuhDzdnlvwPhuC6KbGbbpLq2mSvISIqU5ySzvtSNg==}
+  '@tombi-toml/cli-linux-x64@1.5.5':
+    resolution: {integrity: sha512-3AWdWuGQ+Y6vJyCrEaKS8BOOtJW7ZX5aiv8JKJocB/+YZ/oMAi9PBPnJA9VXiuRyX3z8pAN7q5Rf0KytcuISBA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-sunos-x64@1.5.4':
-    resolution: {integrity: sha512-tlsUBOXVbxHLr3BhxcxbkyJ9DQlVMqnbGLJdThKlTOcU0o1OehIzYjm5g0i+bhxaclQBWKHiTOjjcWLonHXQ1Q==}
+  '@tombi-toml/cli-sunos-x64@1.5.5':
+    resolution: {integrity: sha512-SKKzvklVj9749rXih7GLyT5Qrz7OGN60/6Jf44DnlE9M45pEeA8y2YXy86OdQ84yaioyFTYNigbjdZrAYSC2RA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [sunos]
 
-  '@tombi-toml/cli-win32-arm64@1.5.4':
-    resolution: {integrity: sha512-IJ54EmHeizMuIEEPviGsksZj7jsTk4vnB9/KGNebAmj8/NP5DlvJ1P03uZgwPSVB3u6TWmqDczhQzanrjuNnnQ==}
+  '@tombi-toml/cli-win32-arm64@1.5.5':
+    resolution: {integrity: sha512-LZKN5jtJrzpx7Ad3Nw26vn3dsv2RjwKxDzhdFmu2UODeBpTb2vkqUqPeuJQ0BHeqJ4Ou1Iy6N2iT7F2/SwnJbQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@1.5.4':
-    resolution: {integrity: sha512-KRkU+SatHT2rjT/qnoKtrZg2VlyNHLboV5SM+/G64cc5gFieroiITy5Hy8MhUqIsvDKLOrPX9/ZNI4v71Deacg==}
+  '@tombi-toml/cli-win32-x64@1.5.5':
+    resolution: {integrity: sha512-CbWaV2yZhtxr+IWnA8CWdQKuegwRRnohSTUv8kPiJFPMppA7fxzXUpgEnqO/nYohQGlqSz5L0xXsi/6asib1cw==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -1521,8 +1521,8 @@ packages:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
-  tombi@1.5.4:
-    resolution: {integrity: sha512-l6h2dpKEjf3C35NHZD9RuIB3iibyWSQDKarFO+2DnnFOr5KbTvGbH0LHVwGvQ0XAe0UVDBV5QoRqKkgvVdR9wA==}
+  tombi@1.5.5:
+    resolution: {integrity: sha512-tY+XwsZmMCj4BHbX1iot1H5djjvAmANKf8bIJJWPvDvc+JIwE8/7Od3ryIfnqGzZepLk249O2GOyeaTSO+8F+w==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -2150,31 +2150,31 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.4':
+  '@tombi-toml/cli-darwin-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@1.5.4':
+  '@tombi-toml/cli-darwin-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.4':
+  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@1.5.4':
+  '@tombi-toml/cli-linux-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.4':
+  '@tombi-toml/cli-linux-x64-musl@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@1.5.4':
+  '@tombi-toml/cli-linux-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-sunos-x64@1.5.4':
+  '@tombi-toml/cli-sunos-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@1.5.4':
+  '@tombi-toml/cli-win32-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@1.5.4':
+  '@tombi-toml/cli-win32-x64@1.5.5':
     optional: true
 
   '@types/chai@5.2.2':
@@ -2704,17 +2704,17 @@ snapshots:
 
   tinyrainbow@3.1.0: {}
 
-  tombi@1.5.4:
+  tombi@1.5.5:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 1.5.4
-      '@tombi-toml/cli-darwin-x64': 1.5.4
-      '@tombi-toml/cli-linux-arm64': 1.5.4
-      '@tombi-toml/cli-linux-arm64-musl': 1.5.4
-      '@tombi-toml/cli-linux-x64': 1.5.4
-      '@tombi-toml/cli-linux-x64-musl': 1.5.4
-      '@tombi-toml/cli-sunos-x64': 1.5.4
-      '@tombi-toml/cli-win32-arm64': 1.5.4
-      '@tombi-toml/cli-win32-x64': 1.5.4
+      '@tombi-toml/cli-darwin-arm64': 1.5.5
+      '@tombi-toml/cli-darwin-x64': 1.5.5
+      '@tombi-toml/cli-linux-arm64': 1.5.5
+      '@tombi-toml/cli-linux-arm64-musl': 1.5.5
+      '@tombi-toml/cli-linux-x64': 1.5.5
+      '@tombi-toml/cli-linux-x64-musl': 1.5.5
+      '@tombi-toml/cli-sunos-x64': 1.5.5
+      '@tombi-toml/cli-win32-arm64': 1.5.5
+      '@tombi-toml/cli-win32-x64': 1.5.5
 
   tsx@4.21.0:
     dependencies:
