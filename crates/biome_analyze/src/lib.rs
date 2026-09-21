@@ -404,7 +404,7 @@ where
             &token.text()[remaining - token.text_range().start()],
             remaining,
         );
-        if !self.deny_top_level_suppressions {
+        if !self.deny_top_level_suppressions && !token_range.is_empty() {
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 

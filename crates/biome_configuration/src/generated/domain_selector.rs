@@ -53,6 +53,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
@@ -84,6 +85,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noComponentHookFactories"),
         RuleFilter::Rule("nursery", "noJsxLeakedDollar"),
         RuleFilter::Rule("nursery", "noJsxNamespace"),
+        RuleFilter::Rule("nursery", "noReactObjectTypeAsDefaultProp"),
         RuleFilter::Rule("nursery", "noReactStringRefs"),
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
         RuleFilter::Rule("nursery", "useReactCompiler"),
@@ -130,6 +132,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
     ]
 });

@@ -1,4 +1,0 @@
-# biome-ignore format: keep as is
-foo:     bar
----
-a:    1

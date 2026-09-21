@@ -5308,6 +5308,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoReactObjectTypeAsDefaultPropConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoReactObjectTypeAsDefaultPropOptions" }
+			]
+		},
+		"NoReactObjectTypeAsDefaultPropOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoReactPropAssignmentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5556,6 +5566,13 @@
 			]
 		},
 		"NoSelfCompareOptions": { "type": "object", "additionalProperties": false },
+		"NoSelfImportConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSelfImportOptions" }
+			]
+		},
+		"NoSelfImportOptions": { "type": "object", "additionalProperties": false },
 		"NoSetterReturnConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5775,18 +5792,23 @@
 			]
 		},
 		"NoTailwindArbitraryValueOptions": {
-			"description": "Options for the `noTailwindArbitraryValue` rule.\n\nControls which attributes and utility functions are checked for arbitrary values.",
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoTailwindRawColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindRawColorsOptions" }
+			]
+		},
+		"NoTailwindRawColorsOptions": {
 			"type": "object",
 			"properties": {
-				"attributes": {
-					"description": "Additional attributes that will be checked.",
+				"allowedColors": {
+					"description": "Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.",
 					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"functions": {
-					"description": "Names of the functions or tagged templates that will be checked.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
+					"items": { "type": "string" },
+					"uniqueItems": true
 				}
 			},
 			"additionalProperties": false
@@ -7194,6 +7216,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactObjectTypeAsDefaultProp": {
+					"description": "Disallow array, object, and function values as default props in React components.\nSee https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactStringRefs": {
 					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
 					"anyOf": [
@@ -7212,6 +7241,13 @@
 					"description": "Disallow return statements in Promise.prototype.finally() callbacks.\nSee https://biomejs.dev/linter/rules/no-return-in-finally",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReturnInFinallyConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSelfImport": {
+					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7247,6 +7283,13 @@
 					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindRawColors": {
+					"description": "Disallow Tailwind CSS utility classes that use raw palette colors.\nSee https://biomejs.dev/linter/rules/no-tailwind-raw-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindRawColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7579,6 +7622,13 @@
 						{
 							"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackConfiguration"
 						},
+						{ "type": "null" }
+					]
+				},
+				"usePromiseRejectErrors": {
+					"description": "Require Error objects as Promise rejection reasons.\nSee https://biomejs.dev/linter/rules/use-promise-reject-errors",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePromiseRejectErrorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10388,6 +10438,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoReactObjectTypeAsDefaultPropOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoReactPropAssignmentsOptions": {
 			"type": "object",
 			"properties": {
@@ -10577,6 +10636,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSelfCompareOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSelfImportOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSelfImportOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -10774,6 +10842,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindRawColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindRawColorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12784,6 +12861,15 @@
 				"options": {
 					"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUsePromiseRejectErrorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePromiseRejectErrorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -17015,6 +17101,16 @@
 			]
 		},
 		"UsePlaywrightValidDescribeCallbackOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePromiseRejectErrorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePromiseRejectErrorsOptions" }
+			]
+		},
+		"UsePromiseRejectErrorsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_graphql_factory"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Utilities to create GraphQL AST for biome_graphql_parser"

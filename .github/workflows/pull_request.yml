@@ -16,6 +16,7 @@ on:
       - "rustfmt.toml"
       - "deny.toml"
       - "justfile"
+      - "scripts/update-crates-versions.ts"
       - ".github/workflows/**"
 
 # Cancel jobs when the PR is updated
@@ -29,6 +30,25 @@ env:
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
 
 jobs:
+  publishable-crates:
+    name: Verify publishable crates
+    runs-on: depot-ubuntu-24.04-arm-16
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify publishable crates
+        run: node --experimental-strip-types scripts/update-crates-versions.ts verify
+
   lint:
     name: Lint project
     runs-on: ${{ matrix.os }}

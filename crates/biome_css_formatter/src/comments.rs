@@ -11,7 +11,7 @@ use crate::utils::scss_include_comments::{
 };
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssRoot, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
+    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
     CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
     CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
     CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
@@ -83,24 +83,18 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Default)]
 pub struct CssCommentStyle;
 
-impl CommentStyle for CssCommentStyle {
-    type Language = CssLanguage;
-
-    fn is_suppression(text: &str) -> bool {
+impl CssCommentStyle {
+    pub(crate) fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .filter(|suppression| suppression.kind == SuppressionKind::Classic)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
+}
 
-    fn is_global_suppression(text: &str) -> bool {
-        parse_suppression_comment(text)
-            .filter_map(Result::ok)
-            .filter(|suppression| suppression.kind == SuppressionKind::All)
-            .flat_map(|suppression| suppression.categories)
-            .any(|(key, ..)| key == category!("format"))
-    }
+impl CommentStyle for CssCommentStyle {
+    type Language = CssLanguage;
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
         if comment.text().starts_with("/*") {
@@ -138,7 +132,6 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
-            .or_else(handle_global_suppression)
     }
 }
 
@@ -643,7 +636,10 @@ fn handle_declaration_important_comment(
 fn handle_component_value_boundary_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    if !comment.kind().is_inline_block() || CssCommentStyle::is_suppression(comment.piece().text())
+    if !comment.kind().is_inline_block()
+        || comment
+            .suppression_kind()
+            .is_some_and(SuppressionKind::is_classic)
     {
         return CommentPlacement::Default(comment);
     }
@@ -859,27 +855,4 @@ fn handle_selector_block_comment(
     };
 
     CommentPlacement::dangling(owner, comment)
-}
-
-fn handle_global_suppression(
-    comment: DecoratedComment<CssLanguage>,
-) -> CommentPlacement<CssLanguage> {
-    let node = comment.enclosing_node();
-
-    if node.text_range_with_trivia().start() == TextSize::from(0) {
-        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
-            trivia
-                .pieces()
-                .filter(|piece| piece.is_comments())
-                .any(|piece| CssCommentStyle::is_global_suppression(piece.text()))
-        });
-        let root = node.ancestors().find_map(AnyCssRoot::cast);
-        if let Some(root) = root
-            && has_global_suppression
-        {
-            return CommentPlacement::leading(root.syntax().clone(), comment);
-        }
-    }
-
-    CommentPlacement::Default(comment)
 }

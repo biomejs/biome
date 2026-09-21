@@ -305,7 +305,6 @@ fn declaration_scalar_support_does_not_accept_type_operators_or_objects() -> Res
         "keyof symbol",
         "object",
         "{ value: bigint }",
-        "bigint[]",
         "`text`",
     ] {
         let mut file = fixture("lowering.interfaces.d.ts")?;

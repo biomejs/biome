@@ -2565,6 +2565,11 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
+	* Disallow array, object, and function values as default props in React components.
+See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop 
+	 */
+	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;
+	/**
 	* Disallow string refs in React components.
 See https://biomejs.dev/linter/rules/no-react-string-refs 
 	 */
@@ -2579,6 +2584,11 @@ See https://biomejs.dev/linter/rules/no-restricted-dependencies
 See https://biomejs.dev/linter/rules/no-return-in-finally 
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
+	/**
+	* Forbid a module from importing itself.
+See https://biomejs.dev/linter/rules/no-self-import 
+	 */
+	noSelfImport?: NoSelfImportConfiguration;
 	/**
 	* Disallow the use of Svelte's {@debug} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
@@ -2604,6 +2614,11 @@ See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap
 See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
+	* Disallow Tailwind CSS utility classes that use raw palette colors.
+See https://biomejs.dev/linter/rules/no-tailwind-raw-colors 
+	 */
+	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
 	* Disallow this outside of classes.
 See https://biomejs.dev/linter/rules/no-this-outside-of-class 
@@ -2842,6 +2857,11 @@ See https://biomejs.dev/linter/rules/use-nullish-coalescing
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
+	/**
+	* Require Error objects as Promise rejection reasons.
+See https://biomejs.dev/linter/rules/use-promise-reject-errors 
+	 */
+	usePromiseRejectErrors?: UsePromiseRejectErrorsConfiguration;
 	/**
 	* Enforce that Qwik loader functions are declared in the correct location.
 See https://biomejs.dev/linter/rules/use-qwik-loader-location 
@@ -4944,6 +4964,9 @@ export type NoReactNativeLiteralColorsConfiguration =
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
+export type NoReactObjectTypeAsDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
 export type NoReactStringRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactStringRefsOptions;
@@ -4953,6 +4976,9 @@ export type NoRestrictedDependenciesConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoSelfImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfImportOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
@@ -4968,6 +4994,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindRawColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindRawColorsOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -5106,6 +5135,9 @@ export type UseNullishCoalescingConfiguration =
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
+export type UsePromiseRejectErrorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePromiseRejectErrorsOptions;
 export type UseQwikLoaderLocationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikLoaderLocationOptions;
@@ -6945,6 +6977,10 @@ export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
 }
+export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactObjectTypeAsDefaultPropOptions;
+}
 export interface RuleWithNoReactStringRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactStringRefsOptions;
@@ -6956,6 +6992,10 @@ export interface RuleWithNoRestrictedDependenciesOptions {
 export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
+}
+export interface RuleWithNoSelfImportOptions {
+	level: RulePlainConfiguration;
+	options?: NoSelfImportOptions;
 }
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	fix?: FixKind;
@@ -6978,6 +7018,10 @@ export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
+}
+export interface RuleWithNoTailwindRawColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindRawColorsOptions;
 }
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
@@ -7178,6 +7222,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
+}
+export interface RuleWithUsePromiseRejectErrorsOptions {
+	level: RulePlainConfiguration;
+	options?: UsePromiseRejectErrorsOptions;
 }
 export interface RuleWithUseQwikLoaderLocationOptions {
 	level: RulePlainConfiguration;
@@ -8810,9 +8858,11 @@ export interface NoReactNativeRawTextOptions {
 	 */
 	skip?: string[];
 }
+export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteLegacyConstOptions = {};
@@ -8826,20 +8876,12 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	 */
 	allowReassign?: boolean;
 }
-/**
-	* Options for the `noTailwindArbitraryValue` rule.
-
-Controls which attributes and utility functions are checked for arbitrary values. 
-	 */
-export interface NoTailwindArbitraryValueOptions {
+export type NoTailwindArbitraryValueOptions = {};
+export interface NoTailwindRawColorsOptions {
 	/**
-	 * Additional attributes that will be checked.
+	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
 	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be checked.
-	 */
-	functions?: string[];
+	allowedColors?: string[];
 }
 export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -9067,6 +9109,7 @@ export interface UseNullishCoalescingOptions {
 	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
+export type UsePromiseRejectErrorsOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
 export interface UseReactCompilerOptions {
@@ -10334,6 +10377,7 @@ export type Category =
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
+	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
@@ -10356,14 +10400,17 @@ export type Category =
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
+	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -10371,10 +10418,8 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
-	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
-	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -10395,6 +10440,7 @@ export type Category =
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
@@ -10423,6 +10469,7 @@ export type Category =
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"

@@ -32,7 +32,9 @@ impl LoweredDeclarations {
 /// No global IDs or runtime name registrations are allocated.
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
-/// global interface references, parentheses, unions, and nongeneric function types.
+/// global interface references, arrays, parentheses, unions, and nongeneric function types.
+/// Methods may declare type parameters with constraints and defaults using supported types
+/// and earlier parameters. Their bindings are local to the method signature.
 /// Type aliases, type arguments, qualified references, object and template literal types,
 /// and type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
@@ -213,12 +215,10 @@ impl DeclarationLowerer<'_> {
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
                 let name = lower_object_member_name(method.name()?)?;
-                if method.type_parameters().is_some() {
-                    bail!("unsupported type parameters on method {name}");
-                }
                 let function = self
-                    .lower_function(
+                    .lower_method(
                         Some(name.clone()),
+                        method.type_parameters(),
                         method.parameters()?,
                         method
                             .return_type_annotation()
@@ -236,6 +236,63 @@ impl DeclarationLowerer<'_> {
             }
             _ => bail!("unsupported interface member: {:?}", member.syntax().kind()),
         }
+    }
+
+    fn lower_method(
+        &mut self,
+        name: Option<Text>,
+        type_parameters: Option<TsTypeParameters>,
+        parameters: JsParameters,
+        return_type: AnyTsReturnType,
+    ) -> Result<LoweredFunction> {
+        let Some(type_parameters) = type_parameters else {
+            return self.lower_function(name, parameters, return_type);
+        };
+        let outer_parameters = self.declaration_parameters.clone();
+        let outer_unbound = self.unbound_parameters.clone();
+        let result = (|| {
+            let mut names = BTreeSet::new();
+            for parameter in type_parameters.items() {
+                let parameter = parameter?;
+                let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
+                if !names.insert(name.clone()) {
+                    bail!("duplicate method type parameter {name}");
+                }
+            }
+            self.unbound_parameters.extend(names);
+            let mut references = Vec::new();
+            for parameter in type_parameters.items() {
+                let parameter = parameter?;
+                if !parameter.modifiers().is_empty() {
+                    bail!("modified method type parameters are not supported");
+                }
+                let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
+                let constraint = parameter
+                    .constraint()
+                    .map(|constraint| self.lower_reference(&constraint.ty()?))
+                    .transpose()
+                    .with_context(|| format!("in constraint of {name}"))?;
+                let default = parameter
+                    .default()
+                    .map(|default| self.lower_reference(&default.ty()?))
+                    .transpose()
+                    .with_context(|| format!("in default of {name}"))?;
+                let reference = self.register(LoweredTypeData::GenericParameter {
+                    name: name.clone(),
+                    constraint,
+                    default,
+                });
+                self.unbound_parameters.remove(&name);
+                self.declaration_parameters.insert(name, reference.clone());
+                references.push(reference);
+            }
+            let mut function = self.lower_function(name, parameters, return_type)?;
+            function.type_parameters = references.into_boxed_slice();
+            Ok(function)
+        })();
+        self.declaration_parameters = outer_parameters;
+        self.unbound_parameters = outer_unbound;
+        result
     }
 
     fn lower_function(
@@ -263,6 +320,13 @@ impl DeclarationLowerer<'_> {
             return Ok(self.register(data));
         }
         match ty {
+            AnyTsType::TsArrayType(array) => {
+                let element = self.lower_reference(&array.element_type()?)?;
+                Ok(self.register(LoweredTypeData::InstanceOf {
+                    ty: LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"),
+                    type_parameters: Box::new([element]),
+                }))
+            }
             AnyTsType::TsThisType(_) if self.class_scope.is_some() => {
                 Ok(self.register(LoweredTypeData::ThisKeyword))
             }
@@ -293,6 +357,7 @@ impl DeclarationLowerer<'_> {
                 if let Some(scope) = &self.class_scope
                     && scope.name == name
                     && !scope.parameters.contains_key(name)
+                    && !self.declaration_parameters.contains_key(name)
                 {
                     let ty = LoweredTypeReference::Predefined(scope.reference);
                     let type_parameters = reference
@@ -406,9 +471,9 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
     }
 }
 
-/// Lowers named instance properties and nongeneric methods with declaration-derived
+/// Lowers named instance properties and methods with declaration-derived
 /// generic parameters. Constraints use supported member types and earlier type parameters;
-/// the first interface supplies constraints for merged declarations. Defaults,
+/// the first interface supplies constraints for merged declarations. Class parameter defaults,
 /// value-side declarations, computed members, methods returning `MapIterator` or
 /// `SetIterator`, and methods referencing Intl types
 /// are excluded. References to the
@@ -858,6 +923,249 @@ mod tests {
         collect::collect, emit::render_local_types, manifest::build_global_manifest,
         source::CanonicalPath,
     };
+
+    #[test]
+    fn method_generics_bind_constraints_defaults_and_callbacks() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for parameter in ["T", "Owner", "WeakKey"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+                repo_relative: "methods.d.ts".to_owned(),
+                bytes: format!("
+                    interface Owner<T extends boolean> {{
+                        outer: T;
+                        transform<{parameter} extends string = string, U extends {parameter} = {parameter}>(value: U, callback: (value: {parameter}) => U): U;
+                        capture<U extends T = T>(value: U): U;
+                        after(value: T): T;
+                    }}
+                ").into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types =
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            let LoweredTypeData::Function(method) =
+                local(class.member("transform").unwrap().type_reference())
+            else {
+                panic!("expected method")
+            };
+            let [first, second] = method.type_parameters() else {
+                panic!("expected method parameters")
+            };
+            let LoweredTypeData::GenericParameter {
+                name,
+                constraint,
+                default,
+            } = local(first)
+            else {
+                panic!("expected generic")
+            };
+            assert_eq!(name.text(), parameter);
+            assert_eq!(
+                constraint,
+                &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+            );
+            assert_eq!(default, constraint);
+            let LoweredTypeData::GenericParameter {
+                constraint,
+                default,
+                ..
+            } = local(second)
+            else {
+                panic!("expected dependent generic")
+            };
+            assert_eq!(constraint.as_ref(), Some(first));
+            assert_eq!(default, constraint);
+            assert_eq!(method.parameters()[0].type_reference(), second);
+            assert_eq!(method.return_type(), second);
+            let LoweredTypeData::Function(callback) =
+                local(method.parameters()[1].type_reference())
+            else {
+                panic!("expected callback")
+            };
+            assert_eq!(callback.parameters()[0].type_reference(), first);
+            assert_eq!(callback.return_type(), second);
+            assert!(callback.type_parameters().is_empty());
+            let LoweredTypeData::Function(capture) =
+                local(class.member("capture").unwrap().type_reference())
+            else {
+                panic!("expected capturing method")
+            };
+            let LoweredTypeData::GenericParameter {
+                constraint,
+                default,
+                ..
+            } = local(&capture.type_parameters()[0])
+            else {
+                panic!("expected capturing parameter")
+            };
+            assert_eq!(
+                constraint.as_ref(),
+                Some(class.member("outer").unwrap().type_reference())
+            );
+            assert_eq!(default, constraint);
+            let LoweredTypeData::Function(after) =
+                local(class.member("after").unwrap().type_reference())
+            else {
+                panic!("expected following method")
+            };
+            assert_eq!(
+                after.return_type(),
+                class.member("outer").unwrap().type_reference()
+            );
+            assert_eq!(after.parameters()[0].type_reference(), after.return_type());
+            assert!(after.type_parameters().is_empty());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn method_generics_translate_in_interfaces_and_statics() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+            repo_relative: "methods.d.ts".to_owned(),
+            bytes: b"interface Owner { identity<Value>(value: Value): Value; choose<Value extends boolean = boolean>(value?: Value): Value; }".to_vec(),
+        };
+        let files = [file];
+        let manifest = build_global_manifest(collect(&files[0]).records);
+        let table = lower_interfaces(&manifest, &files, &["Owner"])?;
+        let LoweredTypeReference::Local(index) = table.interface_reference("Owner").unwrap() else {
+            panic!("expected local interface")
+        };
+        let LoweredTypeData::Interface(interface) = &table.types()[index] else {
+            panic!("expected interface")
+        };
+        let mut class = LoweredClass {
+            name: Text::from("Owner"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let static_types = lower_constructor_members(
+            &manifest,
+            &files,
+            manifest.global_group("Owner").unwrap().declarations(),
+            &mut class,
+            "GLOBAL_TEST_OWNER_ID",
+            |_| Ok(true),
+            &[],
+        )?;
+        for (members, types) in [
+            (interface.members(), table.types()),
+            (class.members(), static_types.as_ref()),
+        ] {
+            let mut generics = Vec::new();
+            for member in members {
+                let LoweredTypeReference::Local(index) = member.type_reference() else {
+                    panic!("expected local method")
+                };
+                let LoweredTypeData::Function(function) = &types[*index] else {
+                    panic!("expected function")
+                };
+                let [generic] = function.type_parameters() else {
+                    panic!("expected method generic")
+                };
+                assert_eq!(function.parameters()[0].type_reference(), generic);
+                assert_eq!(function.return_type(), generic);
+                let LoweredTypeReference::Local(parameter_index) = generic else {
+                    panic!("expected local parameter")
+                };
+                assert!(parameter_index < index);
+                generics.push(generic);
+            }
+            assert_ne!(
+                generics[0], generics[1],
+                "different constraints must retain distinct parameters"
+            );
+        }
+        assert!(
+            class
+                .members()
+                .iter()
+                .all(|member| member.kind() == &LoweredMemberKind::NamedStatic)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn array_types_preserve_elements_and_share_references() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for element in ["boolean", "string", "number", "T", "(boolean | T)"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "arrays.d.ts".to_owned(),
+                bytes: format!(
+                    "
+                    interface Owner<T> {{
+                        element: {element};
+                        values: {element}[];
+                        repeated: {element}[];
+                        nested: {element}[][];
+                        callback: (values: {element}[]) => {element}[][];
+                    }}
+                "
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types =
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+            let member_type = |name| class.member(name).unwrap().type_reference();
+            let local_index = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                *index
+            };
+            for (array, element) in [("values", "element"), ("nested", "values")] {
+                let index = local_index(member_type(array));
+                let LoweredTypeData::InstanceOf {
+                    ty,
+                    type_parameters,
+                } = &types[index]
+                else {
+                    panic!("expected array instance")
+                };
+                assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+                assert_eq!(
+                    type_parameters.as_ref(),
+                    std::slice::from_ref(member_type(element))
+                );
+                if let LoweredTypeReference::Local(element_index) = member_type(element) {
+                    assert!(*element_index < index);
+                }
+            }
+            assert_eq!(member_type("values"), member_type("repeated"));
+            let LoweredTypeData::Function(callback) = &types[local_index(member_type("callback"))]
+            else {
+                panic!("expected callback")
+            };
+            assert_eq!(
+                callback.parameters()[0].type_reference(),
+                member_type("values")
+            );
+            assert_eq!(callback.return_type(), member_type("nested"));
+        }
+        Ok(())
+    }
 
     #[test]
     fn repeated_local_types_share_references() -> Result<()> {

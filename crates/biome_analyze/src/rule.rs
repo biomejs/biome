@@ -1597,6 +1597,9 @@ fn build_inline_suppression<L: Language>(
             diagnostic_text_range: text_range,
             suppression_reason: suppression_reason.unwrap_or("<explanation>"),
         });
+        if mutation.is_empty() {
+            return None;
+        }
 
         let message = if category == RuleCategory::Action {
             "action"

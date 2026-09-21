@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+Promise.resolve(5);
+Foo.reject(5);
+Promise.reject(new Error("failure"));
+Promise.reject(new TypeError());
+Promise.reject(error);
+Promise.reject(error.message);
+Promise.reject(getError());
+Promise.reject(error || 5);
+Promise.reject(5 && error);
+Promise.reject(error ?? 5);
+Promise.reject(condition ? error : 5);
+Promise.reject(condition ? 5 : error);
+Promise.reject((5, error));
+Promise.reject(error = new Error());
+Promise.reject(error ||= 5);
+Promise.reject(error ??= 5);
+Promise.reject(error &&= new Error());
+Promise.reject(tag`error`);
+Promise.reject(obj?.error);
+Promise.reject(obj?.error());
+Promise.reject(...errors);
+Promise[method](5);
+new Foo((resolve, reject) => reject(5));
+new Promise((resolve, reject) => reject(new Error()));
+new Promise((resolve, reject) => resolve(5, reject));
+new Promise((resolve, { apply }) => apply(5));
+new Promise((resolve, ...reject) => reject(5));
+new Promise((resolve, reject = other) => reject(5));
+new Promise(resolve => resolve(5));
+new Promise(executor);
+new Promise(() => {}, (resolve, reject) => reject(5));
+new Promise(function(resolve, reject) {
+    return function(reject) { reject(5); };
+});
+new Promise((resolve, reject) => {
+    if (condition) {
+        const reject = other;
+        reject(5);
+    }
+});
+function shadowed(Promise) {
+    Promise.reject(5);
+    new Promise((resolve, reject) => reject(5));
+}
+function shadowedUndefined(undefined) {
+    Promise.reject(undefined);
+    new Promise((resolve, reject) => reject(undefined));
+}
+async function awaited() {
+    Promise.reject(await result);
+}
+function* yielded() {
+    Promise.reject(yield result);
+}
+class Private {
+    #reject;
+    run() { Promise.#reject(5); }
+}
+// biome-ignore lint/nursery/usePromiseRejectErrors: Test suppression.
+Promise.reject("suppressed");
+new Promise(((function(resolve, reject) { reject(new Error()); })));
+
+```

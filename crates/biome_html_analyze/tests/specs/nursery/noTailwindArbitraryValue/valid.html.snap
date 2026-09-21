@@ -11,5 +11,6 @@ expression: valid.html
 <div class="has-[:checked]:bg-red-500"></div>
 <div classList="p-[10px]"></div>
 <div className="w-[400px]"></div>
+<div CLASSLIST="p-[10px]"></div>
 
 ```
