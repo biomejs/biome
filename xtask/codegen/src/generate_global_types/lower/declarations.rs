@@ -36,6 +36,7 @@ impl LoweredDeclarations {
 /// parentheses, unions, and function types.
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
+/// Numeric and string index signatures preserve their key and value types.
 /// Computed methods support declared predefined Symbol keys; other computed names are errors.
 /// References to selected predefined types preserve type arguments and require declarations.
 /// Type aliases, type arguments on other references, qualified references, object and template literal types,
@@ -211,6 +212,19 @@ impl DeclarationLowerer<'_> {
 
     fn lower_member(&mut self, member: AnyTsTypeMember) -> Result<LoweredTypeMember> {
         match member {
+            AnyTsTypeMember::TsIndexSignatureTypeMember(signature) => {
+                let key = signature.parameter()?.type_annotation()?.ty()?;
+                if !matches!(key, AnyTsType::TsNumberType(_) | AnyTsType::TsStringType(_)) {
+                    bail!("unsupported index signature key type");
+                }
+                let key_reference = self.lower_reference(&key)?;
+                let type_reference = self.lower_reference(&signature.type_annotation()?.ty()?)?;
+                Ok(LoweredTypeMember {
+                    name: Text::default(),
+                    kind: LoweredMemberKind::IndexSignature { key_reference },
+                    type_reference,
+                })
+            }
             AnyTsTypeMember::TsConstructSignatureTypeMember(signature) => {
                 let function = self
                     .lower_signature(
@@ -840,7 +854,8 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
 /// Lowers selected constructor-interface members as statics and call/construct signatures of a class.
 /// The caller selects members and supplies predefined identities for unique symbols.
 /// Other unique symbols use the runtime's symbol type. Function signatures use
-/// the same translation as instance methods.
+/// the same translation as instance methods. Named method overloads become an object
+/// with call signatures in declaration order; duplicate properties remain errors.
 pub(super) fn lower_constructor_members(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
@@ -882,6 +897,7 @@ impl DeclarationLowerer<'_> {
         predefined_symbols: &[(&str, &'static str)],
     ) -> Result<()> {
         let mut members = class.members.to_vec();
+        let mut methods = BTreeMap::<Text, Vec<LoweredTypeReference>>::new();
         for record in records {
             let declaration = self
                 .sources
@@ -897,6 +913,7 @@ impl DeclarationLowerer<'_> {
                 if !select_member(&member)? {
                     continue;
                 }
+                let is_method = matches!(member, AnyTsTypeMember::TsMethodSignatureTypeMember(_));
                 let mut member = match member {
                     AnyTsTypeMember::TsPropertySignatureTypeMember(property)
                         if is_unique_symbol_property(&property)? =>
@@ -944,18 +961,57 @@ impl DeclarationLowerer<'_> {
                 if members.iter().any(|previous: &LoweredTypeMember| {
                     previous.kind == member.kind && previous.name == member.name
                 }) {
+                    if is_method && let Some(signatures) = methods.get_mut(&member.name) {
+                        signatures.push(member.type_reference);
+                        continue;
+                    }
                     bail!(
                         "duplicate static member {}.{} cannot be represented by one member",
                         class.name(),
                         member.name
                     );
                 }
+                if is_method {
+                    methods.insert(member.name.clone(), vec![member.type_reference.clone()]);
+                }
                 members.push(member);
+            }
+        }
+        for member in &mut members {
+            if member.kind == LoweredMemberKind::NamedStatic
+                && let Some(signatures) = methods.remove(&member.name)
+                && signatures.len() > 1
+            {
+                member.type_reference = self.register(LoweredTypeData::Object(
+                    signatures
+                        .into_iter()
+                        .map(|type_reference| LoweredTypeMember {
+                            name: Text::default(),
+                            kind: LoweredMemberKind::CallSignature,
+                            type_reference,
+                        })
+                        .collect(),
+                ));
             }
         }
         class.members = members.into_boxed_slice();
         Ok(())
     }
+}
+
+/// Selects named members without interpreting their signatures or types.
+pub(super) fn select_named_members(member: &AnyTsTypeMember, names: &[&str]) -> Result<bool> {
+    let name = match member {
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
+        AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => getter.name()?,
+        AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => setter.name()?,
+        _ => return Ok(false),
+    };
+    if matches!(name, AnyJsObjectMemberName::JsComputedMemberName(_)) {
+        return Ok(false);
+    }
+    Ok(names.contains(&lower_object_member_name(name)?.text()))
 }
 
 fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
@@ -1017,6 +1073,11 @@ pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &st
         "REGEXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID",
         "GLOBAL_REGEXP_EXEC_ARRAY_ID",
     ),
+    (
+        "ArrayLike",
+        "ARRAY_LIKE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ARRAY_LIKE_ID",
+    ),
 ];
 
 /// Lowers selected type-only declarations and their declared bases and members.
@@ -1042,7 +1103,8 @@ pub(super) fn lower_predefined_declarations(
     for &(name, id_constant, _) in PREDEFINED_DECLARATIONS {
         if !matches!(
             name,
-            "RegExpExecArray"
+            "ArrayLike"
+                | "RegExpExecArray"
                 | "IteratorYieldResult"
                 | "IteratorReturnResult"
                 | "IteratorResult"
@@ -2270,6 +2332,91 @@ mod tests {
             };
             assert_eq!(local(&types[0]), &expected);
             assert_eq!(local(&types[1]), &LoweredTypeData::Undefined);
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn named_constructor_members_preserve_overloads() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for (owner, method) in [("First", "create"), ("Second", "convert")] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "statics.d.ts".to_owned(),
+                bytes: format!(
+                    r#"
+                    interface Factory {{
+                        {method}<T>(value: T): T;
+                        unrelated: Missing;
+                    }}
+                    interface Factory {{
+                        {method}<T, U>(value: T, map: (value: T) => U, context?: any): U;
+                    }}
+                "#
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from(owner),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types = lower_constructor_members(
+                &manifest,
+                &[file],
+                manifest.global_group("Factory").unwrap().declarations(),
+                &mut class,
+                "GLOBAL_TEST_OWNER_ID",
+                |member| select_named_members(member, &["create", "convert"]),
+                &[],
+            )?;
+            let [member] = class.members() else {
+                panic!("expected one selected static")
+            };
+            assert_eq!(member.name(), method);
+            assert_eq!(member.kind(), &LoweredMemberKind::NamedStatic);
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            let LoweredTypeData::Object(signatures) = local(member.type_reference()) else {
+                panic!("expected overloads")
+            };
+            assert_eq!(signatures.len(), 2);
+            for (index, signature) in signatures.iter().enumerate() {
+                assert_eq!(signature.kind(), &LoweredMemberKind::CallSignature);
+                let LoweredTypeData::Function(function) = local(signature.type_reference()) else {
+                    panic!("expected function")
+                };
+                assert_eq!(function.type_parameters().len(), index + 1);
+                assert_eq!(
+                    function.parameters()[0].type_reference(),
+                    &function.type_parameters()[0]
+                );
+                assert_eq!(
+                    Some(function.return_type()),
+                    function.type_parameters().last()
+                );
+                if index == 1 {
+                    let LoweredTypeData::Function(callback) =
+                        local(function.parameters()[1].type_reference())
+                    else {
+                        panic!("expected callback")
+                    };
+                    assert_eq!(
+                        callback.parameters()[0].type_reference(),
+                        &function.type_parameters()[0]
+                    );
+                    assert_eq!(callback.return_type(), function.return_type());
+                    assert!(function.parameters()[2].is_optional());
+                }
+            }
         }
         Ok(())
     }

@@ -608,3 +608,70 @@ fn regexp_declarations_infer_results_and_constructor_calls() {
         &fs,
     );
 }
+
+#[test]
+fn array_from_calls_use_lowered_overloads() {
+    use biome_module_graph::{BindingTypeInput, infer_binding_type};
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const values: ArrayLike<string>;
+        declare const iterable: Iterable<number>;
+        export const copied = Array.from(values);
+        export const iterated = Array.from(iterable);
+        export const mapped = Array.from(values, value => 1);
+        export const withThis = Array.from(values, value => true, {});
+        export const mappedIterable = Array.from(iterable, value => "text");
+        export const indexes = Array.from(values, (value, index) => index);
+        const from = Array.from;
+        export const aliased = from(values, value => "text");
+        export const length = values.length;
+        export const noArguments = Array.from();
+        declare const array: string[];
+        export const instanceFrom = array.from;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
+    let binding = |name| {
+        let input = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, name));
+        normalize_type(&db, module, infer_binding_type(&db, input).unwrap())
+    };
+    for name in [
+        "copied",
+        "iterated",
+        "mapped",
+        "withThis",
+        "mappedIterable",
+        "indexes",
+        "aliased",
+    ] {
+        let ty = binding(name);
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            panic!("{name}: expected array, got {ty:?}");
+        };
+        let InferredTypeData::Class(class) = instance.ty(&db).expand_canonical_global(&db) else {
+            panic!("{name}: expected Array class");
+        };
+        assert_eq!(class.name(&db).as_ref().map(Text::text), Some("Array"));
+        let [element] = instance.type_parameters(&db).as_ref() else {
+            panic!("{name}: expected one element type");
+        };
+        match name {
+            "mapped" | "indexes" => {
+                assert!(is_inferred_number(&db, *element), "{name}: {element:?}")
+            }
+            "withThis" => assert!(is_inferred_boolean(&db, *element)),
+            "mappedIterable" | "aliased" => assert!(is_inferred_string(&db, *element)),
+            _ => {}
+        }
+    }
+    assert!(is_inferred_number(&db, binding("length")));
+    assert_eq!(binding("noArguments"), InferredTypeData::Unknown);
+    assert_eq!(binding("instanceFrom"), InferredTypeData::Unknown);
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}

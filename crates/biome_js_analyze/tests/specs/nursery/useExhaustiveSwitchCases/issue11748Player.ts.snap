@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: issue11748Player.ts
+---
+# Input
+```ts
+type State = "running" | "jumping" | "ducking";
+
+export class Player {
+	state: State;
+	constructor(state: State) {
+		this.state = state;
+	}
+}
+
+```

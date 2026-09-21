@@ -192,6 +192,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         }
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
+        LoweredTypeData::Object(members) => format!(
+            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false }})",
+            render_members(members),
+        ),
         LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),
         LoweredTypeData::NumberLiteral(value) => format!(
             "crate::TypeData::Literal(Box::new(crate::Literal::Number(crate::literal::NumberLiteral::new(biome_rowan::Text::new_static({})))))",
@@ -373,6 +377,10 @@ fn render_member_kind(member: &LoweredTypeMember) -> String {
                 rust_string_literal(member.name()),
             )
         }
+        LoweredMemberKind::IndexSignature { key_reference } => format!(
+            "crate::TypeMemberKind::IndexSignature({})",
+            render_type_reference(key_reference),
+        ),
         LoweredMemberKind::Constructor => "crate::TypeMemberKind::Constructor".to_string(),
         LoweredMemberKind::CallSignature => "crate::TypeMemberKind::CallSignature".to_string(),
         LoweredMemberKind::ComputedValue { key_reference } => {
