@@ -728,7 +728,7 @@ impl ConfigurationExt for Configuration {
                         "to read the file."
                     })
                 })?;
-                let deserialized = deserialize_from_json_str::<Self>(
+                let mut deserialized = deserialize_from_json_str::<Self>(
                     content.as_str(),
                     match extend_configuration_file_path.extension() {
                         Some("json") => JsonParserOptions::default(),
@@ -738,6 +738,29 @@ impl ConfigurationExt for Configuration {
                     },
                     "",
                 );
+
+                // Normalize the extended configuration's plugin paths relative
+                // to *its own* directory before it gets merged into the config
+                // that extends it. Otherwise, a later normalization pass would
+                // incorrectly re-resolve them against the extending config's
+                // directory (see https://github.com/biomejs/biome/issues/10360).
+                #[cfg(feature = "plugins")]
+                if let Some(config) = deserialized.deserialized.as_mut() {
+                    let extend_config_dir = extend_configuration_file_path
+                        .parent()
+                        .unwrap_or(external_resolution_base_path);
+                    if let Some(plugins) = config.plugins.as_mut() {
+                        plugins.normalize_relative_paths(extend_config_dir);
+                    }
+                    if let Some(overrides) = config.overrides.as_mut() {
+                        for pattern in overrides.0.iter_mut() {
+                            if let Some(plugins) = pattern.plugins.as_mut() {
+                                plugins.normalize_relative_paths(extend_config_dir);
+                            }
+                        }
+                    }
+                }
+
                 deserialized_configurations.push(deserialized)
             }
         }

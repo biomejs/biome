@@ -815,3 +815,64 @@ fn plugins_from_root_config_work_in_child_config_extends_root() {
         result,
     ));
 }
+
+#[test]
+fn plugins_in_shared_config_extended_by_relative_path() {
+    let mut fs = TemporaryFs::new("plugins_in_shared_config_extended_by_relative_path");
+
+    // Mirrors a shared config package (e.g. `node_modules/@org/biome-config`)
+    // that consumers pull in via `extends`. The plugin path is relative to
+    // *this* file, not to whatever config ends up extending it.
+    fs.create_file(
+        "shared-config/base.json",
+        r#"{
+    "plugins": ["./biome-plugins/no-object-assign.grit"],
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true
+        }
+    }
+}"#,
+    );
+
+    fs.create_file(
+        "shared-config/biome-plugins/no-object-assign.grit",
+        r#"`$fn($args)` where {
+    $fn <: `Object.assign`,
+    register_diagnostic(
+        span = $fn,
+        message = "Prefer object spread instead of Object.assign()",
+        severity = "warn"
+    )
+}"#,
+    );
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "extends": ["./shared-config/base.json"]
+}"#,
+    );
+
+    fs.create_file(
+        "src/file.js",
+        r#"const merged = Object.assign({}, a, b);
+"#,
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", &format!("{}/src/file.js", fs.cli_path())].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "plugins_in_shared_config_extended_by_relative_path",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
