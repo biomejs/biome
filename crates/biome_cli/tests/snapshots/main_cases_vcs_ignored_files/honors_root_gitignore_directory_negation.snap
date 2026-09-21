@@ -1,0 +1,45 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.jsonc`
+
+```json
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  }
+}
+```
+
+## `.gitignore`
+
+```gitignore
+/*
+!/src
+!/biome.jsonc
+!/.gitignore
+
+```
+
+## `excluded/ignored.js`
+
+```js
+  statement(  )  
+```
+
+## `src/included.js`
+
+```js
+statement();
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 2 files in <TIME>. Fixed 2 files.
+```
