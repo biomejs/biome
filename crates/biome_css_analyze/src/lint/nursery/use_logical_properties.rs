@@ -143,114 +143,66 @@ pub struct UseLogicalPropertiesState {
     logical_property: &'static str,
 }
 
+/// Maps a physical property name to its logical `(ltr, rtl)` replacement names.
+static LOGICAL_PROPERTIES: phf::Map<&'static str, (&'static str, &'static str)> = phf::phf_map! {
+    // Sizing properties
+    "width" => ("inline-size", "inline-size"),
+    "min-width" => ("min-inline-size", "min-inline-size"),
+    "max-width" => ("max-inline-size", "max-inline-size"),
+    "height" => ("block-size", "block-size"),
+    "min-height" => ("min-block-size", "min-block-size"),
+    "max-height" => ("max-block-size", "max-block-size"),
+    // Positioning properties
+    "top" => ("inset-block-start", "inset-block-start"),
+    "right" => ("inset-inline-end", "inset-inline-start"),
+    "bottom" => ("inset-block-end", "inset-block-end"),
+    "left" => ("inset-inline-start", "inset-inline-end"),
+    // Margin properties
+    "margin-top" => ("margin-block-start", "margin-block-start"),
+    "margin-right" => ("margin-inline-end", "margin-inline-start"),
+    "margin-bottom" => ("margin-block-end", "margin-block-end"),
+    "margin-left" => ("margin-inline-start", "margin-inline-end"),
+    // Padding properties
+    "padding-top" => ("padding-block-start", "padding-block-start"),
+    "padding-right" => ("padding-inline-end", "padding-inline-start"),
+    "padding-bottom" => ("padding-block-end", "padding-block-end"),
+    "padding-left" => ("padding-inline-start", "padding-inline-end"),
+    // Border top properties
+    "border-top" => ("border-block-start", "border-block-start"),
+    "border-top-color" => ("border-block-start-color", "border-block-start-color"),
+    "border-top-style" => ("border-block-start-style", "border-block-start-style"),
+    "border-top-width" => ("border-block-start-width", "border-block-start-width"),
+    // Border bottom properties
+    "border-bottom" => ("border-block-end", "border-block-end"),
+    "border-bottom-color" => ("border-block-end-color", "border-block-end-color"),
+    "border-bottom-style" => ("border-block-end-style", "border-block-end-style"),
+    "border-bottom-width" => ("border-block-end-width", "border-block-end-width"),
+    // Border left properties
+    "border-left" => ("border-inline-start", "border-inline-end"),
+    "border-left-color" => ("border-inline-start-color", "border-inline-end-color"),
+    "border-left-style" => ("border-inline-start-style", "border-inline-end-style"),
+    "border-left-width" => ("border-inline-start-width", "border-inline-end-width"),
+    // Border right properties
+    "border-right" => ("border-inline-end", "border-inline-start"),
+    "border-right-color" => ("border-inline-end-color", "border-inline-start-color"),
+    "border-right-style" => ("border-inline-end-style", "border-inline-start-style"),
+    "border-right-width" => ("border-inline-end-width", "border-inline-start-width"),
+    // Border radius properties
+    "border-top-left-radius" => ("border-start-start-radius", "border-start-end-radius"),
+    "border-top-right-radius" => ("border-start-end-radius", "border-start-start-radius"),
+    "border-bottom-left-radius" => ("border-end-start-radius", "border-end-end-radius"),
+    "border-bottom-right-radius" => ("border-end-end-radius", "border-end-start-radius"),
+};
+
 fn physical_to_logical_property(
     property: &str,
     direction: UseLogicalPropertiesDirection,
 ) -> Option<&'static str> {
-    match property {
-        // Sizing properties
-        "width" => Some("inline-size"),
-        "min-width" => Some("min-inline-size"),
-        "max-width" => Some("max-inline-size"),
-        "height" => Some("block-size"),
-        "min-height" => Some("min-block-size"),
-        "max-height" => Some("max-block-size"),
-        // Positioning properties
-        "top" => Some("inset-block-start"),
-        "right" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "inset-inline-end",
-            UseLogicalPropertiesDirection::Rtl => "inset-inline-start",
-        }),
-        "bottom" => Some("inset-block-end"),
-        "left" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "inset-inline-start",
-            UseLogicalPropertiesDirection::Rtl => "inset-inline-end",
-        }),
-        // Margin properties
-        "margin-top" => Some("margin-block-start"),
-        "margin-right" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "margin-inline-end",
-            UseLogicalPropertiesDirection::Rtl => "margin-inline-start",
-        }),
-        "margin-bottom" => Some("margin-block-end"),
-        "margin-left" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "margin-inline-start",
-            UseLogicalPropertiesDirection::Rtl => "margin-inline-end",
-        }),
-        // Padding properties
-        "padding-top" => Some("padding-block-start"),
-        "padding-right" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "padding-inline-end",
-            UseLogicalPropertiesDirection::Rtl => "padding-inline-start",
-        }),
-        "padding-bottom" => Some("padding-block-end"),
-        "padding-left" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "padding-inline-start",
-            UseLogicalPropertiesDirection::Rtl => "padding-inline-end",
-        }),
-        // Border top properties
-        "border-top" => Some("border-block-start"),
-        "border-top-color" => Some("border-block-start-color"),
-        "border-top-style" => Some("border-block-start-style"),
-        "border-top-width" => Some("border-block-start-width"),
-        // Border bottom properties
-        "border-bottom" => Some("border-block-end"),
-        "border-bottom-color" => Some("border-block-end-color"),
-        "border-bottom-style" => Some("border-block-end-style"),
-        "border-bottom-width" => Some("border-block-end-width"),
-        // Border left properties
-        "border-left" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-start",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-end",
-        }),
-        "border-left-color" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-start-color",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-end-color",
-        }),
-        "border-left-style" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-start-style",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-end-style",
-        }),
-        "border-left-width" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-start-width",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-end-width",
-        }),
-        // Border right properties
-        "border-right" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-end",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-start",
-        }),
-        "border-right-color" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-end-color",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-start-color",
-        }),
-        "border-right-style" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-end-style",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-start-style",
-        }),
-        "border-right-width" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-inline-end-width",
-            UseLogicalPropertiesDirection::Rtl => "border-inline-start-width",
-        }),
-        // Border radius properties
-        "border-top-left-radius" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-start-start-radius",
-            UseLogicalPropertiesDirection::Rtl => "border-start-end-radius",
-        }),
-        "border-top-right-radius" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-start-end-radius",
-            UseLogicalPropertiesDirection::Rtl => "border-start-start-radius",
-        }),
-        "border-bottom-left-radius" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-end-start-radius",
-            UseLogicalPropertiesDirection::Rtl => "border-end-end-radius",
-        }),
-        "border-bottom-right-radius" => Some(match direction {
-            UseLogicalPropertiesDirection::Ltr => "border-end-end-radius",
-            UseLogicalPropertiesDirection::Rtl => "border-end-start-radius",
-        }),
-        _ => None,
-    }
+    let (ltr, rtl) = LOGICAL_PROPERTIES.get(property)?;
+    Some(match direction {
+        UseLogicalPropertiesDirection::Ltr => ltr,
+        UseLogicalPropertiesDirection::Rtl => rtl,
+    })
 }
 
 fn declaration_name_value_token(
