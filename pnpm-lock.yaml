@@ -119,8 +119,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.5
+        version: 24.13.5
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
@@ -233,10 +233,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.6
-        version: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.4)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.13.5)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/@biomejs/runtime:
     dependencies:
@@ -996,6 +996,9 @@ packages:
 
   '@types/node@24.13.4':
     resolution: {integrity: sha512-YJ7EqCstVTzIr0fMr7qul/977en+pQHrfmuKIo6Zr9i75Be21dr3MovcfvGtyvi2HAUrRerWps5sMO9I7WaxDw==}
+
+  '@types/node@24.13.5':
+    resolution: {integrity: sha512-TXyindR+lBr22aJIdMQzCFHPHR6cR4js838mRDCSz5hOKWZvZwsXSSiXDmjRj4iJmgl+sR9O+1mkoVBSMadNug==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2201,6 +2204,10 @@ snapshots:
     dependencies:
       undici-types: 7.18.2
 
+  '@types/node@24.13.5':
+    dependencies:
+      undici-types: 7.18.2
+
   '@types/normalize-package-data@2.4.4': {}
 
   '@types/react@19.3.0':
@@ -2291,6 +2298,14 @@ snapshots:
       magic-string: 0.30.21
     optionalDependencies:
       vite: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+
+  '@vitest/mocker@4.1.11(vite@7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0))':
+    dependencies:
+      '@vitest/spy': 4.1.11
+      estree-walker: 3.0.3
+      magic-string: 0.30.21
+    optionalDependencies:
+      vite: 7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -2798,6 +2813,20 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.9.0
 
+  vite@7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0):
+    dependencies:
+      esbuild: 0.27.2
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
+      postcss: 8.5.6
+      rollup: 4.46.2
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 24.13.5
+      fsevents: 2.3.3
+      tsx: 4.21.0
+      yaml: 2.9.0
+
   vitest@4.1.11(@types/node@24.13.4)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
@@ -2822,6 +2851,34 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.4
+      happy-dom: 20.9.0
+    transitivePeerDependencies:
+      - msw
+
+  vitest@4.1.11(@types/node@24.13.5)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0)):
+    dependencies:
+      '@vitest/expect': 4.1.11
+      '@vitest/mocker': 4.1.11(vite@7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/pretty-format': 4.1.11
+      '@vitest/runner': 4.1.11
+      '@vitest/snapshot': 4.1.11
+      '@vitest/spy': 4.1.11
+      '@vitest/utils': 4.1.11
+      es-module-lexer: 2.0.0
+      expect-type: 1.3.0
+      magic-string: 0.30.21
+      obug: 2.1.1
+      pathe: 2.0.3
+      picomatch: 4.0.4
+      std-env: 4.0.0
+      tinybench: 2.9.0
+      tinyexec: 1.3.0
+      tinyglobby: 0.2.15
+      tinyrainbow: 3.1.0
+      vite: 7.3.6(@types/node@24.13.5)(tsx@4.21.0)(yaml@2.9.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@types/node': 24.13.5
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw
