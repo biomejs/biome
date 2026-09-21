@@ -5795,6 +5795,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoTailwindRawColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindRawColorsOptions" }
+			]
+		},
+		"NoTailwindRawColorsOptions": {
+			"type": "object",
+			"properties": {
+				"allowedColors": {
+					"description": "Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.",
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7265,6 +7283,13 @@
 					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindRawColors": {
+					"description": "Disallow Tailwind CSS utility classes that use raw palette colors.\nSee https://biomejs.dev/linter/rules/no-tailwind-raw-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindRawColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10810,6 +10835,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindRawColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindRawColorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
