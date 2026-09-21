@@ -98,12 +98,16 @@ impl Rule for UseLogicalProperties {
 
         Some(UseLogicalPropertiesState {
             span: name.range(),
-            physical_property: normalized_name.to_string(),
             logical_property,
         })
     }
 
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let property = ctx.query();
+        let name = property.name().ok()?;
+        let name_token = name.declaration().ok()?;
+        let normalized_name = name_token.text_trimmed().to_ascii_lowercase_cow();
+
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -116,7 +120,7 @@ impl Rule for UseLogicalProperties {
                 "Logical properties adapt better to different writing modes and layout directions."
             })
             .note(markup! {
-                "Replace "<Emphasis>{state.physical_property.as_str()}</Emphasis>" with "<Emphasis>{state.logical_property}</Emphasis>"."
+                "Replace "<Emphasis>{normalized_name.as_ref()}</Emphasis>" with "<Emphasis>{state.logical_property}</Emphasis>"."
             }),
         )
     }
@@ -124,7 +128,6 @@ impl Rule for UseLogicalProperties {
 
 pub struct UseLogicalPropertiesState {
     span: TextRange,
-    physical_property: String,
     logical_property: &'static str,
 }
 
