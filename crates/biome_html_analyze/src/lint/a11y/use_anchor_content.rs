@@ -3,15 +3,17 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList, T};
+use biome_html_syntax::{
+    AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElement, HtmlElementList, T,
+};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
-    html_self_closing_element_has_accessible_name,
+    get_truthy_aria_hidden_attribute, html_element_has_non_empty_attribute,
+    html_element_has_truthy_aria_hidden, html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
@@ -183,10 +185,14 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
-                false
-            } else {
-                has_accessible_content(&element.children(), is_astro)
+                return false;
             }
+
+            if has_accessible_content(&element.children(), is_astro) {
+                return true;
+            }
+
+            html_element_renders_accessible_content(element, is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
@@ -233,6 +239,32 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         | AnyHtmlElement::HtmlCdataSection(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
     })
+}
+
+/// Checks whether an element written with an explicit closing tag may still
+/// render accessible content, based on its tag name.
+///
+/// The self-closing branch of [`has_accessible_content`] already performs this
+/// check. Astro, Vue and Svelte treat `<Icon />` and `<Icon></Icon>` as the same
+/// component, so both spellings have to reach the same verdict.
+fn html_element_renders_accessible_content(element: &HtmlElement, is_astro: bool) -> bool {
+    let Some(tag_text) = element
+        .opening_element()
+        .ok()
+        .and_then(|opening| opening.name().ok())
+        .and_then(|name| name.token_text_trimmed())
+    else {
+        return false;
+    };
+
+    let name = tag_text.as_ref();
+
+    if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") {
+        return html_element_has_non_empty_attribute(element, "alt");
+    }
+
+    // Custom components (PascalCase) may render accessible content
+    name.starts_with(|c: char| c.is_uppercase())
 }
 
 /// Checks if the content node contains non-empty text.
