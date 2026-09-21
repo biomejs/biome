@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "extends": ["base.json"] }
+```
+
+## `base.json`
+
+```json
+{
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "formatter": { "lineWidth": 120 }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+base.json:5:35 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the following value.
+  
+    3 │     {
+    4 │       "includes": ["**/*.test.js"],
+  > 5 │       "formatter": { "lineWidth": 120 }
+      │                                   ^^^
+    6 │     }
+    7 │   ]
+  
+  i This value is provided by override 0 in the extended configuration.
+  
+  i The override matched file.test.js using **/*.test.js.
+  
+
+```

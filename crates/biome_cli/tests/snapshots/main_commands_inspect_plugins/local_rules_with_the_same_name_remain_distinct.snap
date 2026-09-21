@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "./first/shared.grit",
+    "./second/shared.grit",
+    "./first/shared.grit"
+  ]
+}
+```
+
+## `first/shared.grit`
+
+```grit
+`unterminated
+```
+
+## `second/shared.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  Local plugins
+  
+  - shared (first/shared.grit)
+  - shared (second/shared.grit)
+  
+
+```

@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "formatter": { "lineWidth": null }
+}
+```
+
+## `base.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Emitted Messages
+
+```block
+base.json:1:31 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter.lineWidth has the following value.
+  
+  > 1 │ { "formatter": { "lineWidth": 100 } }
+      │                               ^^^
+  
+  i This value comes from base.json, extended by biome.json.
+  
+
+```

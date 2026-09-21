@@ -1,0 +1,83 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    { "path": "./unfiltered.grit", "includes": ["src/**/*.ts"] },
+    "./unfiltered.grit",
+    { "path": "./filtered.grit", "includes": ["src/**/*.ts", "!**/*.test.ts"] },
+    { "path": "./throw.ts", "includes": ["src/**/*.ts"] },
+    "./broken"
+  ],
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "plugins": [
+        { "path": "./filtered.grit", "includes": ["**/*.test.ts"] },
+        { "path": "./throw.ts", "includes": ["**/*.test.ts"] },
+        { "path": "./unfiltered.grit", "includes": ["**/*.test.ts"] }
+      ]
+    },
+    { "includes": ["scripts/**"], "plugins": ["./filtered.grit"] }
+  ]
+}
+```
+
+## `broken/biome-manifest.json`
+
+```json
+{ "version": 2 }
+```
+
+## `filtered.grit`
+
+```grit
+`console.log($message)`
+```
+
+## `throw.ts`
+
+```ts
+throw new Error('must not execute');
+```
+
+## `unfiltered.grit`
+
+```grit
+`console.log($message)`
+```
+
+# Termination Message
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 2 rules resolved. Some plugin imports could not be resolved.
+  
+  Local plugins
+  
+  - unfiltered
+  
+  Rules with include globs
+  
+  - filtered.grit ((includes: [src/**/*.ts, !**/*.test.ts]) or (includes: [**/*.test.ts] and override includes: [tests/**]) or (override includes: [scripts/**]))
+  
+  JavaScript plugins
+  
+  - throw.ts ((includes: [src/**/*.ts]) or (includes: [**/*.test.ts] and override includes: [tests/**]))
+  
+  Unresolved imports
+  
+  broken
+  
+  × Cannot load Biome manifest broken/biome-manifest.json.
+  
+  × version must be 1.
+  
+
+
+```

@@ -1,7 +1,6 @@
 //! Resolves retained configuration inputs and traces effective values to their declarations.
 
 use super::key::ConfigurationKey;
-use crate::commands::inspect::display_path;
 use biome_configuration::{
     BiomeDiagnostic, Configuration, ConfigurationSource, ConfigurationSourceEntry, OverridePattern,
 };
@@ -13,7 +12,7 @@ use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_service::WorkspaceError;
 use camino::Utf8Path;
-use serde_json::{Map, Value};
+use serde_json::Value;
 use std::collections::BTreeMap;
 
 /// Owns the resolved view and parsed source metadata for one retained configuration graph.
@@ -144,25 +143,6 @@ impl<'source> ConfigurationInspector<'source> {
 pub(crate) struct KeyInspection<'source> {
     pub(crate) value: Option<Value>,
     pub(crate) sources: Vec<SourceReference<'source>>,
-}
-
-impl KeyInspection<'_> {
-    pub(crate) fn source_json(&self) -> Option<Value> {
-        match self.sources.as_slice() {
-            [] => None,
-            [source] => Some(source.to_json()),
-            sources => Some(Value::Object(Map::from_iter([
-                (
-                    "configurationKind".to_string(),
-                    Value::String("merged".to_string()),
-                ),
-                (
-                    "contributors".to_string(),
-                    Value::Array(sources.iter().map(|source| source.to_json()).collect()),
-                ),
-            ]))),
-        }
-    }
 }
 
 /// Identifies whether a declaration belongs to the root file or an extended file.
@@ -722,62 +702,6 @@ pub(crate) struct SourceReference<'source> {
     pub(crate) override_index: Option<usize>,
     pub(crate) includes: Option<Vec<String>>,
     pub(crate) matched_path: Option<String>,
-}
-
-impl SourceReference<'_> {
-    fn to_json(&self) -> Value {
-        let mut result = Map::new();
-        let configuration_kind = match self.kind {
-            ConfigurationKind::Root => "root",
-            ConfigurationKind::Extend { .. } => "extend",
-        };
-        result.insert(
-            "configurationKind".to_string(),
-            Value::String(configuration_kind.to_string()),
-        );
-        result.insert(
-            "scope".to_string(),
-            Value::String(
-                match self.scope {
-                    SourceScope::Base => "base",
-                    SourceScope::Override => "override",
-                }
-                .to_string(),
-            ),
-        );
-        result.insert(
-            "path".to_string(),
-            Value::String(display_path(self.path).into_owned()),
-        );
-        if let Some(range) = self.range {
-            result.insert(
-                "range".to_string(),
-                serde_json::json!({
-                    "start": u32::from(range.start()),
-                    "end": u32::from(range.end()),
-                }),
-            );
-        }
-        if let ConfigurationKind::Extend {
-            specifier: Some(specifier),
-        } = self.kind
-        {
-            result.insert("specifier".to_string(), Value::String(specifier.clone()));
-        }
-        if let Some(index) = self.override_index {
-            result.insert("overrideIndex".to_string(), Value::from(index));
-        }
-        if let Some(includes) = &self.includes {
-            result.insert(
-                "includes".to_string(),
-                Value::Array(includes.iter().cloned().map(Value::String).collect()),
-            );
-        }
-        if let Some(path) = &self.matched_path {
-            result.insert("matchedPath".to_string(), Value::String(path.clone()));
-        }
-        Value::Object(result)
-    }
 }
 
 #[cfg(test)]

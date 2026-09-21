@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "extends": ["base.json"],
+  "formatter": { "lineWidth": 100 }
+}
+```
+
+## `base.json`
+
+```json
+{ "formatter": { "lineWidth": 100 } }
+```
+
+# Emitted Messages
+
+```block
+biome.json:3:16 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key formatter has the following value.
+  
+    1 │ {
+    2 │   "extends": ["base.json"],
+  > 3 │   "formatter": { "lineWidth": 100 }
+      │                ^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+  
+  i This value is provided by the root configuration.
+  
+
+```

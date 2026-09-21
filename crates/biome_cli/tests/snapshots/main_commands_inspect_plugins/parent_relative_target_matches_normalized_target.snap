@@ -1,0 +1,57 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] },
+    { "path": "./other-only.grit", "includes": ["other/**"] }
+  ],
+  "overrides": [{ "includes": ["src/**"], "plugins": ["./src-override.grit"] }]
+}
+```
+
+## `base.grit`
+
+```grit
+`unterminated
+```
+
+## `other-only.grit`
+
+```grit
+`unterminated
+```
+
+## `src-only.grit`
+
+```grit
+`unterminated
+```
+
+## `src-override.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 rules resolved.
+  
+  Target path: other/file.ts
+  
+  Local plugins
+  
+  - base
+  - other-only (includes: [other/**])
+  
+
+```

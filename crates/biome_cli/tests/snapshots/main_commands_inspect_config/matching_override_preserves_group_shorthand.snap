@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": { "suspicious": "error" }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.js"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noDebugger": "off" }
+        }
+      }
+    }
+  ]
+}
+```
+
+# Emitted Messages
+
+```block
+biome.json:3:30 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The key linter.rules.suspicious.noConsole has the following value.
+  
+    1 │ {
+    2 │   "linter": {
+  > 3 │     "rules": { "suspicious": "error" }
+      │                              ^^^^^^^
+    4 │   },
+    5 │   "overrides": [
+  
+  i This value is provided by the root configuration.
+  
+
+```
