@@ -54,9 +54,9 @@ invalidRtl.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━
     4 │ 	left: 3rem;
     5 │ }
   
-  i Replace right with inset-inline-start.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with inset-inline-start.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -75,9 +75,9 @@ invalidRtl.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━
     5 │ }
     6 │ 
   
-  i Replace left with inset-inline-end.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inset-inline-end.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -95,9 +95,9 @@ invalidRtl.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━
      9 │ 	margin-left: 4rem;
     10 │ }
   
-  i Replace margin-right with margin-inline-start.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-right with margin-inline-start.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -116,9 +116,9 @@ invalidRtl.css:9:2 lint/nursery/useLogicalProperties ━━━━━━━━━
     10 │ }
     11 │ 
   
-  i Replace margin-left with margin-inline-end.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-left with margin-inline-end.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -136,9 +136,9 @@ invalidRtl.css:13:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     14 │ 	padding-left: 20px;
     15 │ }
   
-  i Replace padding-right with padding-inline-start.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace padding-right with padding-inline-start.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -157,9 +157,9 @@ invalidRtl.css:14:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     15 │ }
     16 │ 
   
-  i Replace padding-left with padding-inline-end.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace padding-left with padding-inline-end.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -177,9 +177,9 @@ invalidRtl.css:18:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     19 │ 	border-left-color: green;
     20 │ 	border-left-style: dotted;
   
-  i Replace border-left with border-inline-end.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left with border-inline-end.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -198,9 +198,9 @@ invalidRtl.css:19:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     20 │ 	border-left-style: dotted;
     21 │ 	border-left-width: 6px;
   
-  i Replace border-left-color with border-inline-end-color.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-color with border-inline-end-color.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -219,9 +219,9 @@ invalidRtl.css:20:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     21 │ 	border-left-width: 6px;
     22 │ 	border-right: 7px double yellow;
   
-  i Replace border-left-style with border-inline-end-style.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-style with border-inline-end-style.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -240,9 +240,9 @@ invalidRtl.css:21:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     22 │ 	border-right: 7px double yellow;
     23 │ 	border-right-color: yellow;
   
-  i Replace border-left-width with border-inline-end-width.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-width with border-inline-end-width.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -261,9 +261,9 @@ invalidRtl.css:22:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     23 │ 	border-right-color: yellow;
     24 │ 	border-right-style: double;
   
-  i Replace border-right with border-inline-start.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right with border-inline-start.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -282,9 +282,9 @@ invalidRtl.css:23:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     24 │ 	border-right-style: double;
     25 │ 	border-right-width: 8px;
   
-  i Replace border-right-color with border-inline-start-color.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-color with border-inline-start-color.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -303,9 +303,9 @@ invalidRtl.css:24:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     25 │ 	border-right-width: 8px;
     26 │ }
   
-  i Replace border-right-style with border-inline-start-style.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-style with border-inline-start-style.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -324,9 +324,9 @@ invalidRtl.css:25:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     26 │ }
     27 │ 
   
-  i Replace border-right-width with border-inline-start-width.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-width with border-inline-start-width.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -344,9 +344,9 @@ invalidRtl.css:29:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     30 │ 	border-top-right-radius: 8px;
     31 │ 	border-bottom-left-radius: 12px;
   
-  i Replace border-top-left-radius with border-start-end-radius.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-top-left-radius with border-start-end-radius.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -365,9 +365,9 @@ invalidRtl.css:30:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     31 │ 	border-bottom-left-radius: 12px;
     32 │ 	border-bottom-right-radius: 16px;
   
-  i Replace border-top-right-radius with border-start-start-radius.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-top-right-radius with border-start-start-radius.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -386,9 +386,9 @@ invalidRtl.css:31:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     32 │ 	border-bottom-right-radius: 16px;
     33 │ }
   
-  i Replace border-bottom-left-radius with border-end-end-radius.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-bottom-left-radius with border-end-end-radius.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -407,9 +407,9 @@ invalidRtl.css:32:2 lint/nursery/useLogicalProperties ━━━━━━━━�
     33 │ }
     34 │ 
   
-  i Replace border-bottom-right-radius with border-end-start-radius.
-  
   i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-bottom-right-radius with border-end-start-radius.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -113,10 +113,10 @@ impl Rule for UseLogicalProperties {
                 },
             )
             .note(markup! {
-                "Replace "<Emphasis>{state.physical_property.as_str()}</Emphasis>" with "<Emphasis>{state.logical_property}</Emphasis>"."
+                "Logical properties adapt better to different writing modes and layout directions."
             })
             .note(markup! {
-                "Logical properties adapt better to different writing modes and layout directions."
+                "Replace "<Emphasis>{state.physical_property.as_str()}</Emphasis>" with "<Emphasis>{state.logical_property}</Emphasis>"."
             }),
         )
     }
