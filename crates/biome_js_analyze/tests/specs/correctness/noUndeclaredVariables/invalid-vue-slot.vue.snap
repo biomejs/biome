@@ -1,0 +1,107 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-slot.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <template #named="{ source: alias, nested: { label } }">
+    {{ alias }} {{ label }}
+    {{ source }} {{ nested }} {{ missing }}
+  </template>
+  <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-slot.vue:5:8 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The source variable is undeclared.
+  
+    3 │   <template #named="{ source: alias, nested: { label } }">
+    4 │     {{ alias }} {{ label }}
+  > 5 │     {{ source }} {{ nested }} {{ missing }}
+      │        ^^^^^^
+    6 │   </template>
+    7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-slot.vue:5:21 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The nested variable is undeclared.
+  
+    3 │   <template #named="{ source: alias, nested: { label } }">
+    4 │     {{ alias }} {{ label }}
+  > 5 │     {{ source }} {{ nested }} {{ missing }}
+      │                     ^^^^^^
+    6 │   </template>
+    7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-slot.vue:5:34 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missing variable is undeclared.
+  
+    3 │   <template #named="{ source: alias, nested: { label } }">
+    4 │     {{ alias }} {{ label }}
+  > 5 │     {{ source }} {{ nested }} {{ missing }}
+      │                                  ^^^^^^^
+    6 │   </template>
+    7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-slot.vue:7:40 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ordinaryBinding variable is undeclared.
+  
+    5 │     {{ source }} {{ nested }} {{ missing }}
+    6 │   </template>
+  > 7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+      │                                        ^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
+
+```
+invalid-vue-slot.vue:7:18 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The ordinaryBinding variable is undeclared.
+  
+    5 │     {{ source }} {{ nested }} {{ missing }}
+    6 │   </template>
+  > 7 │   <div v-bind="{ ordinaryBinding }">{{ ordinaryBinding }}</div>
+      │                  ^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```
