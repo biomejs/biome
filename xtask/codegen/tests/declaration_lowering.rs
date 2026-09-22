@@ -44,6 +44,50 @@ fn local<'a>(
 }
 
 #[test]
+fn keyof_preserves_operands_in_signatures() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Keys {
+        named: keyof Target;
+        key<T, K extends keyof T = keyof T>(value: keyof (T)): keyof T;
+    }
+    interface Target { id: boolean; }"
+        .to_vec();
+    let table = lower(&[file], &["Keys"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Keys").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    assert_eq!(
+        local(&table, interface.member("named").unwrap().type_reference()),
+        &LoweredTypeData::Keyof(table.interface_reference("Target").unwrap()),
+    );
+    let LoweredTypeData::Function(function) =
+        local(&table, interface.member("key").unwrap().type_reference())
+    else {
+        panic!("expected function")
+    };
+    let expected = LoweredTypeData::Keyof(function.type_parameters()[0].clone());
+    assert_eq!(
+        local(&table, function.parameters()[0].type_reference()),
+        &expected
+    );
+    assert_eq!(local(&table, function.return_type()), &expected);
+    let LoweredTypeData::GenericParameter {
+        constraint,
+        default,
+        ..
+    } = local(&table, &function.type_parameters()[1])
+    else {
+        panic!("expected generic parameter")
+    };
+    for reference in [constraint, default] {
+        assert_eq!(local(&table, reference.as_ref().unwrap()), &expected);
+    }
+    Ok(())
+}
+
+#[test]
 fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
     let files = [fixture("lowering.interfaces.d.ts")?];
     let table = lower(&files, &["Catalog"])?;
