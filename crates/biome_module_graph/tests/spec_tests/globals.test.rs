@@ -539,3 +539,72 @@ fn lowered_constructors_preserve_explicit_collection_arguments() {
     let has = inferred_binding_ty_by_name(&db, module, inferred, "setHas").unwrap();
     assert!(is_inferred_boolean(&db, inferred.resolve_type(&db, has)));
 }
+
+#[test]
+fn regexp_declarations_infer_results_and_constructor_calls() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const annotated: RegExpExecArray;
+        export const annotatedIndex = annotated.index;
+        export const annotatedInput = annotated.input;
+        export const first = annotated["0"];
+        export const length = annotated.length;
+        export const execute = /ab/.exec;
+        export const result = /ab/.exec("abc");
+        export const resultIndex = result?.index;
+        export const resultInput = result?.input;
+        export const constructed = new RegExp("ab", "g").exec("abc");
+        export const called = RegExp("ab", "g").exec("abc");
+        export const constructedIndex = constructed?.index;
+        export const calledIndex = called?.index;
+        export const copied = new RegExp(/ab/).source;
+        export const calledCopy = RegExp(/ab/).source;
+        const create = RegExp;
+        export const aliased = create("ab").test("abc");
+        export const constructedAlias = new create("ab").lastIndex;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in ["annotatedIndex", "length", "constructedAlias"] {
+        assert!(
+            is_inferred_number(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    for name in ["annotatedInput", "first", "copied", "calledCopy"] {
+        assert!(
+            is_inferred_string(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    assert!(is_inferred_boolean(&db, binding("aliased")));
+    for name in ["resultIndex", "constructedIndex", "calledIndex"] {
+        assert!(
+            contains_inferred_number(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    assert!(contains_inferred_string(&db, binding("resultInput")));
+    for name in ["result", "constructed", "called"] {
+        let ty = binding(name);
+        assert!(contains_inferred_null(&db, ty), "{name}: {ty:?}");
+    }
+    assert_inferred_type_snapshot(
+        "regexp_declarations_infer_results_and_constructor_calls",
+        &db,
+        &fs,
+    );
+}

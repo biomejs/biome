@@ -74,7 +74,10 @@ fn generated_body(
     let mut names = String::new();
     for (name, _, reference) in super::lower::declarations::PREDEFINED_DECLARATIONS {
         if let Some(global) = lowered.global(name)
-            && !matches!(global.data(), LoweredTypeData::Class(_))
+            && matches!(
+                global.data(),
+                LoweredTypeData::Interface(_) | LoweredTypeData::InstanceOf { .. }
+            )
         {
             names.push_str(&format!(
                 "({:?}, crate::globals::{}),\n",
@@ -471,7 +474,6 @@ fn for_each_global_in_emit_order(
 ) -> Result<()> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
-            && global.id_constant() != "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID"
             && !super::lower::declarations::PREDEFINED_DECLARATIONS
                 .iter()
                 .any(|(_, id, _)| *id == global.id_constant())
@@ -498,10 +500,6 @@ fn for_each_global_in_emit_order(
         {
             visit(global);
         }
-    }
-
-    if let Some(global) = lowered.global("Symbol.iterator") {
-        visit(global);
     }
 
     Ok(())
