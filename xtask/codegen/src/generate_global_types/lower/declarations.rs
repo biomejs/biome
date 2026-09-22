@@ -592,6 +592,7 @@ fn lower_scalar_type(ty: &AnyTsType) -> Result<Option<LoweredTypeData>> {
         AnyTsType::TsBigintType(_) => LoweredTypeData::BigInt,
         AnyTsType::TsBooleanType(_) => LoweredTypeData::Boolean,
         AnyTsType::TsNeverType(_) => LoweredTypeData::NeverKeyword,
+        AnyTsType::TsNonPrimitiveType(_) => LoweredTypeData::ObjectKeyword,
         AnyTsType::TsNullLiteralType(_) => LoweredTypeData::Null,
         AnyTsType::TsSymbolType(_) => LoweredTypeData::Symbol,
         AnyTsType::TsUndefinedType(_) => LoweredTypeData::Undefined,
