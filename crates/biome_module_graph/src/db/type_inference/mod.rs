@@ -9,6 +9,7 @@ use biome_js_type_info::interned_types::{
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
+mod conditional_classification;
 mod expressions;
 mod globals;
 mod imports;
@@ -17,6 +18,9 @@ mod promise_classification;
 mod qualifiers;
 mod resolver;
 
+pub(in crate::db) use conditional_classification::{
+    classify_expression_case_literal, classify_expression_conditional,
+};
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
     resolve_export_type_on_demand,

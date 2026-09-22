@@ -172,7 +172,7 @@ impl ExactSizeIterator for UnionIterator<'_> {
 
 impl FusedIterator for UnionIterator<'_> {}
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq, salsa::Update)]
 pub enum ConditionalType {
     Anything,
     Falsy,
