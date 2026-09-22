@@ -226,6 +226,11 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Keyof, ty: {} }}))",
             render_type_reference(ty),
         ),
+        LoweredTypeData::IndexedAccess { object, index } => format!(
+            "crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {{ object: {}, index: {} }}))",
+            render_type_reference(object),
+            render_type_reference(index),
+        ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
             ty,
