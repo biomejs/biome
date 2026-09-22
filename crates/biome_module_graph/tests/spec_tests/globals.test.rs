@@ -780,3 +780,26 @@ fn generated_intl_namespace_infers_constructor_and_method_results() {
         &fs,
     );
 }
+
+#[test]
+fn generated_date_statics_infer_declared_returns() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const text = Date();
+        export const now = Date.now();
+        export const parsed = Date.parse("2026-01-01");
+        export const utc = Date.UTC(2026, 0);
+        export const utcFull = Date.UTC(2026, 0, 1, 12, 30, 45, 500);
+        export const prototype = Date.prototype;
+        export const prototypeTime = Date.prototype.getTime();
+        const create = Date;
+        export const aliasedText = create();
+        const parse = Date.parse;
+        export const aliasedTimestamp = parse("2026-01-01");
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot("generated_date_statics_infer_declared_returns", &db, &fs);
+}
