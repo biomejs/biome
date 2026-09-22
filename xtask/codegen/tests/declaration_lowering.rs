@@ -44,6 +44,105 @@ fn local<'a>(
 }
 
 #[test]
+fn indexed_access_preserves_nested_operands() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Access {
+        object: Target;
+        key: 'items';
+        items: Target['items'];
+        repeated: (Target)['items'];
+        nested: Target['items'][number];
+        values: Target[keyof Target];
+        pair: [string, number];
+        keys: 0 | 1;
+        element: [string, number][0 | 1];
+    }
+    interface Target { items: string[]; }"
+        .to_vec();
+    let table = lower(&[file], &["Access"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Access").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    let member = |name| interface.member(name).unwrap().type_reference().clone();
+    for (name, object, index) in [
+        ("items", member("object"), member("key")),
+        (
+            "nested",
+            member("items"),
+            LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID"),
+        ),
+        ("element", member("pair"), member("keys")),
+    ] {
+        assert_eq!(
+            local(&table, &member(name)),
+            &LoweredTypeData::IndexedAccess { object, index },
+        );
+    }
+    assert_eq!(member("items"), member("repeated"));
+    let LoweredTypeData::IndexedAccess { object, index } = local(&table, &member("values")) else {
+        panic!("expected indexed access")
+    };
+    assert_eq!(object, &table.interface_reference("Target").unwrap());
+    assert_eq!(
+        local(&table, index),
+        &LoweredTypeData::Keyof(object.clone())
+    );
+    Ok(())
+}
+
+#[test]
+fn indexed_access_preserves_signature_parameters() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Access {
+        get<T, K extends keyof T, V extends T[K] = T[K]>(value: T[K]): T[K];
+    }"
+    .to_vec();
+    let table = lower(&[file], &["Access"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Access").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    let LoweredTypeData::Function(function) =
+        local(&table, interface.member("get").unwrap().type_reference())
+    else {
+        panic!("expected function")
+    };
+    let expected = LoweredTypeData::IndexedAccess {
+        object: function.type_parameters()[0].clone(),
+        index: function.type_parameters()[1].clone(),
+    };
+    assert_eq!(local(&table, function.return_type()), &expected);
+    assert_eq!(
+        function.parameters()[0].type_reference(),
+        function.return_type()
+    );
+    let LoweredTypeData::GenericParameter {
+        constraint,
+        default,
+        ..
+    } = local(&table, &function.type_parameters()[2])
+    else {
+        panic!("expected generic parameter")
+    };
+    assert_eq!(constraint.as_ref(), Some(function.return_type()));
+    assert_eq!(default, constraint);
+    for (position, ty) in table.types().iter().enumerate() {
+        if let LoweredTypeData::IndexedAccess { object, index } = ty {
+            for operand in [object, index] {
+                let LoweredTypeReference::Local(operand) = operand else {
+                    panic!("expected local operand")
+                };
+                assert!(*operand < position);
+            }
+        }
+    }
+    Ok(())
+}
+
+#[test]
 fn keyof_preserves_operands_in_signatures() -> Result<()> {
     let mut file = fixture("lowering.interfaces.d.ts")?;
     file.bytes = b"interface Keys {

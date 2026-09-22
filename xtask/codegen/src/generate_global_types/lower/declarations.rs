@@ -33,7 +33,7 @@ impl LoweredDeclarations {
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
 /// global interface references, arrays, required unnamed tuple elements, readonly arrays/tuples,
-/// `keyof`, parentheses, unions, and function types.
+/// `keyof`, indexed access, parentheses, unions, and function types.
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Numeric and string index signatures preserve their key and value types.
@@ -537,6 +537,11 @@ impl DeclarationLowerer<'_> {
                     bail!("unsupported type arguments in type reference");
                 }
                 self.named_reference(name)
+            }
+            AnyTsType::TsIndexedAccessType(access) => {
+                let object = self.lower_reference(&access.object_type()?)?;
+                let index = self.lower_reference(&access.index_type()?)?;
+                Ok(self.register(LoweredTypeData::IndexedAccess { object, index }))
             }
             AnyTsType::TsTypeOperatorType(operator)
                 if operator.operator_token()?.kind() == T![keyof] =>
