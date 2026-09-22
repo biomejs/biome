@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 88;
+const PREDEFINED_TYPE_COUNT: usize = 89;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -206,4 +206,5 @@ predefined_globals! {
     (MAP_ITERATOR_ID, MAP_ITERATOR_ID_NAME, MAP_ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_MAP_ITERATOR_ID, "MapIterator", Helper),
     (SET_ITERATOR_ID, SET_ITERATOR_ID_NAME, SET_ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_SET_ITERATOR_ID, "SetIterator", Helper),
     (BUILTIN_ITERATOR_RETURN_ID, BUILTIN_ITERATOR_RETURN_ID_NAME, BUILTIN_ITERATOR_RETURN_ID_GLOBAL_TYPE_ID, GLOBAL_BUILTIN_ITERATOR_RETURN_ID, "BuiltinIteratorReturn", Helper),
+    (INTL_ID, INTL_ID_NAME, INTL_ID_GLOBAL_TYPE_ID, _, "Intl", ManualGlobal),
 }

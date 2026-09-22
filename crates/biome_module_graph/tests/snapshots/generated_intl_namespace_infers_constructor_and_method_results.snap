@@ -1,0 +1,1034 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const compared = new Intl.Collator("en").compare("a", "b");
+export const calledCompare = Intl.Collator().compare("a", "b");
+export const numeric = Intl.Collator().resolvedOptions().numeric;
+export const numberText = new Intl.NumberFormat("en").format(42);
+export const calledNumberText = Intl.NumberFormat().format(42);
+export const dateText = new Intl.DateTimeFormat("en").format(0);
+export const calledDateText = Intl.DateTimeFormat().format(new Date());
+export const calendar = Intl.DateTimeFormat().resolvedOptions().calendar;
+export const locales = Intl.NumberFormat.supportedLocalesOf(["en"]);
+export const prototypeText = Intl.NumberFormat.prototype.format(42);
+const Format = Intl.NumberFormat;
+export const aliasedText = new Format().format(42);
+export const localeMethod = new Date().toLocaleString;
+```
+
+## Inferred types
+
+```
+Binding compared "compared" => number
+
+Expression "new Intl.Collator(\"en\")" => instanceof Intl.Collator
+
+Expression "new Intl.Collator(\"en\").compare" => sync Function "compare" {
+  accepts: {
+    params: [
+      required x: string
+      required y: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "new Intl.Collator(\"en\").compare(\"a\", \"b\")" => number
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.Collator" => class "Intl.Collator" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"en\"" => string: en
+
+Expression "\"a\"" => string: a
+
+Expression "\"b\"" => string: b
+
+Binding calledCompare "calledCompare" => number
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.Collator" => class "Intl.Collator" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.Collator()" => interface "Intl.Collator" {
+  extends: []
+  type_args: []
+  members: [
+    "compare":
+      sync Function "compare" {
+        accepts: {
+          params: [
+            required x: string
+            required y: string
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedCollatorOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "usage": string,
+            "sensitivity": string,
+            "ignorePunctuation": boolean,
+            "collation": string,
+            "caseFirst": string,
+            "numeric": boolean
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.Collator().compare" => sync Function "compare" {
+  accepts: {
+    params: [
+      required x: string
+      required y: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Intl.Collator().compare(\"a\", \"b\")" => number
+
+Expression "\"a\"" => string: a
+
+Expression "\"b\"" => string: b
+
+Binding numeric "numeric" => boolean
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.Collator" => class "Intl.Collator" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.Collator()" => interface "Intl.Collator" {
+  extends: []
+  type_args: []
+  members: [
+    "compare":
+      sync Function "compare" {
+        accepts: {
+          params: [
+            required x: string
+            required y: string
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedCollatorOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "usage": string,
+            "sensitivity": string,
+            "ignorePunctuation": boolean,
+            "collation": string,
+            "caseFirst": string,
+            "numeric": boolean
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.Collator().resolvedOptions" => sync Function "resolvedOptions" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: interface "Intl.ResolvedCollatorOptions" {
+    extends: []
+    type_args: []
+    members: [
+      "locale": string,
+      "usage": string,
+      "sensitivity": string,
+      "ignorePunctuation": boolean,
+      "collation": string,
+      "caseFirst": string,
+      "numeric": boolean
+    ]
+  }
+}
+
+Expression "Intl.Collator().resolvedOptions()" => interface "Intl.ResolvedCollatorOptions" {
+  extends: []
+  type_args: []
+  members: [
+    "locale": string,
+    "usage": string,
+    "sensitivity": string,
+    "ignorePunctuation": boolean,
+    "collation": string,
+    "caseFirst": string,
+    "numeric": boolean
+  ]
+}
+
+Expression "Intl.Collator().resolvedOptions().numeric" => boolean
+
+Binding numberText "numberText" => string
+
+Expression "new Intl.NumberFormat(\"en\")" => instanceof Intl.NumberFormat
+
+Expression "new Intl.NumberFormat(\"en\").format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Intl.NumberFormat(\"en\").format(42)" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"en\"" => string: en
+
+Expression "42" => number: 42
+
+Binding calledNumberText "calledNumberText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.NumberFormat()" => interface "Intl.NumberFormat" {
+  extends: []
+  type_args: []
+  members: [
+    "format":
+      sync Function "format" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedNumberFormatOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "numberingSystem": string,
+            "style": unknown,
+            "currency"?: string,
+            "currencyDisplay"?: unknown,
+            "minimumIntegerDigits": number,
+            "minimumFractionDigits"?: number,
+            "maximumFractionDigits"?: number,
+            "minimumSignificantDigits"?: number,
+            "maximumSignificantDigits"?: number,
+            "useGrouping": unknown
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat().format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.NumberFormat().format(42)" => string
+
+Expression "42" => number: 42
+
+Binding dateText "dateText" => string
+
+Expression "new Intl.DateTimeFormat(\"en\")" => instanceof Intl.DateTimeFormat
+
+Expression "new Intl.DateTimeFormat(\"en\").format" => sync Function "format" {
+  accepts: {
+    params: [
+      optional date: instanceof Date | number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Intl.DateTimeFormat(\"en\").format(0)" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => class "Intl.DateTimeFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"en\"" => string: en
+
+Expression "0" => number: 0
+
+Binding calledDateText "calledDateText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => class "Intl.DateTimeFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.DateTimeFormat()" => interface "Intl.DateTimeFormat" {
+  extends: []
+  type_args: []
+  members: [
+    "format":
+      sync Function "format" {
+        accepts: {
+          params: [
+            optional date: instanceof Date | number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedDateTimeFormatOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "calendar": string,
+            "numberingSystem": string,
+            "timeZone": string,
+            "hour12"?: boolean,
+            "weekday"?: string,
+            "era"?: string,
+            "year"?: string,
+            "month"?: string,
+            "day"?: string,
+            "hour"?: string,
+            "minute"?: string,
+            "second"?: string,
+            "timeZoneName"?: string
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.DateTimeFormat().format" => sync Function "format" {
+  accepts: {
+    params: [
+      optional date: instanceof Date | number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.DateTimeFormat().format(new Date())" => string
+
+Expression "new Date()" => instanceof Date
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding calendar "calendar" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => class "Intl.DateTimeFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.DateTimeFormat()" => interface "Intl.DateTimeFormat" {
+  extends: []
+  type_args: []
+  members: [
+    "format":
+      sync Function "format" {
+        accepts: {
+          params: [
+            optional date: instanceof Date | number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedDateTimeFormatOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "calendar": string,
+            "numberingSystem": string,
+            "timeZone": string,
+            "hour12"?: boolean,
+            "weekday"?: string,
+            "era"?: string,
+            "year"?: string,
+            "month"?: string,
+            "day"?: string,
+            "hour"?: string,
+            "minute"?: string,
+            "second"?: string,
+            "timeZoneName"?: string
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.DateTimeFormat().resolvedOptions" => sync Function "resolvedOptions" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: interface "Intl.ResolvedDateTimeFormatOptions" {
+    extends: []
+    type_args: []
+    members: [
+      "locale": string,
+      "calendar": string,
+      "numberingSystem": string,
+      "timeZone": string,
+      "hour12"?: boolean,
+      "weekday"?: string,
+      "era"?: string,
+      "year"?: string,
+      "month"?: string,
+      "day"?: string,
+      "hour"?: string,
+      "minute"?: string,
+      "second"?: string,
+      "timeZoneName"?: string
+    ]
+  }
+}
+
+Expression "Intl.DateTimeFormat().resolvedOptions()" => interface "Intl.ResolvedDateTimeFormatOptions" {
+  extends: []
+  type_args: []
+  members: [
+    "locale": string,
+    "calendar": string,
+    "numberingSystem": string,
+    "timeZone": string,
+    "hour12"?: boolean,
+    "weekday"?: string,
+    "era"?: string,
+    "year"?: string,
+    "month"?: string,
+    "day"?: string,
+    "hour"?: string,
+    "minute"?: string,
+    "second"?: string,
+    "timeZoneName"?: string
+  ]
+}
+
+Expression "Intl.DateTimeFormat().resolvedOptions().calendar" => string
+
+Binding locales "locales" => instanceof Array<string>
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.NumberFormat.supportedLocalesOf" => sync Function "supportedLocalesOf" {
+  accepts: {
+    params: [
+      required locales: string | instanceof Array<string>
+      optional options: interface "Intl.NumberFormatOptions" {
+        extends: []
+        type_args: []
+        members: [
+          "localeMatcher"?: string: lookup | string: best fit | undefined,
+          "style"?: unknown,
+          "currency"?: string | undefined,
+          "currencyDisplay"?: unknown,
+          "useGrouping"?: unknown,
+          "minimumIntegerDigits"?: number | undefined,
+          "minimumFractionDigits"?: number | undefined,
+          "maximumFractionDigits"?: number | undefined,
+          "minimumSignificantDigits"?: number | undefined,
+          "maximumSignificantDigits"?: number | undefined
+        ]
+      }
+    ]
+    type_args: []
+  }
+  returns: instanceof Array<string>
+}
+
+Expression "Intl.NumberFormat.supportedLocalesOf([\"en\"])" => instanceof Array<string>
+
+Expression "[\"en\"]" => [string: en]
+
+Expression "\"en\"" => string: en
+
+Binding prototypeText "prototypeText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl.NumberFormat.prototype" => interface "Intl.NumberFormat" {
+  extends: []
+  type_args: []
+  members: [
+    "format":
+      sync Function "format" {
+        accepts: {
+          params: [
+            required value: number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    "resolvedOptions":
+      sync Function "resolvedOptions" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: interface "Intl.ResolvedNumberFormatOptions" {
+          extends: []
+          type_args: []
+          members: [
+            "locale": string,
+            "numberingSystem": string,
+            "style": unknown,
+            "currency"?: string,
+            "currencyDisplay"?: unknown,
+            "minimumIntegerDigits": number,
+            "minimumFractionDigits"?: number,
+            "maximumFractionDigits"?: number,
+            "minimumSignificantDigits"?: number,
+            "maximumSignificantDigits"?: number,
+            "useGrouping": unknown
+          ]
+        }
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat.prototype.format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.NumberFormat.prototype.format(42)" => string
+
+Expression "42" => number: 42
+
+Binding Format "Format" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator":
+      class "Intl.Collator" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "NumberFormat":
+      class "Intl.NumberFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+    ,
+    "DateTimeFormat":
+      class "Intl.DateTimeFormat" {
+        extends: none
+        implements: []
+        type_args: []
+      }
+  ]
+}
+
+Expression "Intl.NumberFormat" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding aliasedText "aliasedText" => string
+
+Expression "new Format()" => instanceof Intl.NumberFormat
+
+Expression "new Format().format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Format().format(42)" => string
+
+Expression "Format" => class "Intl.NumberFormat" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "42" => number: 42
+
+Binding localeMethod "localeMethod" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: [
+            optional locales: string | instanceof Array<string>
+            optional options: interface "Intl.DateTimeFormatOptions" {
+              extends: []
+              type_args: []
+              members: [
+                "localeMatcher"?: string: best fit | string: lookup | undefined,
+                "weekday"?:
+                  string: long | string: short | string: narrow | undefined
+                ,
+                "era"?:
+                  string: long | string: short | string: narrow | undefined
+                ,
+                "year"?: string: numeric | string: 2-digit | undefined,
+                "month"?:
+                  string: numeric | string: 2-digit | string: long | string: short | string: narrow | undefined
+                ,
+                "day"?: string: numeric | string: 2-digit | undefined,
+                "hour"?: string: numeric | string: 2-digit | undefined,
+                "minute"?: string: numeric | string: 2-digit | undefined,
+                "second"?: string: numeric | string: 2-digit | undefined,
+                "timeZoneName"?:
+                  string: short | string: long | string: shortOffset | string: longOffset | string: shortGeneric | string: longGeneric | undefined
+                ,
+                "formatMatcher"?: string: best fit | string: basic | undefined,
+                "hour12"?: boolean | undefined,
+                "timeZone"?: string | undefined
+              ]
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "new Date()" => instanceof Date
+
+Expression "new Date().toLocaleString" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: [
+            optional locales: string | instanceof Array<string>
+            optional options: interface "Intl.DateTimeFormatOptions" {
+              extends: []
+              type_args: []
+              members: [
+                "localeMatcher"?: string: best fit | string: lookup | undefined,
+                "weekday"?:
+                  string: long | string: short | string: narrow | undefined
+                ,
+                "era"?:
+                  string: long | string: short | string: narrow | undefined
+                ,
+                "year"?: string: numeric | string: 2-digit | undefined,
+                "month"?:
+                  string: numeric | string: 2-digit | string: long | string: short | string: narrow | undefined
+                ,
+                "day"?: string: numeric | string: 2-digit | undefined,
+                "hour"?: string: numeric | string: 2-digit | undefined,
+                "minute"?: string: numeric | string: 2-digit | undefined,
+                "second"?: string: numeric | string: 2-digit | undefined,
+                "timeZoneName"?:
+                  string: short | string: long | string: shortOffset | string: longOffset | string: shortGeneric | string: longGeneric | undefined
+                ,
+                "formatMatcher"?: string: best fit | string: basic | undefined,
+                "hour12"?: boolean | undefined,
+                "timeZone"?: string | undefined
+              ]
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

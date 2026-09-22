@@ -343,6 +343,8 @@ struct ClassSelection {
     constructor_members: declarations::MemberSelector,
 }
 
+pub(super) const NAMESPACE_GLOBALS: &[(&str, &str)] = &[("Intl", "INTL_ID_GLOBAL_TYPE_ID")];
+
 /// Lowers supported global groups into generated global type definitions.
 pub fn lower_global_types(
     manifest: &GlobalManifest,
@@ -475,6 +477,13 @@ pub fn lower_global_types(
     }
 
     declarations::lower_predefined_declarations(manifest, source_files, &mut globals)?;
+    for &(name, id_constant) in NAMESPACE_GLOBALS {
+        if let Some(namespace) =
+            declarations::lower_namespace(manifest, source_files, &[name], id_constant)?
+        {
+            globals.push(namespace);
+        }
+    }
 
     Ok(LoweredGlobalTypes {
         globals: globals.into_boxed_slice(),
