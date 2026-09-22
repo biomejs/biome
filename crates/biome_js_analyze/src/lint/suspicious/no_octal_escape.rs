@@ -55,10 +55,14 @@ impl Rule for NoOctalEscape {
                 && let Some((_, byte)) = it.next()
                 && matches!(byte, b'0'..=b'7')
             {
+                // A legacy octal escape sequence has at most 3 octal digits, and
+                // at most 2 when the leading digit is 4-7 (max value is `\377` = 255).
+                // See ECMAScript Annex B.1.2 (LegacyOctalEscapeSequence).
+                let max_more = if matches!(byte, b'0'..=b'3') { 2 } else { 1 };
                 let len = 2 + it
                     .clone()
-                    .take(5)
-                    .take_while(|(_, byte)| matches!(byte, b'0'..=b'7'))
+                    .take(max_more)
+                    .take_while(|(_, b)| matches!(b, b'0'..=b'7'))
                     .count();
                 // Ignore the non-deprecated `\0`
                 if byte != b'0' || len > 2 {
