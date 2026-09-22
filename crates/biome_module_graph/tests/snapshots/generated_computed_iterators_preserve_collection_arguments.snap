@@ -1,0 +1,175 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const map: Map<string, number>;
+declare const set: Set<string>;
+export const entries = map[Symbol.iterator]();
+export const values = set[Symbol.iterator]();
+export const entry = entries.next().value;
+export const value = values.next().value;
+export const repeated = entries[Symbol.iterator]();
+const iterator: typeof Symbol.iterator = Symbol.iterator;
+export const aliased = map[iterator]();
+```
+
+## Inferred types
+
+```
+Binding map "map" => instanceof Map<string, number>
+
+Binding set "set" => instanceof Set<string>
+
+Binding entries "entries" => instanceof MapIterator<[string,
+number]>
+
+Expression "map" => instanceof Map<string, number>
+
+Expression "map[Symbol.iterator]" => sync Function "[Symbol.iterator]" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof MapIterator<[string,
+  number]>
+}
+
+Expression "map[Symbol.iterator]()" => instanceof MapIterator<[string,
+number]>
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.iterator" => Symbol.iterator
+
+Binding values "values" => instanceof SetIterator<string>
+
+Expression "set" => instanceof Set<string>
+
+Expression "set[Symbol.iterator]" => sync Function "[Symbol.iterator]" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof SetIterator<string>
+}
+
+Expression "set[Symbol.iterator]()" => instanceof SetIterator<string>
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.iterator" => Symbol.iterator
+
+Binding entry "entry" => [string,
+number] | instanceof BuiltinIteratorReturn
+
+Expression "entries" => instanceof MapIterator<[string,
+number]>
+
+Expression "entries.next" => sync Function "next" {
+  accepts: {
+    params: [
+      ...: [] | [unknown]
+    ]
+    type_args: []
+  }
+  returns: instanceof instanceof instanceof IteratorYieldResult<[string,
+  number]> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><[string,
+  number], instanceof BuiltinIteratorReturn><[string,
+  number], instanceof BuiltinIteratorReturn>
+}
+
+Expression "entries.next()" => instanceof instanceof instanceof IteratorYieldResult<[string,
+number]> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><[string,
+number], instanceof BuiltinIteratorReturn><[string,
+number], instanceof BuiltinIteratorReturn>
+
+Expression "entries.next().value" => [string,
+number] | instanceof BuiltinIteratorReturn
+
+Binding value "value" => string | instanceof BuiltinIteratorReturn
+
+Expression "values" => instanceof SetIterator<string>
+
+Expression "values.next" => sync Function "next" {
+  accepts: {
+    params: [
+      ...: [] | [unknown]
+    ]
+    type_args: []
+  }
+  returns: instanceof instanceof instanceof IteratorYieldResult<string> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn>
+}
+
+Expression "values.next()" => instanceof instanceof instanceof IteratorYieldResult<string> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn>
+
+Expression "values.next().value" => string | instanceof BuiltinIteratorReturn
+
+Binding repeated "repeated" => instanceof MapIterator<[string,
+number]>
+
+Expression "entries" => instanceof MapIterator<[string,
+number]>
+
+Expression "entries[Symbol.iterator]" => sync Function "[Symbol.iterator]" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof MapIterator<[string,
+  number]>
+}
+
+Expression "entries[Symbol.iterator]()" => instanceof MapIterator<[string,
+number]>
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.iterator" => Symbol.iterator
+
+Binding iterator "iterator" => instanceof typeof Symbol.iterator
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.iterator" => Symbol.iterator
+
+Binding aliased "aliased" => instanceof MapIterator<[string,
+number]>
+
+Expression "map" => instanceof Map<string, number>
+
+Expression "map[iterator]" => sync Function "[Symbol.iterator]" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof MapIterator<[string,
+  number]>
+}
+
+Expression "map[iterator]()" => instanceof MapIterator<[string,
+number]>
+
+Expression "iterator" => instanceof typeof Symbol.iterator
+```

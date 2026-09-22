@@ -1,0 +1,523 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const map: Map<string, number>;
+declare const set: Set<string>;
+declare const weak: WeakMap<object, string>;
+declare const date: Date;
+declare const expression: RegExp;
+export const mathTag = Math[Symbol.toStringTag];
+export const mapTag = map[Symbol.toStringTag];
+export const setTag = set[Symbol.toStringTag];
+export const weakTag = weak[Symbol.toStringTag];
+export const arraySpecies = Array[Symbol.species];
+export const regexpSpecies = RegExp[Symbol.species];
+export const search = expression[Symbol.search]("text");
+export const text = date[Symbol.toPrimitive]("string");
+export const number = date[Symbol.toPrimitive]("number");
+export const replaced = expression[Symbol.replace]("text", "replacement");
+export const replacedCallback = expression[Symbol.replace](
+	"text",
+	() => "replacement",
+);
+const tag = Symbol.toStringTag;
+export const aliasedTag = map[tag];
+declare const optional: Map<string, number> | undefined;
+export const optionalTag = optional?.[tag];
+interface TagName {
+	"Symbol.toStringTag": number;
+}
+interface TaggedMap extends Map<string, number>, TagName {}
+declare const tagged: TaggedMap;
+export const symbolTag = tagged[Symbol.toStringTag];
+export const stringTag = tagged["Symbol.toStringTag"];
+export function shadowed(Symbol: { toStringTag: "size" }) {
+	return map[Symbol.toStringTag];
+}
+```
+
+## Inferred types
+
+```
+Binding map "map" => instanceof Map<string, number>
+
+Binding set "set" => instanceof Set<string>
+
+Binding weak "weak" => instanceof WeakMap<object, string>
+
+Binding date "date" => instanceof Date
+
+Binding expression "expression" => instanceof RegExp
+
+Binding mathTag "mathTag" => string
+
+Expression "Math" => class "Math" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Math[Symbol.toStringTag]" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding mapTag "mapTag" => string
+
+Expression "map" => instanceof Map<string, number>
+
+Expression "map[Symbol.toStringTag]" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding setTag "setTag" => string
+
+Expression "set" => instanceof Set<string>
+
+Expression "set[Symbol.toStringTag]" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding weakTag "weakTag" => string
+
+Expression "weak" => instanceof WeakMap<object, string>
+
+Expression "weak[Symbol.toStringTag]" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding arraySpecies "arraySpecies" => Array
+
+Expression "Array" => class "Array" {
+  extends: none
+  implements: []
+  type_args: [T]
+}
+
+Expression "Array[Symbol.species]" => Array
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.species" => Symbol.species
+
+Binding regexpSpecies "regexpSpecies" => RegExp
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "RegExp[Symbol.species]" => RegExp
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.species" => Symbol.species
+
+Binding search "search" => number
+
+Expression "expression" => instanceof RegExp
+
+Expression "expression[Symbol.search]" => sync Function "[Symbol.search]" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "expression[Symbol.search](\"text\")" => number
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.search" => Symbol.search
+
+Expression "\"text\"" => string: text
+
+Binding text "text" => string
+
+Expression "date" => instanceof Date
+
+Expression "date[Symbol.toPrimitive]" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: default
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "date[Symbol.toPrimitive](\"string\")" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toPrimitive" => Symbol.toPrimitive
+
+Expression "\"string\"" => string: string
+
+Binding number "number" => number
+
+Expression "date" => instanceof Date
+
+Expression "date[Symbol.toPrimitive]" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: default
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string: number
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "[Symbol.toPrimitive]" {
+        accepts: {
+          params: [
+            required hint: string
+          ]
+          type_args: []
+        }
+        returns: string | number
+      }
+  ]
+}
+
+Expression "date[Symbol.toPrimitive](\"number\")" => number
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toPrimitive" => Symbol.toPrimitive
+
+Expression "\"number\"" => string: number
+
+Binding replaced "replaced" => string
+
+Expression "expression" => instanceof RegExp
+
+Expression "expression[Symbol.replace]" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "[Symbol.replace]" {
+        accepts: {
+          params: [
+            required string: string
+            required replaceValue: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.replace]" {
+        accepts: {
+          params: [
+            required string: string
+            required replacer: sync Function {
+              accepts: {
+                params: [
+                  required substring: string
+                  required ...args: instanceof Array<any>
+                ]
+                type_args: []
+              }
+              returns: string
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "expression[Symbol.replace](\"text\", \"replacement\")" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.replace" => Symbol.replace
+
+Expression "\"text\"" => string: text
+
+Expression "\"replacement\"" => string: replacement
+
+Binding replacedCallback "replacedCallback" => string
+
+Expression "expression" => instanceof RegExp
+
+Expression "expression[Symbol.replace]" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "[Symbol.replace]" {
+        accepts: {
+          params: [
+            required string: string
+            required replaceValue: string
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "[Symbol.replace]" {
+        accepts: {
+          params: [
+            required string: string
+            required replacer: sync Function {
+              accepts: {
+                params: [
+                  required substring: string
+                  required ...args: instanceof Array<any>
+                ]
+                type_args: []
+              }
+              returns: string
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "expression[Symbol.replace](\"text\", () => \"replacement\")" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.replace" => Symbol.replace
+
+Expression "\"text\"" => string: text
+
+Expression "() => \"replacement\"" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string: replacement
+}
+
+Expression "\"replacement\"" => string: replacement
+
+Binding tag "tag" => Symbol.toStringTag
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding aliasedTag "aliasedTag" => string
+
+Expression "map" => instanceof Map<string, number>
+
+Expression "map[tag]" => string
+
+Expression "tag" => Symbol.toStringTag
+
+Binding optional "optional" => instanceof Map<string, number> | undefined
+
+Binding optionalTag "optionalTag" => string | undefined
+
+Expression "optional" => instanceof Map<string, number> | undefined
+
+Expression "optional?.[tag]" => string | undefined
+
+Expression "tag" => Symbol.toStringTag
+
+Binding TagName "TagName" => interface "TagName" {
+  extends: []
+  type_args: []
+  members: ["Symbol.toStringTag": number]
+}
+
+Binding TaggedMap "TaggedMap" => interface "TaggedMap" {
+  extends: [instanceof Map<string, number>, instanceof TagName]
+  type_args: []
+  members: []
+}
+
+Binding tagged "tagged" => instanceof TaggedMap
+
+Binding symbolTag "symbolTag" => string
+
+Expression "tagged" => instanceof TaggedMap
+
+Expression "tagged[Symbol.toStringTag]" => string
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+
+Binding stringTag "stringTag" => number
+
+Expression "tagged" => instanceof TaggedMap
+
+Expression "tagged[\"Symbol.toStringTag\"]" => number
+
+Expression "\"Symbol.toStringTag\"" => string: Symbol.toStringTag
+
+Binding shadowed "shadowed" => sync Function "shadowed" {
+  accepts: {
+    params: [
+      required Symbol: Object {
+        prototype: No prototype
+        members: ["toStringTag": string: size]
+      }
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding Symbol "Symbol" => Object {
+  prototype: No prototype
+  members: ["toStringTag": string: size]
+}
+
+Expression "map" => instanceof Map<string, number>
+
+Expression "map[Symbol.toStringTag]" => number
+
+Expression "Symbol" => Object {
+  prototype: No prototype
+  members: ["toStringTag": string: size]
+}
+
+Expression "Symbol.toStringTag" => string: size
+```

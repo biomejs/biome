@@ -316,6 +316,7 @@ pub enum LoweredMemberKind {
     Constructor,
     CallSignature,
     ComputedValue { key_reference: LoweredTypeReference },
+    ComputedStatic { key_reference: LoweredTypeReference },
     IndexSignature { key_reference: LoweredTypeReference },
 }
 
@@ -1758,20 +1759,30 @@ fn lower_symbol_globals(
         &mut class,
         "GLOBAL_SYMBOL_ID",
         supports_symbol_constructor_member,
-        &[
-            ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
-            ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
-            ("iterator", "GLOBAL_SYMBOL_ITERATOR_ID"),
-        ],
+        &declarations::PREDEFINED_DECLARATIONS
+            .iter()
+            .filter_map(|(name, _, reference)| {
+                name.strip_prefix("Symbol.").map(|name| (name, *reference))
+            })
+            .chain([
+                ("dispose", "GLOBAL_SYMBOL_DISPOSE_ID"),
+                ("asyncDispose", "GLOBAL_SYMBOL_ASYNC_DISPOSE_ID"),
+            ])
+            .collect::<Vec<_>>(),
     )?;
-    if class.member("iterator").is_some() {
-        globals.push(LoweredGlobal {
-            local_types: Box::default(),
-            name: Text::from("Symbol.iterator"),
-            id_constant: "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
-            data: LoweredTypeData::Symbol,
-        });
+    for &(name, id_constant, _) in declarations::PREDEFINED_DECLARATIONS {
+        if let Some(member) = name.strip_prefix("Symbol.")
+            && class.member(member).is_some()
+        {
+            globals.push(LoweredGlobal {
+                local_types: Box::default(),
+                name: Text::from(name),
+                id_constant,
+                data: LoweredTypeData::Symbol,
+            });
+        }
     }
+
     globals.push(LoweredGlobal {
         local_types,
         name: class.name.clone(),
@@ -1916,24 +1927,16 @@ fn lower_namespace_object_global(
     })
 }
 
-/// Selects literal-named properties and methods of a namespace object interface.
-///
-/// Computed members such as `[Symbol.toStringTag]` are excluded: a static member cannot
-/// carry a computed key. Any other member shape is an error so new syntax in the
-/// TypeScript sources is surfaced instead of silently dropped.
+/// Selects properties and methods of a namespace object interface.
 fn supports_namespace_object_member(member: &AnyTsTypeMember) -> Result<bool> {
-    let name = match member {
-        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
-        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+    match member {
+        AnyTsTypeMember::TsPropertySignatureTypeMember(_)
+        | AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Ok(true),
         _ => bail!(
             "unsupported namespace object member: {:?}",
             member.syntax().kind()
         ),
-    };
-    Ok(matches!(
-        name,
-        AnyJsObjectMemberName::JsLiteralMemberName(_)
-    ))
+    }
 }
 
 fn is_unique_symbol_property(property: &TsPropertySignatureTypeMember) -> Result<bool> {
@@ -2498,7 +2501,7 @@ struct ComputedMemberName {
     key_reference: LoweredTypeReference,
 }
 
-/// Resolves computed dispose, asyncDispose, and iterator keys to predefined symbol identities.
+/// Resolves well-known Symbol keys to their predefined identities.
 /// Other computed expressions and Symbol properties return errors.
 fn lower_symbol_computed_member_name(name: AnyJsObjectMemberName) -> Result<ComputedMemberName> {
     let AnyJsObjectMemberName::JsComputedMemberName(name) = name else {
@@ -2531,7 +2534,15 @@ fn lower_symbol_computed_member_name(name: AnyJsObjectMemberName) -> Result<Comp
             name: Text::from("[Symbol.iterator]"),
             key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ITERATOR_ID"),
         }),
-        name => bail!("unsupported Symbol computed member {name}"),
+        name => declarations::PREDEFINED_DECLARATIONS
+            .iter()
+            .find_map(|&(declared, _, reference)| {
+                (declared.strip_prefix("Symbol.") == Some(name)).then(|| ComputedMemberName {
+                    name: Text::from(format!("[{declared}]")),
+                    key_reference: LoweredTypeReference::Predefined(reference),
+                })
+            })
+            .with_context(|| format!("unsupported Symbol computed member {name}")),
     }
 }
 

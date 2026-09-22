@@ -37,7 +37,8 @@ impl LoweredDeclarations {
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Numeric and string index signatures preserve their key and value types.
-/// Computed methods support declared predefined Symbol keys; other computed names are errors.
+/// Computed properties and methods support string/number literals and declared predefined Symbol keys.
+/// Optional computed members include undefined in their value type.
 /// References to selected predefined types preserve type arguments and require declarations.
 /// Type aliases, type arguments on other references, qualified references, object and template literal types,
 /// and other type operators such as `unique symbol` are excluded.
@@ -270,7 +271,8 @@ impl DeclarationLowerer<'_> {
                 })
             }
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
-                let name = lower_object_member_name(property.name()?)?;
+                let optional = property.optional_token().is_some();
+                let (name, kind) = self.lower_member_name(property.name()?, optional)?;
                 let ty = property
                     .type_annotation()
                     .with_context(|| format!("property {name} is missing a type annotation"))?
@@ -280,35 +282,13 @@ impl DeclarationLowerer<'_> {
                     .with_context(|| format!("in property {name}"))?;
                 Ok(LoweredTypeMember {
                     name,
-                    kind: LoweredMemberKind::Named {
-                        optional: property.optional_token().is_some(),
-                    },
-                    type_reference,
+                    type_reference: self.lower_member_value(&kind, optional, type_reference),
+                    kind,
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
-                let (name, kind) = match method.name()? {
-                    name @ AnyJsObjectMemberName::JsComputedMemberName(_) => {
-                        // ComputedValue has no optional flag; dropping it would lose undefined.
-                        if method.optional_token().is_some() {
-                            bail!("optional computed methods are not supported");
-                        }
-                        let computed = lower_symbol_computed_member_name(name)?;
-                        self.require_symbol_key(&computed)?;
-                        (
-                            computed.name,
-                            LoweredMemberKind::ComputedValue {
-                                key_reference: computed.key_reference,
-                            },
-                        )
-                    }
-                    name => (
-                        lower_object_member_name(name)?,
-                        LoweredMemberKind::Named {
-                            optional: method.optional_token().is_some(),
-                        },
-                    ),
-                };
+                let optional = method.optional_token().is_some();
+                let (name, kind) = self.lower_member_name(method.name()?, optional)?;
                 let function = self
                     .lower_signature(
                         Some(name.clone()),
@@ -320,13 +300,94 @@ impl DeclarationLowerer<'_> {
                             .ty()?,
                     )
                     .with_context(|| format!("in method {name}"))?;
+                let type_reference = self.register(LoweredTypeData::Function(function));
                 Ok(LoweredTypeMember {
                     name,
+                    type_reference: self.lower_member_value(&kind, optional, type_reference),
                     kind,
-                    type_reference: self.register(LoweredTypeData::Function(function)),
                 })
             }
             _ => bail!("unsupported interface member: {:?}", member.syntax().kind()),
+        }
+    }
+
+    fn merge_overloads(
+        &mut self,
+        previous: LoweredTypeReference,
+        next: LoweredTypeReference,
+    ) -> Result<LoweredTypeReference> {
+        let LoweredTypeReference::Local(index) = previous else {
+            bail!("overload must reference a local signature");
+        };
+        let mut signatures = match self.types.get(index).and_then(Option::as_ref) {
+            Some(LoweredTypeData::Function(_)) => vec![LoweredTypeMember {
+                name: Text::default(),
+                kind: LoweredMemberKind::CallSignature,
+                type_reference: previous,
+            }],
+            Some(LoweredTypeData::Object(signatures)) => signatures.to_vec(),
+            _ => bail!("expected callable overload"),
+        };
+        signatures.push(LoweredTypeMember {
+            name: Text::default(),
+            kind: LoweredMemberKind::CallSignature,
+            type_reference: next,
+        });
+        Ok(self.register(LoweredTypeData::Object(signatures.into_boxed_slice())))
+    }
+
+    fn lower_member_name(
+        &mut self,
+        name: AnyJsObjectMemberName,
+        optional: bool,
+    ) -> Result<(Text, LoweredMemberKind)> {
+        if let AnyJsObjectMemberName::JsComputedMemberName(computed) = &name {
+            let expression = computed.expression()?.omit_parentheses();
+            if let AnyJsExpression::AnyJsLiteralExpression(literal) = &expression {
+                let key = match literal {
+                    biome_js_syntax::AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
+                        LoweredTypeData::StringLiteral(Text::from(string.inner_string_text()?))
+                    }
+                    biome_js_syntax::AnyJsLiteralExpression::JsNumberLiteralExpression(number) => {
+                        LoweredTypeData::NumberLiteral(Text::from(
+                            number.value_token()?.token_text_trimmed(),
+                        ))
+                    }
+                    _ => bail!("unsupported computed literal member key"),
+                };
+                return Ok((
+                    Text::from(format!("[{}]", expression.syntax().text_trimmed())),
+                    LoweredMemberKind::ComputedValue {
+                        key_reference: self.register(key),
+                    },
+                ));
+            }
+            let computed = lower_symbol_computed_member_name(name)?;
+            self.require_symbol_key(&computed)?;
+            return Ok((
+                computed.name,
+                LoweredMemberKind::ComputedValue {
+                    key_reference: computed.key_reference,
+                },
+            ));
+        }
+        Ok((
+            lower_object_member_name(name)?,
+            LoweredMemberKind::Named { optional },
+        ))
+    }
+
+    fn lower_member_value(
+        &mut self,
+        kind: &LoweredMemberKind,
+        optional: bool,
+        reference: LoweredTypeReference,
+    ) -> LoweredTypeReference {
+        if optional && matches!(kind, LoweredMemberKind::ComputedValue { .. }) {
+            let undefined = self.register(LoweredTypeData::Undefined);
+            self.register(LoweredTypeData::Union(Box::new([reference, undefined])))
+        } else {
+            reference
         }
     }
 
@@ -470,6 +531,28 @@ impl DeclarationLowerer<'_> {
                 };
                 let name = name.value_token()?;
                 let name = name.text_trimmed();
+                if name == "intrinsic"
+                    && self.predefined_declarations
+                    && !self.declaration_parameters.contains_key(name)
+                {
+                    return Ok(self.register(LoweredTypeData::UnknownKeyword));
+                }
+                if reference.type_arguments().is_none()
+                    && !self.declaration_parameters.contains_key(name)
+                    && let Some(scope) = &self.class_scope
+                    && !scope.parameters.contains_key(name)
+                    && let Some(group) = self.manifest.global_group(scope.name.text())
+                    && group.has_role(GlobalDeclarationRole::Value)
+                    && resolve_constructor_name(
+                        scope.name.text(),
+                        group.declarations(),
+                        &mut self.sources,
+                    )?
+                    .text()
+                        == name
+                {
+                    return Ok(LoweredTypeReference::Predefined(scope.reference));
+                }
                 if self.unbound_parameters.contains(name) {
                     bail!("type parameter {name} requires a forward or recursive local reference");
                 }
@@ -635,17 +718,15 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
 
 pub(super) type MemberSelector = fn(&AnyTsTypeMember) -> Result<bool>;
 
-/// Lowers named instance properties and methods with declaration-derived
+/// Lowers instance properties and methods with declaration-derived
 /// generic parameters. Constraints and defaults use supported member types and earlier parameters;
 /// the first interface supplies them for merged declarations.
-/// Value-side declarations, computed members, methods returning `MapIterator` or
-/// `SetIterator`, and methods referencing Intl types
-/// are excluded. References to the
+/// Value-side declarations and methods referencing Intl types are excluded. References to the
 /// enclosing class and selected predefined types may carry type arguments.
 /// Other external references and unsupported member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
 /// Existing class members retain their projections; their declarations are not lowered again.
-/// The caller selects members from the supplied constructor declarations.
+/// Computed constructor members are included alongside the caller's selected members.
 /// They share the instance members' local type table and may reference predefined iterator
 /// protocol types. Class type parameters are not in scope on the constructor side.
 /// Local types are registered after their dependencies for runtime conversion in one pass.
@@ -676,6 +757,7 @@ pub(super) fn lower_class_members(
         .context("missing class declaration group")?;
     let mut members = class.members.to_vec();
     let mut class_parameters = None;
+    let mut method_names = BTreeSet::new();
     for record in group.declarations() {
         match record.kind {
             DeclarationKind::Interface => {}
@@ -757,15 +839,27 @@ pub(super) fn lower_class_members(
             if !supports_class_member(&member, class)? {
                 continue;
             }
+            let is_method = matches!(member, AnyTsTypeMember::TsMethodSignatureTypeMember(_));
             let member = lowerer.lower_member(member).with_context(|| {
                 format!("in {} from {}", class.name(), record.file_repo_relative)
             })?;
-            if members.iter().any(|previous| previous.name == member.name) {
+            if let Some(previous) = members
+                .iter_mut()
+                .find(|previous| previous.name == member.name)
+            {
+                if is_method && method_names.contains(&member.name) {
+                    previous.type_reference = lowerer
+                        .merge_overloads(previous.type_reference.clone(), member.type_reference)?;
+                    continue;
+                }
                 bail!(
                     "unsupported duplicate member {}.{}",
                     class.name(),
                     member.name
                 );
+            }
+            if is_method {
+                method_names.insert(member.name.clone());
             }
             members.push(member);
         }
@@ -832,6 +926,18 @@ pub(super) fn lower_method_global(
     })
 }
 
+fn is_computed_member(member: &AnyTsTypeMember) -> Result<bool> {
+    let name = match member {
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        _ => return Ok(false),
+    };
+    Ok(matches!(
+        name,
+        AnyJsObjectMemberName::JsComputedMemberName(_)
+    ))
+}
+
 fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
     let name = match member {
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
@@ -839,24 +945,12 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
             if method_uses_intl_types(method)? {
                 return Ok(false);
             }
-            if let Some(annotation) = method.return_type_annotation()
-                && let AnyTsReturnType::AnyTsType(AnyTsType::TsReferenceType(reference)) =
-                    annotation.ty()?
-                && reference.type_arguments().is_some()
-                && let biome_js_syntax::AnyTsName::JsReferenceIdentifier(name) = reference.name()?
-                && matches!(
-                    name.value_token()?.text_trimmed(),
-                    "MapIterator" | "SetIterator"
-                )
-            {
-                return Ok(false);
-            }
             method.name()?
         }
         _ => bail!("unsupported class member: {:?}", member.syntax().kind()),
     };
     match name {
-        AnyJsObjectMemberName::JsComputedMemberName(_) => Ok(false),
+        AnyJsObjectMemberName::JsComputedMemberName(_) => Ok(true),
         name => Ok(class
             .member(lower_object_member_name(name)?.text())
             .is_none()),
@@ -864,7 +958,8 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
 }
 
 /// Lowers selected constructor-interface members as statics and call/construct signatures of a class.
-/// The caller selects members and supplies predefined identities for unique symbols.
+/// Computed members are included alongside the caller's selection.
+/// The caller supplies predefined identities for unique symbols.
 /// Other unique symbols use the runtime's symbol type. Function signatures use
 /// the same translation as instance methods. Named method overloads become an object
 /// with call signatures in declaration order; duplicate properties remain errors.
@@ -922,7 +1017,7 @@ impl DeclarationLowerer<'_> {
                 );
             }
             for member in declaration.members() {
-                if !select_member(&member)? {
+                if !select_member(&member)? && !is_computed_member(&member)? {
                     continue;
                 }
                 let is_method = matches!(member, AnyTsTypeMember::TsMethodSignatureTypeMember(_));
@@ -961,15 +1056,17 @@ impl DeclarationLowerer<'_> {
                     members.push(member);
                     continue;
                 }
-                // NamedStatic cannot represent an optional member without losing undefined.
-                if member.kind != (LoweredMemberKind::Named { optional: false }) {
-                    bail!(
+                member.kind = match member.kind {
+                    LoweredMemberKind::Named { optional: false } => LoweredMemberKind::NamedStatic,
+                    LoweredMemberKind::ComputedValue { key_reference } => {
+                        LoweredMemberKind::ComputedStatic { key_reference }
+                    }
+                    _ => bail!(
                         "optional static member {}.{} is not supported",
                         class.name(),
                         member.name
-                    );
-                }
-                member.kind = LoweredMemberKind::NamedStatic;
+                    ),
+                };
                 if members.iter().any(|previous: &LoweredTypeMember| {
                     previous.kind == member.kind && previous.name == member.name
                 }) {
@@ -990,8 +1087,10 @@ impl DeclarationLowerer<'_> {
             }
         }
         for member in &mut members {
-            if member.kind == LoweredMemberKind::NamedStatic
-                && let Some(signatures) = methods.remove(&member.name)
+            if matches!(
+                member.kind,
+                LoweredMemberKind::NamedStatic | LoweredMemberKind::ComputedStatic { .. }
+            ) && let Some(signatures) = methods.remove(&member.name)
                 && signatures.len() > 1
             {
                 member.type_reference = self.register(LoweredTypeData::Object(
@@ -1090,12 +1189,88 @@ pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &st
         "ARRAY_LIKE_ID_GLOBAL_TYPE_ID",
         "GLOBAL_ARRAY_LIKE_ID",
     ),
+    (
+        "Symbol.toStringTag",
+        "SYMBOL_TO_STRING_TAG_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_TO_STRING_TAG_ID",
+    ),
+    (
+        "Symbol.toPrimitive",
+        "SYMBOL_TO_PRIMITIVE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_TO_PRIMITIVE_ID",
+    ),
+    (
+        "Symbol.match",
+        "SYMBOL_MATCH_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_MATCH_ID",
+    ),
+    (
+        "Symbol.replace",
+        "SYMBOL_REPLACE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_REPLACE_ID",
+    ),
+    (
+        "Symbol.search",
+        "SYMBOL_SEARCH_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_SEARCH_ID",
+    ),
+    (
+        "Symbol.split",
+        "SYMBOL_SPLIT_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_SPLIT_ID",
+    ),
+    (
+        "Symbol.species",
+        "SYMBOL_SPECIES_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_SPECIES_ID",
+    ),
+    (
+        "Symbol.hasInstance",
+        "SYMBOL_HAS_INSTANCE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_HAS_INSTANCE_ID",
+    ),
+    (
+        "Symbol.unscopables",
+        "SYMBOL_UNSCOPABLES_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_UNSCOPABLES_ID",
+    ),
+    (
+        "RegExpMatchArray",
+        "REGEXP_MATCH_ARRAY_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_REGEXP_MATCH_ARRAY_ID",
+    ),
+    (
+        "IteratorObject",
+        "ITERATOR_OBJECT_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERATOR_OBJECT_ID",
+    ),
+    (
+        "MapIterator",
+        "MAP_ITERATOR_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_MAP_ITERATOR_ID",
+    ),
+    (
+        "SetIterator",
+        "SET_ITERATOR_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SET_ITERATOR_ID",
+    ),
+    (
+        "BuiltinIteratorReturn",
+        "BUILTIN_ITERATOR_RETURN_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_BUILTIN_ITERATOR_RETURN_ID",
+    ),
+    (
+        "Disposable",
+        "DISPOSABLE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_DISPOSABLE_ID",
+    ),
 ];
 
 /// Lowers selected type-only declarations and their declared bases and members.
 /// Constraints use supported member types and earlier type parameters.
-/// Merged declarations and dependencies without predefined identities are errors.
-/// Computed methods support declared predefined Symbol keys. Tuples support required unnamed elements.
+/// Merged interfaces share the first declaration's type parameters.
+/// Dependencies without predefined identities are errors.
+/// Computed members support literal and declared predefined Symbol keys. Tuples support required unnamed elements.
 pub(super) fn lower_predefined_declarations(
     manifest: &GlobalManifest,
     sources: &[DiscoveredFile],
@@ -1122,15 +1297,21 @@ pub(super) fn lower_predefined_declarations(
                 | "IteratorResult"
                 | "Iterator"
                 | "Iterable"
+                | "RegExpMatchArray"
+                | "IteratorObject"
+                | "MapIterator"
+                | "SetIterator"
+                | "BuiltinIteratorReturn"
         ) {
             continue;
         }
         let Some(group) = manifest.global_group(name) else {
             continue;
         };
-        let [record] = group.declarations() else {
-            bail!("merged protocol declarations are not supported: {name}");
-        };
+        let record = group
+            .declarations()
+            .first()
+            .context("missing declaration")?;
         let module = lowerer.sources.module_for(record)?;
         let node = module
             .syntax()

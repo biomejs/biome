@@ -48,11 +48,12 @@ use crate::{
     TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
-    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
-    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
-    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
-    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -539,6 +540,13 @@ impl TypeData {
                             Err(_) => Self::unknown(),
                         })
                         .unwrap_or_default(),
+                    (Ok(object), Ok(member)) => Self::from(TypeofExpression::ComputedMember(
+                        TypeofComputedMemberExpression {
+                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                            member: collector.reference_to_resolved_expression(scope_id, &member),
+                            is_optional_chain: expr.is_optional_chain(),
+                        },
+                    )),
                     _ => Self::unknown(),
                 }
             }
