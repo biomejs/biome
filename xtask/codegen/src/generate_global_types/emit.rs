@@ -469,6 +469,7 @@ fn for_each_global_in_emit_order(
 ) -> Result<()> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
+            && global.id_constant() != "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID"
             && !super::lower::declarations::ITERATOR_DECLARATIONS
                 .iter()
                 .any(|(_, id, _)| *id == global.id_constant())
@@ -492,6 +493,10 @@ fn for_each_global_in_emit_order(
         {
             visit(global);
         }
+    }
+
+    if let Some(global) = lowered.global("Symbol.iterator") {
+        visit(global);
     }
 
     Ok(())
