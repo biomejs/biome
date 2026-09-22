@@ -222,6 +222,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Readonly, ty: {} }}))",
             render_type_reference(ty),
         ),
+        LoweredTypeData::Keyof(ty) => format!(
+            "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Keyof, ty: {} }}))",
+            render_type_reference(ty),
+        ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
             ty,

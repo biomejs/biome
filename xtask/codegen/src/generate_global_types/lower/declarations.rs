@@ -33,7 +33,7 @@ impl LoweredDeclarations {
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
 /// global interface references, arrays, required unnamed tuple elements, readonly arrays/tuples,
-/// parentheses, unions, and function types.
+/// `keyof`, parentheses, unions, and function types.
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Numeric and string index signatures preserve their key and value types.
@@ -537,6 +537,12 @@ impl DeclarationLowerer<'_> {
                     bail!("unsupported type arguments in type reference");
                 }
                 self.named_reference(name)
+            }
+            AnyTsType::TsTypeOperatorType(operator)
+                if operator.operator_token()?.kind() == T![keyof] =>
+            {
+                let ty = self.lower_reference(&operator.ty()?)?;
+                Ok(self.register(LoweredTypeData::Keyof(ty)))
             }
             AnyTsType::TsTypeOperatorType(operator)
                 if operator.operator_token()?.kind() == T![readonly] =>

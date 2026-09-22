@@ -103,6 +103,7 @@ pub enum LoweredTypeData {
     },
     Tuple(Box<[LoweredTypeReference]>),
     Readonly(LoweredTypeReference),
+    Keyof(LoweredTypeReference),
     InstanceOf {
         ty: LoweredTypeReference,
         type_parameters: Box<[LoweredTypeReference]>,
