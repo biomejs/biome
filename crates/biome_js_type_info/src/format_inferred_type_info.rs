@@ -588,6 +588,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedTypeInstance<'db> {
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for InternedGenericTypeParameter<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        if self.is_const(f.context().db()) {
+            write!(f, [token("const"), space()])?;
+        }
         let db = f.context().db();
         let constraint = format_with(|f| {
             if let Some(constraint) = self.constraint(db) {

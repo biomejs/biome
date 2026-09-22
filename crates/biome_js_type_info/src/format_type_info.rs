@@ -611,6 +611,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
 
 impl Format<FormatTypeContext> for GenericTypeParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        if self.is_const {
+            write!(f, [token("const"), space()])?;
+        }
         let constraint = format_with(|f| {
             if self.constraint.is_known() {
                 write!(f, [space(), token("extends"), space(), &self.constraint])

@@ -32,11 +32,12 @@ impl LoweredDeclarations {
 /// No global IDs or runtime name registrations are allocated.
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
-/// global interface references, arrays, parentheses, unions, and function types.
+/// global interface references, arrays, required unnamed tuple elements, readonly arrays/tuples,
+/// parentheses, unions, and function types.
 /// Methods, call/construct signatures, and function types may declare type parameters with constraints
 /// and defaults using supported types and earlier parameters. Bindings are signature-local.
 /// Type aliases, type arguments, qualified references, object and template literal types,
-/// and type operators such as `unique symbol` are excluded.
+/// and other type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
@@ -314,8 +315,12 @@ impl DeclarationLowerer<'_> {
             let mut references = Vec::new();
             for parameter in type_parameters.items() {
                 let parameter = parameter?;
-                if !parameter.modifiers().is_empty() {
-                    bail!("modified signature type parameters are not supported");
+                if parameter
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_none())
+                {
+                    bail!("variance modifiers on signature type parameters are not supported");
                 }
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
                 let constraint = parameter
@@ -329,6 +334,10 @@ impl DeclarationLowerer<'_> {
                     .transpose()
                     .with_context(|| format!("in default of {name}"))?;
                 let reference = self.register(LoweredTypeData::GenericParameter {
+                    is_const: parameter
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                     name: name.clone(),
                     constraint,
                     default,
@@ -450,7 +459,17 @@ impl DeclarationLowerer<'_> {
                 }
                 self.named_reference(name)
             }
-            AnyTsType::TsTupleType(tuple) if self.predefined_declarations => {
+            AnyTsType::TsTypeOperatorType(operator)
+                if operator.operator_token()?.kind() == T![readonly] =>
+            {
+                let ty = operator.ty()?;
+                if !matches!(ty, AnyTsType::TsArrayType(_) | AnyTsType::TsTupleType(_)) {
+                    bail!("readonly requires an array or tuple type");
+                }
+                let ty = self.lower_reference(&ty)?;
+                Ok(self.register(LoweredTypeData::Readonly(ty)))
+            }
+            AnyTsType::TsTupleType(tuple) => {
                 let elements = tuple
                     .elements()
                     .into_iter()
@@ -608,6 +627,10 @@ pub(super) fn lower_class_members(
                         .transpose()
                         .with_context(|| format!("in default of {}.{name}", class.name()))?;
                     let reference = lowerer.register(LoweredTypeData::GenericParameter {
+                        is_const: parameter
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                         name: name.clone(),
                         constraint,
                         default,
@@ -909,6 +932,7 @@ pub(super) fn lower_iterator_globals(
                     .map(|default| lowerer.lower_reference(&default.ty()?))
                     .transpose()?;
                 let reference = lowerer.register(LoweredTypeData::GenericParameter {
+                    is_const: false,
                     name: name.clone(),
                     constraint,
                     default,
@@ -957,6 +981,175 @@ mod tests {
         collect::collect, emit::render_local_types, manifest::build_global_manifest,
         source::CanonicalPath,
     };
+
+    #[test]
+    fn const_signature_parameters_survive_lowering_and_emission() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for modifier in ["", "const "] {
+            for signature in [
+                format!("<{modifier}T>(value: T): T"),
+                format!("method<{modifier}T>(value: T): T"),
+                format!("callback: <{modifier}T>(value: T) => T"),
+                format!("new <{modifier}T>(value: T): T"),
+            ] {
+                let file = DiscoveredFile {
+                    path: CanonicalPath::from_within(
+                        root,
+                        "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                    )?,
+                    repo_relative: "const.d.ts".to_owned(),
+                    bytes: format!("interface Owner {{ {signature}; }}").into_bytes(),
+                };
+                let manifest = build_global_manifest(collect(&file).records);
+                let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+                let expected = !modifier.is_empty();
+                let parameter = table
+                    .types()
+                    .iter()
+                    .find_map(|ty| match ty {
+                        LoweredTypeData::GenericParameter { is_const, .. } => Some(*is_const),
+                        _ => None,
+                    })
+                    .expect("signature must declare a generic parameter");
+                assert_eq!(parameter, expected);
+                let emitted = crate::generate_global_types::emit::render_declarations(&table);
+                assert!(emitted.contains(&format!("is_const: {expected}")));
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn readonly_arrays_and_tuples_preserve_nested_elements() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for element in ["T", "string", "(T | number)"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "readonly.d.ts".to_owned(),
+                bytes: format!(
+                    "interface Owner<T> {{
+                    element: {element};
+                    array: {element}[];
+                    frozenArray: readonly {element}[];
+                    tuple: [{element}, {element}[]];
+                    frozenTuple: readonly [{element}, {element}[]];
+                    repeated: readonly [{element}, {element}[]];
+                    nested: readonly (readonly [{element}, {element}[]])[];
+                }}"
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types =
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+            let member = |name| class.member(name).unwrap().type_reference();
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            for (frozen, mutable) in [("frozenArray", "array"), ("frozenTuple", "tuple")] {
+                assert_eq!(
+                    local(member(frozen)),
+                    &LoweredTypeData::Readonly(member(mutable).clone())
+                );
+                assert_ne!(member(frozen), member(mutable));
+            }
+            let LoweredTypeData::Tuple(elements) = local(member("tuple")) else {
+                panic!("expected tuple")
+            };
+            assert_eq!(
+                elements.as_ref(),
+                [member("element").clone(), member("array").clone()]
+            );
+            assert_eq!(member("frozenTuple"), member("repeated"));
+            let LoweredTypeData::Readonly(array) = local(member("nested")) else {
+                panic!("expected readonly outer array")
+            };
+            let LoweredTypeData::InstanceOf {
+                ty,
+                type_parameters,
+            } = local(array)
+            else {
+                panic!("expected array")
+            };
+            assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+            assert_eq!(
+                type_parameters.as_ref(),
+                std::slice::from_ref(member("frozenTuple"))
+            );
+            for (index, ty) in types.iter().enumerate() {
+                if let LoweredTypeData::Readonly(LoweredTypeReference::Local(inner)) = ty {
+                    assert!(
+                        *inner < index,
+                        "readonly dependencies must precede their wrappers"
+                    );
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn readonly_emission_preserves_the_operator_and_operand() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "readonly.d.ts".to_owned(),
+            bytes:
+                b"interface Owner { array: readonly string[]; tuple: readonly [string, number]; }"
+                    .to_vec(),
+        };
+        let manifest = build_global_manifest(collect(&file).records);
+        let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+        let emitted: syn::ExprCall = syn::parse_str(
+            &crate::generate_global_types::emit::render_declarations(&table),
+        )?;
+        let syn::Expr::Array(entries) = &emitted.args[0] else {
+            panic!("expected emitted table")
+        };
+        for (data, expression) in table.types().iter().zip(&entries.elems) {
+            let LoweredTypeData::Readonly(LoweredTypeReference::Local(index)) = data else {
+                continue;
+            };
+            let syn::Expr::Call(variant) = expression else {
+                panic!("expected type operator variant")
+            };
+            let syn::Expr::Call(boxed) = &variant.args[0] else {
+                panic!("expected boxed operator")
+            };
+            let syn::Expr::Struct(fields) = &boxed.args[0] else {
+                panic!("expected operator data")
+            };
+            for (name, expected) in [
+                ("operator", "crate::TypeOperator::Readonly".to_owned()),
+                (
+                    "ty",
+                    format!("crate::RawTypeId::Local(crate::TypeId::new({index})).into()"),
+                ),
+            ] {
+                let expression = &fields.fields.iter().find(|field| matches!(&field.member, syn::Member::Named(member) if member == name)).unwrap().expr;
+                let expected: syn::Expr = syn::parse_str(&expected)?;
+                assert_eq!(
+                    quote::quote!(#expression).to_string(),
+                    quote::quote!(#expected).to_string()
+                );
+            }
+        }
+        Ok(())
+    }
 
     #[test]
     fn construct_signatures_preserve_generic_parameters_and_overloads() -> Result<()> {
@@ -1338,6 +1531,7 @@ mod tests {
                 name,
                 constraint,
                 default,
+                ..
             } = local(first)
             else {
                 panic!("expected generic")
