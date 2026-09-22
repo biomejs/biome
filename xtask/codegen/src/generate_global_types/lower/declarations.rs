@@ -1,5 +1,7 @@
+mod functions;
 mod namespaces;
 
+pub(super) use functions::lower_function_globals;
 pub(super) use namespaces::lower_namespace;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -944,7 +946,7 @@ pub(super) fn lower_method_global(
     )?;
     Ok(LoweredGlobal {
         name: Text::from(format!("{owner}.{name}")),
-        id_constant,
+        id_constant: id_constant.into(),
         data: LoweredTypeData::Function(function),
         local_types: lowerer
             .types
@@ -1406,7 +1408,7 @@ pub(super) fn lower_predefined_declarations(
         globals.push(LoweredGlobal {
             local_types,
             name: Text::from(record.declared_name.clone()),
-            id_constant,
+            id_constant: id_constant.into(),
             data,
         });
     }
@@ -2661,7 +2663,7 @@ mod tests {
             }
             globals.push(LoweredGlobal {
                 name: class.name.clone(),
-                id_constant,
+                id_constant: id_constant.into(),
                 data: LoweredTypeData::Class(class),
                 local_types,
             });

@@ -27,12 +27,21 @@ use crate::generate_global_types::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredGlobalTypes {
     globals: Box<[LoweredGlobal]>,
+    predefined_count: usize,
 }
 
 impl LoweredGlobalTypes {
     /// Returns all lowered globals in deterministic output order.
     pub fn globals(&self) -> &[LoweredGlobal] {
         &self.globals
+    }
+
+    pub(super) fn predefined_globals(&self) -> &[LoweredGlobal] {
+        &self.globals[..self.predefined_count]
+    }
+
+    pub(super) fn functions(&self) -> &[LoweredGlobal] {
+        &self.globals[self.predefined_count..]
     }
 
     /// Returns one lowered global by TypeScript global name.
@@ -45,7 +54,7 @@ impl LoweredGlobalTypes {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LoweredGlobal {
     name: Text,
-    id_constant: &'static str,
+    id_constant: Text,
     data: LoweredTypeData,
     local_types: Box<[LoweredTypeData]>,
 }
@@ -62,8 +71,8 @@ impl LoweredGlobal {
     }
 
     /// Rust constant used by `GlobalsResolverBuilder::set_type_data`.
-    pub fn id_constant(&self) -> &'static str {
-        self.id_constant
+    pub fn id_constant(&self) -> &str {
+        self.id_constant.text()
     }
 
     /// Lowered type data for this global.
@@ -441,7 +450,7 @@ pub fn lower_global_types(
             globals.push(LoweredGlobal {
                 local_types: Box::default(),
                 name: Text::from(name),
-                id_constant,
+                id_constant: id_constant.into(),
                 data: LoweredTypeData::Class(LoweredClass {
                     name: Text::from(name),
                     type_parameters: Box::default(),
@@ -485,7 +494,24 @@ pub fn lower_global_types(
         }
     }
 
+    let predefined_count = globals.len();
+    globals.extend(declarations::lower_function_globals(
+        manifest,
+        source_files,
+    )?);
+    let mut ids = std::collections::BTreeSet::new();
+    for global in &globals {
+        if !ids.insert(global.id_constant()) {
+            bail!(
+                "duplicate global type ID {} for {}",
+                global.id_constant(),
+                global.name()
+            );
+        }
+    }
+
     Ok(LoweredGlobalTypes {
+        predefined_count,
         globals: globals.into_boxed_slice(),
     })
 }
@@ -568,7 +594,7 @@ fn lower_error_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Error"),
-        id_constant: "ERROR_ID_GLOBAL_TYPE_ID",
+        id_constant: "ERROR_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Error"),
             type_parameters: Box::default(),
@@ -578,13 +604,13 @@ fn lower_error_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Error.constructor"),
-        id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+        id_constant: "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Constructor(constructor),
     });
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Error.call"),
-        id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID",
+        id_constant: "ERROR_CALL_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Function(call),
     });
 
@@ -913,7 +939,7 @@ fn lower_array_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Array"),
-        id_constant: "ARRAY_ID_GLOBAL_TYPE_ID",
+        id_constant: "ARRAY_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Array"),
             type_parameters: Box::new([LoweredTypeReference::Predefined("GLOBAL_T_ID")]),
@@ -1089,7 +1115,7 @@ fn lower_promise_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Promise"),
-        id_constant: "PROMISE_ID_GLOBAL_TYPE_ID",
+        id_constant: "PROMISE_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("Promise"),
             type_parameters: Box::new([LoweredTypeReference::Predefined("GLOBAL_T_ID")]),
@@ -1099,7 +1125,7 @@ fn lower_promise_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Promise.constructor"),
-        id_constant: "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+        id_constant: "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Function(LoweredFunction {
             is_async: false,
             type_parameters: Box::default(),
@@ -1331,7 +1357,7 @@ fn promise_method_global(specification: PromiseMethodSpecification) -> LoweredGl
     LoweredGlobal {
         local_types: Box::default(),
         name: Text::from(specification.global_name),
-        id_constant: specification.id_constant,
+        id_constant: specification.id_constant.into(),
         data: LoweredTypeData::Function(LoweredFunction {
             is_async: false,
             type_parameters: Box::default(),
@@ -1353,7 +1379,7 @@ fn array_method_global(
     LoweredGlobal {
         local_types: Box::default(),
         name: Text::from(name),
-        id_constant,
+        id_constant: id_constant.into(),
         data: LoweredTypeData::Function(LoweredFunction {
             is_async: false,
             type_parameters,
@@ -1786,7 +1812,7 @@ fn lower_symbol_globals(
             globals.push(LoweredGlobal {
                 local_types: Box::default(),
                 name: Text::from(name),
-                id_constant,
+                id_constant: id_constant.into(),
                 data: LoweredTypeData::Symbol,
             });
         }
@@ -1795,19 +1821,19 @@ fn lower_symbol_globals(
     globals.push(LoweredGlobal {
         local_types,
         name: class.name.clone(),
-        id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID",
+        id_constant: "SYMBOL_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Class(class),
     });
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Symbol.dispose"),
-        id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
+        id_constant: "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Symbol,
     });
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("Symbol.asyncDispose"),
-        id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
+        id_constant: "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Symbol,
     });
 
@@ -1866,7 +1892,7 @@ fn lower_namespace_object_globals(
         globals.push(LoweredGlobal {
             local_types: global.local_types,
             name: global.name,
-            id_constant,
+            id_constant: id_constant.into(),
             data: global.data,
         });
     }
@@ -2089,7 +2115,7 @@ fn lower_regexp_globals(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from("RegExp"),
-        id_constant: "REGEXP_ID_GLOBAL_TYPE_ID",
+        id_constant: "REGEXP_ID_GLOBAL_TYPE_ID".into(),
         data: LoweredTypeData::Class(LoweredClass {
             name: Text::from("RegExp"),
             type_parameters: Box::default(),
@@ -2384,7 +2410,7 @@ fn lower_disposable_global(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from(spec.interface_name),
-        id_constant: spec.global_id_constant,
+        id_constant: spec.global_id_constant.into(),
         data: LoweredTypeData::Interface(LoweredInterface {
             name: Text::from(spec.interface_name),
             type_parameters: Box::default(),
@@ -2395,7 +2421,7 @@ fn lower_disposable_global(
     globals.push(LoweredGlobal {
         local_types: Box::default(),
         name: Text::from(spec.helper_name),
-        id_constant: spec.helper_id_constant,
+        id_constant: spec.helper_id_constant.into(),
         data: LoweredTypeData::Function(LoweredFunction {
             is_async: spec.return_kind.helper_is_async(),
             type_parameters: Box::default(),

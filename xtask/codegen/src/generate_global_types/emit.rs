@@ -72,6 +72,21 @@ fn generated_body(
     let registrations = render_registrations(lowered)?;
     let local_types = render_local_types(lowered.globals());
     let mut names = String::new();
+    let mut values = String::new();
+    let mut function_ids = String::new();
+    for (index, global) in lowered.functions().iter().enumerate() {
+        let name = global.name();
+        let id = global.id_constant();
+        values.push_str(&format!("({name:?}, crate::globals::{id}),\n"));
+        let offset = if index == 0 {
+            String::new()
+        } else {
+            format!(" + {index}")
+        };
+        function_ids.push_str(&format!(
+            "pub(crate) const {id}: crate::globals::GlobalTypeId = crate::globals::GlobalTypeId::new(crate::TypeId::new(crate::globals::PREDEFINED_ID_ROWS.len(){offset}));\n"
+        ));
+    }
     for (name, _, reference) in super::lower::declarations::PREDEFINED_DECLARATIONS {
         if let Some(global) = lowered.global(name)
             && matches!(
@@ -90,12 +105,20 @@ fn generated_body(
     Ok(format!(
         r#"// Generated from microsoft/TypeScript {typescript_tag} (git commit {typescript_sha}).
 
+/// Function identities allocated after the fixed predefined manifest.
+pub(crate) mod function_ids {{
+{function_ids}
+}}
+
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
 {migrated_ids}];
 
 /// Type-only declaration names and their global identities.
 pub(crate) const DECLARATION_GLOBALS: &[(&str, crate::RawTypeId)] = &[{names}];
+
+/// Value declaration names and their global identities.
+pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{values}];
 
 /// Registers all generated global type data into the resolver builder.
 pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
@@ -495,7 +518,7 @@ fn for_each_global_in_emit_order(
     lowered: &LoweredGlobalTypes,
     mut visit: impl FnMut(&LoweredGlobal),
 ) -> Result<()> {
-    for global in lowered.globals() {
+    for global in lowered.predefined_globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
             && !super::lower::declarations::PREDEFINED_DECLARATIONS
                 .iter()
@@ -530,6 +553,10 @@ fn for_each_global_in_emit_order(
         {
             visit(global);
         }
+    }
+
+    for global in lowered.functions() {
+        visit(global);
     }
 
     Ok(())

@@ -803,3 +803,41 @@ fn generated_date_statics_infer_declared_returns() {
     let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     assert_inferred_type_snapshot("generated_date_statics_infer_declared_returns", &db, &fs);
 }
+
+#[test]
+fn generated_global_functions_infer_declared_signatures_and_returns() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const evaluated = eval("1 + 1");
+        export const integer = parseInt("42");
+        export const hexadecimal = parseInt("ff", 16);
+        export const float = parseFloat("1.5");
+        export const nan = isNaN(0);
+        export const finite = isFinite(42);
+        export const decoded = decodeURI("https://example.com/a%20b");
+        export const decodedComponent = decodeURIComponent("a%20b");
+        export const encoded = encodeURI("https://example.com/a b");
+        export const encodedComponent = encodeURIComponent("a b");
+        export const encodedNumber = encodeURIComponent(42);
+        export const encodedBoolean = encodeURIComponent(true);
+        export const escaped = escape("a b");
+        export const unescaped = unescape("a%20b");
+        export const parse = parseInt;
+        export const aliased = parse("101", 2);
+        export const encode = encodeURIComponent;
+        export const checked = globalThis.isFinite(42);
+        export const qualified = globalThis.parseFloat("1.5");
+        export function shadowed(parseInt: (value: string) => boolean) {
+            return parseInt("42");
+        }
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot(
+        "generated_global_functions_infer_declared_signatures_and_returns",
+        &db,
+        &fs,
+    );
+}

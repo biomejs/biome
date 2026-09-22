@@ -12,6 +12,7 @@ use super::globals_builder::GlobalsResolverBuilder;
 use crate::generated::global_types::{generated_local_types, set_generated_global_type_data};
 
 pub use super::globals_ids::*;
+pub(crate) use crate::generated::global_types::function_ids::*;
 
 pub(super) struct RawGlobalTypes {
     pub(super) types: TypeStore,
@@ -239,7 +240,9 @@ pub fn global_type_id_for_value(name: &str) -> Option<GlobalTypeId> {
         "fetch" => Some(FETCH_ID_GLOBAL_TYPE_ID),
         "Intl" => Some(INTL_ID_GLOBAL_TYPE_ID),
         "globalThis" | "window" => Some(GLOBAL_ID_GLOBAL_TYPE_ID),
-        _ => None,
+        _ => crate::generated::global_types::VALUE_GLOBALS
+            .iter()
+            .find_map(|(declared, id)| (*declared == name).then_some(*id)),
     }
 }
 
