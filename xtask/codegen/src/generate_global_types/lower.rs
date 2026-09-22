@@ -84,6 +84,7 @@ pub enum LoweredTypeData {
     Null,
     NumberLiteral(Text),
     ObjectKeyword,
+    Object(Box<[LoweredTypeMember]>),
     Class(LoweredClass),
     Constructor(LoweredConstructor),
     Function(LoweredFunction),
@@ -310,6 +311,7 @@ pub enum LoweredMemberKind {
     Constructor,
     CallSignature,
     ComputedValue { key_reference: LoweredTypeReference },
+    IndexSignature { key_reference: LoweredTypeReference },
 }
 
 /// Lowered type reference.
@@ -317,6 +319,22 @@ pub enum LoweredMemberKind {
 pub enum LoweredTypeReference {
     Predefined(&'static str),
     Local(usize),
+}
+
+/// Selects which declarations the shared lowerer adds to a global class.
+/// Allows constructor members to be lowered while retaining projected instance members.
+/// This selection is temporary until full declaration lowering replaces the projections.
+struct ClassSelection {
+    /// TypeScript global name used to find its declaration group.
+    name: &'static str,
+    /// Rust constant used to register the class in the globals resolver.
+    id_constant: &'static str,
+    /// Rust predefined type reference used when declarations refer to this class.
+    reference: &'static str,
+    /// Whether to lower instance declarations; false preserves the projected members.
+    lower_instances: bool,
+    /// Selects signatures and static members from the constructor interface.
+    constructor_members: declarations::MemberSelector,
 }
 
 /// Lowers supported global groups into generated global type definitions.
@@ -340,23 +358,62 @@ pub fn lower_global_types(
         &mut globals,
         ASYNC_DISPOSABLE_GLOBAL,
     )?;
-    for (name, id_constant, reference) in [
-        (
-            "WeakMap",
-            "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-            "GLOBAL_WEAK_MAP_ID",
-        ),
-        ("Set", "SET_ID_GLOBAL_TYPE_ID", "GLOBAL_SET_ID"),
-        ("Map", "MAP_ID_GLOBAL_TYPE_ID", "GLOBAL_MAP_ID"),
-        ("Date", "DATE_ID_GLOBAL_TYPE_ID", "GLOBAL_DATE_ID"),
-        ("RegExp", "REGEXP_ID_GLOBAL_TYPE_ID", "GLOBAL_REGEXP_ID"),
-    ] {
+    let classes: &[ClassSelection] = &[
+        ClassSelection {
+            name: "Array",
+            id_constant: "ARRAY_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_ARRAY_ID",
+            lower_instances: false,
+            constructor_members: |member| declarations::select_named_members(member, &["from"]),
+        },
+        ClassSelection {
+            name: "WeakMap",
+            id_constant: "WEAK_MAP_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_WEAK_MAP_ID",
+            lower_instances: true,
+            constructor_members: select_construct_signatures,
+        },
+        ClassSelection {
+            name: "Set",
+            id_constant: "SET_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_SET_ID",
+            lower_instances: true,
+            constructor_members: select_construct_signatures,
+        },
+        ClassSelection {
+            name: "Map",
+            id_constant: "MAP_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_MAP_ID",
+            lower_instances: true,
+            constructor_members: select_construct_signatures,
+        },
+        ClassSelection {
+            name: "Date",
+            id_constant: "DATE_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_DATE_ID",
+            lower_instances: true,
+            constructor_members: select_construct_signatures,
+        },
+        ClassSelection {
+            name: "RegExp",
+            id_constant: "REGEXP_ID_GLOBAL_TYPE_ID",
+            reference: "GLOBAL_REGEXP_ID",
+            lower_instances: true,
+            constructor_members: select_call_and_construct_signatures,
+        },
+    ];
+    for &ClassSelection {
+        name,
+        id_constant,
+        reference,
+        lower_instances,
+        constructor_members,
+    } in classes
+    {
         let Some(group) = manifest.global_group(name) else {
             continue;
         };
-        let constructors = if matches!(name, "Map" | "Set" | "WeakMap" | "Date" | "RegExp")
-            && group.has_role(GlobalDeclarationRole::Value)
-        {
+        let constructors = if group.has_role(GlobalDeclarationRole::Value) {
             let constructor_name =
                 resolve_constructor_name(name, group.declarations(), &mut source_cache)?;
             Some(
@@ -388,22 +445,27 @@ pub fn lower_global_types(
         let LoweredTypeData::Class(class) = &mut globals[index].data else {
             bail!("expected class data for {name}");
         };
-        globals[index].local_types = declarations::lower_class_members(
-            manifest,
-            source_files,
-            class,
-            reference,
-            constructors.map(|records| {
-                (
-                    records,
-                    if name == "RegExp" {
-                        select_call_and_construct_signatures as fn(&AnyTsTypeMember) -> Result<bool>
-                    } else {
-                        select_construct_signatures
-                    },
-                )
-            }),
-        )?;
+        globals[index].local_types = if lower_instances {
+            declarations::lower_class_members(
+                manifest,
+                source_files,
+                class,
+                reference,
+                constructors.map(|records| (records, constructor_members)),
+            )?
+        } else if let Some(records) = constructors {
+            declarations::lower_constructor_members(
+                manifest,
+                source_files,
+                records,
+                class,
+                reference,
+                constructor_members,
+                &[],
+            )?
+        } else {
+            Box::default()
+        };
     }
 
     declarations::lower_predefined_declarations(manifest, source_files, &mut globals)?;
