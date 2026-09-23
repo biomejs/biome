@@ -400,7 +400,7 @@ pub fn lower_global_types(
             id_constant: "DATE_ID_GLOBAL_TYPE_ID",
             reference: "GLOBAL_DATE_ID",
             lower_instances: true,
-            constructor_members: select_construct_signatures,
+            constructor_members: |_| Ok(true),
         },
         ClassSelection {
             name: "RegExp",
