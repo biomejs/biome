@@ -1,0 +1,21 @@
+[
+  "const s = 'a\"' + 'b';",
+  "const s = 'a\"${' + 'b}\"';",
+  "const s = 'a' + '\"b';",
+  "const s = \"a'\" + '\"b';",
+  "const s = 'a\\\"' + \"b\\\"\";",
+  "const s = 'a\\\\\"' + 'b';",
+  "const s = 'a\\\\\\\"' + 'b';",
+  "const s = 'a\\\\' + '\"b';",
+  "const s = '\\n\\t\\u0041' + '\"b';",
+  "const s = 'é漢\"' + 'b';",
+  "const s = `a\"` + 'b';",
+  "const s = 'a' + `\"b`;",
+  "const s = 'a\"' + 1;",
+  "const s = 1 + '\"b';",
+  "const s = 'a\"' + 'b' + 'c';",
+  "const s = ('a\"' + 'b') + 'c';",
+  "const s = 'a' + ('\"b' + 'c');",
+  "const s = foo + 'a' + 'b\"' + 'c';",
+  "const s = (foo + 'a') + ('b\"' + 'c');"
+]

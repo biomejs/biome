@@ -1,0 +1,459 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: quotes.jsonc
+---
+# Input
+```cjs
+const s = 'a"' + 'b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a"' + 'b';
+      │           ^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a"'·+·'b';
+  + const·s·=·"a\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a"${' + 'b}"';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a"${' + 'b}"';
+      │           ^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a"${'·+·'b}"';
+  + const·s·=·"a\"${b}\"";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a' + '"b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a' + '"b';
+      │           ^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a'·+·'"b';
+  + const·s·=·"a\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = "a'" + '"b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = "a'" + '"b';
+      │           ^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·"a'"·+·'"b';
+  + const·s·=·"a'\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a\"' + "b\"";
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a\"' + "b\"";
+      │           ^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a\"'·+·"b\"";
+  + const·s·=·"a\"b\"";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a\\"' + 'b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a\\"' + 'b';
+      │           ^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a\\"'·+·'b';
+  + const·s·=·"a\\\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a\\\"' + 'b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a\\\"' + 'b';
+      │           ^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a\\\"'·+·'b';
+  + const·s·=·"a\\\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a\\' + '"b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a\\' + '"b';
+      │           ^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a\\'·+·'"b';
+  + const·s·=·"a\\\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = '\n\t\u0041' + '"b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = '\n\t\u0041' + '"b';
+      │           ^^^^^^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'\n\t\u0041'·+·'"b';
+  + const·s·=·"\n\t\u0041\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'é漢"' + 'b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'é漢"' + 'b';
+      │           ^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'é漢"'·+·'b';
+  + const·s·=·"é漢\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = `a"` + 'b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = `a"` + 'b';
+      │           ^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·`a"`·+·'b';
+  + const·s·=·"a\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a' + `"b`;
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a' + `"b`;
+      │           ^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a'·+·`"b`;
+  + const·s·=·"a\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a"' + 1;
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a"' + 1;
+      │           ^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a"'·+·1;
+  + const·s·=·"a\"1";
+  
+
+```
+
+# Input
+```cjs
+const s = 1 + '"b';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 1 + '"b';
+      │           ^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·1·+·'"b';
+  + const·s·=·"1\"b";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a"' + 'b' + 'c';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a"' + 'b' + 'c';
+      │           ^^^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a"'·+·'b'·+·'c';
+  + const·s·=·"a\"bc";
+  
+
+```
+
+# Input
+```cjs
+const s = ('a"' + 'b') + 'c';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = ('a"' + 'b') + 'c';
+      │           ^^^^^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·('a"'·+·'b')·+·'c';
+  + const·s·=·"a\"bc";
+  
+
+```
+
+# Input
+```cjs
+const s = 'a' + ('"b' + 'c');
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = 'a' + ('"b' + 'c');
+      │           ^^^^^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·'a'·+·('"b'·+·'c');
+  + const·s·=·"a\"bc";
+  
+
+```
+
+# Input
+```cjs
+const s = foo + 'a' + 'b"' + 'c';
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = foo + 'a' + 'b"' + 'c';
+      │           ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·foo·+·'a'·+·'b"'·+·'c';
+  + const·s·=·foo·+·'a'·+·"b\"c";
+  
+
+```
+
+# Input
+```cjs
+const s = (foo + 'a') + ('b"' + 'c');
+```
+
+# Diagnostics
+```
+quotes.jsonc:1:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+  > 1 │ const s = (foo + 'a') + ('b"' + 'c');
+      │                          ^^^^^^^^^^
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+  - const·s·=·(foo·+·'a')·+·('b"'·+·'c');
+  + const·s·=·(foo·+·'a')·+·("b\"c");
+  
+
+```
