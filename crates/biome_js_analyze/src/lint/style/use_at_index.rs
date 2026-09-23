@@ -10,7 +10,7 @@ use biome_js_syntax::{
     JsCallExpression, JsComputedMemberExpression, JsParenthesizedExpression,
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, declare_node_union};
 use biome_rule_options::use_at_index::UseAtIndexOptions;
 
 declare_lint_rule! {
@@ -410,9 +410,19 @@ fn split_minus_binary_expressions(
 /// Combine the expressions in the list with the addition operator.
 fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpression> {
     list.into_iter().rev().reduce(|left, right| {
+        let has_space_before_operator = left
+            .syntax()
+            .last_trailing_trivia()
+            .and_then(|trivia| trivia.last())
+            .is_some_and(|piece| piece.is_whitespace() || piece.is_newline());
+        let mut operator =
+            make::token(T![+]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        if !has_space_before_operator {
+            operator = operator.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        }
         AnyJsExpression::JsBinaryExpression(make::js_binary_expression(
             left,
-            make::token(T![+]),
+            operator,
             right,
         ))
     })

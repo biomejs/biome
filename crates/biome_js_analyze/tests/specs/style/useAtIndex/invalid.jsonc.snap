@@ -501,7 +501,7 @@ invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━
   i Unsafe fix: Use .at().
   
   - array[array.length·-·unknown·-·1]
-  + array.at(-(unknown·+1))
+  + array.at(-(unknown·+·1))
   
 
 ```
@@ -525,7 +525,55 @@ invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━
   i Unsafe fix: Use .at().
   
   - array[array.length·-·1·-·unknown]
-  + array.at(-(1·+unknown))
+  + array.at(-(1·+·unknown))
+  
+
+```
+
+# Input
+```cjs
+array[array.length-1-unknown]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length-1-unknown]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length-1-unknown]
+  + array.at(-(1·+·unknown))
+  
+
+```
+
+# Input
+```cjs
+array[array.length-1/* keep */-unknown]
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  > 1 │ array[array.length-1/* keep */-unknown]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Using .at() is more convenient and is easier to read.
+  
+  i Unsafe fix: Use .at().
+  
+  - array[array.length-1/*·keep·*/-unknown]
+  + array.at(-(1/*·keep·*/·+·unknown))
   
 
 ```
@@ -549,7 +597,7 @@ invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━
   i Unsafe fix: Use .at().
   
   - array[array.length·-·unknown·-·another]
-  + array.at(-(unknown·+another))
+  + array.at(-(unknown·+·another))
   
 
 ```
@@ -813,7 +861,7 @@ invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━
   i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·unknown·-·1·);
-  + string.at(-(unknown·+1));
+  + string.at(-(unknown·+·1));
   
 
 ```
@@ -837,7 +885,7 @@ invalid.jsonc:1:1 lint/style/useAtIndex  FIXABLE  ━━━━━━━━━━
   i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·1·-·unknown);
-  + string.at(-(1·+unknown));
+  + string.at(-(1·+·unknown));
   
 
 ```

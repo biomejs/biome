@@ -25,6 +25,8 @@
   // Support some polynomials as well.
   "array[array.length - unknown - 1]",
   "array[array.length - 1 - unknown]",
+  "array[array.length-1-unknown]",
+  "array[array.length-1/* keep */-unknown]",
   "array[array.length - unknown - another]",
   "array[array.length - (unknown + 1)]",
   // ========================================================================
