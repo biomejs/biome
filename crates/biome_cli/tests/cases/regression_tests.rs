@@ -712,3 +712,155 @@ sequential {
         console.out_buffer
     );
 }
+
+#[test]
+fn configuration_malformed_format() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_format",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_check() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_check",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_lint() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_lint",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_ci() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_ci",
+        fs,
+        console,
+        result,
+    ));
+}
