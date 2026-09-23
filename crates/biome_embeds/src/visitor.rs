@@ -176,7 +176,7 @@ fn collect_embedded_bindings(
     let mut builder = EmbeddedBindingsBuilder::new();
 
     if host_file_source.is_vue() {
-        builder.visit_vue_html_root(&html_root);
+        builder.visit_vue_html_root(&html_root, snippets);
         builder.has_unknown_vue_directive_options |= has_external_script_element(&html_root);
     } else if host_file_source.is_svelte() {
         builder.visit_svelte_html_root(&html_root);
@@ -462,10 +462,36 @@ impl EmbeddedBindingsBuilder {
         self.js_bindings.push((range, text, source));
     }
 
-    fn visit_vue_html_root(&mut self, root: &HtmlRoot) {
+    fn visit_vue_html_root(&mut self, root: &HtmlRoot, snippets: &[EmbeddedSnippet]) {
         for node in root.syntax().descendants() {
             if let Some(value) = VueVForValue::cast_ref(&node) {
                 self.visit_vue_v_for_value(&value);
+            }
+
+            let initializer = match AnyVueDirective::cast_ref(&node) {
+                Some(AnyVueDirective::VueVSlotShorthandDirective(directive)) => {
+                    directive.initializer()
+                }
+                Some(AnyVueDirective::VueDirective(directive))
+                    if directive
+                        .name_token()
+                        .is_ok_and(|name| name.text_trimmed() == "v-slot") =>
+                {
+                    directive.initializer()
+                }
+                _ => None,
+            };
+            if let Some(initializer) = initializer
+                && let Some(snippet) = snippets
+                    .iter()
+                    .find(|snippet| initializer.range().contains_range(snippet.content_range))
+                && let Some(root) = snippet
+                    .parse
+                    .tree::<AnyJsRoot>()
+                    .as_js_expression_template_root()
+                && let Some(expression) = root.expression()
+            {
+                self.visit_expression_bindings(&expression);
             }
         }
     }
@@ -804,11 +830,11 @@ impl EmbeddedBindingsBuilder {
                     for argument in arguments.args().iter().flatten() {
                         match argument {
                             AnyJsCallArgument::AnyJsExpression(expr) => {
-                                self.visit_svelte_call_bindings(&expr);
+                                self.visit_expression_bindings(&expr);
                             }
                             AnyJsCallArgument::JsSpread(spread) => {
                                 let expr = spread.argument().ok()?;
-                                self.visit_svelte_call_bindings(&expr);
+                                self.visit_expression_bindings(&expr);
                             }
                         }
                     }
@@ -821,7 +847,7 @@ impl EmbeddedBindingsBuilder {
         None
     }
 
-    fn visit_svelte_call_bindings(&mut self, expression: &AnyJsExpression) -> Option<()> {
+    fn visit_expression_bindings(&mut self, expression: &AnyJsExpression) -> Option<()> {
         match expression {
             AnyJsExpression::JsIdentifierExpression(ident) => {
                 let token = ident.name().ok()?.value_token().ok()?;
@@ -839,11 +865,11 @@ impl EmbeddedBindingsBuilder {
                         }
                         AnyJsObjectMember::JsPropertyObjectMember(prop) => {
                             let value = prop.value().ok()?;
-                            self.visit_svelte_call_bindings(&value);
+                            self.visit_expression_bindings(&value);
                         }
                         AnyJsObjectMember::JsSpread(spread) => {
                             let argument = spread.argument().ok()?;
-                            self.visit_svelte_call_bindings(&argument);
+                            self.visit_expression_bindings(&argument);
                         }
                         AnyJsObjectMember::JsBogusMember(_)
                         | AnyJsObjectMember::JsGetterObjectMember(_)
@@ -857,11 +883,11 @@ impl EmbeddedBindingsBuilder {
                 for element in array.elements().iter().flatten() {
                     match element {
                         AnyJsArrayElement::AnyJsExpression(expr) => {
-                            self.visit_svelte_call_bindings(&expr);
+                            self.visit_expression_bindings(&expr);
                         }
                         AnyJsArrayElement::JsSpread(spread) => {
                             let argument = spread.argument().ok()?;
-                            self.visit_svelte_call_bindings(&argument);
+                            self.visit_expression_bindings(&argument);
                         }
                         AnyJsArrayElement::JsArrayHole(_) => {}
                     }

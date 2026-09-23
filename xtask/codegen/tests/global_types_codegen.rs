@@ -1008,6 +1008,7 @@ mod tests {
             generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
         );
         assert!(generated.contains("crate::globals::DATE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::MATH_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("builder.set_type_data("));
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
@@ -1376,14 +1377,6 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_date_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.date-extends.d.ts"),
-            "unsupported extends clause on class Date",
-        )
-    }
-
-    #[test]
     fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
         let LoweredTypeData::Class(class) = lowered.global("Date").unwrap().data() else {
@@ -1429,38 +1422,6 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-extends.d.ts"),
-            "Error interface extends clauses are not supported",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-extends.d.ts"),
-            "ErrorConstructor extends clauses are not supported",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_type_alias() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-type-alias.d.ts"),
-            "type aliases are not supported in ErrorConstructor",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-unsupported-value.d.ts"),
-            "value-side ErrorConstructor declarations are not supported",
-        )
-    }
-
-    #[test]
     fn comparator_accepts_generated_global_shapes() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
 
@@ -1500,26 +1461,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_unsupported_error_members() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-index.d.ts"),
-            "index signatures are not supported in the Error global",
-        )
-    }
-
-    #[test]
     fn lowerer_rejects_unresolved_error_member_references() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.error-named-reference.d.ts"),
             "unresolved type reference ErrorOptions in Error global",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_unsupported_error_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-value.d.ts"),
-            "unsupported value-side Error declaration",
         )
     }
 

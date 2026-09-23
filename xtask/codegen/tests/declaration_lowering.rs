@@ -44,6 +44,149 @@ fn local<'a>(
 }
 
 #[test]
+fn indexed_access_preserves_nested_operands() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Access {
+        object: Target;
+        key: 'items';
+        items: Target['items'];
+        repeated: (Target)['items'];
+        nested: Target['items'][number];
+        values: Target[keyof Target];
+        pair: [string, number];
+        keys: 0 | 1;
+        element: [string, number][0 | 1];
+    }
+    interface Target { items: string[]; }"
+        .to_vec();
+    let table = lower(&[file], &["Access"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Access").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    let member = |name| interface.member(name).unwrap().type_reference().clone();
+    for (name, object, index) in [
+        ("items", member("object"), member("key")),
+        (
+            "nested",
+            member("items"),
+            LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID"),
+        ),
+        ("element", member("pair"), member("keys")),
+    ] {
+        assert_eq!(
+            local(&table, &member(name)),
+            &LoweredTypeData::IndexedAccess { object, index },
+        );
+    }
+    assert_eq!(member("items"), member("repeated"));
+    let LoweredTypeData::IndexedAccess { object, index } = local(&table, &member("values")) else {
+        panic!("expected indexed access")
+    };
+    assert_eq!(object, &table.interface_reference("Target").unwrap());
+    assert_eq!(
+        local(&table, index),
+        &LoweredTypeData::Keyof(object.clone())
+    );
+    Ok(())
+}
+
+#[test]
+fn indexed_access_preserves_signature_parameters() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Access {
+        get<T, K extends keyof T, V extends T[K] = T[K]>(value: T[K]): T[K];
+    }"
+    .to_vec();
+    let table = lower(&[file], &["Access"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Access").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    let LoweredTypeData::Function(function) =
+        local(&table, interface.member("get").unwrap().type_reference())
+    else {
+        panic!("expected function")
+    };
+    let expected = LoweredTypeData::IndexedAccess {
+        object: function.type_parameters()[0].clone(),
+        index: function.type_parameters()[1].clone(),
+    };
+    assert_eq!(local(&table, function.return_type()), &expected);
+    assert_eq!(
+        function.parameters()[0].type_reference(),
+        function.return_type()
+    );
+    let LoweredTypeData::GenericParameter {
+        constraint,
+        default,
+        ..
+    } = local(&table, &function.type_parameters()[2])
+    else {
+        panic!("expected generic parameter")
+    };
+    assert_eq!(constraint.as_ref(), Some(function.return_type()));
+    assert_eq!(default, constraint);
+    for (position, ty) in table.types().iter().enumerate() {
+        if let LoweredTypeData::IndexedAccess { object, index } = ty {
+            for operand in [object, index] {
+                let LoweredTypeReference::Local(operand) = operand else {
+                    panic!("expected local operand")
+                };
+                assert!(*operand < position);
+            }
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn keyof_preserves_operands_in_signatures() -> Result<()> {
+    let mut file = fixture("lowering.interfaces.d.ts")?;
+    file.bytes = b"interface Keys {
+        named: keyof Target;
+        key<T, K extends keyof T = keyof T>(value: keyof (T)): keyof T;
+    }
+    interface Target { id: boolean; }"
+        .to_vec();
+    let table = lower(&[file], &["Keys"])?;
+    let LoweredTypeData::Interface(interface) =
+        local(&table, &table.interface_reference("Keys").unwrap())
+    else {
+        panic!("expected interface")
+    };
+    assert_eq!(
+        local(&table, interface.member("named").unwrap().type_reference()),
+        &LoweredTypeData::Keyof(table.interface_reference("Target").unwrap()),
+    );
+    let LoweredTypeData::Function(function) =
+        local(&table, interface.member("key").unwrap().type_reference())
+    else {
+        panic!("expected function")
+    };
+    let expected = LoweredTypeData::Keyof(function.type_parameters()[0].clone());
+    assert_eq!(
+        local(&table, function.parameters()[0].type_reference()),
+        &expected
+    );
+    assert_eq!(local(&table, function.return_type()), &expected);
+    let LoweredTypeData::GenericParameter {
+        constraint,
+        default,
+        ..
+    } = local(&table, &function.type_parameters()[1])
+    else {
+        panic!("expected generic parameter")
+    };
+    for reference in [constraint, default] {
+        assert_eq!(local(&table, reference.as_ref().unwrap()), &expected);
+    }
+    Ok(())
+}
+
+#[test]
 fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
     let files = [fixture("lowering.interfaces.d.ts")?];
     let table = lower(&files, &["Catalog"])?;
@@ -223,6 +366,7 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
         ("any", LoweredTypeData::AnyKeyword),
         ("unknown", LoweredTypeData::UnknownKeyword),
         ("never", LoweredTypeData::NeverKeyword),
+        ("object", LoweredTypeData::ObjectKeyword),
         ("undefined", LoweredTypeData::Undefined),
         ("bigint", LoweredTypeData::BigInt),
         ("symbol", LoweredTypeData::Symbol),
@@ -294,84 +438,6 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
         };
         assert_eq!(local(&table, &union[0]), &expected, "{source}");
         syn::parse_str::<syn::Expr>(&render_declarations(&table))?;
-    }
-    Ok(())
-}
-
-#[test]
-fn declaration_scalar_support_does_not_accept_type_operators_or_objects() -> Result<()> {
-    for source in [
-        "unique symbol",
-        "keyof symbol",
-        "object",
-        "{ value: bigint }",
-        "`text`",
-    ] {
-        let mut file = fixture("lowering.interfaces.d.ts")?;
-        file.bytes = format!("interface Example {{ value: {source}; }}").into_bytes();
-        let error = lower(&[file], &["Example"]).expect_err(source);
-        assert!(
-            format!("{error:#}").contains("unsupported type syntax"),
-            "{source}: {error:#}"
-        );
-    }
-    Ok(())
-}
-
-#[test]
-fn class_members_use_declaration_names_and_generic_positions() -> Result<()> {
-    use xtask_codegen::generate_global_types::lower::lower_global_types;
-
-    for (key, value, member_name) in [("K", "V", "lookup"), ("Key", "Value", "renamed")] {
-        let mut file = fixture("lowering.interfaces.d.ts")?;
-        file.bytes = format!(
-            "interface WeakMap<{key} extends boolean, {value}> {{ {member_name}(key: {key}): {value} | undefined; }}
-             interface WeakMap<{key} extends boolean, {value}> {{ extra?: boolean; chain(): this; readonly [Symbol.toStringTag]: Unsupported; }}
-             declare var WeakMap: UnsupportedConstructor;"
-        ).into_bytes();
-        let manifest = build_global_manifest(collect(&file).records);
-        let lowered = lower_global_types(&manifest, &[file])?;
-        let LoweredTypeData::Class(class) = lowered.global("WeakMap").unwrap().data() else {
-            panic!("expected class")
-        };
-        let local = |reference: &LoweredTypeReference| {
-            let LoweredTypeReference::Local(index) = reference else {
-                panic!("expected local reference")
-            };
-            &lowered.global("WeakMap").unwrap().local_types()[*index]
-        };
-        let LoweredTypeData::Function(method) =
-            local(class.member(member_name).unwrap().type_reference())
-        else {
-            panic!("expected method")
-        };
-        assert_eq!(
-            method.parameters()[0].type_reference(),
-            &class.type_parameters()[0]
-        );
-        let LoweredTypeData::Union(types) = local(method.return_type()) else {
-            panic!("expected union")
-        };
-        assert_eq!(&types[0], &class.type_parameters()[1]);
-        assert_eq!(local(&types[1]), &LoweredTypeData::Undefined);
-        let property = class.member("extra").unwrap();
-        assert_eq!(
-            property.kind(),
-            &LoweredMemberKind::Named { optional: true }
-        );
-        assert_eq!(local(property.type_reference()), &LoweredTypeData::Boolean);
-        let LoweredTypeData::Function(chain) =
-            local(class.member("chain").unwrap().type_reference())
-        else {
-            panic!("expected method")
-        };
-        assert_eq!(local(chain.return_type()), &LoweredTypeData::ThisKeyword);
-        assert!(
-            class
-                .members()
-                .iter()
-                .all(|member| matches!(member.kind(), LoweredMemberKind::Named { .. }))
-        );
     }
     Ok(())
 }
@@ -464,6 +530,7 @@ fn generic_constraints_translate_types_and_parameter_references() -> Result<()> 
             ("boolean", LoweredTypeData::Boolean),
             ("'bound'", LoweredTypeData::StringLiteral("bound".into())),
             ("WeakKey", LoweredTypeData::ObjectKeyword),
+            ("object", LoweredTypeData::ObjectKeyword),
         ] {
             let mut file = fixture("lowering.interfaces.d.ts")?;
             let body = if declaration.starts_with("type") {
@@ -559,175 +626,58 @@ fn unresolved_constraints_report_the_parameter() -> Result<()> {
 fn generic_constraints_preserve_unions_and_defaults() -> Result<()> {
     use xtask_codegen::generate_global_types::lower::lower_global_types;
 
-    let mut file = fixture("lowering.interfaces.d.ts")?;
-    file.bytes =
-        b"interface Iterator<A extends string | number = string, B extends A = A> {}".to_vec();
-    let manifest = build_global_manifest(collect(&file).records);
-    let lowered = lower_global_types(&manifest, &[file])?;
-    let global = lowered.global("Iterator").unwrap();
-    let LoweredTypeData::Interface(interface) = global.data() else {
-        panic!("expected interface")
-    };
-    let local = |reference: &LoweredTypeReference| {
-        let LoweredTypeReference::Local(index) = reference else {
-            panic!("expected local type")
+    for name in ["Iterator", "WeakMap"] {
+        let mut file = fixture("lowering.interfaces.d.ts")?;
+        file.bytes =
+            format!("interface {name}<A extends string | number = string, B extends A = A> {{}}")
+                .into_bytes();
+        let manifest = build_global_manifest(collect(&file).records);
+        let lowered = lower_global_types(&manifest, &[file])?;
+        let global = lowered.global(name).unwrap();
+        let parameters = match global.data() {
+            LoweredTypeData::Interface(interface) => interface.type_parameters(),
+            LoweredTypeData::Class(class) => class.type_parameters(),
+            _ => panic!("expected generic declaration"),
         };
-        &global.local_types()[*index]
-    };
-    let LoweredTypeData::GenericParameter {
-        constraint: Some(constraint),
-        default,
-        ..
-    } = local(&interface.type_parameters()[0])
-    else {
-        panic!("expected constrained parameter")
-    };
-    let LoweredTypeData::Union(types) = local(constraint) else {
-        panic!("expected union constraint")
-    };
-    assert_eq!(
-        types.as_ref(),
-        [
-            LoweredTypeReference::Predefined("GLOBAL_STRING_ID"),
-            LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")
-        ]
-    );
-    assert_eq!(
-        default,
-        &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
-    );
-    let LoweredTypeData::GenericParameter {
-        constraint,
-        default,
-        ..
-    } = local(&interface.type_parameters()[1])
-    else {
-        panic!("expected constrained parameter")
-    };
-    assert_eq!(constraint.as_ref(), Some(&interface.type_parameters()[0]));
-    assert_eq!(default, constraint);
-    Ok(())
-}
-
-#[test]
-fn class_callbacks_preserve_self_type_arguments_in_owner_tables() -> Result<()> {
-    use xtask_codegen::generate_global_types::lower::lower_global_types;
-    let mut file = fixture("lowering.interfaces.d.ts")?;
-    file.bytes = b"
-        interface WeakMap<K, V> { value: V; }
-        interface Set<Element> { visit(callback: (owner: Set<Element>) => void): void; }
-        interface Map<Left, Right> {
-            visit(callback: (owner: Map<Right, Left>) => void): void;
-            walk(): MapIterator<Left>;
-            entries(): boolean;
-        }
-        interface Set<Element> { walk(): SetIterator<Element>; entries(): boolean; }
-    "
-    .to_vec();
-    let manifest = build_global_manifest(collect(&file).records);
-    let lowered = lower_global_types(&manifest, &[file])?;
-    for (name, global_reference) in [("Set", "GLOBAL_SET_ID"), ("Map", "GLOBAL_MAP_ID")] {
         let local = |reference: &LoweredTypeReference| {
             let LoweredTypeReference::Local(index) = reference else {
-                panic!("expected local reference")
+                panic!("expected local type")
             };
-            &lowered.global(name).unwrap().local_types()[*index]
+            &global.local_types()[*index]
         };
-        let LoweredTypeData::Class(class) = lowered.global(name).unwrap().data() else {
-            panic!("expected class")
-        };
-        assert!(class.member("walk").is_none());
-        assert!(class.member("entries").is_some());
-        let LoweredTypeData::Function(visit) =
-            local(class.member("visit").unwrap().type_reference())
+        let LoweredTypeData::GenericParameter {
+            constraint: Some(constraint),
+            default,
+            ..
+        } = local(&parameters[0])
         else {
-            panic!("expected method")
+            panic!("expected constrained parameter")
         };
-        let LoweredTypeData::Function(callback) = local(visit.parameters()[0].type_reference())
-        else {
-            panic!("expected callback")
+        let LoweredTypeData::Union(types) = local(constraint) else {
+            panic!("expected union constraint")
         };
-        let LoweredTypeData::InstanceOf {
-            ty,
-            type_parameters,
-        } = local(callback.parameters()[0].type_reference())
-        else {
-            panic!("expected instance")
-        };
-        assert_eq!(ty, &LoweredTypeReference::Predefined(global_reference));
         assert_eq!(
-            type_parameters.as_ref(),
-            class
-                .type_parameters()
-                .iter()
-                .cloned()
-                .rev()
-                .collect::<Vec<_>>()
+            types.as_ref(),
+            [
+                LoweredTypeReference::Predefined("GLOBAL_STRING_ID"),
+                LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")
+            ]
         );
+        assert_eq!(
+            default,
+            &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+        );
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(&parameters[1])
+        else {
+            panic!("expected constrained parameter")
+        };
+        assert_eq!(constraint.as_ref(), Some(&parameters[0]));
+        assert_eq!(default, constraint);
     }
-    Ok(())
-}
-
-#[test]
-fn class_extensions_preserve_projections_and_exclude_intl_overloads() -> Result<()> {
-    use xtask_codegen::generate_global_types::lower::lower_global_types;
-    let mut file = fixture("manifest.disposables.d.ts")?;
-    let manifest = build_global_manifest(collect(&file).records);
-    let original = lower_global_types(&manifest, std::slice::from_ref(&file))?;
-    file.bytes.extend_from_slice(
-        b"
-        interface RegExp { extra?: boolean; check(input: string): boolean; }
-        interface Date {
-            format(): string;
-            format(locales?: string[], options?: Intl.DateTimeFormatOptions): string;
-            custom(options: Intl.CustomOptions): string;
-            readonly [Symbol.toPrimitive]: Unsupported;
-        }
-    ",
-    );
-    let manifest = build_global_manifest(collect(&file).records);
-    let lowered = lower_global_types(&manifest, &[file])?;
-    let LoweredTypeData::Class(regexp) = lowered.global("RegExp").unwrap().data() else {
-        panic!("expected class")
-    };
-    let LoweredTypeData::Class(original_regexp) = original.global("RegExp").unwrap().data() else {
-        panic!("expected class")
-    };
-    assert_eq!(regexp.member("exec"), original_regexp.member("exec"));
-    assert_eq!(
-        lowered.global("RegExp.exec"),
-        original.global("RegExp.exec")
-    );
-    assert_eq!(
-        regexp.member("extra").unwrap().kind(),
-        &LoweredMemberKind::Named { optional: true }
-    );
-    assert!(regexp.member("check").is_some());
-    let LoweredTypeData::Class(date) = lowered.global("Date").unwrap().data() else {
-        panic!("expected class")
-    };
-    assert!(date.member("custom").is_none());
-    let LoweredTypeReference::Local(index) = date.member("format").unwrap().type_reference() else {
-        panic!("expected local reference")
-    };
-    let LoweredTypeData::Function(format) = &lowered.global("Date").unwrap().local_types()[*index]
-    else {
-        panic!("expected function")
-    };
-    assert!(format.parameters().is_empty());
-    Ok(())
-}
-
-#[test]
-fn intl_exclusion_does_not_hide_other_unsupported_overloads() -> Result<()> {
-    use xtask_codegen::generate_global_types::lower::lower_global_types;
-    let mut file = fixture("lowering.interfaces.d.ts")?;
-    file.bytes =
-        b"interface Date { format(): string; format(options: Custom.Options): string; }".to_vec();
-    let manifest = build_global_manifest(collect(&file).records);
-    let error =
-        lower_global_types(&manifest, &[file]).expect_err("unsupported namespace must fail");
-    assert!(format!("{error:#}").contains("unsupported qualified type reference"));
     Ok(())
 }
 
@@ -831,34 +781,93 @@ fn iterator_declarations_translate_generics_aliases_and_rest_tuples() -> Result<
 }
 
 #[test]
-fn iterator_declarations_reject_unsupported_dependencies_and_shapes() -> Result<()> {
+fn regexp_signatures_follow_declarations() -> Result<()> {
     use xtask_codegen::generate_global_types::lower::lower_global_types;
-    for (source, expected) in [
-        (
-            "interface Iterator<T> { next(): Missing<T>; }",
-            "missing declaration dependency",
-        ),
-        (
-            "interface Iterator<T> { next(...[x]: [value?: T]): T; }",
-            "tuple elements are not supported",
-        ),
-        (
-            "interface Iterator<T> { [Symbol.iterator](): T; }",
-            "unsupported computed",
-        ),
-        (
-            "interface Iterator<T> {} interface Iterator<T> {}",
-            "merged protocol declarations",
-        ),
-    ] {
-        let mut file = fixture("lowering.interfaces.d.ts")?;
-        file.bytes = source.as_bytes().to_vec();
-        let manifest = build_global_manifest(collect(&file).records);
-        let error = lower_global_types(&manifest, &[file]).expect_err(source);
-        assert!(
-            format!("{error:#}").contains(expected),
-            "{source}: {error:#}"
-        );
+    let mut file = fixture("manifest.disposables.d.ts")?;
+    file.bytes = String::from_utf8(file.bytes)?
+        .replace(
+            "interface RegExpExecArray {}",
+            "interface RegExpExecArray extends Array<number> {}",
+        )
+        .replace(
+            "exec(string: string): RegExpExecArray | null;",
+            "exec<T>(value?: T): T;",
+        )
+        .into_bytes();
+    file.bytes.extend_from_slice(
+        b"
+        declare var RegExp: Factory;
+        interface Factory {
+            new<T>(value?: T): RegExp;
+            <T>(value?: T): RegExp;
+            new(value: RegExp, flag?: boolean): RegExp;
+            (value: RegExp, flag?: boolean): RegExp;
+        }
+    ",
+    );
+    let manifest = build_global_manifest(collect(&file).records);
+    let lowered = lower_global_types(&manifest, &[file])?;
+    let result = lowered.global("RegExpExecArray").unwrap();
+    let LoweredTypeData::Interface(interface) = result.data() else {
+        panic!("expected interface")
+    };
+    let LoweredTypeReference::Local(index) = &interface.extends()[0] else {
+        panic!("expected applied base")
+    };
+    let LoweredTypeData::InstanceOf {
+        ty,
+        type_parameters,
+    } = &result.local_types()[*index]
+    else {
+        panic!("expected applied base")
+    };
+    assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+    assert_eq!(
+        type_parameters.as_ref(),
+        &[LoweredTypeReference::Predefined("GLOBAL_NUMBER_ID")]
+    );
+    let LoweredTypeData::Function(exec) = lowered.global("RegExp.exec").unwrap().data() else {
+        panic!("expected exec function")
+    };
+    assert_eq!(
+        exec.parameters()[0].type_reference(),
+        &exec.type_parameters()[0]
+    );
+    assert_eq!(exec.return_type(), &exec.type_parameters()[0]);
+    assert!(exec.parameters()[0].is_optional());
+    let regexp = lowered.global("RegExp").unwrap();
+    let LoweredTypeData::Class(class) = regexp.data() else {
+        panic!("expected class")
+    };
+    let mut calls = Vec::new();
+    let mut constructors = Vec::new();
+    for member in class.members() {
+        let LoweredTypeReference::Local(index) = member.type_reference() else {
+            continue;
+        };
+        match &regexp.local_types()[*index] {
+            LoweredTypeData::Function(function)
+                if member.kind() == &LoweredMemberKind::CallSignature =>
+            {
+                calls.push((function.parameters(), function.return_type()));
+            }
+            LoweredTypeData::Constructor(constructor) => {
+                constructors.push((constructor.parameters(), constructor.return_type().unwrap()));
+            }
+            _ => {}
+        }
+    }
+    assert_eq!(calls, constructors);
+    assert_eq!(calls.len(), 2, "both distinct overloads must survive");
+    for (parameters, result) in calls {
+        assert!(parameters.last().unwrap().is_optional());
+        let LoweredTypeReference::Local(index) = result else {
+            panic!("expected self instance")
+        };
+        let LoweredTypeData::InstanceOf { ty, .. } = &regexp.local_types()[*index] else {
+            panic!("expected self instance")
+        };
+        assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_REGEXP_ID"));
     }
     Ok(())
 }

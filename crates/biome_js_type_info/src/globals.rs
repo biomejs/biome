@@ -99,6 +99,7 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(T_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
+                is_const: false,
                 name: Text::new_static("T"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
@@ -106,6 +107,7 @@ impl Default for RawGlobalTypes {
         });
         builder.set_manual_type_data(U_ID_GLOBAL_TYPE_ID, || {
             TypeData::from(GenericTypeParameter {
+                is_const: false,
                 name: Text::new_static("U"),
                 constraint: TypeReference::unknown(),
                 default: TypeReference::unknown(),
@@ -209,6 +211,8 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
         SYMBOL_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_date() {
         DATE_ID_GLOBAL_TYPE_ID
+    } else if qualifier.is_math() {
+        MATH_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_map() {
         MAP_ID_GLOBAL_TYPE_ID
     } else if qualifier.is_set() {

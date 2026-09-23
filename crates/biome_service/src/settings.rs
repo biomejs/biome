@@ -1376,7 +1376,7 @@ impl VcsIgnoredPatterns {
     ) -> bool {
         let root_ignored = {
             let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched(path, is_dir).is_ignore()
+            root.matched_path_or_any_parents(path, is_dir).is_ignore()
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {

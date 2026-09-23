@@ -9,6 +9,9 @@
 "foo \751 bar";
 "foo \258 bar";
 "foo \25a bar";
+"foo \456 bar";
+"foo \777 bar";
+"foo \1234 bar";
 
 const o = {
     '\31': 0,

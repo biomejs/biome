@@ -720,6 +720,8 @@ pub struct FunctionParameterBinding {
 /// Definition of a generic type parameter.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GenericTypeParameter {
+    /// Whether inline call arguments use const-like inference for this parameter.
+    pub is_const: bool,
     /// Name of the type parameter.
     pub name: Text,
 
@@ -1508,6 +1510,8 @@ pub struct TypeofValue {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofUnaryMinusExpression {
+    /// Whether the operand syntax is a number or bigint literal.
+    pub is_literal_argument: bool,
     pub argument: TypeReference,
 }
 
@@ -1809,6 +1813,11 @@ impl TypeReferenceQualifier {
     /// Checks whether this type qualifier references the `Date` type.
     pub fn is_date(&self) -> bool {
         self.path.is_identifier("Date")
+    }
+
+    /// Checks whether this type qualifier references the `Math` namespace object.
+    pub fn is_math(&self) -> bool {
+        self.path.is_identifier("Math")
     }
 
     /// Checks whether this type qualifier references the `Map` type.

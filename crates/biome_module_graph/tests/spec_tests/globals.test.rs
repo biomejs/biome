@@ -228,6 +228,49 @@ fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
 }
 
 #[test]
+fn math_members_infer_as_statics_from_declarations() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const pi = Math.PI;
+        export const e = Math.E;
+        export const floored = Math.floor(1.5);
+        export const largest = Math.max(1, 2, 3);
+        export const power = Math.pow(2, 8);
+        export const random = Math.random();
+        export const truncated = Math.trunc(1.5);
+        export const sign = Math.sign(-1);
+        export const root = Math.cbrt(27);
+        export const distance = Math.hypot(3, 4);
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in [
+        "pi",
+        "e",
+        "floored",
+        "largest",
+        "power",
+        "random",
+        "truncated",
+        "sign",
+        "root",
+        "distance",
+    ] {
+        assert!(is_inferred_number(&db, binding(name)), "{name}");
+    }
+}
+
+#[test]
 fn weak_map_members_infer_calls_with_instance_arguments() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -428,4 +471,207 @@ fn iterator_results_infer_yield_and_completion_values() {
     assert_eq!(ty, InferredTypeData::AnyKeyword);
     let ty = inferred_binding_ty_by_name(&db, module, inferred, "dependentValue").unwrap();
     assert!(is_inferred_string(&db, inferred.resolve_type(&db, ty)));
+}
+
+#[test]
+fn iterable_annotations_resolve_declared_generic_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export function retain(values: Iterable<number, string>) { return values; }
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let value = inferred_function_return_ty_by_name(&db, module, inferred, "retain").unwrap();
+    let InferredTypeData::InstanceOf(instance) = value else {
+        panic!("expected Iterable instance, got {value:?}")
+    };
+    let InferredTypeData::Interface(interface) = instance.ty(&db) else {
+        panic!("expected declared interface")
+    };
+    assert_eq!(interface.name(&db).text(), "Iterable");
+    assert!(is_inferred_number(&db, instance.type_parameters(&db)[0]));
+    assert!(is_inferred_string(&db, instance.type_parameters(&db)[1]));
+}
+
+#[test]
+fn lowered_constructors_preserve_explicit_collection_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const mapValue = new Map<string, number>().get("key");
+        export const entryValue = new Map<string, number>([["key", 1]]).get("key");
+        const createMap = Map;
+        export const aliasedValue = new createMap<number, string>().get(1);
+        declare const key: object;
+        export const weakValue = new WeakMap<object, string>().get(key);
+        export const setHas = new Set<string>().has("key");
+        export const time = new Date(0).getTime();
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    for name in ["mapValue", "entryValue"] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = inferred.resolve_type(&db, value);
+        assert!(
+            contains_inferred_number(&db, value),
+            "{name}: {}",
+            format_inferred_type(&db, value)
+        );
+    }
+    for name in ["aliasedValue", "weakValue"] {
+        let value = inferred_binding_ty_by_name(&db, module, inferred, name).unwrap();
+        let value = inferred.resolve_type(&db, value);
+        assert!(
+            contains_inferred_string(&db, value),
+            "{name}: {}",
+            format_inferred_type(&db, value)
+        );
+    }
+    let time = inferred_binding_ty_by_name(&db, module, inferred, "time").unwrap();
+    assert!(is_inferred_number(&db, inferred.resolve_type(&db, time)));
+    let has = inferred_binding_ty_by_name(&db, module, inferred, "setHas").unwrap();
+    assert!(is_inferred_boolean(&db, inferred.resolve_type(&db, has)));
+}
+
+#[test]
+fn regexp_declarations_infer_results_and_constructor_calls() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const annotated: RegExpExecArray;
+        export const annotatedIndex = annotated.index;
+        export const annotatedInput = annotated.input;
+        export const first = annotated["0"];
+        export const length = annotated.length;
+        export const execute = /ab/.exec;
+        export const result = /ab/.exec("abc");
+        export const resultIndex = result?.index;
+        export const resultInput = result?.input;
+        export const constructed = new RegExp("ab", "g").exec("abc");
+        export const called = RegExp("ab", "g").exec("abc");
+        export const constructedIndex = constructed?.index;
+        export const calledIndex = called?.index;
+        export const copied = new RegExp(/ab/).source;
+        export const calledCopy = RegExp(/ab/).source;
+        const create = RegExp;
+        export const aliased = create("ab").test("abc");
+        export const constructedAlias = new create("ab").lastIndex;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    for name in ["annotatedIndex", "length", "constructedAlias"] {
+        assert!(
+            is_inferred_number(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    for name in ["annotatedInput", "first", "copied", "calledCopy"] {
+        assert!(
+            is_inferred_string(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    assert!(is_inferred_boolean(&db, binding("aliased")));
+    for name in ["resultIndex", "constructedIndex", "calledIndex"] {
+        assert!(
+            contains_inferred_number(&db, binding(name)),
+            "{name}: {:?}",
+            binding(name)
+        );
+    }
+    assert!(contains_inferred_string(&db, binding("resultInput")));
+    for name in ["result", "constructed", "called"] {
+        let ty = binding(name);
+        assert!(contains_inferred_null(&db, ty), "{name}: {ty:?}");
+    }
+    assert_inferred_type_snapshot(
+        "regexp_declarations_infer_results_and_constructor_calls",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn array_from_calls_use_lowered_overloads() {
+    use biome_module_graph::{BindingTypeInput, infer_binding_type};
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const values: ArrayLike<string>;
+        declare const iterable: Iterable<number>;
+        export const copied = Array.from(values);
+        export const iterated = Array.from(iterable);
+        export const mapped = Array.from(values, value => 1);
+        export const withThis = Array.from(values, value => true, {});
+        export const mappedIterable = Array.from(iterable, value => "text");
+        export const indexes = Array.from(values, (value, index) => index);
+        const from = Array.from;
+        export const aliased = from(values, value => "text");
+        export const length = values.length;
+        export const noArguments = Array.from();
+        declare const array: string[];
+        export const instanceFrom = array.from;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
+    let binding = |name| {
+        let input = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, name));
+        normalize_type(&db, module, infer_binding_type(&db, input).unwrap())
+    };
+    for name in [
+        "copied",
+        "iterated",
+        "mapped",
+        "withThis",
+        "mappedIterable",
+        "indexes",
+        "aliased",
+    ] {
+        let ty = binding(name);
+        let InferredTypeData::InstanceOf(instance) = ty else {
+            panic!("{name}: expected array, got {ty:?}");
+        };
+        let InferredTypeData::Class(class) = instance.ty(&db).expand_canonical_global(&db) else {
+            panic!("{name}: expected Array class");
+        };
+        assert_eq!(class.name(&db).as_ref().map(Text::text), Some("Array"));
+        let [element] = instance.type_parameters(&db).as_ref() else {
+            panic!("{name}: expected one element type");
+        };
+        match name {
+            "mapped" | "indexes" => {
+                assert!(is_inferred_number(&db, *element), "{name}: {element:?}")
+            }
+            "withThis" => assert!(is_inferred_boolean(&db, *element)),
+            "mappedIterable" | "aliased" => assert!(is_inferred_string(&db, *element)),
+            _ => {}
+        }
+    }
+    assert!(is_inferred_number(&db, binding("length")));
+    assert_eq!(binding("noArguments"), InferredTypeData::Unknown);
+    assert_eq!(binding("instanceFrom"), InferredTypeData::Unknown);
+    let events = db.take_salsa_events();
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
 }
