@@ -19,8 +19,6 @@ static NEXT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("correctness", "noBeforeInteractiveScriptOutsideDocument"),
         RuleFilter::Rule("correctness", "noNextAsyncClientComponent"),
-        RuleFilter::Rule("correctness", "useExhaustiveDependencies"),
-        RuleFilter::Rule("correctness", "useHookAtTopLevel"),
         RuleFilter::Rule("correctness", "useInlineScriptId"),
         RuleFilter::Rule("performance", "noImgElement"),
         RuleFilter::Rule("performance", "noSyncScripts"),
