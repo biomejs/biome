@@ -2523,15 +2523,19 @@ fn at_expression_position(scanned: &[u8]) -> bool {
     !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
 }
 
-/// Returns whether `code` ends with a keyword that an expression can directly
-/// follow, such as `return`. After `.` or `#` the word is a property name
-/// instead, like the operand in `pool.yield / 100`.
+/// Returns whether `code` ends with a reserved word that an expression can
+/// directly follow, such as `return`. Contextual keywords such as `of` are left
+/// out because they are also plain names (`of / 2`), and a word after `.` or
+/// `#` is a property name, like the operand in `pool.yield / 100`.
 fn ends_with_expression_keyword(code: &[u8]) -> bool {
     let start = code
         .iter()
         .rposition(|byte| !is_js_word_byte(*byte))
         .map_or(0, |index| index + 1);
-    if start > 0 && matches!(lookup_byte(code[start - 1]), PRD | HAS) {
+    let before = code[..start]
+        .iter()
+        .rposition(|byte| !byte.is_ascii_whitespace());
+    if before.is_some_and(|index| matches!(lookup_byte(code[index]), PRD | HAS)) {
         return false;
     }
 
@@ -2545,7 +2549,6 @@ fn ends_with_expression_keyword(code: &[u8]) -> bool {
             | b"in"
             | b"instanceof"
             | b"new"
-            | b"of"
             | b"return"
             | b"throw"
             | b"typeof"
@@ -2835,6 +2838,13 @@ mod js_scanner {
         assert!(fence("const apy = pool.yield / 100;\n---\n<p>{apy}</p>\n").is_some());
         assert!(fence("const a = this.#return / 2, b = \"/'\";\n---\n").is_some());
         assert!(fence("const a = begin / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = pool. yield / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = pool.\n  yield / 2, b = \"/'\";\n---\n").is_some());
+    }
+
+    #[test]
+    fn a_slash_after_a_contextual_keyword_used_as_a_name_is_a_division() {
+        assert!(fence("const of = 8, n = of / 2, s = \"/'\";\n---\n").is_some());
     }
 
     #[test]
