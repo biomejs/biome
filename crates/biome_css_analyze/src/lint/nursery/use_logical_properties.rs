@@ -73,6 +73,22 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// #### Invalid
+    ///
+    /// ```css,expect_diagnostic,use_options
+    /// p {
+    ///   margin-left: 1rem;
+    /// }
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```css,use_options
+    /// p {
+    ///   margin-inline-end: 1rem;
+    /// }
+    /// ```
+    ///
     pub UseLogicalProperties {
         version: "next",
         name: "useLogicalProperties",
