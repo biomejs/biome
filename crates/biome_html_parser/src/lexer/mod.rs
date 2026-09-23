@@ -2397,8 +2397,9 @@ impl<'src> JsScanner<'src> {
                 self.advance(2);
                 self.skip_block_comment();
             }
-            // `/>` closes a tag that was not recognised as JSX; it never opens a regex.
-            Some(b'>') => self.advance(1),
+            // `/>` closes a tag that was not recognised as JSX, unless the slash
+            // sits where only an operand can start: `s.replace(/>/g, "")`.
+            Some(b'>') if !self.at_operand_start() => self.advance(1),
             _ if self.scanned().last() != Some(&b'<')
                 && slash_starts_regex(self.previous_non_whitespace()) =>
             {
@@ -2406,6 +2407,36 @@ impl<'src> JsScanner<'src> {
                 self.skip_regex();
             }
             _ => self.advance(1),
+        }
+    }
+
+    /// Returns whether the previous token leaves the scanner where an operand
+    /// must start (after `(`, `,`, `=`, `=>`, ...), so a `/` there can only
+    /// open a regex literal, never close a tag.
+    fn at_operand_start(&self) -> bool {
+        let scanned = self.scanned();
+        let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
+            return true;
+        };
+        match scanned[end] {
+            b'>' => end > 0 && scanned[end - 1] == b'=',
+            byte => matches!(
+                byte,
+                b'(' | b','
+                    | b'='
+                    | b':'
+                    | b'['
+                    | b'!'
+                    | b'&'
+                    | b'|'
+                    | b'?'
+                    | b';'
+                    | b'{'
+                    | b'~'
+                    | b'^'
+                    | b'%'
+                    | b'*'
+            ),
         }
     }
 
@@ -2782,6 +2813,21 @@ mod js_scanner {
     #[test]
     fn a_type_assertion_in_frontmatter_closes_the_fence() {
         assert_eq!(fence("const a = <string>x;\n---\n"), Some(21));
+    }
+
+    #[test]
+    fn a_regex_starting_with_a_closing_angle_bracket_is_a_regex() {
+        assert!(fence("const a = s.replace(/>/g, '&gt;');\n---\n<p>{a}</p>\n").is_some());
+        assert!(fence("const isTag = (s) => />$/.test(s);\n---\n").is_some());
+        assert!(fence("const r = [/>/, /</];\n---\n").is_some());
+        let source = "s.replace(/>/g, '')}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_self_closing_tag_in_frontmatter_still_closes() {
+        assert!(fence("const el = <Foo bar={1} />;\n---\n").is_some());
+        assert!(fence("const el = <Foo bar=\"x\" />;\n---\n").is_some());
     }
 
     #[test]
