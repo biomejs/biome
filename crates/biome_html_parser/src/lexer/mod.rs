@@ -1948,13 +1948,15 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
-fn slash_starts_regex(previous_non_whitespace: Option<u8>) -> bool {
-    match previous_non_whitespace {
-        None => true,
-        Some(byte) => !matches!(
-            lookup_byte(byte),
-            IDT | DOL | DIG | ZER | PNC | BTC | PLS | MIN
-        ),
+fn slash_starts_regex(scanned: &[u8]) -> bool {
+    let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
+        return true;
+    };
+    match lookup_byte(scanned[end]) {
+        // A keyword such as `return` leaves an operand position; other words do not.
+        IDT => ends_with_expression_keyword(&scanned[..=end]),
+        DOL | DIG | ZER | PNC | BTC | PLS | MIN => false,
+        _ => true,
     }
 }
 
@@ -2400,10 +2402,7 @@ impl<'src> JsScanner<'src> {
             // `/>` closes a tag that was not recognized as JSX, unless the slash
             // sits where only an operand can start: `s.replace(/>/g, "")`.
             Some(b'>') if !self.at_operand_start() => self.advance(1),
-            _ if self.scanned().last() != Some(&b'<')
-                && (slash_starts_regex(self.previous_non_whitespace())
-                    || ends_with_expression_keyword(self.scanned().trim_ascii_end())) =>
-            {
+            _ if self.scanned().last() != Some(&b'<') && slash_starts_regex(self.scanned()) => {
                 self.advance(1);
                 self.skip_regex();
             }
@@ -2419,27 +2418,12 @@ impl<'src> JsScanner<'src> {
         let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
             return true;
         };
-        match scanned[end] {
-            b'>' => end > 0 && scanned[end - 1] == b'=',
-            byte => {
-                matches!(
-                    byte,
-                    b'(' | b','
-                        | b'='
-                        | b':'
-                        | b'['
-                        | b'!'
-                        | b'&'
-                        | b'|'
-                        | b'?'
-                        | b';'
-                        | b'{'
-                        | b'~'
-                        | b'^'
-                        | b'%'
-                        | b'*'
-                ) || ends_with_expression_keyword(&scanned[..=end])
-            }
+        match lookup_byte(scanned[end]) {
+            MOR => end > 0 && scanned[end - 1] == b'=',
+            PNO | COM | EQL | COL | BTO | EXL | AMP | PIP | QST | SEM | BEO | TLD | CRT | PRC
+            | MUL => true,
+            IDT => ends_with_expression_keyword(&scanned[..=end]),
+            _ => false,
         }
     }
 
@@ -2547,7 +2531,7 @@ fn ends_with_expression_keyword(code: &[u8]) -> bool {
         .iter()
         .rposition(|byte| !is_js_word_byte(*byte))
         .map_or(0, |index| index + 1);
-    if start > 0 && matches!(code[start - 1], b'.' | b'#') {
+    if start > 0 && matches!(lookup_byte(code[start - 1]), PRD | HAS) {
         return false;
     }
 
