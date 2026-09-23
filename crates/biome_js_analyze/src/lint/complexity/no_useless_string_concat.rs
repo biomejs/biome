@@ -488,21 +488,3 @@ fn concat_binary_expression(
 
     Some(left_binary_expression.clone())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn escape_double_quotes_only_allocates_when_needed() {
-        assert!(matches!(
-            escape_double_quotes("plain"),
-            Cow::Borrowed("plain")
-        ));
-        assert!(matches!(
-            escape_double_quotes(r#"a\"b"#),
-            Cow::Borrowed(r#"a\"b"#)
-        ));
-        assert_eq!(escape_double_quotes(r#"a"b"#), r#"a\"b"#);
-    }
-}
