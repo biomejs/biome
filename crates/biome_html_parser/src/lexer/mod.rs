@@ -2397,11 +2397,12 @@ impl<'src> JsScanner<'src> {
                 self.advance(2);
                 self.skip_block_comment();
             }
-            // `/>` closes a tag that was not recognised as JSX, unless the slash
+            // `/>` closes a tag that was not recognized as JSX, unless the slash
             // sits where only an operand can start: `s.replace(/>/g, "")`.
             Some(b'>') if !self.at_operand_start() => self.advance(1),
             _ if self.scanned().last() != Some(&b'<')
-                && slash_starts_regex(self.previous_non_whitespace()) =>
+                && (slash_starts_regex(self.previous_non_whitespace())
+                    || ends_with_expression_keyword(self.scanned().trim_ascii_end())) =>
             {
                 self.advance(1);
                 self.skip_regex();
@@ -2411,8 +2412,8 @@ impl<'src> JsScanner<'src> {
     }
 
     /// Returns whether the previous token leaves the scanner where an operand
-    /// must start (after `(`, `,`, `=`, `=>`, ...), so a `/` there can only
-    /// open a regex literal, never close a tag.
+    /// must start (after `(`, `,`, `=`, `=>`, `return`, ...), so a `/` there
+    /// can only open a regex literal, never close a tag.
     fn at_operand_start(&self) -> bool {
         let scanned = self.scanned();
         let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
@@ -2420,23 +2421,25 @@ impl<'src> JsScanner<'src> {
         };
         match scanned[end] {
             b'>' => end > 0 && scanned[end - 1] == b'=',
-            byte => matches!(
-                byte,
-                b'(' | b','
-                    | b'='
-                    | b':'
-                    | b'['
-                    | b'!'
-                    | b'&'
-                    | b'|'
-                    | b'?'
-                    | b';'
-                    | b'{'
-                    | b'~'
-                    | b'^'
-                    | b'%'
-                    | b'*'
-            ),
+            byte => {
+                matches!(
+                    byte,
+                    b'(' | b','
+                        | b'='
+                        | b':'
+                        | b'['
+                        | b'!'
+                        | b'&'
+                        | b'|'
+                        | b'?'
+                        | b';'
+                        | b'{'
+                        | b'~'
+                        | b'^'
+                        | b'%'
+                        | b'*'
+                ) || ends_with_expression_keyword(&scanned[..=end])
+            }
         }
     }
 
@@ -2530,30 +2533,41 @@ fn at_expression_position(scanned: &[u8]) -> bool {
     };
 
     if is_js_word_byte(scanned[index]) {
-        let start = scanned[..index]
-            .iter()
-            .rposition(|byte| !is_js_word_byte(*byte))
-            .map_or(0, |index| index + 1);
-        return matches!(
-            &scanned[start..=index],
-            b"await"
-                | b"case"
-                | b"delete"
-                | b"do"
-                | b"else"
-                | b"in"
-                | b"instanceof"
-                | b"new"
-                | b"of"
-                | b"return"
-                | b"throw"
-                | b"typeof"
-                | b"void"
-                | b"yield"
-        );
+        return ends_with_expression_keyword(&scanned[..=index]);
     }
 
     !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
+}
+
+/// Returns whether `code` ends with a keyword that an expression can directly
+/// follow, such as `return`. After `.` or `#` the word is a property name
+/// instead, like the operand in `pool.yield / 100`.
+fn ends_with_expression_keyword(code: &[u8]) -> bool {
+    let start = code
+        .iter()
+        .rposition(|byte| !is_js_word_byte(*byte))
+        .map_or(0, |index| index + 1);
+    if start > 0 && matches!(code[start - 1], b'.' | b'#') {
+        return false;
+    }
+
+    matches!(
+        &code[start..],
+        b"await"
+            | b"case"
+            | b"delete"
+            | b"do"
+            | b"else"
+            | b"in"
+            | b"instanceof"
+            | b"new"
+            | b"of"
+            | b"return"
+            | b"throw"
+            | b"typeof"
+            | b"void"
+            | b"yield"
+    )
 }
 
 fn is_js_word_byte(byte: u8) -> bool {
@@ -2822,6 +2836,21 @@ mod js_scanner {
         assert!(fence("const r = [/>/, /</];\n---\n").is_some());
         let source = "s.replace(/>/g, '')}";
         assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_regex_after_an_expression_keyword_is_a_regex() {
+        assert!(fence("function hasTag(s) {\n  return />'/.test(s);\n}\n---\n").is_some());
+        assert!(fence("function hasQuote(s) {\n  return /'/.test(s);\n}\n---\n").is_some());
+        let source = "typeof />'/}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_after_a_property_or_other_identifier_is_a_division() {
+        assert!(fence("const apy = pool.yield / 100;\n---\n<p>{apy}</p>\n").is_some());
+        assert!(fence("const a = this.#return / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = begin / 2, b = \"/'\";\n---\n").is_some());
     }
 
     #[test]
