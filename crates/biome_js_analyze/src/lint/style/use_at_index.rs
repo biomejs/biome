@@ -461,7 +461,12 @@ fn extract_negative_index_expression(
             ))
         }
     } else {
-        make_plus_binary_expression(right_list)
+        Some(AnyJsExpression::JsUnaryExpression(
+            make::js_unary_expression(
+                make::token(T![-]),
+                overwrap_parentheses_expression(&make_plus_binary_expression(right_list)?.trim_trivia()?)?,
+            ),
+        ))
     }
 }
 
