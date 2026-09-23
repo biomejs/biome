@@ -1069,6 +1069,7 @@ impl<'db> TypeData<'db> {
             )),
             raw::TypeData::Generic(generic) => Self::Generic(InternedGenericTypeParameter::new(
                 db,
+                generic.is_const,
                 generic
                     .constraint
                     .is_known()
@@ -1515,6 +1516,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
             )),
             TypeData::Generic(generic) => TypeData::Generic(InternedGenericTypeParameter::new(
                 db,
+                generic.is_const(db),
                 self.take_optional_type(generic.constraint(db))?,
                 self.take_optional_type(generic.default(db))?,
                 generic.name(db).clone(),
@@ -2443,6 +2445,7 @@ impl<'db> InternedMergedReference<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedGenericTypeParameter<'db> {
+    pub is_const: bool,
     pub constraint: Option<TypeData<'db>>,
     pub default: Option<TypeData<'db>>,
     #[returns(ref)]
@@ -3008,7 +3011,13 @@ mod tests {
     }
 
     fn generic<'db>(db: &'db TestDb) -> TypeData<'db> {
-        TypeData::Generic(InternedGenericTypeParameter::new(db, None, None, text("T")))
+        TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            text("T"),
+        ))
     }
 
     #[test]
@@ -3040,6 +3049,7 @@ mod tests {
         let reference_t = TypeData::instance_of(&db, generic_t, Box::default());
         let generic_u = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             Some(reference_t),
             text("U"),
@@ -3229,6 +3239,7 @@ mod tests {
         let db = TestDb::default();
         let generic = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             None,
             text("T"),
@@ -3372,14 +3383,17 @@ mod tests {
                 true,
             ))
         });
-        assert_identity(&db, |s| {
-            TypeData::Generic(InternedGenericTypeParameter::new(
-                &db,
-                Some(s.next()),
-                Some(s.next()),
-                text("T"),
-            ))
-        });
+        for is_const in [false, true] {
+            assert_identity(&db, |s| {
+                TypeData::Generic(InternedGenericTypeParameter::new(
+                    &db,
+                    is_const,
+                    Some(s.next()),
+                    Some(s.next()),
+                    text("T"),
+                ))
+            });
+        }
         assert_identity(&db, |s| {
             TypeData::Intersection(InternedIntersection::new(&db, boxed([s.next(), s.next()])))
         });

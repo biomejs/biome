@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: issue11748Valid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+import { players } from "./issue11748Players.js";
+
+function updatePlayers() {
+	switch (players[0].state) {
+		case "running":
+		case "jumping":
+		case "ducking":
+			break;
+	}
+}
+
+```

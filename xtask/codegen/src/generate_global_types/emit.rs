@@ -48,6 +48,7 @@ const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
     "ERROR_ID_GLOBAL_TYPE_ID",
     "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
     "ERROR_CALL_ID_GLOBAL_TYPE_ID",
+    "MATH_ID_GLOBAL_TYPE_ID",
 ];
 
 /// Emits the global types module with LF-normalized output.
@@ -71,8 +72,13 @@ fn generated_body(
     let registrations = render_registrations(lowered)?;
     let local_types = render_local_types(lowered.globals());
     let mut names = String::new();
-    for (name, _, reference) in super::lower::declarations::ITERATOR_DECLARATIONS {
-        if let Some(global) = lowered.global(name) {
+    for (name, _, reference) in super::lower::declarations::PREDEFINED_DECLARATIONS {
+        if let Some(global) = lowered.global(name)
+            && matches!(
+                global.data(),
+                LoweredTypeData::Interface(_) | LoweredTypeData::InstanceOf { .. }
+            )
+        {
             names.push_str(&format!(
                 "({:?}, crate::globals::{}),\n",
                 global.name(),
@@ -186,6 +192,10 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         }
         LoweredTypeData::NeverKeyword => "crate::TypeData::NeverKeyword".to_string(),
         LoweredTypeData::Null => "crate::TypeData::Null".to_string(),
+        LoweredTypeData::Object(members) => format!(
+            "crate::TypeData::from(crate::Object {{ prototype: None, members: Box::new([{}]), has_unknown_members: false }})",
+            render_members(members),
+        ),
         LoweredTypeData::ObjectKeyword => "crate::TypeData::ObjectKeyword".to_string(),
         LoweredTypeData::NumberLiteral(value) => format!(
             "crate::TypeData::Literal(Box::new(crate::Literal::Number(crate::literal::NumberLiteral::new(biome_rowan::Text::new_static({})))))",
@@ -208,6 +218,19 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(","),
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
+        LoweredTypeData::Readonly(ty) => format!(
+            "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Readonly, ty: {} }}))",
+            render_type_reference(ty),
+        ),
+        LoweredTypeData::Keyof(ty) => format!(
+            "crate::TypeData::TypeOperator(Box::new(crate::TypeOperatorType {{ operator: crate::TypeOperator::Keyof, ty: {} }}))",
+            render_type_reference(ty),
+        ),
+        LoweredTypeData::IndexedAccess { object, index } => format!(
+            "crate::TypeData::IndexedAccess(Box::new(crate::IndexedAccessType {{ object: {}, index: {} }}))",
+            render_type_reference(object),
+            render_type_reference(index),
+        ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
             ty,
@@ -217,8 +240,8 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(ty),
             render_type_references(type_parameters),
         ),
-        LoweredTypeData::GenericParameter { name, constraint, default } => format!(
-            "crate::TypeData::from(crate::GenericTypeParameter {{ name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
+        LoweredTypeData::GenericParameter { is_const, name, constraint, default } => format!(
+            "crate::TypeData::from(crate::GenericTypeParameter {{ is_const: {is_const}, name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
             rust_string_literal(name.text()),
             constraint.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
             default.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
@@ -284,10 +307,11 @@ fn render_constructor(constructor: &LoweredConstructor) -> String {
 
     format!(
         "crate::TypeData::Constructor(Box::new(crate::Constructor {{
-            type_parameters: Box::default(),
+            type_parameters: {type_parameters},
             parameters: Box::new([{parameters}]),
             return_type: {return_type},
         }}))",
+        type_parameters = render_type_references(constructor.type_parameters()),
         parameters = render_constructor_parameters(constructor.parameters()),
     )
 }
@@ -362,6 +386,10 @@ fn render_member_kind(member: &LoweredTypeMember) -> String {
                 rust_string_literal(member.name()),
             )
         }
+        LoweredMemberKind::IndexSignature { key_reference } => format!(
+            "crate::TypeMemberKind::IndexSignature({})",
+            render_type_reference(key_reference),
+        ),
         LoweredMemberKind::Constructor => "crate::TypeMemberKind::Constructor".to_string(),
         LoweredMemberKind::CallSignature => "crate::TypeMemberKind::CallSignature".to_string(),
         LoweredMemberKind::ComputedValue { key_reference } => {
@@ -463,7 +491,7 @@ fn for_each_global_in_emit_order(
 ) -> Result<()> {
     for global in lowered.globals() {
         if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
-            && !super::lower::declarations::ITERATOR_DECLARATIONS
+            && !super::lower::declarations::PREDEFINED_DECLARATIONS
                 .iter()
                 .any(|(_, id, _)| *id == global.id_constant())
         {
@@ -478,7 +506,10 @@ fn for_each_global_in_emit_order(
     for id_constant in GLOBAL_ID_EMIT_ORDER {
         visit(global_with_id_constant(lowered, id_constant)?);
     }
-    for (_, id, _) in super::lower::declarations::ITERATOR_DECLARATIONS {
+    for (_, id, _) in super::lower::declarations::PREDEFINED_DECLARATIONS {
+        if GLOBAL_ID_EMIT_ORDER.contains(id) {
+            continue;
+        }
         if let Some(global) = lowered
             .globals()
             .iter()

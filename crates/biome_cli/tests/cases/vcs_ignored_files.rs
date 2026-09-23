@@ -1,8 +1,9 @@
 use crate::run_cli_with_dyn_fs;
-use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
+use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
 use bpaf::Args;
+use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";
 
@@ -62,6 +63,44 @@ fn honors_nested_gitignore_negation() {
             );
         }
     }
+}
+
+#[test]
+fn honors_root_gitignore_directory_negation() {
+    let mut fs = TemporaryFs::new("honors_root_gitignore_directory_negation");
+    let mut console = BufferConsole::default();
+    fs.create_file(
+        "biome.jsonc",
+        r#"{
+            "vcs": {
+                "enabled": true,
+                "clientKind": "git",
+                "useIgnoreFile": true,
+                "defaultBranch": "main"
+            }
+        }"#,
+    );
+    fs.create_file(".gitignore", "/*\n!/src\n!/biome.jsonc\n!/.gitignore\n");
+    fs.create_file("src/included.js", UNFORMATTED);
+    fs.create_file("excluded/ignored.js", UNFORMATTED);
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["format", "--write", fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let fs = fs.create_mem();
+    assert_file_contents(&fs, Utf8Path::new("src/included.js"), "statement();\n");
+    assert_file_contents(&fs, Utf8Path::new("excluded/ignored.js"), UNFORMATTED);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "honors_root_gitignore_directory_negation",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]

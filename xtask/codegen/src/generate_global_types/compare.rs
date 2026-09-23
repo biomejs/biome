@@ -303,7 +303,7 @@ fn assert_promise_method(
     Ok(())
 }
 
-/// Rejects output that differs from the predefined `Array` projection used by the resolver.
+/// Validates the retained predefined `Array` instance projection independently of lowered statics.
 fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let Some(array) = lowered.global("Array") else {
         bail!("generated globals are missing the Array global");
@@ -326,10 +326,14 @@ fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     if class.type_parameters() != ARRAY_TYPE_PARAMETERS {
         bail!("generated Array global has unexpected type parameters");
     }
-    if class.members().len() != ARRAY_MEMBER_COUNT {
+    let instance_member_count = class
+        .members()
+        .iter()
+        .filter(|member| member.kind() != &LoweredMemberKind::NamedStatic)
+        .count();
+    if instance_member_count != ARRAY_MEMBER_COUNT {
         bail!(
-            "generated Array global has {} members, expected {ARRAY_MEMBER_COUNT}",
-            class.members().len()
+            "generated Array global has {instance_member_count} instance members, expected {ARRAY_MEMBER_COUNT}",
         );
     }
 

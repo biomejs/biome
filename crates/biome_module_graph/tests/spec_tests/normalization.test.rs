@@ -313,3 +313,37 @@ fn test_normalize_type_preserves_recursive_array_local_edge() {
         &fs,
     );
 }
+
+#[test]
+fn test_const_generic_tuple_projections() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare function keep<const T>(value: T): T;
+        declare function collect<const T extends readonly unknown[]>(...values: T): T;
+        const direct = keep(["a", "b"]);
+        const nested = keep({ values: ["a", "b"] }).values;
+        const rest = collect("a", "b");
+        const empty = collect();
+        declare const directElement: (typeof direct)[number];
+        declare const nestedElement: (typeof nested)[number];
+        declare const restElement: (typeof rest)[number];
+        declare const emptyElement: (typeof empty)[number];
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (name, expected) in [
+        ("directElement", "string: a | string: b"),
+        ("nestedElement", "string: a | string: b"),
+        ("restElement", "string: a | string: b"),
+        ("emptyElement", "never"),
+    ] {
+        assert_eq!(
+            format_inferred_type(&db, projected_binding(&db, module, name)),
+            expected,
+            "{name}"
+        );
+    }
+}

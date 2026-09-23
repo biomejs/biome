@@ -32,11 +32,15 @@ impl LoweredDeclarations {
 /// No global IDs or runtime name registrations are allocated.
 ///
 /// Member types support primitive keywords, boolean/number/bigint/string literals,
-/// global interface references, arrays, parentheses, unions, and nongeneric function types.
-/// Methods may declare type parameters with constraints and defaults using supported types
-/// and earlier parameters. Their bindings are local to the method signature.
-/// Type aliases, type arguments, qualified references, object and template literal types,
-/// and type operators such as `unique symbol` are excluded.
+/// global interface references, arrays, required unnamed tuple elements, readonly arrays/tuples,
+/// `keyof`, indexed access, parentheses, unions, and function types.
+/// Methods, call/construct signatures, and function types may declare type parameters with constraints
+/// and defaults using supported types and earlier parameters. Bindings are signature-local.
+/// Numeric and string index signatures preserve their key and value types.
+/// Computed methods support declared predefined Symbol keys; other computed names are errors.
+/// References to selected predefined types preserve type arguments and require declarations.
+/// Type aliases, type arguments on other references, qualified references, object and template literal types,
+/// and other type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
@@ -100,22 +104,18 @@ impl DeclarationLowerer<'_> {
         if let Some(reference) = self.declaration_parameters.get(name) {
             return Ok(reference.clone());
         }
-        if self.predefined_declarations {
-            self.manifest
-                .global_group(name)
-                .with_context(|| format!("missing declaration dependency {name}"))?;
-            return ITERATOR_DECLARATIONS
-                .iter()
-                .find(|(declared, _, _)| *declared == name)
-                .map(|(_, _, reference)| LoweredTypeReference::Predefined(reference))
-                .with_context(|| format!("unsupported declaration dependency {name}"));
+        if let Some(reference) = self
+            .class_scope
+            .as_ref()
+            .and_then(|scope| scope.parameters.get(name))
+        {
+            return Ok(reference.clone());
         }
-        if let Some(scope) = &self.class_scope {
-            return scope
-                .parameters
-                .get(name)
-                .cloned()
-                .with_context(|| format!("unsupported class member type reference {name}"));
+        if self.predefined_declarations {
+            return self.predefined_reference(name);
+        }
+        if self.class_scope.is_some() {
+            bail!("unsupported class member type reference {name}");
         }
         if let Some(index) = self.interfaces.get(name) {
             return Ok(LoweredTypeReference::Local(*index));
@@ -136,6 +136,15 @@ impl DeclarationLowerer<'_> {
         self.interfaces.insert(name.to_owned(), index);
         self.pending.push((name.to_owned(), index));
         Ok(LoweredTypeReference::Local(index))
+    }
+
+    fn predefined_reference(&self, name: &str) -> Result<LoweredTypeReference> {
+        self.manifest
+            .global_group(name)
+            .with_context(|| format!("missing declaration dependency {name}"))?;
+        predefined_type_reference(name)
+            .map(LoweredTypeReference::Predefined)
+            .with_context(|| format!("unsupported declaration dependency {name}"))
     }
 
     /// Reuses structurally equal entries without changing existing local indices.
@@ -177,10 +186,17 @@ impl DeclarationLowerer<'_> {
             }
             for member in declaration.members() {
                 let member = self.lower_member(member)?;
-                if members
-                    .iter()
-                    .any(|previous: &LoweredTypeMember| previous.name == member.name)
-                {
+                if members.iter().any(|previous: &LoweredTypeMember| {
+                    previous.name == member.name
+                        && !matches!(
+                            previous.kind,
+                            LoweredMemberKind::CallSignature | LoweredMemberKind::Constructor
+                        )
+                        && !matches!(
+                            member.kind,
+                            LoweredMemberKind::CallSignature | LoweredMemberKind::Constructor
+                        )
+                }) {
                     bail!("unsupported duplicate member {name}.{}", member.name);
                 }
                 members.push(member);
@@ -196,6 +212,63 @@ impl DeclarationLowerer<'_> {
 
     fn lower_member(&mut self, member: AnyTsTypeMember) -> Result<LoweredTypeMember> {
         match member {
+            AnyTsTypeMember::TsIndexSignatureTypeMember(signature) => {
+                let key = signature.parameter()?.type_annotation()?.ty()?;
+                if !matches!(key, AnyTsType::TsNumberType(_) | AnyTsType::TsStringType(_)) {
+                    bail!("unsupported index signature key type");
+                }
+                let key_reference = self.lower_reference(&key)?;
+                let type_reference = self.lower_reference(&signature.type_annotation()?.ty()?)?;
+                Ok(LoweredTypeMember {
+                    name: Text::default(),
+                    kind: LoweredMemberKind::IndexSignature { key_reference },
+                    type_reference,
+                })
+            }
+            AnyTsTypeMember::TsConstructSignatureTypeMember(signature) => {
+                let function = self
+                    .lower_signature(
+                        None,
+                        signature.type_parameters(),
+                        signature.parameters()?,
+                        AnyTsReturnType::AnyTsType(
+                            signature
+                                .type_annotation()
+                                .context("construct signature is missing a return type")?
+                                .ty()?,
+                        ),
+                    )
+                    .context("in construct signature")?;
+                Ok(LoweredTypeMember {
+                    name: Text::from("constructor"),
+                    kind: LoweredMemberKind::Constructor,
+                    type_reference: self.register(LoweredTypeData::Constructor(
+                        LoweredConstructor {
+                            type_parameters: function.type_parameters,
+                            parameters: function.parameters,
+                            return_type: Some(function.return_type),
+                        },
+                    )),
+                })
+            }
+            AnyTsTypeMember::TsCallSignatureTypeMember(signature) => {
+                let function = self
+                    .lower_signature(
+                        None,
+                        signature.type_parameters(),
+                        signature.parameters()?,
+                        signature
+                            .return_type_annotation()
+                            .context("call signature is missing a return type")?
+                            .ty()?,
+                    )
+                    .context("in call signature")?;
+                Ok(LoweredTypeMember {
+                    name: Text::default(),
+                    kind: LoweredMemberKind::CallSignature,
+                    type_reference: self.register(LoweredTypeData::Function(function)),
+                })
+            }
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
                 let name = lower_object_member_name(property.name()?)?;
                 let ty = property
@@ -214,9 +287,30 @@ impl DeclarationLowerer<'_> {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
-                let name = lower_object_member_name(method.name()?)?;
+                let (name, kind) = match method.name()? {
+                    name @ AnyJsObjectMemberName::JsComputedMemberName(_) => {
+                        // ComputedValue has no optional flag; dropping it would lose undefined.
+                        if method.optional_token().is_some() {
+                            bail!("optional computed methods are not supported");
+                        }
+                        let computed = lower_symbol_computed_member_name(name)?;
+                        self.require_symbol_key(&computed)?;
+                        (
+                            computed.name,
+                            LoweredMemberKind::ComputedValue {
+                                key_reference: computed.key_reference,
+                            },
+                        )
+                    }
+                    name => (
+                        lower_object_member_name(name)?,
+                        LoweredMemberKind::Named {
+                            optional: method.optional_token().is_some(),
+                        },
+                    ),
+                };
                 let function = self
-                    .lower_method(
+                    .lower_signature(
                         Some(name.clone()),
                         method.type_parameters(),
                         method.parameters()?,
@@ -228,9 +322,7 @@ impl DeclarationLowerer<'_> {
                     .with_context(|| format!("in method {name}"))?;
                 Ok(LoweredTypeMember {
                     name,
-                    kind: LoweredMemberKind::Named {
-                        optional: method.optional_token().is_some(),
-                    },
+                    kind,
                     type_reference: self.register(LoweredTypeData::Function(function)),
                 })
             }
@@ -238,7 +330,40 @@ impl DeclarationLowerer<'_> {
         }
     }
 
-    fn lower_method(
+    fn require_symbol_key(&mut self, computed: &ComputedMemberName) -> Result<()> {
+        let group = self
+            .manifest
+            .global_group("Symbol")
+            .context("missing Symbol declaration for computed key")?;
+        let constructor =
+            resolve_constructor_name("Symbol", group.declarations(), &mut self.sources)?;
+        let group = self
+            .manifest
+            .global_group(constructor.text())
+            .context("missing Symbol constructor declaration")?;
+        for record in group.declarations() {
+            let declaration = self
+                .sources
+                .find_interface_declaration(record)?
+                .context("missing Symbol constructor interface")?;
+            for member in declaration.members() {
+                if let AnyTsTypeMember::TsPropertySignatureTypeMember(property) = member
+                    && let AnyJsObjectMemberName::JsLiteralMemberName(name) = property.name()?
+                    && format!("[Symbol.{}]", name.name()?) == computed.name.text()
+                    && property.optional_token().is_none()
+                    && is_unique_symbol_property(&property)?
+                {
+                    return Ok(());
+                }
+            }
+        }
+        bail!(
+            "computed key {} requires a declared unique symbol property",
+            computed.name
+        )
+    }
+
+    fn lower_signature(
         &mut self,
         name: Option<Text>,
         type_parameters: Option<TsTypeParameters>,
@@ -256,15 +381,19 @@ impl DeclarationLowerer<'_> {
                 let parameter = parameter?;
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
                 if !names.insert(name.clone()) {
-                    bail!("duplicate method type parameter {name}");
+                    bail!("duplicate signature type parameter {name}");
                 }
             }
             self.unbound_parameters.extend(names);
             let mut references = Vec::new();
             for parameter in type_parameters.items() {
                 let parameter = parameter?;
-                if !parameter.modifiers().is_empty() {
-                    bail!("modified method type parameters are not supported");
+                if parameter
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_none())
+                {
+                    bail!("variance modifiers on signature type parameters are not supported");
                 }
                 let name = Text::from(parameter.name()?.ident_token()?.token_text_trimmed());
                 let constraint = parameter
@@ -278,6 +407,10 @@ impl DeclarationLowerer<'_> {
                     .transpose()
                     .with_context(|| format!("in default of {name}"))?;
                 let reference = self.register(LoweredTypeData::GenericParameter {
+                    is_const: parameter
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                     name: name.clone(),
                     constraint,
                     default,
@@ -376,8 +509,14 @@ impl DeclarationLowerer<'_> {
                         type_parameters,
                     }));
                 }
-                if self.predefined_declarations && !self.declaration_parameters.contains_key(name) {
-                    let ty = self.named_reference(name)?;
+                if (self.predefined_declarations || predefined_type_reference(name).is_some())
+                    && !self.declaration_parameters.contains_key(name)
+                    && !self
+                        .class_scope
+                        .as_ref()
+                        .is_some_and(|scope| scope.parameters.contains_key(name))
+                {
+                    let ty = self.predefined_reference(name)?;
                     let type_parameters = reference
                         .type_arguments()
                         .map(|arguments| {
@@ -399,7 +538,28 @@ impl DeclarationLowerer<'_> {
                 }
                 self.named_reference(name)
             }
-            AnyTsType::TsTupleType(tuple) if self.predefined_declarations => {
+            AnyTsType::TsIndexedAccessType(access) => {
+                let object = self.lower_reference(&access.object_type()?)?;
+                let index = self.lower_reference(&access.index_type()?)?;
+                Ok(self.register(LoweredTypeData::IndexedAccess { object, index }))
+            }
+            AnyTsType::TsTypeOperatorType(operator)
+                if operator.operator_token()?.kind() == T![keyof] =>
+            {
+                let ty = self.lower_reference(&operator.ty()?)?;
+                Ok(self.register(LoweredTypeData::Keyof(ty)))
+            }
+            AnyTsType::TsTypeOperatorType(operator)
+                if operator.operator_token()?.kind() == T![readonly] =>
+            {
+                let ty = operator.ty()?;
+                if !matches!(ty, AnyTsType::TsArrayType(_) | AnyTsType::TsTupleType(_)) {
+                    bail!("readonly requires an array or tuple type");
+                }
+                let ty = self.lower_reference(&ty)?;
+                Ok(self.register(LoweredTypeData::Readonly(ty)))
+            }
+            AnyTsType::TsTupleType(tuple) => {
                 let elements = tuple
                     .elements()
                     .into_iter()
@@ -424,11 +584,12 @@ impl DeclarationLowerer<'_> {
                 Ok(self.register(LoweredTypeData::Union(types)))
             }
             AnyTsType::TsFunctionType(function) => {
-                if function.type_parameters().is_some() {
-                    bail!("unsupported function type parameters");
-                }
-                let function =
-                    self.lower_function(None, function.parameters()?, function.return_type()?)?;
+                let function = self.lower_signature(
+                    None,
+                    function.type_parameters(),
+                    function.parameters()?,
+                    function.return_type()?,
+                )?;
                 Ok(self.register(LoweredTypeData::Function(function)))
             }
             _ => bail!("unsupported type syntax: {:?}", ty.syntax().kind()),
@@ -442,6 +603,7 @@ fn lower_scalar_type(ty: &AnyTsType) -> Result<Option<LoweredTypeData>> {
         AnyTsType::TsBigintType(_) => LoweredTypeData::BigInt,
         AnyTsType::TsBooleanType(_) => LoweredTypeData::Boolean,
         AnyTsType::TsNeverType(_) => LoweredTypeData::NeverKeyword,
+        AnyTsType::TsNonPrimitiveType(_) => LoweredTypeData::ObjectKeyword,
         AnyTsType::TsNullLiteralType(_) => LoweredTypeData::Null,
         AnyTsType::TsSymbolType(_) => LoweredTypeData::Symbol,
         AnyTsType::TsUndefinedType(_) => LoweredTypeData::Undefined,
@@ -471,22 +633,28 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
     }
 }
 
+pub(super) type MemberSelector = fn(&AnyTsTypeMember) -> Result<bool>;
+
 /// Lowers named instance properties and methods with declaration-derived
-/// generic parameters. Constraints use supported member types and earlier type parameters;
-/// the first interface supplies constraints for merged declarations. Class parameter defaults,
-/// value-side declarations, computed members, methods returning `MapIterator` or
+/// generic parameters. Constraints and defaults use supported member types and earlier parameters;
+/// the first interface supplies them for merged declarations.
+/// Value-side declarations, computed members, methods returning `MapIterator` or
 /// `SetIterator`, and methods referencing Intl types
 /// are excluded. References to the
-/// enclosing class may carry type arguments. Other external references and unsupported
-/// member shapes are errors.
+/// enclosing class and selected predefined types may carry type arguments.
+/// Other external references and unsupported member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
 /// Existing class members retain their projections; their declarations are not lowered again.
+/// The caller selects members from the supplied constructor declarations.
+/// They share the instance members' local type table and may reference predefined iterator
+/// protocol types. Class type parameters are not in scope on the constructor side.
 /// Local types are registered after their dependencies for runtime conversion in one pass.
 pub(super) fn lower_class_members(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
     class: &mut LoweredClass,
     class_reference: &'static str,
+    constructors: Option<(&[DeclarationRecord], MemberSelector)>,
 ) -> Result<Box<[LoweredTypeData]>> {
     let mut lowerer = DeclarationLowerer {
         manifest,
@@ -550,10 +718,19 @@ pub(super) fn lower_class_members(
                         .map(|constraint| lowerer.lower_reference(&constraint.ty()?))
                         .transpose()
                         .with_context(|| format!("in constraint of {}.{name}", class.name()))?;
+                    let default = parameter
+                        .default()
+                        .map(|default| lowerer.lower_reference(&default.ty()?))
+                        .transpose()
+                        .with_context(|| format!("in default of {}.{name}", class.name()))?;
                     let reference = lowerer.register(LoweredTypeData::GenericParameter {
+                        is_const: parameter
+                            .modifiers()
+                            .into_iter()
+                            .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                         name: name.clone(),
                         constraint,
-                        default: None,
+                        default,
                     });
                     lowerer.unbound_parameters.remove(&name);
                     if let Some(scope) = &mut lowerer.class_scope {
@@ -596,11 +773,63 @@ pub(super) fn lower_class_members(
     class.type_parameters =
         class_parameters.context("class must include an interface declaration")?;
     class.members = members.into_boxed_slice();
+    if let Some((records, select_member)) = constructors {
+        lowerer.predefined_declarations = true;
+        if let Some(scope) = &mut lowerer.class_scope {
+            scope.parameters.clear();
+        }
+        lowerer.lower_constructor_members(records, class, select_member, &[])?;
+    }
     lowerer
         .types
         .into_iter()
         .collect::<Option<Box<[_]>>>()
         .context("unfilled class member type")
+}
+
+pub(super) fn lower_method_global(
+    manifest: &GlobalManifest,
+    source_files: &[DiscoveredFile],
+    owner: &str,
+    owner_reference: &'static str,
+    id_constant: &'static str,
+    method: TsMethodSignatureTypeMember,
+) -> Result<LoweredGlobal> {
+    let mut lowerer = DeclarationLowerer {
+        manifest,
+        sources: ParsedSourceCache::new(source_files),
+        interfaces: BTreeMap::new(),
+        pending: Vec::new(),
+        types: Vec::new(),
+        class_scope: Some(ClassScope {
+            name: Text::from(owner.to_owned()),
+            reference: owner_reference,
+            parameters: BTreeMap::new(),
+        }),
+        declaration_parameters: BTreeMap::new(),
+        unbound_parameters: BTreeSet::new(),
+        predefined_declarations: true,
+    };
+    let name = lower_object_member_name(method.name()?)?;
+    let function = lowerer.lower_signature(
+        Some(name.clone()),
+        method.type_parameters(),
+        method.parameters()?,
+        method
+            .return_type_annotation()
+            .with_context(|| format!("method {name} is missing a return type"))?
+            .ty()?,
+    )?;
+    Ok(LoweredGlobal {
+        name: Text::from(format!("{owner}.{name}")),
+        id_constant,
+        data: LoweredTypeData::Function(function),
+        local_types: lowerer
+            .types
+            .into_iter()
+            .collect::<Option<Box<[_]>>>()
+            .context("unfilled method type")?,
+    })
 }
 
 fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
@@ -634,17 +863,18 @@ fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Resu
     }
 }
 
-/// Lowers selected constructor-interface members as static members and call signatures of a class.
+/// Lowers selected constructor-interface members as statics and call/construct signatures of a class.
 /// The caller selects members and supplies predefined identities for unique symbols.
 /// Other unique symbols use the runtime's symbol type. Function signatures use
-/// the same translation as instance methods.
+/// the same translation as instance methods. Named method overloads become an object
+/// with call signatures in declaration order; duplicate properties remain errors.
 pub(super) fn lower_constructor_members(
     manifest: &GlobalManifest,
     source_files: &[DiscoveredFile],
     records: &[DeclarationRecord],
     class: &mut LoweredClass,
     class_reference: &'static str,
-    select_member: fn(&AnyTsTypeMember) -> Result<bool>,
+    select_member: MemberSelector,
     predefined_symbols: &[(&str, &'static str)],
 ) -> Result<Box<[LoweredTypeData]>> {
     let mut lowerer = DeclarationLowerer {
@@ -662,107 +892,138 @@ pub(super) fn lower_constructor_members(
         unbound_parameters: BTreeSet::new(),
         predefined_declarations: false,
     };
-    let mut members = Vec::new();
-    for record in records {
-        let declaration = lowerer
-            .sources
-            .find_interface_declaration(record)?
-            .context("missing constructor interface")?;
-        if declaration.extends_clause().is_some() || declaration.type_parameters().is_some() {
-            bail!(
-                "constructor bases and type parameters are not supported for {}",
-                class.name()
-            );
-        }
-        for member in declaration.members() {
-            if !select_member(&member)? {
-                continue;
-            }
-            let mut member = match member {
-                AnyTsTypeMember::TsCallSignatureTypeMember(signature) => {
-                    if signature.type_parameters().is_some() {
-                        bail!("generic call signatures are not supported");
-                    }
-                    let function = lowerer
-                        .lower_function(
-                            None,
-                            signature.parameters()?,
-                            signature
-                                .return_type_annotation()
-                                .context("call signature is missing a return type")?
-                                .ty()?,
-                        )
-                        .with_context(|| {
-                            format!(
-                                "in {} call signature from {}",
-                                class.name(),
-                                record.file_repo_relative
-                            )
-                        })?;
-                    LoweredTypeMember {
-                        name: Text::default(),
-                        kind: LoweredMemberKind::CallSignature,
-                        type_reference: lowerer.register(LoweredTypeData::Function(function)),
-                    }
-                }
-                AnyTsTypeMember::TsPropertySignatureTypeMember(property)
-                    if is_unique_symbol_property(&property)? =>
-                {
-                    let name = lower_object_member_name(property.name()?)?;
-                    let type_reference = predefined_symbols
-                        .iter()
-                        .find(|(member_name, _)| *member_name == name.text())
-                        .map_or_else(
-                            || lowerer.register(LoweredTypeData::Symbol),
-                            |(_, reference)| LoweredTypeReference::Predefined(reference),
-                        );
-                    LoweredTypeMember {
-                        name,
-                        kind: LoweredMemberKind::Named {
-                            optional: property.optional_token().is_some(),
-                        },
-                        type_reference,
-                    }
-                }
-                member => lowerer.lower_member(member).with_context(|| {
-                    format!(
-                        "in {} statics from {}",
-                        class.name(),
-                        record.file_repo_relative
-                    )
-                })?,
-            };
-            if member.kind == LoweredMemberKind::CallSignature {
-                members.push(member);
-                continue;
-            }
-            // NamedStatic cannot represent an optional member without losing undefined.
-            if member.kind != (LoweredMemberKind::Named { optional: false }) {
-                bail!(
-                    "optional static member {}.{} is not supported",
-                    class.name(),
-                    member.name
-                );
-            }
-            member.kind = LoweredMemberKind::NamedStatic;
-            if members.iter().any(|previous: &LoweredTypeMember| {
-                previous.kind == member.kind && previous.name == member.name
-            }) {
-                bail!(
-                    "duplicate static member {}.{} cannot be represented by one member",
-                    class.name(),
-                    member.name
-                );
-            }
-            members.push(member);
-        }
-    }
-    class.members = members.into_boxed_slice();
+    lowerer.lower_constructor_members(records, class, select_member, predefined_symbols)?;
     lowerer
         .types
         .into_iter()
         .collect::<Option<Box<[_]>>>()
         .context("unfilled constructor member type")
+}
+
+impl DeclarationLowerer<'_> {
+    fn lower_constructor_members(
+        &mut self,
+        records: &[DeclarationRecord],
+        class: &mut LoweredClass,
+        select_member: MemberSelector,
+        predefined_symbols: &[(&str, &'static str)],
+    ) -> Result<()> {
+        let mut members = class.members.to_vec();
+        let mut methods = BTreeMap::<Text, Vec<LoweredTypeReference>>::new();
+        for record in records {
+            let declaration = self
+                .sources
+                .find_interface_declaration(record)?
+                .context("missing constructor interface")?;
+            if declaration.extends_clause().is_some() || declaration.type_parameters().is_some() {
+                bail!(
+                    "constructor bases and type parameters are not supported for {}",
+                    class.name()
+                );
+            }
+            for member in declaration.members() {
+                if !select_member(&member)? {
+                    continue;
+                }
+                let is_method = matches!(member, AnyTsTypeMember::TsMethodSignatureTypeMember(_));
+                let mut member = match member {
+                    AnyTsTypeMember::TsPropertySignatureTypeMember(property)
+                        if is_unique_symbol_property(&property)? =>
+                    {
+                        let name = lower_object_member_name(property.name()?)?;
+                        let type_reference = predefined_symbols
+                            .iter()
+                            .find(|(member_name, _)| *member_name == name.text())
+                            .map_or_else(
+                                || self.register(LoweredTypeData::Symbol),
+                                |(_, reference)| LoweredTypeReference::Predefined(reference),
+                            );
+                        LoweredTypeMember {
+                            name,
+                            kind: LoweredMemberKind::Named {
+                                optional: property.optional_token().is_some(),
+                            },
+                            type_reference,
+                        }
+                    }
+                    member => self.lower_member(member).with_context(|| {
+                        format!(
+                            "in {} statics from {}",
+                            class.name(),
+                            record.file_repo_relative
+                        )
+                    })?,
+                };
+                if matches!(
+                    member.kind,
+                    LoweredMemberKind::CallSignature | LoweredMemberKind::Constructor
+                ) {
+                    members.push(member);
+                    continue;
+                }
+                // NamedStatic cannot represent an optional member without losing undefined.
+                if member.kind != (LoweredMemberKind::Named { optional: false }) {
+                    bail!(
+                        "optional static member {}.{} is not supported",
+                        class.name(),
+                        member.name
+                    );
+                }
+                member.kind = LoweredMemberKind::NamedStatic;
+                if members.iter().any(|previous: &LoweredTypeMember| {
+                    previous.kind == member.kind && previous.name == member.name
+                }) {
+                    if is_method && let Some(signatures) = methods.get_mut(&member.name) {
+                        signatures.push(member.type_reference);
+                        continue;
+                    }
+                    bail!(
+                        "duplicate static member {}.{} cannot be represented by one member",
+                        class.name(),
+                        member.name
+                    );
+                }
+                if is_method {
+                    methods.insert(member.name.clone(), vec![member.type_reference.clone()]);
+                }
+                members.push(member);
+            }
+        }
+        for member in &mut members {
+            if member.kind == LoweredMemberKind::NamedStatic
+                && let Some(signatures) = methods.remove(&member.name)
+                && signatures.len() > 1
+            {
+                member.type_reference = self.register(LoweredTypeData::Object(
+                    signatures
+                        .into_iter()
+                        .map(|type_reference| LoweredTypeMember {
+                            name: Text::default(),
+                            kind: LoweredMemberKind::CallSignature,
+                            type_reference,
+                        })
+                        .collect(),
+                ));
+            }
+        }
+        class.members = members.into_boxed_slice();
+        Ok(())
+    }
+}
+
+/// Selects named members without interpreting their signatures or types.
+pub(super) fn select_named_members(member: &AnyTsTypeMember, names: &[&str]) -> Result<bool> {
+    let name = match member {
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
+        AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
+        AnyTsTypeMember::TsGetterSignatureTypeMember(getter) => getter.name()?,
+        AnyTsTypeMember::TsSetterSignatureTypeMember(setter) => setter.name()?,
+        _ => return Ok(false),
+    };
+    if matches!(name, AnyJsObjectMemberName::JsComputedMemberName(_)) {
+        return Ok(false);
+    }
+    Ok(names.contains(&lower_object_member_name(name)?.text()))
 }
 
 fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
@@ -780,8 +1041,15 @@ fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> 
     Ok(false)
 }
 
-/// Named protocol declarations with stable runtime identities. Member selection is syntax-driven.
-pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str, &str)] = &[
+fn predefined_type_reference(name: &str) -> Option<&'static str> {
+    PREDEFINED_DECLARATIONS
+        .iter()
+        .find_map(|&(declared, _, reference)| (declared == name).then_some(reference))
+}
+
+/// Selected declaration names and their existing runtime identities.
+pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &str, &str)] = &[
+    ("Array", "ARRAY_ID_GLOBAL_TYPE_ID", "GLOBAL_ARRAY_ID"),
     (
         "IteratorYieldResult",
         "ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID",
@@ -802,13 +1070,33 @@ pub(in crate::generate_global_types) const ITERATOR_DECLARATIONS: &[(&str, &str,
         "ITERATOR_ID_GLOBAL_TYPE_ID",
         "GLOBAL_ITERATOR_ID",
     ),
+    (
+        "Iterable",
+        "ITERABLE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ITERABLE_ID",
+    ),
+    (
+        "Symbol.iterator",
+        "SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_SYMBOL_ITERATOR_ID",
+    ),
+    (
+        "RegExpExecArray",
+        "REGEXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_REGEXP_EXEC_ARRAY_ID",
+    ),
+    (
+        "ArrayLike",
+        "ARRAY_LIKE_ID_GLOBAL_TYPE_ID",
+        "GLOBAL_ARRAY_LIKE_ID",
+    ),
 ];
 
-/// Lowers the synchronous iterator protocol, including its result dependencies.
+/// Lowers selected type-only declarations and their declared bases and members.
 /// Constraints use supported member types and earlier type parameters.
-/// Merged declarations and dependencies outside this selection are errors.
-/// Computed members are excluded. Tuples support required unnamed elements.
-pub(super) fn lower_iterator_globals(
+/// Merged declarations and dependencies without predefined identities are errors.
+/// Computed methods support declared predefined Symbol keys. Tuples support required unnamed elements.
+pub(super) fn lower_predefined_declarations(
     manifest: &GlobalManifest,
     sources: &[DiscoveredFile],
     globals: &mut Vec<LoweredGlobal>,
@@ -824,7 +1112,19 @@ pub(super) fn lower_iterator_globals(
         unbound_parameters: BTreeSet::new(),
         predefined_declarations: true,
     };
-    for &(name, id_constant, _) in ITERATOR_DECLARATIONS {
+    for &(name, id_constant, _) in PREDEFINED_DECLARATIONS {
+        if !matches!(
+            name,
+            "ArrayLike"
+                | "RegExpExecArray"
+                | "IteratorYieldResult"
+                | "IteratorReturnResult"
+                | "IteratorResult"
+                | "Iterator"
+                | "Iterable"
+        ) {
+            continue;
+        }
         let Some(group) = manifest.global_group(name) else {
             continue;
         };
@@ -875,6 +1175,7 @@ pub(super) fn lower_iterator_globals(
                     .map(|default| lowerer.lower_reference(&default.ty()?))
                     .transpose()?;
                 let reference = lowerer.register(LoweredTypeData::GenericParameter {
+                    is_const: false,
                     name: name.clone(),
                     constraint,
                     default,
@@ -925,6 +1226,702 @@ mod tests {
     };
 
     #[test]
+    fn const_signature_parameters_survive_lowering_and_emission() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for modifier in ["", "const "] {
+            for signature in [
+                format!("<{modifier}T>(value: T): T"),
+                format!("method<{modifier}T>(value: T): T"),
+                format!("callback: <{modifier}T>(value: T) => T"),
+                format!("new <{modifier}T>(value: T): T"),
+            ] {
+                let file = DiscoveredFile {
+                    path: CanonicalPath::from_within(
+                        root,
+                        "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                    )?,
+                    repo_relative: "const.d.ts".to_owned(),
+                    bytes: format!("interface Owner {{ {signature}; }}").into_bytes(),
+                };
+                let manifest = build_global_manifest(collect(&file).records);
+                let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+                let expected = !modifier.is_empty();
+                let parameter = table
+                    .types()
+                    .iter()
+                    .find_map(|ty| match ty {
+                        LoweredTypeData::GenericParameter { is_const, .. } => Some(*is_const),
+                        _ => None,
+                    })
+                    .expect("signature must declare a generic parameter");
+                assert_eq!(parameter, expected);
+                let emitted = crate::generate_global_types::emit::render_declarations(&table);
+                assert!(emitted.contains(&format!("is_const: {expected}")));
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn readonly_arrays_and_tuples_preserve_nested_elements() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for element in ["T", "string", "(T | number)"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "readonly.d.ts".to_owned(),
+                bytes: format!(
+                    "interface Owner<T> {{
+                    element: {element};
+                    array: {element}[];
+                    frozenArray: readonly {element}[];
+                    tuple: [{element}, {element}[]];
+                    frozenTuple: readonly [{element}, {element}[]];
+                    repeated: readonly [{element}, {element}[]];
+                    nested: readonly (readonly [{element}, {element}[]])[];
+                }}"
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types =
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID", None)?;
+            let member = |name| class.member(name).unwrap().type_reference();
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            for (frozen, mutable) in [("frozenArray", "array"), ("frozenTuple", "tuple")] {
+                assert_eq!(
+                    local(member(frozen)),
+                    &LoweredTypeData::Readonly(member(mutable).clone())
+                );
+                assert_ne!(member(frozen), member(mutable));
+            }
+            let LoweredTypeData::Tuple(elements) = local(member("tuple")) else {
+                panic!("expected tuple")
+            };
+            assert_eq!(
+                elements.as_ref(),
+                [member("element").clone(), member("array").clone()]
+            );
+            assert_eq!(member("frozenTuple"), member("repeated"));
+            let LoweredTypeData::Readonly(array) = local(member("nested")) else {
+                panic!("expected readonly outer array")
+            };
+            let LoweredTypeData::InstanceOf {
+                ty,
+                type_parameters,
+            } = local(array)
+            else {
+                panic!("expected array")
+            };
+            assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ARRAY_ID"));
+            assert_eq!(
+                type_parameters.as_ref(),
+                std::slice::from_ref(member("frozenTuple"))
+            );
+            for (index, ty) in types.iter().enumerate() {
+                if let LoweredTypeData::Readonly(LoweredTypeReference::Local(inner)) = ty {
+                    assert!(
+                        *inner < index,
+                        "readonly dependencies must precede their wrappers"
+                    );
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn readonly_emission_preserves_the_operator_and_operand() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "readonly.d.ts".to_owned(),
+            bytes:
+                b"interface Owner { array: readonly string[]; tuple: readonly [string, number]; }"
+                    .to_vec(),
+        };
+        let manifest = build_global_manifest(collect(&file).records);
+        let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+        let emitted: syn::ExprCall = syn::parse_str(
+            &crate::generate_global_types::emit::render_declarations(&table),
+        )?;
+        let syn::Expr::Array(entries) = &emitted.args[0] else {
+            panic!("expected emitted table")
+        };
+        for (data, expression) in table.types().iter().zip(&entries.elems) {
+            let LoweredTypeData::Readonly(LoweredTypeReference::Local(index)) = data else {
+                continue;
+            };
+            let syn::Expr::Call(variant) = expression else {
+                panic!("expected type operator variant")
+            };
+            let syn::Expr::Call(boxed) = &variant.args[0] else {
+                panic!("expected boxed operator")
+            };
+            let syn::Expr::Struct(fields) = &boxed.args[0] else {
+                panic!("expected operator data")
+            };
+            for (name, expected) in [
+                ("operator", "crate::TypeOperator::Readonly".to_owned()),
+                (
+                    "ty",
+                    format!("crate::RawTypeId::Local(crate::TypeId::new({index})).into()"),
+                ),
+            ] {
+                let expression = &fields.fields.iter().find(|field| matches!(&field.member, syn::Member::Named(member) if member == name)).unwrap().expr;
+                let expected: syn::Expr = syn::parse_str(&expected)?;
+                assert_eq!(
+                    quote::quote!(#expression).to_string(),
+                    quote::quote!(#expected).to_string()
+                );
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn computed_protocol_methods_preserve_generic_arguments() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for element in ["Element", "Value"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+                repo_relative: "protocol.d.ts".to_owned(),
+                bytes: format!("
+                    declare var Symbol: Keys;
+                    interface Keys {{ readonly iterator: unique symbol; }}
+                    interface Iterator<T> {{ value: T; }}
+                    interface Iterable<{element}> {{ [Symbol.iterator](fallback: {element}): Iterator<{element}>; }}
+                    interface Owner<T> {{ value: T; }}
+                    interface Factory {{ new<U>(values: Iterable<U>): Owner<U>; }}
+                ").into_bytes(),
+            };
+            let files = [file];
+            let manifest = build_global_manifest(collect(&files[0]).records);
+            let mut globals = Vec::new();
+            lower_predefined_declarations(&manifest, &files, &mut globals)?;
+            let global = globals
+                .iter()
+                .find(|global| global.name() == "Iterable")
+                .unwrap();
+            let LoweredTypeData::Interface(interface) = global.data() else {
+                panic!("expected interface")
+            };
+            let member = interface.members().first().unwrap();
+            assert_eq!(
+                member.kind(),
+                &LoweredMemberKind::ComputedValue {
+                    key_reference: LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ITERATOR_ID"),
+                }
+            );
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &global.local_types()[*index]
+            };
+            let LoweredTypeData::Function(function) = local(member.type_reference()) else {
+                panic!("expected method")
+            };
+            let LoweredTypeData::InstanceOf {
+                ty,
+                type_parameters,
+            } = local(function.return_type())
+            else {
+                panic!("expected generic return")
+            };
+            assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ITERATOR_ID"));
+            assert_eq!(type_parameters.as_ref(), interface.type_parameters());
+            assert_eq!(
+                function.parameters()[0].type_reference(),
+                &interface.type_parameters()[0]
+            );
+            let emitted = render_local_types(&globals);
+            syn::parse_file(&emitted)?;
+            let mut class = LoweredClass {
+                name: Text::from("Owner"),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types = lower_class_members(
+                &manifest,
+                &files,
+                &mut class,
+                "GLOBAL_TEST_OWNER_ID",
+                Some((
+                    manifest.global_group("Factory").unwrap().declarations(),
+                    |member| {
+                        Ok(matches!(
+                            member,
+                            AnyTsTypeMember::TsConstructSignatureTypeMember(_)
+                        ))
+                    },
+                )),
+            )?;
+            let constructor = types
+                .iter()
+                .find_map(|ty| match ty {
+                    LoweredTypeData::Constructor(constructor) => Some(constructor),
+                    _ => None,
+                })
+                .unwrap();
+            let LoweredTypeReference::Local(index) = constructor.parameters()[0].type_reference()
+            else {
+                panic!("expected local parameter")
+            };
+            let LoweredTypeData::InstanceOf {
+                ty,
+                type_parameters,
+            } = &types[*index]
+            else {
+                panic!("expected protocol instance")
+            };
+            assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_ITERABLE_ID"));
+            assert_eq!(type_parameters.as_ref(), constructor.type_parameters());
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn computed_keys_require_a_declared_symbol_identity() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for declaration in ["", "iterator: string;", "iterator?: unique symbol;"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+                repo_relative: "keys.d.ts".to_owned(),
+                bytes: format!("declare var Symbol: Keys; interface Keys {{ {declaration} }} interface Owner {{ [Symbol.iterator](): void; }}").into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let error = lower_interfaces(&manifest, &[file], &["Owner"]).unwrap_err();
+            assert!(
+                format!("{error:#}").contains("requires a declared unique symbol property"),
+                "{error:#}"
+            );
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn global_constructors_share_instance_type_tables() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for owner in ["Map", "Set", "WeakMap", "Date"] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "constructors.d.ts".to_owned(),
+                bytes: format!(
+                    "interface {owner}<T> {{ current: T; }}
+                    declare var {owner}: Factory;
+                    interface Factory {{ new<U>(value: U): {owner}<U>; }}
+                    interface Factory {{ new<U>(value: readonly U[]): {owner}<U>; }}"
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let lowered = super::lower_global_types(&manifest, &[file])?;
+            let global = lowered
+                .globals()
+                .iter()
+                .find(|global| global.name() == owner)
+                .unwrap();
+            let LoweredTypeData::Class(class) = global.data() else {
+                panic!("expected class")
+            };
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local reference")
+                };
+                &global.local_types()[*index]
+            };
+            assert_eq!(
+                class.member("current").unwrap().type_reference(),
+                &class.type_parameters()[0]
+            );
+            let constructors = class
+                .members()
+                .iter()
+                .filter(|member| member.kind() == &LoweredMemberKind::Constructor)
+                .collect::<Vec<_>>();
+            assert_eq!(constructors.len(), 2);
+            for member in constructors {
+                let LoweredTypeData::Constructor(constructor) = local(member.type_reference())
+                else {
+                    panic!("expected constructor")
+                };
+                let LoweredTypeData::InstanceOf {
+                    type_parameters, ..
+                } = local(constructor.return_type().unwrap())
+                else {
+                    panic!("expected owner instance")
+                };
+                assert_eq!(type_parameters.as_ref(), constructor.type_parameters());
+                assert!(matches!(
+                    local(&constructor.type_parameters()[0]),
+                    LoweredTypeData::GenericParameter { .. }
+                ));
+            }
+            for (index, ty) in global.local_types().iter().enumerate() {
+                assert!(!global.local_types()[..index].contains(ty));
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn construct_signatures_preserve_generic_parameters_and_overloads() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "constructors.d.ts".to_owned(),
+            bytes: b"interface Factory {
+                constructor: boolean;
+                new <T extends string = string, U extends T = T>(value?: U): U;
+                <T extends string = string, U extends T = T>(value?: U): U;
+                new <V>(value: V): V;
+            }"
+            .to_vec(),
+        };
+        let files = [file];
+        let manifest = build_global_manifest(collect(&files[0]).records);
+        let table = lower_interfaces(&manifest, &files, &["Factory"])?;
+        let LoweredTypeReference::Local(index) = table.interface_reference("Factory").unwrap()
+        else {
+            panic!("expected interface reference")
+        };
+        let LoweredTypeData::Interface(interface) = &table.types()[index] else {
+            panic!("expected interface")
+        };
+        let mut class = LoweredClass {
+            name: Text::from("Factory"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let static_types = lower_constructor_members(
+            &manifest,
+            &files,
+            manifest.global_group("Factory").unwrap().declarations(),
+            &mut class,
+            "GLOBAL_TEST_OWNER_ID",
+            |_| Ok(true),
+            &[],
+        )?;
+        for (members, types) in [
+            (interface.members(), table.types()),
+            (class.members(), static_types.as_ref()),
+        ] {
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            let calls = members
+                .iter()
+                .filter(|member| member.kind() == &LoweredMemberKind::Constructor)
+                .collect::<Vec<_>>();
+            let [first, second] = calls.as_slice() else {
+                panic!("expected both constructors")
+            };
+            assert_ne!(first.type_reference(), second.type_reference());
+            let LoweredTypeData::Constructor(constructor) = local(first.type_reference()) else {
+                panic!("expected constructor")
+            };
+            let call = members
+                .iter()
+                .find(|member| member.kind() == &LoweredMemberKind::CallSignature)
+                .unwrap();
+            let LoweredTypeData::Function(function) = local(call.type_reference()) else {
+                panic!("expected call signature")
+            };
+            assert_eq!(constructor.type_parameters(), function.type_parameters());
+            assert_eq!(constructor.parameters(), function.parameters());
+            assert_eq!(constructor.return_type(), Some(function.return_type()));
+            for call in calls {
+                let LoweredTypeData::Constructor(constructor) = local(call.type_reference()) else {
+                    panic!("expected constructor")
+                };
+                let parameter = constructor.type_parameters().last().unwrap();
+                assert_eq!(constructor.parameters()[0].type_reference(), parameter);
+                assert_eq!(constructor.return_type(), Some(parameter));
+            }
+        }
+        let emitted: syn::ExprCall = syn::parse_str(
+            &crate::generate_global_types::emit::render_declarations(&table),
+        )?;
+        let syn::Expr::Array(entries) = &emitted.args[0] else {
+            panic!("expected emitted table")
+        };
+        for (data, expression) in table.types().iter().zip(&entries.elems) {
+            let LoweredTypeData::Constructor(constructor) = data else {
+                continue;
+            };
+            let syn::Expr::Call(variant) = expression else {
+                panic!("expected constructor variant")
+            };
+            let syn::Expr::Call(boxed) = &variant.args[0] else {
+                panic!("expected boxed constructor")
+            };
+            let syn::Expr::Struct(fields) = &boxed.args[0] else {
+                panic!("expected constructor data")
+            };
+            let parameters = fields.fields.iter().find(|field| matches!(&field.member, syn::Member::Named(name) if name == "type_parameters")).unwrap();
+            let syn::Expr::Call(boxed) = &parameters.expr else {
+                panic!("expected emitted generic parameters")
+            };
+            let syn::Expr::Array(references) = &boxed.args[0] else {
+                panic!("expected generic parameter references")
+            };
+            assert_eq!(references.elems.len(), constructor.type_parameters().len());
+            for (expression, reference) in
+                references.elems.iter().zip(constructor.type_parameters())
+            {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local generic parameter")
+                };
+                let expected: syn::Expr = syn::parse_str(&format!(
+                    "crate::RawTypeId::Local(crate::TypeId::new({index})).into()"
+                ))?;
+                assert_eq!(
+                    quote::quote!(#expression).to_string(),
+                    quote::quote!(#expected).to_string()
+                );
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn construct_signatures_apply_type_arguments_to_the_owner() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "constructors.d.ts".to_owned(),
+            bytes: b"interface Factory { new <T = string>(value: T): Owner<T>; }".to_vec(),
+        };
+        let files = [file];
+        let manifest = build_global_manifest(collect(&files[0]).records);
+        let mut class = LoweredClass {
+            name: Text::from("Owner"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let types = lower_constructor_members(
+            &manifest,
+            &files,
+            manifest.global_group("Factory").unwrap().declarations(),
+            &mut class,
+            "GLOBAL_TEST_OWNER_ID",
+            |_| Ok(true),
+            &[],
+        )?;
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local type")
+            };
+            &types[*index]
+        };
+        let LoweredTypeData::Constructor(constructor) = local(class.members()[0].type_reference())
+        else {
+            panic!("expected constructor")
+        };
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = local(constructor.return_type().unwrap())
+        else {
+            panic!("expected instance")
+        };
+        assert_eq!(
+            ty,
+            &LoweredTypeReference::Predefined("GLOBAL_TEST_OWNER_ID")
+        );
+        assert_eq!(type_parameters.as_ref(), constructor.type_parameters());
+        assert_eq!(
+            constructor.parameters()[0].type_reference(),
+            &type_parameters[0]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn generic_function_types_and_calls_share_translation() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(
+                root,
+                "tests/fixtures/global-types/lowering.interfaces.d.ts",
+            )?,
+            repo_relative: "signatures.d.ts".to_owned(),
+            bytes: b"interface Owner {
+                identity: <T extends string = string>(value: T) => T;
+                <T extends string = string>(value: T): T;
+                <U extends boolean>(value: U): U;
+            }"
+            .to_vec(),
+        };
+        let files = [file];
+        let manifest = build_global_manifest(collect(&files[0]).records);
+        let table = lower_interfaces(&manifest, &files, &["Owner"])?;
+        let LoweredTypeReference::Local(index) = table.interface_reference("Owner").unwrap() else {
+            panic!("expected interface reference")
+        };
+        let LoweredTypeData::Interface(interface) = &table.types()[index] else {
+            panic!("expected interface")
+        };
+        let mut class = LoweredClass {
+            name: Text::from("Owner"),
+            type_parameters: Box::default(),
+            members: Box::default(),
+        };
+        let static_types = lower_constructor_members(
+            &manifest,
+            &files,
+            manifest.global_group("Owner").unwrap().declarations(),
+            &mut class,
+            "GLOBAL_TEST_OWNER_ID",
+            |_| Ok(true),
+            &[],
+        )?;
+        for (members, types) in [
+            (interface.members(), table.types()),
+            (class.members(), static_types.as_ref()),
+        ] {
+            let identity = members
+                .iter()
+                .find(|member| member.name() == "identity")
+                .unwrap();
+            let calls = members
+                .iter()
+                .filter(|member| member.kind() == &LoweredMemberKind::CallSignature)
+                .collect::<Vec<_>>();
+            let [first, second] = calls.as_slice() else {
+                panic!("expected both call signatures")
+            };
+            assert_eq!(first.type_reference(), identity.type_reference());
+            assert_ne!(first.type_reference(), second.type_reference());
+            for call in calls {
+                let LoweredTypeReference::Local(index) = call.type_reference() else {
+                    panic!("expected local function")
+                };
+                let LoweredTypeData::Function(function) = &types[*index] else {
+                    panic!("expected function")
+                };
+                let [parameter] = function.type_parameters() else {
+                    panic!("expected generic parameter")
+                };
+                assert_eq!(function.name(), None);
+                assert_eq!(function.parameters()[0].type_reference(), parameter);
+                assert_eq!(function.return_type(), parameter);
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn nested_generic_functions_restore_outer_bindings() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        let file = DiscoveredFile {
+            path: CanonicalPath::from_within(root, "tests/fixtures/global-types/lowering.interfaces.d.ts")?,
+            repo_relative: "nested.d.ts".to_owned(),
+            bytes: b"interface Owner {
+                callback: <T extends string = string>(shadow: <T extends boolean>(value: T) => T, capture: <U extends T = T>(value: U) => T, after: T) => T;
+            }".to_vec(),
+        };
+        let manifest = build_global_manifest(collect(&file).records);
+        let table = lower_interfaces(&manifest, &[file], &["Owner"])?;
+        let local = |reference: &LoweredTypeReference| {
+            let LoweredTypeReference::Local(index) = reference else {
+                panic!("expected local type")
+            };
+            &table.types()[*index]
+        };
+        let LoweredTypeData::Interface(interface) =
+            local(&table.interface_reference("Owner").unwrap())
+        else {
+            panic!("expected interface")
+        };
+        let LoweredTypeData::Function(outer) =
+            local(interface.member("callback").unwrap().type_reference())
+        else {
+            panic!("expected outer function")
+        };
+        let parameter = &outer.type_parameters()[0];
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(parameter)
+        else {
+            panic!("expected outer parameter")
+        };
+        assert_eq!(
+            constraint,
+            &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_ID"))
+        );
+        assert_eq!(default, constraint);
+        let LoweredTypeData::Function(shadow) = local(outer.parameters()[0].type_reference())
+        else {
+            panic!("expected shadowing callback")
+        };
+        let inner = &shadow.type_parameters()[0];
+        assert_ne!(parameter, inner);
+        assert_eq!(shadow.parameters()[0].type_reference(), inner);
+        assert_eq!(shadow.return_type(), inner);
+        let LoweredTypeData::GenericParameter {
+            constraint: Some(constraint),
+            default,
+            ..
+        } = local(inner)
+        else {
+            panic!("expected inner parameter")
+        };
+        assert_eq!(local(constraint), &LoweredTypeData::Boolean);
+        assert_eq!(default, &None);
+        let LoweredTypeData::Function(capture) = local(outer.parameters()[1].type_reference())
+        else {
+            panic!("expected capturing callback")
+        };
+        let captured = &capture.type_parameters()[0];
+        let LoweredTypeData::GenericParameter {
+            constraint,
+            default,
+            ..
+        } = local(captured)
+        else {
+            panic!("expected capturing parameter")
+        };
+        assert_eq!(constraint.as_ref(), Some(parameter));
+        assert_eq!(default, constraint);
+        assert_eq!(capture.parameters()[0].type_reference(), captured);
+        assert_eq!(capture.return_type(), parameter);
+        assert_eq!(outer.parameters()[2].type_reference(), parameter);
+        assert_eq!(outer.return_type(), parameter);
+        Ok(())
+    }
+
+    #[test]
     fn method_generics_bind_constraints_defaults_and_callbacks() -> Result<()> {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
         for parameter in ["T", "Owner", "WeakKey"] {
@@ -947,7 +1944,7 @@ mod tests {
                 members: Box::default(),
             };
             let types =
-                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID", None)?;
             let local = |reference: &LoweredTypeReference| {
                 let LoweredTypeReference::Local(index) = reference else {
                     panic!("expected local type")
@@ -966,6 +1963,7 @@ mod tests {
                 name,
                 constraint,
                 default,
+                ..
             } = local(first)
             else {
                 panic!("expected generic")
@@ -1127,7 +2125,7 @@ mod tests {
                 members: Box::default(),
             };
             let types =
-                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID")?;
+                lower_class_members(&manifest, &[file], &mut class, "GLOBAL_TEST_OWNER_ID", None)?;
             let member_type = |name| class.member(name).unwrap().type_reference();
             let local_index = |reference: &LoweredTypeReference| {
                 let LoweredTypeReference::Local(index) = reference else {
@@ -1351,6 +2349,91 @@ mod tests {
     }
 
     #[test]
+    fn named_constructor_members_preserve_overloads() -> Result<()> {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
+        for (owner, method) in [("First", "create"), ("Second", "convert")] {
+            let file = DiscoveredFile {
+                path: CanonicalPath::from_within(
+                    root,
+                    "tests/fixtures/global-types/lowering.interfaces.d.ts",
+                )?,
+                repo_relative: "statics.d.ts".to_owned(),
+                bytes: format!(
+                    r#"
+                    interface Factory {{
+                        {method}<T>(value: T): T;
+                        unrelated: Missing;
+                    }}
+                    interface Factory {{
+                        {method}<T, U>(value: T, map: (value: T) => U, context?: any): U;
+                    }}
+                "#
+                )
+                .into_bytes(),
+            };
+            let manifest = build_global_manifest(collect(&file).records);
+            let mut class = LoweredClass {
+                name: Text::from(owner),
+                type_parameters: Box::default(),
+                members: Box::default(),
+            };
+            let types = lower_constructor_members(
+                &manifest,
+                &[file],
+                manifest.global_group("Factory").unwrap().declarations(),
+                &mut class,
+                "GLOBAL_TEST_OWNER_ID",
+                |member| select_named_members(member, &["create", "convert"]),
+                &[],
+            )?;
+            let [member] = class.members() else {
+                panic!("expected one selected static")
+            };
+            assert_eq!(member.name(), method);
+            assert_eq!(member.kind(), &LoweredMemberKind::NamedStatic);
+            let local = |reference: &LoweredTypeReference| {
+                let LoweredTypeReference::Local(index) = reference else {
+                    panic!("expected local type")
+                };
+                &types[*index]
+            };
+            let LoweredTypeData::Object(signatures) = local(member.type_reference()) else {
+                panic!("expected overloads")
+            };
+            assert_eq!(signatures.len(), 2);
+            for (index, signature) in signatures.iter().enumerate() {
+                assert_eq!(signature.kind(), &LoweredMemberKind::CallSignature);
+                let LoweredTypeData::Function(function) = local(signature.type_reference()) else {
+                    panic!("expected function")
+                };
+                assert_eq!(function.type_parameters().len(), index + 1);
+                assert_eq!(
+                    function.parameters()[0].type_reference(),
+                    &function.type_parameters()[0]
+                );
+                assert_eq!(
+                    Some(function.return_type()),
+                    function.type_parameters().last()
+                );
+                if index == 1 {
+                    let LoweredTypeData::Function(callback) =
+                        local(function.parameters()[1].type_reference())
+                    else {
+                        panic!("expected callback")
+                    };
+                    assert_eq!(
+                        callback.parameters()[0].type_reference(),
+                        &function.type_parameters()[0]
+                    );
+                    assert_eq!(callback.return_type(), function.return_type());
+                    assert!(function.parameters()[2].is_optional());
+                }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
     fn supporting_arrays_are_scoped_to_each_declaration() -> Result<()> {
         let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
         let file = DiscoveredFile {
@@ -1375,6 +2458,7 @@ mod tests {
                 std::slice::from_ref(&file),
                 &mut class,
                 id_constant,
+                None,
             )?;
             if let Some(member) = class.members().first() {
                 assert_eq!(member.type_reference(), &LoweredTypeReference::Local(0));
