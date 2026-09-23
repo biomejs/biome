@@ -54,3 +54,25 @@
 	border-bottom-left-radius: 12px;
 	border-bottom-right-radius: 16px;
 }
+
+.values {
+	float: left;
+	float: right;
+	clear: left;
+	clear: right;
+	text-align: left;
+	text-align: right;
+	justify-content: left;
+	justify-content: right;
+	justify-items: left;
+	justify-items: right;
+	justify-self: left;
+	justify-self: right;
+}
+
+.anchor-functions {
+	width: anchor-size(width);
+	height: anchor-size(height);
+	top: anchor(bottom);
+	left: anchor(right);
+}

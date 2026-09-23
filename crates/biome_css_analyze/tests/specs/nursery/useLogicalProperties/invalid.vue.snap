@@ -21,7 +21,7 @@ expression: invalid.vue
 
 # Diagnostics
 ```
-invalid.vue:8:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -38,11 +38,20 @@ invalid.vue:8:3 lint/nursery/useLogicalProperties ━━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    1 1 │   
+    2 2 │     .card {
+    3   │ - → → width:·100%;
+      3 │ + → → inline-size:·100%;
+    4 4 │       margin-left: 1rem;
+    5 5 │     }
+  
 
 ```
 
 ```
-invalid.vue:9:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -58,6 +67,15 @@ invalid.vue:9:3 lint/nursery/useLogicalProperties ━━━━━━━━━━
   i Replace margin-left with margin-inline-start.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    2 2 │     .card {
+    3 3 │       width: 100%;
+    4   │ - → → margin-left:·1rem;
+      4 │ + → → margin-inline-start:·1rem;
+    5 5 │     }
+    6 6 │   
   
 
 ```
