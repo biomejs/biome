@@ -15,24 +15,25 @@ env:
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
 
 jobs:
-  publishable-crates:
-    name: Verify publishable crates
-    runs-on: depot-ubuntu-24.04-arm-16
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.21.0
-      - name: Install toolchain
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
-        with:
-          cache-base: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verify publishable crates
-        run: node --experimental-strip-types scripts/update-crates-versions.ts verify
+  # NOTE: disabled until we fix the deployment of crates
+  #  publishable-crates:
+  #    name: Verify publishable crates
+  #    runs-on: depot-ubuntu-24.04-arm-16
+  #    steps:
+  #      - name: Checkout repository
+  #        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+  #      - name: Install Node.js
+  #        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+  #        with:
+  #          node-version: 24.21.0
+  #      - name: Install toolchain
+  #        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+  #        with:
+  #          cache-base: main
+  #        env:
+  #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #      - name: Verify publishable crates
+  #        run: node --experimental-strip-types scripts/update-crates-versions.ts verify
 
   format:
     name: Format Rust Files
@@ -145,7 +146,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [depot-windows-2022-16, depot-ubuntu-24.04-arm-16]
+        os: [ depot-windows-2022-16, depot-ubuntu-24.04-arm-16 ]
     steps:
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths
