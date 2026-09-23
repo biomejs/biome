@@ -1,6 +1,6 @@
-//! Predefined global type IDs derived from one ordered manifest, [`PREDEFINED_ID_ROWS`].
-//! Row position is the `TypeId` value, so the manifest is append-only: reordering
-//! or removing rows shifts every consumer's `*_ID` constant.
+//! Global IDs consist of a fixed manifest followed by generated declarations.
+//! Row position in [`PREDEFINED_ID_ROWS`] is the fixed `TypeId` value, so the
+//! manifest is append-only. Generated function IDs follow it in source order.
 
 use std::cmp::Ordering;
 
@@ -72,7 +72,7 @@ macro_rules! predefined_globals {
     ($(($id:ident, $id_name:ident, $global_type_id:ident, $resolved_id:tt, $name:literal, $role:ident $(,)?)),+ $(,)?) => {
         predefined_global_ids!(0usize; $(($id, $id_name, $global_type_id, $resolved_id, $name, $role)),+);
 
-        /// Single ordered manifest of every predefined global type ID.
+        /// Ordered manifest of fixed predefined global type IDs.
         pub(crate) const PREDEFINED_ID_ROWS: &[&str] = &[
             $(
                 $id_name,
@@ -81,12 +81,16 @@ macro_rules! predefined_globals {
 
         const _: () = assert!(PREDEFINED_ID_ROWS.len() == PREDEFINED_TYPE_COUNT);
 
-        /// Number of predefined global type IDs derived from the manifest.
-        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len();
+        /// Number of fixed and generated global type IDs.
+        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len()
+            + crate::generated::global_types::VALUE_GLOBALS.len();
 
         /// Returns a string for formatting global IDs in test snapshots.
         pub(crate) fn global_type_name(id: TypeId) -> Option<&'static str> {
-            PREDEFINED_ID_ROWS.get(id.index()).copied()
+            PREDEFINED_ID_ROWS.get(id.index()).copied().or_else(|| {
+                let index = id.index().checked_sub(PREDEFINED_ID_ROWS.len())?;
+                crate::generated::global_types::VALUE_GLOBALS.get(index).map(|(name, _)| *name)
+            })
         }
     };
 }

@@ -79,7 +79,7 @@ pub(in crate::generate_global_types::lower) fn lower_namespace(
     }
     Ok(Some(LoweredGlobal {
         name: Text::from(path.join(".")),
-        id_constant,
+        id_constant: id_constant.into(),
         data: LoweredTypeData::Object(members.into_boxed_slice()),
         local_types: lowerer
             .types

@@ -2,6 +2,54 @@
 
 // Generated from microsoft/TypeScript v6.0.3 (git commit 050880ce59e30b356b686bd3144efe24f875ebc8).
 
+/// Function identities allocated after the fixed predefined manifest.
+pub(crate) mod function_ids {
+    pub(crate) const EVAL_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len(),
+        ));
+    pub(crate) const PARSE_INT_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 1,
+        ));
+    pub(crate) const PARSE_FLOAT_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 2,
+        ));
+    pub(crate) const IS_NA_N_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 3,
+        ));
+    pub(crate) const IS_FINITE_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 4,
+        ));
+    pub(crate) const DECODE_URI_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 5,
+        ));
+    pub(crate) const DECODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 6,
+        ));
+    pub(crate) const ENCODE_URI_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 7,
+        ));
+    pub(crate) const ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 8,
+        ));
+    pub(crate) const ESCAPE_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 9,
+        ));
+    pub(crate) const UNESCAPE_ID_GLOBAL_TYPE_ID: crate::globals::GlobalTypeId =
+        crate::globals::GlobalTypeId::new(crate::TypeId::new(
+            crate::globals::PREDEFINED_ID_ROWS.len() + 10,
+        ));
+}
+
 /// Predefined global IDs whose `TypeData` is supplied by this generated module.
 pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::ARRAY_ID_GLOBAL_TYPE_ID,
@@ -60,6 +108,17 @@ pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
     crate::globals::SET_ITERATOR_ID_GLOBAL_TYPE_ID,
     crate::globals::BUILTIN_ITERATOR_RETURN_ID_GLOBAL_TYPE_ID,
     crate::globals::INTL_ID_GLOBAL_TYPE_ID,
+    crate::globals::EVAL_ID_GLOBAL_TYPE_ID,
+    crate::globals::PARSE_INT_ID_GLOBAL_TYPE_ID,
+    crate::globals::PARSE_FLOAT_ID_GLOBAL_TYPE_ID,
+    crate::globals::IS_NA_N_ID_GLOBAL_TYPE_ID,
+    crate::globals::IS_FINITE_ID_GLOBAL_TYPE_ID,
+    crate::globals::DECODE_URI_ID_GLOBAL_TYPE_ID,
+    crate::globals::DECODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
+    crate::globals::ENCODE_URI_ID_GLOBAL_TYPE_ID,
+    crate::globals::ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
+    crate::globals::ESCAPE_ID_GLOBAL_TYPE_ID,
+    crate::globals::UNESCAPE_ID_GLOBAL_TYPE_ID,
 ];
 
 /// Type-only declaration names and their global identities.
@@ -92,6 +151,27 @@ pub(crate) const DECLARATION_GLOBALS: &[(&str, crate::RawTypeId)] = &[
         crate::globals::GLOBAL_BUILTIN_ITERATOR_RETURN_ID,
     ),
     ("Disposable", crate::globals::GLOBAL_DISPOSABLE_ID),
+];
+
+/// Value declaration names and their global identities.
+pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[
+    ("eval", crate::globals::EVAL_ID_GLOBAL_TYPE_ID),
+    ("parseInt", crate::globals::PARSE_INT_ID_GLOBAL_TYPE_ID),
+    ("parseFloat", crate::globals::PARSE_FLOAT_ID_GLOBAL_TYPE_ID),
+    ("isNaN", crate::globals::IS_NA_N_ID_GLOBAL_TYPE_ID),
+    ("isFinite", crate::globals::IS_FINITE_ID_GLOBAL_TYPE_ID),
+    ("decodeURI", crate::globals::DECODE_URI_ID_GLOBAL_TYPE_ID),
+    (
+        "decodeURIComponent",
+        crate::globals::DECODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
+    ),
+    ("encodeURI", crate::globals::ENCODE_URI_ID_GLOBAL_TYPE_ID),
+    (
+        "encodeURIComponent",
+        crate::globals::ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
+    ),
+    ("escape", crate::globals::ESCAPE_ID_GLOBAL_TYPE_ID),
+    ("unescape", crate::globals::UNESCAPE_ID_GLOBAL_TYPE_ID),
 ];
 
 /// Registers all generated global type data into the resolver builder.
@@ -1511,6 +1591,177 @@ pub(crate) fn set_generated_global_type_data(
         has_unknown_members: false,
     });
     builder.set_type_data(crate::globals::INTL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("eval")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("x"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(0)).into()),
+    }));
+    builder.set_type_data(crate::globals::EVAL_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("parseInt")),
+        parameters: Box::new([
+            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("string"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            }),
+            crate::FunctionParameter::Named(crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("radix"),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                is_optional: true,
+                is_rest: false,
+            }),
+        ]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PARSE_INT_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("parseFloat")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("string"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_NUMBER_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::PARSE_FLOAT_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("isNaN")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("number"),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(0)).into()),
+    }));
+    builder.set_type_data(crate::globals::IS_NA_N_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("isFinite")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("number"),
+                ty: crate::globals::GLOBAL_NUMBER_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::RawTypeId::Local(crate::TypeId::new(0)).into()),
+    }));
+    builder.set_type_data(crate::globals::IS_FINITE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("decodeURI")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("encodedURI"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::DECODE_URI_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("decodeURIComponent")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("encodedURIComponent"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::DECODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("encodeURI")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("uri"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ENCODE_URI_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("encodeURIComponent")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("uriComponent"),
+                ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("escape")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("string"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::ESCAPE_ID_GLOBAL_TYPE_ID, data);
+    let data = crate::TypeData::Function(Box::new(crate::Function {
+        is_async: false,
+        type_parameters: Box::default(),
+        name: Some(biome_rowan::Text::new_static("unescape")),
+        parameters: Box::new([crate::FunctionParameter::Named(
+            crate::NamedFunctionParameter {
+                name: biome_rowan::Text::new_static("string"),
+                ty: crate::globals::GLOBAL_STRING_ID.into(),
+                is_optional: false,
+                is_rest: false,
+            },
+        )]),
+        return_type: crate::ReturnType::Type(crate::globals::GLOBAL_STRING_ID.into()),
+    }));
+    builder.set_type_data(crate::globals::UNESCAPE_ID_GLOBAL_TYPE_ID, data);
 }
 
 pub(crate) static ARRAY_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 14]> =
@@ -5996,6 +6247,23 @@ pub(crate) static INTL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 105]> 
             })),
         ]
     });
+pub(crate) static EVAL_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
+    std::sync::LazyLock::new(|| [crate::TypeData::AnyKeyword]);
+pub(crate) static IS_NA_N_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
+    std::sync::LazyLock::new(|| [crate::TypeData::Boolean]);
+pub(crate) static IS_FINITE_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 1]> =
+    std::sync::LazyLock::new(|| [crate::TypeData::Boolean]);
+pub(crate) static ENCODE_URI_COMPONENT_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 2]> =
+    std::sync::LazyLock::new(|| {
+        [
+            crate::TypeData::Boolean,
+            crate::TypeData::Union(Box::new(crate::Union(Box::new([
+                crate::globals::GLOBAL_STRING_ID.into(),
+                crate::globals::GLOBAL_NUMBER_ID.into(),
+                crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
+            ])))),
+        ]
+    });
 
 /// Supporting types in dependency order, indexed relative to their owning global.
 pub(crate) fn generated_local_types(
@@ -6030,6 +6298,12 @@ pub(crate) fn generated_local_types(
             &*BUILTIN_ITERATOR_RETURN_LOCAL_TYPES
         }
         crate::globals::INTL_ID_GLOBAL_TYPE_ID => &*INTL_LOCAL_TYPES,
+        crate::globals::EVAL_ID_GLOBAL_TYPE_ID => &*EVAL_LOCAL_TYPES,
+        crate::globals::IS_NA_N_ID_GLOBAL_TYPE_ID => &*IS_NA_N_LOCAL_TYPES,
+        crate::globals::IS_FINITE_ID_GLOBAL_TYPE_ID => &*IS_FINITE_LOCAL_TYPES,
+        crate::globals::ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID => {
+            &*ENCODE_URI_COMPONENT_LOCAL_TYPES
+        }
         _ => &[],
     }
 }
