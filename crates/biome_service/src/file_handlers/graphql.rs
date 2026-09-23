@@ -31,7 +31,7 @@ use biome_formatter::{
     QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_graphql_analyze::analyze;
+use biome_graphql_analyze::{analyze, analyze_snippet};
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_formatter::format_node;
 use biome_graphql_parser::parse_graphql_with_cache;
@@ -564,6 +564,13 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<biome_analyze::EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ = debug_span!("Linting GraphQL file", path =? params.path, language =? params.language)
         .entered();
     let analyzer_options = resolve_analyzer_options(
@@ -596,11 +603,16 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
 
-    let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(&tree, filter, &analyzer_options, inspector, |signal| {
+            process_lint.process_signal(signal)
+        }),
+        None => analyze(&tree, filter, &analyzer_options, |signal| {
+            process_lint.process_signal(signal)
+        }),
+    };
 
     process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),

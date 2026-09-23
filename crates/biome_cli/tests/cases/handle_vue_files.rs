@@ -1086,6 +1086,49 @@ import { computed } from "vue";
 }
 
 #[test]
+fn html_comment_suppresses_vue_expression_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUndeclaredVariables": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <!-- biome-ignore lint/correctness/noUndeclaredVariables: intentionally external -->
+  <div :title="missingValue" />
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_comment_suppresses_vue_expression_rule",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn unused_suppression_has_correct_span_in_vue_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

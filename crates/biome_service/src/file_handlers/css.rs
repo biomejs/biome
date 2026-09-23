@@ -30,7 +30,7 @@ use biome_configuration::css::{
     CssFormatterConfiguration, CssFormatterEnabled, CssLinterConfiguration, CssLinterEnabled,
     CssModulesEnabled, CssParserConfiguration, CssTailwindDirectivesEnabled,
 };
-use biome_css_analyze::{CssAnalyzerServices, analyze};
+use biome_css_analyze::{CssAnalyzerServices, analyze, analyze_snippet};
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssModulesKind, CssParserOptions};
@@ -674,6 +674,13 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<biome_analyze::EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let Some(file_source) = params.language.to_css_file_source() else {
         return LintResults {
             diagnostics: vec![],
@@ -715,7 +722,7 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
     let css_services = CssAnalyzerServices {
         language_db: Some(params.workspace_db.rc_language_db()),
         parsed_source: match &params.parsed_source {
@@ -735,14 +742,25 @@ fn lint(params: LintParams) -> LintResults {
         },
         project_layout: Some(params.project_layout.clone()),
     };
-    let (_, analyze_diagnostics) = analyze(
-        &tree,
-        filter,
-        &analyzer_options,
-        css_services,
-        &params.plugins,
-        |signal| process_lint.process_signal(signal),
-    );
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(
+            &tree,
+            filter,
+            &analyzer_options,
+            css_services,
+            &params.plugins,
+            inspector,
+            |signal| process_lint.process_signal(signal),
+        ),
+        None => analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            css_services,
+            &params.plugins,
+            |signal| process_lint.process_signal(signal),
+        ),
+    };
 
     process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),
