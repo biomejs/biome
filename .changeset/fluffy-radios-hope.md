@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#11841](https://github.com/biomejs/biome/issues/11841), where suppression comments didn't have effect on certain area of HTML-ish languages or snippets inside JavaScript files.
+Fixed [#11841](https://github.com/biomejs/biome/issues/11841), where suppression comments had no effect on some parts of HTML-ish files and on snippets embedded in JavaScript files.
 
 Now the following suppression works as expected:
 
