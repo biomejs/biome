@@ -1948,13 +1948,15 @@ fn is_vue_directive_prefix_bytes(bytes: &[u8]) -> bool {
     bytes.starts_with(b"v-")
 }
 
-fn slash_starts_regex(previous_non_whitespace: Option<u8>) -> bool {
-    match previous_non_whitespace {
-        None => true,
-        Some(byte) => !matches!(
-            lookup_byte(byte),
-            IDT | DOL | DIG | ZER | PNC | BTC | PLS | MIN
-        ),
+fn slash_starts_regex(scanned: &[u8]) -> bool {
+    let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
+        return true;
+    };
+    match lookup_byte(scanned[end]) {
+        // A keyword such as `return` leaves an operand position; other words do not.
+        IDT => ends_with_expression_keyword(&scanned[..=end]),
+        DOL | DIG | ZER | PNC | BTC | PLS | MIN => false,
+        _ => true,
     }
 }
 
@@ -2397,15 +2399,31 @@ impl<'src> JsScanner<'src> {
                 self.advance(2);
                 self.skip_block_comment();
             }
-            // `/>` closes a tag that was not recognised as JSX; it never opens a regex.
-            Some(b'>') => self.advance(1),
-            _ if self.scanned().last() != Some(&b'<')
-                && slash_starts_regex(self.previous_non_whitespace()) =>
-            {
+            // `/>` closes a tag that was not recognized as JSX, unless the slash
+            // sits where only an operand can start: `s.replace(/>/g, "")`.
+            Some(b'>') if !self.at_operand_start() => self.advance(1),
+            _ if self.scanned().last() != Some(&b'<') && slash_starts_regex(self.scanned()) => {
                 self.advance(1);
                 self.skip_regex();
             }
             _ => self.advance(1),
+        }
+    }
+
+    /// Returns whether the previous token leaves the scanner where an operand
+    /// must start (after `(`, `,`, `=`, `=>`, `return`, ...), so a `/` there
+    /// can only open a regex literal, never close a tag.
+    fn at_operand_start(&self) -> bool {
+        let scanned = self.scanned();
+        let Some(end) = scanned.iter().rposition(|byte| !byte.is_ascii_whitespace()) else {
+            return true;
+        };
+        match lookup_byte(scanned[end]) {
+            MOR => end > 0 && scanned[end - 1] == b'=',
+            PNO | COM | EQL | COL | BTO | EXL | AMP | PIP | QST | SEM | BEO | TLD | CRT | PRC
+            | MUL => true,
+            IDT => ends_with_expression_keyword(&scanned[..=end]),
+            _ => false,
         }
     }
 
@@ -2499,30 +2517,44 @@ fn at_expression_position(scanned: &[u8]) -> bool {
     };
 
     if is_js_word_byte(scanned[index]) {
-        let start = scanned[..index]
-            .iter()
-            .rposition(|byte| !is_js_word_byte(*byte))
-            .map_or(0, |index| index + 1);
-        return matches!(
-            &scanned[start..=index],
-            b"await"
-                | b"case"
-                | b"delete"
-                | b"do"
-                | b"else"
-                | b"in"
-                | b"instanceof"
-                | b"new"
-                | b"of"
-                | b"return"
-                | b"throw"
-                | b"typeof"
-                | b"void"
-                | b"yield"
-        );
+        return ends_with_expression_keyword(&scanned[..=index]);
     }
 
     !matches!(scanned[index], b')' | b']' | b'"' | b'\'' | b'`')
+}
+
+/// Returns whether `code` ends with a reserved word that an expression can
+/// directly follow, such as `return`. Contextual keywords such as `of` are left
+/// out because they are also plain names (`of / 2`), and a word after `.` or
+/// `#` is a property name, like the operand in `pool.yield / 100`.
+fn ends_with_expression_keyword(code: &[u8]) -> bool {
+    let start = code
+        .iter()
+        .rposition(|byte| !is_js_word_byte(*byte))
+        .map_or(0, |index| index + 1);
+    let before = code[..start]
+        .iter()
+        .rposition(|byte| !byte.is_ascii_whitespace());
+    if before.is_some_and(|index| matches!(lookup_byte(code[index]), PRD | HAS)) {
+        return false;
+    }
+
+    matches!(
+        &code[start..],
+        b"await"
+            | b"case"
+            | b"delete"
+            | b"do"
+            | b"else"
+            | b"in"
+            | b"instanceof"
+            | b"new"
+            | b"return"
+            | b"throw"
+            | b"typeof"
+            | b"void"
+            | b"yield"
+    )
 }
 
 fn is_js_word_byte(byte: u8) -> bool {
@@ -2782,6 +2814,43 @@ mod js_scanner {
     #[test]
     fn a_type_assertion_in_frontmatter_closes_the_fence() {
         assert_eq!(fence("const a = <string>x;\n---\n"), Some(21));
+    }
+
+    #[test]
+    fn a_regex_starting_with_a_closing_angle_bracket_is_a_regex() {
+        assert!(fence("const a = s.replace(/>/g, '&gt;');\n---\n<p>{a}</p>\n").is_some());
+        assert!(fence("const isTag = (s) => />$/.test(s);\n---\n").is_some());
+        assert!(fence("const r = [/>/, /</];\n---\n").is_some());
+        let source = "s.replace(/>/g, '')}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_regex_after_an_expression_keyword_is_a_regex() {
+        assert!(fence("function hasTag(s) {\n  return />'/.test(s);\n}\n---\n").is_some());
+        assert!(fence("function hasQuote(s) {\n  return /'/.test(s);\n}\n---\n").is_some());
+        let source = "typeof />'/}";
+        assert_eq!(expression(source), Some(source.len() - 1));
+    }
+
+    #[test]
+    fn a_slash_after_a_property_or_other_identifier_is_a_division() {
+        assert!(fence("const apy = pool.yield / 100;\n---\n<p>{apy}</p>\n").is_some());
+        assert!(fence("const a = this.#return / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = begin / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = pool. yield / 2, b = \"/'\";\n---\n").is_some());
+        assert!(fence("const a = pool.\n  yield / 2, b = \"/'\";\n---\n").is_some());
+    }
+
+    #[test]
+    fn a_slash_after_a_contextual_keyword_used_as_a_name_is_a_division() {
+        assert!(fence("const of = 8, n = of / 2, s = \"/'\";\n---\n").is_some());
+    }
+
+    #[test]
+    fn a_self_closing_tag_in_frontmatter_still_closes() {
+        assert!(fence("const el = <Foo bar={1} />;\n---\n").is_some());
+        assert!(fence("const el = <Foo bar=\"x\" />;\n---\n").is_some());
     }
 
     #[test]
