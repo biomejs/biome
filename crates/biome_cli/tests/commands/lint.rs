@@ -4587,3 +4587,32 @@ fn only_per_plugin_selector_is_rejected() {
         result,
     ));
 }
+
+#[test]
+fn missing_plugins_report_their_paths() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["missingOne.grit", "missingTwo.grit"]
+}
+"#,
+    );
+
+    let file_path = "file.js";
+
+    fs.insert(file_path.into(), b"debugger\n");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_plugins_report_their_paths",
+        fs,
+        console,
+        result,
+    ));
+}
