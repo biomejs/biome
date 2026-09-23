@@ -451,7 +451,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                     let ty = annotation.ty()?;
                     self.lower_property_type(&key.name, &ty)
                 } else {
-                    self.register(LoweredTypeData::AnyKeyword)
+                    LoweredTypeReference::Predefined("GLOBAL_ANY_KEYWORD_ID")
                 };
                 let ty = self.optional_computed_value(&key, optional, ty);
                 list.push_property(key, ty);
@@ -559,7 +559,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                 .and_then(|interface| self.lowerer.ids.unique_symbol(interface, name.text()));
             return match slot {
                 Some(index) => self.global_reference(index),
-                None => self.register(LoweredTypeData::Symbol),
+                None => LoweredTypeReference::Predefined("GLOBAL_SYMBOL_KEYWORD_ID"),
             };
         }
         self.lower_type(ty)
@@ -572,7 +572,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
         reference: LoweredTypeReference,
     ) -> LoweredTypeReference {
         if optional && matches!(key.kind, LoweredMemberKind::ComputedValue { .. }) {
-            let undefined = self.register(LoweredTypeData::Undefined);
+            let undefined = LoweredTypeReference::Predefined("GLOBAL_UNDEFINED_ID");
             self.register(LoweredTypeData::Union(Box::new([reference, undefined])))
         } else {
             reference
@@ -846,7 +846,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
         let return_type = match return_type {
             Some(AnyTsReturnType::AnyTsType(ty)) => self.lower_type(&ty),
             Some(AnyTsReturnType::TsPredicateReturnType(_)) => {
-                self.register(LoweredTypeData::Boolean)
+                LoweredTypeReference::Predefined("GLOBAL_BOOLEAN_KEYWORD_ID")
             }
             Some(AnyTsReturnType::TsAssertsReturnType(_)) => {
                 LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
@@ -875,7 +875,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
         if let Some(reference) = lower_primitive_reference(ty) {
             return Ok(reference);
         }
-        if let Some(data) = lower_scalar_type(ty)? {
+        if let Some(data) = lower_literal_type(ty)? {
             return Ok(self.register(data));
         }
         Ok(match ty {
@@ -920,7 +920,7 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                     let ty = self.lower_type(&operand);
                     self.register(LoweredTypeData::Keyof(ty))
                 } else if kind == T![unique] {
-                    self.register(LoweredTypeData::Symbol)
+                    LoweredTypeReference::Predefined("GLOBAL_SYMBOL_KEYWORD_ID")
                 } else if matches!(
                     operand,
                     AnyTsType::TsArrayType(_) | AnyTsType::TsTupleType(_)
@@ -1296,17 +1296,8 @@ fn expression_path(expression: &AnyJsExpression) -> Option<Vec<Text>> {
     }
 }
 
-fn lower_scalar_type(ty: &AnyTsType) -> Result<Option<LoweredTypeData>> {
+fn lower_literal_type(ty: &AnyTsType) -> Result<Option<LoweredTypeData>> {
     let data = match ty {
-        AnyTsType::TsAnyType(_) => LoweredTypeData::AnyKeyword,
-        AnyTsType::TsBigintType(_) => LoweredTypeData::BigInt,
-        AnyTsType::TsBooleanType(_) => LoweredTypeData::Boolean,
-        AnyTsType::TsNeverType(_) => LoweredTypeData::NeverKeyword,
-        AnyTsType::TsNonPrimitiveType(_) => LoweredTypeData::ObjectKeyword,
-        AnyTsType::TsNullLiteralType(_) => LoweredTypeData::Null,
-        AnyTsType::TsSymbolType(_) => LoweredTypeData::Symbol,
-        AnyTsType::TsUndefinedType(_) => LoweredTypeData::Undefined,
-        AnyTsType::TsUnknownType(_) => LoweredTypeData::UnknownKeyword,
         AnyTsType::TsBooleanLiteralType(literal) => {
             LoweredTypeData::BooleanLiteral(literal.literal()?.kind() == T![true])
         }
