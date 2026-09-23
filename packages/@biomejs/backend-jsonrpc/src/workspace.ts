@@ -2578,6 +2578,11 @@ See https://biomejs.dev/linter/rules/no-duplicate-field-definition-names
 	 */
 	noDuplicateFieldDefinitionNames?: NoDuplicateFieldDefinitionNamesConfiguration;
 	/**
+	* Disallow two keys with the same name inside YAML maps.
+See https://biomejs.dev/linter/rules/no-duplicate-map-keys 
+	 */
+	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
+	/**
 	* Disallow duplicate selectors.
 See https://biomejs.dev/linter/rules/no-duplicate-selectors 
 	 */
@@ -5041,6 +5046,9 @@ export type NoDrizzleUpdateWithoutWhereConfiguration =
 export type NoDuplicateFieldDefinitionNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateFieldDefinitionNamesOptions;
+export type NoDuplicateMapKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateMapKeysOptions;
 export type NoDuplicateSelectorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateSelectorsOptions;
@@ -7022,6 +7030,10 @@ export interface RuleWithNoDuplicateFieldDefinitionNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateFieldDefinitionNamesOptions;
 }
+export interface RuleWithNoDuplicateMapKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateMapKeysOptions;
+}
 export interface RuleWithNoDuplicateSelectorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateSelectorsOptions;
@@ -8970,6 +8982,7 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 	drizzleObjectName?: string[];
 }
 export type NoDuplicateFieldDefinitionNamesOptions = {};
+export type NoDuplicateMapKeysOptions = {};
 export type NoDuplicateSelectorsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
 export interface NoExcessiveNestedCallbacksOptions {

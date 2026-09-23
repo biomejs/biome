@@ -3897,6 +3897,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateMapKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateMapKeysOptions" }
+			]
+		},
+		"NoDuplicateMapKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateObjectKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7053,6 +7063,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateMapKeys": {
+					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateMapKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateSelectors": {
 					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
 					"anyOf": [
@@ -9256,6 +9273,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateJsxPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateMapKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateMapKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
