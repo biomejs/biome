@@ -1,5 +1,5 @@
-use crate::AnyCssDeclarationName;
-use biome_rowan::TokenText;
+use crate::{AnyCssDashedIdentifier, AnyCssDeclarationName, CssSyntaxToken};
+use biome_rowan::{SyntaxError, SyntaxResult, TokenText};
 use biome_string_case::StrLikeExtension;
 
 impl AnyCssDeclarationName {
@@ -17,6 +17,22 @@ impl AnyCssDeclarationName {
                     .token_text_trimmed(),
             ),
             _ => None,
+        }
+    }
+
+    /// Returns the token holding the declaration name, resolving through
+    /// `TwValueThemeReference` indirection.
+    pub fn declaration(&self) -> SyntaxResult<CssSyntaxToken> {
+        match self {
+            Self::AnyCssDashedIdentifier(AnyCssDashedIdentifier::CssDashedIdentifier(name)) => {
+                name.value_token()
+            }
+            Self::AnyCssDashedIdentifier(
+                AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
+            ) => Err(SyntaxError::MissingRequiredChild),
+            Self::CssIdentifier(name) => name.value_token(),
+            Self::TwValueThemeReference(name) => name.reference()?.value_token(),
+            Self::ScssInterpolatedIdentifier(_) => Err(SyntaxError::MissingRequiredChild),
         }
     }
 }
