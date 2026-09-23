@@ -556,3 +556,53 @@ export function Component() {
         result,
     ));
 }
+
+/// A rule that belongs to several domains stays enabled when one of its domains
+/// is disabled but another one is enabled.
+#[test]
+fn disabled_domain_does_not_disable_rules_of_enabled_domain() {
+    let mut console = BufferConsole::default();
+    let fs = MemoryFileSystem::default();
+    let config = Utf8Path::new("biome.json");
+    fs.insert(
+        config.into(),
+        br#"{
+    "linter": {
+        "domains": {
+            "react": "all",
+            "next": "none"
+        }
+    }
+}
+"#,
+    );
+    let test1 = Utf8Path::new("test1.jsx");
+    fs.insert(
+        test1.into(),
+        br#"import { useEffect } from "react";
+
+export function Clock({ tick, onTick }) {
+    useEffect(() => {
+        onTick(tick);
+    }, []);
+    return null;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", test1.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "disabled_domain_does_not_disable_rules_of_enabled_domain",
+        fs,
+        console,
+        result,
+    ));
+}

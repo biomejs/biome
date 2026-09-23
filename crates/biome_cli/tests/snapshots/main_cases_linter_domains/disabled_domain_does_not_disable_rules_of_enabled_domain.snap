@@ -1,0 +1,114 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "domains": {
+      "react": "all",
+      "next": "none"
+    }
+  }
+}
+```
+
+## `test1.jsx`
+
+```jsx
+import { useEffect } from "react";
+
+export function Clock({ tick, onTick }) {
+    useEffect(() => {
+        onTick(tick);
+    }, []);
+    return null;
+}
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+test1.jsx:4:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on onTick.
+  
+    3 │ export function Clock({ tick, onTick }) {
+  > 4 │     useEffect(() => {
+      │     ^^^^^^^^^
+    5 │         onTick(tick);
+    6 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    3 │ export function Clock({ tick, onTick }) {
+    4 │     useEffect(() => {
+  > 5 │         onTick(tick);
+      │         ^^^^^^
+    6 │     }, []);
+    7 │     return null;
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency onTick to the list.
+  
+    6 │ ····},·[onTick]);
+      │         ++++++   
+
+```
+
+```block
+test1.jsx:4:5 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This hook does not specify its dependency on tick.
+  
+    3 │ export function Clock({ tick, onTick }) {
+  > 4 │     useEffect(() => {
+      │     ^^^^^^^^^
+    5 │         onTick(tick);
+    6 │     }, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    3 │ export function Clock({ tick, onTick }) {
+    4 │     useEffect(() => {
+  > 5 │         onTick(tick);
+      │                ^^^^
+    6 │     }, []);
+    7 │     return null;
+  
+  i React relies on hook dependencies to determine when to re-compute Effects.
+    Failing to specify dependencies can result in Effects not updating correctly when state changes.
+    These "stale closures" are a common source of surprising bugs.
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency tick to the list.
+  
+    6 │ ····},·[tick]);
+      │         ++++   
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```
