@@ -7,7 +7,7 @@ use std::path::Path;
 pub mod collect;
 pub mod compare;
 mod emit;
-pub use emit::render_declarations;
+pub use emit::render_global_types;
 pub mod lower;
 pub mod manifest;
 pub mod source;
@@ -70,9 +70,37 @@ pub fn run_with_workspace_root(
     let manifest = manifest::build_global_manifest(records);
     let lowered = lower::lower_global_types(&manifest, &source_files)?;
     compare::compare_lowered_globals(&lowered)?;
+    report_gaps(&lowered);
 
     emit::emit_global_types(checkout.pin(), workspace_root, &lowered)?;
     Ok(())
+}
+
+/// Summarizes declaration parts that were lowered to `unknown`, most common first.
+fn report_gaps(lowered: &lower::LoweredGlobalTypes) {
+    let gaps = lowered.gaps();
+    if gaps.is_empty() {
+        return;
+    }
+    let mut counts = std::collections::BTreeMap::<&str, usize>::new();
+    for gap in gaps {
+        let reason = gap.detail.split(':').next().unwrap_or(&gap.detail);
+        *counts.entry(reason).or_default() += 1;
+    }
+    let mut counts = counts.into_iter().collect::<Vec<_>>();
+    counts.sort_by_key(|(_, count)| std::cmp::Reverse(*count));
+    eprintln!(
+        "{} of {} globals contain parts lowered to unknown ({} parts):",
+        gaps.iter()
+            .map(|gap| gap.owner.as_str())
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        lowered.globals().len(),
+        gaps.len()
+    );
+    for (reason, count) in counts {
+        eprintln!("  {count:>5}  {reason}");
+    }
 }
 
 /// Runs the typed declaration collector over every discovered source and

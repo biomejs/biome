@@ -20,3 +20,7 @@ interface SymbolConstructor {
 }
 
 declare var Symbol: SymbolConstructor;
+
+interface Disposable {
+    [Symbol.dispose](): void;
+}

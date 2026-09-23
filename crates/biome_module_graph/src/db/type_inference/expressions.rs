@@ -1066,11 +1066,16 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         args: &[ResolvedCallArgument<'db>],
     ) -> Option<InferredTypeData<'db>> {
-        let callee = self.resolve_inferred_type(callee);
+        // Namespace members such as `Intl.Collator` refer to global classes by handle.
+        let callee = self
+            .resolve_inferred_type(callee)
+            .expand_canonical_global(self.db);
         let (class_ty, class, explicit_type_parameters) = match callee {
             InferredTypeData::Class(class) => (callee, class, Box::default()),
             InferredTypeData::InstanceOf(instance) => {
-                let class_ty = self.resolve_inferred_type(instance.ty(self.db));
+                let class_ty = self
+                    .resolve_inferred_type(instance.ty(self.db))
+                    .expand_canonical_global(self.db);
                 let InferredTypeData::Class(class) = class_ty else {
                     return None;
                 };

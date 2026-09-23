@@ -29,6 +29,11 @@ impl GlobalManifest {
             .find(|group| &group.scope == scope && group.name.text() == name)
     }
 
+    /// All groups in source order.
+    pub fn groups(&self) -> impl Iterator<Item = &GlobalDeclarationGroup> {
+        self.groups.iter()
+    }
+
     pub(super) fn groups_in_scope(
         &self,
         scope: &ScopePath,
@@ -50,6 +55,16 @@ pub struct GlobalDeclarationGroup {
 }
 
 impl GlobalDeclarationGroup {
+    /// Scope containing the declarations.
+    pub fn scope(&self) -> &ScopePath {
+        &self.scope
+    }
+
+    /// Declared name shared by the declarations.
+    pub fn name(&self) -> &Text {
+        &self.name
+    }
+
     /// Source-order declarations that contributed to this group.
     pub fn declarations(&self) -> &[DeclarationRecord] {
         &self.declarations

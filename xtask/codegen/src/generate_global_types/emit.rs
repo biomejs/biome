@@ -1,55 +1,15 @@
 use std::path::Path;
 
-use anyhow::{Result, bail};
+use biome_string_case::StrLikeExtension;
 
 use super::lower::{
-    LoweredClass, LoweredConstructor, LoweredDeclarations, LoweredFunction,
-    LoweredFunctionParameter, LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes,
-    LoweredInterface, LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
+    LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
+    LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
+    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
 const OUTPUT_RELATIVE_PATH: &str = "crates/biome_js_type_info/src/generated/global_types.rs";
-
-/// Generated globals in ascending `GlobalTypeId` index order.
-///
-/// The index is the row position in `PREDEFINED_ID_ROWS`. This keeps
-/// `MIGRATED_PREDEFINED_IDS` sorted for the runtime `binary_search`.
-const GLOBAL_ID_EMIT_ORDER: &[&str] = &[
-    "ARRAY_ID_GLOBAL_TYPE_ID",
-    "ARRAY_FILTER_ID_GLOBAL_TYPE_ID",
-    "ARRAY_FOREACH_ID_GLOBAL_TYPE_ID",
-    "ARRAY_MAP_ID_GLOBAL_TYPE_ID",
-    "PROMISE_ID_GLOBAL_TYPE_ID",
-    "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
-    "PROMISE_CATCH_ID_GLOBAL_TYPE_ID",
-    "PROMISE_FINALLY_ID_GLOBAL_TYPE_ID",
-    "PROMISE_THEN_ID_GLOBAL_TYPE_ID",
-    "PROMISE_ALL_ID_GLOBAL_TYPE_ID",
-    "PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID",
-    "PROMISE_ANY_ID_GLOBAL_TYPE_ID",
-    "PROMISE_RACE_ID_GLOBAL_TYPE_ID",
-    "PROMISE_REJECT_ID_GLOBAL_TYPE_ID",
-    "PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID",
-    "PROMISE_TRY_ID_GLOBAL_TYPE_ID",
-    "REGEXP_ID_GLOBAL_TYPE_ID",
-    "REGEXP_EXEC_ID_GLOBAL_TYPE_ID",
-    "SYMBOL_ID_GLOBAL_TYPE_ID",
-    "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID",
-    "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
-    "DISPOSABLE_ID_GLOBAL_TYPE_ID",
-    "DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID",
-    "ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID",
-    "ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID",
-    "DATE_ID_GLOBAL_TYPE_ID",
-    "MAP_ID_GLOBAL_TYPE_ID",
-    "SET_ID_GLOBAL_TYPE_ID",
-    "WEAK_MAP_ID_GLOBAL_TYPE_ID",
-    "ERROR_ID_GLOBAL_TYPE_ID",
-    "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
-    "ERROR_CALL_ID_GLOBAL_TYPE_ID",
-    "MATH_ID_GLOBAL_TYPE_ID",
-];
 
 /// Emits the global types module with LF-normalized output.
 pub(super) fn emit_global_types(
@@ -58,77 +18,110 @@ pub(super) fn emit_global_types(
     lowered: &LoweredGlobalTypes,
 ) -> anyhow::Result<crate::UpdateResult> {
     let path = workspace_root.join(OUTPUT_RELATIVE_PATH);
-    let formatted =
-        xtask_glue::reformat_with_command(generated_body(pin, lowered)?, "just gen-global-types")?;
+    let formatted = xtask_glue::reformat_with_command(
+        render_global_types(pin, lowered),
+        "just gen-global-types",
+    )?;
     crate::update(&path, &formatted, &xtask_glue::Mode::Overwrite)
 }
 
-/// Renders the unformatted Rust body for the generated module.
-fn generated_body(
+/// Renders the unformatted Rust source of the generated module.
+pub fn render_global_types(
     pin: &crate::generate_global_types::SourcePin,
     lowered: &LoweredGlobalTypes,
-) -> Result<String> {
-    let migrated_ids = render_migrated_ids(lowered)?;
-    let registrations = render_registrations(lowered)?;
-    let local_types = render_local_types(lowered.globals());
+) -> String {
+    let globals = lowered.globals();
+    let mut ids = String::new();
     let mut names = String::new();
-    let mut values = String::new();
-    let mut function_ids = String::new();
-    for (index, global) in lowered.functions().iter().enumerate() {
-        let name = global.name();
+    let mut registrations = String::new();
+    let mut builders = String::new();
+    let mut type_globals = Vec::new();
+    let mut value_globals = Vec::new();
+    for (index, global) in globals.iter().enumerate() {
         let id = global.id_constant();
-        values.push_str(&format!("({name:?}, crate::globals::{id}),\n"));
+        let reference = global.reference_constant();
         let offset = if index == 0 {
             String::new()
         } else {
             format!(" + {index}")
         };
-        function_ids.push_str(&format!(
-            "pub(crate) const {id}: crate::globals::GlobalTypeId = crate::globals::GlobalTypeId::new(crate::TypeId::new(crate::globals::PREDEFINED_ID_ROWS.len(){offset}));\n"
+        ids.push_str(&format!(
+            "pub(crate) const {id}: GlobalTypeId = GlobalTypeId::new(TypeId::new(FIRST_GENERATED_ID{offset}));\n\
+             pub(crate) const {reference}: RawTypeId = RawTypeId::Global({id});\n"
         ));
-    }
-    for (name, _, reference) in super::lower::declarations::PREDEFINED_DECLARATIONS {
-        if let Some(global) = lowered.global(name)
-            && matches!(
-                global.data(),
-                LoweredTypeData::Interface(_) | LoweredTypeData::InstanceOf { .. }
-            )
-        {
-            names.push_str(&format!(
-                "({:?}, crate::globals::{}),\n",
-                global.name(),
-                reference
-            ));
+        names.push_str(&format!("{:?},\n", global.name()));
+        let builder = builder_name(global);
+        registrations.push_str(&format!("builder.set_type_data(ids::{id}, {builder}());\n"));
+        builders.push_str(&format!(
+            "fn {builder}() -> crate::TypeData {{ {} }}\n",
+            render_type_data(global.data())
+        ));
+        let roles = global.roles();
+        if roles.type_name {
+            type_globals.push((global.name(), id));
+        }
+        if roles.value_name {
+            value_globals.push((global.name(), id));
         }
     }
+    let local_types = render_local_types(globals);
 
-    Ok(format!(
+    format!(
         r#"// Generated from microsoft/TypeScript {typescript_tag} (git commit {typescript_sha}).
 
-/// Function identities allocated after the fixed predefined manifest.
-pub(crate) mod function_ids {{
-{function_ids}
+/// Identities of generated globals, allocated after the hand-written manifest.
+#[expect(dead_code, reason = "Rust code only names the globals it inspects")]
+pub(crate) mod ids {{
+    use crate::globals::GlobalTypeId;
+    use crate::{{RawTypeId, TypeId}};
+
+    const FIRST_GENERATED_ID: usize = crate::globals_ids::PREDEFINED_ID_ROWS.len();
+
+    {ids}
 }}
 
-/// Predefined global IDs whose `TypeData` is supplied by this generated module.
-pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] = &[
-{migrated_ids}];
+/// Names of generated globals in ID order.
+pub(crate) const GENERATED_GLOBAL_NAMES: &[&str] = &[{names}];
 
-/// Type-only declaration names and their global identities.
-pub(crate) const DECLARATION_GLOBALS: &[(&str, crate::RawTypeId)] = &[{names}];
+/// Globals that type annotations can name, sorted by name.
+pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{type_globals}];
 
-/// Value declaration names and their global identities.
-pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{values}];
+/// Globals that expressions can name, sorted by name.
+pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{value_globals}];
 
 /// Registers all generated global type data into the resolver builder.
 pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
 {registrations}}}
 
+{builders}
+
 {local_types}
 "#,
         typescript_tag = pin.tag(),
         typescript_sha = pin.sha(),
-    ))
+        type_globals = render_name_index(type_globals),
+        value_globals = render_name_index(value_globals),
+    )
+}
+
+/// Renders a name index sorted for binary search.
+fn render_name_index(mut entries: Vec<(&str, &str)>) -> String {
+    entries.sort_unstable();
+    entries
+        .into_iter()
+        .map(|(name, id)| format!("({name:?}, ids::{id}),\n"))
+        .collect()
+}
+
+/// Name of the function that builds a global's type data.
+fn builder_name(global: &LoweredGlobal) -> String {
+    format!(
+        "global_{}",
+        global
+            .id_constant()
+            .trim_end_matches("_ID_GLOBAL_TYPE_ID")
+            .to_ascii_lowercase_cow()
+    )
 }
 
 pub(super) fn render_local_types(globals: &[LoweredGlobal]) -> String {
@@ -148,9 +141,9 @@ pub(super) fn render_local_types(globals: &[LoweredGlobal]) -> String {
             .collect::<Vec<_>>()
             .join(",\n");
         arrays.push_str(&format!(
-            "pub(crate) static {name}: std::sync::LazyLock<[crate::TypeData; {count}]> = std::sync::LazyLock::new(|| [{types}]);\n"
+            "static {name}: std::sync::LazyLock<[crate::TypeData; {count}]> = std::sync::LazyLock::new(|| [{types}]);\n"
         ));
-        arms.push_str(&format!("crate::globals::{id} => &*{name},\n"));
+        arms.push_str(&format!("ids::{id} => &*{name},\n"));
     }
     format!(
         "{arrays}
@@ -159,45 +152,6 @@ pub(super) fn render_local_types(globals: &[LoweredGlobal]) -> String {
             match owner {{ {arms} _ => &[] }}
         }}"
     )
-}
-
-/// Builds the migrated ID slice body.
-fn render_migrated_ids(lowered: &LoweredGlobalTypes) -> Result<String> {
-    let mut ids = String::new();
-    for_each_global_in_emit_order(lowered, |global| {
-        ids.push_str("    crate::globals::");
-        ids.push_str(global.id_constant());
-        ids.push_str(",\n");
-    })?;
-    Ok(ids)
-}
-
-/// Builds the resolver registration statements.
-fn render_registrations(lowered: &LoweredGlobalTypes) -> Result<String> {
-    let mut registrations = String::new();
-    for_each_global_in_emit_order(lowered, |global| {
-        registrations.push_str("    let data = ");
-        registrations.push_str(&render_type_data(global.data()));
-        registrations.push_str(";\n");
-        registrations.push_str("    builder.set_type_data(crate::globals::");
-        registrations.push_str(global.id_constant());
-        registrations.push_str(", data);\n");
-    })?;
-    Ok(registrations)
-}
-
-/// Renders a Rust expression containing the complete local type table.
-///
-/// The expression is intended for a module inside `biome_js_type_info`.
-/// Local references index this table starting at zero; consumers must preserve its order.
-pub fn render_declarations(lowered: &LoweredDeclarations) -> String {
-    let types = lowered
-        .types()
-        .iter()
-        .map(render_type_data)
-        .collect::<Vec<_>>()
-        .join(",\n");
-    format!("Box::new([{types}])")
 }
 
 /// Dispatches lowered data to its Rust expression renderer.
@@ -238,7 +192,31 @@ fn render_type_data(data: &LoweredTypeData) -> String {
         ),
         LoweredTypeData::Tuple(elements) => format!(
             "crate::TypeData::from(crate::Tuple {{ elements: Box::new([{}]), is_inferred_array: false }})",
-            elements.iter().map(|ty| format!("crate::TupleElementType {{ ty: {}, name: None, is_optional: false, is_rest: false }}", render_type_reference(ty))).collect::<Vec<_>>().join(","),
+            elements
+                .iter()
+                .map(|element| format!(
+                    "crate::TupleElementType {{ ty: {}, name: {}, is_optional: {}, is_rest: {} }}",
+                    render_type_reference(element.ty()),
+                    element.name().map_or_else(
+                        || "None".to_string(),
+                        |name| format!(
+                            "Some(biome_rowan::Text::new_static({}))",
+                            rust_string_literal(name)
+                        )
+                    ),
+                    element.is_optional(),
+                    element.is_rest(),
+                ))
+                .collect::<Vec<_>>()
+                .join(","),
+        ),
+        LoweredTypeData::Intersection(types) => format!(
+            "crate::TypeData::Intersection(Box::new(crate::Intersection({})))",
+            render_type_references(types),
+        ),
+        LoweredTypeData::Reference(reference) => format!(
+            "crate::TypeData::Reference({})",
+            render_type_reference(reference),
         ),
         LoweredTypeData::Symbol => "crate::TypeData::Symbol".to_string(),
         LoweredTypeData::Readonly(ty) => format!(
@@ -263,11 +241,22 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(ty),
             render_type_references(type_parameters),
         ),
-        LoweredTypeData::GenericParameter { is_const, name, constraint, default } => format!(
+        LoweredTypeData::GenericParameter {
+            is_const,
+            name,
+            constraint,
+            default,
+        } => format!(
             "crate::TypeData::from(crate::GenericTypeParameter {{ is_const: {is_const}, name: biome_rowan::Text::new_static({}), constraint: {}, default: {} }})",
             rust_string_literal(name.text()),
-            constraint.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
-            default.as_ref().map_or_else(|| "crate::TypeReference::unknown()".to_string(), render_type_reference),
+            constraint.as_ref().map_or_else(
+                || "crate::TypeReference::unknown()".to_string(),
+                render_type_reference
+            ),
+            default.as_ref().map_or_else(
+                || "crate::TypeReference::unknown()".to_string(),
+                render_type_reference
+            ),
         ),
         LoweredTypeData::ThisKeyword => "crate::TypeData::ThisKeyword".to_string(),
         LoweredTypeData::UnknownKeyword => "crate::TypeData::UnknownKeyword".to_string(),
@@ -280,12 +269,17 @@ fn render_class(class: &LoweredClass) -> String {
         "crate::TypeData::Class(Box::new(crate::Class {{
             name: Some(biome_rowan::Text::new_static({name})),
             type_parameters: {type_parameters},
-            extends: None,
-            implements: Box::default(),
+            extends: {extends},
+            implements: {implements},
             members: Box::new([{members}]),
         }}))",
         name = rust_string_literal(class.name()),
         type_parameters = render_type_references(class.type_parameters()),
+        extends = class.extends().map_or_else(
+            || "None".to_string(),
+            |extends| format!("Some({})", render_type_reference(extends))
+        ),
+        implements = render_type_references(class.implements()),
         members = render_members(class.members()),
     )
 }
@@ -493,71 +487,13 @@ fn render_type_reference(reference: &LoweredTypeReference) -> String {
         LoweredTypeReference::Predefined(id) => {
             format!("crate::globals::{id}.into()")
         }
+        LoweredTypeReference::Global(id) => {
+            format!("crate::globals::{id}.into()")
+        }
     }
 }
 
 /// Quotes a string for generated Rust source.
 fn rust_string_literal(value: &str) -> String {
     format!("{value:?}")
-}
-
-fn global_with_id_constant<'a>(
-    lowered: &'a LoweredGlobalTypes,
-    id_constant: &str,
-) -> Result<&'a LoweredGlobal> {
-    for global in lowered.globals() {
-        if global.id_constant() == id_constant {
-            return Ok(global);
-        }
-    }
-
-    bail!("generated global output is missing {id_constant}");
-}
-
-fn for_each_global_in_emit_order(
-    lowered: &LoweredGlobalTypes,
-    mut visit: impl FnMut(&LoweredGlobal),
-) -> Result<()> {
-    for global in lowered.predefined_globals() {
-        if !GLOBAL_ID_EMIT_ORDER.contains(&global.id_constant())
-            && !super::lower::declarations::PREDEFINED_DECLARATIONS
-                .iter()
-                .any(|(_, id, _)| *id == global.id_constant())
-            && !super::lower::NAMESPACE_GLOBALS
-                .iter()
-                .any(|(_, id)| *id == global.id_constant())
-        {
-            bail!(
-                "generated global {} targets {}, but the ID is missing from GLOBAL_ID_EMIT_ORDER",
-                global.name(),
-                global.id_constant()
-            );
-        }
-    }
-
-    for id_constant in GLOBAL_ID_EMIT_ORDER {
-        visit(global_with_id_constant(lowered, id_constant)?);
-    }
-    for id in super::lower::declarations::PREDEFINED_DECLARATIONS
-        .iter()
-        .map(|(_, id, _)| id)
-        .chain(super::lower::NAMESPACE_GLOBALS.iter().map(|(_, id)| id))
-    {
-        if GLOBAL_ID_EMIT_ORDER.contains(id) {
-            continue;
-        }
-        if let Some(global) = lowered
-            .globals()
-            .iter()
-            .find(|global| global.id_constant() == *id)
-        {
-            visit(global);
-        }
-    }
-
-    for global in lowered.functions() {
-        visit(global);
-    }
-
-    Ok(())
 }

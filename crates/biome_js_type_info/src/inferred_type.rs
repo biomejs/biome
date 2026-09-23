@@ -1297,6 +1297,12 @@ impl<'db> InferredType<'db> {
                     TypeData::Intersection(intersection) => {
                         pending.extend(intersection.types(self.db).iter().copied());
                     }
+                    TypeData::IndexedAccess(access) => {
+                        let Some(types) = access.keyof_property_types(self.db) else {
+                            return ConditionalType::Unknown;
+                        };
+                        pending.extend(types);
+                    }
                     TypeData::MergedReference(reference) => pending.extend(
                         [
                             reference.ty(self.db),

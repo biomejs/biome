@@ -17,12 +17,13 @@ use std::iter::FusedIterator;
 use crate::{
     ScopeId,
     builders::{IntersectionBuilder, UnionBuilder},
-    globals_ids::{
+    generated::global_types::ids::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
-        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID,
-        PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
+        DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, MAP_ID_GLOBAL_TYPE_ID,
+        PROMISE_ID_GLOBAL_TYPE_ID, REG_EXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
         SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
+    globals_ids::GlobalTypeId,
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
     type_data as raw,
 };
@@ -44,11 +45,7 @@ pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
 }
 
 pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
-    crate::globals_ids::PREDEFINED_ID_ROWS
-        .iter()
-        .position(|name| name.strip_prefix("Symbol.") == Some(member_name))
-        .and_then(|index| GlobalTypeId::try_from_type_id(raw::TypeId::new(index)))
-        .map(TypeData::GlobalType)
+    crate::global_type_id_for_value(&format!("Symbol.{member_name}")).map(TypeData::GlobalType)
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
@@ -933,7 +930,7 @@ impl<'db> TypeData<'db> {
     }
 
     pub const fn regexp_class() -> Self {
-        Self::GlobalType(REGEXP_ID_GLOBAL_TYPE_ID)
+        Self::GlobalType(REG_EXP_ID_GLOBAL_TYPE_ID)
     }
 
     pub const fn set_class() -> Self {
@@ -2522,6 +2519,45 @@ pub struct InternedTypeOperatorType<'db> {
 pub struct InternedIndexedAccessType<'db> {
     pub object: TypeData<'db>,
     pub index: TypeData<'db>,
+}
+
+impl<'db> InternedIndexedAccessType<'db> {
+    /// Evaluates `T[keyof T]` to the types of `T`'s properties.
+    ///
+    /// Returns `None` for other indexed accesses, and when `T` has members other
+    /// than required properties, because those would contribute types that this
+    /// evaluation does not model.
+    ///
+    /// ```ts
+    /// interface WeakKeyTypes { object: object; symbol: symbol }
+    /// type WeakKey = WeakKeyTypes[keyof WeakKeyTypes]; // object | symbol
+    /// ```
+    pub fn keyof_property_types(self, db: &'db dyn TypeDb) -> Option<Box<[TypeData<'db>]>> {
+        let object = self.object(db);
+        let TypeData::TypeOperator(operator) = self.index(db) else {
+            return None;
+        };
+        if operator.operator(db) != raw::TypeOperator::Keyof || operator.ty(db) != object {
+            return None;
+        }
+        let target = match object {
+            TypeData::InstanceOf(instance) if instance.type_parameters(db).is_empty() => {
+                instance.ty(db)
+            }
+            object => object,
+        };
+        let members = match target.expand_canonical_global(db) {
+            TypeData::Interface(interface) if interface.extends(db).is_empty() => {
+                interface.members(db).as_ref()
+            }
+            TypeData::Object(object) => object.members(db).as_ref(),
+            _ => return None,
+        };
+        members
+            .iter()
+            .map(|member| matches!(member.kind, TypeMemberKind::Named(_)).then_some(member.ty))
+            .collect()
+    }
 }
 
 #[salsa::interned]

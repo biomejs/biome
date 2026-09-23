@@ -1,4 +1,3 @@
-use crate::generated::global_types::MIGRATED_PREDEFINED_IDS;
 use crate::{TypeData, TypeStore, globals_ids::NUM_PREDEFINED_TYPES};
 
 use super::{globals::RawGlobalTypes, globals_ids::GlobalTypeId};
@@ -32,18 +31,6 @@ impl GlobalsResolverBuilder {
             "GlobalsResolverBuilder::set_type_data: double-write at index {index}"
         );
         *slot = Some(data);
-    }
-
-    /// Skips manual data for IDs owned by the generated module, so codegen remains
-    /// the source of truth. `MIGRATED_PREDEFINED_IDS` must stay sorted and unique
-    /// because this lookup uses `binary_search`.
-    pub(crate) fn set_manual_type_data<F>(&mut self, id: GlobalTypeId, build: F)
-    where
-        F: FnOnce() -> TypeData,
-    {
-        if MIGRATED_PREDEFINED_IDS.binary_search(&id).is_err() {
-            self.set_type_data(id, build());
-        }
     }
 
     /// Consumes the builder and produces the immutable raw global table.
