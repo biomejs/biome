@@ -1682,7 +1682,13 @@ impl WorkspaceServerWithDb<'_> {
                 EditorFeatures::default(),
                 query_context,
             );
-            let results = lint(LintParams {
+            let LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
+                warnings,
+                infos,
+            } = lint(LintParams {
                 parsed_source: state.parsed.clone(),
                 settings: &settings,
                 path: &path,
@@ -1692,69 +1698,19 @@ impl WorkspaceServerWithDb<'_> {
                 categories,
                 workspace_db: state.db.clone(),
                 #[cfg(feature = "html_embeds")]
-                embedded_data: embedded_data.clone(),
+                embedded_data,
                 #[cfg(feature = "module_graph")]
-                module_db: module_db.clone(),
+                module_db,
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
                 pull_code_actions,
-                plugins: plugins.clone(),
+                plugins,
                 working_directory: Some(working_directory.as_path()),
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
             });
-            let LintResults {
-                mut diagnostics,
-                mut errors,
-                mut skipped_diagnostics,
-                mut warnings,
-                mut infos,
-            } = results;
-
-            for embedded_node in
-                state
-                    .iter_snippets()
-                    .for_analysis(&state.parsed, state.file_source, &state.db)
-            {
-                let Some(file_source) = embedded_node.file_source(&state.db) else {
-                    continue;
-                };
-                let capabilities = self.features.get_deprecated_capabilities(file_source);
-                let Some(lint) = capabilities.analyzer.lint else {
-                    continue;
-                };
-                let results = lint(LintParams {
-                    parsed_source: embedded_node.parsed_origin(),
-                    settings: &settings,
-                    path: &path,
-                    only: &only,
-                    skip: &skip,
-                    language: file_source,
-                    categories,
-                    workspace_db: state.db.clone(),
-                    #[cfg(feature = "html_embeds")]
-                    embedded_data: embedded_data.clone(),
-                    #[cfg(feature = "module_graph")]
-                    module_db: module_db.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_selectors: &enabled_rules,
-                    pull_code_actions,
-                    plugins: plugins.clone(),
-                    working_directory: Some(working_directory.as_path()),
-                    max_diagnostics,
-                    diagnostic_level,
-                    enforce_assist,
-                });
-                diagnostics.extend(results.diagnostics);
-                skipped_diagnostics += results.skipped_diagnostics;
-                errors += results.errors;
-                warnings += results.warnings;
-                infos += results.infos;
-            }
-
             (diagnostics, errors, warnings, infos, skipped_diagnostics)
         } else {
             let mut diagnostics: Vec<_> = state
