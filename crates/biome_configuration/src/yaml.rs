@@ -21,10 +21,7 @@ pub struct YamlConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<YamlFormatterConfiguration>,
 
-    #[cfg_attr(
-        feature = "cli",
-        bpaf(external(yaml_linter_configuration), optional, hide)
-    )]
+    #[cfg_attr(feature = "cli", bpaf(external(yaml_linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<YamlLinterConfiguration>,
 }
@@ -115,7 +112,10 @@ pub struct YamlFormatterConfiguration {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct YamlLinterConfiguration {
     /// Control the linter for Yaml files.
-    #[cfg_attr(all(feature = "cli", feature = "lang_yaml"), bpaf(hide))]
+    #[cfg_attr(
+        all(feature = "cli", feature = "lang_yaml"),
+        bpaf(long("yaml-linter-enabled"), argument("true|false"))
+    )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<YamlLinterEnabled>,
 }
