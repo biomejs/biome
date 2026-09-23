@@ -92,3 +92,10 @@ function k() {
 function l() {
     if (foo) { return; }
 }
+
+// leading comment must be preserved when the return is removed
+function m() {
+    doSomething();
+    // best effort: nothing else to do
+    return;
+}

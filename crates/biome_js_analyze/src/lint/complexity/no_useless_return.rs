@@ -68,6 +68,14 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```js
+    /// function foo() {
+    ///     // Removing this return would leave `if (condition)` without its
+    ///     // required body, so the unbraced form is left untouched.
+    ///     if (condition) return;
+    /// }
+    /// ```
+    ///
     pub NoUselessReturn {
         version: "2.3.15",
         name: "noUselessReturn",
@@ -134,7 +142,10 @@ impl Rule for NoUselessReturn {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(ctx.query().clone());
+        // Keep the removed statement's leading/trailing trivia (including any
+        // comments) by moving it onto the following token, instead of
+        // discarding it along with the node.
+        mutation.remove_node_keep_trivia(ctx.query().clone());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -173,9 +184,14 @@ fn is_inside_loop_or_switch(
 /// A return is in tail position if, walking from the return up to the function body,
 /// every intermediate node allows the return to be the "last thing that happens":
 /// - In a `JsStatementList`, the node must be the last element.
-/// - Block statements, if/else, try/catch, and labeled statements are transparent.
+/// - Block statements, try/catch, and labeled/if/else statements whose body is
+///   that block are transparent.
 /// - The function body itself confirms tail position.
 /// - A `finally` clause conservatively bails out (return in finally has override semantics).
+/// - An `if`/`else`/labeled statement whose body is the return itself, with no
+///   enclosing block (e.g. `if (condition) return;`), bails out: the return is
+///   the construct's only mandatory child, so removing it would leave invalid
+///   syntax (`if (condition)` with no consequent) rather than a no-op.
 fn is_tail_position(
     ret: &JsReturnStatement,
     function_root: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
@@ -213,14 +229,29 @@ fn is_tail_position(
             // Return in finally has override semantics, conservatively bail
             return false;
         } else if biome_js_syntax::JsBlockStatement::can_cast(parent.kind())
-            || biome_js_syntax::JsIfStatement::can_cast(parent.kind())
-            || biome_js_syntax::JsElseClause::can_cast(parent.kind())
             || biome_js_syntax::JsCatchClause::can_cast(parent.kind())
             || biome_js_syntax::JsTryStatement::can_cast(parent.kind())
             || biome_js_syntax::JsTryFinallyStatement::can_cast(parent.kind())
+        {
+            // These always wrap their body in a mandatory block (or, for
+            // JsStatementList's own parent, are handled above), so removing
+            // a tail return underneath them can never leave a required child
+            // slot empty.
+        } else if biome_js_syntax::JsIfStatement::can_cast(parent.kind())
+            || biome_js_syntax::JsElseClause::can_cast(parent.kind())
             || biome_js_syntax::JsLabeledStatement::can_cast(parent.kind())
         {
-            // These are "transparent" — pass through
+            // The consequent/alternate/body of `if`/`else`/a label is allowed
+            // to be a single unbraced statement. If `current` reached here
+            // without passing through a `JsBlockStatement`, it *is* that bare
+            // statement, i.e. the construct's only child: `if (x) return;`,
+            // `else return;`, `label: return;`. Removing the return in that
+            // position would leave the construct without its mandatory body
+            // (invalid syntax), so bail instead of reporting it as tail
+            // position.
+            if !biome_js_syntax::JsBlockStatement::can_cast(current.kind()) {
+                return false;
+            }
         } else {
             // Unknown/unsupported node kind — bail
             return false;

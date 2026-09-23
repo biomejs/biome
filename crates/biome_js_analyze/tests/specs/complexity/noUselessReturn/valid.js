@@ -102,3 +102,20 @@ function n() {
         doSomething();
     }
 }
+
+// unbraced if body: removing the return would leave `if (aborted)` with no
+// consequent, so it must not be reported
+function o() {
+    if (aborted) return;
+}
+
+// unbraced if/else, both branches
+function p() {
+    if (a) return;
+    else return;
+}
+
+// unbraced label body: removing the return would leave `foo:` with no body
+function q() {
+    foo: return;
+}
