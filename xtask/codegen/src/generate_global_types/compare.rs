@@ -329,7 +329,12 @@ fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let instance_member_count = class
         .members()
         .iter()
-        .filter(|member| member.kind() != &LoweredMemberKind::NamedStatic)
+        .filter(|member| {
+            !matches!(
+                member.kind(),
+                LoweredMemberKind::NamedStatic | LoweredMemberKind::ComputedStatic { .. }
+            )
+        })
         .count();
     if instance_member_count != ARRAY_MEMBER_COUNT {
         bail!(

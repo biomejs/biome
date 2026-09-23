@@ -21,7 +21,6 @@ use crate::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
         DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID,
         PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
         SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
@@ -37,24 +36,19 @@ const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
 pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
-    match ty {
-        TypeData::GlobalType(id) if id == SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID => {
-            Some(Text::new_static("Symbol.dispose"))
-        }
-        TypeData::GlobalType(id) if id == SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID => {
-            Some(Text::new_static("Symbol.asyncDispose"))
-        }
-        _ => None,
-    }
+    let TypeData::GlobalType(id) = ty else {
+        return None;
+    };
+    let name = crate::globals_ids::global_type_name(id.as_type_id())?;
+    name.starts_with("Symbol.").then(|| Text::new_static(name))
 }
 
 pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
-    let id = match member_name {
-        "dispose" => SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
-        "asyncDispose" => SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
-        _ => return None,
-    };
-    Some(TypeData::GlobalType(id))
+    crate::globals_ids::PREDEFINED_ID_ROWS
+        .iter()
+        .position(|name| name.strip_prefix("Symbol.") == Some(member_name))
+        .and_then(|index| GlobalTypeId::try_from_type_id(raw::TypeId::new(index)))
+        .map(TypeData::GlobalType)
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
@@ -1305,9 +1299,13 @@ impl<'db> TypeDataSlots<'db> {
     fn push_type_member_slots(&mut self, member: &TypeMember<'db>) {
         match &member.kind {
             TypeMemberKind::ComputedValue(ty)
+            | TypeMemberKind::ComputedStatic(ty)
             | TypeMemberKind::ComputedValueNamed(_, ty)
+            | TypeMemberKind::ComputedStaticNamed(_, ty)
             | TypeMemberKind::ConstAssertedComputedValue(ty)
+            | TypeMemberKind::ConstAssertedComputedStatic(ty)
             | TypeMemberKind::ConstAssertedComputedValueNamed(_, ty)
+            | TypeMemberKind::ConstAssertedComputedStaticNamed(_, ty)
             | TypeMemberKind::ConstAssertedIndexSignature(ty)
             | TypeMemberKind::IndexSignature(ty) => self.slots.push(*ty),
             TypeMemberKind::CallSignature
@@ -1343,6 +1341,9 @@ impl<'db> TypeDataSlots<'db> {
                 self.push_call_argument_slots(&expression.arguments);
             }
             TypeofExpression::Parameter(expression) => self.slots.push(expression.function),
+            TypeofExpression::ComputedMember(expression) => {
+                self.slots.extend([expression.object, expression.member]);
+            }
             TypeofExpression::Conditional(expression) => {
                 self.slots
                     .extend([expression.test, expression.consequent, expression.alternate]);
@@ -1670,12 +1671,22 @@ impl<'db> TypeDataSlotReplacements<'db> {
     ) -> Option<TypeMemberKind<'db>> {
         Some(match kind {
             TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
+            TypeMemberKind::ComputedStatic(_) => TypeMemberKind::ComputedStatic(self.take_type()?),
+            TypeMemberKind::ComputedStaticNamed(name, _) => {
+                TypeMemberKind::ComputedStaticNamed(name.clone(), self.take_type()?)
+            }
             TypeMemberKind::ComputedValue(_) => TypeMemberKind::ComputedValue(self.take_type()?),
             TypeMemberKind::ComputedValueNamed(name, _) => {
                 TypeMemberKind::ComputedValueNamed(name.clone(), self.take_type()?)
             }
             TypeMemberKind::ConstAssertedCallSignature => {
                 TypeMemberKind::ConstAssertedCallSignature
+            }
+            TypeMemberKind::ConstAssertedComputedStatic(_) => {
+                TypeMemberKind::ConstAssertedComputedStatic(self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedComputedStaticNamed(name, _) => {
+                TypeMemberKind::ConstAssertedComputedStaticNamed(name.clone(), self.take_type()?)
             }
             TypeMemberKind::ConstAssertedComputedValue(_) => {
                 TypeMemberKind::ConstAssertedComputedValue(self.take_type()?)
@@ -1742,6 +1753,13 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     function: self.take_type()?,
                     index: expression.index,
                     has_initializer: expression.has_initializer,
+                })
+            }
+            TypeofExpression::ComputedMember(expression) => {
+                TypeofExpression::ComputedMember(TypeofComputedMemberExpression {
+                    object: self.take_type()?,
+                    member: self.take_type()?,
+                    is_optional_chain: expression.is_optional_chain,
                 })
             }
             TypeofExpression::Conditional(_) => {
@@ -1977,10 +1995,14 @@ impl TypeMember<'_> {
 pub enum TypeMemberKind<'db> {
     CallSignature,
     ComputedValue(TypeData<'db>),
+    ComputedStatic(TypeData<'db>),
     ComputedValueNamed(Text, TypeData<'db>),
+    ComputedStaticNamed(Text, TypeData<'db>),
     ConstAssertedCallSignature,
     ConstAssertedComputedValue(TypeData<'db>),
+    ConstAssertedComputedStatic(TypeData<'db>),
     ConstAssertedComputedValueNamed(Text, TypeData<'db>),
+    ConstAssertedComputedStaticNamed(Text, TypeData<'db>),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeData<'db>),
@@ -2002,7 +2024,9 @@ impl<'db> TypeMemberKind<'db> {
             Self::Getter(own_name)
             | Self::ConstAssertedGetter(own_name)
             | Self::ComputedValueNamed(own_name, _)
+            | Self::ComputedStaticNamed(own_name, _)
             | Self::ConstAssertedComputedValueNamed(own_name, _)
+            | Self::ConstAssertedComputedStaticNamed(own_name, _)
             | Self::Named(own_name)
             | Self::ConstAssertedNamed(own_name)
             | Self::NamedOptional(own_name)
@@ -2011,8 +2035,10 @@ impl<'db> TypeMemberKind<'db> {
             | Self::ConstAssertedNamedStatic(own_name) => own_name.text() == name,
             Self::CallSignature
             | Self::ComputedValue(_)
+            | Self::ComputedStatic(_)
             | Self::ConstAssertedCallSignature
             | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ConstAssertedIndexSignature(_)
             | Self::IndexSignature(_) => false,
         }
@@ -2030,6 +2056,10 @@ impl<'db> TypeMemberKind<'db> {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedStatic(_)
+                | Self::ComputedStaticNamed(_, _)
+                | Self::ConstAssertedComputedStatic(_)
+                | Self::ConstAssertedComputedStaticNamed(_, _)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
@@ -2051,7 +2081,9 @@ impl<'db> TypeMemberKind<'db> {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::ConstAssertedComputedValueNamed(_, _)
+                | Self::ConstAssertedComputedStaticNamed(_, _)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -2085,8 +2117,10 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::CallSignature
             | Self::ComputedValue(_)
+            | Self::ComputedStatic(_)
             | Self::ConstAssertedCallSignature
             | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ConstAssertedIndexSignature(_)
             | Self::IndexSignature(_) => None,
             Self::ConstAssertedConstructor | Self::Constructor => {
@@ -2094,11 +2128,13 @@ impl<'db> TypeMemberKind<'db> {
             }
             Self::ConstAssertedGetter(name)
             | Self::ConstAssertedComputedValueNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _)
             | Self::ConstAssertedNamed(name)
             | Self::ConstAssertedNamedOptional(name)
             | Self::ConstAssertedNamedStatic(name)
             | Self::Getter(name)
             | Self::ComputedValueNamed(name, _)
+            | Self::ComputedStaticNamed(name, _)
             | Self::Named(name)
             | Self::NamedOptional(name)
             | Self::NamedStatic(name) => Some(name.clone()),
@@ -2107,9 +2143,10 @@ impl<'db> TypeMemberKind<'db> {
 
     pub fn computed_name(&self) -> Option<&str> {
         match self {
-            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
-                Some(name.text())
-            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _)
+            | Self::ComputedValueNamed(name, _)
+            | Self::ConstAssertedComputedValueNamed(name, _) => Some(name.text()),
             _ => None,
         }
     }
@@ -2117,8 +2154,12 @@ impl<'db> TypeMemberKind<'db> {
     pub fn computed_value_type(&self) -> Option<TypeData<'db>> {
         match self {
             Self::ComputedValue(ty)
+            | Self::ComputedStatic(ty)
             | Self::ComputedValueNamed(_, ty)
+            | Self::ComputedStaticNamed(_, ty)
             | Self::ConstAssertedComputedValue(ty)
+            | Self::ConstAssertedComputedStatic(ty)
+            | Self::ConstAssertedComputedStaticNamed(_, ty)
             | Self::ConstAssertedComputedValueNamed(_, ty) => Some(*ty),
             _ => None,
         }
@@ -2132,6 +2173,7 @@ pub enum TypeofExpression<'db> {
     BitwiseNot(TypeofBitwiseNotExpression<'db>),
     Call(TypeofCallExpression<'db>),
     CallArgument(TypeofCallArgumentExpression<'db>),
+    ComputedMember(TypeofComputedMemberExpression<'db>),
     Conditional(TypeofConditionalExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
@@ -2227,6 +2269,13 @@ pub struct TypeofNewExpression<'db> {
 pub enum CallArgumentType<'db> {
     Argument(TypeData<'db>),
     Spread(TypeData<'db>),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofComputedMemberExpression<'db> {
+    pub object: TypeData<'db>,
+    pub member: TypeData<'db>,
+    pub is_optional_chain: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2528,6 +2577,13 @@ fn convert_type_member_kind<'db>(
     let _ = db;
     match kind {
         raw::TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
+        raw::TypeMemberKind::ComputedStatic(ty) => {
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(resolved)
+                .map_or(TypeMemberKind::ComputedStatic(resolved), |name| {
+                    TypeMemberKind::ComputedStaticNamed(name, resolved)
+                })
+        }
         raw::TypeMemberKind::ComputedValue(ty) => {
             let resolved = resolve_reference(ty);
             well_known_symbol_name(resolved)
@@ -2537,6 +2593,13 @@ fn convert_type_member_kind<'db>(
         }
         raw::TypeMemberKind::ConstAssertedCallSignature => {
             TypeMemberKind::ConstAssertedCallSignature
+        }
+        raw::TypeMemberKind::ConstAssertedComputedStatic(ty) => {
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(resolved).map_or(
+                TypeMemberKind::ConstAssertedComputedStatic(resolved),
+                |name| TypeMemberKind::ConstAssertedComputedStaticNamed(name, resolved),
+            )
         }
         raw::TypeMemberKind::ConstAssertedComputedValue(ty) => {
             let resolved = resolve_reference(ty);
@@ -2707,6 +2770,13 @@ fn convert_typeof_expression<'db>(
                 function: resolve_reference(&expression.function),
                 index: expression.index,
                 has_initializer: expression.has_initializer,
+            })
+        }
+        raw::TypeofExpression::ComputedMember(expression) => {
+            TypeofExpression::ComputedMember(TypeofComputedMemberExpression {
+                object: resolve_reference(&expression.object),
+                member: resolve_reference(&expression.member),
+                is_optional_chain: expression.is_optional_chain,
             })
         }
         raw::TypeofExpression::Conditional(expression) => {

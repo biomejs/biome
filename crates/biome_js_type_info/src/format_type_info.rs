@@ -356,6 +356,18 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 write!(formatter, [token("["), index_signature_type, token("]")])
             }
+            Self::ComputedStatic(key_type) | Self::ConstAssertedComputedStatic(key_type) => {
+                write!(
+                    formatter,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 write!(
                     formatter,
@@ -511,6 +523,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => {
                 write!(
                     f,

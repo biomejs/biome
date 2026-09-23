@@ -392,6 +392,12 @@ fn render_member_kind(member: &LoweredTypeMember) -> String {
         ),
         LoweredMemberKind::Constructor => "crate::TypeMemberKind::Constructor".to_string(),
         LoweredMemberKind::CallSignature => "crate::TypeMemberKind::CallSignature".to_string(),
+        LoweredMemberKind::ComputedStatic { key_reference } => {
+            format!(
+                "crate::TypeMemberKind::ComputedStatic({})",
+                render_type_reference(key_reference)
+            )
+        }
         LoweredMemberKind::ComputedValue { key_reference } => {
             format!(
                 "crate::TypeMemberKind::ComputedValue({})",

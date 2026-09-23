@@ -412,8 +412,24 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
                 write!(f, [token("["), ty, token("]")])
             }
+            Self::ComputedStatic(ty) | Self::ConstAssertedComputedStatic(ty) => {
+                write!(
+                    f,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        ty,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]"), None)])
             }
             Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
                 write!(f, [text(&std::format!("computed [{name}]"), None)])
@@ -822,6 +838,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     ]]
                 ),
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => write!(
                 f,
                 [&format_args![

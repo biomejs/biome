@@ -722,6 +722,7 @@ fn classify_expression(
                         | TypeofExpression::CallArgument(_)
                         | TypeofExpression::Parameter(_)
                         | TypeofExpression::Conditional(_)
+                        | TypeofExpression::ComputedMember(_)
                         | TypeofExpression::Destructure(_)
                         | TypeofExpression::Index(_)
                         | TypeofExpression::OptionalChainIndex(_)

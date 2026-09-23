@@ -1103,6 +1103,8 @@ impl TypeMember {
         match &self.kind {
             TypeMemberKind::IndexSignature(key_type)
             | TypeMemberKind::ConstAssertedIndexSignature(key_type)
+            | TypeMemberKind::ComputedStatic(key_type)
+            | TypeMemberKind::ConstAssertedComputedStatic(key_type)
             | TypeMemberKind::ComputedValue(key_type)
             | TypeMemberKind::ConstAssertedComputedValue(key_type) => predicate(key_type),
             _ => false,
@@ -1134,9 +1136,11 @@ pub enum TypeMemberKind {
     /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
     /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
     ComputedValue(TypeReference),
+    ComputedStatic(TypeReference),
     ConstAssertedCallSignature,
     /// A [`Self::ComputedValue`] carried through an `as const` assertion.
     ConstAssertedComputedValue(TypeReference),
+    ConstAssertedComputedStatic(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeReference),
@@ -1156,6 +1160,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1202,6 +1208,8 @@ impl TypeMemberKind {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedStatic(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
@@ -1213,6 +1221,7 @@ impl TypeMemberKind {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -1227,6 +1236,9 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => {
                 Self::ConstAssertedCallSignature
+            }
+            Self::ComputedStatic(key_type) | Self::ConstAssertedComputedStatic(key_type) => {
+                Self::ConstAssertedComputedStatic(key_type)
             }
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 Self::ConstAssertedComputedValue(key_type)
@@ -1251,6 +1263,7 @@ impl TypeMemberKind {
     pub fn without_const_asserted(&self) -> Self {
         match self {
             Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedComputedStatic(key_type) => Self::ComputedStatic(key_type.clone()),
             Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
@@ -1286,6 +1299,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1339,6 +1354,7 @@ pub enum TypeofExpression {
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     CallArgument(TypeofCallArgumentExpression),
+    ComputedMember(TypeofComputedMemberExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1457,6 +1473,13 @@ pub struct TypeofNewExpression {
 pub enum CallArgumentType {
     Argument(TypeReference),
     Spread(TypeReference),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofComputedMemberExpression {
+    pub object: TypeReference,
+    pub member: TypeReference,
+    pub is_optional_chain: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

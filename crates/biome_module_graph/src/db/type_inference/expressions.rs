@@ -1,8 +1,9 @@
 use super::{
     collected_type_result,
     lookup::{
-        MemberLookupMode, MemberLookupResolver, apply_substitutions,
-        find_member_type_with_resolver, substitutions_for_instance,
+        MemberLookupKey, MemberLookupMode, MemberLookupResolver, apply_substitutions,
+        find_member_key_type_with_resolver, find_member_type_with_resolver,
+        substitutions_for_instance,
     },
     normalize_structural_type,
     resolver::ResolutionCtx,
@@ -41,6 +42,7 @@ const MAX_REST_MEMBER_STEPS: usize = 1024;
 const MAX_AWAIT_EXPRESSION_STEPS: usize = 1024;
 const MAX_CALL_CALLEE_STEPS: usize = 64;
 const MAX_ELEMENT_INDEX_STEPS: usize = 1024;
+const MAX_PROPERTY_KEY_STEPS: usize = 64;
 
 /// `Promise.prototype` methods that receive synthesized signatures during
 /// member lookup, parsed from the member name.
@@ -81,6 +83,9 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
         substitutions: &[biome_js_type_info::interned_types::TypeSubstitution<'db>],
         crossed_instance: bool,
     ) -> InferredTypeData<'db> {
+        if biome_js_type_info::interned_types::well_known_symbol_name(ty).is_some() {
+            return self.member_type(ty, is_optional);
+        }
         let ty = if crossed_instance {
             self.resolve_member_references(ty)
         } else {
@@ -141,6 +146,18 @@ impl<'db> ResolutionCtx<'db, '_> {
             RawTypeofExpression::Parameter(expression) => {
                 let function = self.resolve(&expression.function);
                 self.resolve_parameter(function, expression.index, expression.has_initializer)
+            }
+            RawTypeofExpression::ComputedMember(expression) => {
+                let object = self.resolve_static_member_object(&expression.object);
+                let member = self.resolve(&expression.member);
+                self.resolve_computed_member_expression(object, member)
+                    .map(|result| {
+                        if expression.is_optional_chain {
+                            self.optional_chain_result(object, result)
+                        } else {
+                            result
+                        }
+                    })
             }
             RawTypeofExpression::Conditional(expression) => {
                 let test = self.resolve(&expression.test);
@@ -276,6 +293,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                 expression.index,
                 expression.has_initializer,
             ),
+            InferredTypeofExpression::ComputedMember(expression) => self
+                .resolve_computed_member_expression(expression.object, expression.member)
+                .map(|result| {
+                    if expression.is_optional_chain {
+                        self.optional_chain_result(expression.object, result)
+                    } else {
+                        result
+                    }
+                }),
             InferredTypeofExpression::Conditional(expression) => self
                 .resolve_conditional_expression(
                     expression.test,
@@ -1474,6 +1500,64 @@ impl<'db> ResolutionCtx<'db, '_> {
             | InferredTypeData::UnknownKeyword
             | InferredTypeData::VoidKeyword => InferredTypeData::Unknown,
         }
+    }
+
+    fn resolve_computed_member_expression(
+        &mut self,
+        object: InferredTypeData<'db>,
+        member: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        let member = self.resolve_property_key(member)?;
+        if biome_js_type_info::interned_types::well_known_symbol_name(member).is_some() {
+            return find_member_key_type_with_resolver(
+                self.db,
+                self,
+                object,
+                MemberLookupKey::Symbol(member),
+                MemberLookupMode::Value,
+            );
+        }
+        if let InferredTypeData::Literal(literal) = member {
+            match literal.literal(self.db) {
+                InferredLiteral::String(name) => {
+                    return self.resolve_static_member_expression(object, name.as_str());
+                }
+                InferredLiteral::Number(index) => {
+                    return index
+                        .text()
+                        .parse()
+                        .ok()
+                        .and_then(|index| self.resolve_element_type_at_index(object, index));
+                }
+                InferredLiteral::BigInt(_)
+                | InferredLiteral::Boolean(_)
+                | InferredLiteral::Object(_)
+                | InferredLiteral::RegExp(_)
+                | InferredLiteral::Template(_) => {}
+            }
+        }
+        None
+    }
+
+    /// Unwraps key annotations without widening well-known symbol identities.
+    /// Cycles and chains longer than 64 wrappers produce no resolved key.
+    fn resolve_property_key(
+        &mut self,
+        mut key: InferredTypeData<'db>,
+    ) -> Option<InferredTypeData<'db>> {
+        for _ in 0..MAX_PROPERTY_KEY_STEPS {
+            key = self.resolve_inferred_type(key);
+            if let InferredTypeData::TypeofType(ty) = key {
+                key = ty.ty(self.db);
+            } else if let InferredTypeData::TypeofValue(value) = key {
+                key = value.ty(self.db);
+            } else if let InferredTypeData::InstanceOf(instance) = key {
+                key = instance.ty(self.db);
+            } else {
+                return Some(key);
+            }
+        }
+        None
     }
 
     pub(in crate::db::type_inference) fn resolve_static_member_expression(

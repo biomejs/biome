@@ -217,7 +217,11 @@ fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
         )
     };
     for name in ["registered", "iterator", "asyncIterator", "tag"] {
-        assert_eq!(binding(name), InferredTypeData::Symbol, "{name}");
+        assert_eq!(
+            binding(name).expand_canonical_global(&db),
+            InferredTypeData::Symbol,
+            "{name}"
+        );
     }
     let key = binding("key");
     assert!(contains_inferred_string(&db, key));
@@ -225,6 +229,11 @@ fn symbol_static_members_infer_registry_calls_and_well_known_keys() {
         panic!("expected optional registry key")
     };
     assert!(key.types(&db).contains(&InferredTypeData::Undefined));
+    assert_inferred_type_snapshot(
+        "symbol_static_members_infer_registry_calls_and_well_known_keys",
+        &db,
+        &fs,
+    );
 }
 
 #[test]
@@ -674,4 +683,71 @@ fn array_from_calls_use_lowered_overloads() {
     assert_eq!(binding("instanceFrom"), InferredTypeData::Unknown);
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn generated_computed_members_resolve_on_values() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const map: Map<string, number>;
+        declare const set: Set<string>;
+        declare const weak: WeakMap<object, string>;
+        declare const date: Date;
+        declare const expression: RegExp;
+        export const mathTag = Math[Symbol.toStringTag];
+        export const mapTag = map[Symbol.toStringTag];
+        export const setTag = set[Symbol.toStringTag];
+        export const weakTag = weak[Symbol.toStringTag];
+        export const arraySpecies = Array[Symbol.species];
+        export const regexpSpecies = RegExp[Symbol.species];
+        export const search = expression[Symbol.search]("text");
+        export const text = date[Symbol.toPrimitive]("string");
+        export const number = date[Symbol.toPrimitive]("number");
+        export const replaced = expression[Symbol.replace]("text", "replacement");
+        export const replacedCallback = expression[Symbol.replace]("text", () => "replacement");
+        const tag = Symbol.toStringTag;
+        export const aliasedTag = map[tag];
+        declare const optional: Map<string, number> | undefined;
+        export const optionalTag = optional?.[tag];
+        interface TagName {
+            "Symbol.toStringTag": number;
+        }
+        interface TaggedMap extends Map<string, number>, TagName {}
+        declare const tagged: TaggedMap;
+        export const symbolTag = tagged[Symbol.toStringTag];
+        export const stringTag = tagged["Symbol.toStringTag"];
+        export function shadowed(Symbol: { toStringTag: "size" }) {
+            return map[Symbol.toStringTag];
+        }
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot("generated_computed_members_resolve_on_values", &db, &fs);
+}
+
+#[test]
+fn generated_computed_iterators_preserve_collection_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const map: Map<string, number>;
+        declare const set: Set<string>;
+        export const entries = map[Symbol.iterator]();
+        export const values = set[Symbol.iterator]();
+        export const entry = entries.next().value;
+        export const value = values.next().value;
+        export const repeated = entries[Symbol.iterator]();
+        const iterator: typeof Symbol.iterator = Symbol.iterator;
+        export const aliased = map[iterator]();
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot(
+        "generated_computed_iterators_preserve_collection_arguments",
+        &db,
+        &fs,
+    );
 }
