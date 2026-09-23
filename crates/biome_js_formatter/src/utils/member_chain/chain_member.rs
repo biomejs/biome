@@ -1,3 +1,4 @@
+use crate::js::expressions::call_arguments::FormatJsCallArgumentsOptions;
 use crate::js::expressions::computed_member_expression::FormatComputedMemberLookup;
 use crate::prelude::*;
 use biome_formatter::write;
@@ -174,6 +175,58 @@ impl Format<JsFormatContext> for ChainMember {
             Self::Node(node) => {
                 write!(f, [node.format()])
             }
+        }
+    }
+}
+
+/// Formats a [`ChainMember`], forcing the last call argument (if the member is a
+/// call expression) to be grouped/hugged.
+///
+/// The member-chain formatter uses this to build the "chain inline, last
+/// argument broken" layout, which keeps the chain's break decision independent
+/// of whether its final object/array argument already spans multiple lines in
+/// the source. See <https://github.com/biomejs/biome/issues/10531>.
+pub(crate) struct FormatChainMemberGroupedLastArgument<'a> {
+    member: &'a ChainMember,
+}
+
+impl ChainMember {
+    /// Returns a formatter that hugs this member's last call argument.
+    pub(crate) fn format_grouped_last_argument(&self) -> FormatChainMemberGroupedLastArgument<'_> {
+        FormatChainMemberGroupedLastArgument { member: self }
+    }
+}
+
+impl Format<JsFormatContext> for FormatChainMemberGroupedLastArgument<'_> {
+    fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        match self.member {
+            // The last member of a chain is the root call expression, printed in
+            // the `End` position (only the optional chain token, type arguments
+            // and arguments are formatted here).
+            ChainMember::CallExpression { expression, .. } => {
+                let JsCallExpressionFields {
+                    // Formatted as part of the previous item
+                    callee: _,
+                    optional_chain_token,
+                    type_arguments,
+                    arguments,
+                } = expression.as_fields();
+                let arguments = arguments?;
+
+                write!(
+                    f,
+                    [
+                        optional_chain_token.format(),
+                        type_arguments.format(),
+                        arguments
+                            .format()
+                            .with_options(FormatJsCallArgumentsOptions {
+                                force_group_last_argument: true,
+                            })
+                    ]
+                )
+            }
+            _ => write!(f, [self.member]),
         }
     }
 }

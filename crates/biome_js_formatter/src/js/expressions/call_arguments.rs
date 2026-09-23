@@ -9,7 +9,9 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{VecBuffer, format_args, format_element::BestFittingVariants, write};
+use biome_formatter::{
+    FormatRuleWithOptions, VecBuffer, format_args, format_element::BestFittingVariants, write,
+};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
@@ -20,7 +22,32 @@ use biome_js_syntax::{
 use biome_rowan::{AstSeparatedElement, AstSeparatedList, SyntaxResult};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsCallArguments;
+pub(crate) struct FormatJsCallArguments {
+    options: FormatJsCallArgumentsOptions,
+}
+
+/// Options controlling how a call's arguments are laid out.
+#[derive(Debug, Clone, Copy, Default)]
+pub(crate) struct FormatJsCallArgumentsOptions {
+    /// When `true` and the arguments use the *grouped last argument* layout,
+    /// force the last argument to be hugged (broken onto its own lines) even if
+    /// it wouldn't otherwise break on its own.
+    ///
+    /// The member-chain formatter uses this to keep a chain inline while only
+    /// breaking its final object/array argument, which makes the chain's layout
+    /// independent of whether that argument already spans multiple lines in the
+    /// source (see <https://github.com/biomejs/biome/issues/10531>).
+    pub force_group_last_argument: bool,
+}
+
+impl FormatRuleWithOptions<JsCallArguments> for FormatJsCallArguments {
+    type Options = FormatJsCallArgumentsOptions;
+
+    fn with_options(mut self, options: Self::Options) -> Self {
+        self.options = options;
+        self
+    }
+}
 
 impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
     fn fmt_fields(&self, node: &JsCallArguments, f: &mut JsFormatter) -> FormatResult<()> {
@@ -140,7 +167,14 @@ impl FormatNodeRule<JsCallArguments> for FormatJsCallArguments {
         }
 
         if let Some(group_layout) = arguments_grouped_layout(&args, f.comments()) {
-            write_grouped_arguments(node, arguments, group_layout, should_insert_space, f)
+            write_grouped_arguments(
+                node,
+                arguments,
+                group_layout,
+                should_insert_space,
+                f,
+                self.options.force_group_last_argument,
+            )
         } else if is_long_curried_call(call_expression.as_ref()) {
             let should_insert_space = f.options().delimiter_spacing().value();
             write!(
@@ -355,6 +389,7 @@ fn write_grouped_arguments(
     group_layout: GroupedCallArgumentLayout,
     should_insert_space: bool,
     f: &mut JsFormatter,
+    force_group_last_argument: bool,
 ) -> FormatResult<()> {
     let l_paren_token = call_arguments.l_paren_token();
     let r_paren_token = call_arguments.r_paren_token();
@@ -403,7 +438,17 @@ fn write_grouped_arguments(
             }
         }
 
-        grouped_arg.will_break(f)
+        let will_break = grouped_arg.will_break(f);
+
+        // When the member-chain formatter requests it, force the grouped-last
+        // argument layout to hug its last argument (drop the flat variant) so
+        // the chain can stay inline while only that argument breaks. This keeps
+        // the chain's layout stable regardless of whether the last argument
+        // already spans multiple lines in the source.
+        // See <https://github.com/biomejs/biome/issues/10531>.
+        will_break
+            || (force_group_last_argument
+                && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument))
     };
 
     // We now cache them the delimiters tokens. This is needed because `[biome_formatter::best_fitting]` will try to
@@ -809,7 +854,7 @@ impl Format<JsFormatContext> for FormatGroupedLastArgument<'_> {
 }
 
 /// Disable the token tracking because it is necessary to format function/arrow expressions slightly different.
-fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
+pub(crate) fn with_token_tracking_disabled<F: FnOnce(&mut JsFormatter) -> R, R>(
     f: &mut JsFormatter,
     callback: F,
 ) -> R {
@@ -967,7 +1012,7 @@ fn should_group_first_argument(
 }
 
 /// Checks if the last argument should be grouped.
-fn should_group_last_argument(
+pub(crate) fn should_group_last_argument(
     list: &JsCallArgumentList,
     comments: &JsComments,
 ) -> SyntaxResult<bool> {

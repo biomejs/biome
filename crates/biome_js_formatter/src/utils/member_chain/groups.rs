@@ -192,7 +192,7 @@ impl MemberChainGroup {
         let result = match cell.as_ref() {
             Some(formatted) => formatted.will_break(),
             None => {
-                let interned = f.intern(&FormatMemberChainGroup { group: self })?;
+                let interned = f.intern(&FormatMemberChainGroup::new(self, false))?;
 
                 if let Some(interned) = interned {
                     let breaks = interned.will_break();
@@ -258,12 +258,26 @@ impl Format<JsFormatContext> for MemberChainGroup {
             return f.write_element(formatted.clone());
         }
 
-        FormatMemberChainGroup { group: self }.fmt(f)
+        FormatMemberChainGroup::new(self, false).fmt(f)
     }
 }
 
 pub struct FormatMemberChainGroup<'a> {
     group: &'a MemberChainGroup,
+    /// When `true`, the group's last member (a call expression) hugs its last
+    /// argument instead of letting it stay inline.
+    hug_last_call_argument: bool,
+}
+
+impl<'a> FormatMemberChainGroup<'a> {
+    /// Creates a formatter for `group`, optionally hugging the group's last call
+    /// argument.
+    pub(super) fn new(group: &'a MemberChainGroup, hug_last_call_argument: bool) -> Self {
+        Self {
+            group,
+            hug_last_call_argument,
+        }
+    }
 }
 
 impl Format<JsFormatContext> for FormatMemberChainGroup<'_> {
@@ -278,7 +292,22 @@ impl Format<JsFormatContext> for FormatMemberChainGroup<'_> {
             _ => false,
         });
 
-        let format_entries = format_with(|f| f.join().entries(group.members.iter()).finish());
+        let format_entries = format_with(|f| {
+            if self.hug_last_call_argument {
+                let mut joiner = f.join();
+                let member_count = group.members.len();
+                for (index, member) in group.members.iter().enumerate() {
+                    if index + 1 == member_count {
+                        joiner.entry(&member.format_grouped_last_argument());
+                    } else {
+                        joiner.entry(member);
+                    }
+                }
+                joiner.finish()
+            } else {
+                f.join().entries(group.members.iter()).finish()
+            }
+        });
 
         if needs_parens {
             write!(f, [token("("), format_entries, token(")")])

@@ -105,20 +105,25 @@ mod simple_argument;
 
 use crate::JsLabels;
 use crate::context::TabWidth;
+use crate::js::expressions::call_arguments::{
+    should_group_last_argument, with_token_tracking_disabled,
+};
 use crate::prelude::*;
 use crate::utils::is_long_curried_call;
 use crate::utils::member_chain::chain_member::{CallExpressionPosition, ChainMember};
 use crate::utils::member_chain::groups::{
-    MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
+    FormatMemberChainGroup, MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
 };
 pub use crate::utils::member_chain::simple_argument::SimpleArgument;
-use biome_formatter::{Buffer, write};
+use biome_formatter::format_element::LineMode;
+use biome_formatter::{Buffer, FormatElement, FormatOptions, write};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
     JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,
 };
 use biome_rowan::{AstNode, SyntaxResult};
 use std::iter::FusedIterator;
+use unicode_width::UnicodeWidthStr;
 
 #[derive(Debug, Clone)]
 pub(crate) struct MemberChain {
@@ -321,6 +326,69 @@ impl MemberChain {
         self.tail.last().unwrap_or(&self.head)
     }
 
+    /// Returns `true` if the chain ends with a call expression whose last
+    /// argument is an object or array literal that benefits from being grouped
+    /// (hugged).
+    ///
+    /// When this is the case, the chain can stay inline while only that argument
+    /// breaks. Detecting it lets the formatter offer a "chain inline, last
+    /// argument hugged" layout as an intermediate option, which keeps the break
+    /// decision independent of whether the last argument already spans multiple
+    /// lines in the source. See <https://github.com/biomejs/biome/issues/10531>.
+    ///
+    /// Function and arrow-function arguments are intentionally excluded: chains
+    /// ending in a callback keep their existing (expanded) behavior, which is
+    /// handled by [`Self::groups_should_break`].
+    fn last_call_has_groupable_last_argument(&self, f: &mut JsFormatter) -> FormatResult<bool> {
+        let last_group = self.last_group();
+        let Some(ChainMember::CallExpression { expression, .. }) =
+            self.last_group().members().last()
+        else {
+            return Ok(false);
+        };
+
+        let Ok(arguments) = expression.arguments() else {
+            return Ok(false);
+        };
+        let args = arguments.args();
+
+        let is_object_or_array_last = matches!(
+            args.last(),
+            Some(Ok(AnyJsCallArgument::AnyJsExpression(
+                AnyJsExpression::JsObjectExpression(_) | AnyJsExpression::JsArrayExpression(_)
+            )))
+        );
+
+        if !is_object_or_array_last
+            || !should_group_last_argument(&args, f.comments()).unwrap_or(false)
+        {
+            return Ok(false);
+        }
+
+        // Only hug the last argument (keeping the chain inline) when the last
+        // group wouldn't fit on its own line either. If the last group fits on
+        // its own line, the chain should expand instead (matching Prettier and
+        // the existing stable layout). This keeps the layout independent of
+        // whether the last argument is already broken across multiple lines in
+        // the source, which is what made the formatter non-idempotent.
+        // See <https://github.com/biomejs/biome/issues/10531>.
+        let Ok(Some(last_group_element)) = f.intern(last_group) else {
+            return Ok(false);
+        };
+        let line_width = usize::from(f.options().line_width().value());
+        // In the expanded layout the last group is placed on its own indented
+        // line and followed by trailing tokens (e.g. `;` or `,`). Approximate
+        // that overhead so we hug only when the last argument genuinely wouldn't
+        // fit on its own line.
+        let indent_width = usize::from(f.options().indent_width().value());
+        let available = line_width.saturating_sub(indent_width.saturating_mul(4));
+
+        Ok(matches!(
+            measure_flat_width(std::slice::from_ref(&last_group_element)),
+            Some(width) if width > available
+        ))
+    }
+
     /// Returns an iterator over all members in the member chain
     fn members(&self) -> impl DoubleEndedIterator<Item = &ChainMember> {
         self.head.members().iter().chain(self.tail.members())
@@ -387,6 +455,34 @@ impl Format<JsFormatContext> for MemberChain {
 
         let format_expanded = format_with(|f| write!(f, [self.head, indent(&group(&format_tail))]));
 
+        // Intermediate layout: the chain stays inline but its last call argument
+        // is hugged (broken onto its own lines). Offered between the fully-inline
+        // and fully-expanded layouts when the last call has a groupable last
+        // argument, so a chain whose only overflow is that argument converges to
+        // a stable, inline shape on the first pass.
+        // See <https://github.com/biomejs/biome/issues/10531>.
+        let format_one_line_last_arg_hugged = format_with(|f| {
+            // This variant re-formats the last group, whose tokens are already
+            // tracked by the primary inline variant. Disable token tracking to
+            // avoid the "printed twice" assertion, mirroring how function/arrow
+            // arguments are re-formatted elsewhere.
+            with_token_tracking_disabled(f, |f| {
+                let mut joiner = f.join();
+                joiner.entry(&self.head);
+
+                let last_index = self.tail.len().saturating_sub(1);
+                for (index, group) in self.tail.iter().enumerate() {
+                    if index == last_index {
+                        joiner.entry(&FormatMemberChainGroup::new(group, true));
+                    } else {
+                        joiner.entry(group);
+                    }
+                }
+
+                joiner.finish()
+            })
+        });
+
         let format_content = format_with(|f| {
             if self.groups_should_break(f)? {
                 write!(f, [group(&format_expanded)])
@@ -400,7 +496,18 @@ impl Format<JsFormatContext> for MemberChain {
                     write!(f, [expand_parent()])?;
                 }
 
-                write!(f, [best_fitting!(format_one_line, format_expanded)])
+                if self.last_call_has_groupable_last_argument(f)? {
+                    write!(
+                        f,
+                        [best_fitting!(
+                            format_one_line,
+                            format_one_line_last_arg_hugged,
+                            format_expanded
+                        )]
+                    )
+                } else {
+                    write!(f, [best_fitting!(format_one_line, format_expanded)])
+                }
             }
         });
 
@@ -578,6 +685,42 @@ fn has_simple_arguments(call: &JsCallExpression) -> bool {
             argument.is_ok_and(|argument| SimpleArgument::new(argument).is_simple())
         })
     })
+}
+
+/// Measures the width of `elements` as if they were printed on a single line:
+/// soft line breaks are treated as a single space. Returns `None` when the
+/// content can't fit on a single line because it contains a hard line break, an
+/// [`FormatElement::ExpandParent`], or multiline text.
+///
+/// Used by the member-chain formatter to decide whether a chain's last group
+/// would still break when placed on its own line, so the chain can be kept
+/// inline (hugging only the last argument) only when that's the stable layout.
+fn measure_flat_width(elements: &[FormatElement]) -> Option<usize> {
+    let mut width = 0usize;
+
+    for element in elements {
+        match element {
+            FormatElement::Space | FormatElement::HardSpace => width += 1,
+            FormatElement::Token { text } => width += text.width(),
+            FormatElement::Text { text_width, .. }
+            | FormatElement::LocatedTokenText { text_width, .. } => {
+                width += text_width.width()?.value() as usize;
+            }
+            // A soft line break is a space when printed flat.
+            FormatElement::Line(LineMode::SoftOrSpace) => width += 1,
+            FormatElement::Line(LineMode::Soft) => {}
+            // Any forced break means the content doesn't fit on a single line.
+            FormatElement::Line(_) | FormatElement::ExpandParent => return None,
+            FormatElement::Interned(interned) => width += measure_flat_width(interned)?,
+            FormatElement::BestFitting(best_fitting) => {
+                width += measure_flat_width(best_fitting.most_flat())?;
+            }
+            // Tags (groups, indents, ...) don't add width when printed flat.
+            _ => {}
+        }
+    }
+
+    Some(width)
 }
 
 /// In order to detect those cases, we use an heuristic: if the first
