@@ -1,3 +1,7 @@
+mod namespaces;
+
+pub(super) use namespaces::lower_namespace;
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::*;
@@ -40,7 +44,8 @@ impl LoweredDeclarations {
 /// Computed properties and methods support string/number literals and declared predefined Symbol keys.
 /// Optional computed members include undefined in their value type.
 /// References to selected predefined types preserve type arguments and require declarations.
-/// Type aliases, type arguments on other references, qualified references, object and template literal types,
+/// Namespace interface and alias references and conditional branch unions are supported.
+/// Type arguments on other references, global type aliases, object and template literal types,
 /// and other type operators such as `unique symbol` are excluded.
 pub fn lower_interfaces(
     manifest: &GlobalManifest,
@@ -50,6 +55,9 @@ pub fn lower_interfaces(
     let mut lowerer = DeclarationLowerer {
         manifest,
         sources: ParsedSourceCache::new(source_files),
+        namespace_scope: Vec::new(),
+        scoped_types: BTreeMap::new(),
+        active_declarations: BTreeSet::new(),
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
@@ -83,6 +91,9 @@ pub fn lower_interfaces(
 struct DeclarationLowerer<'a> {
     manifest: &'a GlobalManifest,
     sources: ParsedSourceCache<'a>,
+    namespace_scope: Vec<String>,
+    scoped_types: BTreeMap<String, LoweredTypeReference>,
+    active_declarations: BTreeSet<String>,
     interfaces: BTreeMap<String, usize>,
     pending: Vec<(String, usize)>,
     types: Vec<Option<LoweredTypeData>>,
@@ -161,7 +172,7 @@ impl DeclarationLowerer<'_> {
     fn lower_interface(&mut self, name: &str) -> Result<LoweredInterface> {
         let group = self
             .manifest
-            .global_group(name)
+            .group(&self.declaration_scope(), name)
             .with_context(|| format!("unresolved type reference {name}"))?;
         let mut extends = Vec::new();
         let mut members = Vec::new();
@@ -177,7 +188,9 @@ impl DeclarationLowerer<'_> {
                 .sources
                 .find_interface_declaration(record)?
                 .with_context(|| format!("missing interface declaration {name}"))?;
-            if declaration.type_parameters().is_some() && !self.predefined_declarations {
+            if declaration.type_parameters().is_some()
+                && (!self.predefined_declarations || !self.namespace_scope.is_empty())
+            {
                 bail!("unsupported type parameters on interface {name}");
             }
             if let Some(clause) = declaration.extends_clause() {
@@ -525,6 +538,9 @@ impl DeclarationLowerer<'_> {
                 Ok(self.register(LoweredTypeData::ThisKeyword))
             }
             AnyTsType::TsReferenceType(reference) => {
+                if let Some(ty) = self.lower_scoped_reference(reference)? {
+                    return Ok(ty);
+                }
                 let biome_js_syntax::AnyTsName::JsReferenceIdentifier(name) = reference.name()?
                 else {
                     bail!("unsupported qualified type reference");
@@ -620,6 +636,12 @@ impl DeclarationLowerer<'_> {
                     bail!("unsupported type arguments in type reference");
                 }
                 self.named_reference(name)
+            }
+            AnyTsType::TsConditionalType(conditional) => {
+                // Match local inference's conservative union of both conditional branches.
+                let yes = self.lower_reference(&conditional.true_type()?)?;
+                let no = self.lower_reference(&conditional.false_type()?)?;
+                Ok(self.register(LoweredTypeData::Union(Box::new([yes, no]))))
             }
             AnyTsType::TsIndexedAccessType(access) => {
                 let object = self.lower_reference(&access.object_type()?)?;
@@ -721,7 +743,7 @@ pub(super) type MemberSelector = fn(&AnyTsTypeMember) -> Result<bool>;
 /// Lowers instance properties and methods with declaration-derived
 /// generic parameters. Constraints and defaults use supported member types and earlier parameters;
 /// the first interface supplies them for merged declarations.
-/// Value-side declarations and methods referencing Intl types are excluded. References to the
+/// Value-side declarations are excluded. References to the
 /// enclosing class and selected predefined types may carry type arguments.
 /// Other external references and unsupported member shapes are errors.
 /// `this` remains a keyword; lowering does not bind it to a call receiver.
@@ -740,6 +762,9 @@ pub(super) fn lower_class_members(
     let mut lowerer = DeclarationLowerer {
         manifest,
         sources: ParsedSourceCache::new(source_files),
+        namespace_scope: Vec::new(),
+        scoped_types: BTreeMap::new(),
+        active_declarations: BTreeSet::new(),
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
@@ -892,6 +917,9 @@ pub(super) fn lower_method_global(
     let mut lowerer = DeclarationLowerer {
         manifest,
         sources: ParsedSourceCache::new(source_files),
+        namespace_scope: Vec::new(),
+        scoped_types: BTreeMap::new(),
+        active_declarations: BTreeSet::new(),
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
@@ -941,12 +969,7 @@ fn is_computed_member(member: &AnyTsTypeMember) -> Result<bool> {
 fn supports_class_member(member: &AnyTsTypeMember, class: &LoweredClass) -> Result<bool> {
     let name = match member {
         AnyTsTypeMember::TsPropertySignatureTypeMember(property) => property.name()?,
-        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => {
-            if method_uses_intl_types(method)? {
-                return Ok(false);
-            }
-            method.name()?
-        }
+        AnyTsTypeMember::TsMethodSignatureTypeMember(method) => method.name()?,
         _ => bail!("unsupported class member: {:?}", member.syntax().kind()),
     };
     match name {
@@ -975,6 +998,9 @@ pub(super) fn lower_constructor_members(
     let mut lowerer = DeclarationLowerer {
         manifest,
         sources: ParsedSourceCache::new(source_files),
+        namespace_scope: Vec::new(),
+        scoped_types: BTreeMap::new(),
+        active_declarations: BTreeSet::new(),
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),
@@ -1125,21 +1151,6 @@ pub(super) fn select_named_members(member: &AnyTsTypeMember, names: &[&str]) -> 
     Ok(names.contains(&lower_object_member_name(name)?.text()))
 }
 
-fn method_uses_intl_types(method: &TsMethodSignatureTypeMember) -> Result<bool> {
-    for name in method
-        .syntax()
-        .descendants()
-        .filter_map(biome_js_syntax::TsQualifiedName::cast)
-    {
-        if let biome_js_syntax::AnyTsName::JsReferenceIdentifier(root) = name.left()?
-            && root.value_token()?.text_trimmed() == "Intl"
-        {
-            return Ok(true);
-        }
-    }
-    Ok(false)
-}
-
 fn predefined_type_reference(name: &str) -> Option<&'static str> {
     PREDEFINED_DECLARATIONS
         .iter()
@@ -1149,6 +1160,7 @@ fn predefined_type_reference(name: &str) -> Option<&'static str> {
 /// Selected declaration names and their existing runtime identities.
 pub(in crate::generate_global_types) const PREDEFINED_DECLARATIONS: &[(&str, &str, &str)] = &[
     ("Array", "ARRAY_ID_GLOBAL_TYPE_ID", "GLOBAL_ARRAY_ID"),
+    ("Date", "DATE_ID_GLOBAL_TYPE_ID", "GLOBAL_DATE_ID"),
     (
         "IteratorYieldResult",
         "ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID",
@@ -1279,6 +1291,9 @@ pub(super) fn lower_predefined_declarations(
     let mut lowerer = DeclarationLowerer {
         manifest,
         sources: ParsedSourceCache::new(sources),
+        namespace_scope: Vec::new(),
+        scoped_types: BTreeMap::new(),
+        active_declarations: BTreeSet::new(),
         interfaces: BTreeMap::new(),
         pending: Vec::new(),
         types: Vec::new(),

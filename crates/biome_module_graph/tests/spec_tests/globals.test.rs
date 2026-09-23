@@ -751,3 +751,32 @@ fn generated_computed_iterators_preserve_collection_arguments() {
         &fs,
     );
 }
+
+#[test]
+fn generated_intl_namespace_infers_constructor_and_method_results() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        export const compared = new Intl.Collator("en").compare("a", "b");
+        export const calledCompare = Intl.Collator().compare("a", "b");
+        export const numeric = Intl.Collator().resolvedOptions().numeric;
+        export const numberText = new Intl.NumberFormat("en").format(42);
+        export const calledNumberText = Intl.NumberFormat().format(42);
+        export const dateText = new Intl.DateTimeFormat("en").format(0);
+        export const calledDateText = Intl.DateTimeFormat().format(new Date());
+        export const calendar = Intl.DateTimeFormat().resolvedOptions().calendar;
+        export const locales = Intl.NumberFormat.supportedLocalesOf(["en"]);
+        export const prototypeText = Intl.NumberFormat.prototype.format(42);
+        const Format = Intl.NumberFormat;
+        export const aliasedText = new Format().format(42);
+        export const localeMethod = new Date().toLocaleString;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot(
+        "generated_intl_namespace_infers_constructor_and_method_results",
+        &db,
+        &fs,
+    );
+}

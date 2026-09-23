@@ -500,6 +500,9 @@ fn for_each_global_in_emit_order(
             && !super::lower::declarations::PREDEFINED_DECLARATIONS
                 .iter()
                 .any(|(_, id, _)| *id == global.id_constant())
+            && !super::lower::NAMESPACE_GLOBALS
+                .iter()
+                .any(|(_, id)| *id == global.id_constant())
         {
             bail!(
                 "generated global {} targets {}, but the ID is missing from GLOBAL_ID_EMIT_ORDER",
@@ -512,7 +515,11 @@ fn for_each_global_in_emit_order(
     for id_constant in GLOBAL_ID_EMIT_ORDER {
         visit(global_with_id_constant(lowered, id_constant)?);
     }
-    for (_, id, _) in super::lower::declarations::PREDEFINED_DECLARATIONS {
+    for id in super::lower::declarations::PREDEFINED_DECLARATIONS
+        .iter()
+        .map(|(_, id, _)| id)
+        .chain(super::lower::NAMESPACE_GLOBALS.iter().map(|(_, id)| id))
+    {
         if GLOBAL_ID_EMIT_ORDER.contains(id) {
             continue;
         }

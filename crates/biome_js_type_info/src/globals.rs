@@ -237,6 +237,7 @@ pub fn global_type_id_for_qualifier(qualifier: &TypeReferenceQualifier) -> Optio
 pub fn global_type_id_for_value(name: &str) -> Option<GlobalTypeId> {
     match name {
         "fetch" => Some(FETCH_ID_GLOBAL_TYPE_ID),
+        "Intl" => Some(INTL_ID_GLOBAL_TYPE_ID),
         "globalThis" | "window" => Some(GLOBAL_ID_GLOBAL_TYPE_ID),
         _ => None,
     }
