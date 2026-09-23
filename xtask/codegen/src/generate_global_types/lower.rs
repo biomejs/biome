@@ -594,10 +594,20 @@ fn lower_object_member_name(name: AnyJsObjectMemberName) -> Result<Text> {
     }
 }
 
+/// Maps a primitive keyword type to its predefined global ID.
 fn lower_primitive_reference(type_node: &AnyTsType) -> Option<LoweredTypeReference> {
     let id = match type_node {
-        AnyTsType::TsStringType(_) => "GLOBAL_STRING_KEYWORD_ID",
+        AnyTsType::TsAnyType(_) => "GLOBAL_ANY_KEYWORD_ID",
+        AnyTsType::TsBigintType(_) => "GLOBAL_BIGINT_KEYWORD_ID",
+        AnyTsType::TsBooleanType(_) => "GLOBAL_BOOLEAN_KEYWORD_ID",
+        AnyTsType::TsNeverType(_) => "GLOBAL_NEVER_KEYWORD_ID",
+        AnyTsType::TsNonPrimitiveType(_) => "GLOBAL_OBJECT_KEYWORD_ID",
+        AnyTsType::TsNullLiteralType(_) => "GLOBAL_NULL_KEYWORD_ID",
         AnyTsType::TsNumberType(_) => "GLOBAL_NUMBER_KEYWORD_ID",
+        AnyTsType::TsStringType(_) => "GLOBAL_STRING_KEYWORD_ID",
+        AnyTsType::TsSymbolType(_) => "GLOBAL_SYMBOL_KEYWORD_ID",
+        AnyTsType::TsUndefinedType(_) => "GLOBAL_UNDEFINED_ID",
+        AnyTsType::TsUnknownType(_) => "GLOBAL_UNKNOWN_KEYWORD_ID",
         AnyTsType::TsVoidType(_) => "GLOBAL_VOID_ID",
         _ => return None,
     };

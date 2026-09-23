@@ -69,8 +69,8 @@ fn global_catalog() -> crate::TypeData {
             name: biome_rowan::Text::new_static("Catalog"),
             type_parameters: Box::default(),
             extends: Box::new([
-                crate::RawTypeId::Local(crate::TypeId::new(9)).into(),
-                crate::RawTypeId::Local(crate::TypeId::new(10)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
             ]),
             members: Box::new([
                 crate::TypeMember {
@@ -83,37 +83,37 @@ fn global_catalog() -> crate::TypeData {
                     kind: crate::TypeMemberKind::NamedOptional(
                         biome_rowan::Text::new_static("selected"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::Named(
                         biome_rowan::Text::new_static("state"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::Named(
                         biome_rowan::Text::new_static("empty"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                    ty: crate::globals::GLOBAL_NULL_KEYWORD_ID.into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::Named(
                         biome_rowan::Text::new_static("label"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::NamedOptional(
                         biome_rowan::Text::new_static("find"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(7)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::Named(
                         biome_rowan::Text::new_static("update"),
                     ),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(8)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
                 },
                 crate::TypeMember {
                     kind: crate::TypeMemberKind::Named(
@@ -199,24 +199,22 @@ fn global_unselected() -> crate::TypeData {
         }),
     )
 }
-static CATALOG_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> = std::sync::LazyLock::new(||
+static CATALOG_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 9]> = std::sync::LazyLock::new(||
 [
     crate::TypeData::instance_of(crate::TypeInstance {
         ty: crate::globals::GLOBAL_ITEM_ID.into(),
         type_parameters: Box::default(),
     }),
-    crate::TypeData::Null,
     crate::TypeData::Union(
         Box::new(
             crate::Union(
                 Box::new([
                     crate::RawTypeId::Local(crate::TypeId::new(0)).into(),
-                    crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
+                    crate::globals::GLOBAL_NULL_KEYWORD_ID.into(),
                 ]),
             ),
         ),
     ),
-    crate::TypeData::Boolean,
     crate::TypeData::Literal(
         Box::new(crate::Literal::String(biome_rowan::Text::new_static("pending").into())),
     ),
@@ -224,8 +222,8 @@ static CATALOG_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> = std::sy
         Box::new(
             crate::Union(
                 Box::new([
-                    crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
-                    crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
+                    crate::globals::GLOBAL_BOOLEAN_KEYWORD_ID.into(),
+                    crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
                 ]),
             ),
         ),
@@ -241,19 +239,19 @@ static CATALOG_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> = std::sy
             parameters: Box::new([
                 crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                     name: biome_rowan::Text::new_static("candidate"),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
                     is_optional: false,
                     is_rest: false,
                 }),
                 crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                     name: biome_rowan::Text::new_static("state"),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(5)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(3)).into(),
                     is_optional: true,
                     is_rest: false,
                 }),
             ]),
             return_type: crate::ReturnType::Type(
-                crate::RawTypeId::Local(crate::TypeId::new(2)).into(),
+                crate::RawTypeId::Local(crate::TypeId::new(1)).into(),
             ),
         }),
     ),
@@ -271,7 +269,7 @@ static CATALOG_LOCAL_TYPES: std::sync::LazyLock<[crate::TypeData; 11]> = std::sy
                 }),
                 crate::FunctionParameter::Named(crate::NamedFunctionParameter {
                     name: biome_rowan::Text::new_static("label"),
-                    ty: crate::RawTypeId::Local(crate::TypeId::new(6)).into(),
+                    ty: crate::RawTypeId::Local(crate::TypeId::new(4)).into(),
                     is_optional: true,
                     is_rest: false,
                 }),

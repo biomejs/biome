@@ -37,6 +37,13 @@ impl Default for RawGlobalTypes {
         builder.set_type_data(NUMBER_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::Number);
         builder.set_type_data(STRING_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::String);
         builder.set_type_data(BOOLEAN_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::Boolean);
+        builder.set_type_data(BIGINT_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::BigInt);
+        builder.set_type_data(SYMBOL_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::Symbol);
+        builder.set_type_data(NULL_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::Null);
+        builder.set_type_data(ANY_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::AnyKeyword);
+        builder.set_type_data(NEVER_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::NeverKeyword);
+        builder.set_type_data(OBJECT_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::ObjectKeyword);
+        builder.set_type_data(UNKNOWN_KEYWORD_ID_GLOBAL_TYPE_ID, TypeData::UnknownKeyword);
 
         builder.set_type_data(
             INSTANCEOF_ARRAY_T_ID_GLOBAL_TYPE_ID,
@@ -286,6 +293,25 @@ struct GlobalTypeInput {
     local: Option<crate::TypeId>,
 }
 
+/// Returns whether `id` is a predefined keyword type such as `any` or `string`.
+fn is_keyword(id: GlobalTypeId) -> bool {
+    [
+        ANY_KEYWORD_ID_GLOBAL_TYPE_ID,
+        BIGINT_KEYWORD_ID_GLOBAL_TYPE_ID,
+        BOOLEAN_KEYWORD_ID_GLOBAL_TYPE_ID,
+        NEVER_KEYWORD_ID_GLOBAL_TYPE_ID,
+        NULL_KEYWORD_ID_GLOBAL_TYPE_ID,
+        NUMBER_KEYWORD_ID_GLOBAL_TYPE_ID,
+        OBJECT_KEYWORD_ID_GLOBAL_TYPE_ID,
+        STRING_KEYWORD_ID_GLOBAL_TYPE_ID,
+        SYMBOL_KEYWORD_ID_GLOBAL_TYPE_ID,
+        UNDEFINED_ID_GLOBAL_TYPE_ID,
+        UNKNOWN_KEYWORD_ID_GLOBAL_TYPE_ID,
+        VOID_ID_GLOBAL_TYPE_ID,
+    ]
+    .contains(&id)
+}
+
 #[salsa::tracked]
 fn resolve_global_type<'db>(
     db: &'db dyn crate::TypeDb,
@@ -310,8 +336,12 @@ fn resolve_global_type<'db>(
     InferredTypeData::from_raw_with_resolver(db, raw, true, &mut |reference| {
         match reference {
             TypeReference::Resolved(RawTypeId::Global(target)) => {
-                // The typeof result contains literal values rather than deferred global handles.
-                if local.is_none() && owner == TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID {
+                // Keywords and the typeof result's literals resolve to their data rather than
+                // deferred global handles, because matchers such as `is_any_keyword()` don't
+                // expand handles.
+                if is_keyword(*target)
+                    || (local.is_none() && owner == TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
+                {
                     global_types(db).get(*target)
                 } else {
                     InferredTypeData::GlobalType(*target)

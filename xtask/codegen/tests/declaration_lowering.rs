@@ -63,6 +63,24 @@ fn local<'a>(global: &'a LoweredGlobal, reference: &LoweredTypeReference) -> &'a
     &global.local_types()[*index]
 }
 
+/// A lowered type as tests compare it: predefined IDs by name, local types by data.
+#[derive(Debug, PartialEq)]
+enum Lowered {
+    Predefined(&'static str),
+    Local(LoweredTypeData),
+}
+
+fn lowered_type(global: &LoweredGlobal, reference: &LoweredTypeReference) -> Lowered {
+    match reference {
+        LoweredTypeReference::Predefined(id) => Lowered::Predefined(id),
+        reference => Lowered::Local(local(global, reference).clone()),
+    }
+}
+
+fn predefined(id: &'static str) -> LoweredTypeReference {
+    LoweredTypeReference::Predefined(id)
+}
+
 fn generated(constant: &str) -> LoweredTypeReference {
     LoweredTypeReference::Global(biome_rowan::Text::from(constant.to_owned()))
 }
@@ -141,7 +159,7 @@ fn indexed_access_preserves_nested_operands() -> Result<()> {
         (
             "nested",
             member("items"),
-            LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID"),
+            predefined("GLOBAL_NUMBER_KEYWORD_ID"),
         ),
         ("element", member("pair"), member("keys")),
     ] {
@@ -272,19 +290,16 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
             panic!("expected union")
         };
         assert_eq!(types.as_ref()[0], *item_ref);
-        assert_eq!(local(catalog_global, &types[1]), &LoweredTypeData::Null);
+        assert_eq!(types[1], predefined("GLOBAL_NULL_KEYWORD_ID"));
     };
     assert_nullable(catalog.member("selected").unwrap().type_reference());
     assert_eq!(
-        local(
-            catalog_global,
-            catalog.member("empty").unwrap().type_reference()
-        ),
-        &LoweredTypeData::Null
+        catalog.member("empty").unwrap().type_reference(),
+        &predefined("GLOBAL_NULL_KEYWORD_ID")
     );
     assert_eq!(
         catalog.member("count").unwrap().type_reference(),
-        &LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID"),
+        &predefined("GLOBAL_NUMBER_KEYWORD_ID"),
         "members of merged declarations are included"
     );
     assert_eq!(
@@ -300,7 +315,7 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
     ) else {
         panic!("expected union")
     };
-    assert_eq!(local(catalog_global, &state[0]), &LoweredTypeData::Boolean);
+    assert_eq!(state[0], predefined("GLOBAL_BOOLEAN_KEYWORD_ID"));
     assert_eq!(
         local(catalog_global, &state[1]),
         &LoweredTypeData::StringLiteral("pending".into())
@@ -332,10 +347,7 @@ fn declaration_interfaces_preserve_types_and_signatures() -> Result<()> {
         panic!("expected function")
     };
     assert_eq!(update.name(), None);
-    assert_eq!(
-        update.return_type(),
-        &LoweredTypeReference::Predefined("GLOBAL_VOID_ID")
-    );
+    assert_eq!(update.return_type(), &predefined("GLOBAL_VOID_ID"));
     assert_eq!(update.parameters()[0].type_reference(), item_ref);
     assert!(update.parameters()[1].is_optional());
 
@@ -386,7 +398,7 @@ fn declaration_output_is_deterministic_and_follows_source_edits() -> Result<()> 
 #[test]
 fn unresolved_references_lower_to_unknown_and_are_reported() -> Result<()> {
     let lowered = lower(&[fixture("lowering.errors.d.ts")?])?;
-    let unknown = LoweredTypeReference::Predefined("GLOBAL_UNKNOWN_ID");
+    let unknown = predefined("GLOBAL_UNKNOWN_ID");
     for owner in [
         "MissingProperty",
         "MissingBase",
@@ -465,16 +477,22 @@ fn declaration_parser_errors_are_not_silently_lowered() -> Result<()> {
 
 #[test]
 fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
-    for (source_type, expected) in [
-        ("any", LoweredTypeData::AnyKeyword),
-        ("unknown", LoweredTypeData::UnknownKeyword),
-        ("never", LoweredTypeData::NeverKeyword),
-        ("object", LoweredTypeData::ObjectKeyword),
-        ("undefined", LoweredTypeData::Undefined),
-        ("bigint", LoweredTypeData::BigInt),
-        ("symbol", LoweredTypeData::Symbol),
-        ("boolean", LoweredTypeData::Boolean),
-        ("null", LoweredTypeData::Null),
+    let keywords = [
+        ("any", "GLOBAL_ANY_KEYWORD_ID"),
+        ("unknown", "GLOBAL_UNKNOWN_KEYWORD_ID"),
+        ("never", "GLOBAL_NEVER_KEYWORD_ID"),
+        ("object", "GLOBAL_OBJECT_KEYWORD_ID"),
+        ("undefined", "GLOBAL_UNDEFINED_ID"),
+        ("bigint", "GLOBAL_BIGINT_KEYWORD_ID"),
+        ("symbol", "GLOBAL_SYMBOL_KEYWORD_ID"),
+        ("boolean", "GLOBAL_BOOLEAN_KEYWORD_ID"),
+        ("null", "GLOBAL_NULL_KEYWORD_ID"),
+        ("string", "GLOBAL_STRING_KEYWORD_ID"),
+        ("number", "GLOBAL_NUMBER_KEYWORD_ID"),
+        ("void", "GLOBAL_VOID_ID"),
+    ]
+    .map(|(source_type, id)| (source_type, Lowered::Predefined(id)));
+    let literals = [
         ("true", LoweredTypeData::BooleanLiteral(true)),
         ("false", LoweredTypeData::BooleanLiteral(false)),
         ("0", LoweredTypeData::NumberLiteral("0".into())),
@@ -505,7 +523,9 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
             LoweredTypeData::BigIntLiteral("-0xFFn".into()),
         ),
         ("'ready'", LoweredTypeData::StringLiteral("ready".into())),
-    ] {
+    ]
+    .map(|(source_type, data)| (source_type, Lowered::Local(data)));
+    for (source_type, expected) in keywords.into_iter().chain(literals) {
         let lowered = lower(&[source(
             "scalars.d.ts",
             format!(
@@ -516,8 +536,8 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
         let example = global(&lowered, "Example");
         let interface = interface(&lowered, "Example");
         assert_eq!(
-            local(example, interface.member("value").unwrap().type_reference()),
-            &expected,
+            lowered_type(example, interface.member("value").unwrap().type_reference()),
+            expected,
             "{source_type}"
         );
         for name in ["method", "callback"] {
@@ -527,13 +547,13 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
                 panic!("expected function")
             };
             assert_eq!(
-                local(example, function.parameters()[0].type_reference()),
-                &expected,
+                lowered_type(example, function.parameters()[0].type_reference()),
+                expected,
                 "{source_type}"
             );
             assert_eq!(
-                local(example, function.return_type()),
-                &expected,
+                lowered_type(example, function.return_type()),
+                expected,
                 "{source_type}"
             );
         }
@@ -543,7 +563,7 @@ fn declaration_scalar_types_translate_in_every_type_position() -> Result<()> {
         ) else {
             panic!("expected union")
         };
-        assert_eq!(local(example, &union[0]), &expected, "{source_type}");
+        assert_eq!(lowered_type(example, &union[0]), expected, "{source_type}");
     }
     Ok(())
 }
@@ -555,9 +575,14 @@ fn symbol_static_members_follow_merged_constructor_declarations() -> Result<()> 
             "SymbolConstructor",
             "customKey",
             "boolean",
-            LoweredTypeData::Boolean,
+            "GLOBAL_BOOLEAN_KEYWORD_ID",
         ),
-        ("Registry", "anotherKey", "bigint", LoweredTypeData::BigInt),
+        (
+            "Registry",
+            "anotherKey",
+            "bigint",
+            "GLOBAL_BIGINT_KEYWORD_ID",
+        ),
     ] {
         let mut file = fixture("manifest.disposables.d.ts")?;
         file.bytes = String::from_utf8(file.bytes)?
@@ -599,16 +624,16 @@ fn symbol_static_members_follow_merged_constructor_declarations() -> Result<()> 
                 panic!("expected function")
             };
             let parameter = &function.parameters()[0];
-            assert_eq!(local(symbol, parameter.type_reference()), &expected);
+            assert_eq!(parameter.type_reference(), &predefined(expected));
             assert_eq!(parameter.is_optional(), name == "for");
             if name == "for" {
                 let LoweredTypeData::Union(types) = local(symbol, function.return_type()) else {
                     panic!("expected union")
                 };
-                assert_eq!(local(symbol, &types[0]), &expected);
-                assert_eq!(local(symbol, &types[1]), &LoweredTypeData::Undefined);
+                assert_eq!(types[0], predefined(expected));
+                assert_eq!(types[1], predefined("GLOBAL_UNDEFINED_ID"));
             } else {
-                assert_eq!(local(symbol, function.return_type()), &expected);
+                assert_eq!(function.return_type(), &predefined(expected));
             }
         }
     }
@@ -820,11 +845,11 @@ fn function_declarations_preserve_generic_overloads_and_parameters() -> Result<(
     assert_eq!(function.name(), Some("readFlag"));
     assert_eq!(
         function.parameters()[0].type_reference(),
-        &LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID")
+        &predefined("GLOBAL_NUMBER_KEYWORD_ID")
     );
     assert_eq!(
-        local(read_flag, function.return_type()),
-        &LoweredTypeData::Boolean
+        function.return_type(),
+        &predefined("GLOBAL_BOOLEAN_KEYWORD_ID")
     );
 
     let convert = global(&lowered, "convertValue");
@@ -851,18 +876,12 @@ fn function_declarations_preserve_generic_overloads_and_parameters() -> Result<(
             panic!("expected generic parameter")
         };
         if index == 0 {
-            assert_eq!(
-                constraint,
-                &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID"))
-            );
+            assert_eq!(constraint, &Some(predefined("GLOBAL_STRING_KEYWORD_ID")));
             assert_eq!(default, constraint);
             assert!(function.parameters()[0].is_optional());
             assert_eq!(function.return_type(), generic);
         } else {
-            assert_eq!(
-                local(convert, constraint.as_ref().unwrap()),
-                &LoweredTypeData::Boolean
-            );
+            assert_eq!(constraint, &Some(predefined("GLOBAL_BOOLEAN_KEYWORD_ID")));
             let rest = &function.parameters()[1];
             assert!(rest.is_rest());
             assert_eq!(rest.type_reference(), function.return_type());
@@ -948,9 +967,12 @@ fn generic_constraints_translate_types_and_parameter_references() -> Result<()> 
         "type IteratorResult",
     ] {
         for (source_type, expected) in [
-            ("boolean", LoweredTypeData::Boolean),
-            ("'bound'", LoweredTypeData::StringLiteral("bound".into())),
-            ("object", LoweredTypeData::ObjectKeyword),
+            ("boolean", Lowered::Predefined("GLOBAL_BOOLEAN_KEYWORD_ID")),
+            (
+                "'bound'",
+                Lowered::Local(LoweredTypeData::StringLiteral("bound".into())),
+            ),
+            ("object", Lowered::Predefined("GLOBAL_OBJECT_KEYWORD_ID")),
         ] {
             let body = if declaration.starts_with("type") {
                 "= B;"
@@ -977,7 +999,7 @@ fn generic_constraints_translate_types_and_parameter_references() -> Result<()> 
                 constraint.clone()
             };
             let bound = constraint(&parameters[0]).expect("constraint must be preserved");
-            assert_eq!(local(global, &bound), &expected);
+            assert_eq!(lowered_type(global, &bound), expected);
             assert_eq!(constraint(&parameters[1]), Some(parameters[0].clone()));
             assert_eq!(constraint(&parameters[2]), None);
         }
@@ -1013,10 +1035,7 @@ fn constraints_on_later_parameters_lower_to_unknown() -> Result<()> {
         panic!("expected generic parameter")
     };
     // Local types must follow their dependencies, so `A` cannot refer to `B`.
-    assert_eq!(
-        constraint.as_ref(),
-        Some(&LoweredTypeReference::Predefined("GLOBAL_UNKNOWN_ID"))
-    );
+    assert_eq!(constraint.as_ref(), Some(&predefined("GLOBAL_UNKNOWN_ID")));
     Ok(())
 }
 
@@ -1042,14 +1061,11 @@ fn generic_constraints_preserve_unions_and_defaults() -> Result<()> {
     assert_eq!(
         types.as_ref(),
         [
-            LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID"),
-            LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID")
+            predefined("GLOBAL_STRING_KEYWORD_ID"),
+            predefined("GLOBAL_NUMBER_KEYWORD_ID")
         ]
     );
-    assert_eq!(
-        default,
-        &Some(LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID"))
-    );
+    assert_eq!(default, &Some(predefined("GLOBAL_STRING_KEYWORD_ID")));
     let LoweredTypeData::GenericParameter {
         constraint,
         default,
@@ -1138,7 +1154,7 @@ fn iterator_declarations_translate_generics_aliases_and_rest_tuples() -> Result<
         else {
             panic!("expected default")
         };
-        assert_eq!(local(result, default), &LoweredTypeData::Boolean);
+        assert_eq!(default, &predefined("GLOBAL_BOOLEAN_KEYWORD_ID"));
         let LoweredTypeData::Union(results) = local(result, ty) else {
             panic!("expected alias union")
         };
@@ -1203,7 +1219,7 @@ fn unsupported_syntax_lowers_to_unknown() -> Result<()> {
     let LoweredTypeData::InstanceOf { ty, .. } = partial.data() else {
         panic!("expected generic alias")
     };
-    assert_eq!(ty, &LoweredTypeReference::Predefined("GLOBAL_UNKNOWN_ID"));
+    assert_eq!(ty, &predefined("GLOBAL_UNKNOWN_ID"));
     let details = lowered
         .gaps()
         .iter()
@@ -1258,7 +1274,7 @@ fn regexp_signatures_follow_declarations() -> Result<()> {
     assert_eq!(ty, &generated("GLOBAL_ARRAY_ID"));
     assert_eq!(
         type_parameters.as_ref(),
-        &[LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID")]
+        &[predefined("GLOBAL_NUMBER_KEYWORD_ID")]
     );
     let regexp = global(&lowered, "RegExp");
     let LoweredTypeData::Class(class) = regexp.data() else {
