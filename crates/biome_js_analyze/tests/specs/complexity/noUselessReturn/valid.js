@@ -102,3 +102,22 @@ function n() {
         doSomething();
     }
 }
+
+// return as the entire body of an unbraced if (removing it would break parsing)
+function o() {
+    doSomething();
+    if (condition) return;
+}
+
+// return as the entire body of an unbraced else
+function p() {
+    if (condition) {
+        foo();
+    } else return;
+}
+
+// unbraced if/else where both branches return
+function q() {
+    if (condition) return;
+    else return;
+}

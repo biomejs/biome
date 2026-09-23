@@ -1,10 +1,14 @@
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    JsDoWhileStatement, JsFinallyClause, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsFunctionBody, JsReturnStatement, JsStatementList, JsSwitchStatement, JsWhileStatement,
+    JsDoWhileStatement, JsElseClause, JsFinallyClause, JsForInStatement, JsForOfStatement,
+    JsForStatement, JsFunctionBody, JsIfStatement, JsLanguage, JsReturnStatement, JsStatementList,
+    JsSwitchStatement, JsWhileStatement,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
+use biome_languages::JsFileSource;
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutation, BatchMutationExt, SyntaxNode, chain_trivia_pieces,
+};
 use biome_rule_options::no_useless_return::NoUselessReturnOptions;
 
 use crate::JsRuleAction;
@@ -92,6 +96,13 @@ impl Rule for NoUselessReturn {
             return None;
         }
 
+        // Skip a `return;` that is the entire body of an unbraced `if` or
+        // `else`: removing it alone would leave `if (cond)` or `else` with no
+        // consequent, which is a syntax error.
+        if is_unbraced_if_body(ret) {
+            return None;
+        }
+
         // Find the enclosing function
         let function_root = ret
             .syntax()
@@ -112,6 +123,14 @@ impl Rule for NoUselessReturn {
 
         // Check if the return is in tail position
         if is_tail_position(ret, &function_root) {
+            // In TypeScript, a trailing `return;` is load-bearing when another
+            // code path returns a value: removing it breaks
+            // `tsc --noImplicitReturns` (TS7030).
+            if ctx.source_type::<JsFileSource>().is_typescript()
+                && has_valued_return(&function_root, ret)
+            {
+                return None;
+            }
             return Some(());
         }
 
@@ -134,7 +153,7 @@ impl Rule for NoUselessReturn {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(ctx.query().clone());
+        remove_return_preserving_comments(&mut mutation, ctx.query());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -143,6 +162,95 @@ impl Rule for NoUselessReturn {
             mutation,
         ))
     }
+}
+
+/// Remove the `return` statement, preserving its leading comments.
+///
+/// The comments are transferred to the next token's leading trivia. Trailing
+/// whitespace is trimmed, and a trailing newline is only kept when the next
+/// token doesn't already start on a new line, so the fixed output stays
+/// clean and the next token is never commented out. When the statement has
+/// no comments, this is equivalent to a plain removal.
+fn remove_return_preserving_comments(
+    mutation: &mut BatchMutation<JsLanguage>,
+    ret: &JsReturnStatement,
+) {
+    if let (Some(next_token), Some(leading)) = (
+        ret.syntax()
+            .last_token()
+            .and_then(|token| token.next_token()),
+        ret.syntax().first_leading_trivia(),
+    ) {
+        let mut pieces: Vec<_> = leading.pieces().collect();
+
+        // Trim trailing whitespace; newlines are handled below.
+        while pieces.last().is_some_and(|piece| piece.is_whitespace()) {
+            pieces.pop();
+        }
+
+        // Only transfer trivia when there are comments to preserve;
+        // otherwise a plain removal keeps the output clean.
+        if pieces.iter().any(|piece| piece.is_comments()) {
+            let next_starts_with_newline = next_token
+                .leading_trivia()
+                .pieces()
+                .next()
+                .is_some_and(|piece| piece.is_newline());
+
+            // If the next token already starts on a new line, drop our own
+            // trailing newlines to avoid a blank line.
+            if next_starts_with_newline {
+                while pieces.last().is_some_and(|piece| piece.is_newline()) {
+                    pieces.pop();
+                }
+            }
+
+            let new_token = next_token.with_leading_trivia_pieces(chain_trivia_pieces(
+                pieces.into_iter(),
+                next_token.leading_trivia().pieces(),
+            ));
+            mutation.replace_token_discard_trivia(next_token, new_token);
+        }
+    }
+
+    mutation.remove_node(ret.clone());
+}
+
+/// Check whether the `return` statement is the entire consequent or alternate
+/// of an `if` statement without braces.
+///
+/// Removing just the `return` would leave `if (cond)` or `else` with no
+/// statement, which is a syntax error, so the rule stays silent.
+fn is_unbraced_if_body(ret: &JsReturnStatement) -> bool {
+    let Some(parent) = ret.syntax().parent() else {
+        return false;
+    };
+    JsIfStatement::can_cast(parent.kind()) || JsElseClause::can_cast(parent.kind())
+}
+
+/// Check whether the function contains another `return` statement that returns
+/// a value (`return expr;`) in the same control flow root.
+///
+/// With TypeScript's `noImplicitReturns`, a trailing bare `return;` keeps the
+/// compiler satisfied when another code path returns a value (TS7030), so the
+/// safe fix must not remove it.
+fn has_valued_return(function_root: &SyntaxNode<JsLanguage>, ret: &JsReturnStatement) -> bool {
+    function_root.descendants().any(|node| {
+        let Some(candidate) = JsReturnStatement::cast(node) else {
+            return false;
+        };
+        if candidate.syntax() == ret.syntax() || candidate.argument().is_none() {
+            return false;
+        }
+        // Ignore returns that belong to a nested function or other nested
+        // control flow root; only the current function's paths matter.
+        for ancestor in candidate.syntax().ancestors() {
+            if AnyJsControlFlowRoot::can_cast(ancestor.kind()) {
+                return &ancestor == function_root;
+            }
+        }
+        false
+    })
 }
 
 /// Check if the return statement is inside a loop or switch statement

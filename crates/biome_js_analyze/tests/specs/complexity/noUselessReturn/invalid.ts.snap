@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// trailing return in a TypeScript function where no path returns a value
+export function a(): void {
+    doSomething();
+    return;
+}
+
+// a valued return in a nested function does not protect the outer return:
+// the outer trailing return is still useless
+export function b(): void {
+    function inner(): number {
+        return 1;
+    }
+    inner();
+    return;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    4 │ export function a(): void {
+    5 │     doSomething();
+  > 6 │     return;
+      │     ^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+     4  4 │   export function a(): void {
+     5  5 │       doSomething();
+     6    │ - ····return;
+     7  6 │   }
+     8  7 │   
+  
+
+```
+
+```
+invalid.ts:16:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    14 │     }
+    15 │     inner();
+  > 16 │     return;
+       │     ^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    14 14 │       }
+    15 15 │       inner();
+    16    │ - ····return;
+    17 16 │   }
+    18 17 │   
+  
+
+```

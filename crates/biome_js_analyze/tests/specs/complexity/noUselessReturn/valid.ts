@@ -1,0 +1,16 @@
+/* should not generate diagnostics */
+
+// trailing return is load-bearing with noImplicitReturns when another path
+// returns a value (TS7030)
+export function pick(flag: boolean): number | undefined {
+    if (flag) {
+        return 1;
+    }
+    return;
+}
+
+// same, with the valued return in an unbraced if
+export function pick2(flag: boolean): number | undefined {
+    if (flag) return 1;
+    return;
+}
