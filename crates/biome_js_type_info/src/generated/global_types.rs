@@ -1777,685 +1777,251 @@ pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[
     ("unescape", ids::UNESCAPE_ID_GLOBAL_TYPE_ID),
 ];
 
-/// Registers all generated global type data into the resolver builder.
-pub(crate) fn set_generated_global_type_data(
-    builder: &mut crate::globals_builder::GlobalsResolverBuilder,
-) {
-    builder.set_type_data(ids::NA_N_ID_GLOBAL_TYPE_ID, global_na_n());
-    builder.set_type_data(ids::INFINITY_ID_GLOBAL_TYPE_ID, global_infinity());
-    builder.set_type_data(ids::EVAL_ID_GLOBAL_TYPE_ID, global_eval());
-    builder.set_type_data(ids::PARSE_INT_ID_GLOBAL_TYPE_ID, global_parse_int());
-    builder.set_type_data(ids::PARSE_FLOAT_ID_GLOBAL_TYPE_ID, global_parse_float());
-    builder.set_type_data(ids::IS_NA_N_ID_GLOBAL_TYPE_ID, global_is_na_n());
-    builder.set_type_data(ids::IS_FINITE_ID_GLOBAL_TYPE_ID, global_is_finite());
-    builder.set_type_data(ids::DECODE_URI_ID_GLOBAL_TYPE_ID, global_decode_uri());
-    builder.set_type_data(
-        ids::DECODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
-        global_decode_uri_component(),
-    );
-    builder.set_type_data(ids::ENCODE_URI_ID_GLOBAL_TYPE_ID, global_encode_uri());
-    builder.set_type_data(
-        ids::ENCODE_URI_COMPONENT_ID_GLOBAL_TYPE_ID,
-        global_encode_uri_component(),
-    );
-    builder.set_type_data(ids::ESCAPE_ID_GLOBAL_TYPE_ID, global_escape());
-    builder.set_type_data(ids::UNESCAPE_ID_GLOBAL_TYPE_ID, global_unescape());
-    builder.set_type_data(ids::SYMBOL_ID_GLOBAL_TYPE_ID, global_symbol());
-    builder.set_type_data(ids::PROPERTY_KEY_ID_GLOBAL_TYPE_ID, global_property_key());
-    builder.set_type_data(
-        ids::PROPERTY_DESCRIPTOR_ID_GLOBAL_TYPE_ID,
-        global_property_descriptor(),
-    );
-    builder.set_type_data(
-        ids::PROPERTY_DESCRIPTOR_MAP_ID_GLOBAL_TYPE_ID,
-        global_property_descriptor_map(),
-    );
-    builder.set_type_data(ids::OBJECT_ID_GLOBAL_TYPE_ID, global_object());
-    builder.set_type_data(
-        ids::OBJECT_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_object_constructor(),
-    );
-    builder.set_type_data(ids::FUNCTION_ID_GLOBAL_TYPE_ID, global_function());
-    builder.set_type_data(
-        ids::FUNCTION_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_function_constructor(),
-    );
-    builder.set_type_data(
-        ids::THIS_PARAMETER_TYPE_ID_GLOBAL_TYPE_ID,
-        global_this_parameter_type(),
-    );
-    builder.set_type_data(
-        ids::OMIT_THIS_PARAMETER_ID_GLOBAL_TYPE_ID,
-        global_omit_this_parameter(),
-    );
-    builder.set_type_data(
-        ids::CALLABLE_FUNCTION_ID_GLOBAL_TYPE_ID,
-        global_callable_function(),
-    );
-    builder.set_type_data(
-        ids::NEWABLE_FUNCTION_ID_GLOBAL_TYPE_ID,
-        global_newable_function(),
-    );
-    builder.set_type_data(ids::I_ARGUMENTS_ID_GLOBAL_TYPE_ID, global_i_arguments());
-    builder.set_type_data(ids::STRING_ID_GLOBAL_TYPE_ID, global_string());
-    builder.set_type_data(
-        ids::STRING_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_string_constructor(),
-    );
-    builder.set_type_data(ids::BOOLEAN_ID_GLOBAL_TYPE_ID, global_boolean());
-    builder.set_type_data(
-        ids::BOOLEAN_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_boolean_constructor(),
-    );
-    builder.set_type_data(ids::NUMBER_ID_GLOBAL_TYPE_ID, global_number());
-    builder.set_type_data(
-        ids::NUMBER_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_number_constructor(),
-    );
-    builder.set_type_data(
-        ids::TEMPLATE_STRINGS_ARRAY_ID_GLOBAL_TYPE_ID,
-        global_template_strings_array(),
-    );
-    builder.set_type_data(ids::IMPORT_META_ID_GLOBAL_TYPE_ID, global_import_meta());
-    builder.set_type_data(
-        ids::IMPORT_CALL_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_import_call_options(),
-    );
-    builder.set_type_data(
-        ids::IMPORT_ASSERTIONS_ID_GLOBAL_TYPE_ID,
-        global_import_assertions(),
-    );
-    builder.set_type_data(
-        ids::IMPORT_ATTRIBUTES_ID_GLOBAL_TYPE_ID,
-        global_import_attributes(),
-    );
-    builder.set_type_data(ids::MATH_ID_GLOBAL_TYPE_ID, global_math());
-    builder.set_type_data(ids::MATH_VALUE_ID_GLOBAL_TYPE_ID, global_math_value());
-    builder.set_type_data(ids::DATE_ID_GLOBAL_TYPE_ID, global_date());
-    builder.set_type_data(
-        ids::DATE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_date_constructor(),
-    );
-    builder.set_type_data(
-        ids::REG_EXP_MATCH_ARRAY_ID_GLOBAL_TYPE_ID,
-        global_reg_exp_match_array(),
-    );
-    builder.set_type_data(
-        ids::REG_EXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID,
-        global_reg_exp_exec_array(),
-    );
-    builder.set_type_data(ids::REG_EXP_ID_GLOBAL_TYPE_ID, global_reg_exp());
-    builder.set_type_data(
-        ids::REG_EXP_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_reg_exp_constructor(),
-    );
-    builder.set_type_data(ids::ERROR_ID_GLOBAL_TYPE_ID, global_error());
-    builder.set_type_data(
-        ids::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_error_constructor(),
-    );
-    builder.set_type_data(ids::EVAL_ERROR_ID_GLOBAL_TYPE_ID, global_eval_error());
-    builder.set_type_data(
-        ids::EVAL_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_eval_error_constructor(),
-    );
-    builder.set_type_data(ids::RANGE_ERROR_ID_GLOBAL_TYPE_ID, global_range_error());
-    builder.set_type_data(
-        ids::RANGE_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_range_error_constructor(),
-    );
-    builder.set_type_data(
-        ids::REFERENCE_ERROR_ID_GLOBAL_TYPE_ID,
-        global_reference_error(),
-    );
-    builder.set_type_data(
-        ids::REFERENCE_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_reference_error_constructor(),
-    );
-    builder.set_type_data(ids::SYNTAX_ERROR_ID_GLOBAL_TYPE_ID, global_syntax_error());
-    builder.set_type_data(
-        ids::SYNTAX_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_syntax_error_constructor(),
-    );
-    builder.set_type_data(ids::TYPE_ERROR_ID_GLOBAL_TYPE_ID, global_type_error());
-    builder.set_type_data(
-        ids::TYPE_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_type_error_constructor(),
-    );
-    builder.set_type_data(ids::URI_ERROR_ID_GLOBAL_TYPE_ID, global_uri_error());
-    builder.set_type_data(
-        ids::URI_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_uri_error_constructor(),
-    );
-    builder.set_type_data(ids::JSON_ID_GLOBAL_TYPE_ID, global_json());
-    builder.set_type_data(ids::JSON_VALUE_ID_GLOBAL_TYPE_ID, global_json_value());
-    builder.set_type_data(
-        ids::READONLY_ARRAY_ID_GLOBAL_TYPE_ID,
-        global_readonly_array(),
-    );
-    builder.set_type_data(ids::CONCAT_ARRAY_ID_GLOBAL_TYPE_ID, global_concat_array());
-    builder.set_type_data(ids::ARRAY_ID_GLOBAL_TYPE_ID, global_array());
-    builder.set_type_data(
-        ids::ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_array_constructor(),
-    );
-    builder.set_type_data(
-        ids::TYPED_PROPERTY_DESCRIPTOR_ID_GLOBAL_TYPE_ID,
-        global_typed_property_descriptor(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_CONSTRUCTOR_LIKE_ID_GLOBAL_TYPE_ID,
-        global_promise_constructor_like(),
-    );
-    builder.set_type_data(ids::PROMISE_LIKE_ID_GLOBAL_TYPE_ID, global_promise_like());
-    builder.set_type_data(ids::PROMISE_ID_GLOBAL_TYPE_ID, global_promise());
-    builder.set_type_data(ids::AWAITED_ID_GLOBAL_TYPE_ID, global_awaited());
-    builder.set_type_data(ids::ARRAY_LIKE_ID_GLOBAL_TYPE_ID, global_array_like());
-    builder.set_type_data(ids::PARTIAL_ID_GLOBAL_TYPE_ID, global_partial());
-    builder.set_type_data(ids::REQUIRED_ID_GLOBAL_TYPE_ID, global_required());
-    builder.set_type_data(ids::READONLY_ID_GLOBAL_TYPE_ID, global_readonly());
-    builder.set_type_data(ids::PICK_ID_GLOBAL_TYPE_ID, global_pick());
-    builder.set_type_data(ids::RECORD_ID_GLOBAL_TYPE_ID, global_record());
-    builder.set_type_data(ids::EXCLUDE_ID_GLOBAL_TYPE_ID, global_exclude());
-    builder.set_type_data(ids::EXTRACT_ID_GLOBAL_TYPE_ID, global_extract());
-    builder.set_type_data(ids::OMIT_ID_GLOBAL_TYPE_ID, global_omit());
-    builder.set_type_data(ids::NON_NULLABLE_ID_GLOBAL_TYPE_ID, global_non_nullable());
-    builder.set_type_data(ids::PARAMETERS_ID_GLOBAL_TYPE_ID, global_parameters());
-    builder.set_type_data(
-        ids::CONSTRUCTOR_PARAMETERS_ID_GLOBAL_TYPE_ID,
-        global_constructor_parameters(),
-    );
-    builder.set_type_data(ids::RETURN_TYPE_ID_GLOBAL_TYPE_ID, global_return_type());
-    builder.set_type_data(ids::INSTANCE_TYPE_ID_GLOBAL_TYPE_ID, global_instance_type());
-    builder.set_type_data(ids::UPPERCASE_ID_GLOBAL_TYPE_ID, global_uppercase());
-    builder.set_type_data(ids::LOWERCASE_ID_GLOBAL_TYPE_ID, global_lowercase());
-    builder.set_type_data(ids::CAPITALIZE_ID_GLOBAL_TYPE_ID, global_capitalize());
-    builder.set_type_data(ids::UNCAPITALIZE_ID_GLOBAL_TYPE_ID, global_uncapitalize());
-    builder.set_type_data(ids::NO_INFER_ID_GLOBAL_TYPE_ID, global_no_infer());
-    builder.set_type_data(ids::THIS_TYPE_ID_GLOBAL_TYPE_ID, global_this_type());
-    builder.set_type_data(
-        ids::WEAK_KEY_TYPES_ID_GLOBAL_TYPE_ID,
-        global_weak_key_types(),
-    );
-    builder.set_type_data(ids::WEAK_KEY_ID_GLOBAL_TYPE_ID, global_weak_key());
-    builder.set_type_data(ids::ARRAY_BUFFER_ID_GLOBAL_TYPE_ID, global_array_buffer());
-    builder.set_type_data(
-        ids::ARRAY_BUFFER_TYPES_ID_GLOBAL_TYPE_ID,
-        global_array_buffer_types(),
-    );
-    builder.set_type_data(
-        ids::ARRAY_BUFFER_LIKE_ID_GLOBAL_TYPE_ID,
-        global_array_buffer_like(),
-    );
-    builder.set_type_data(
-        ids::ARRAY_BUFFER_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_array_buffer_constructor(),
-    );
-    builder.set_type_data(
-        ids::ARRAY_BUFFER_VIEW_ID_GLOBAL_TYPE_ID,
-        global_array_buffer_view(),
-    );
-    builder.set_type_data(ids::DATA_VIEW_ID_GLOBAL_TYPE_ID, global_data_view());
-    builder.set_type_data(
-        ids::DATA_VIEW_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_data_view_constructor(),
-    );
-    builder.set_type_data(ids::INT8_ARRAY_ID_GLOBAL_TYPE_ID, global_int8_array());
-    builder.set_type_data(
-        ids::INT8_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_int8_array_constructor(),
-    );
-    builder.set_type_data(ids::UINT8_ARRAY_ID_GLOBAL_TYPE_ID, global_uint8_array());
-    builder.set_type_data(
-        ids::UINT8_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_uint8_array_constructor(),
-    );
-    builder.set_type_data(
-        ids::UINT8_CLAMPED_ARRAY_ID_GLOBAL_TYPE_ID,
-        global_uint8_clamped_array(),
-    );
-    builder.set_type_data(
-        ids::UINT8_CLAMPED_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_uint8_clamped_array_constructor(),
-    );
-    builder.set_type_data(ids::INT16_ARRAY_ID_GLOBAL_TYPE_ID, global_int16_array());
-    builder.set_type_data(
-        ids::INT16_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_int16_array_constructor(),
-    );
-    builder.set_type_data(ids::UINT16_ARRAY_ID_GLOBAL_TYPE_ID, global_uint16_array());
-    builder.set_type_data(
-        ids::UINT16_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_uint16_array_constructor(),
-    );
-    builder.set_type_data(ids::INT32_ARRAY_ID_GLOBAL_TYPE_ID, global_int32_array());
-    builder.set_type_data(
-        ids::INT32_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_int32_array_constructor(),
-    );
-    builder.set_type_data(ids::UINT32_ARRAY_ID_GLOBAL_TYPE_ID, global_uint32_array());
-    builder.set_type_data(
-        ids::UINT32_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_uint32_array_constructor(),
-    );
-    builder.set_type_data(ids::FLOAT32_ARRAY_ID_GLOBAL_TYPE_ID, global_float32_array());
-    builder.set_type_data(
-        ids::FLOAT32_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_float32_array_constructor(),
-    );
-    builder.set_type_data(ids::FLOAT64_ARRAY_ID_GLOBAL_TYPE_ID, global_float64_array());
-    builder.set_type_data(
-        ids::FLOAT64_ARRAY_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_float64_array_constructor(),
-    );
-    builder.set_type_data(
-        ids::INTL_COLLATOR_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_collator_options(),
-    );
-    builder.set_type_data(
-        ids::INTL_RESOLVED_COLLATOR_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_resolved_collator_options(),
-    );
-    builder.set_type_data(ids::INTL_COLLATOR_ID_GLOBAL_TYPE_ID, global_intl_collator());
-    builder.set_type_data(
-        ids::INTL_COLLATOR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_intl_collator_constructor(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_STYLE_REGISTRY_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_style_registry(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_STYLE_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_style(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_CURRENCY_DISPLAY_REGISTRY_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_currency_display_registry(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_CURRENCY_DISPLAY_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_currency_display(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_REGISTRY_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_use_grouping_registry(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_USE_GROUPING_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options_use_grouping(),
-    );
-    builder.set_type_data(
-        ids::INTL_RESOLVED_NUMBER_FORMAT_OPTIONS_USE_GROUPING_ID_GLOBAL_TYPE_ID,
-        global_intl_resolved_number_format_options_use_grouping(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_options(),
-    );
-    builder.set_type_data(
-        ids::INTL_RESOLVED_NUMBER_FORMAT_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_resolved_number_format_options(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format(),
-    );
-    builder.set_type_data(
-        ids::INTL_NUMBER_FORMAT_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_intl_number_format_constructor(),
-    );
-    builder.set_type_data(
-        ids::INTL_DATE_TIME_FORMAT_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_date_time_format_options(),
-    );
-    builder.set_type_data(
-        ids::INTL_RESOLVED_DATE_TIME_FORMAT_OPTIONS_ID_GLOBAL_TYPE_ID,
-        global_intl_resolved_date_time_format_options(),
-    );
-    builder.set_type_data(
-        ids::INTL_DATE_TIME_FORMAT_ID_GLOBAL_TYPE_ID,
-        global_intl_date_time_format(),
-    );
-    builder.set_type_data(
-        ids::INTL_DATE_TIME_FORMAT_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_intl_date_time_format_constructor(),
-    );
-    builder.set_type_data(ids::MAP_ID_GLOBAL_TYPE_ID, global_map());
-    builder.set_type_data(
-        ids::MAP_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_map_constructor(),
-    );
-    builder.set_type_data(ids::READONLY_MAP_ID_GLOBAL_TYPE_ID, global_readonly_map());
-    builder.set_type_data(ids::WEAK_MAP_ID_GLOBAL_TYPE_ID, global_weak_map());
-    builder.set_type_data(
-        ids::WEAK_MAP_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_weak_map_constructor(),
-    );
-    builder.set_type_data(ids::SET_ID_GLOBAL_TYPE_ID, global_set());
-    builder.set_type_data(
-        ids::SET_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_set_constructor(),
-    );
-    builder.set_type_data(ids::READONLY_SET_ID_GLOBAL_TYPE_ID, global_readonly_set());
-    builder.set_type_data(ids::WEAK_SET_ID_GLOBAL_TYPE_ID, global_weak_set());
-    builder.set_type_data(
-        ids::WEAK_SET_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_weak_set_constructor(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_symbol_constructor(),
-    );
-    builder.set_type_data(
-        ids::ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID,
-        global_iterator_yield_result(),
-    );
-    builder.set_type_data(
-        ids::ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID,
-        global_iterator_return_result(),
-    );
-    builder.set_type_data(
-        ids::ITERATOR_RESULT_ID_GLOBAL_TYPE_ID,
-        global_iterator_result(),
-    );
-    builder.set_type_data(ids::ITERATOR_ID_GLOBAL_TYPE_ID, global_iterator());
-    builder.set_type_data(ids::ITERABLE_ID_GLOBAL_TYPE_ID, global_iterable());
-    builder.set_type_data(
-        ids::ITERABLE_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_iterable_iterator(),
-    );
-    builder.set_type_data(
-        ids::ITERATOR_OBJECT_ID_GLOBAL_TYPE_ID,
-        global_iterator_object(),
-    );
-    builder.set_type_data(
-        ids::BUILTIN_ITERATOR_RETURN_ID_GLOBAL_TYPE_ID,
-        global_builtin_iterator_return(),
-    );
-    builder.set_type_data(
-        ids::ARRAY_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_array_iterator(),
-    );
-    builder.set_type_data(ids::MAP_ITERATOR_ID_GLOBAL_TYPE_ID, global_map_iterator());
-    builder.set_type_data(ids::SET_ITERATOR_ID_GLOBAL_TYPE_ID, global_set_iterator());
-    builder.set_type_data(
-        ids::PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_promise_constructor(),
-    );
-    builder.set_type_data(
-        ids::STRING_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_string_iterator(),
-    );
-    builder.set_type_data(ids::REFLECT_APPLY_ID_GLOBAL_TYPE_ID, global_reflect_apply());
-    builder.set_type_data(
-        ids::REFLECT_CONSTRUCT_ID_GLOBAL_TYPE_ID,
-        global_reflect_construct(),
-    );
-    builder.set_type_data(
-        ids::REFLECT_DEFINE_PROPERTY_ID_GLOBAL_TYPE_ID,
-        global_reflect_define_property(),
-    );
-    builder.set_type_data(
-        ids::REFLECT_DELETE_PROPERTY_ID_GLOBAL_TYPE_ID,
-        global_reflect_delete_property(),
-    );
-    builder.set_type_data(ids::REFLECT_GET_ID_GLOBAL_TYPE_ID, global_reflect_get());
-    builder.set_type_data(
-        ids::REFLECT_GET_OWN_PROPERTY_DESCRIPTOR_ID_GLOBAL_TYPE_ID,
-        global_reflect_get_own_property_descriptor(),
-    );
-    builder.set_type_data(
-        ids::REFLECT_GET_PROTOTYPE_OF_ID_GLOBAL_TYPE_ID,
-        global_reflect_get_prototype_of(),
-    );
-    builder.set_type_data(ids::REFLECT_HAS_ID_GLOBAL_TYPE_ID, global_reflect_has());
-    builder.set_type_data(
-        ids::REFLECT_IS_EXTENSIBLE_ID_GLOBAL_TYPE_ID,
-        global_reflect_is_extensible(),
-    );
-    builder.set_type_data(
-        ids::REFLECT_OWN_KEYS_ID_GLOBAL_TYPE_ID,
-        global_reflect_own_keys(),
-    );
-    builder.set_type_data(
-        ids::REFLECT_PREVENT_EXTENSIONS_ID_GLOBAL_TYPE_ID,
-        global_reflect_prevent_extensions(),
-    );
-    builder.set_type_data(ids::REFLECT_SET_ID_GLOBAL_TYPE_ID, global_reflect_set());
-    builder.set_type_data(
-        ids::REFLECT_SET_PROTOTYPE_OF_ID_GLOBAL_TYPE_ID,
-        global_reflect_set_prototype_of(),
-    );
-    builder.set_type_data(
-        ids::GENERATOR_FUNCTION_ID_GLOBAL_TYPE_ID,
-        global_generator_function(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_async_iterator(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_ITERABLE_ID_GLOBAL_TYPE_ID,
-        global_async_iterable(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_ITERABLE_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_async_iterable_iterator(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_ITERATOR_OBJECT_ID_GLOBAL_TYPE_ID,
-        global_async_iterator_object(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_FULFILLED_RESULT_ID_GLOBAL_TYPE_ID,
-        global_promise_fulfilled_result(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_REJECTED_RESULT_ID_GLOBAL_TYPE_ID,
-        global_promise_rejected_result(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_SETTLED_RESULT_ID_GLOBAL_TYPE_ID,
-        global_promise_settled_result(),
-    );
-    builder.set_type_data(
-        ids::AGGREGATE_ERROR_ID_GLOBAL_TYPE_ID,
-        global_aggregate_error(),
-    );
-    builder.set_type_data(
-        ids::AGGREGATE_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_aggregate_error_constructor(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_WITH_RESOLVERS_ID_GLOBAL_TYPE_ID,
-        global_promise_with_resolvers(),
-    );
-    builder.set_type_data(ids::DISPOSABLE_ID_GLOBAL_TYPE_ID, global_disposable());
-    builder.set_type_data(
-        ids::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID,
-        global_async_disposable(),
-    );
-    builder.set_type_data(
-        ids::SUPPRESSED_ERROR_ID_GLOBAL_TYPE_ID,
-        global_suppressed_error(),
-    );
-    builder.set_type_data(
-        ids::SUPPRESSED_ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_suppressed_error_constructor(),
-    );
-    builder.set_type_data(
-        ids::DISPOSABLE_STACK_ID_GLOBAL_TYPE_ID,
-        global_disposable_stack(),
-    );
-    builder.set_type_data(
-        ids::DISPOSABLE_STACK_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_disposable_stack_constructor(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_DISPOSABLE_STACK_ID_GLOBAL_TYPE_ID,
-        global_async_disposable_stack(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_DISPOSABLE_STACK_CONSTRUCTOR_ID_GLOBAL_TYPE_ID,
-        global_async_disposable_stack_constructor(),
-    );
-    builder.set_type_data(
-        ids::CLASS_MEMBER_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_member_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::DECORATOR_METADATA_OBJECT_ID_GLOBAL_TYPE_ID,
-        global_decorator_metadata_object(),
-    );
-    builder.set_type_data(
-        ids::DECORATOR_METADATA_ID_GLOBAL_TYPE_ID,
-        global_decorator_metadata(),
-    );
-    builder.set_type_data(
-        ids::CLASS_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_METHOD_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_method_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_GETTER_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_getter_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_SETTER_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_setter_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_ACCESSOR_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_accessor_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_ACCESSOR_DECORATOR_TARGET_ID_GLOBAL_TYPE_ID,
-        global_class_accessor_decorator_target(),
-    );
-    builder.set_type_data(
-        ids::CLASS_ACCESSOR_DECORATOR_RESULT_ID_GLOBAL_TYPE_ID,
-        global_class_accessor_decorator_result(),
-    );
-    builder.set_type_data(
-        ids::CLASS_FIELD_DECORATOR_CONTEXT_ID_GLOBAL_TYPE_ID,
-        global_class_field_decorator_context(),
-    );
-    builder.set_type_data(
-        ids::CLASS_DECORATOR_ID_GLOBAL_TYPE_ID,
-        global_class_decorator(),
-    );
-    builder.set_type_data(
-        ids::PROPERTY_DECORATOR_ID_GLOBAL_TYPE_ID,
-        global_property_decorator(),
-    );
-    builder.set_type_data(
-        ids::METHOD_DECORATOR_ID_GLOBAL_TYPE_ID,
-        global_method_decorator(),
-    );
-    builder.set_type_data(
-        ids::PARAMETER_DECORATOR_ID_GLOBAL_TYPE_ID,
-        global_parameter_decorator(),
-    );
-    builder.set_type_data(ids::INTL_ID_GLOBAL_TYPE_ID, global_intl());
-    builder.set_type_data(ids::REFLECT_ID_GLOBAL_TYPE_ID, global_reflect());
-    builder.set_type_data(
-        ids::SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_symbol_iterator(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_HAS_INSTANCE_ID_GLOBAL_TYPE_ID,
-        global_symbol_has_instance(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_IS_CONCAT_SPREADABLE_ID_GLOBAL_TYPE_ID,
-        global_symbol_is_concat_spreadable(),
-    );
-    builder.set_type_data(ids::SYMBOL_MATCH_ID_GLOBAL_TYPE_ID, global_symbol_match());
-    builder.set_type_data(
-        ids::SYMBOL_REPLACE_ID_GLOBAL_TYPE_ID,
-        global_symbol_replace(),
-    );
-    builder.set_type_data(ids::SYMBOL_SEARCH_ID_GLOBAL_TYPE_ID, global_symbol_search());
-    builder.set_type_data(
-        ids::SYMBOL_SPECIES_ID_GLOBAL_TYPE_ID,
-        global_symbol_species(),
-    );
-    builder.set_type_data(ids::SYMBOL_SPLIT_ID_GLOBAL_TYPE_ID, global_symbol_split());
-    builder.set_type_data(
-        ids::SYMBOL_TO_PRIMITIVE_ID_GLOBAL_TYPE_ID,
-        global_symbol_to_primitive(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_TO_STRING_TAG_ID_GLOBAL_TYPE_ID,
-        global_symbol_to_string_tag(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_UNSCOPABLES_ID_GLOBAL_TYPE_ID,
-        global_symbol_unscopables(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_ASYNC_ITERATOR_ID_GLOBAL_TYPE_ID,
-        global_symbol_async_iterator(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
-        global_symbol_dispose(),
-    );
-    builder.set_type_data(
-        ids::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
-        global_symbol_async_dispose(),
-    );
-    builder.set_type_data(ids::ARRAY_FILTER_ID_GLOBAL_TYPE_ID, global_array_filter());
-    builder.set_type_data(ids::ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, global_array_foreach());
-    builder.set_type_data(ids::ARRAY_MAP_ID_GLOBAL_TYPE_ID, global_array_map());
-    builder.set_type_data(
-        ids::PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID,
-        global_promise_construct(),
-    );
-    builder.set_type_data(ids::PROMISE_CATCH_ID_GLOBAL_TYPE_ID, global_promise_catch());
-    builder.set_type_data(
-        ids::PROMISE_FINALLY_ID_GLOBAL_TYPE_ID,
-        global_promise_finally(),
-    );
-    builder.set_type_data(ids::PROMISE_THEN_ID_GLOBAL_TYPE_ID, global_promise_then());
-    builder.set_type_data(ids::PROMISE_ALL_ID_GLOBAL_TYPE_ID, global_promise_all());
-    builder.set_type_data(
-        ids::PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID,
-        global_promise_all_settled(),
-    );
-    builder.set_type_data(ids::PROMISE_ANY_ID_GLOBAL_TYPE_ID, global_promise_any());
-    builder.set_type_data(ids::PROMISE_RACE_ID_GLOBAL_TYPE_ID, global_promise_race());
-    builder.set_type_data(
-        ids::PROMISE_REJECT_ID_GLOBAL_TYPE_ID,
-        global_promise_reject(),
-    );
-    builder.set_type_data(
-        ids::PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID,
-        global_promise_resolve(),
-    );
-    builder.set_type_data(ids::PROMISE_TRY_ID_GLOBAL_TYPE_ID, global_promise_try());
-    builder.set_type_data(
-        ids::ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID,
-        global_error_construct(),
-    );
-    builder.set_type_data(ids::ERROR_CALL_ID_GLOBAL_TYPE_ID, global_error_call());
-    builder.set_type_data(
-        ids::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID,
-        global_disposable_dispose(),
-    );
-    builder.set_type_data(
-        ids::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
-        global_async_disposable_async_dispose(),
-    );
-}
+/// Builds each generated global's type data, in ID order after the manifest.
+pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; 242] = [
+    global_na_n,
+    global_infinity,
+    global_eval,
+    global_parse_int,
+    global_parse_float,
+    global_is_na_n,
+    global_is_finite,
+    global_decode_uri,
+    global_decode_uri_component,
+    global_encode_uri,
+    global_encode_uri_component,
+    global_escape,
+    global_unescape,
+    global_symbol,
+    global_property_key,
+    global_property_descriptor,
+    global_property_descriptor_map,
+    global_object,
+    global_object_constructor,
+    global_function,
+    global_function_constructor,
+    global_this_parameter_type,
+    global_omit_this_parameter,
+    global_callable_function,
+    global_newable_function,
+    global_i_arguments,
+    global_string,
+    global_string_constructor,
+    global_boolean,
+    global_boolean_constructor,
+    global_number,
+    global_number_constructor,
+    global_template_strings_array,
+    global_import_meta,
+    global_import_call_options,
+    global_import_assertions,
+    global_import_attributes,
+    global_math,
+    global_math_value,
+    global_date,
+    global_date_constructor,
+    global_reg_exp_match_array,
+    global_reg_exp_exec_array,
+    global_reg_exp,
+    global_reg_exp_constructor,
+    global_error,
+    global_error_constructor,
+    global_eval_error,
+    global_eval_error_constructor,
+    global_range_error,
+    global_range_error_constructor,
+    global_reference_error,
+    global_reference_error_constructor,
+    global_syntax_error,
+    global_syntax_error_constructor,
+    global_type_error,
+    global_type_error_constructor,
+    global_uri_error,
+    global_uri_error_constructor,
+    global_json,
+    global_json_value,
+    global_readonly_array,
+    global_concat_array,
+    global_array,
+    global_array_constructor,
+    global_typed_property_descriptor,
+    global_promise_constructor_like,
+    global_promise_like,
+    global_promise,
+    global_awaited,
+    global_array_like,
+    global_partial,
+    global_required,
+    global_readonly,
+    global_pick,
+    global_record,
+    global_exclude,
+    global_extract,
+    global_omit,
+    global_non_nullable,
+    global_parameters,
+    global_constructor_parameters,
+    global_return_type,
+    global_instance_type,
+    global_uppercase,
+    global_lowercase,
+    global_capitalize,
+    global_uncapitalize,
+    global_no_infer,
+    global_this_type,
+    global_weak_key_types,
+    global_weak_key,
+    global_array_buffer,
+    global_array_buffer_types,
+    global_array_buffer_like,
+    global_array_buffer_constructor,
+    global_array_buffer_view,
+    global_data_view,
+    global_data_view_constructor,
+    global_int8_array,
+    global_int8_array_constructor,
+    global_uint8_array,
+    global_uint8_array_constructor,
+    global_uint8_clamped_array,
+    global_uint8_clamped_array_constructor,
+    global_int16_array,
+    global_int16_array_constructor,
+    global_uint16_array,
+    global_uint16_array_constructor,
+    global_int32_array,
+    global_int32_array_constructor,
+    global_uint32_array,
+    global_uint32_array_constructor,
+    global_float32_array,
+    global_float32_array_constructor,
+    global_float64_array,
+    global_float64_array_constructor,
+    global_intl_collator_options,
+    global_intl_resolved_collator_options,
+    global_intl_collator,
+    global_intl_collator_constructor,
+    global_intl_number_format_options_style_registry,
+    global_intl_number_format_options_style,
+    global_intl_number_format_options_currency_display_registry,
+    global_intl_number_format_options_currency_display,
+    global_intl_number_format_options_use_grouping_registry,
+    global_intl_number_format_options_use_grouping,
+    global_intl_resolved_number_format_options_use_grouping,
+    global_intl_number_format_options,
+    global_intl_resolved_number_format_options,
+    global_intl_number_format,
+    global_intl_number_format_constructor,
+    global_intl_date_time_format_options,
+    global_intl_resolved_date_time_format_options,
+    global_intl_date_time_format,
+    global_intl_date_time_format_constructor,
+    global_map,
+    global_map_constructor,
+    global_readonly_map,
+    global_weak_map,
+    global_weak_map_constructor,
+    global_set,
+    global_set_constructor,
+    global_readonly_set,
+    global_weak_set,
+    global_weak_set_constructor,
+    global_symbol_constructor,
+    global_iterator_yield_result,
+    global_iterator_return_result,
+    global_iterator_result,
+    global_iterator,
+    global_iterable,
+    global_iterable_iterator,
+    global_iterator_object,
+    global_builtin_iterator_return,
+    global_array_iterator,
+    global_map_iterator,
+    global_set_iterator,
+    global_promise_constructor,
+    global_string_iterator,
+    global_reflect_apply,
+    global_reflect_construct,
+    global_reflect_define_property,
+    global_reflect_delete_property,
+    global_reflect_get,
+    global_reflect_get_own_property_descriptor,
+    global_reflect_get_prototype_of,
+    global_reflect_has,
+    global_reflect_is_extensible,
+    global_reflect_own_keys,
+    global_reflect_prevent_extensions,
+    global_reflect_set,
+    global_reflect_set_prototype_of,
+    global_generator_function,
+    global_async_iterator,
+    global_async_iterable,
+    global_async_iterable_iterator,
+    global_async_iterator_object,
+    global_promise_fulfilled_result,
+    global_promise_rejected_result,
+    global_promise_settled_result,
+    global_aggregate_error,
+    global_aggregate_error_constructor,
+    global_promise_with_resolvers,
+    global_disposable,
+    global_async_disposable,
+    global_suppressed_error,
+    global_suppressed_error_constructor,
+    global_disposable_stack,
+    global_disposable_stack_constructor,
+    global_async_disposable_stack,
+    global_async_disposable_stack_constructor,
+    global_class_member_decorator_context,
+    global_decorator_context,
+    global_decorator_metadata_object,
+    global_decorator_metadata,
+    global_class_decorator_context,
+    global_class_method_decorator_context,
+    global_class_getter_decorator_context,
+    global_class_setter_decorator_context,
+    global_class_accessor_decorator_context,
+    global_class_accessor_decorator_target,
+    global_class_accessor_decorator_result,
+    global_class_field_decorator_context,
+    global_class_decorator,
+    global_property_decorator,
+    global_method_decorator,
+    global_parameter_decorator,
+    global_intl,
+    global_reflect,
+    global_symbol_iterator,
+    global_symbol_has_instance,
+    global_symbol_is_concat_spreadable,
+    global_symbol_match,
+    global_symbol_replace,
+    global_symbol_search,
+    global_symbol_species,
+    global_symbol_split,
+    global_symbol_to_primitive,
+    global_symbol_to_string_tag,
+    global_symbol_unscopables,
+    global_symbol_async_iterator,
+    global_symbol_dispose,
+    global_symbol_async_dispose,
+    global_array_filter,
+    global_array_foreach,
+    global_array_map,
+    global_promise_construct,
+    global_promise_catch,
+    global_promise_finally,
+    global_promise_then,
+    global_promise_all,
+    global_promise_all_settled,
+    global_promise_any,
+    global_promise_race,
+    global_promise_reject,
+    global_promise_resolve,
+    global_promise_try,
+    global_error_construct,
+    global_error_call,
+    global_disposable_dispose,
+    global_async_disposable_async_dispose,
+];
 
 fn global_na_n() -> crate::TypeData {
     crate::TypeData::Reference(crate::globals::GLOBAL_NUMBER_KEYWORD_ID.into())

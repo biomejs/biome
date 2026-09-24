@@ -11,6 +11,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail};
+use biome_string_case::StrLikeExtension;
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
@@ -745,7 +746,7 @@ mod tests {
             "pub(crate) const GENERATED_GLOBAL_NAMES: &[&str] =",
             "pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
             "pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
-            "pub(crate) fn set_generated_global_type_data(",
+            "pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData;",
             "pub(crate) fn generated_local_types(",
         ] {
             assert!(
@@ -998,19 +999,32 @@ mod tests {
         let generated = fs::read_to_string(&output_path)
             .with_context(|| format!("failed to read {}", output_path.display()))?;
 
-        assert!(generated.contains("ids::ERROR_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::SYMBOL_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::DATE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("ids::MATH_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("builder.set_type_data("));
+        let builders = generated
+            .split_once("pub(crate) static GENERATED_GLOBAL_BUILDERS")
+            .and_then(|(_, rest)| rest.split_once("];"))
+            .map(|(table, _)| table)
+            .context("generated module should contain the builder table")?;
+        for name in [
+            "ERROR",
+            "ERROR_CONSTRUCT",
+            "ERROR_CALL",
+            "SYMBOL",
+            "SYMBOL_DISPOSE",
+            "SYMBOL_ASYNC_DISPOSE",
+            "DISPOSABLE",
+            "DISPOSABLE_DISPOSE",
+            "ASYNC_DISPOSABLE",
+            "ASYNC_DISPOSABLE_ASYNC_DISPOSE",
+            "DATE",
+            "MATH",
+        ] {
+            assert!(generated.contains(&format!("const {name}_ID_GLOBAL_TYPE_ID: GlobalTypeId")));
+            let builder = format!("global_{},", name.to_ascii_lowercase_cow());
+            assert!(
+                builders.lines().any(|line| line.trim() == builder),
+                "builder table should contain `{builder}`"
+            );
+        }
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
         assert!(generated.contains("crate::TypeData::Function("));

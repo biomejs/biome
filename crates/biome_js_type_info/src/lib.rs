@@ -13,7 +13,6 @@ mod format_inferred_type_info;
 mod format_type_info;
 pub(crate) mod generated;
 mod globals;
-mod globals_builder;
 pub(crate) mod globals_ids;
 mod inferred_type;
 pub mod interned_types;

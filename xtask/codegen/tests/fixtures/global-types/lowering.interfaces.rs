@@ -53,16 +53,14 @@ pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[
 ];
 /// Globals that expressions can name, sorted by name.
 pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[];
-/// Registers all generated global type data into the resolver builder.
-pub(crate) fn set_generated_global_type_data(
-    builder: &mut crate::globals_builder::GlobalsResolverBuilder,
-) {
-    builder.set_type_data(ids::CATALOG_ID_GLOBAL_TYPE_ID, global_catalog());
-    builder.set_type_data(ids::ITEM_ID_GLOBAL_TYPE_ID, global_item());
-    builder.set_type_data(ids::NAMED_ID_GLOBAL_TYPE_ID, global_named());
-    builder.set_type_data(ids::TAGGED_ID_GLOBAL_TYPE_ID, global_tagged());
-    builder.set_type_data(ids::UNSELECTED_ID_GLOBAL_TYPE_ID, global_unselected());
-}
+/// Builds each generated global's type data, in ID order after the manifest.
+pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; 5] = [
+    global_catalog,
+    global_item,
+    global_named,
+    global_tagged,
+    global_unselected,
+];
 fn global_catalog() -> crate::TypeData {
     crate::TypeData::Interface(
         Box::new(crate::Interface {
