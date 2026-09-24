@@ -7,7 +7,7 @@ use std::{
     convert::Infallible,
     env, fs,
     io::{self, ErrorKind},
-    os::unix::fs::FileTypeExt,
+    os::unix::fs::{DirBuilderExt, FileTypeExt, MetadataExt, PermissionsExt},
     time::Duration,
 };
 use tokio::{
@@ -21,14 +21,67 @@ use tokio::{
 };
 use tracing::{Instrument, debug, info, warn};
 
+/// Returns the directory containing the daemon sockets
+///
+/// Only the current user can access this directory, so other users can't
+/// reach the sockets inside it regardless of the permissions of the sockets
+/// themselves.
+fn get_socket_dir() -> Utf8PathBuf {
+    biome_fs::ensure_cache_dir().join("biome-daemon")
+}
+
 /// Returns the filesystem path of the global socket used to communicate with
 /// the server daemon
 fn get_socket_name() -> Utf8PathBuf {
-    biome_fs::ensure_cache_dir().join(format!("biome-socket-{}", biome_configuration::VERSION))
+    get_socket_dir().join(format!("biome-socket-{}", biome_configuration::VERSION))
+}
+
+fn current_uid() -> u32 {
+    // SAFETY: `geteuid` is always successful and has no side effects
+    unsafe { libc::geteuid() }
+}
+
+/// Creates the socket directory at `path` if it doesn't exist, and ensures
+/// that only the current user can access it
+fn create_socket_dir(path: &Utf8Path) -> io::Result<()> {
+    if let Err(err) = fs::DirBuilder::new().mode(0o700).create(path)
+        && err.kind() != ErrorKind::AlreadyExists
+    {
+        return Err(err);
+    }
+
+    verify_socket_dir(path)
+}
+
+/// Ensures that `path` is a directory that only the current user can access
+///
+/// When the directory is in a shared location, such as the temporary
+/// directory, another user could create it first to intercept connections.
+fn verify_socket_dir(path: &Utf8Path) -> io::Result<()> {
+    let metadata = fs::symlink_metadata(path)?;
+    if !metadata.is_dir() || metadata.uid() != current_uid() || metadata.mode() & 0o077 != 0 {
+        return Err(io::Error::new(
+            ErrorKind::PermissionDenied,
+            format!(
+                "the socket directory {path} must be a directory owned by the current user and inaccessible to other users"
+            ),
+        ));
+    }
+
+    Ok(())
 }
 
 pub(crate) fn enumerate_pipes() -> io::Result<impl Iterator<Item = (String, Utf8PathBuf)>> {
-    enumerate_pipes_in(biome_fs::ensure_cache_dir())
+    let sockets = match enumerate_pipes_in(get_socket_dir()) {
+        Ok(sockets) => Some(sockets),
+        Err(err) if err.kind() == ErrorKind::NotFound => None,
+        Err(err) => return Err(err),
+    };
+
+    // Older versions created their sockets directly in the cache directory
+    let legacy_sockets = enumerate_pipes_in(biome_fs::ensure_cache_dir())?;
+
+    Ok(legacy_sockets.chain(sockets.into_iter().flatten()))
 }
 
 fn enumerate_pipes_in(
@@ -104,11 +157,14 @@ async fn purge_old_sockets_in(cache_dir: &Utf8Path, current_version: &str) {
 }
 
 async fn purge_old_sockets() {
+    // Older versions created their sockets directly in the cache directory
     purge_old_sockets_in(&biome_fs::ensure_cache_dir(), biome_configuration::VERSION).await;
+    purge_old_sockets_in(&get_socket_dir(), biome_configuration::VERSION).await;
 }
 
 /// Try to connect to the global socket and wait for the connection to become ready
 async fn try_connect() -> io::Result<UnixStream> {
+    verify_socket_dir(&get_socket_dir())?;
     let socket_name = get_socket_name();
     info!("Trying to connect to socket {}", socket_name.as_str());
     let stream = UnixStream::connect(socket_name).await?;
@@ -269,6 +325,7 @@ pub(crate) async fn print_socket() -> io::Result<()> {
 /// Start listening on the global socket and accepting connections with the
 /// provided [ServerFactory]
 pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible> {
+    create_socket_dir(&get_socket_dir())?;
     let path = get_socket_name();
 
     info!("Trying to connect to socket {path}");
@@ -281,7 +338,7 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
         fs::remove_file(&path)?;
     }
 
-    let listener = UnixListener::bind(path)?;
+    let listener = bind_socket(&path)?;
 
     loop {
         let (stream, _) = listener.accept().await?;
@@ -289,6 +346,13 @@ pub(crate) async fn run_daemon(factory: ServerFactory) -> io::Result<Infallible>
         let span = tracing::trace_span!("run_server");
         tokio::spawn(run_server(connection, stream).instrument(span.or_current()));
     }
+}
+
+/// Bind a listener on `path` that is only accessible by the current user
+fn bind_socket(path: &Utf8Path) -> io::Result<UnixListener> {
+    let listener = UnixListener::bind(path)?;
+    fs::set_permissions(path, fs::Permissions::from_mode(0o600))?;
+    Ok(listener)
 }
 
 /// Async task driving a single client connection
@@ -333,6 +397,52 @@ mod tests {
 
     fn create_stale_socket(path: &Utf8Path) {
         drop(UnixListener::bind(path).unwrap());
+    }
+
+    #[tokio::test]
+    async fn binds_socket_accessible_only_by_owner() {
+        let directory = TestDirectory::new();
+        let socket = directory.socket("2.0.0");
+        let _listener = bind_socket(&socket).unwrap();
+
+        let mode = fs::metadata(&socket).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o600);
+    }
+
+    #[test]
+    fn creates_socket_dir_accessible_only_by_owner() {
+        let directory = TestDirectory::new();
+        let socket_dir = directory.0.join("sockets");
+        create_socket_dir(&socket_dir).unwrap();
+
+        let mode = fs::metadata(&socket_dir).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o700);
+
+        // An existing private directory is reused
+        create_socket_dir(&socket_dir).unwrap();
+    }
+
+    #[test]
+    fn rejects_socket_dir_accessible_by_others() {
+        let directory = TestDirectory::new();
+        let socket_dir = directory.0.join("sockets");
+        fs::create_dir(&socket_dir).unwrap();
+        fs::set_permissions(&socket_dir, fs::Permissions::from_mode(0o755)).unwrap();
+
+        let err = create_socket_dir(&socket_dir).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::PermissionDenied);
+    }
+
+    #[test]
+    fn rejects_symlinked_socket_dir() {
+        let directory = TestDirectory::new();
+        let target = directory.0.join("target");
+        let socket_dir = directory.0.join("sockets");
+        fs::DirBuilder::new().mode(0o700).create(&target).unwrap();
+        symlink(&target, &socket_dir).unwrap();
+
+        let err = create_socket_dir(&socket_dir).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::PermissionDenied);
     }
 
     #[tokio::test]
