@@ -1,9 +1,9 @@
+use crate::TestArgs as Args;
 use crate::run_cli_with_watcher_factory;
 use crate::snap_test::markup_to_string;
 use biome_cli::{MockWatcher, WatcherEvent};
 use biome_console::{BufferConsole, markup};
 use biome_fs::TemporaryFs;
-use bpaf::Args;
 use std::sync::Mutex;
 
 #[test]

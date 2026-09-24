@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli_with_server_workspace;
 use crate::snap_test::markup_to_string;
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use serial_test::serial;
 
 fn run_lint(extra_arguments: &[&str]) -> String {
@@ -124,7 +124,7 @@ fn rejects_unsupported_execution_modes() {
             run_cli_with_server_workspace(fs, &mut console, Args::from(arguments.as_slice()));
         assert!(
             matches!(
-                result,
+                result.into_result(),
                 Err(biome_cli::CliDiagnostic::IncompatibleArguments(_))
             ),
             "unsupported mode must report incompatible arguments: {arguments:?}"

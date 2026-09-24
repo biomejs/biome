@@ -1,4 +1,4 @@
-use bpaf::Args;
+use crate::TestArgs as Args;
 use camino::Utf8Path;
 
 use biome_console::BufferConsole;

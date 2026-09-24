@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli_with_dyn_fs;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::TemporaryFs;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const ROOT: &str = r#"

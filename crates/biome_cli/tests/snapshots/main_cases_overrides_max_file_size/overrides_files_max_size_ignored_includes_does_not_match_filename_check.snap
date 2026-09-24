@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check test.js
+```
+
 ## `biome.json`
 
 ```json
@@ -11,8 +17,8 @@ expression: redactor(content)
   },
   "overrides": [
     {
-      "includes": ["test.js"],
-      "files": { "maxSize": 1024 }
+      "includes": ["invalidFile.js"],
+      "files": { "maxSize": 1 }
     }
   ]
 }
