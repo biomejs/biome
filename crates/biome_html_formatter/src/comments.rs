@@ -103,6 +103,32 @@ impl CommentStyle for HtmlCommentStyle {
             }
         }
 
+        // A comment on the same line as the last child of a Svelte block is in the trailing trivia
+        // of the child's last token. The element list of the block's children prints it after that
+        // child, so it must be attached to the child, which leaves it to the list. Otherwise, the
+        // `{:...}` or `{/...}` node after it prints it again.
+        //
+        // ```svelte
+        // {#if a}
+        //   <span>a</span><!-- this comment is attached to the `<span>` element -->
+        // {/if}
+        // ```
+        let token = comment.piece().as_piece().token();
+        if let Some(following_token) = comment.following_token()
+            && matches!(
+                following_token.kind(),
+                HtmlSyntaxKind::SV_CURLY_COLON | HtmlSyntaxKind::SV_CURLY_SLASH
+            )
+            && token != *following_token
+            && let Some(child) = token.ancestors().find(|node| {
+                node.parent()
+                    .is_some_and(|parent| parent.kind() == HtmlSyntaxKind::HTML_ELEMENT_LIST)
+            })
+            && child.last_token().as_ref() == Some(&token)
+        {
+            return CommentPlacement::trailing(child, comment);
+        }
+
         // Attach comments between attributes to the following attribute as leading comments.
         // This is required for suppression comments (e.g. `// biome-ignore format: reason`)
         // to work on attributes:
