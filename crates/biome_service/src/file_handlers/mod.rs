@@ -1744,7 +1744,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             }
         }
 
-        // A rule that belongs to several domains stays enabled as long as one
+        // A rule that belongs to several domains stays enabled as long as at least one
         // of them enables it, even if another one is set to `none`.
         if enabled {
             self.enabled_rules.insert(rule_filter);
