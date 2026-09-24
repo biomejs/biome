@@ -33,7 +33,7 @@ pub fn render_global_types(
     let globals = lowered.globals();
     let mut ids = String::new();
     let mut names = String::new();
-    let mut registrations = String::new();
+    let mut builder_table = String::new();
     let mut builders = String::new();
     let mut type_globals = Vec::new();
     let mut value_globals = Vec::new();
@@ -51,7 +51,7 @@ pub fn render_global_types(
         ));
         names.push_str(&format!("{:?},\n", global.name()));
         let builder = builder_name(global);
-        registrations.push_str(&format!("builder.set_type_data(ids::{id}, {builder}());\n"));
+        builder_table.push_str(&format!("{builder},\n"));
         builders.push_str(&format!(
             "fn {builder}() -> crate::TypeData {{ {} }}\n",
             render_type_data(global.data())
@@ -89,15 +89,15 @@ pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{type
 /// Globals that expressions can name, sorted by name.
 pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] = &[{value_globals}];
 
-/// Registers all generated global type data into the resolver builder.
-pub(crate) fn set_generated_global_type_data(builder: &mut crate::globals_builder::GlobalsResolverBuilder) {{
-{registrations}}}
+/// Builds each generated global's type data, in ID order after the manifest.
+pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData; {builder_count}] = [{builder_table}];
 
 {builders}
 
 {local_types}
 "#,
         typescript_tag = pin.tag(),
+        builder_count = globals.len(),
         typescript_sha = pin.sha(),
         type_globals = render_name_index(type_globals),
         value_globals = render_name_index(value_globals),
