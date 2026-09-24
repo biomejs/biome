@@ -1699,7 +1699,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     ///
     /// Global recommended presets exclude rules with domains. A matching domain
     /// set to `all` enables the rule, `recommended` enables it only when the rule
-    /// is recommended, and `none` disables it.
+    /// is recommended, and `none` disables it unless another matching domain
+    /// enables it.
     fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1715,6 +1716,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         }
 
+        let mut enabled = false;
+        let mut disabled = false;
         for rule_domain in R::METADATA.domains {
             if let Some((configured_domain, configured_domain_value)) = self
                 .domains
@@ -1722,16 +1725,16 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             {
                 match configured_domain_value {
                     RuleDomainValue::All => {
-                        self.enabled_rules.insert(rule_filter);
+                        enabled = true;
                         self.globals
                             .extend(configured_domain.globals().iter().copied().map(Into::into));
                     }
                     RuleDomainValue::None => {
-                        self.disabled_rules.insert(rule_filter);
+                        disabled = true;
                     }
                     RuleDomainValue::Recommended => {
                         if R::METADATA.recommended {
-                            self.enabled_rules.insert(rule_filter);
+                            enabled = true;
                             self.globals.extend(
                                 configured_domain.globals().iter().copied().map(Into::into),
                             );
@@ -1739,6 +1742,14 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     }
                 }
             }
+        }
+
+        // A rule that belongs to several domains stays enabled as long as at least one
+        // of them enables it, even if another one is set to `none`.
+        if enabled {
+            self.enabled_rules.insert(rule_filter);
+        } else if disabled {
+            self.disabled_rules.insert(rule_filter);
         }
     }
 
@@ -1750,6 +1761,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         FxHashSet<RuleFilter<'a>>,
     ) {
         let rules = self.rules.cloned().unwrap_or_default();
+        // A rule enabled explicitly in the configuration stays enabled even if
+        // one of its domains is disabled.
+        for rule_filter in rules.as_explicitly_enabled_rules() {
+            self.disabled_rules.remove(&rule_filter);
+        }
         self.enabled_rules.extend(rules.as_enabled_rules());
         self.disabled_rules.extend(rules.as_disabled_rules());
         (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
