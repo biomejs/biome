@@ -1,0 +1,60 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function falsyMappings(a: bigint | boolean | string) {
+	if (!a) {
+		a;
+	}
+}
+
+export function truthyBoolean(b: boolean | null) {
+	if (b) {
+		b;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding falsyMappings "falsyMappings" => sync Function "falsyMappings" {
+  accepts: {
+    params: [
+      required a: BigInt | boolean | string
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding a "a" => BigInt | boolean | string
+
+Expression "!a" => boolean
+
+Expression "a" => BigInt | boolean | string
+
+Expression "a" => bigint: 0n | bool: false | string: 
+
+Binding truthyBoolean "truthyBoolean" => sync Function "truthyBoolean" {
+  accepts: {
+    params: [
+      required b: boolean | null
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding b "b" => boolean | null
+
+Expression "b" => boolean | null
+
+Expression "b" => bool: true
+```

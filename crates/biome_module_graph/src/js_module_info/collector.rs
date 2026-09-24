@@ -9,9 +9,9 @@ use biome_js_syntax::{
     JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
-    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
-    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
-    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
+    FunctionParameter, FunctionParameterBinding, GenericTypeParameter, NarrowingInvalidationCache,
+    RawTypeCollector, RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember,
+    TypeMemberKind, TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_resolver::ResolutionKind;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
@@ -58,6 +58,9 @@ pub(super) struct JsModuleInfoCollector {
 
     /// Map of parsed declarations, for caching purposes.
     parsed_expressions: FxHashMap<TextRange, TypeId>,
+
+    /// Memoizes narrowing invalidation scans for this pass over the module.
+    narrowing_invalidation_cache: NarrowingInvalidationCache,
 
     /// Static and dynamic import paths in source order.
     import_paths: ImportPathMap<JsImportPath>,
@@ -147,6 +150,7 @@ impl JsModuleInfoCollector {
             function_parameters: FxHashMap::default(),
             variable_declarations: FxHashMap::default(),
             parsed_expressions: FxHashMap::default(),
+            narrowing_invalidation_cache: NarrowingInvalidationCache::default(),
             import_paths: ImportPathMap::default(),
             exports: Vec::new(),
             blanket_reexports: Vec::new(),
@@ -862,6 +866,14 @@ impl RawTypeCollector for JsModuleInfoCollector {
         Some(self.semantic_model.scope(node).id())
     }
 
+    fn narrowing_enabled(&self) -> bool {
+        crate::TYPE_NARROWING_ENABLED
+    }
+
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache {
+        &mut self.narrowing_invalidation_cache
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
@@ -888,6 +900,12 @@ impl RawTypeCollector for JsModuleInfoCollector {
             Some(id) => Cow::Borrowed(self.get_by_id(*id)),
             None => Cow::Owned(TypeData::unknown()),
         }
+    }
+
+    fn recorded_expression_type(&mut self, expression: &AnyJsExpression) -> Option<TypeReference> {
+        self.parsed_expressions
+            .get(&expression.range())
+            .map(|id| TypeReference::Resolved(RawTypeId::Local(*id)))
     }
 
     fn reference_to_resolved_expression(

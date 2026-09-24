@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+
+function genericValue<T>(g: T | undefined) {
+	if (!g) {
+		// Biome does not narrow a generic type parameter out of a falsy branch,
+		// so `g` keeps `T | undefined` here and nothing is provable.
+		if (g) {
+			g;
+		}
+	}
+}

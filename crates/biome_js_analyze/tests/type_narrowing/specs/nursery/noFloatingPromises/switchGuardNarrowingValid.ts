@@ -1,0 +1,33 @@
+/* should not generate diagnostics */
+
+type Value =
+	| { kind: "promise"; payload: Promise<void> }
+	| { kind: "plain"; payload: number };
+
+// `value` is narrowed to the plain variant, so its payload cannot be a
+// promise.
+function narrowedToPlain(value: Value) {
+	switch (value.kind) {
+		case "plain":
+			value.payload;
+			break;
+	}
+}
+
+// The preceding case provably exits, so the narrowing still applies.
+function precededByBreak(value: Value) {
+	switch (value.kind) {
+		case "promise":
+			break;
+		case "plain":
+			value.payload;
+			break;
+	}
+}
+
+// An equality guard narrows the union away from the promise variant.
+function narrowedByEquality(x: Promise<void> | "done") {
+	if (x === "done") {
+		x;
+	}
+}

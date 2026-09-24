@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_type_info/src/format_inferred_type_info.rs
+expression: formatted
+---
+Narrowed(assigned string, unknown)
+Narrowed(falsy, unknown)
+Narrowed(instanceof class "Cls" {
+  extends: none
+  implements: []
+  type_args: []
+}, unknown)
+Narrowed(.kind == "left", unknown)
+Narrowed(predicate class "Cls" {
+  extends: none
+  implements: []
+  type_args: []
+}[1], unknown)
+Narrowed(== "left", unknown)
+Narrowed(truthy, unknown)
+Narrowed(typeof == "string", unknown)

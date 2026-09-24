@@ -1,0 +1,29 @@
+/* should not generate diagnostics */
+
+type Dup =
+	| { kind: "o\x6e"; flag: number }
+	| { kind: "on"; flag: 1 };
+
+// `"o\x6e"` is the same string as `"on"`, so the guard keeps both variants
+// and `flag` can still be `0`.
+function escapedDiscriminant(x: Dup) {
+	if (x.kind === "on") {
+		if (x.flag) {
+			x;
+		}
+	}
+}
+
+type Pair =
+	| { kind: "a"; left: number; right: number }
+	| { kind: "b"; left: string; right: string };
+
+// The guard narrows the discriminant, so it says nothing about `left`, which
+// is still any number including `0`.
+function unrelatedMember(x: Pair) {
+	if (x.kind === "a") {
+		if (x.left) {
+			x.right;
+		}
+	}
+}
