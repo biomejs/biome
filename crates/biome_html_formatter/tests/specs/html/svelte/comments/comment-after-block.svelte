@@ -1,0 +1,62 @@
+<p>
+  {#if condition}
+    <span>Conditional Text</span>
+  {/if}
+  <!-- TODO: todo comment
+  <span>Text</span> -->
+</p>
+
+<p>
+  {#each loops as loop}
+    <span>{loop}</span>
+  {/each}
+  <!-- TODO: todo comment
+  <span>Text</span> -->
+</p>
+
+<div>
+  {#if a}
+    <span>a</span>
+  {:else}
+    <span>b</span>
+  {/if}
+  <!-- after if-else -->
+</div>
+
+<div>
+  {#await promise}
+    <span>loading</span>
+  {:then value}
+    <span>{value}</span>
+  {/await}
+  <!-- after await -->
+</div>
+
+<div>
+  {#key value}
+    <span>{value}</span>
+  {/key}
+  <!-- after key -->
+</div>
+
+<div>
+  {#snippet foo()}
+    <span>foo</span>
+  {/snippet}
+  <!-- after snippet -->
+</div>
+
+<div>
+  {@const doubled = value * 2}
+  <!-- after const -->
+</div>
+
+<div>
+  {let doubled = value * 2}
+  <!-- after declaration -->
+</div>
+
+<div>
+  {@debug value}
+  <!-- after debug -->
+</div>
