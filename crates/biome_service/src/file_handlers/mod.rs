@@ -858,7 +858,7 @@ impl<'a> ProcessFixAll<'a> {
                 continue;
             }
             match &mut master {
-                Some(m) => m.merge(action.mutation),
+                Some(m) => m.merge_actions(action.mutation),
                 None => master = Some(action.mutation),
             }
             count += 1;
