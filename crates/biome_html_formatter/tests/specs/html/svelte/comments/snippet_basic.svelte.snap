@@ -24,7 +24,7 @@ info: svelte/comments/snippet_basic.svelte
 {#snippet greeting()}
 	<!-- 2 -->
 	<p>Hello!</p>
-<!-- 3 -->
+	<!-- 3 -->
 {/snippet}
 <!-- 4 -->
 

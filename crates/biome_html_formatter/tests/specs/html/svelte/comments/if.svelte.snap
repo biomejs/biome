@@ -24,7 +24,7 @@ info: svelte/comments/if.svelte
 {#if answer === 42}
 	<!-- 2 -->
 	<p>what was the question?</p>
-<!-- 3 -->
+	<!-- 3 -->
 {/if}
 <!-- 4 -->
 

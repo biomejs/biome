@@ -129,6 +129,26 @@ impl CommentStyle for HtmlCommentStyle {
             return CommentPlacement::trailing(child, comment);
         }
 
+        // Other comments before the `{:` or `{/` token that ends the children of a Svelte block
+        // are also formatted by the children's element list, so they are attached to the node that
+        // starts with that token, which skips its leading comments.
+        //
+        // ```svelte
+        // {#if a}
+        //   <span>a</span>
+        //   <!-- this comment is attached to the `{/if}` node -->
+        // {/if}
+        // ```
+        if let Some(token) = comment.following_token()
+            && matches!(
+                token.kind(),
+                HtmlSyntaxKind::SV_CURLY_COLON | HtmlSyntaxKind::SV_CURLY_SLASH
+            )
+            && let Some(parent) = token.parent()
+        {
+            return CommentPlacement::leading(parent, comment);
+        }
+
         // Attach comments between attributes to the following attribute as leading comments.
         // This is required for suppression comments (e.g. `// biome-ignore format: reason`)
         // to work on attributes:

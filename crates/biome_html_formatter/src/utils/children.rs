@@ -8,9 +8,7 @@ use biome_console::{
     markup,
 };
 use biome_formatter::{Buffer, Format, FormatElement, FormatResult, prelude::*};
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlLanguage, HtmlSyntaxToken,
-};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlLanguage, HtmlSyntaxToken};
 use biome_rowan::{
     AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
 };
@@ -258,7 +256,7 @@ const fn html_child_kind(child: &HtmlChild) -> &'static str {
 pub(crate) fn html_split_children<I>(
     children: I,
     opening_r_angle: Option<&HtmlSyntaxToken>,
-    closing_element: Option<&HtmlClosingElement>,
+    closing_token: Option<&HtmlSyntaxToken>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
@@ -553,19 +551,18 @@ where
         }
     }
 
-    // Include trailing whitespace from the closing element's l_angle_token leading trivia.
+    // Include trailing whitespace from the leading trivia of the closing token, which is the
+    // closing element's `<`, or the `{:` or `{/` that ends a Svelte block's children.
     // We do this because it makes handling whitespace sensitivity easier. We take the full content
     // of what is within the element so that we can properly classify what whitespace is meaningful
     // and what isn't.
     //
     // The reason this is necessary is because the trivia adjacent to the closing tag is attached to
     // the closing tag's leading trivia, not the content's trailing trivia.
-    if let Some(closing_element) = closing_element
-        && let Ok(l_angle_token) = closing_element.l_angle_token()
-    {
+    if let Some(closing_token) = closing_token {
         push_trivia_children(
             &mut builder,
-            &l_angle_token.leading_trivia(),
+            &closing_token.leading_trivia(),
             false,
             f.comments(),
         );
