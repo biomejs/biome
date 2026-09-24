@@ -1761,6 +1761,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         FxHashSet<RuleFilter<'a>>,
     ) {
         let rules = self.rules.cloned().unwrap_or_default();
+        // A rule enabled explicitly in the configuration stays enabled even if
+        // one of its domains is disabled.
+        for rule_filter in rules.as_explicitly_enabled_rules() {
+            self.disabled_rules.remove(&rule_filter);
+        }
         self.enabled_rules.extend(rules.as_enabled_rules());
         self.disabled_rules.extend(rules.as_disabled_rules());
         (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
