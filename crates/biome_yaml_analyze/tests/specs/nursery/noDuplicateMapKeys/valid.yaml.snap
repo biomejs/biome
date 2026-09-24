@@ -1,0 +1,23 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  nameA: Jane Doe
+  NAME: John Smith
+  "quoted": value
+  'single': value
+
+person2:
+  # comments do not count as keys
+  name: John Doe
+  # name: commented out duplicate
+  age: 50
+
+
+```

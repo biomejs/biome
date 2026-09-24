@@ -384,6 +384,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_duplicate_jsx_props::NoDuplicateJsxPropsOptions>(),
     ));
     result.push((
+        "nursery",
+        "noDuplicateMapKeys",
+        TypeId::of::<biome_rule_options::no_duplicate_map_keys::NoDuplicateMapKeysOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noDuplicateObjectKeys",
         TypeId::of::<biome_rule_options::no_duplicate_object_keys::NoDuplicateObjectKeysOptions>(),

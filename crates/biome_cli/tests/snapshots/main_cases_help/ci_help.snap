@@ -233,6 +233,7 @@ The configuration contained in `biome.json`.
         --yaml-formatter-line-ending=<lf|crlf|cr|auto>  The type of line ending applied to Yaml (and
                               its super languages) files. `auto` uses CRLF on Windows and LF on
                               other platforms.
+        --yaml-linter-enabled=<true|false>  Control the linter for Yaml files.
         --graphql-formatter-enabled=<true|false>  Controls the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files. If
                               unset, inherits the global indentation style.

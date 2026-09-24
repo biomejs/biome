@@ -441,6 +441,7 @@ export interface YamlConfiguration {
 	 * Formatter options
 	 */
 	formatter?: YamlFormatterConfiguration;
+	linter?: YamlLinterConfiguration;
 }
 export interface Actions {
 	/**
@@ -1251,6 +1252,15 @@ Disable the option at your own risk.
 Defaults to true. 
 	 */
 	trailingNewline?: TrailingNewline;
+}
+/**
+ * Options that change how the Yaml linter behaves
+ */
+export interface YamlLinterConfiguration {
+	/**
+	 * Control the linter for Yaml files.
+	 */
+	enabled?: Bool;
 }
 /**
  * A preset configuration for enabling a set of rules.
@@ -2567,6 +2577,11 @@ See https://biomejs.dev/linter/rules/no-drizzle-update-without-where
 See https://biomejs.dev/linter/rules/no-duplicate-field-definition-names 
 	 */
 	noDuplicateFieldDefinitionNames?: NoDuplicateFieldDefinitionNamesConfiguration;
+	/**
+	* Disallow two keys with the same name inside YAML maps.
+See https://biomejs.dev/linter/rules/no-duplicate-map-keys 
+	 */
+	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
 	* Disallow duplicate selectors.
 See https://biomejs.dev/linter/rules/no-duplicate-selectors 
@@ -5031,6 +5046,9 @@ export type NoDrizzleUpdateWithoutWhereConfiguration =
 export type NoDuplicateFieldDefinitionNamesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateFieldDefinitionNamesOptions;
+export type NoDuplicateMapKeysConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDuplicateMapKeysOptions;
 export type NoDuplicateSelectorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateSelectorsOptions;
@@ -7012,6 +7030,10 @@ export interface RuleWithNoDuplicateFieldDefinitionNamesOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateFieldDefinitionNamesOptions;
 }
+export interface RuleWithNoDuplicateMapKeysOptions {
+	level: RulePlainConfiguration;
+	options?: NoDuplicateMapKeysOptions;
+}
 export interface RuleWithNoDuplicateSelectorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateSelectorsOptions;
@@ -8960,6 +8982,7 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 	drizzleObjectName?: string[];
 }
 export type NoDuplicateFieldDefinitionNamesOptions = {};
+export type NoDuplicateMapKeysOptions = {};
 export type NoDuplicateSelectorsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
 export interface NoExcessiveNestedCallbacksOptions {
@@ -10562,6 +10585,7 @@ export type Category =
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"

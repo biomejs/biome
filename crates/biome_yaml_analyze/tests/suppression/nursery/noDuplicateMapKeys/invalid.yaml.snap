@@ -1,0 +1,457 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalid.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+person:
+  name: John Doe
+  age: 50
+  name: Jane Doe
+
+person2: { name: John, age: 50, name: Jane }
+
+person3:
+  name: John Doe
+  "name": Jane Doe
+  'name': Baby Doe
+
+# nested block mappings, duplicates at both levels
+parent:
+  child:
+    name: John Doe
+    name: Jane Doe
+  child: second
+
+# sequence of mappings, each with duplicates
+people:
+  - id: 1
+    id: 2
+  - name: a
+    role: admin
+    role: guest
+
+# nested flow mappings, duplicates at both levels
+config: { a: { x: 1, x: 2 }, a: 3 }
+
+
+```
+
+# Diagnostics
+```
+invalid.yaml:3:3 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    1 │ # should generate diagnostics
+    2 │ person:
+  > 3 │   name: John Doe
+      │   ^^^^
+    4 │   age: 50
+    5 │   name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    3 │   name: John Doe
+    4 │   age: 50
+  > 5 │   name: Jane Doe
+      │   ^^^^
+    6 │ 
+    7 │ person2: { name: John, age: 50, name: Jane }
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+     1  1 │   # should generate diagnostics
+     2  2 │   person:
+     3    │ - ··name:·John·Doe
+        3 │ + ··#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+        4 │ + ··name:·John·Doe
+     4  5 │     age: 50
+     5  6 │     name: Jane Doe
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:7:12 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    5 │   name: Jane Doe
+    6 │ 
+  > 7 │ person2: { name: John, age: 50, name: Jane }
+      │            ^^^^
+    8 │ 
+    9 │ person3:
+  
+  i This is where a duplicated key was declared again.
+  
+    5 │   name: Jane Doe
+    6 │ 
+  > 7 │ person2: { name: John, age: 50, name: Jane }
+      │                                 ^^^^
+    8 │ 
+    9 │ person3:
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+     5  5 │     name: Jane Doe
+     6  6 │   
+        7 │ + #·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+     7  8 │   person2: { name: John, age: 50, name: Jane }
+     8  9 │   
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:10:3 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+     9 │ person3:
+  > 10 │   name: John Doe
+       │   ^^^^
+    11 │   "name": Jane Doe
+    12 │   'name': Baby Doe
+  
+  i This is where a duplicated key was declared again.
+  
+     9 │ person3:
+    10 │   name: John Doe
+  > 11 │   "name": Jane Doe
+       │   ^^^^^^
+    12 │   'name': Baby Doe
+    13 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    10 │   name: John Doe
+    11 │   "name": Jane Doe
+  > 12 │   'name': Baby Doe
+       │   ^^^^^^
+    13 │ 
+    14 │ # nested block mappings, duplicates at both levels
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+     8  8 │   
+     9  9 │   person3:
+    10    │ - ··name:·John·Doe
+       10 │ + ··#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+       11 │ + ··name:·John·Doe
+    11 12 │     "name": Jane Doe
+    12 13 │     'name': Baby Doe
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:16:3 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key child was already declared.
+  
+    14 │ # nested block mappings, duplicates at both levels
+    15 │ parent:
+  > 16 │   child:
+       │   ^^^^^
+    17 │     name: John Doe
+    18 │     name: Jane Doe
+  
+  i This is where a duplicated key was declared again.
+  
+    17 │     name: John Doe
+    18 │     name: Jane Doe
+  > 19 │   child: second
+       │   ^^^^^
+    20 │ 
+    21 │ # sequence of mappings, each with duplicates
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    14 14 │   # nested block mappings, duplicates at both levels
+    15 15 │   parent:
+    16    │ - ··child:
+       16 │ + ··#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+       17 │ + ··child:
+    17 18 │       name: John Doe
+    18 19 │       name: Jane Doe
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:17:5 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key name was already declared.
+  
+    15 │ parent:
+    16 │   child:
+  > 17 │     name: John Doe
+       │     ^^^^
+    18 │     name: Jane Doe
+    19 │   child: second
+  
+  i This is where a duplicated key was declared again.
+  
+    16 │   child:
+    17 │     name: John Doe
+  > 18 │     name: Jane Doe
+       │     ^^^^
+    19 │   child: second
+    20 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    15 15 │   parent:
+    16 16 │     child:
+    17    │ - ····name:·John·Doe
+       17 │ + ····#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+       18 │ + ····name:·John·Doe
+    18 19 │       name: Jane Doe
+    19 20 │     child: second
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:23:5 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key id was already declared.
+  
+    21 │ # sequence of mappings, each with duplicates
+    22 │ people:
+  > 23 │   - id: 1
+       │     ^^
+    24 │     id: 2
+    25 │   - name: a
+  
+  i This is where a duplicated key was declared again.
+  
+    22 │ people:
+    23 │   - id: 1
+  > 24 │     id: 2
+       │     ^^
+    25 │   - name: a
+    26 │     role: admin
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    21 21 │   # sequence of mappings, each with duplicates
+    22 22 │   people:
+    23    │ - ··-·id:·1
+       23 │ + ··#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+       24 │ + ··-·id:·1
+    24 25 │       id: 2
+    25 26 │     - name: a
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:26:5 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key role was already declared.
+  
+    24 │     id: 2
+    25 │   - name: a
+  > 26 │     role: admin
+       │     ^^^^
+    27 │     role: guest
+    28 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    25 │   - name: a
+    26 │     role: admin
+  > 27 │     role: guest
+       │     ^^^^
+    28 │ 
+    29 │ # nested flow mappings, duplicates at both levels
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    24 24 │       id: 2
+    25 25 │     - name: a
+    26    │ - ····role:·admin
+       26 │ + ····#·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+       27 │ + ····role:·admin
+    27 28 │       role: guest
+    28 29 │   
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:30:11 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key a was already declared.
+  
+    29 │ # nested flow mappings, duplicates at both levels
+  > 30 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │           ^
+    31 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    29 │ # nested flow mappings, duplicates at both levels
+  > 30 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                              ^
+    31 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    28 28 │   
+    29 29 │   # nested flow mappings, duplicates at both levels
+       30 │ + #·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+    30 31 │   config: { a: { x: 1, x: 2 }, a: 3 }
+    31 32 │   
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```
+
+```
+invalid.yaml:30:16 lint/nursery/noDuplicateMapKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key x was already declared.
+  
+    29 │ # nested flow mappings, duplicates at both levels
+  > 30 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                ^
+    31 │ 
+  
+  i This is where a duplicated key was declared again.
+  
+    29 │ # nested flow mappings, duplicates at both levels
+  > 30 │ config: { a: { x: 1, x: 2 }, a: 3 }
+       │                      ^
+    31 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for this line.
+  
+    28 28 │   
+    29 29 │   # nested flow mappings, duplicates at both levels
+       30 │ + #·biome-ignore·lint/nursery/noDuplicateMapKeys:·<explanation>
+    30 31 │   config: { a: { x: 1, x: 2 }, a: 3 }
+    31 32 │   
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicateMapKeys for the whole file.
+  
+     1  1 │   # should generate diagnostics
+        2 │ + #·biome-ignore-all·lint/nursery/noDuplicateMapKeys:·<explanation>
+     2  3 │   person:
+     3  4 │     name: John Doe
+  
+
+```

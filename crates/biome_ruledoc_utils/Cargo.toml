@@ -51,6 +51,9 @@ biome_service               = {
 }
 biome_test_utils            = { workspace = true, features = ["lang_css", "lang_html", "lang_js", "module_graph"] }
 biome_text_edit             = { workspace = true }
+biome_yaml_analyze          = { workspace = true }
+biome_yaml_parser           = { workspace = true }
+biome_yaml_syntax           = { workspace = true }
 camino                      = { workspace = true }
 
 [lints]

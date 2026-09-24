@@ -57,6 +57,8 @@ biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_service            = { workspace = true, features = ["stable"] }
 biome_text_edit          = { workspace = true }
+biome_yaml_analyze       = { workspace = true }
+biome_yaml_syntax        = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }

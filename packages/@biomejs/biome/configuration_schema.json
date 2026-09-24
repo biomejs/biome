@@ -3897,6 +3897,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDuplicateMapKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateMapKeysOptions" }
+			]
+		},
+		"NoDuplicateMapKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDuplicateObjectKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7053,6 +7063,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateMapKeys": {
+					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateMapKeysConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateSelectors": {
 					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
 					"anyOf": [
@@ -9256,6 +9273,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateJsxPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateMapKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateMapKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -18375,6 +18401,12 @@
 						{ "$ref": "#/$defs/YamlFormatterConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"linter": {
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlLinterConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -18411,6 +18443,17 @@
 				"trailingNewline": {
 					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
 					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"YamlLinterConfiguration": {
+			"description": "Options that change how the Yaml linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for Yaml files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
