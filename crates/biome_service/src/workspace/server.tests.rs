@@ -1431,6 +1431,92 @@ fn store_embedded_nodes_with_current_ranges() {
 }
 
 #[test]
+fn astro_class_directive_metadata_distinguishes_class_list() {
+    const FILE_PATH: &str = "/project/file.astro";
+    const FILE_CONTENT: &str = r#"---
+export default value;
+---
+<div
+    class={`plain`}
+    class:list={["list"]}
+    class:other={otherClass}
+    client:load={ready}
+    set:html={markup}
+></div>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
+    let source_for = |expression: &str| {
+        snippets
+            .iter()
+            .find_map(|snippet| {
+                let source = db
+                    .source_from_index(snippet.document_source_index(&db))?
+                    .to_js_file_source()?;
+                let text = snippet
+                    .parsed(&db)
+                    .unwrap_as_embedded_syntax_node()
+                    .into_node::<JsLanguage>()
+                    .text_trimmed()
+                    .to_string();
+                (text == expression).then_some(source)
+            })
+            .unwrap_or_else(|| panic!("missing embedded expression {expression}"))
+    };
+
+    let plain = source_for("`plain`");
+    assert!(plain.as_embedding_kind().is_class_attribute());
+    assert!(!plain.as_embedding_kind().is_class_list_attribute());
+    assert_eq!(
+        plain.as_embedding_kind().astro_content_offset(),
+        Some(TextSize::from(FILE_CONTENT.find("`plain`").unwrap() as u32))
+    );
+
+    let list = source_for("[\"list\"]");
+    assert!(list.as_embedding_kind().is_class_attribute());
+    assert!(list.as_embedding_kind().is_class_list_attribute());
+
+    let frontmatter = source_for("export default value;");
+    assert!(frontmatter.as_embedding_kind().is_astro_frontmatter());
+
+    for expression in ["otherClass", "ready", "markup"] {
+        let source = source_for(expression);
+        assert!(!source.as_embedding_kind().is_class_attribute());
+        assert!(!source.as_embedding_kind().is_class_list_attribute());
+    }
+}
+
+#[test]
 fn format_html_with_scripts_and_css() {
     const FILE_CONTENT: &str = r#"<html>
     <head>

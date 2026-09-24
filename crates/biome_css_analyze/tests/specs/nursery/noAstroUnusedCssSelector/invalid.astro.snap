@@ -1,0 +1,88 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<div class="used"></div>
+<div class={"expression"}></div>
+<div class={`template`}></div>
+<div class:list={["array", { object: enabled }, enabled ? "first" : "second", enabled && "logical"]}></div>
+<Component className="component-static" />
+<Component className={"component-expression"} />
+
+<style>
+.used { color: green; }
+.expression { color: green; }
+.template { color: green; }
+.array { color: green; }
+.object { color: green; }
+.first { color: green; }
+.second { color: green; }
+.logical { color: green; }
+.component-static { color: green; }
+.component-expression { color: green; }
+.unused { color: red; }
+.compound.active { color: red; }
+.parent .child { color: red; }
+.pseudo:hover { color: red; }
+:global(.global) { color: red; }
+@keyframes unused-keyframes {}
+</style>
+
+<style>
+.second-unused { color: red; }
+</style>
+
+<style is:global>
+.global-unused { color: red; }
+</style>
+
+<style lang="scss">
+.unsupported { color: red; }
+</style>
+
+```
+
+# Diagnostics
+```
+invalid.astro:20:1 lint/nursery/noAstroUnusedCssSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This CSS selector is not used by this Astro component.
+  
+    18 │ .component-static { color: green; }
+    19 │ .component-expression { color: green; }
+  > 20 │ .unused { color: red; }
+       │ ^^^^^^^
+    21 │ .compound.active { color: red; }
+    22 │ .parent .child { color: red; }
+  
+  i No static class reference matches .unused in this component.
+  
+  i Use this class in the component or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:29:1 lint/nursery/noAstroUnusedCssSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This CSS selector is not used by this Astro component.
+  
+    28 │ <style>
+  > 29 │ .second-unused { color: red; }
+       │ ^^^^^^^^^^^^^^
+    30 │ </style>
+    31 │ 
+  
+  i No static class reference matches .second-unused in this component.
+  
+  i Use this class in the component or remove the selector.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

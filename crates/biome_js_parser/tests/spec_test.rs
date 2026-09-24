@@ -100,14 +100,18 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     } else if file_name.contains(".astro_expr.") {
         // Fixture text is the brace-less body of an Astro `{...}` expression.
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Astro {
+            content_offset: 0.into(),
             frontmatter: false,
             is_class_attribute: false,
+            is_class_list_attribute: false,
         });
     } else if file_name.contains(".astro_frontmatter.") {
         // Fixture text is the TypeScript between the `---` fences of an Astro file.
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Astro {
+            content_offset: 0.into(),
             frontmatter: true,
             is_class_attribute: false,
+            is_class_list_attribute: false,
         });
     }
 

@@ -1,0 +1,14 @@
+---
+// should not generate diagnostics
+const active = true;
+const value = "active";
+---
+<div class:list={{ active }}></div>
+<div class:list={active ? value : ""}></div>
+<div class:list={active ? "" : ""}></div>
+<div class:list={[active && "active"]}></div>
+<div class:list={[[active ? "nested" : ""]]}></div>
+<div class:list={[...(active ? ["active"] : [])]}></div>
+<div class:list={`${active ? "active" : ""}`}></div>
+<div class:list={getClass(active ? "active" : "")}></div>
+<div class={active ? "plain" : ""}></div>

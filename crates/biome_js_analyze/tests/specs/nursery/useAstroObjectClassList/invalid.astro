@@ -1,0 +1,12 @@
+---
+// should generate diagnostics
+const active = true;
+const size = "large";
+---
+<div class:list={active ? "active" : ""}></div>
+<div class:list={active ? "" : "inactive"}></div>
+<div class:list={active ? "active" : "inactive"}></div>
+<div class:list={[size, active ? "selected" : ""]}></div>
+<div class:list={active /* keep */ ? "commented" : ""}></div>
+<div class:list={active ? "__proto__" : ""}></div>
+<div class:list={active ? "\x5f\x5fproto__" : ""}></div>

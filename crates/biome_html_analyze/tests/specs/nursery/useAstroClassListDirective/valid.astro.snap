@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<div class="card active"></div>
+<div class:list={classes}></div>
+<div class:other={classes}></div>
+
+```

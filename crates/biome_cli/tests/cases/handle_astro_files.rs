@@ -1328,3 +1328,59 @@ fn comment_only_template_expression_formats() {
         result,
     ));
 }
+
+#[test]
+fn astro_class_list_safe_fixes_are_idempotent() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "nursery": {
+        "useAstroObjectClassList": "error",
+        "useAstroSplitClassList": "error"
+      }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        br#"---
+const active = true;
+---
+<div class:list={active ? "selected" : ""}></div>
+<div class:list={"card active"}></div>
+"#,
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--write", astro_file_path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let expected = r#"---
+const active = true;
+---
+<div class:list={{"selected": active}}></div>
+<div class:list={["card", "active"]}></div>
+"#;
+    assert_file_contents(&fs, astro_file_path, expected);
+
+    let mut second_console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut second_console,
+        Args::from(["lint", "--write", astro_file_path.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "second run_cli returned {result:?}");
+    assert_file_contents(&fs, astro_file_path, expected);
+}

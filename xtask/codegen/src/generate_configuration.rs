@@ -85,6 +85,13 @@ impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
             .entry(<R::Group as RuleGroup>::NAME)
             .or_default()
             .insert(R::METADATA.name, R::METADATA);
+
+        for domain in R::METADATA.domains.iter() {
+            self.domains
+                .entry(domain.as_str())
+                .or_default()
+                .insert((<R::Group as RuleGroup>::NAME, R::METADATA.name));
+        }
     }
 }
 
