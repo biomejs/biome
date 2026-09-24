@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --write '<TEMP_DIR>/ignore_vcs_os_independent_parse'
+```
+
 ## `biome.json`
 
 ```json

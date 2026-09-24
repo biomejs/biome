@@ -1,3 +1,2 @@
 behavior:
-  force_update: true
-  update: "new"
+  update: "force"

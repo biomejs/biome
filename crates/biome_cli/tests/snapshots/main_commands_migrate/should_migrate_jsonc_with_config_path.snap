@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome migrate --config-path '<TEMP_DIR>/should_migrate_jsonc_with_config_path/base.biome.jsonc' --write
+```
+
 ## `base.biome.jsonc`
 
 ```jsonc

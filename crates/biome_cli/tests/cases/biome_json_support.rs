@@ -1,9 +1,9 @@
+use crate::TestArgs as Args;
 use crate::configs::CONFIG_FORMAT;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use crate::{UNFORMATTED, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const CUSTOM_CONFIGURATION_BEFORE: &str = r#"function f() {

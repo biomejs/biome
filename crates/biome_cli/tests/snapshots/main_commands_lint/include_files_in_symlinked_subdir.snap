@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/include_files_in_symlinked_subdir/subroot'
+```
+
 # Termination Message
 
 ```block

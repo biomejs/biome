@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/should_find_settings_when_run_from_nested_dir/packages/lib'
+```
+
 ## `biome.jsonc`
 
 ```json

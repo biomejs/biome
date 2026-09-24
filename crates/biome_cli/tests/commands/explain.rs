@@ -1,4 +1,4 @@
-use bpaf::Args;
+use crate::TestArgs as Args;
 
 use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli};

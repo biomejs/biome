@@ -31,12 +31,82 @@ static DURATION_REGEX: LazyLock<Regex> =
 static SCANNER_DURATION_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("\"scannerDuration\":\\s*[0-9]+").unwrap());
 
+pub struct TestArgs(Vec<String>);
+
+impl<T> From<&[T]> for TestArgs
+where
+    T: AsRef<str>,
+{
+    fn from(value: &[T]) -> Self {
+        Self(value.iter().map(|arg| arg.as_ref().to_string()).collect())
+    }
+}
+
+impl<const N: usize> From<&[&str; N]> for TestArgs {
+    fn from(value: &[&str; N]) -> Self {
+        Self::from(value.as_slice())
+    }
+}
+
+impl TestArgs {
+    pub fn into_arguments(self) -> Vec<String> {
+        self.0
+    }
+}
+
+pub struct CliRunResult {
+    commands: Vec<Vec<String>>,
+    result: Result<(), CliDiagnostic>,
+}
+
+impl CliRunResult {
+    pub fn new(command: Vec<String>, result: Result<(), CliDiagnostic>) -> Self {
+        Self {
+            commands: vec![command],
+            result,
+        }
+    }
+
+    pub fn is_ok(&self) -> bool {
+        self.result.is_ok()
+    }
+
+    pub fn is_err(&self) -> bool {
+        self.result.is_err()
+    }
+
+    pub fn expect_err(self, message: &str) -> CliDiagnostic {
+        self.result.expect_err(message)
+    }
+
+    pub fn followed_by(mut self, mut next: Self) -> Self {
+        self.commands.append(&mut next.commands);
+        next.commands = self.commands;
+        next
+    }
+
+    pub fn into_parts(self) -> (Vec<Vec<String>>, Result<(), CliDiagnostic>) {
+        (self.commands, self.result)
+    }
+
+    pub fn into_result(self) -> Result<(), CliDiagnostic> {
+        self.result
+    }
+}
+
+impl std::fmt::Debug for CliRunResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.result.fmt(f)
+    }
+}
+
 #[derive(Default)]
 struct InMessages {
     stdin: Option<String>,
 }
 
 pub(crate) struct CliSnapshot {
+    commands: Vec<Vec<String>>,
     /// input messages, coming from different sources
     in_messages: InMessages,
     /// the configuration, if set
@@ -52,8 +122,10 @@ pub(crate) struct CliSnapshot {
 }
 
 impl CliSnapshot {
-    pub fn from_result(result: Result<(), CliDiagnostic>) -> Self {
+    pub fn from_result(result: CliRunResult) -> Self {
+        let (commands, result) = result.into_parts();
         Self {
+            commands,
             in_messages: InMessages::default(),
             configuration_list: BTreeMap::default(),
             files: BTreeMap::default(),
@@ -66,6 +138,8 @@ impl CliSnapshot {
 impl CliSnapshot {
     pub fn emit_content_snapshot(&self) -> String {
         let mut content = String::new();
+
+        write_command_snapshot(&mut content, &self.commands);
 
         for (file_name, configuration) in &self.configuration_list {
             let file_name = redact_snapshot(file_name).unwrap_or(file_name.into());
@@ -180,6 +254,40 @@ impl CliSnapshot {
         }
 
         content
+    }
+}
+
+fn write_command_snapshot(content: &mut String, commands: &[Vec<String>]) {
+    content.push_str("## Command\n\n```shell\n");
+
+    for command in commands {
+        content.push_str("biome");
+        for argument in command {
+            content.push(' ');
+            let argument = redact_snapshot(argument).unwrap_or(argument.into());
+            write_shell_argument(content, &argument);
+        }
+        content.push('\n');
+    }
+
+    content.push_str("```\n\n");
+}
+
+fn write_shell_argument(content: &mut String, argument: &str) {
+    if !argument.is_empty()
+        && argument.bytes().all(|byte| {
+            byte.is_ascii_alphanumeric()
+                || matches!(
+                    byte,
+                    b'_' | b'-' | b'.' | b'/' | b':' | b'=' | b'+' | b',' | b'@' | b'%'
+                )
+        })
+    {
+        content.push_str(argument);
+    } else {
+        content.push('\'');
+        content.push_str(&argument.replace('\'', "'\"'\"'"));
+        content.push('\'');
     }
 }
 
@@ -538,7 +646,7 @@ pub struct SnapshotPayload<'a> {
     pub test_name: &'a str,
     pub fs: MemoryFileSystem,
     pub console: BufferConsole,
-    pub result: Result<(), CliDiagnostic>,
+    pub result: CliRunResult,
 }
 
 impl<'a> SnapshotPayload<'a> {
@@ -547,7 +655,7 @@ impl<'a> SnapshotPayload<'a> {
         test_name: &'a str,
         fs: MemoryFileSystem,
         console: BufferConsole,
-        result: Result<(), CliDiagnostic>,
+        result: CliRunResult,
     ) -> Self {
         Self {
             module_path,
@@ -627,6 +735,35 @@ mod tests {
         assert_eq!(
             replace_temp_dir_impl(input, "/build"),
             r#"{"path": "<TEMP_DIR>/file.js"}"#
+        );
+    }
+
+    #[test]
+    fn command_snapshot_redacts_and_quotes_temp_path() {
+        let path = temp_dir().join("file with space.js").display().to_string();
+        let mut content = String::new();
+
+        write_command_snapshot(&mut content, &[vec!["check".into(), path]]);
+
+        assert_eq!(
+            content,
+            "## Command\n\n```shell\nbiome check '<TEMP_DIR>/file with space.js'\n```\n\n"
+        );
+    }
+
+    #[test]
+    fn command_snapshot_lists_each_invocation() {
+        let mut content = String::new();
+        let commands = [
+            vec!["check".into(), "file.js".into()],
+            vec!["lint".into(), "--write".into(), "file.js".into()],
+        ];
+
+        write_command_snapshot(&mut content, &commands);
+
+        assert_eq!(
+            content,
+            "## Command\n\n```shell\nbiome check file.js\nbiome lint --write file.js\n```\n\n"
         );
     }
 }

@@ -1,9 +1,8 @@
-use crate::run_cli;
+use crate::TestArgs as Args;
 use crate::snap_test::{CliSnapshot, SnapshotPayload};
-use biome_cli::CliDiagnostic;
+use crate::{CliRunResult, run_cli};
 use biome_console::{BufferConsole, Console};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use serial_test::serial;
 use std::{env, fs};
@@ -345,7 +344,7 @@ fn run_rage(
     fs: MemoryFileSystem,
     console: &mut dyn Console,
     args: Args,
-) -> (MemoryFileSystem, Result<(), CliDiagnostic>) {
+) -> (MemoryFileSystem, CliRunResult) {
     let _test_dir = TestLogDir::new("biome-rage-test");
     run_cli(fs, console, args)
 }

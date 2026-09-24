@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --skip=suspicious/noDebugger --skip=performance check.js
+```
+
 ## `check.js`
 
 ```js

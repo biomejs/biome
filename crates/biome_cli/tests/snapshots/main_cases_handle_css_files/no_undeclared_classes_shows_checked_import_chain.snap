@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --only=nursery/noUndeclaredClasses '<TEMP_DIR>/no_undeclared_classes_shows_checked_import_chain'
+```
+
 ## `Button.jsx`
 
 ```jsx

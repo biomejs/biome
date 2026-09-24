@@ -24,7 +24,7 @@ Quick tests are scratch space for inspecting CST, formatter IR, or one analyzer 
 
 ## Snapshot Workflow
 
-Run the focused test to create pending snapshots. Treat unrelated test failures separately.
+Run the focused test to create pending snapshots. Treat unrelated test failures separately. **Never update, add or delete snapshots manually**. Let `insta` do that.
 
 Agents must not run unfiltered `cargo insta review`; it needs a TTY. In a non-TTY agent shell, cargo-insta 1.44+ prints a filtered `--snapshot` diff without prompting:
 
