@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: spread.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<div {...attributes}></div>
+
+<style>
+.possibly-used { color: green; }
+</style>
+
+```

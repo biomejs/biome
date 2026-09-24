@@ -1,0 +1,10 @@
+<!-- should not generate diagnostics -->
+<div class="used"></div>
+
+<style>
+.used { color: green; }
+.card.active { color: red; }
+.parent .child { color: red; }
+.pseudo:hover { color: red; }
+:global(.global) { color: red; }
+</style>

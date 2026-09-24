@@ -1,16 +1,22 @@
 use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
-use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
+use crate::html_module_info::{AstroStyleInfo, AstroStyleVariable, HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
-use biome_css_syntax::{AnyCssRoot, CssClassSelector};
+use biome_css_syntax::{AnyCssRoot, CssClassSelector, CssDashedIdentifier, CssFunction};
 use biome_db::ParsedSource;
 use biome_html_syntax::{
-    AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlAttributeInitializer, HtmlAttributeList,
+    HtmlElement, HtmlRoot, HtmlSelfClosingElement, T, element_ext::AnyHtmlTagElement,
 };
-use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
+use biome_js_syntax::{
+    AnyJsArrayElement, AnyJsExpression, AnyJsImportLike, AnyJsLiteralExpression, AnyJsObjectMember,
+    AnyJsObjectMemberName, AnyJsRoot, AnyJsTemplateElement, JsLogicalOperator,
+};
 use biome_languages::css::EmbeddingStyleApplicability;
-use biome_languages::{CssFileSource, LanguageDb};
-use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
+use biome_languages::{CssFileSource, JsFileSource, LanguageDb};
+use biome_rowan::{
+    AstNode, AstNodeList, AstSeparatedList, Text, TextRange, TextSize, TokenText, WalkEvent,
+};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexSet;
 
@@ -27,10 +33,13 @@ enum PreparedHtmlSnippet {
         root: AnyCssRoot,
         file_source: CssFileSource,
         content_offset: TextSize,
+        has_errors: bool,
     },
     JavaScript {
         root: AnyJsRoot,
+        file_source: JsFileSource,
         content_offset: TextSize,
+        has_errors: bool,
     },
 }
 
@@ -44,15 +53,20 @@ pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: ParsedSource) -> 
             let file_source = db.source_from_index(snippet.document_source_index(db))?;
             let content_offset = snippet.content_offset(db);
             if let Some(file_source) = file_source.to_css_file_source() {
+                let parsed = snippet.parsed(db);
                 Some(PreparedHtmlSnippet::Css {
-                    root: snippet.parsed(db).tree::<AnyCssRoot>(),
+                    root: parsed.tree::<AnyCssRoot>(),
                     file_source,
                     content_offset,
+                    has_errors: parsed.has_errors(),
                 })
-            } else if file_source.to_js_file_source().is_some() {
+            } else if let Some(file_source) = file_source.to_js_file_source() {
+                let parsed = snippet.parsed(db);
                 Some(PreparedHtmlSnippet::JavaScript {
-                    root: snippet.parsed(db).tree::<AnyJsRoot>(),
+                    root: parsed.tree::<AnyJsRoot>(),
+                    file_source,
                     content_offset,
+                    has_errors: parsed.has_errors(),
                 })
             } else {
                 None
@@ -84,6 +98,9 @@ impl HtmlModuleVisitor {
         let mut referenced_classes = Vec::new();
         let mut imported_stylesheets = Vec::new();
         let mut import_paths = ImportPathMap::default();
+        let mut astro_class_references = IndexSet::new();
+        let mut has_unknown_astro_class_reference = false;
+        let mut astro_styles = Vec::new();
 
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
@@ -94,12 +111,20 @@ impl HtmlModuleVisitor {
                 continue;
             };
             if let Some(element) = HtmlElement::cast(node.clone()) {
-                self.visit_html_element(element, &mut referenced_classes);
+                self.visit_html_element(
+                    element,
+                    &mut referenced_classes,
+                    &mut astro_class_references,
+                    &mut has_unknown_astro_class_reference,
+                    &mut astro_styles,
+                );
             } else if let Some(element) = HtmlSelfClosingElement::cast(node) {
                 self.visit_self_closing_element(
                     element,
                     &mut referenced_classes,
                     &mut imported_stylesheets,
+                    &mut astro_class_references,
+                    &mut has_unknown_astro_class_reference,
                 );
             }
         }
@@ -107,30 +132,70 @@ impl HtmlModuleVisitor {
         for snippet in self.prepared.snippets.clone() {
             match snippet {
                 PreparedHtmlSnippet::Css {
-                    root,
+                    root: css_root,
                     file_source,
                     content_offset,
+                    has_errors,
                 } => {
-                    collect_css_classes(&root, &mut style_classes, &file_source, content_offset);
-                    let css_info = CssModuleVisitor::new(root).visit();
-                    imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
-                        range: import.range + content_offset,
-                        specifier: import.specifier.clone(),
-                        applicability: file_source.embedding_applicability(),
-                    }));
+                collect_css_classes(&css_root, &mut style_classes, &file_source, content_offset);
+                let css_info = CssModuleVisitor::new(css_root.clone()).visit();
+                imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
+                    range: import.range + content_offset,
+                    specifier: import.specifier.clone(),
+                    applicability: file_source.embedding_applicability(),
+                }));
+                collect_astro_style_references(
+                    &css_root,
+                    &file_source,
+                    has_errors,
+                    content_offset,
+                    &mut astro_styles,
+                );
                 }
                 PreparedHtmlSnippet::JavaScript {
-                    root,
+                    root: js_root,
+                    file_source,
                     content_offset,
-                } => self.collect_js_imports(&root, content_offset, &mut import_paths),
+                    has_errors,
+                } => {
+                self.collect_js_imports(&js_root, content_offset, &mut import_paths);
+                if file_source.as_embedding_kind().is_class_attribute() {
+                    let Some(root) = js_root.as_js_expression_template_root() else {
+                        has_unknown_astro_class_reference = true;
+                        continue;
+                    };
+                    let Some(expression) = root.expression() else {
+                        has_unknown_astro_class_reference = true;
+                        continue;
+                    };
+                    if !collect_astro_class_expression(
+                        &expression,
+                        file_source.as_embedding_kind().is_class_list_attribute(),
+                        &mut astro_class_references,
+                    ) {
+                        has_unknown_astro_class_reference = true;
+                    }
+                }
+                collect_astro_style_definitions(
+                    &js_root,
+                    &file_source,
+                    has_errors,
+                    content_offset,
+                    &mut astro_styles,
+                );
+                }
             }
         }
+        astro_styles.retain(|style| style.has_supported_css);
 
         HtmlModuleInfo::new(
             style_classes,
             referenced_classes,
             imported_stylesheets,
             import_paths,
+            astro_class_references,
+            has_unknown_astro_class_reference,
+            astro_styles,
         )
     }
 
@@ -208,33 +273,44 @@ impl HtmlModuleVisitor {
         &self,
         element: HtmlElement,
         referenced_classes: &mut Vec<CssClassReference>,
+        astro_class_references: &mut IndexSet<Text>,
+        has_unknown_astro_class_reference: &mut bool,
+        astro_styles: &mut Vec<AstroStyleInfo>,
     ) {
         let Ok(opening) = element.opening_element() else {
             return;
         };
 
-        for attr in opening.attributes() {
-            let Some(attr) = attr.as_html_attribute() else {
-                continue;
-            };
+        collect_astro_html_classes(
+            &opening.attributes(),
+            &self.file_path,
+            referenced_classes,
+            astro_class_references,
+            has_unknown_astro_class_reference,
+        );
 
-            let Some(name_token) = attr.name().ok().and_then(|name| name.value_token().ok()) else {
-                continue;
-            };
-
-            let name_text = name_token.text_trimmed();
-
-            if name_text.eq_ignore_ascii_case("class") {
-                // Collect the class attribute reference
-                if let Some(initializer) = attr.initializer()
-                    && let Ok(value_node) = initializer.value()
-                {
-                    collect_class_attribute_reference(
-                        &value_node,
-                        &self.file_path,
-                        referenced_classes,
-                    );
+        if AnyHtmlTagElement::from(opening.clone()).tag_name_kind() == Some(T![style]) {
+            let style_range = element.range();
+            if let Some(style) = opening.attributes().iter().find_map(|attribute| {
+                let AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroDefineDirective(
+                    directive,
+                )) = attribute
+                else {
+                    return None;
+                };
+                let value = directive.value().ok()?;
+                if value.name().ok()?.value_token().ok()?.text_trimmed() != "vars" {
+                    return None;
                 }
+                Some(AstroStyleInfo {
+                    style_range,
+                    define_vars_range: value.initializer()?.value().ok()?.range(),
+                    definitions: Vec::new(),
+                    references: IndexSet::new(),
+                    has_supported_css: false,
+                })
+            }) {
+                astro_styles.push(style);
             }
         }
     }
@@ -249,22 +325,16 @@ impl HtmlModuleVisitor {
         element: HtmlSelfClosingElement,
         referenced_classes: &mut Vec<CssClassReference>,
         imported_stylesheets: &mut Vec<HtmlImport>,
+        astro_class_references: &mut IndexSet<Text>,
+        has_unknown_astro_class_reference: &mut bool,
     ) {
-        // Collect class= references from all self-closing elements.
-        for attr in element.attributes() {
-            let Some(attr) = attr.as_html_attribute() else {
-                continue;
-            };
-            let Some(name_token) = attr.name().ok().and_then(|n| n.value_token().ok()) else {
-                continue;
-            };
-            if name_token.text_trimmed().eq_ignore_ascii_case("class")
-                && let Some(initializer) = attr.initializer()
-                && let Ok(value_node) = initializer.value()
-            {
-                collect_class_attribute_reference(&value_node, &self.file_path, referenced_classes);
-            }
-        }
+        collect_astro_html_classes(
+            &element.attributes(),
+            &self.file_path,
+            referenced_classes,
+            astro_class_references,
+            has_unknown_astro_class_reference,
+        );
 
         // Collect <link rel="stylesheet"> imports.
         let is_link_tag = element
@@ -291,6 +361,366 @@ impl HtmlModuleVisitor {
                 specifier: href_value.text().to_string().into(),
                 applicability: EmbeddingStyleApplicability::Global,
             });
+        }
+    }
+}
+
+fn collect_astro_html_classes(
+    attributes: &HtmlAttributeList,
+    file_path: &Utf8Path,
+    referenced_classes: &mut Vec<CssClassReference>,
+    astro_class_references: &mut IndexSet<Text>,
+    has_unknown_astro_class_reference: &mut bool,
+) {
+    for attribute in attributes {
+        match attribute {
+            AnyHtmlAttribute::HtmlAttribute(attribute) => {
+                let Some(name) = attribute
+                    .name()
+                    .ok()
+                    .and_then(|name| name.value_token().ok())
+                else {
+                    continue;
+                };
+                if !matches!(name.text_trimmed(), "class" | "className") {
+                    continue;
+                }
+                let Some(initializer) = attribute.initializer() else {
+                    continue;
+                };
+                let Ok(value) = initializer.value() else {
+                    *has_unknown_astro_class_reference = true;
+                    continue;
+                };
+                collect_class_attribute_reference(&value, file_path, referenced_classes);
+                match value {
+                    AnyHtmlAttributeInitializer::HtmlString(string) => {
+                        let Some(value) = string.inner_string_text().ok() else {
+                            *has_unknown_astro_class_reference = true;
+                            continue;
+                        };
+                        if value.text().contains('&') {
+                            *has_unknown_astro_class_reference = true;
+                        } else {
+                            collect_class_token_text(value, astro_class_references);
+                        }
+                    }
+                    AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_) => {}
+                    _ => *has_unknown_astro_class_reference = true,
+                }
+            }
+            AnyHtmlAttribute::AnyAstroDirective(directive) => match directive {
+                AnyAstroDirective::AstroClassDirective(directive) => {
+                    let Ok(value) = directive.value() else {
+                        *has_unknown_astro_class_reference = true;
+                        continue;
+                    };
+                    if value
+                        .name()
+                        .ok()
+                        .and_then(|name| name.value_token().ok())
+                        .is_none_or(|name| name.text_trimmed() != "list")
+                    {
+                        continue;
+                    }
+                    let Some(initializer) = value.initializer() else {
+                        *has_unknown_astro_class_reference = true;
+                        continue;
+                    };
+                    match initializer.value() {
+                        Ok(AnyHtmlAttributeInitializer::HtmlString(string)) => {
+                            let Some(value) = string.inner_string_text().ok() else {
+                                *has_unknown_astro_class_reference = true;
+                                continue;
+                            };
+                            if value.text().contains(['\\', '&']) {
+                                *has_unknown_astro_class_reference = true;
+                            } else {
+                                collect_class_token_text(value, astro_class_references);
+                            }
+                        }
+                        Ok(AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(_)) => {}
+                        _ => *has_unknown_astro_class_reference = true,
+                    }
+                }
+                AnyAstroDirective::AstroSetDirective(directive)
+                    if directive
+                        .value()
+                        .ok()
+                        .and_then(|value| value.name().ok())
+                        .and_then(|name| name.value_token().ok())
+                        .is_some_and(|name| name.text_trimmed() == "html") =>
+                {
+                    *has_unknown_astro_class_reference = true;
+                }
+                _ => {}
+            },
+            AnyHtmlAttribute::HtmlSpreadAttribute(_)
+            | AnyHtmlAttribute::HtmlAttributeDoubleTextExpression(_)
+            | AnyHtmlAttribute::HtmlAttributeSingleTextExpression(_) => {
+                *has_unknown_astro_class_reference = true;
+            }
+            _ => {}
+        }
+    }
+}
+
+fn collect_astro_style_definitions(
+    root: &AnyJsRoot,
+    file_source: &JsFileSource,
+    has_errors: bool,
+    content_offset: TextSize,
+    styles: &mut [AstroStyleInfo],
+) {
+    if !file_source.as_embedding_kind().is_astro() {
+        return;
+    }
+    let Some(style) = styles
+        .iter_mut()
+        .find(|style| style.define_vars_range.contains(content_offset))
+    else {
+        return;
+    };
+    if has_errors {
+        return;
+    }
+    let Some(object) = root
+        .as_js_expression_template_root()
+        .and_then(|root| root.expression())
+        .map(AnyJsExpression::omit_parentheses)
+        .and_then(|expression| expression.as_js_object_expression().cloned())
+    else {
+        return;
+    };
+
+    for member in object.members().iter().flatten() {
+        let (name, range) = match member {
+            AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
+                let Some(token) = member.name().ok().and_then(|name| name.value_token().ok())
+                else {
+                    continue;
+                };
+                let name = token.token_text_trimmed();
+                if name.text().contains('\\') {
+                    continue;
+                }
+                (Text::from(name), token.text_trimmed_range())
+            }
+            AnyJsObjectMember::JsPropertyObjectMember(member) => {
+                if member.value().is_err() {
+                    continue;
+                }
+                let Some(name) = member
+                    .name()
+                    .ok()
+                    .and_then(|name| name.as_js_literal_member_name().cloned())
+                else {
+                    continue;
+                };
+                let Some(token) = name.value().ok() else {
+                    continue;
+                };
+                if token.text_trimmed().contains('\\') {
+                    continue;
+                }
+                let Some(decoded) = AnyJsObjectMemberName::JsLiteralMemberName(name).name() else {
+                    continue;
+                };
+                if !token.text_trimmed().starts_with(['\'', '"']) {
+                    let mut bytes = decoded.text().bytes();
+                    if !bytes.next().is_some_and(|byte| {
+                        byte == b'_' || byte == b'$' || byte.is_ascii_alphabetic()
+                    }) || !bytes
+                        .all(|byte| byte == b'_' || byte == b'$' || byte.is_ascii_alphanumeric())
+                    {
+                        continue;
+                    }
+                }
+                (Text::from(decoded), token.text_trimmed_range())
+            }
+            _ => continue,
+        };
+        if name.text() != "__proto__" {
+            style.definitions.push(AstroStyleVariable {
+                name,
+                range: range + content_offset,
+            });
+        }
+    }
+}
+
+fn collect_astro_style_references(
+    root: &AnyCssRoot,
+    file_source: &CssFileSource,
+    has_errors: bool,
+    content_offset: TextSize,
+    styles: &mut [AstroStyleInfo],
+) {
+    let Some(style) = styles
+        .iter_mut()
+        .find(|style| style.style_range.contains(content_offset))
+    else {
+        return;
+    };
+    if !file_source.is_css() || has_errors {
+        style.definitions.clear();
+        return;
+    }
+    style.has_supported_css = true;
+    for function in root.syntax().descendants().filter_map(CssFunction::cast) {
+        let Some(name) = function
+            .name()
+            .ok()
+            .and_then(|name| name.as_css_identifier().cloned())
+            .and_then(|name| name.value_token().ok())
+        else {
+            continue;
+        };
+        if !name.text_trimmed().eq_ignore_ascii_case("var") {
+            continue;
+        }
+        let Some(first_argument) = function.items().iter().next().and_then(Result::ok) else {
+            continue;
+        };
+        if first_argument.syntax().text_trimmed().contains_char('\\') {
+            style.has_supported_css = false;
+            return;
+        }
+        let Some(identifier) = first_argument
+            .syntax()
+            .descendants()
+            .find_map(CssDashedIdentifier::cast)
+        else {
+            continue;
+        };
+        let Some(token) = identifier.value_token().ok() else {
+            continue;
+        };
+        let text = token.token_text_trimmed();
+        if !text.text().starts_with("--") {
+            continue;
+        }
+        let name = text
+            .clone()
+            .slice(TextRange::new(TextSize::from(2), text.len()));
+        style.references.insert(Text::from(name));
+    }
+}
+
+fn collect_astro_class_expression(
+    expression: &AnyJsExpression,
+    is_class_list: bool,
+    classes: &mut IndexSet<Text>,
+) -> bool {
+    let mut pending = vec![(expression.clone(), is_class_list)];
+    while let Some((expression, is_class_list)) = pending.pop() {
+        match expression.omit_parentheses() {
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(string),
+            ) => {
+                let Some(raw) = string.inner_string_text().ok() else {
+                    return false;
+                };
+                if raw.text().contains('\\') {
+                    return false;
+                }
+                collect_class_token_text(raw, classes);
+            }
+            AnyJsExpression::JsTemplateExpression(template) if template.is_constant() => {
+                if template.syntax().text_trimmed().contains_char('\\') {
+                    return false;
+                }
+                for element in template.elements() {
+                    let AnyJsTemplateElement::JsTemplateChunkElement(chunk) = element else {
+                        return false;
+                    };
+                    let Some(token) = chunk.template_chunk_token().ok() else {
+                        return false;
+                    };
+                    collect_class_token_text(token.token_text_trimmed(), classes);
+                }
+            }
+            AnyJsExpression::JsArrayExpression(array) if is_class_list => {
+                for element in array.elements().iter() {
+                    let Ok(AnyJsArrayElement::AnyJsExpression(expression)) = element else {
+                        return false;
+                    };
+                    pending.push((expression, true));
+                }
+            }
+            AnyJsExpression::JsObjectExpression(object) if is_class_list => {
+                for member in object.members().iter() {
+                    match member {
+                        Ok(AnyJsObjectMember::JsPropertyObjectMember(member)) => {
+                            let Some(name) = member
+                                .name()
+                                .ok()
+                                .filter(|name| name.as_js_computed_member_name().is_none())
+                                .and_then(|name| name.name())
+                                .filter(|name| !name.text().contains('\\'))
+                            else {
+                                return false;
+                            };
+                            collect_class_token_text(name, classes);
+                        }
+                        Ok(AnyJsObjectMember::JsShorthandPropertyObjectMember(member)) => {
+                            let Some(name) = member
+                                .name()
+                                .ok()
+                                .and_then(|name| name.value_token().ok())
+                                .map(|name| name.token_text_trimmed())
+                            else {
+                                return false;
+                            };
+                            if name.text().contains('\\') {
+                                return false;
+                            }
+                            collect_class_token_text(name, classes);
+                        }
+                        _ => return false,
+                    }
+                }
+            }
+            AnyJsExpression::JsConditionalExpression(conditional) if is_class_list => {
+                let Some(consequent) = conditional.consequent().ok() else {
+                    return false;
+                };
+                let Some(alternate) = conditional.alternate().ok() else {
+                    return false;
+                };
+                pending.push((alternate, true));
+                pending.push((consequent, true));
+            }
+            AnyJsExpression::JsLogicalExpression(logical)
+                if is_class_list && logical.operator() == Ok(JsLogicalOperator::LogicalAnd) =>
+            {
+                let Some(right) = logical.right().ok() else {
+                    return false;
+                };
+                pending.push((right, true));
+            }
+            _ => return false,
+        }
+    }
+    true
+}
+
+fn collect_class_token_text(value: TokenText, classes: &mut IndexSet<Text>) {
+    let mut start = None;
+    for (index, byte) in value
+        .text()
+        .bytes()
+        .chain(std::iter::once(b' '))
+        .enumerate()
+    {
+        if byte.is_ascii_whitespace() {
+            if let Some(start) = start.take() {
+                let range =
+                    TextRange::new(TextSize::from(start as u32), TextSize::from(index as u32));
+                classes.insert(Text::from(value.clone().slice(range)));
+            }
+        } else if start.is_none() {
+            start = Some(index);
         }
     }
 }

@@ -1,0 +1,17 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: escaped_shorthand.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+---
+const f\u006fo = true;
+---
+<div class:list={{ f\u006fo }}></div>
+
+<style>
+.foo { color: green; }
+</style>
+
+```

@@ -16,8 +16,10 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, fi
     let mut source_type: JsFileSource = if file_type == "astro_expr" {
         // Fixture text is the brace-less body of an Astro `{...}` expression.
         JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+            content_offset: 0.into(),
             frontmatter: false,
             is_class_attribute: false,
+            is_class_list_attribute: false,
         })
     } else {
         test_file.input_file().as_path().try_into().unwrap()
