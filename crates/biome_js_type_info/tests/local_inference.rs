@@ -1,8 +1,13 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
-use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter, TsTypeAliasDeclaration};
-use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
+use biome_js_syntax::{
+    JsArrowFunctionExpression, JsExpressionStatement, JsFormalParameter, TsTypeAliasDeclaration,
+};
+use biome_js_type_info::{
+    NarrowingPredicate, RawTypeCollector, ReturnType, TypeData, TypeReference, TypeofExpression,
+    TypeofTag,
+};
 use biome_rowan::AstNode;
 
 use utils::{
@@ -506,4 +511,40 @@ fn contextual_callback_parameter_requires_direct_call_argument() {
             "{param:?} must not be contextually typed"
         );
     }
+}
+
+#[test]
+fn infer_type_of_typeof_guard_narrowed_reference() {
+    const CODE: &str = r#"if (typeof x === "string") {
+    x;
+}"#;
+
+    let root = parse_ts(CODE);
+    let expr = root
+        .syntax()
+        .descendants()
+        .find_map(JsExpressionStatement::cast)
+        .expect("cannot find expression statement")
+        .expression()
+        .expect("expression statement must have an expression");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+
+    // The raw type formatter prints the un-narrowed type, so the shape is
+    // checked directly.
+    let TypeData::TypeofExpression(expression) = &ty else {
+        panic!("expected a narrowed reference, got {ty:?}");
+    };
+    let TypeofExpression::Narrowed(narrowed) = expression.as_ref() else {
+        panic!("expected a narrowed reference, got {expression:?}");
+    };
+    assert_eq!(
+        narrowed.predicate,
+        NarrowingPredicate::Typeof(TypeofTag::String)
+    );
+    assert!(
+        matches!(&narrowed.ty, TypeReference::Qualifier(qualifier) if qualifier.path.identifier().is_some_and(|name| name.text() == "x")),
+        "the narrowed type must be the reference to `x`, got {:?}",
+        narrowed.ty
+    );
 }

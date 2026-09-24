@@ -1,0 +1,110 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export function precedingCaseTestWrites(x: number | "a") {
+	switch (x) {
+		case ((x = 5), "nope" as any):
+			break;
+		case "a":
+			x;
+			break;
+	}
+}
+
+type Kinded = { kind: "a"; a: number } | { kind: "b"; b: number };
+
+export function precedingCaseTestWritesMember(y: Kinded) {
+	switch (y.kind) {
+		case ((y.kind = "a"), "zzz" as any):
+			break;
+		case "b":
+			y;
+			break;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding precedingCaseTestWrites "precedingCaseTestWrites" => sync Function "precedingCaseTestWrites" {
+  accepts: {
+    params: [
+      required x: number | string: a
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => number | string: a
+
+Expression "x" => number | string: a
+
+Expression "(x = 5, \"nope\" as any)" => any
+
+Expression "x = 5" => unknown
+
+Expression "x = 5, \"nope\" as any" => any
+
+Expression "5" => number: 5
+
+Expression "\"nope\"" => string: nope
+
+Expression "\"nope\" as any" => any
+
+Expression "\"a\"" => string: a
+
+Expression "x" => number | string: a
+
+Binding Kinded "Kinded" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: a, "a": number]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: b, "b": number]
+  }
+
+Binding precedingCaseTestWritesMember "precedingCaseTestWritesMember" => sync Function "precedingCaseTestWritesMember" {
+  accepts: {
+    params: [
+      required y: instanceof Kinded
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => instanceof Kinded
+
+Expression "y" => instanceof Kinded
+
+Expression "y.kind" => string: a | string: b
+
+Expression "(y.kind = \"a\", \"zzz\" as any)" => any
+
+Expression "y" => instanceof Kinded
+
+Expression "y.kind = \"a\"" => unknown
+
+Expression "y.kind = \"a\", \"zzz\" as any" => any
+
+Expression "\"a\"" => string: a
+
+Expression "\"zzz\"" => string: zzz
+
+Expression "\"zzz\" as any" => any
+
+Expression "\"b\"" => string: b
+
+Expression "y" => instanceof Kinded
+```
