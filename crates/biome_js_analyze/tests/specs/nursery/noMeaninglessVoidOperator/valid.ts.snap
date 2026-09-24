@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare function fail(): never;
+declare function text(): string;
+declare function maybe(): string | void;
+declare function maybeUndefined(): string | undefined;
+declare function anything(): any;
+declare function unknownValue(): unknown;
+void fail();
+void text();
+void maybe();
+void maybeUndefined();
+void anything();
+void unknownValue();
+void (text() as string);
+void (text() satisfies string);
+void (text(), text());
+declare const box: { method?: () => string };
+void box.method?.();
+declare const promise: Promise<number>;
+declare const thenable: { then(callback: () => void): void };
+void promise;
+void thenable;
+declare const unresolved: MissingType;
+void unresolved;
+void missingFunction();
+declare const optional: { method?: () => void };
+void optional.method?.();
+
+```

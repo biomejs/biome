@@ -9,4 +9,14 @@ expression: valid.astro
 <div>{content}</div>
 <div set:HTML={content}></div>
 
+{show && <span set:text={content} />}
+
+{
+    show && (
+        <div>
+            <span>{content}</span>
+        </div>
+    )
+}
+
 ```

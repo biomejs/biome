@@ -1,0 +1,94 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const registered = Symbol.for("entry");
+export const key = Symbol.keyFor(registered);
+export const iterator = Symbol.iterator;
+export const asyncIterator = Symbol.asyncIterator;
+export const tag = Symbol.toStringTag;
+```
+
+## Inferred types
+
+```
+Binding registered "registered" => symbol
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.for" => sync Function "for" {
+  accepts: {
+    params: [
+      required key: string
+    ]
+    type_args: []
+  }
+  returns: symbol
+}
+
+Expression "Symbol.for(\"entry\")" => symbol
+
+Expression "\"entry\"" => string: entry
+
+Binding key "key" => string | undefined
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.keyFor" => sync Function "keyFor" {
+  accepts: {
+    params: [
+      required sym: symbol
+    ]
+    type_args: []
+  }
+  returns: string | undefined
+}
+
+Expression "Symbol.keyFor(registered)" => string | undefined
+
+Expression "registered" => symbol
+
+Binding iterator "iterator" => Symbol.iterator
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.iterator" => Symbol.iterator
+
+Binding asyncIterator "asyncIterator" => symbol
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.asyncIterator" => symbol
+
+Binding tag "tag" => Symbol.toStringTag
+
+Expression "Symbol" => class "Symbol" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Symbol.toStringTag" => Symbol.toStringTag
+```

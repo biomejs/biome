@@ -168,6 +168,9 @@ pub enum TypeData {
     /// Type derived from another through a built-in operator.
     TypeOperator(Box<TypeOperatorType>),
 
+    /// A type such as `T[K]`, kept unevaluated until `T` and `K` can be resolved.
+    IndexedAccess(Box<IndexedAccessType>),
+
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
@@ -473,6 +476,7 @@ impl TypeData {
             // class, stripping the instance would change its meaning.
             | Self::Reference(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofExpression(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
@@ -637,6 +641,19 @@ impl Default for FunctionParameter {
 }
 
 impl FunctionParameter {
+    /// Returns the type of the binding named `name`, or unknown when this
+    /// parameter does not declare it.
+    pub fn binding_type(&self, name: &Text) -> TypeReference {
+        match self {
+            Self::Named(named) => named.ty.clone(),
+            Self::Pattern(pattern) => pattern
+                .bindings
+                .iter()
+                .find_map(|binding| (binding.name == *name).then(|| binding.ty.clone()))
+                .unwrap_or_default(),
+        }
+    }
+
     pub fn ty(&self) -> &TypeReference {
         match self {
             Self::Named(named) => &named.ty,
@@ -703,6 +720,8 @@ pub struct FunctionParameterBinding {
 /// Definition of a generic type parameter.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GenericTypeParameter {
+    /// Whether inline call arguments use const-like inference for this parameter.
+    pub is_const: bool,
     /// Name of the type parameter.
     pub name: Text,
 
@@ -963,24 +982,39 @@ pub struct AssertsReturnType {
 ///
 /// Tuples in TypeScript are created using `Array`s of a fixed size.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct Tuple(pub(super) Box<[TupleElementType]>);
+pub struct Tuple {
+    pub(super) elements: Box<[TupleElementType]>,
+    /// Whether the elements describe an ordinary mutable array expression.
+    ///
+    /// For example, `mutable` sets this flag, while `fixed` does not:
+    ///
+    /// ```ts
+    /// const mutable = ["A", "B"];
+    /// const fixed = ["A", "B"] as const;
+    /// ```
+    ///
+    /// The initial values of `mutable` do not describe every value it can hold.
+    /// A tuple annotation such as `["A", "B"]` also leaves this flag unset.
+    pub is_inferred_array: bool,
+}
 
 impl Tuple {
     pub fn elements(&self) -> &[TupleElementType] {
-        &self.0
+        &self.elements
     }
 
     /// Returns the element at the given index.
     pub fn get_element(&self, index: usize) -> Option<&TupleElementType> {
-        self.0
+        self.elements
             .get(index)
-            .or_else(|| self.0.last().filter(|last| last.is_rest))
+            .or_else(|| self.elements.last().filter(|last| last.is_rest))
     }
 
     /// Returns a new tuple starting at the given index.
     pub fn slice_from(&self, index: usize) -> Self {
-        Self(
-            self.0
+        Self {
+            elements: self
+                .elements
                 .iter()
                 .skip(index)
                 .map(|element| TupleElementType {
@@ -989,7 +1023,8 @@ impl Tuple {
                     ..*element
                 })
                 .collect(),
-        )
+            is_inferred_array: self.is_inferred_array,
+        }
     }
 }
 
@@ -1068,6 +1103,8 @@ impl TypeMember {
         match &self.kind {
             TypeMemberKind::IndexSignature(key_type)
             | TypeMemberKind::ConstAssertedIndexSignature(key_type)
+            | TypeMemberKind::ComputedStatic(key_type)
+            | TypeMemberKind::ConstAssertedComputedStatic(key_type)
             | TypeMemberKind::ComputedValue(key_type)
             | TypeMemberKind::ConstAssertedComputedValue(key_type) => predicate(key_type),
             _ => false,
@@ -1099,9 +1136,11 @@ pub enum TypeMemberKind {
     /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
     /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
     ComputedValue(TypeReference),
+    ComputedStatic(TypeReference),
     ConstAssertedCallSignature,
     /// A [`Self::ComputedValue`] carried through an `as const` assertion.
     ConstAssertedComputedValue(TypeReference),
+    ConstAssertedComputedStatic(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeReference),
@@ -1121,6 +1160,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1167,6 +1208,8 @@ impl TypeMemberKind {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedStatic(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
@@ -1178,6 +1221,7 @@ impl TypeMemberKind {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -1192,6 +1236,9 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => {
                 Self::ConstAssertedCallSignature
+            }
+            Self::ComputedStatic(key_type) | Self::ConstAssertedComputedStatic(key_type) => {
+                Self::ConstAssertedComputedStatic(key_type)
             }
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 Self::ConstAssertedComputedValue(key_type)
@@ -1216,6 +1263,7 @@ impl TypeMemberKind {
     pub fn without_const_asserted(&self) -> Self {
         match self {
             Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedComputedStatic(key_type) => Self::ComputedStatic(key_type.clone()),
             Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
@@ -1251,6 +1299,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1303,6 +1353,8 @@ pub enum TypeofExpression {
     Await(TypeofAwaitExpression),
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
+    CallArgument(TypeofCallArgumentExpression),
+    ComputedMember(TypeofComputedMemberExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1312,6 +1364,7 @@ pub enum TypeofExpression {
     LogicalOr(TypeofLogicalOrExpression),
     New(TypeofNewExpression),
     NullishCoalescing(TypeofNullishCoalescingExpression),
+    Parameter(TypeofParameterExpression),
     StaticMember(TypeofStaticMemberExpression),
     OptionalChainStaticMember(TypeofStaticMemberExpression),
     Super(TypeofThisOrSuperExpression),
@@ -1340,6 +1393,31 @@ pub struct TypeofBitwiseNotExpression {
 pub struct TypeofCallExpression {
     pub callee: TypeReference,
     pub arguments: Box<[CallArgumentType]>,
+}
+
+/// Type expected for the argument at `index` of a call or `new` expression,
+/// according to the signature selected for `callee` and `arguments`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofCallArgumentExpression {
+    pub callee: TypeReference,
+
+    /// Source arguments of the call. The slot at `index` is unknown so the
+    /// expression does not depend on that argument's own type.
+    pub arguments: Box<[CallArgumentType]>,
+
+    /// Source index of the argument, before spreads are expanded.
+    pub index: u16,
+
+    pub is_constructor: bool,
+}
+
+/// Type of the parameter at `index` of a callable type, not counting a
+/// `this` parameter.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofParameterExpression {
+    pub function: TypeReference,
+    pub index: u16,
+    pub has_initializer: bool,
 }
 
 /// Represents the type of a ternary expression.
@@ -1398,6 +1476,13 @@ pub enum CallArgumentType {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofComputedMemberExpression {
+    pub object: TypeReference,
+    pub member: TypeReference,
+    pub is_optional_chain: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofIndexExpression {
     pub object: TypeReference,
     pub index: usize,
@@ -1448,6 +1533,8 @@ pub struct TypeofValue {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofUnaryMinusExpression {
+    /// Whether the operand syntax is a number or bigint literal.
+    pub is_literal_argument: bool,
     pub argument: TypeReference,
 }
 
@@ -1455,6 +1542,21 @@ pub struct TypeofUnaryMinusExpression {
 pub struct TypeOperatorType {
     pub operator: TypeOperator,
     pub ty: TypeReference,
+}
+
+/// Stores the two types used by a TypeScript indexed access.
+///
+/// In this example, `object` refers to `typeof values` and `index` refers to
+/// `number`. Both are kept as references until inference can resolve them:
+///
+/// ```ts
+/// const values = ["A", "B", "C"] as const;
+/// type Letter = (typeof values)[number];
+/// ```
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct IndexedAccessType {
+    pub object: TypeReference,
+    pub index: TypeReference,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -1734,6 +1836,11 @@ impl TypeReferenceQualifier {
     /// Checks whether this type qualifier references the `Date` type.
     pub fn is_date(&self) -> bool {
         self.path.is_identifier("Date")
+    }
+
+    /// Checks whether this type qualifier references the `Math` namespace object.
+    pub fn is_math(&self) -> bool {
+        self.path.is_identifier("Math")
     }
 
     /// Checks whether this type qualifier references the `Map` type.

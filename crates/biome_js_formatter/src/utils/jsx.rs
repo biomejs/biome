@@ -1,6 +1,6 @@
 use crate::JsCommentStyle;
 use crate::prelude::*;
-use biome_formatter::{FormatOptions, QuoteStyle, comments::CommentStyle, format_args, write};
+use biome_formatter::{FormatOptions, QuoteStyle, format_args, write};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsxChild, AnyJsxTag, JsComputedMemberExpression,
     JsStaticMemberExpression, JsSyntaxKind, JsxChildList, JsxExpressionChild, JsxTagExpression,

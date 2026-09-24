@@ -16619,6 +16619,7 @@ impl AnyTsType {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeMember {
     JsBogusMember(JsBogusMember),
+    JsMetavariable(JsMetavariable),
     TsCallSignatureTypeMember(TsCallSignatureTypeMember),
     TsConstructSignatureTypeMember(TsConstructSignatureTypeMember),
     TsGetterSignatureTypeMember(TsGetterSignatureTypeMember),
@@ -16631,6 +16632,12 @@ impl AnyTsTypeMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
             Self::JsBogusMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -40415,6 +40422,11 @@ impl From<JsBogusMember> for AnyTsTypeMember {
         Self::JsBogusMember(node)
     }
 }
+impl From<JsMetavariable> for AnyTsTypeMember {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
 impl From<TsCallSignatureTypeMember> for AnyTsTypeMember {
     fn from(node: TsCallSignatureTypeMember) -> Self {
         Self::TsCallSignatureTypeMember(node)
@@ -40453,6 +40465,7 @@ impl From<TsSetterSignatureTypeMember> for AnyTsTypeMember {
 impl AstNode for AnyTsTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusMember::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(TsCallSignatureTypeMember::KIND_SET)
         .union(TsConstructSignatureTypeMember::KIND_SET)
         .union(TsGetterSignatureTypeMember::KIND_SET)
@@ -40464,6 +40477,7 @@ impl AstNode for AnyTsTypeMember {
         matches!(
             kind,
             JS_BOGUS_MEMBER
+                | JS_METAVARIABLE
                 | TS_CALL_SIGNATURE_TYPE_MEMBER
                 | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
                 | TS_GETTER_SIGNATURE_TYPE_MEMBER
@@ -40476,6 +40490,7 @@ impl AstNode for AnyTsTypeMember {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             TS_CALL_SIGNATURE_TYPE_MEMBER => {
                 Self::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
             }
@@ -40504,6 +40519,7 @@ impl AstNode for AnyTsTypeMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.syntax(),
+            Self::JsMetavariable(it) => it.syntax(),
             Self::TsCallSignatureTypeMember(it) => it.syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.syntax(),
@@ -40516,6 +40532,7 @@ impl AstNode for AnyTsTypeMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.into_syntax(),
+            Self::JsMetavariable(it) => it.into_syntax(),
             Self::TsCallSignatureTypeMember(it) => it.into_syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -40530,6 +40547,7 @@ impl std::fmt::Debug for AnyTsTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
@@ -40544,6 +40562,7 @@ impl From<AnyTsTypeMember> for SyntaxNode {
     fn from(n: AnyTsTypeMember) -> Self {
         match n {
             AnyTsTypeMember::JsBogusMember(it) => it.into_syntax(),
+            AnyTsTypeMember::JsMetavariable(it) => it.into_syntax(),
             AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsGetterSignatureTypeMember(it) => it.into_syntax(),

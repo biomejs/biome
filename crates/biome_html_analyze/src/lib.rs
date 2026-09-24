@@ -12,17 +12,19 @@ mod tailwind;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
+use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
 pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, Suppression,
+    MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer, Suppression,
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error;
+use biome_embeds::EmbeddedData;
 use biome_html_syntax::HtmlLanguage;
-use biome_languages::HtmlFileSource;
+use biome_languages::{HtmlFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_project_layout::ProjectLayout;
 use biome_suppression::SuppressionDiagnostic;
@@ -35,6 +37,8 @@ use std::sync::{Arc, LazyLock};
 #[derive(Default)]
 pub struct HtmlAnalyzerServices {
     pub module_db: Option<Rc<dyn ModuleDb>>,
+    pub language_db: Option<Rc<dyn LanguageDb>>,
+    pub embedded_data: Option<Arc<EmbeddedData>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
 }
 
@@ -48,12 +52,24 @@ impl HtmlAnalyzerServices {
         self.project_layout = Some(project_layout);
         self
     }
+
+    pub fn with_language_db(mut self, language_db: Rc<dyn LanguageDb>) -> Self {
+        self.language_db = Some(language_db);
+        self
+    }
+
+    pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
+        self.embedded_data = embedded_data;
+        self
+    }
 }
 
 impl std::fmt::Debug for HtmlAnalyzerServices {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("HtmlAnalyzerServices")
             .field("module_db", &self.module_db.as_ref().map(|_| "..."))
+            .field("language_db", &self.language_db.as_ref().map(|_| "..."))
+            .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
             .field("project_layout", &self.project_layout)
             .finish()
     }
@@ -83,8 +99,62 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    analyze_with_optional_snippets::<F, B, ()>(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        emit_signal,
+    )
+}
+
+/// Analyzes HTML and embedded snippets together. Ignore comments in HTML can
+/// also apply to findings in the snippets.
+pub fn analyze_with_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: &mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>],
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        Some(snippets),
+        emit_signal,
+    )
+}
+
+fn analyze_with_optional_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
     let module_db = html_services.module_db.clone();
-    analyze_with_inspect_matcher(
+    analyze_with_inspect_matcher_and_snippets(
         root,
         filter,
         move |_| {
@@ -96,6 +166,7 @@ where
         source_type,
         html_services,
         suppression,
+        snippets,
         emit_signal,
     )
 }
@@ -114,6 +185,35 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
     suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<HtmlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_snippets::<V, F, B, ()>(
+        root,
+        filter,
+        inspect_matcher,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_snippets<'a, V, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -137,6 +237,11 @@ where
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
     }
+    if let Some(embedded_data) = html_services.embedded_data {
+        services.insert_service(EmbeddedService::from_data(embedded_data));
+    } else if let Some(language_db) = html_services.language_db {
+        services.insert_service(EmbeddedService::new(language_db, options.file_path.clone()));
+    }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);
     }
@@ -153,15 +258,18 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippets {
+        Some(snippets) => analyzer.run_with_snippets(ctx, snippets),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

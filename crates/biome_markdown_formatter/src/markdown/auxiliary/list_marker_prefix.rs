@@ -205,7 +205,10 @@ fn is_marker_only_bullet(node: &MdListMarkerPrefix) -> bool {
     };
 
     let mut blocks = bullet.content().iter();
-    blocks.next().is_some_and(|block| block.is_newline()) && blocks.next().is_none()
+    blocks
+        .next()
+        .is_some_and(|block| block.is_newline() && !block.syntax().has_comments_descendants())
+        && blocks.next().is_none()
 }
 
 pub(crate) struct FormatMdListMarkerPrefixOptions {

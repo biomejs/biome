@@ -314,6 +314,122 @@ import { ButtonLink } from "other/components";
 }
 
 #[test]
+fn issue_6888() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["lodash.grit"],
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "lodash.grit".into(),
+        br#"language js
+
+`import $clause from "lodash-es"` where {
+    $clause <: contains `padStart`,
+    register_diagnostic(
+        span = $clause,
+        message = "Prefer native String.padStart() over the lodash version",
+        severity = "error"
+    )
+}
+"#,
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        br#"import { padStart, times } from "lodash-es";
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_6888",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_7363() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "plugins": ["interface.grit"],
+    "formatter": {
+        "enabled": false
+    },
+    "linter": {
+        "rules": {
+            "recommended": false
+        }
+    }
+}"#,
+    );
+    fs.insert(
+        "interface.grit".into(),
+        br#"`interface $name { $body }` where {
+    register_diagnostic(span=$name, severity="warn", message="found interface")
+}
+"#,
+    );
+
+    let ts_file = Utf8Path::new("interface.ts");
+    fs.insert(
+        ts_file.into(),
+        br#"interface Zero {}
+
+interface Single {
+    f1: string;
+}
+
+interface Multi {
+    id: number;
+    name: string;
+    email: string;
+}
+"#,
+    );
+
+    let (fs, result) = run_cli_with_server_workspace(
+        fs,
+        &mut console,
+        Args::from(["check", ts_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7363",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn issue_6782() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -369,6 +485,380 @@ const imported = <Fragment><span>Child</span></Fragment>;
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "issue_6782",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_7644() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let mut temp_fs = TemporaryFs::new("issue_7644");
+
+    for (path, content) in [
+        (
+            "biome.json",
+            r#"{
+    "formatter": { "enabled": false },
+    "assist": { "enabled": false },
+    "linter": {
+        "rules": {
+            "preset": "none",
+            "correctness": {
+                "useImportExtensions": "error"
+            }
+        }
+    }
+}
+"#,
+        ),
+        ("package.json", "{}\n"),
+        (
+            "tsconfig.json",
+            r#"{
+    "files": [],
+    "references": [
+        { "path": "./tsconfig.app.json" }
+    ]
+}
+"#,
+        ),
+        (
+            "tsconfig.app.json",
+            r#"{
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src"]
+}
+"#,
+        ),
+        (
+            "src/index.js",
+            r#"import { helper } from "@/utils";
+
+console.log(helper());
+"#,
+        ),
+        (
+            "src/utils.js",
+            r#"export function helper() {
+    return "test";
+}
+"#,
+        ),
+    ] {
+        temp_fs.create_file(path, content);
+    }
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(temp_fs.create_os()),
+        &mut console,
+        Args::from(["check", temp_fs.cli_path()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_7644",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn issue_7771() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        br#"{
+    "assist": {
+        "actions": {
+            "source": {
+                "organizeImports": {
+                    "level": "on",
+                    "options": {
+                        "groups": [
+                            "@app", "@app/**",
+                            "@pages", "@pages/**",
+                            "@widgets", "@widgets/**",
+                            "@features", "@features/**",
+                            "@entities", "@entities/**",
+                            "@shared", "@shared/**",
+                            ":PACKAGE:", ":ALIAS:", ":PATH:"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "plugins": [
+        "./tools/biome/plugins/fsd-depth.grit",
+        "./tools/biome/plugins/fsd-deps.grit"
+    ]
+}"#,
+    );
+    fs.insert(
+        "tools/biome/plugins/fsd-depth.grit".into(),
+        br#"engine biome(1.0)
+language js(typescript,jsx)
+
+sequential {
+    `import $what from $src` where {
+        $src <: r"^\"@(app|pages|widgets|features|entities|shared)\/[^\/]+\/.+\"$",
+        register_diagnostic(
+            span = $src,
+            message = "Only 2 level paths are allowed (e.g. @layer/name).",
+            severity = "error"
+        )
+    },
+
+    `import $src` where {
+        $src <: r"^\"@(app|pages|widgets|features|entities|shared)\/[^\/]+\/.+\"$",
+        register_diagnostic(
+            span = $src,
+            message = "Only 2 level paths are allowed (e.g. @layer/name).",
+            severity = "error"
+        )
+    }
+}"#,
+    );
+    fs.insert(
+        "tools/biome/plugins/fsd-deps.grit".into(),
+        br#"engine biome(1.0)
+language js(typescript,jsx)
+
+sequential {
+    `import $w from $src` where {
+        $filename <: r".*/pages/.*",
+        $src <: r"^\"@app(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "pages cannot import from higher layer @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/widgets/.*",
+        $src <: r"^\"@(pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "widgets cannot import from @pages or @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/features/.*",
+        $src <: r"^\"@(widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "features cannot import from @widgets, @pages, or @app.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/entities/.*",
+        $src <: r"^\"@(features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "entities cannot import from higher layers.",
+            severity = "error"
+        )
+    },
+
+    `import $w from $src` where {
+        $filename <: r".*/shared/.*",
+        $src <: r"^\"@(entities|features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "shared cannot import from higher layers.",
+            severity = "error"
+        )
+    },
+
+    `import $src` where {
+        $filename <: r".*/shared/.*",
+        $src <: r"^\"@(entities|features|widgets|pages|app)(?:/.*)?\"$",
+        register_diagnostic(
+            span = $src,
+            message = "shared cannot import from higher layers (side-effect import).",
+            severity = "error"
+        )
+    }
+}"#,
+    );
+    fs.insert("src/pages/a.ts".into(), br#"import "@app/foo";"#);
+
+    let _ = run_cli_with_server_workspace(fs, &mut console, Args::from(["check", "."].as_slice()));
+
+    assert!(
+        !console
+            .out_buffer
+            .iter()
+            .flat_map(|message| &message.content.0)
+            .any(|node| node.content.contains("processing panicked")),
+        "Grit plugin processing panicked: {:?}",
+        console.out_buffer
+    );
+}
+
+#[test]
+fn configuration_malformed_format() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_format",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_check() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_check",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_lint() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_lint",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn configuration_malformed_ci() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    // intentionally broken
+    let biome_json = Utf8Path::new("biome.jsonc");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+           "foo"
+        }"#
+        .as_bytes(),
+    );
+
+    let js_file = Utf8Path::new("test.js");
+    fs.insert(
+        js_file.into(),
+        "// foo\n'use strict';\r\nconsole.log('test');\n".as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["ci", js_file.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "configuration_malformed_ci",
         fs,
         console,
         result,

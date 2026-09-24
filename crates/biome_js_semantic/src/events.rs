@@ -861,6 +861,20 @@ impl SemanticEventExtractor {
                                     Reference::Export(range),
                                 );
                             }
+                            JS_COMPUTED_MEMBER_NAME
+                                if matches!(
+                                    grand_parent.parent().kind(),
+                                    Some(
+                                        TS_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                            | TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
+                                    )
+                                ) =>
+                            {
+                                self.push_reference(
+                                    BindingName::Value(name),
+                                    Reference::AmbientRead(range),
+                                );
+                            }
                             _ => {
                                 self.push_reference(
                                     BindingName::Value(name.clone()),

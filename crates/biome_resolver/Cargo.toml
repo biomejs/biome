@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_resolver"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Responsible for resolving dependency path"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 [dependencies]
 biome_console     = { workspace = true }

@@ -10,8 +10,8 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssRoot, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
+    AnyCssAtRule, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
+    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
     CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
     CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
     CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
@@ -83,24 +83,18 @@ impl FormatRule<SourceComment<CssLanguage>> for FormatCssLeadingComment {
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Default)]
 pub struct CssCommentStyle;
 
-impl CommentStyle for CssCommentStyle {
-    type Language = CssLanguage;
-
-    fn is_suppression(text: &str) -> bool {
+impl CssCommentStyle {
+    pub(crate) fn is_suppression(text: &str) -> bool {
         parse_suppression_comment(text)
             .filter_map(Result::ok)
             .filter(|suppression| suppression.kind == SuppressionKind::Classic)
             .flat_map(|suppression| suppression.categories)
             .any(|(key, ..)| key == category!("format"))
     }
+}
 
-    fn is_global_suppression(text: &str) -> bool {
-        parse_suppression_comment(text)
-            .filter_map(Result::ok)
-            .filter(|suppression| suppression.kind == SuppressionKind::All)
-            .flat_map(|suppression| suppression.categories)
-            .any(|(key, ..)| key == category!("format"))
-    }
+impl CommentStyle for CssCommentStyle {
+    type Language = CssLanguage;
 
     fn get_comment_kind(comment: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
         if comment.text().starts_with("/*") {
@@ -118,7 +112,8 @@ impl CommentStyle for CssCommentStyle {
         &self,
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        handle_scss_map_trailing_separator_comment(comment)
+        handle_statement_at_rule_terminator_comment(comment)
+            .or_else(handle_scss_map_trailing_separator_comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_scss_each_value_list_comment)
@@ -137,8 +132,50 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
-            .or_else(handle_global_suppression)
     }
+}
+
+/// Keeps statement-boundary comments attached to their at-rule.
+///
+/// Sass consumes `@extend %base /* note */` comments as part of the statement;
+/// printing an inserted `;` before the comment would emit the comment as CSS.
+fn handle_statement_at_rule_terminator_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(owner) = find_statement_at_rule_boundary_owner(&comment) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(owner, comment)
+}
+
+fn find_statement_at_rule_boundary_owner(
+    comment: &DecoratedComment<CssLanguage>,
+) -> Option<CssSyntaxNode> {
+    let following = comment.following_token()?;
+    if !matches!(following.kind(), T![;] | T!['}'] | CssSyntaxKind::EOF) {
+        return None;
+    }
+
+    let preceding = following.prev_token()?;
+    if is_token_boundary_suppressed(&preceding, following) {
+        return None;
+    }
+
+    let rule = preceding.ancestors().find_map(AnyCssAtRule::cast)?;
+    let semicolon = match &rule {
+        AnyCssAtRule::ScssExtendAtRule(rule) => rule.semicolon_token(),
+        AnyCssAtRule::ScssImportAtRule(rule) => rule.semicolon_token(),
+        AnyCssAtRule::CssUnknownValueAtRule(rule) => rule.semicolon_token(),
+        AnyCssAtRule::TwApplyAtRule(rule) => rule.semicolon_token(),
+        _ => return None,
+    };
+    let owns_boundary = match semicolon {
+        Some(semicolon) => semicolon == *following,
+        None => rule.syntax().last_token().as_ref() == Some(&preceding),
+    };
+
+    owns_boundary.then(|| rule.into_syntax())
 }
 
 /// Keeps a comment inside an otherwise empty raw custom-property container.
@@ -599,7 +636,10 @@ fn handle_declaration_important_comment(
 fn handle_component_value_boundary_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
-    if !comment.kind().is_inline_block() || CssCommentStyle::is_suppression(comment.piece().text())
+    if !comment.kind().is_inline_block()
+        || comment
+            .suppression_kind()
+            .is_some_and(SuppressionKind::is_classic)
     {
         return CommentPlacement::Default(comment);
     }
@@ -716,11 +756,10 @@ fn handle_declaration_name_comment(
                 return CommentPlacement::dangling(generic_property.into_syntax(), comment);
             }
 
-            if preceding_node
-                .parent()
-                .and_then(CssGenericComponentValueList::cast)
-                .is_some()
-            {
+            if preceding_node.parent().is_some_and(|parent| {
+                CssGenericComponentValueList::can_cast(parent.kind())
+                    || ScssExpressionItemList::can_cast(parent.kind())
+            }) {
                 CommentPlacement::Default(comment)
             } else {
                 CommentPlacement::leading(preceding_node.clone(), comment)
@@ -816,27 +855,4 @@ fn handle_selector_block_comment(
     };
 
     CommentPlacement::dangling(owner, comment)
-}
-
-fn handle_global_suppression(
-    comment: DecoratedComment<CssLanguage>,
-) -> CommentPlacement<CssLanguage> {
-    let node = comment.enclosing_node();
-
-    if node.text_range_with_trivia().start() == TextSize::from(0) {
-        let has_global_suppression = node.first_leading_trivia().is_some_and(|trivia| {
-            trivia
-                .pieces()
-                .filter(|piece| piece.is_comments())
-                .any(|piece| CssCommentStyle::is_global_suppression(piece.text()))
-        });
-        let root = node.ancestors().find_map(AnyCssRoot::cast);
-        if let Some(root) = root
-            && has_global_suppression
-        {
-            return CommentPlacement::leading(root.syntax().clone(), comment);
-        }
-    }
-
-    CommentPlacement::Default(comment)
 }

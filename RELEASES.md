@@ -35,6 +35,5 @@ Stable releases are published on GitHub, and `npmjs.org` under the `latest` tag.
 The Biome internal crates are published on `crates.io` on demand to avoid too much work on our end.
 You can reach us out on [discord](https://biomejs.dev/chat) if you require a version of the crates to be published.
 
-As for now, no changelogs or tags are published when new crates are released.
-
-All Biome crates are published under a single version.
+All Biome crates are published under a single version (either patch or minor), and they are tagged with a
+single git tag.

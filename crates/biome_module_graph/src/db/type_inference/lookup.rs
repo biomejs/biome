@@ -312,6 +312,26 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
     name: &str,
     mode: MemberLookupMode,
 ) -> Option<InferredTypeData<'db>> {
+    find_member_key_type_with_resolver(db, resolver, ty, MemberLookupKey::Name(name), mode)
+}
+
+#[derive(Clone, Copy)]
+pub(in crate::db::type_inference) enum MemberLookupKey<'a, 'db> {
+    Name(&'a str),
+    /// A resolved symbol identity, kept distinct from its display name.
+    Symbol(InferredTypeData<'db>),
+}
+
+/// Looks up a string name or symbol identity with the traversal and work limits
+/// of [`find_member_type_with_resolver`]. Symbol keys match only computed members
+/// and index signatures with the same identity.
+pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    ty: InferredTypeData<'db>,
+    key: MemberLookupKey<'_, 'db>,
+    mode: MemberLookupMode,
+) -> Option<InferredTypeData<'db>> {
     let mut seen = FxHashSet::default();
     let mut pending = vec![MemberLookupState::new(ty, mode)];
     let mut found = Vec::new();
@@ -355,7 +375,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             continue;
         }
 
-        if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, name, state.mode) {
+        if let Some((member_ty, is_optional)) = find_own_member_type(db, ty, key, state.mode) {
             let member_ty = resolver.finalize_member_type(
                 db,
                 member_ty,
@@ -371,6 +391,16 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
         }
 
         match ty {
+            InferredTypeData::Literal(literal)
+                if matches!(literal.literal(db), InferredLiteral::RegExp(_)) =>
+            {
+                state.ty = InferredTypeData::instance_of(
+                    db,
+                    InferredTypeData::regexp_class(),
+                    Box::default(),
+                );
+                pending.push(state);
+            }
             InferredTypeData::Class(class) => {
                 if let Some(mut extends) = class.extends(db) {
                     if matches!(
@@ -443,6 +473,7 @@ pub(in crate::db::type_inference) fn find_member_type_with_resolver<'db>(
             | InferredTypeData::Tuple(_)
             | InferredTypeData::Local(_)
             | InferredTypeData::TypeOperator(_)
+            | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::Literal(_)
             | InferredTypeData::InstanceOf(_)
             | InferredTypeData::TypeofExpression(_)
@@ -476,6 +507,9 @@ pub(in crate::db) fn substitutions_for_instance<'db>(
     let mut substitutions = inherited.to_vec();
     for (declared, replacement) in declared_parameters.iter().zip(type_parameters) {
         let declared = apply_substitutions(db, *declared, inherited);
+        if !declared.is_generic_reference(db) {
+            continue;
+        }
         let replacement = apply_substitutions(db, *replacement, inherited);
         let declared_instance = InferredTypeData::instance_of(db, declared, Box::default());
         if declared_instance != declared {
@@ -523,6 +557,7 @@ fn declared_type_parameters<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -595,6 +630,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -618,14 +654,14 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
 fn find_own_member_type<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
-    name: &str,
+    key: MemberLookupKey<'_, 'db>,
     mode: MemberLookupMode,
 ) -> Option<(InferredTypeData<'db>, bool)> {
     let find = |members, mode: MemberLookupMode, allow_index_signature| {
         find_member_in_members(
             db,
             members,
-            name,
+            key,
             |kind| mode.allows_named_member(kind),
             allow_index_signature,
         )
@@ -699,6 +735,7 @@ fn find_own_member_type<'db>(
         | InferredTypeData::Intersection(_)
         | InferredTypeData::Union(_)
         | InferredTypeData::TypeOperator(_)
+        | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -716,19 +753,43 @@ fn find_own_member_type<'db>(
 fn find_member_in_members<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
-    name: &str,
+    key: MemberLookupKey<'_, 'db>,
     allows_named_member: impl Fn(&InferredTypeMemberKind<'db>) -> bool,
     allow_index_signature: bool,
 ) -> Option<(InferredTypeData<'db>, bool)> {
+    let name = match key {
+        MemberLookupKey::Name(name) => name,
+        MemberLookupKey::Symbol(symbol) => {
+            return members.iter().find_map(|member| {
+                if !allows_named_member(&member.kind) {
+                    return None;
+                }
+                let key = member.kind.computed_value_type().or_else(|| {
+                    allow_index_signature
+                        .then(|| member.kind.index_signature_type())
+                        .flatten()
+                })?;
+                (key == symbol)
+                    .then_some((member_value_type(db, member), member.kind.is_optional()))
+            });
+        }
+    };
     let named_member = members
         .iter()
-        .find(|member| allows_named_member(&member.kind) && member.kind.has_name(name))
+        .find(|member| {
+            allows_named_member(&member.kind)
+                && member.kind.computed_name().is_none()
+                && member.kind.has_name(name)
+        })
         .map(|member| (member_value_type(db, member), member.kind.is_optional()));
     if named_member.is_some() {
         return named_member;
     }
 
     let computed_member = members.iter().find_map(|member| {
+        if !allows_named_member(&member.kind) {
+            return None;
+        }
         member
             .kind
             .computed_value_type()

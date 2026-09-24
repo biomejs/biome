@@ -15,13 +15,14 @@ use biome_js_syntax::{
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
-    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsInitializerClause, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
     JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
     JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
@@ -30,7 +31,7 @@ use biome_js_syntax::{
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
@@ -41,16 +42,18 @@ use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
-    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
-    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
-    TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    IndexedAccessType, Interface, Intersection, Literal, Module, NamedFunctionParameter, Namespace,
+    Object, Path, PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId,
+    ReturnType, ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember,
+    TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
+    TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
+    TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
+    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
     TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
     TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -435,8 +438,9 @@ impl TypeData {
             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                 Self::from_any_js_literal_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple(
-                expr.elements()
+            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple {
+                elements: expr
+                    .elements()
                     .into_iter()
                     .filter_map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => Some(TupleElementType {
@@ -463,7 +467,8 @@ impl TypeData {
                         }),
                     })
                     .collect(),
-            ))),
+                is_inferred_array: true,
+            })),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
                 Self::from_js_arrow_function_expression(collector, scope_id, expr)
             }
@@ -480,7 +485,7 @@ impl TypeData {
             }
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => Self::from(TypeofExpression::Call(TypeofCallExpression {
-                    callee: collector.reference_to_resolved_expression(scope_id, &callee),
+                    callee: callee_reference(collector, scope_id, &callee, expr.type_arguments()),
                     arguments: CallArgumentType::types_from_js_call_arguments(
                         collector,
                         scope_id,
@@ -535,6 +540,13 @@ impl TypeData {
                             Err(_) => Self::unknown(),
                         })
                         .unwrap_or_default(),
+                    (Ok(object), Ok(member)) => Self::from(TypeofExpression::ComputedMember(
+                        TypeofComputedMemberExpression {
+                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                            member: collector.reference_to_resolved_expression(scope_id, &member),
+                            is_optional_chain: expr.is_optional_chain(),
+                        },
+                    )),
                     _ => Self::unknown(),
                 }
             }
@@ -617,7 +629,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
@@ -634,7 +653,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -753,10 +779,13 @@ impl TypeData {
                 // TODO: Handle import types (`import("./module").T`).
                 Self::unknown()
             }
-            AnyTsType::TsIndexedAccessType(_) => {
-                // TODO: Handle type indexing (`T[U]`).
-                Self::unknown()
-            }
+            AnyTsType::TsIndexedAccessType(ty) => match (ty.object_type(), ty.index_type()) {
+                (Ok(object), Ok(index)) => Self::IndexedAccess(Box::new(IndexedAccessType {
+                    object: TypeReference::from_any_ts_type(collector, scope_id, &object),
+                    index: TypeReference::from_any_ts_type(collector, scope_id, &index),
+                })),
+                _ => Self::unknown(),
+            },
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
                 Self::unknown()
@@ -776,20 +805,34 @@ impl TypeData {
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Null,
             AnyTsType::TsNumberLiteralType(ty) => match ty.literal_token() {
+                Ok(token) if ty.minus_token().is_some() => Literal::Number(NumberLiteral::new(
+                    format!("-{}", token.text_trimmed()).into(),
+                ))
+                .into(),
                 Ok(token) => {
                     Literal::Number(NumberLiteral::new(token.token_text_trimmed().into())).into()
                 }
                 Err(_) => Self::unknown(),
             },
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
-            AnyTsType::TsObjectType(ty) => Self::object_with_members(
-                ty.members()
+            AnyTsType::TsObjectType(ty) => {
+                let mut has_unknown_members = false;
+                let members = ty
+                    .members()
                     .into_iter()
                     .filter_map(|member| {
-                        TypeMember::from_any_ts_type_member(collector, scope_id, &member)
+                        let member =
+                            TypeMember::from_any_ts_type_member(collector, scope_id, &member);
+                        has_unknown_members |= member.is_none();
+                        member
                     })
-                    .collect(),
-            ),
+                    .collect();
+                Self::Object(Box::new(Object {
+                    prototype: None,
+                    members,
+                    has_unknown_members,
+                }))
+            }
             AnyTsType::TsParenthesizedType(ty) => ty
                 .ty()
                 .map(|ty| Self::from_any_ts_type(collector, scope_id, &ty))
@@ -818,7 +861,10 @@ impl TypeData {
                     })
                     .collect();
                 match elements {
-                    Ok(elements) => Self::Tuple(Box::new(Tuple(elements))),
+                    Ok(elements) => Self::Tuple(Box::new(Tuple {
+                        elements,
+                        is_inferred_array: false,
+                    })),
                     Err(_) => Self::unknown(),
                 }
             }
@@ -1128,13 +1174,135 @@ impl TypeData {
         expr: &JsNewExpression,
     ) -> Option<Self> {
         Some(Self::from(TypeofExpression::New(TypeofNewExpression {
-            callee: collector.reference_to_resolved_expression(scope_id, &expr.callee().ok()?),
+            callee: callee_reference(
+                collector,
+                scope_id,
+                &expr.callee().ok()?,
+                expr.type_arguments(),
+            ),
             arguments: CallArgumentType::types_from_js_call_arguments(
                 collector,
                 scope_id,
                 expr.arguments(),
             ),
         })))
+    }
+
+    /// Types parameter `parameter_index` (not counting `this`) of the
+    /// callback `function` as the corresponding parameter of the type
+    /// expected for its argument position. Returns `None` when the callback
+    /// is not a direct argument of a call or `new` expression.
+    pub fn from_contextual_callback_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        function: &JsSyntaxNode,
+        parameter_index: usize,
+        has_initializer: bool,
+    ) -> Option<Self> {
+        let mut argument = function.clone();
+        let mut parent = argument.parent()?;
+        while JsParenthesizedExpression::can_cast(parent.kind()) {
+            argument = parent;
+            parent = argument.parent()?;
+        }
+        let argument_list = JsCallArgumentList::cast(parent)?;
+        let argument_range = argument.text_trimmed_range();
+        let argument_index = argument_list.iter().position(|item| {
+            item.is_ok_and(|item| item.syntax().text_trimmed_range() == argument_range)
+        })?;
+        let call_like = argument_list
+            .parent::<JsCallArguments>()?
+            .syntax()
+            .parent()?;
+        let (callee, type_arguments, is_constructor) =
+            if let Some(call) = JsCallExpression::cast_ref(&call_like) {
+                (call.callee().ok()?, call.type_arguments(), false)
+            } else {
+                let new = JsNewExpression::cast_ref(&call_like)?;
+                (new.callee().ok()?, new.type_arguments(), true)
+            };
+
+        let callee = callee_reference(collector, scope_id, &callee, type_arguments);
+        let arguments = argument_list
+            .iter()
+            .enumerate()
+            .map(|(index, item)| match item {
+                Ok(item) if index != argument_index => {
+                    CallArgumentType::from_any_js_call_argument(collector, scope_id, &item)
+                }
+                _ => CallArgumentType::Argument(TypeReference::unknown()),
+            })
+            .collect();
+
+        let expected = collector.reference_to_owned_data(Self::from(
+            TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                callee,
+                arguments,
+                index: argument_index.try_into().ok()?,
+                is_constructor,
+            }),
+        ));
+        Some(Self::from(TypeofExpression::Parameter(
+            TypeofParameterExpression {
+                function: expected,
+                index: parameter_index.try_into().ok()?,
+                has_initializer,
+            },
+        )))
+    }
+
+    /// Contextual type of an unannotated parameter of a function expression
+    /// or arrow function; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_formal_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+    ) -> Option<Self> {
+        if param.type_annotation().is_some() {
+            return None;
+        }
+        let param_range = param.syntax().text_trimmed_range();
+        let parameter_list = param.parent::<JsParameterList>()?;
+        let parameter_index = parameter_list
+            .iter()
+            .filter_map(Result::ok)
+            .filter(|item| !matches!(item, AnyJsParameter::TsThisParameter(_)))
+            .position(|item| item.syntax().text_trimmed_range() == param_range)?;
+        let function = parameter_list.parent::<JsParameters>()?.syntax().parent()?;
+        if !matches!(
+            function.kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+        ) {
+            return None;
+        }
+        Self::from_contextual_callback_parameter(
+            collector,
+            scope_id,
+            &function,
+            parameter_index,
+            param.initializer().is_some(),
+        )
+    }
+
+    /// Contextual type of the single unparenthesised arrow parameter, as in
+    /// `run(value => value)`; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_arrow_function_binding(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        expr: &JsArrowFunctionExpression,
+    ) -> Option<Self> {
+        match expr.parameters().ok()? {
+            AnyJsArrowFunctionParameters::AnyJsBinding(_) => {
+                Self::from_contextual_callback_parameter(
+                    collector,
+                    scope_id,
+                    expr.syntax(),
+                    0,
+                    false,
+                )
+            }
+            AnyJsArrowFunctionParameters::JsParameters(_) => None,
+        }
     }
 
     pub fn from_ts_instantiation_expression(
@@ -1196,6 +1364,20 @@ impl TypeData {
         scope_id: ScopeId,
         expr: &JsUnaryExpression,
     ) -> Self {
+        if let Ok(operator @ (JsUnaryOperator::Minus | JsUnaryOperator::Plus)) = expr.operator()
+            && let Ok(argument) = expr.argument()
+            && let AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) = argument.omit_parentheses()
+            && let Some(text) = text_from_token(literal.value_token())
+        {
+            let text = if operator == JsUnaryOperator::Minus {
+                format!("-{text}").into()
+            } else {
+                text
+            };
+            return Literal::Number(NumberLiteral::new(text)).into();
+        }
         expr.operator()
             .map(|operator| match operator {
                 JsUnaryOperator::BitwiseNot => {
@@ -1209,6 +1391,15 @@ impl TypeData {
                 JsUnaryOperator::Delete => Self::Boolean,
                 JsUnaryOperator::Minus => {
                     Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                        is_literal_argument: expr.argument().is_ok_and(|argument| {
+                            matches!(
+                                argument,
+                                AnyJsExpression::AnyJsLiteralExpression(
+                                    AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                        | AnyJsLiteralExpression::JsBigintLiteralExpression(_)
+                                )
+                            )
+                        }),
                         argument: expr
                             .argument()
                             .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
@@ -1765,6 +1956,10 @@ impl GenericTypeParameter {
             .name()
             .and_then(|name| name.ident_token())
             .map(|name| Self {
+                is_const: param
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                 name: name.token_text_trimmed().into(),
                 constraint: param
                     .constraint()
@@ -2258,6 +2453,7 @@ impl TypeMember {
     ) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_) => None,
+            AnyTsTypeMember::JsMetavariable(_) => None,
             AnyTsTypeMember::TsCallSignatureTypeMember(member) => {
                 let function = Function {
                     is_async: false,
@@ -2347,13 +2543,22 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                let scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     let function = Function {
                         is_async: false,
                         type_parameters: generic_params_from_ts_type_params(
                             collector,
                             scope_id,
-                            member.type_parameters(),
+                            type_parameters,
                         ),
                         name: Some(name.clone().into()),
                         parameters: function_params_from_js_params(
@@ -2933,6 +3138,26 @@ fn constructor_params_from_js_params(
         .unwrap_or_default()
 }
 
+/// Callee reference of a call or `new` expression, instantiated with its
+/// explicit type arguments when present.
+fn callee_reference(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    callee: &AnyJsExpression,
+    type_arguments: Option<TsTypeArguments>,
+) -> TypeReference {
+    let callee = collector.reference_to_resolved_expression(scope_id, callee);
+    let type_parameters =
+        TypeReference::types_from_ts_type_arguments(collector, scope_id, type_arguments);
+    if type_parameters.is_empty() {
+        return callee;
+    }
+    collector.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+        ty: callee,
+        type_parameters,
+    }))
+}
+
 #[inline]
 fn function_params_from_js_params(
     collector: &mut dyn RawTypeCollector,
@@ -3237,7 +3462,10 @@ fn apply_deep_const_inner(
                     is_rest: element.is_rest,
                 })
                 .collect();
-            TypeData::Tuple(Box::new(Tuple(elements)))
+            TypeData::Tuple(Box::new(Tuple {
+                elements,
+                is_inferred_array: false,
+            }))
         }
         TypeData::Object(object) => TypeData::Object(Box::new(Object {
             prototype: object.prototype.clone(),

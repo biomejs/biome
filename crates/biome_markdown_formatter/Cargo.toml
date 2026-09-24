@@ -1,30 +1,34 @@
 [package]
 name                 = "biome_markdown_formatter"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
+description          = "Biome's Markdown formatter"
 homepage.workspace   = true
 repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["src/**/*"]
+publish              = true
 
 [[bench]]
 harness = false
 name    = "md_formatter"
 
 [dependencies]
-biome_deserialize        = { workspace = true }
-biome_deserialize_macros = { workspace = true }
-biome_formatter          = { workspace = true }
-biome_markdown_factory   = { workspace = true }
-biome_markdown_syntax    = { workspace = true }
-biome_rowan              = { workspace = true }
-schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true, features = ["derive"], optional = true }
-smallvec                 = { workspace = true }
-unicode-width            = { workspace = true }
+biome_deserialize            = { workspace = true }
+biome_deserialize_macros     = { workspace = true }
+biome_diagnostics_categories = { workspace = true }
+biome_formatter              = { workspace = true }
+biome_markdown_factory       = { workspace = true }
+biome_markdown_syntax        = { workspace = true }
+biome_rowan                  = { workspace = true }
+biome_suppression            = { workspace = true }
+schemars                     = { workspace = true, optional = true }
+serde                        = { workspace = true, features = ["derive"], optional = true }
+smallvec                     = { workspace = true }
+unicode-width                = { workspace = true }
 
 [dev-dependencies]
 biome_configuration   = { path = "../biome_configuration" }

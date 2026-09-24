@@ -1,0 +1,153 @@
+!(// leading
+a || b);
+
+!((
+  // leading
+  a || b
+));
+
+!(/* leading */ a && b);
+!(a || b /* trailing */);
+!(a || b // trailing
+);
+!(// leading
+a + b * c);
+!(// leading
+a ? b : c);
+!(// leading
+a = b);
+!(// leading
+a, b);
++(// leading
+a || b);
+-(// leading
+a || b);
+~(// leading
+a || b);
+typeof (// leading
+a || b);
+void (// leading
+a || b);
+delete (// leading
+a || b);
+!(// leading
+a || (b && c));
+!(// leading
+!(// nested
+a || b));
+!(// leading
+a);
+!(a || b);
+// biome-ignore format: preserve expression
+!(a   ||   b);
+
+!(
+  (
+    // blah 1
+    foo
+    // blah 2
+    || bar
+    || baz
+    // blah 3
+    || qux
+  )
+);
+
+!(
+  cond1 || // force this to be multi line
+  cond3 // comment
+);
+
+!(
+  // leading
+  a || // first
+  b || // second
+  c // trailing
+);
+
+!(
+  a || b
+  // trailing own line
+);
+
+!(/* leading */
+  a || // first
+  b /* trailing */
+);
+
+!(a || // first
+  (firstLongOperand && secondLongOperand && thirdLongOperand && fourthLongOperand && fifthLongOperand) // trailing
+);
+
+!(a || // first
+  b /* block */ // line
+);
+
+!(`first
+second` || value // trailing
+);
+
+!("first\
+second" || value // trailing
+);
+
+!(a ||
+  [1] // trailing
+);
+
+!(a ||
+  { value: 1 } // trailing
+);
+
+!(a   ||
+  b // biome-ignore format: preserve expression
+);
+
+!(
+  a || // first
+  (b && c) // trailing
+);
+
+~(
+  a + // first
+  b // trailing
+);
+
+typeof (
+  a instanceof // operator
+  B // trailing
+);
+
+!(
+  a in // operator
+  b // trailing
+);
+
+// biome-ignore format: preserve expression
+!(
+  a   ||   b // trailing
+);
+
+!(a ||
+  b // trailing
+);
+
+!(firstLongOperand || secondLongOperand || thirdLongOperand || fourthLongOperand || fifthLongOperand // trailing
+);
+
+!(
+  a || // first
+  (b && // nested
+   c) // trailing
+);
+
+!(
+  a || // first
+  b /* multiline
+       trailing */
+);
+
+!(
+  a || // first
+  b /* trailing */
+);

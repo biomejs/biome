@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: effectSetStateNonAscii.tsx
+---
+# Input
+```tsx
+// should generate diagnostics
+
+import { useEffect, useState } from "react";
+
+export function useOnlineStatus({ paused }: { paused: boolean }) {
+    const [isOnline, setIsOnline] = useState(true);
+
+    // 非ASCII文字を含むコメントなので、これ以降はUTF-16のオフセットとUTF-8のバイト位置がずれる。
+    useEffect(() => {
+        setIsOnline(true);
+    }, [paused]);
+
+    return isOnline;
+}
+
+```
+
+# Diagnostics
+```
+effectSetStateNonAscii.tsx:10:9 lint/nursery/useReactCompiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This effect synchronously updates state.
+  
+     8 │     // 非ASCII文字を含むコメントなので、これ以降はUTF-16のオフセットとUTF-8のバイト位置がずれる。
+     9 │     useEffect(() => {
+  > 10 │         setIsOnline(true);
+       │         ^^^^^^^^^^^
+    11 │     }, [paused]);
+    12 │ 
+  
+  i Updating state directly inside an effect can trigger cascading renders and hurt performance. Effects should synchronize with external systems instead.
+  
+  i Derive the value during render, initialize state lazily, or update state from an external subscription callback instead.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/10974 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

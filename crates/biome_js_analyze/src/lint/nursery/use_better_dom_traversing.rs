@@ -1,4 +1,7 @@
-use crate::JsRuleAction;
+use crate::{
+    JsRuleAction,
+    ast_utils::dom::{is_definitely_not_dom_node, query_selector_call},
+};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
@@ -7,7 +10,7 @@ use biome_console::markup;
 use biome_js_factory::make::{self, js_string_literal_expression, js_string_literal_single_quotes};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsComputedMemberExpression,
-    JsStaticMemberExpression, JsSyntaxNode, static_value::StaticValue,
+    JsStaticMemberExpression, JsSyntaxNode,
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, declare_node_union};
 use biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions;
@@ -67,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBetterDomTraversing {
-        version: "next",
+        version: "2.5.13",
         name: "useBetterDomTraversing",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("better-dom-traversing").inspired()],
@@ -240,10 +243,9 @@ impl Rule for UseBetterDomTraversing {
                 } else {
                     format!(":scope {}", selectors.join(" "))
                 };
-                let argument = first_and_only_argument(node)?;
-                let callee = node.callee().ok()?.omit_parentheses();
-                let member = callee.as_js_static_member_expression()?;
-                let inner_object = member.object().ok()?;
+                let query = query_selector_call(node)?;
+                let argument = query.argument;
+                let inner_object = query.member.object().ok()?;
                 mutation.replace_node(
                     argument,
                     make_string_literal_expression(&merged_selector, ctx.preferred_quote()),
@@ -314,7 +316,7 @@ fn parent_element_chain_state(
 }
 
 fn merge_query_selector_state(node: &JsCallExpression) -> Option<UseBetterDomTraversingState> {
-    if !is_query_selector_call(node)
+    if query_selector_call(node).is_none()
         || is_followed_by_static_query_selector(node)
         || is_inside_optional_chain(node.syntax())
     {
@@ -473,17 +475,6 @@ fn is_props_children(collection: &JsStaticMemberExpression) -> bool {
     static_member_named(&object, "props").is_some()
 }
 
-fn is_query_selector_call(call: &JsCallExpression) -> bool {
-    if call.is_optional() {
-        return false;
-    }
-    let Ok(callee) = call.callee() else {
-        return false;
-    };
-    static_member_named(&callee, "querySelector").is_some()
-        && first_and_only_argument(call).is_some()
-}
-
 fn is_followed_by_static_query_selector(call: &JsCallExpression) -> bool {
     let Some(parent) = call.syntax().parent() else {
         return false;
@@ -495,13 +486,6 @@ fn is_followed_by_static_query_selector(call: &JsCallExpression) -> bool {
         .object()
         .ok()
         .is_none_or(|object| object.syntax() != call.syntax())
-        || member.is_optional()
-        || member
-            .member()
-            .ok()
-            .and_then(|name| name.as_js_name().cloned())
-            .and_then(|name| name.value_token().ok())
-            .is_none_or(|token| token.text_trimmed() != "querySelector")
     {
         return false;
     }
@@ -511,16 +495,15 @@ fn is_followed_by_static_query_selector(call: &JsCallExpression) -> bool {
     let Some(outer) = JsCallExpression::cast(grand) else {
         return false;
     };
-    if outer.is_optional()
-        || outer
-            .callee()
-            .ok()
-            .is_none_or(|callee| callee.syntax() != member.syntax())
+    if outer
+        .callee()
+        .ok()
+        .is_none_or(|callee| callee.syntax() != member.syntax())
     {
         return false;
     }
-    first_and_only_argument(&outer)
-        .and_then(|argument| static_selector(&argument))
+    query_selector_call(&outer)
+        .and_then(|query| static_selector(&query.argument))
         .is_some()
 }
 
@@ -535,17 +518,14 @@ fn query_selector_chain(
         let AnyJsExpression::JsCallExpression(current) = current_expr.clone() else {
             break;
         };
-        if !is_query_selector_call(&current) {
+        let Some(query) = query_selector_call(&current) else {
             break;
-        }
-        let argument = first_and_only_argument(&current)?;
-        let Some(selector) = static_selector(&argument) else {
+        };
+        let Some(selector) = static_selector(&query.argument) else {
             break;
         };
         selectors.push(selector);
-        let callee = current.callee().ok()?;
-        let member = static_member_named(&callee, "querySelector")?;
-        raw_root = member.object().ok()?;
+        raw_root = query.member.object().ok()?;
         current_expr = raw_root.clone().omit_parentheses();
     }
 
@@ -609,16 +589,6 @@ fn is_inside_optional_chain(node: &JsSyntaxNode) -> bool {
     false
 }
 
-fn first_and_only_argument(call: &JsCallExpression) -> Option<AnyJsExpression> {
-    let mut args = call.arguments().ok()?.args().into_iter();
-    let argument = args.next()?.ok()?.as_any_js_expression()?.clone();
-    if args.next().is_none() {
-        Some(argument)
-    } else {
-        None
-    }
-}
-
 fn static_selector(expr: &AnyJsExpression) -> Option<String> {
     let expr = expr.clone().omit_parentheses();
     if let AnyJsExpression::JsTemplateExpression(template) = &expr
@@ -664,26 +634,6 @@ fn has_comments_inside(node: &JsSyntaxNode) -> bool {
     };
     first.has_trailing_comments()
         || tokens.any(|token| token.has_leading_comments() || token.has_trailing_comments())
-}
-
-/// Returns `true` when the receiver cannot be a DOM node.
-///
-/// Copied from the approach in `useDomQuerySelector`: only exclude syntax that
-/// is guaranteed not to be a node, such as literals, arrays, objects, and functions.
-fn is_definitely_not_dom_node(expr: &AnyJsExpression) -> bool {
-    let expr = expr.clone().omit_parentheses();
-    matches!(
-        expr,
-        AnyJsExpression::AnyJsLiteralExpression(_)
-            | AnyJsExpression::JsArrayExpression(_)
-            | AnyJsExpression::JsArrowFunctionExpression(_)
-            | AnyJsExpression::JsClassExpression(_)
-            | AnyJsExpression::JsFunctionExpression(_)
-            | AnyJsExpression::JsObjectExpression(_)
-            | AnyJsExpression::JsTemplateExpression(_)
-    ) || expr
-        .as_static_value()
-        .is_some_and(|value| matches!(value, StaticValue::Undefined(_)))
 }
 
 fn make_string_literal_expression(value: &str, preferred_quote: PreferredQuote) -> AnyJsExpression {

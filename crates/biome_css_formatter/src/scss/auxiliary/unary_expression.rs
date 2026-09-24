@@ -36,7 +36,7 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                 [
                     operator.format().with_text_case(CssCase::Preserve),
                     separator,
-                    expression.format()
+                    expression.format().with_text_case(CssCase::Preserve)
                 ]
             )
         } else if is_source_spaced_minus_function {
@@ -46,7 +46,7 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                 [
                     operator.format().with_text_case(CssCase::Preserve),
                     space(),
-                    expression.format()
+                    expression.format().with_text_case(CssCase::Preserve)
                 ]
             )
         } else {
@@ -54,7 +54,7 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                 f,
                 [
                     operator.format().with_text_case(CssCase::Preserve),
-                    expression.format()
+                    expression.format().with_text_case(CssCase::Preserve)
                 ]
             )
         }

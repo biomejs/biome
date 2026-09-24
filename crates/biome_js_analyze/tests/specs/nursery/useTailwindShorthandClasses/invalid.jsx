@@ -12,3 +12,10 @@ export function Component() {
 		</>
 	);
 }
+
+<div className={"w-4 h-4 " + extra} />;
+<div className={cached = 'w-4 h-4'} />;
+clsx(cached = 'w-4 h-4');
+async function component() {
+    return <div className={await 'w-4 h-4'} />;
+}

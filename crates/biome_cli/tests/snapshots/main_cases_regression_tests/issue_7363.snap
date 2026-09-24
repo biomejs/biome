@@ -1,0 +1,95 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "plugins": ["interface.grit"],
+  "formatter": {
+    "enabled": false
+  },
+  "linter": {
+    "rules": {
+      "recommended": false
+    }
+  }
+}
+```
+
+## `interface.grit`
+
+```grit
+`interface $name { $body }` where {
+    register_diagnostic(span=$name, severity="warn", message="found interface")
+}
+
+```
+
+## `interface.ts`
+
+```ts
+interface Zero {}
+
+interface Single {
+    f1: string;
+}
+
+interface Multi {
+    id: number;
+    name: string;
+    email: string;
+}
+
+```
+
+# Emitted Messages
+
+```block
+interface.ts:1:11 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! found interface
+  
+  > 1 │ interface Zero {}
+      │           ^^^^
+    2 │ 
+    3 │ interface Single {
+  
+
+```
+
+```block
+interface.ts:3:11 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! found interface
+  
+    1 │ interface Zero {}
+    2 │ 
+  > 3 │ interface Single {
+      │           ^^^^^^
+    4 │     f1: string;
+    5 │ }
+  
+
+```
+
+```block
+interface.ts:7:11 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! found interface
+  
+    5 │ }
+    6 │ 
+  > 7 │ interface Multi {
+      │           ^^^^^
+    8 │     id: number;
+    9 │     name: string;
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 3 warnings.
+```

@@ -24,13 +24,25 @@ Quick tests are scratch space for inspecting CST, formatter IR, or one analyzer 
 
 ## Snapshot Workflow
 
-Run the focused test to produce snapshots, then review every changed section:
+Run the focused test to create pending snapshots. Treat unrelated test failures separately.
+
+Agents must not run unfiltered `cargo insta review`; it needs a TTY. In a non-TTY agent shell, cargo-insta 1.44+ prints a filtered `--snapshot` diff without prompting:
 
 ```shell
-cargo insta review
+cargo insta pending-snapshots --workspace
+cargo insta review --workspace --snapshot '<path-from-list>'
 ```
 
-Use `cargo insta accept` or `cargo insta reject` only after inspecting the pending changes. A passing snapshot test proves output matches the checked-in snapshot, not that the snapshot describes correct behavior.
+After inspecting the full diff, accept or reject only that snapshot:
+
+```shell
+cargo insta accept --workspace --snapshot '<same-path>'
+cargo insta reject --workspace --snapshot '<same-path>'
+```
+
+Repeat for each change, list pending snapshots again, then rerun the test. Review means checking behavior in the diff. A passing test proves only that output matches the snapshot.
+
+Never use unfiltered `cargo insta accept` or `cargo insta reject`, `cargo insta test --accept`, `cargo insta test --force-update-snapshots`, or `INSTA_UPDATE=always`/`force`. They skip individual review and can modify unrelated work.
 
 ### Orphaned Snapshots
 
@@ -41,6 +53,16 @@ cargo insta test --workspace --unreferenced delete
 ```
 
 For a scoped run, use `--unreferenced warn` or `--unreferenced reject`; incomplete test selection cannot prove that a snapshot is orphaned. Inspect every deletion from a complete run.
+
+## Biome CLI Behavior Tests
+
+Every new or changed test that calls `run_cli` or a variant must snapshot the full session. Use `assert_cli_snapshot`, `assert_cli_snapshot_with_redactor`, or an `insta`-based wrapper. Scalar assertions do not replace the snapshot. Unit and helper tests that do not execute the CLI are exempt.
+
+Snapshot after other assertions to capture the final filesystem, configuration, output, and result. Stabilize ordering or redact unstable values; do not omit the snapshot.
+
+Keep related cases with the same arguments, configuration, source kind, and filesystem state in one fixture and usually one snapshot. Include valid, invalid, and boundary cases together. Keep related multi-file cases in one test. Split only for incompatible inputs or test setup.
+
+For one migration rule, keep compatible cases in one JSONC fixture. Prefer overrides when they preserve the starting configuration.
 
 ## Analyzer Fixtures
 
@@ -96,7 +118,9 @@ Do not run `just ready` in a dirty working tree: the recipe checks for a clean d
 
 - A code change has focused persistent coverage.
 - A bug fixture fails without the fix.
-- Snapshot contents were inspected.
+- Every changed snapshot was individually diffed before a filtered accept or reject.
+- Every new or modified CLI behavior test creates a session snapshot.
+- Related CLI cases are consolidated instead of fragmented across tiny snapshots.
 - Expectation comments match fixture intent.
 - Orphan snapshots were pruned through `insta`.
 - Required generated artifacts are present.
@@ -105,7 +129,9 @@ Do not run `just ready` in a dirty working tree: the recipe checks for a clean d
 ## References
 
 - Main test guide: `CONTRIBUTING.md#testing`
+- Insta non-interactive review: `https://github.com/mitsuhiko/insta/blob/1.48.0/CHANGELOG.md#1440`
 - Analyzer guide: `crates/biome_analyze/CONTRIBUTING.md`
+- CLI snapshot harness: `crates/biome_cli/tests/snap_test.rs`
 - Expectation enforcement: `crates/biome_test_utils/src/lib.rs`
 - Formatter harness: `crates/biome_formatter_test/src/spec.rs`
 - Generator recipes: `justfile`

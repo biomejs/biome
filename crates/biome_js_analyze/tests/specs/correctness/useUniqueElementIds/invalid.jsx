@@ -26,3 +26,25 @@ import { createElement } from "react";
 function Foo() {
 	return createElement("div", { id: "foo" });
 }
+
+function HtmlInsideForeignObject() {
+	return (
+		<svg>
+			<foreignObject>
+				<div id="foo"></div>
+			</foreignObject>
+		</svg>
+	);
+}
+
+function CreateElementInsideSvgCallback() {
+	return (
+		<svg
+			onClick={() => React.createElement("div", { id: "foo" })}
+		></svg>
+	);
+}
+
+function JsxElementInsideSvgCallback() {
+	return <svg onClick={() => <div id="foo"></div>}></svg>;
+}

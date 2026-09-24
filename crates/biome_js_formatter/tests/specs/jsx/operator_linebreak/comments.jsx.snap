@@ -1,0 +1,45 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: jsx/operator_linebreak/comments.jsx
+---
+
+# Input
+
+```jsx
+foo
+// comment
+&& <Bar />;
+
+foo
+// comment
++ (
+  <Bar /> // trailing
+);
+
+```
+
+
+# Options
+
+```json
+{
+  "javascript": {
+    "formatter": {
+      "operatorLinebreak": "before"
+    }
+  }
+}
+```
+
+# Formatted
+
+```jsx
+foo
+// comment
+&& <Bar />;
+
+foo
+// comment
++ <Bar />; // trailing
+
+```

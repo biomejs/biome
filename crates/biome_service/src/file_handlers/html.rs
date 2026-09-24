@@ -2,6 +2,8 @@ mod go_to;
 #[cfg(feature = "html_embeds")]
 mod parse_embedded_nodes;
 
+#[cfg(feature = "html_embeds")]
+use super::LintSnippetAnalyzer;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
@@ -32,6 +34,8 @@ use crate::{
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
+#[cfg(feature = "html_embeds")]
+use biome_analyze::SnippetAnalyzer;
 use biome_analyze::SuppressionComment;
 use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSuppression,
@@ -58,6 +62,8 @@ use biome_formatter::{
     TrailingNewline,
 };
 use biome_fs::BiomePath;
+#[cfg(feature = "html_embeds")]
+use biome_html_analyze::analyze_with_snippets;
 use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
@@ -946,6 +952,49 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
+    #[cfg(feature = "html_embeds")]
+    let mut snippets = {
+        let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> =
+            Vec::new();
+        for snippet in params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+        {
+            let Some(language) = snippet.file_source(&params.workspace_db) else {
+                continue;
+            };
+            let offset = snippet.content_offset(&params.workspace_db);
+            let snippet_params = params.for_snippet(&snippet, language);
+            let analyzer = if language.to_js_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_js_analyze::METADATA,
+                    javascript::lint_with_inspector,
+                )
+            } else if language.to_css_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_css_analyze::METADATA,
+                    css::lint_with_inspector,
+                )
+            } else if language.to_json_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_json_analyze::METADATA,
+                    json::lint_with_inspector,
+                )
+            } else {
+                continue;
+            };
+            snippets.push(Box::new(analyzer));
+        }
+        snippets
+    };
+
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
@@ -961,13 +1010,29 @@ fn lint(params: LintParams) -> LintResults {
             }
         },
         project_layout: Some(params.project_layout.clone()),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(params.workspace_db.rc_language_db());
+    #[cfg(feature = "html_embeds")]
+    let html_services = html_services.with_embedded_data(params.embedded_data.clone());
     let suppression = HtmlSuppressionService::new(
         &tree,
         source_type,
         &params.parsed_source,
         &params.workspace_db,
     );
+    #[cfg(feature = "html_embeds")]
+    let (_, analyze_diagnostics) = analyze_with_snippets(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        Some(Box::new(suppression)),
+        &mut snippets,
+        |signal| process_lint.process_signal(signal),
+    );
+    #[cfg(not(feature = "html_embeds"))]
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
@@ -978,10 +1043,17 @@ fn lint(params: LintParams) -> LintResults {
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(
+    let results = process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),
         analyze_diagnostics,
-    )
+    );
+    #[cfg(feature = "html_embeds")]
+    let mut results = results;
+    #[cfg(feature = "html_embeds")]
+    for snippet in snippets {
+        results.extend(snippet.into_output());
+    }
+    results
 }
 
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
@@ -1052,7 +1124,9 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
         },
         project_layout: Some(project_layout),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(workspace_db.rc_language_db());
 
     let suppression =
         HtmlSuppressionService::new(&tree, source_type, &parsed_source.into(), &workspace_db);
@@ -1155,7 +1229,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     }
                 },
                 project_layout: Some(params.project_layout.clone()),
-            };
+                ..HtmlAnalyzerServices::default()
+            }
+            .with_language_db(params.workspace_db.rc_language_db());
+            #[cfg(feature = "html_embeds")]
+            let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
             let suppression = HtmlSuppressionService::new(
                 &tree,
@@ -1217,7 +1295,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
         let suppression = HtmlSuppressionService::new(
             &tree,
@@ -1262,7 +1344,11 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
         let suppression = HtmlSuppressionService::new(
             &tree,
             source_type,

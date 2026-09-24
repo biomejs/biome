@@ -1,6 +1,6 @@
 use crate::scanner::ScanKind;
 use crate::settings::{
-    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
+    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings, VcsIgnoredPatterns,
     to_json_language_settings,
 };
 use biome_analyze::RuleFilter;
@@ -94,6 +94,7 @@ fn vue_template_expressions_get_instance_properties() {
 
     let settings = Settings::default();
     let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+        is_class_attribute: false,
         setup: false,
         is_source: false,
         event_handler: false,
@@ -114,6 +115,7 @@ fn vue_event_handlers_get_dollar_event() {
     let settings = Settings::default();
     let event_handler_source =
         JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: false,
             is_source: false,
             event_handler: true,
@@ -412,6 +414,21 @@ fn test_project_scan_disables_module_graph_type_inference() {
         !project_kind.is_modules_and_types(),
         "Project scan should NOT enable type inference"
     );
+}
+
+#[test]
+fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(
+            Utf8Path::new("repo"),
+            &["/*", "!/src", "!/biome.jsonc", "!/.gitignore"],
+        )
+        .unwrap(),
+        nested: vec![],
+    };
+
+    assert!(!ignored_patterns.is_ignored(Utf8Path::new("repo/src/file.js"), false, None));
+    assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
 }
 
 fn resolve_html_parse_options(

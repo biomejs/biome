@@ -1,5365 +1,174 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 
-use super::*;
-use biome_js_syntax::*;
+use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
+use biome_js_syntax::{JsSyntaxKind::*, *};
+use biome_rowan::AstNode;
 impl JsAstNode {
-    pub(super) fn create_generated_prototype(
-        kind: JsSyntaxKind,
-        base_prototype: JsObject,
-        context: &mut Context,
-    ) -> JsObject {
-        let mut prototype =
-            ObjectInitializer::with_native_data_and_proto(OrdinaryObject, base_prototype, context);
-        match kind {
-            JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
-                    AstroImplicitFragment,
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ACCESSOR_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ACCESSOR_MODIFIER,
-                    JsAccessorModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN,
-                    JsArrayAssignmentPattern,
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements().into_iter().flatten(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT,
-                    JsArrayAssignmentPatternElement,
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT,
-                    JsArrayAssignmentPatternRestElement,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_BINDING_PATTERN,
-                    JsArrayBindingPattern,
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements().into_iter().flatten(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT,
-                    JsArrayBindingPatternElement,
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT,
-                    JsArrayBindingPatternRestElement,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARRAY_EXPRESSION,
-                    JsArrayExpression,
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements().into_iter().flatten(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ARRAY_HOLE => {
-                register_js_ast_fields!(prototype, JsSyntaxKind::JS_ARRAY_HOLE, JsArrayHole,);
-            }
-            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
-                    JsArrowFunctionExpression,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("fatArrowToken", |node, context| Self::wrap_token(
-                        node.fat_arrow_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION,
-                    JsAssignmentExpression,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_AWAIT_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_AWAIT_EXPRESSION,
-                    JsAwaitExpression,
-                    ("awaitToken", |node, context| Self::wrap_token(
-                        node.await_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION,
-                    JsBigintLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_BINARY_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_BINARY_EXPRESSION,
-                    JsBinaryExpression,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_BLOCK_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_BLOCK_STATEMENT,
-                    JsBlockStatement,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("statements", |node, context| Self::wrap_node_list(
-                        node.statements(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION,
-                    JsBooleanLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_BREAK_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_BREAK_STATEMENT,
-                    JsBreakStatement,
-                    ("breakToken", |node, context| Self::wrap_token(
-                        node.break_token().ok()
-                    )),
-                    ("label", |node, context| Self::wrap_optional_node(
-                        node.label(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CALL_ARGUMENTS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CALL_ARGUMENTS,
-                    JsCallArguments,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("args", |node, context| Self::wrap_node_list(
-                        node.args().into_iter().flatten(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CALL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CALL_EXPRESSION,
-                    JsCallExpression,
-                    ("callee", |node, context| Self::wrap_optional_node(
-                        node.callee().ok(),
-                        context
-                    )),
-                    ("optionalChainToken", |node, context| Self::wrap_token(
-                        node.optional_chain_token()
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                    ("arguments", |node, context| Self::wrap_optional_node(
-                        node.arguments().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CASE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CASE_CLAUSE,
-                    JsCaseClause,
-                    ("caseToken", |node, context| Self::wrap_token(
-                        node.case_token().ok()
-                    )),
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("consequent", |node, context| Self::wrap_node_list(
-                        node.consequent(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CATCH_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CATCH_CLAUSE,
-                    JsCatchClause,
-                    ("catchToken", |node, context| Self::wrap_token(
-                        node.catch_token().ok()
-                    )),
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CATCH_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CATCH_DECLARATION,
-                    JsCatchDeclaration,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("binding", |node, context| Self::wrap_optional_node(
-                        node.binding().ok(),
-                        context
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CLASS_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CLASS_DECLARATION,
-                    JsClassDeclaration,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("abstractToken", |node, context| Self::wrap_token(
-                        node.abstract_token()
-                    )),
-                    ("classToken", |node, context| Self::wrap_token(
-                        node.class_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("extendsClause", |node, context| Self::wrap_optional_node(
-                        node.extends_clause(),
-                        context
-                    )),
-                    (
-                        "implementsClause",
-                        |node, context| Self::wrap_optional_node(node.implements_clause(), context)
-                    ),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION,
-                    JsClassExportDefaultDeclaration,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("abstractToken", |node, context| Self::wrap_token(
-                        node.abstract_token()
-                    )),
-                    ("classToken", |node, context| Self::wrap_token(
-                        node.class_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("extendsClause", |node, context| Self::wrap_optional_node(
-                        node.extends_clause(),
-                        context
-                    )),
-                    (
-                        "implementsClause",
-                        |node, context| Self::wrap_optional_node(node.implements_clause(), context)
-                    ),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CLASS_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CLASS_EXPRESSION,
-                    JsClassExpression,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("classToken", |node, context| Self::wrap_token(
-                        node.class_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("extendsClause", |node, context| Self::wrap_optional_node(
-                        node.extends_clause(),
-                        context
-                    )),
-                    (
-                        "implementsClause",
-                        |node, context| Self::wrap_optional_node(node.implements_clause(), context)
-                    ),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT,
-                    JsComputedMemberAssignment,
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION,
-                    JsComputedMemberExpression,
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("optionalChainToken", |node, context| Self::wrap_token(
-                        node.optional_chain_token()
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_COMPUTED_MEMBER_NAME,
-                    JsComputedMemberName,
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CONDITIONAL_EXPRESSION,
-                    JsConditionalExpression,
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token().ok()
-                    )),
-                    ("consequent", |node, context| Self::wrap_optional_node(
-                        node.consequent().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("alternate", |node, context| Self::wrap_optional_node(
-                        node.alternate().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER,
-                    JsConstructorClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS,
-                    JsConstructorParameters,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("parameters", |node, context| Self::wrap_node_list(
-                        node.parameters().into_iter().flatten(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_CONTINUE_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_CONTINUE_STATEMENT,
-                    JsContinueStatement,
-                    ("continueToken", |node, context| Self::wrap_token(
-                        node.continue_token().ok()
-                    )),
-                    ("label", |node, context| Self::wrap_optional_node(
-                        node.label(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DEBUGGER_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DEBUGGER_STATEMENT,
-                    JsDebuggerStatement,
-                    ("debuggerToken", |node, context| Self::wrap_token(
-                        node.debugger_token().ok()
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DECORATOR => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DECORATOR,
-                    JsDecorator,
-                    ("atToken", |node, context| Self::wrap_token(
-                        node.at_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DEFAULT_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DEFAULT_CLAUSE,
-                    JsDefaultClause,
-                    ("defaultToken", |node, context| Self::wrap_token(
-                        node.default_token().ok()
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("consequent", |node, context| Self::wrap_node_list(
-                        node.consequent(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER,
-                    JsDefaultImportSpecifier,
-                    ("localName", |node, context| Self::wrap_optional_node(
-                        node.local_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DIRECTIVE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DIRECTIVE,
-                    JsDirective,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_DO_WHILE_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_DO_WHILE_STATEMENT,
-                    JsDoWhileStatement,
-                    ("doToken", |node, context| Self::wrap_token(
-                        node.do_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                    ("whileToken", |node, context| Self::wrap_token(
-                        node.while_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_ELSE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_ELSE_CLAUSE,
-                    JsElseClause,
-                    ("elseToken", |node, context| Self::wrap_token(
-                        node.else_token().ok()
-                    )),
-                    ("alternate", |node, context| Self::wrap_optional_node(
-                        node.alternate().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EMPTY_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EMPTY_CLASS_MEMBER,
-                    JsEmptyClassMember,
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EMPTY_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EMPTY_STATEMENT,
-                    JsEmptyStatement,
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT,
-                    JsExport,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("exportToken", |node, context| Self::wrap_token(
-                        node.export_token().ok()
-                    )),
-                    ("exportClause", |node, context| Self::wrap_optional_node(
-                        node.export_clause().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_AS_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_AS_CLAUSE,
-                    JsExportAsClause,
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("exportedName", |node, context| Self::wrap_optional_node(
-                        node.exported_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE,
-                    JsExportDefaultDeclarationClause,
-                    ("defaultToken", |node, context| Self::wrap_token(
-                        node.default_token().ok()
-                    )),
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE,
-                    JsExportDefaultExpressionClause,
-                    ("defaultToken", |node, context| Self::wrap_token(
-                        node.default_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_FROM_CLAUSE,
-                    JsExportFromClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token().ok()
-                    )),
-                    ("exportAs", |node, context| Self::wrap_optional_node(
-                        node.export_as(),
-                        context
-                    )),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE,
-                    JsExportNamedClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("specifiers", |node, context| Self::wrap_node_list(
-                        node.specifiers().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE,
-                    JsExportNamedFromClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("specifiers", |node, context| Self::wrap_node_list(
-                        node.specifiers().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER,
-                    JsExportNamedFromSpecifier,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("sourceName", |node, context| Self::wrap_optional_node(
-                        node.source_name().ok(),
-                        context
-                    )),
-                    ("exportAs", |node, context| Self::wrap_optional_node(
-                        node.export_as(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER,
-                    JsExportNamedShorthandSpecifier,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER,
-                    JsExportNamedSpecifier,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("localName", |node, context| Self::wrap_optional_node(
-                        node.local_name().ok(),
-                        context
-                    )),
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("exportedName", |node, context| Self::wrap_optional_node(
-                        node.exported_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPRESSION_SNIPPET => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPRESSION_SNIPPET,
-                    JsExpressionSnippet,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPRESSION_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPRESSION_STATEMENT,
-                    JsExpressionStatement,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
-                    JsExpressionTemplateRoot,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_EXTENDS_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_EXTENDS_CLAUSE,
-                    JsExtendsClause,
-                    ("extendsToken", |node, context| Self::wrap_token(
-                        node.extends_token().ok()
-                    )),
-                    ("superClass", |node, context| Self::wrap_optional_node(
-                        node.super_class().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FINALLY_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FINALLY_CLAUSE,
-                    JsFinallyClause,
-                    ("finallyToken", |node, context| Self::wrap_token(
-                        node.finally_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FOR_IN_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FOR_IN_STATEMENT,
-                    JsForInStatement,
-                    ("forToken", |node, context| Self::wrap_token(
-                        node.for_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer().ok(),
-                        context
-                    )),
-                    ("inToken", |node, context| Self::wrap_token(
-                        node.in_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FOR_OF_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FOR_OF_STATEMENT,
-                    JsForOfStatement,
-                    ("forToken", |node, context| Self::wrap_token(
-                        node.for_token().ok()
-                    )),
-                    ("awaitToken", |node, context| Self::wrap_token(
-                        node.await_token()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer().ok(),
-                        context
-                    )),
-                    ("ofToken", |node, context| Self::wrap_token(
-                        node.of_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FOR_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FOR_STATEMENT,
-                    JsForStatement,
-                    ("forToken", |node, context| Self::wrap_token(
-                        node.for_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer(),
-                        context
-                    )),
-                    ("firstSemiToken", |node, context| Self::wrap_token(
-                        node.first_semi_token().ok()
-                    )),
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test(),
-                        context
-                    )),
-                    ("secondSemiToken", |node, context| Self::wrap_token(
-                        node.second_semi_token().ok()
-                    )),
-                    ("update", |node, context| Self::wrap_optional_node(
-                        node.update(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION,
-                    JsForVariableDeclaration,
-                    ("awaitToken", |node, context| Self::wrap_token(
-                        node.await_token()
-                    )),
-                    ("kindToken", |node, context| Self::wrap_token(
-                        node.kind_token().ok()
-                    )),
-                    ("declarator", |node, context| Self::wrap_optional_node(
-                        node.declarator().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FORMAL_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FORMAL_PARAMETER,
-                    JsFormalParameter,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("binding", |node, context| Self::wrap_optional_node(
-                        node.binding().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FUNCTION_BODY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FUNCTION_BODY,
-                    JsFunctionBody,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("directives", |node, context| Self::wrap_node_list(
-                        node.directives(),
-                        context
-                    )),
-                    ("statements", |node, context| Self::wrap_node_list(
-                        node.statements(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FUNCTION_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FUNCTION_DECLARATION,
-                    JsFunctionDeclaration,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("functionToken", |node, context| Self::wrap_token(
-                        node.function_token().ok()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
-                    JsFunctionExportDefaultDeclaration,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("functionToken", |node, context| Self::wrap_token(
-                        node.function_token().ok()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_FUNCTION_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_FUNCTION_EXPRESSION,
-                    JsFunctionExpression,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("functionToken", |node, context| Self::wrap_token(
-                        node.function_token().ok()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_GETTER_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_GETTER_CLASS_MEMBER,
-                    JsGetterClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("getToken", |node, context| Self::wrap_token(
-                        node.get_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("returnType", |node, context| Self::wrap_optional_node(
-                        node.return_type(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_GETTER_OBJECT_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_GETTER_OBJECT_MEMBER,
-                    JsGetterObjectMember,
-                    ("getToken", |node, context| Self::wrap_token(
-                        node.get_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("returnType", |node, context| Self::wrap_optional_node(
-                        node.return_type(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT,
-                    JsIdentifierAssignment,
-                    ("nameToken", |node, context| Self::wrap_token(
-                        node.name_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IDENTIFIER_BINDING => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IDENTIFIER_BINDING,
-                    JsIdentifierBinding,
-                    ("nameToken", |node, context| Self::wrap_token(
-                        node.name_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IDENTIFIER_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IDENTIFIER_EXPRESSION,
-                    JsIdentifierExpression,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IF_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IF_STATEMENT,
-                    JsIfStatement,
-                    ("ifToken", |node, context| Self::wrap_token(
-                        node.if_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("consequent", |node, context| Self::wrap_optional_node(
-                        node.consequent().ok(),
-                        context
-                    )),
-                    ("elseClause", |node, context| Self::wrap_optional_node(
-                        node.else_clause(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT,
-                    JsImport,
-                    ("importToken", |node, context| Self::wrap_token(
-                        node.import_token().ok()
-                    )),
-                    ("importClause", |node, context| Self::wrap_optional_node(
-                        node.import_clause().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_ASSERTION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_ASSERTION,
-                    JsImportAssertion,
-                    ("withToken", |node, context| Self::wrap_token(
-                        node.with_token().ok()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("assertions", |node, context| Self::wrap_node_list(
-                        node.assertions().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY,
-                    JsImportAssertionEntry,
-                    ("key", |node, context| Self::wrap_token(node.key().ok())),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_BARE_CLAUSE,
-                    JsImportBareClause,
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
-                    JsImportCallExpression,
-                    ("importToken", |node, context| Self::wrap_token(
-                        node.import_token().ok()
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token()
-                    )),
-                    ("phase", |node, context| Self::wrap_token(node.phase())),
-                    ("arguments", |node, context| Self::wrap_optional_node(
-                        node.arguments().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE,
-                    JsImportCombinedClause,
-                    (
-                        "defaultSpecifier",
-                        |node, context| Self::wrap_optional_node(
-                            node.default_specifier().ok(),
-                            context
-                        )
-                    ),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token().ok()
-                    )),
-                    ("specifier", |node, context| Self::wrap_optional_node(
-                        node.specifier().ok(),
-                        context
-                    )),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE,
-                    JsImportDefaultClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("phaseToken", |node, context| Self::wrap_token(
-                        node.phase_token()
-                    )),
-                    (
-                        "defaultSpecifier",
-                        |node, context| Self::wrap_optional_node(
-                            node.default_specifier().ok(),
-                            context
-                        )
-                    ),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_META_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_META_EXPRESSION,
-                    JsImportMetaExpression,
-                    ("importToken", |node, context| Self::wrap_token(
-                        node.import_token().ok()
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("metaToken", |node, context| Self::wrap_token(
-                        node.meta_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE,
-                    JsImportNamedClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("namedSpecifiers", |node, context| Self::wrap_optional_node(
-                        node.named_specifiers().ok(),
-                        context
-                    )),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE,
-                    JsImportNamespaceClause,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("phaseToken", |node, context| Self::wrap_token(
-                        node.phase_token()
-                    )),
-                    ("namespaceSpecifier", |node, context| {
-                        Self::wrap_optional_node(node.namespace_specifier().ok(), context)
-                    }),
-                    ("fromToken", |node, context| Self::wrap_token(
-                        node.from_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("assertion", |node, context| Self::wrap_optional_node(
-                        node.assertion(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_IN_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_IN_EXPRESSION,
-                    JsInExpression,
-                    ("property", |node, context| Self::wrap_optional_node(
-                        node.property().ok(),
-                        context
-                    )),
-                    ("inToken", |node, context| Self::wrap_token(
-                        node.in_token().ok()
-                    )),
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_INITIALIZER_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_INITIALIZER_CLAUSE,
-                    JsInitializerClause,
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_INSTANCEOF_EXPRESSION,
-                    JsInstanceofExpression,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("instanceofToken", |node, context| Self::wrap_token(
-                        node.instanceof_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_LABEL => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_LABEL,
-                    JsLabel,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_LABELED_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_LABELED_STATEMENT,
-                    JsLabeledStatement,
-                    ("label", |node, context| Self::wrap_optional_node(
-                        node.label().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_LITERAL_EXPORT_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_LITERAL_EXPORT_NAME,
-                    JsLiteralExportName,
-                    ("value", |node, context| Self::wrap_token(node.value().ok())),
-                );
-            }
-            JsSyntaxKind::JS_LITERAL_MEMBER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
-                    JsLiteralMemberName,
-                    ("value", |node, context| Self::wrap_token(node.value().ok())),
-                );
-            }
-            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_LOGICAL_EXPRESSION,
-                    JsLogicalExpression,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_METAVARIABLE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_METAVARIABLE,
-                    JsMetavariable,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_METHOD_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_METHOD_CLASS_MEMBER,
-                    JsMethodClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_METHOD_OBJECT_MEMBER,
-                    JsMethodObjectMember,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_MODULE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_MODULE,
-                    JsModule,
-                    ("bomToken", |node, context| Self::wrap_token(
-                        node.bom_token()
-                    )),
-                    ("interpreterToken", |node, context| Self::wrap_token(
-                        node.interpreter_token()
-                    )),
-                    ("directives", |node, context| Self::wrap_node_list(
-                        node.directives(),
-                        context
-                    )),
-                    ("items", |node, context| Self::wrap_node_list(
-                        node.items(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_MODULE_SOURCE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_MODULE_SOURCE,
-                    JsModuleSource,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NAME,
-                    JsName,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER,
-                    JsNamedImportSpecifier,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("localName", |node, context| Self::wrap_optional_node(
-                        node.local_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS,
-                    JsNamedImportSpecifiers,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("specifiers", |node, context| Self::wrap_node_list(
-                        node.specifiers().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER,
-                    JsNamespaceImportSpecifier,
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token().ok()
-                    )),
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("localName", |node, context| Self::wrap_optional_node(
-                        node.local_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NEW_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NEW_EXPRESSION,
-                    JsNewExpression,
-                    ("newToken", |node, context| Self::wrap_token(
-                        node.new_token().ok()
-                    )),
-                    ("callee", |node, context| Self::wrap_optional_node(
-                        node.callee().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                    ("arguments", |node, context| Self::wrap_optional_node(
-                        node.arguments(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NEW_TARGET_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NEW_TARGET_EXPRESSION,
-                    JsNewTargetExpression,
-                    ("newToken", |node, context| Self::wrap_token(
-                        node.new_token().ok()
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("targetToken", |node, context| Self::wrap_token(
-                        node.target_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION,
-                    JsNullLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
-                    JsNumberLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN,
-                    JsObjectAssignmentPattern,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("properties", |node, context| Self::wrap_node_list(
-                        node.properties().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY,
-                    JsObjectAssignmentPatternProperty,
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST,
-                    JsObjectAssignmentPatternRest,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("target", |node, context| Self::wrap_optional_node(
-                        node.target().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY,
-                    JsObjectAssignmentPatternShorthandProperty,
-                    ("identifier", |node, context| Self::wrap_optional_node(
-                        node.identifier().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN,
-                    JsObjectBindingPattern,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("properties", |node, context| Self::wrap_node_list(
-                        node.properties().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY,
-                    JsObjectBindingPatternProperty,
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("pattern", |node, context| Self::wrap_optional_node(
-                        node.pattern().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST,
-                    JsObjectBindingPatternRest,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("binding", |node, context| Self::wrap_optional_node(
-                        node.binding().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY,
-                    JsObjectBindingPatternShorthandProperty,
-                    ("identifier", |node, context| Self::wrap_optional_node(
-                        node.identifier().ok(),
-                        context
-                    )),
-                    ("init", |node, context| Self::wrap_optional_node(
-                        node.init(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_OBJECT_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_OBJECT_EXPRESSION,
-                    JsObjectExpression,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PARAMETERS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PARAMETERS,
-                    JsParameters,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("items", |node, context| Self::wrap_node_list(
-                        node.items().into_iter().flatten(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT,
-                    JsParenthesizedAssignment,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("assignment", |node, context| Self::wrap_optional_node(
-                        node.assignment().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION,
-                    JsParenthesizedExpression,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_POST_UPDATE_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_POST_UPDATE_EXPRESSION,
-                    JsPostUpdateExpression,
-                    ("operand", |node, context| Self::wrap_optional_node(
-                        node.operand().ok(),
-                        context
-                    )),
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION,
-                    JsPreUpdateExpression,
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("operand", |node, context| Self::wrap_optional_node(
-                        node.operand().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME,
-                    JsPrivateClassMemberName,
-                    ("hashToken", |node, context| Self::wrap_token(
-                        node.hash_token().ok()
-                    )),
-                    ("idToken", |node, context| Self::wrap_token(
-                        node.id_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PRIVATE_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PRIVATE_NAME,
-                    JsPrivateName,
-                    ("hashToken", |node, context| Self::wrap_token(
-                        node.hash_token().ok()
-                    )),
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER,
-                    JsPropertyClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("propertyAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.property_annotation(), context)
-                    }),
-                    ("value", |node, context| Self::wrap_optional_node(
-                        node.value(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER,
-                    JsPropertyObjectMember,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("value", |node, context| Self::wrap_optional_node(
-                        node.value().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_REFERENCE_IDENTIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_REFERENCE_IDENTIFIER,
-                    JsReferenceIdentifier,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION,
-                    JsRegexLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_REST_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_REST_PARAMETER,
-                    JsRestParameter,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("binding", |node, context| Self::wrap_optional_node(
-                        node.binding().ok(),
-                        context
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_RETURN_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_RETURN_STATEMENT,
-                    JsReturnStatement,
-                    ("returnToken", |node, context| Self::wrap_token(
-                        node.return_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SCRIPT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SCRIPT,
-                    JsScript,
-                    ("bomToken", |node, context| Self::wrap_token(
-                        node.bom_token()
-                    )),
-                    ("interpreterToken", |node, context| Self::wrap_token(
-                        node.interpreter_token()
-                    )),
-                    ("directives", |node, context| Self::wrap_node_list(
-                        node.directives(),
-                        context
-                    )),
-                    ("statements", |node, context| Self::wrap_node_list(
-                        node.statements(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SEQUENCE_EXPRESSION,
-                    JsSequenceExpression,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SETTER_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SETTER_CLASS_MEMBER,
-                    JsSetterClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("setToken", |node, context| Self::wrap_token(
-                        node.set_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SETTER_OBJECT_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
-                    JsSetterObjectMember,
-                    ("setToken", |node, context| Self::wrap_token(
-                        node.set_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER,
-                    JsShorthandNamedImportSpecifier,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("localName", |node, context| Self::wrap_optional_node(
-                        node.local_name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER,
-                    JsShorthandPropertyObjectMember,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SPREAD => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SPREAD,
-                    JsSpread,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER,
-                    JsStaticInitializationBlockClassMember,
-                    ("staticToken", |node, context| Self::wrap_token(
-                        node.static_token().ok()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("statements", |node, context| Self::wrap_node_list(
-                        node.statements(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT,
-                    JsStaticMemberAssignment,
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION,
-                    JsStaticMemberExpression,
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_STATIC_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_STATIC_MODIFIER,
-                    JsStaticModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION,
-                    JsStringLiteralExpression,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SUPER_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SUPER_EXPRESSION,
-                    JsSuperExpression,
-                    ("superToken", |node, context| Self::wrap_token(
-                        node.super_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
-                    JsSvelteDeclarationRoot,
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
-                    JsSvelteSnippetRoot,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_SWITCH_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_SWITCH_STATEMENT,
-                    JsSwitchStatement,
-                    ("switchToken", |node, context| Self::wrap_token(
-                        node.switch_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("discriminant", |node, context| Self::wrap_optional_node(
-                        node.discriminant().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("cases", |node, context| Self::wrap_node_list(
-                        node.cases(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT,
-                    JsTemplateChunkElement,
-                    ("templateChunkToken", |node, context| Self::wrap_token(
-                        node.template_chunk_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_TEMPLATE_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_TEMPLATE_ELEMENT,
-                    JsTemplateElement,
-                    ("dollarCurlyToken", |node, context| Self::wrap_token(
-                        node.dollar_curly_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_TEMPLATE_EXPRESSION,
-                    JsTemplateExpression,
-                    ("tag", |node, context| Self::wrap_optional_node(
-                        node.tag(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                    ("lTickToken", |node, context| Self::wrap_token(
-                        node.l_tick_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements(),
-                        context
-                    )),
-                    ("rTickToken", |node, context| Self::wrap_token(
-                        node.r_tick_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_THIS_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_THIS_EXPRESSION,
-                    JsThisExpression,
-                    ("thisToken", |node, context| Self::wrap_token(
-                        node.this_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_THROW_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_THROW_STATEMENT,
-                    JsThrowStatement,
-                    ("throwToken", |node, context| Self::wrap_token(
-                        node.throw_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_TRY_FINALLY_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_TRY_FINALLY_STATEMENT,
-                    JsTryFinallyStatement,
-                    ("tryToken", |node, context| Self::wrap_token(
-                        node.try_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                    ("catchClause", |node, context| Self::wrap_optional_node(
-                        node.catch_clause(),
-                        context
-                    )),
-                    ("finallyClause", |node, context| Self::wrap_optional_node(
-                        node.finally_clause().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_TRY_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_TRY_STATEMENT,
-                    JsTryStatement,
-                    ("tryToken", |node, context| Self::wrap_token(
-                        node.try_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                    ("catchClause", |node, context| Self::wrap_optional_node(
-                        node.catch_clause().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_UNARY_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_UNARY_EXPRESSION,
-                    JsUnaryExpression,
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_VARIABLE_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_VARIABLE_DECLARATION,
-                    JsVariableDeclaration,
-                    ("awaitToken", |node, context| Self::wrap_token(
-                        node.await_token()
-                    )),
-                    ("kindToken", |node, context| Self::wrap_token(
-                        node.kind().ok()
-                    )),
-                    ("declarators", |node, context| Self::wrap_node_list(
-                        node.declarators().into_iter().flatten(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE,
-                    JsVariableDeclarationClause,
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_VARIABLE_DECLARATOR => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_VARIABLE_DECLARATOR,
-                    JsVariableDeclarator,
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("variableAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.variable_annotation(), context)
-                    }),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_VARIABLE_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_VARIABLE_STATEMENT,
-                    JsVariableStatement,
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_WHILE_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_WHILE_STATEMENT,
-                    JsWhileStatement,
-                    ("whileToken", |node, context| Self::wrap_token(
-                        node.while_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("test", |node, context| Self::wrap_optional_node(
-                        node.test().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_WITH_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_WITH_STATEMENT,
-                    JsWithStatement,
-                    ("withToken", |node, context| Self::wrap_token(
-                        node.with_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_YIELD_ARGUMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_YIELD_ARGUMENT,
-                    JsYieldArgument,
-                    ("starToken", |node, context| Self::wrap_token(
-                        node.star_token()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JS_YIELD_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JS_YIELD_EXPRESSION,
-                    JsYieldExpression,
-                    ("yieldToken", |node, context| Self::wrap_token(
-                        node.yield_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_ATTRIBUTE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_ATTRIBUTE,
-                    JsxAttribute,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE,
-                    JsxAttributeInitializerClause,
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("value", |node, context| Self::wrap_optional_node(
-                        node.value().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_CLOSING_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_CLOSING_ELEMENT,
-                    JsxClosingElement,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_CLOSING_FRAGMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_CLOSING_FRAGMENT,
-                    JsxClosingFragment,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token().ok()
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_ELEMENT,
-                    JsxElement,
-                    ("openingElement", |node, context| Self::wrap_optional_node(
-                        node.opening_element().ok(),
-                        context
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements(),
-                        context
-                    )),
-                    ("closingElement", |node, context| Self::wrap_optional_node(
-                        node.closing_element().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE,
-                    JsxExpressionAttributeValue,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_EXPRESSION_CHILD => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_EXPRESSION_CHILD,
-                    JsxExpressionChild,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_FRAGMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_FRAGMENT,
-                    JsxFragment,
-                    ("openingFragment", |node, context| Self::wrap_optional_node(
-                        node.opening_fragment().ok(),
-                        context
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements(),
-                        context
-                    )),
-                    ("closingFragment", |node, context| Self::wrap_optional_node(
-                        node.closing_fragment().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_MEMBER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_MEMBER_NAME,
-                    JsxMemberName,
-                    ("object", |node, context| Self::wrap_optional_node(
-                        node.object().ok(),
-                        context
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("member", |node, context| Self::wrap_optional_node(
-                        node.member().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_NAME,
-                    JsxName,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_NAMESPACE_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_NAMESPACE_NAME,
-                    JsxNamespaceName,
-                    ("namespace", |node, context| Self::wrap_optional_node(
-                        node.namespace().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_OPENING_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_OPENING_ELEMENT,
-                    JsxOpeningElement,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                    ("attributes", |node, context| Self::wrap_node_list(
-                        node.attributes(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_OPENING_FRAGMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_OPENING_FRAGMENT,
-                    JsxOpeningFragment,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_REFERENCE_IDENTIFIER,
-                    JsxReferenceIdentifier,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
-                    JsxSelfClosingElement,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                    ("attributes", |node, context| Self::wrap_node_list(
-                        node.attributes(),
-                        context
-                    )),
-                    ("slashToken", |node, context| Self::wrap_token(
-                        node.slash_token()
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
-                    JsxShorthandAttribute,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_SPREAD_ATTRIBUTE,
-                    JsxSpreadAttribute,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_SPREAD_CHILD => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_SPREAD_CHILD,
-                    JsxSpreadChild,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_STRING => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_STRING,
-                    JsxString,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_TAG_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_TAG_EXPRESSION,
-                    JsxTagExpression,
-                    ("tag", |node, context| Self::wrap_optional_node(
-                        node.tag().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::JSX_TEXT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::JSX_TEXT,
-                    JsxText,
-                    ("valueToken", |node, context| Self::wrap_token(
-                        node.value_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ABSTRACT_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ABSTRACT_MODIFIER,
-                    TsAbstractModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER,
-                    TsAccessibilityModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ANY_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ANY_TYPE,
-                    TsAnyType,
-                    ("anyToken", |node, context| Self::wrap_token(
-                        node.any_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ARRAY_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ARRAY_TYPE,
-                    TsArrayType,
-                    ("elementType", |node, context| Self::wrap_optional_node(
-                        node.element_type().ok(),
-                        context
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_AS_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_AS_ASSIGNMENT,
-                    TsAsAssignment,
-                    ("assignment", |node, context| Self::wrap_optional_node(
-                        node.assignment().ok(),
-                        context
-                    )),
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_AS_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_AS_EXPRESSION,
-                    TsAsExpression,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ASSERTS_CONDITION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ASSERTS_CONDITION,
-                    TsAssertsCondition,
-                    ("isToken", |node, context| Self::wrap_token(
-                        node.is_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ASSERTS_RETURN_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ASSERTS_RETURN_TYPE,
-                    TsAssertsReturnType,
-                    ("assertsToken", |node, context| Self::wrap_token(
-                        node.asserts_token().ok()
-                    )),
-                    ("parameterName", |node, context| Self::wrap_optional_node(
-                        node.parameter_name().ok(),
-                        context
-                    )),
-                    ("predicate", |node, context| Self::wrap_optional_node(
-                        node.predicate(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_BIGINT_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_BIGINT_LITERAL_TYPE,
-                    TsBigintLiteralType,
-                    ("minusToken", |node, context| Self::wrap_token(
-                        node.minus_token()
-                    )),
-                    ("literalToken", |node, context| Self::wrap_token(
-                        node.literal_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_BIGINT_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_BIGINT_TYPE,
-                    TsBigintType,
-                    ("bigintToken", |node, context| Self::wrap_token(
-                        node.bigint_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE,
-                    TsBooleanLiteralType,
-                    ("literal", |node, context| Self::wrap_token(
-                        node.literal().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_BOOLEAN_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_BOOLEAN_TYPE,
-                    TsBooleanType,
-                    ("booleanToken", |node, context| Self::wrap_token(
-                        node.boolean_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER,
-                    TsCallSignatureTypeMember,
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CONDITIONAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CONDITIONAL_TYPE,
-                    TsConditionalType,
-                    ("checkType", |node, context| Self::wrap_optional_node(
-                        node.check_type().ok(),
-                        context
-                    )),
-                    ("extendsToken", |node, context| Self::wrap_token(
-                        node.extends_token().ok()
-                    )),
-                    ("extendsType", |node, context| Self::wrap_optional_node(
-                        node.extends_type().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token().ok()
-                    )),
-                    ("trueType", |node, context| Self::wrap_optional_node(
-                        node.true_type().ok(),
-                        context
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("falseType", |node, context| Self::wrap_optional_node(
-                        node.false_type().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CONST_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CONST_MODIFIER,
-                    TsConstModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER,
-                    TsConstructSignatureTypeMember,
-                    ("newToken", |node, context| Self::wrap_token(
-                        node.new_token().ok()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
-                    TsConstructorSignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_CONSTRUCTOR_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_CONSTRUCTOR_TYPE,
-                    TsConstructorType,
-                    ("abstractToken", |node, context| Self::wrap_token(
-                        node.abstract_token()
-                    )),
-                    ("newToken", |node, context| Self::wrap_token(
-                        node.new_token().ok()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("fatArrowToken", |node, context| Self::wrap_token(
-                        node.fat_arrow_token().ok()
-                    )),
-                    ("returnType", |node, context| Self::wrap_optional_node(
-                        node.return_type().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DECLARATION_MODULE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DECLARATION_MODULE,
-                    TsDeclarationModule,
-                    ("bomToken", |node, context| Self::wrap_token(
-                        node.bom_token()
-                    )),
-                    ("interpreterToken", |node, context| Self::wrap_token(
-                        node.interpreter_token()
-                    )),
-                    ("directives", |node, context| Self::wrap_node_list(
-                        node.directives(),
-                        context
-                    )),
-                    ("items", |node, context| Self::wrap_node_list(
-                        node.items(),
-                        context
-                    )),
-                    ("eofToken", |node, context| Self::wrap_token(
-                        node.eof_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION,
-                    TsDeclareFunctionDeclaration,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("functionToken", |node, context| Self::wrap_token(
-                        node.function_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
-                    TsDeclareFunctionExportDefaultDeclaration,
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("functionToken", |node, context| Self::wrap_token(
-                        node.function_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DECLARE_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DECLARE_MODIFIER,
-                    TsDeclareModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DECLARE_STATEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DECLARE_STATEMENT,
-                    TsDeclareStatement,
-                    ("declareToken", |node, context| Self::wrap_token(
-                        node.declare_token().ok()
-                    )),
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE,
-                    TsDefaultTypeClause,
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION,
-                    TsDefinitePropertyAnnotation,
-                    ("exclToken", |node, context| Self::wrap_token(
-                        node.excl_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION,
-                    TsDefiniteVariableAnnotation,
-                    ("exclToken", |node, context| Self::wrap_token(
-                        node.excl_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY,
-                    TsEmptyExternalModuleDeclarationBody,
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ENUM_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ENUM_DECLARATION,
-                    TsEnumDeclaration,
-                    ("constToken", |node, context| Self::wrap_token(
-                        node.const_token()
-                    )),
-                    ("enumToken", |node, context| Self::wrap_token(
-                        node.enum_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_ENUM_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_ENUM_MEMBER,
-                    TsEnumMember,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("initializer", |node, context| Self::wrap_optional_node(
-                        node.initializer(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE,
-                    TsExportAsNamespaceClause,
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("namespaceToken", |node, context| Self::wrap_token(
-                        node.namespace_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE,
-                    TsExportAssignmentClause,
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE,
-                    TsExportDeclareClause,
-                    ("declareToken", |node, context| Self::wrap_token(
-                        node.declare_token().ok()
-                    )),
-                    ("declaration", |node, context| Self::wrap_optional_node(
-                        node.declaration().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXTENDS_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXTENDS_CLAUSE,
-                    TsExtendsClause,
-                    ("extendsToken", |node, context| Self::wrap_token(
-                        node.extends_token().ok()
-                    )),
-                    ("types", |node, context| Self::wrap_node_list(
-                        node.types().into_iter().flatten(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION,
-                    TsExternalModuleDeclaration,
-                    ("moduleToken", |node, context| Self::wrap_token(
-                        node.module_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE,
-                    TsExternalModuleReference,
-                    ("requireToken", |node, context| Self::wrap_token(
-                        node.require_token().ok()
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("source", |node, context| Self::wrap_optional_node(
-                        node.source().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_FUNCTION_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_FUNCTION_TYPE,
-                    TsFunctionType,
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("fatArrowToken", |node, context| Self::wrap_token(
-                        node.fat_arrow_token().ok()
-                    )),
-                    ("returnType", |node, context| Self::wrap_optional_node(
-                        node.return_type().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_GETTER_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_GETTER_SIGNATURE_CLASS_MEMBER,
-                    TsGetterSignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("getToken", |node, context| Self::wrap_token(
-                        node.get_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("returnType", |node, context| Self::wrap_optional_node(
-                        node.return_type(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER,
-                    TsGetterSignatureTypeMember,
-                    ("getToken", |node, context| Self::wrap_token(
-                        node.get_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_GLOBAL_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_GLOBAL_DECLARATION,
-                    TsGlobalDeclaration,
-                    ("globalToken", |node, context| Self::wrap_token(
-                        node.global_token().ok()
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IDENTIFIER_BINDING => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IDENTIFIER_BINDING,
-                    TsIdentifierBinding,
-                    ("nameToken", |node, context| Self::wrap_token(
-                        node.name_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPLEMENTS_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPLEMENTS_CLAUSE,
-                    TsImplementsClause,
-                    ("implementsToken", |node, context| Self::wrap_token(
-                        node.implements_token().ok()
-                    )),
-                    ("types", |node, context| Self::wrap_node_list(
-                        node.types().into_iter().flatten(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION,
-                    TsImportEqualsDeclaration,
-                    ("importToken", |node, context| Self::wrap_token(
-                        node.import_token().ok()
-                    )),
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("moduleReference", |node, context| Self::wrap_optional_node(
-                        node.module_reference().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_TYPE,
-                    TsImportType,
-                    ("typeofToken", |node, context| Self::wrap_token(
-                        node.typeof_token()
-                    )),
-                    ("importToken", |node, context| Self::wrap_token(
-                        node.import_token().ok()
-                    )),
-                    ("arguments", |node, context| Self::wrap_optional_node(
-                        node.arguments().ok(),
-                        context
-                    )),
-                    ("qualifierClause", |node, context| Self::wrap_optional_node(
-                        node.qualifier_clause(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS,
-                    TsImportTypeArguments,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("argument", |node, context| Self::wrap_optional_node(
-                        node.argument().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token()
-                    )),
-                    ("tsImportTypeAssertionBlock", |node, context| {
-                        Self::wrap_optional_node(node.ts_import_type_assertion_block(), context)
-                    }),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
-                    TsImportTypeAssertion,
-                    ("withToken", |node, context| Self::wrap_token(
-                        node.with_token().ok()
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("assertions", |node, context| Self::wrap_node_list(
-                        node.assertions().into_iter().flatten(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK,
-                    TsImportTypeAssertionBlock,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("typeAssertion", |node, context| Self::wrap_optional_node(
-                        node.type_assertion().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER,
-                    TsImportTypeQualifier,
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_IN_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_IN_MODIFIER,
-                    TsInModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER,
-                    TsIndexSignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER,
-                    TsIndexSignatureParameter,
-                    ("binding", |node, context| Self::wrap_optional_node(
-                        node.binding().ok(),
-                        context
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER,
-                    TsIndexSignatureTypeMember,
-                    ("readonlyToken", |node, context| Self::wrap_token(
-                        node.readonly_token()
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation().ok(),
-                        context
-                    )),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INDEXED_ACCESS_TYPE,
-                    TsIndexedAccessType,
-                    ("objectType", |node, context| Self::wrap_optional_node(
-                        node.object_type().ok(),
-                        context
-                    )),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("indexType", |node, context| Self::wrap_optional_node(
-                        node.index_type().ok(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INFER_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INFER_TYPE,
-                    TsInferType,
-                    ("inferToken", |node, context| Self::wrap_token(
-                        node.infer_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("constraint", |node, context| Self::wrap_optional_node(
-                        node.constraint(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER,
-                    TsInitializedPropertySignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token()
-                    )),
-                    ("value", |node, context| Self::wrap_optional_node(
-                        node.value().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INSTANTIATION_EXPRESSION,
-                    TsInstantiationExpression,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("arguments", |node, context| Self::wrap_optional_node(
-                        node.arguments().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INTERFACE_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INTERFACE_DECLARATION,
-                    TsInterfaceDeclaration,
-                    ("interfaceToken", |node, context| Self::wrap_token(
-                        node.interface_token().ok()
-                    )),
-                    ("id", |node, context| Self::wrap_optional_node(
-                        node.id().ok(),
-                        context
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("extendsClause", |node, context| Self::wrap_optional_node(
-                        node.extends_clause(),
-                        context
-                    )),
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_INTERSECTION_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_INTERSECTION_TYPE,
-                    TsIntersectionType,
-                    ("leadingSeparatorToken", |node, context| Self::wrap_token(
-                        node.leading_separator_token()
-                    )),
-                    ("types", |node, context| Self::wrap_node_list(
-                        node.types().into_iter().flatten(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME,
-                    TsLiteralEnumMemberName,
-                    ("value", |node, context| Self::wrap_token(node.value().ok())),
-                );
-            }
-            JsSyntaxKind::TS_MAPPED_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MAPPED_TYPE,
-                    TsMappedType,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    (
-                        "readonlyModifier",
-                        |node, context| Self::wrap_optional_node(node.readonly_modifier(), context)
-                    ),
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("propertyName", |node, context| Self::wrap_optional_node(
-                        node.property_name().ok(),
-                        context
-                    )),
-                    ("inToken", |node, context| Self::wrap_token(
-                        node.in_token().ok()
-                    )),
-                    ("keysType", |node, context| Self::wrap_optional_node(
-                        node.keys_type().ok(),
-                        context
-                    )),
-                    ("asClause", |node, context| Self::wrap_optional_node(
-                        node.as_clause(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                    (
-                        "optionalModifier",
-                        |node, context| Self::wrap_optional_node(node.optional_modifier(), context)
-                    ),
-                    ("mappedType", |node, context| Self::wrap_optional_node(
-                        node.mapped_type(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE,
-                    TsMappedTypeAsClause,
-                    ("asToken", |node, context| Self::wrap_token(
-                        node.as_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE,
-                    TsMappedTypeOptionalModifierClause,
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token()
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE,
-                    TsMappedTypeReadonlyModifierClause,
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token()
-                    )),
-                    ("readonlyToken", |node, context| Self::wrap_token(
-                        node.readonly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER,
-                    TsMethodSignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("asyncToken", |node, context| Self::wrap_token(
-                        node.async_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER,
-                    TsMethodSignatureTypeMember,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("optionalToken", |node, context| Self::wrap_token(
-                        node.optional_token()
-                    )),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("parameters", |node, context| Self::wrap_optional_node(
-                        node.parameters().ok(),
-                        context
-                    )),
-                    ("returnTypeAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.return_type_annotation(), context)
-                    }),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_MODULE_BLOCK => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MODULE_BLOCK,
-                    TsModuleBlock,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("items", |node, context| Self::wrap_node_list(
-                        node.items(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_MODULE_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_MODULE_DECLARATION,
-                    TsModuleDeclaration,
-                    ("moduleOrNamespace", |node, context| Self::wrap_token(
-                        node.module_or_namespace().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("body", |node, context| Self::wrap_optional_node(
-                        node.body().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT,
-                    TsNamedTupleTypeElement,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token()
-                    )),
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NEVER_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NEVER_TYPE,
-                    TsNeverType,
-                    ("neverToken", |node, context| Self::wrap_token(
-                        node.never_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT,
-                    TsNonNullAssertionAssignment,
-                    ("assignment", |node, context| Self::wrap_optional_node(
-                        node.assignment().ok(),
-                        context
-                    )),
-                    ("exclToken", |node, context| Self::wrap_token(
-                        node.excl_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION,
-                    TsNonNullAssertionExpression,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("exclToken", |node, context| Self::wrap_token(
-                        node.excl_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NON_PRIMITIVE_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NON_PRIMITIVE_TYPE,
-                    TsNonPrimitiveType,
-                    ("objectToken", |node, context| Self::wrap_token(
-                        node.object_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NULL_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NULL_LITERAL_TYPE,
-                    TsNullLiteralType,
-                    ("literalToken", |node, context| Self::wrap_token(
-                        node.literal_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NUMBER_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NUMBER_LITERAL_TYPE,
-                    TsNumberLiteralType,
-                    ("minusToken", |node, context| Self::wrap_token(
-                        node.minus_token()
-                    )),
-                    ("literalToken", |node, context| Self::wrap_token(
-                        node.literal_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_NUMBER_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_NUMBER_TYPE,
-                    TsNumberType,
-                    ("numberToken", |node, context| Self::wrap_token(
-                        node.number_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_OBJECT_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_OBJECT_TYPE,
-                    TsObjectType,
-                    ("lCurlyToken", |node, context| Self::wrap_token(
-                        node.l_curly_token().ok()
-                    )),
-                    ("members", |node, context| Self::wrap_node_list(
-                        node.members(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION,
-                    TsOptionalPropertyAnnotation,
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT,
-                    TsOptionalTupleTypeElement,
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("questionMarkToken", |node, context| Self::wrap_token(
-                        node.question_mark_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_OUT_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_OUT_MODIFIER,
-                    TsOutModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_OVERRIDE_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_OVERRIDE_MODIFIER,
-                    TsOverrideModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_PARENTHESIZED_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_PARENTHESIZED_TYPE,
-                    TsParenthesizedType,
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_PREDICATE_RETURN_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_PREDICATE_RETURN_TYPE,
-                    TsPredicateReturnType,
-                    ("parameterName", |node, context| Self::wrap_optional_node(
-                        node.parameter_name().ok(),
-                        context
-                    )),
-                    ("isToken", |node, context| Self::wrap_token(
-                        node.is_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_PROPERTY_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_PROPERTY_PARAMETER,
-                    TsPropertyParameter,
-                    ("decorators", |node, context| Self::wrap_node_list(
-                        node.decorators(),
-                        context
-                    )),
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("formalParameter", |node, context| Self::wrap_optional_node(
-                        node.formal_parameter().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER,
-                    TsPropertySignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("propertyAnnotation", |node, context| {
-                        Self::wrap_optional_node(node.property_annotation(), context)
-                    }),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER,
-                    TsPropertySignatureTypeMember,
-                    ("readonlyToken", |node, context| Self::wrap_token(
-                        node.readonly_token()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("optionalToken", |node, context| Self::wrap_token(
-                        node.optional_token()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_QUALIFIED_MODULE_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_QUALIFIED_MODULE_NAME,
-                    TsQualifiedModuleName,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_QUALIFIED_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_QUALIFIED_NAME,
-                    TsQualifiedName,
-                    ("left", |node, context| Self::wrap_optional_node(
-                        node.left().ok(),
-                        context
-                    )),
-                    ("dotToken", |node, context| Self::wrap_token(
-                        node.dot_token().ok()
-                    )),
-                    ("right", |node, context| Self::wrap_optional_node(
-                        node.right().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_READONLY_MODIFIER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_READONLY_MODIFIER,
-                    TsReadonlyModifier,
-                    ("modifierToken", |node, context| Self::wrap_token(
-                        node.modifier_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_REFERENCE_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_REFERENCE_TYPE,
-                    TsReferenceType,
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT,
-                    TsRestTupleTypeElement,
-                    ("dotdotdotToken", |node, context| Self::wrap_token(
-                        node.dotdotdot_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION,
-                    TsReturnTypeAnnotation,
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_SATISFIES_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_SATISFIES_ASSIGNMENT,
-                    TsSatisfiesAssignment,
-                    ("assignment", |node, context| Self::wrap_optional_node(
-                        node.assignment().ok(),
-                        context
-                    )),
-                    ("satisfiesToken", |node, context| Self::wrap_token(
-                        node.satisfies_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_SATISFIES_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_SATISFIES_EXPRESSION,
-                    TsSatisfiesExpression,
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                    ("satisfiesToken", |node, context| Self::wrap_token(
-                        node.satisfies_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_SETTER_SIGNATURE_CLASS_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_SETTER_SIGNATURE_CLASS_MEMBER,
-                    TsSetterSignatureClassMember,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("setToken", |node, context| Self::wrap_token(
-                        node.set_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER,
-                    TsSetterSignatureTypeMember,
-                    ("setToken", |node, context| Self::wrap_token(
-                        node.set_token().ok()
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("lParenToken", |node, context| Self::wrap_token(
-                        node.l_paren_token().ok()
-                    )),
-                    ("parameter", |node, context| Self::wrap_optional_node(
-                        node.parameter().ok(),
-                        context
-                    )),
-                    ("commaToken", |node, context| Self::wrap_token(
-                        node.comma_token()
-                    )),
-                    ("rParenToken", |node, context| Self::wrap_token(
-                        node.r_paren_token().ok()
-                    )),
-                    ("separatorToken", |node, context| Self::wrap_token(
-                        node.separator_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_STRING_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_STRING_LITERAL_TYPE,
-                    TsStringLiteralType,
-                    ("literalToken", |node, context| Self::wrap_token(
-                        node.literal_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_STRING_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_STRING_TYPE,
-                    TsStringType,
-                    ("stringToken", |node, context| Self::wrap_token(
-                        node.string_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_SYMBOL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_SYMBOL_TYPE,
-                    TsSymbolType,
-                    ("symbolToken", |node, context| Self::wrap_token(
-                        node.symbol_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT,
-                    TsTemplateChunkElement,
-                    ("templateChunkToken", |node, context| Self::wrap_token(
-                        node.template_chunk_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TEMPLATE_ELEMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TEMPLATE_ELEMENT,
-                    TsTemplateElement,
-                    ("dollarCurlyToken", |node, context| Self::wrap_token(
-                        node.dollar_curly_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("rCurlyToken", |node, context| Self::wrap_token(
-                        node.r_curly_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE,
-                    TsTemplateLiteralType,
-                    ("lTickToken", |node, context| Self::wrap_token(
-                        node.l_tick_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements(),
-                        context
-                    )),
-                    ("rTickToken", |node, context| Self::wrap_token(
-                        node.r_tick_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_THIS_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_THIS_PARAMETER,
-                    TsThisParameter,
-                    ("thisToken", |node, context| Self::wrap_token(
-                        node.this_token().ok()
-                    )),
-                    ("typeAnnotation", |node, context| Self::wrap_optional_node(
-                        node.type_annotation(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_THIS_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_THIS_TYPE,
-                    TsThisType,
-                    ("thisToken", |node, context| Self::wrap_token(
-                        node.this_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TUPLE_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TUPLE_TYPE,
-                    TsTupleType,
-                    ("lBrackToken", |node, context| Self::wrap_token(
-                        node.l_brack_token().ok()
-                    )),
-                    ("elements", |node, context| Self::wrap_node_list(
-                        node.elements().into_iter().flatten(),
-                        context
-                    )),
-                    ("rBrackToken", |node, context| Self::wrap_token(
-                        node.r_brack_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION,
-                    TsTypeAliasDeclaration,
-                    ("typeToken", |node, context| Self::wrap_token(
-                        node.type_token().ok()
-                    )),
-                    ("bindingIdentifier", |node, context| {
-                        Self::wrap_optional_node(node.binding_identifier().ok(), context)
-                    }),
-                    ("typeParameters", |node, context| Self::wrap_optional_node(
-                        node.type_parameters(),
-                        context
-                    )),
-                    ("eqToken", |node, context| Self::wrap_token(
-                        node.eq_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("semicolonToken", |node, context| Self::wrap_token(
-                        node.semicolon_token()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_ANNOTATION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_ANNOTATION,
-                    TsTypeAnnotation,
-                    ("colonToken", |node, context| Self::wrap_token(
-                        node.colon_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_ARGUMENTS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_ARGUMENTS,
-                    TsTypeArguments,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("tsTypeArgumentList", |node, context| Self::wrap_node_list(
-                        node.ts_type_argument_list().into_iter().flatten(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT,
-                    TsTypeAssertionAssignment,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                    ("assignment", |node, context| Self::wrap_optional_node(
-                        node.assignment().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION,
-                    TsTypeAssertionExpression,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                    ("expression", |node, context| Self::wrap_optional_node(
-                        node.expression().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE,
-                    TsTypeConstraintClause,
-                    ("extendsToken", |node, context| Self::wrap_token(
-                        node.extends_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_OPERATOR_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_OPERATOR_TYPE,
-                    TsTypeOperatorType,
-                    ("operatorToken", |node, context| Self::wrap_token(
-                        node.operator_token().ok()
-                    )),
-                    ("ty", |node, context| Self::wrap_optional_node(
-                        node.ty().ok(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_PARAMETER => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_PARAMETER,
-                    TsTypeParameter,
-                    ("modifiers", |node, context| Self::wrap_node_list(
-                        node.modifiers(),
-                        context
-                    )),
-                    ("name", |node, context| Self::wrap_optional_node(
-                        node.name().ok(),
-                        context
-                    )),
-                    ("constraint", |node, context| Self::wrap_optional_node(
-                        node.constraint(),
-                        context
-                    )),
-                    ("default", |node, context| Self::wrap_optional_node(
-                        node.default(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_PARAMETER_NAME => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_PARAMETER_NAME,
-                    TsTypeParameterName,
-                    ("identToken", |node, context| Self::wrap_token(
-                        node.ident_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPE_PARAMETERS => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPE_PARAMETERS,
-                    TsTypeParameters,
-                    ("lAngleToken", |node, context| Self::wrap_token(
-                        node.l_angle_token().ok()
-                    )),
-                    ("items", |node, context| Self::wrap_node_list(
-                        node.items().into_iter().flatten(),
-                        context
-                    )),
-                    ("rAngleToken", |node, context| Self::wrap_token(
-                        node.r_angle_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_TYPEOF_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_TYPEOF_TYPE,
-                    TsTypeofType,
-                    ("typeofToken", |node, context| Self::wrap_token(
-                        node.typeof_token().ok()
-                    )),
-                    ("expressionName", |node, context| Self::wrap_optional_node(
-                        node.expression_name().ok(),
-                        context
-                    )),
-                    ("typeArguments", |node, context| Self::wrap_optional_node(
-                        node.type_arguments(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_UNDEFINED_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_UNDEFINED_TYPE,
-                    TsUndefinedType,
-                    ("undefinedToken", |node, context| Self::wrap_token(
-                        node.undefined_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_UNION_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_UNION_TYPE,
-                    TsUnionType,
-                    ("leadingSeparatorToken", |node, context| Self::wrap_token(
-                        node.leading_separator_token()
-                    )),
-                    ("types", |node, context| Self::wrap_node_list(
-                        node.types().into_iter().flatten(),
-                        context
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_UNKNOWN_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_UNKNOWN_TYPE,
-                    TsUnknownType,
-                    ("unknownToken", |node, context| Self::wrap_token(
-                        node.unknown_token().ok()
-                    )),
-                );
-            }
-            JsSyntaxKind::TS_VOID_TYPE => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::TS_VOID_TYPE,
-                    TsVoidType,
-                    ("voidToken", |node, context| Self::wrap_token(
-                        node.void_token().ok()
-                    )),
-                );
-            }
-            _ => {}
-        }
-        prototype.build()
+    /// Resolves a constructible token kind by its exact native enum name.
+    pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
+        Some(match name {
+            "SEMICOLON" => JsSyntaxKind::SEMICOLON,
+            "COMMA" => JsSyntaxKind::COMMA,
+            "L_PAREN" => JsSyntaxKind::L_PAREN,
+            "R_PAREN" => JsSyntaxKind::R_PAREN,
+            "L_CURLY" => JsSyntaxKind::L_CURLY,
+            "R_CURLY" => JsSyntaxKind::R_CURLY,
+            "L_BRACK" => JsSyntaxKind::L_BRACK,
+            "R_BRACK" => JsSyntaxKind::R_BRACK,
+            "L_ANGLE" => JsSyntaxKind::L_ANGLE,
+            "R_ANGLE" => JsSyntaxKind::R_ANGLE,
+            "TILDE" => JsSyntaxKind::TILDE,
+            "QUESTION" => JsSyntaxKind::QUESTION,
+            "QUESTION2" => JsSyntaxKind::QUESTION2,
+            "QUESTIONDOT" => JsSyntaxKind::QUESTIONDOT,
+            "AMP" => JsSyntaxKind::AMP,
+            "PIPE" => JsSyntaxKind::PIPE,
+            "PLUS" => JsSyntaxKind::PLUS,
+            "PLUS2" => JsSyntaxKind::PLUS2,
+            "STAR" => JsSyntaxKind::STAR,
+            "STAR2" => JsSyntaxKind::STAR2,
+            "SLASH" => JsSyntaxKind::SLASH,
+            "CARET" => JsSyntaxKind::CARET,
+            "PERCENT" => JsSyntaxKind::PERCENT,
+            "DOT" => JsSyntaxKind::DOT,
+            "DOT3" => JsSyntaxKind::DOT3,
+            "COLON" => JsSyntaxKind::COLON,
+            "EQ" => JsSyntaxKind::EQ,
+            "EQ2" => JsSyntaxKind::EQ2,
+            "EQ3" => JsSyntaxKind::EQ3,
+            "FAT_ARROW" => JsSyntaxKind::FAT_ARROW,
+            "BANG" => JsSyntaxKind::BANG,
+            "NEQ" => JsSyntaxKind::NEQ,
+            "NEQ2" => JsSyntaxKind::NEQ2,
+            "MINUS" => JsSyntaxKind::MINUS,
+            "MINUS2" => JsSyntaxKind::MINUS2,
+            "LTEQ" => JsSyntaxKind::LTEQ,
+            "GTEQ" => JsSyntaxKind::GTEQ,
+            "PLUSEQ" => JsSyntaxKind::PLUSEQ,
+            "MINUSEQ" => JsSyntaxKind::MINUSEQ,
+            "PIPEEQ" => JsSyntaxKind::PIPEEQ,
+            "AMPEQ" => JsSyntaxKind::AMPEQ,
+            "CARETEQ" => JsSyntaxKind::CARETEQ,
+            "SLASHEQ" => JsSyntaxKind::SLASHEQ,
+            "STAREQ" => JsSyntaxKind::STAREQ,
+            "PERCENTEQ" => JsSyntaxKind::PERCENTEQ,
+            "AMP2" => JsSyntaxKind::AMP2,
+            "PIPE2" => JsSyntaxKind::PIPE2,
+            "SHL" => JsSyntaxKind::SHL,
+            "SHR" => JsSyntaxKind::SHR,
+            "USHR" => JsSyntaxKind::USHR,
+            "SHLEQ" => JsSyntaxKind::SHLEQ,
+            "SHREQ" => JsSyntaxKind::SHREQ,
+            "USHREQ" => JsSyntaxKind::USHREQ,
+            "AMP2EQ" => JsSyntaxKind::AMP2EQ,
+            "PIPE2EQ" => JsSyntaxKind::PIPE2EQ,
+            "STAR2EQ" => JsSyntaxKind::STAR2EQ,
+            "QUESTION2EQ" => JsSyntaxKind::QUESTION2EQ,
+            "AT" => JsSyntaxKind::AT,
+            "BACKTICK" => JsSyntaxKind::BACKTICK,
+            "BREAK_KW" => JsSyntaxKind::BREAK_KW,
+            "CASE_KW" => JsSyntaxKind::CASE_KW,
+            "CATCH_KW" => JsSyntaxKind::CATCH_KW,
+            "CLASS_KW" => JsSyntaxKind::CLASS_KW,
+            "CONST_KW" => JsSyntaxKind::CONST_KW,
+            "CONTINUE_KW" => JsSyntaxKind::CONTINUE_KW,
+            "DEBUGGER_KW" => JsSyntaxKind::DEBUGGER_KW,
+            "DEFAULT_KW" => JsSyntaxKind::DEFAULT_KW,
+            "DELETE_KW" => JsSyntaxKind::DELETE_KW,
+            "DO_KW" => JsSyntaxKind::DO_KW,
+            "ELSE_KW" => JsSyntaxKind::ELSE_KW,
+            "ENUM_KW" => JsSyntaxKind::ENUM_KW,
+            "EXPORT_KW" => JsSyntaxKind::EXPORT_KW,
+            "EXTENDS_KW" => JsSyntaxKind::EXTENDS_KW,
+            "FALSE_KW" => JsSyntaxKind::FALSE_KW,
+            "FINALLY_KW" => JsSyntaxKind::FINALLY_KW,
+            "FOR_KW" => JsSyntaxKind::FOR_KW,
+            "FUNCTION_KW" => JsSyntaxKind::FUNCTION_KW,
+            "IF_KW" => JsSyntaxKind::IF_KW,
+            "IN_KW" => JsSyntaxKind::IN_KW,
+            "INSTANCEOF_KW" => JsSyntaxKind::INSTANCEOF_KW,
+            "IMPORT_KW" => JsSyntaxKind::IMPORT_KW,
+            "NEW_KW" => JsSyntaxKind::NEW_KW,
+            "NULL_KW" => JsSyntaxKind::NULL_KW,
+            "RETURN_KW" => JsSyntaxKind::RETURN_KW,
+            "SUPER_KW" => JsSyntaxKind::SUPER_KW,
+            "SWITCH_KW" => JsSyntaxKind::SWITCH_KW,
+            "THIS_KW" => JsSyntaxKind::THIS_KW,
+            "THROW_KW" => JsSyntaxKind::THROW_KW,
+            "TRY_KW" => JsSyntaxKind::TRY_KW,
+            "TRUE_KW" => JsSyntaxKind::TRUE_KW,
+            "TYPEOF_KW" => JsSyntaxKind::TYPEOF_KW,
+            "VAR_KW" => JsSyntaxKind::VAR_KW,
+            "VOID_KW" => JsSyntaxKind::VOID_KW,
+            "WHILE_KW" => JsSyntaxKind::WHILE_KW,
+            "WITH_KW" => JsSyntaxKind::WITH_KW,
+            "IMPLEMENTS_KW" => JsSyntaxKind::IMPLEMENTS_KW,
+            "INTERFACE_KW" => JsSyntaxKind::INTERFACE_KW,
+            "LET_KW" => JsSyntaxKind::LET_KW,
+            "PACKAGE_KW" => JsSyntaxKind::PACKAGE_KW,
+            "PRIVATE_KW" => JsSyntaxKind::PRIVATE_KW,
+            "PROTECTED_KW" => JsSyntaxKind::PROTECTED_KW,
+            "PUBLIC_KW" => JsSyntaxKind::PUBLIC_KW,
+            "STATIC_KW" => JsSyntaxKind::STATIC_KW,
+            "YIELD_KW" => JsSyntaxKind::YIELD_KW,
+            "ABSTRACT_KW" => JsSyntaxKind::ABSTRACT_KW,
+            "ACCESSOR_KW" => JsSyntaxKind::ACCESSOR_KW,
+            "AS_KW" => JsSyntaxKind::AS_KW,
+            "SATISFIES_KW" => JsSyntaxKind::SATISFIES_KW,
+            "ASSERTS_KW" => JsSyntaxKind::ASSERTS_KW,
+            "ASSERT_KW" => JsSyntaxKind::ASSERT_KW,
+            "ANY_KW" => JsSyntaxKind::ANY_KW,
+            "ASYNC_KW" => JsSyntaxKind::ASYNC_KW,
+            "AWAIT_KW" => JsSyntaxKind::AWAIT_KW,
+            "BOOLEAN_KW" => JsSyntaxKind::BOOLEAN_KW,
+            "CONSTRUCTOR_KW" => JsSyntaxKind::CONSTRUCTOR_KW,
+            "DECLARE_KW" => JsSyntaxKind::DECLARE_KW,
+            "DEFER_KW" => JsSyntaxKind::DEFER_KW,
+            "GET_KW" => JsSyntaxKind::GET_KW,
+            "INFER_KW" => JsSyntaxKind::INFER_KW,
+            "IS_KW" => JsSyntaxKind::IS_KW,
+            "KEYOF_KW" => JsSyntaxKind::KEYOF_KW,
+            "MODULE_KW" => JsSyntaxKind::MODULE_KW,
+            "NAMESPACE_KW" => JsSyntaxKind::NAMESPACE_KW,
+            "NEVER_KW" => JsSyntaxKind::NEVER_KW,
+            "READONLY_KW" => JsSyntaxKind::READONLY_KW,
+            "REQUIRE_KW" => JsSyntaxKind::REQUIRE_KW,
+            "NUMBER_KW" => JsSyntaxKind::NUMBER_KW,
+            "OBJECT_KW" => JsSyntaxKind::OBJECT_KW,
+            "SET_KW" => JsSyntaxKind::SET_KW,
+            "STRING_KW" => JsSyntaxKind::STRING_KW,
+            "SOURCE_KW" => JsSyntaxKind::SOURCE_KW,
+            "SYMBOL_KW" => JsSyntaxKind::SYMBOL_KW,
+            "TYPE_KW" => JsSyntaxKind::TYPE_KW,
+            "UNDEFINED_KW" => JsSyntaxKind::UNDEFINED_KW,
+            "UNIQUE_KW" => JsSyntaxKind::UNIQUE_KW,
+            "UNKNOWN_KW" => JsSyntaxKind::UNKNOWN_KW,
+            "FROM_KW" => JsSyntaxKind::FROM_KW,
+            "GLOBAL_KW" => JsSyntaxKind::GLOBAL_KW,
+            "BIGINT_KW" => JsSyntaxKind::BIGINT_KW,
+            "OVERRIDE_KW" => JsSyntaxKind::OVERRIDE_KW,
+            "OF_KW" => JsSyntaxKind::OF_KW,
+            "OUT_KW" => JsSyntaxKind::OUT_KW,
+            "USING_KW" => JsSyntaxKind::USING_KW,
+            "JS_NUMBER_LITERAL" => JsSyntaxKind::JS_NUMBER_LITERAL,
+            "JS_BIGINT_LITERAL" => JsSyntaxKind::JS_BIGINT_LITERAL,
+            "JS_STRING_LITERAL" => JsSyntaxKind::JS_STRING_LITERAL,
+            "JS_REGEX_LITERAL" => JsSyntaxKind::JS_REGEX_LITERAL,
+            "JSX_TEXT_LITERAL" => JsSyntaxKind::JSX_TEXT_LITERAL,
+            "JSX_STRING_LITERAL" => JsSyntaxKind::JSX_STRING_LITERAL,
+            "TARGET" => JsSyntaxKind::TARGET,
+            "META" => JsSyntaxKind::META,
+            "HASH" => JsSyntaxKind::HASH,
+            "TEMPLATE_CHUNK" => JsSyntaxKind::TEMPLATE_CHUNK,
+            "DOLLAR_CURLY" => JsSyntaxKind::DOLLAR_CURLY,
+            "IDENT" => JsSyntaxKind::IDENT,
+            "JSX_IDENT" => JsSyntaxKind::JSX_IDENT,
+            "JS_SHEBANG" => JsSyntaxKind::JS_SHEBANG,
+            _ => return None,
+        })
     }
-    #[doc = r" Resolves a syntax kind from the name used in the plugin API type definitions,"]
-    #[doc = r#" e.g. `"JS_CALL_EXPRESSION"`."#]
+    /// Resolves a syntax kind from the name used in the plugin API type definitions,
+    /// e.g. `"JS_CALL_EXPRESSION"`.
     pub(crate) fn syntax_kind_from_ast_name(name: &str) -> Option<JsSyntaxKind> {
         Some(match name {
             "ASTRO_IMPLICIT_FRAGMENT" => JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
@@ -5772,4 +581,10608 @@ impl JsAstNode {
             _ => return None,
         })
     }
+    /// Returns the plugin API fields of `kind`, one per slot in slot order.
+    /// Node kinds without fields, lists, and bogus nodes have no descriptor.
+    pub(crate) fn node_fields(kind: JsSyntaxKind) -> Option<&'static JsAstNodeFields> {
+        Some(match kind {
+            JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT => &ASTRO_IMPLICIT_FRAGMENT_FIELDS,
+            JsSyntaxKind::JS_ACCESSOR_MODIFIER => &JS_ACCESSOR_MODIFIER_FIELDS,
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN => &JS_ARRAY_ASSIGNMENT_PATTERN_FIELDS,
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT => {
+                &JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_FIELDS
+            }
+            JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT => {
+                &JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT_FIELDS
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN => &JS_ARRAY_BINDING_PATTERN_FIELDS,
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT => {
+                &JS_ARRAY_BINDING_PATTERN_ELEMENT_FIELDS
+            }
+            JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT => {
+                &JS_ARRAY_BINDING_PATTERN_REST_ELEMENT_FIELDS
+            }
+            JsSyntaxKind::JS_ARRAY_EXPRESSION => &JS_ARRAY_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => &JS_ARROW_FUNCTION_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => &JS_ASSIGNMENT_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_AWAIT_EXPRESSION => &JS_AWAIT_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION => &JS_BIGINT_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_BINARY_EXPRESSION => &JS_BINARY_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_BLOCK_STATEMENT => &JS_BLOCK_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION => &JS_BOOLEAN_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_BREAK_STATEMENT => &JS_BREAK_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_CALL_ARGUMENTS => &JS_CALL_ARGUMENTS_FIELDS,
+            JsSyntaxKind::JS_CALL_EXPRESSION => &JS_CALL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_CASE_CLAUSE => &JS_CASE_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_CATCH_CLAUSE => &JS_CATCH_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_CATCH_DECLARATION => &JS_CATCH_DECLARATION_FIELDS,
+            JsSyntaxKind::JS_CLASS_DECLARATION => &JS_CLASS_DECLARATION_FIELDS,
+            JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION => {
+                &JS_CLASS_EXPORT_DEFAULT_DECLARATION_FIELDS
+            }
+            JsSyntaxKind::JS_CLASS_EXPRESSION => &JS_CLASS_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => &JS_COMPUTED_MEMBER_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION => &JS_COMPUTED_MEMBER_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => &JS_COMPUTED_MEMBER_NAME_FIELDS,
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => &JS_CONDITIONAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER => &JS_CONSTRUCTOR_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS => &JS_CONSTRUCTOR_PARAMETERS_FIELDS,
+            JsSyntaxKind::JS_CONTINUE_STATEMENT => &JS_CONTINUE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_DEBUGGER_STATEMENT => &JS_DEBUGGER_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_DECORATOR => &JS_DECORATOR_FIELDS,
+            JsSyntaxKind::JS_DEFAULT_CLAUSE => &JS_DEFAULT_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER => &JS_DEFAULT_IMPORT_SPECIFIER_FIELDS,
+            JsSyntaxKind::JS_DIRECTIVE => &JS_DIRECTIVE_FIELDS,
+            JsSyntaxKind::JS_DO_WHILE_STATEMENT => &JS_DO_WHILE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_ELSE_CLAUSE => &JS_ELSE_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_EMPTY_CLASS_MEMBER => &JS_EMPTY_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_EMPTY_STATEMENT => &JS_EMPTY_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_EXPORT => &JS_EXPORT_FIELDS,
+            JsSyntaxKind::JS_EXPORT_AS_CLAUSE => &JS_EXPORT_AS_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE => {
+                &JS_EXPORT_DEFAULT_DECLARATION_CLAUSE_FIELDS
+            }
+            JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE => {
+                &JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE_FIELDS
+            }
+            JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => &JS_EXPORT_FROM_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE => &JS_EXPORT_NAMED_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => &JS_EXPORT_NAMED_FROM_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER => &JS_EXPORT_NAMED_FROM_SPECIFIER_FIELDS,
+            JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER => {
+                &JS_EXPORT_NAMED_SHORTHAND_SPECIFIER_FIELDS
+            }
+            JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER => &JS_EXPORT_NAMED_SPECIFIER_FIELDS,
+            JsSyntaxKind::JS_EXPRESSION_SNIPPET => &JS_EXPRESSION_SNIPPET_FIELDS,
+            JsSyntaxKind::JS_EXPRESSION_STATEMENT => &JS_EXPRESSION_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => &JS_EXPRESSION_TEMPLATE_ROOT_FIELDS,
+            JsSyntaxKind::JS_EXTENDS_CLAUSE => &JS_EXTENDS_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_FINALLY_CLAUSE => &JS_FINALLY_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_FOR_IN_STATEMENT => &JS_FOR_IN_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_FOR_OF_STATEMENT => &JS_FOR_OF_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_FOR_STATEMENT => &JS_FOR_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION => &JS_FOR_VARIABLE_DECLARATION_FIELDS,
+            JsSyntaxKind::JS_FORMAL_PARAMETER => &JS_FORMAL_PARAMETER_FIELDS,
+            JsSyntaxKind::JS_FUNCTION_BODY => &JS_FUNCTION_BODY_FIELDS,
+            JsSyntaxKind::JS_FUNCTION_DECLARATION => &JS_FUNCTION_DECLARATION_FIELDS,
+            JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+                &JS_FUNCTION_EXPORT_DEFAULT_DECLARATION_FIELDS
+            }
+            JsSyntaxKind::JS_FUNCTION_EXPRESSION => &JS_FUNCTION_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_GETTER_CLASS_MEMBER => &JS_GETTER_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_GETTER_OBJECT_MEMBER => &JS_GETTER_OBJECT_MEMBER_FIELDS,
+            JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT => &JS_IDENTIFIER_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::JS_IDENTIFIER_BINDING => &JS_IDENTIFIER_BINDING_FIELDS,
+            JsSyntaxKind::JS_IDENTIFIER_EXPRESSION => &JS_IDENTIFIER_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_IF_STATEMENT => &JS_IF_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_IMPORT => &JS_IMPORT_FIELDS,
+            JsSyntaxKind::JS_IMPORT_ASSERTION => &JS_IMPORT_ASSERTION_FIELDS,
+            JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => &JS_IMPORT_ASSERTION_ENTRY_FIELDS,
+            JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => &JS_IMPORT_BARE_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION => &JS_IMPORT_CALL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => &JS_IMPORT_COMBINED_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => &JS_IMPORT_DEFAULT_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_IMPORT_META_EXPRESSION => &JS_IMPORT_META_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => &JS_IMPORT_NAMED_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => &JS_IMPORT_NAMESPACE_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_IN_EXPRESSION => &JS_IN_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_INITIALIZER_CLAUSE => &JS_INITIALIZER_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_INSTANCEOF_EXPRESSION => &JS_INSTANCEOF_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_LABEL => &JS_LABEL_FIELDS,
+            JsSyntaxKind::JS_LABELED_STATEMENT => &JS_LABELED_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_LITERAL_EXPORT_NAME => &JS_LITERAL_EXPORT_NAME_FIELDS,
+            JsSyntaxKind::JS_LITERAL_MEMBER_NAME => &JS_LITERAL_MEMBER_NAME_FIELDS,
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => &JS_LOGICAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_METAVARIABLE => &JS_METAVARIABLE_FIELDS,
+            JsSyntaxKind::JS_METHOD_CLASS_MEMBER => &JS_METHOD_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_METHOD_OBJECT_MEMBER => &JS_METHOD_OBJECT_MEMBER_FIELDS,
+            JsSyntaxKind::JS_MODULE => &JS_MODULE_FIELDS,
+            JsSyntaxKind::JS_MODULE_SOURCE => &JS_MODULE_SOURCE_FIELDS,
+            JsSyntaxKind::JS_NAME => &JS_NAME_FIELDS,
+            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER => &JS_NAMED_IMPORT_SPECIFIER_FIELDS,
+            JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS => &JS_NAMED_IMPORT_SPECIFIERS_FIELDS,
+            JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER => &JS_NAMESPACE_IMPORT_SPECIFIER_FIELDS,
+            JsSyntaxKind::JS_NEW_EXPRESSION => &JS_NEW_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_NEW_TARGET_EXPRESSION => &JS_NEW_TARGET_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION => &JS_NULL_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION => &JS_NUMBER_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN => &JS_OBJECT_ASSIGNMENT_PATTERN_FIELDS,
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY => {
+                &JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_FIELDS
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST => {
+                &JS_OBJECT_ASSIGNMENT_PATTERN_REST_FIELDS
+            }
+            JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY => {
+                &JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY_FIELDS
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN => &JS_OBJECT_BINDING_PATTERN_FIELDS,
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY => {
+                &JS_OBJECT_BINDING_PATTERN_PROPERTY_FIELDS
+            }
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST => &JS_OBJECT_BINDING_PATTERN_REST_FIELDS,
+            JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY => {
+                &JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY_FIELDS
+            }
+            JsSyntaxKind::JS_OBJECT_EXPRESSION => &JS_OBJECT_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_PARAMETERS => &JS_PARAMETERS_FIELDS,
+            JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT => &JS_PARENTHESIZED_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => &JS_PARENTHESIZED_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_POST_UPDATE_EXPRESSION => &JS_POST_UPDATE_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION => &JS_PRE_UPDATE_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME => &JS_PRIVATE_CLASS_MEMBER_NAME_FIELDS,
+            JsSyntaxKind::JS_PRIVATE_NAME => &JS_PRIVATE_NAME_FIELDS,
+            JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER => &JS_PROPERTY_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => &JS_PROPERTY_OBJECT_MEMBER_FIELDS,
+            JsSyntaxKind::JS_REFERENCE_IDENTIFIER => &JS_REFERENCE_IDENTIFIER_FIELDS,
+            JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION => &JS_REGEX_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_REST_PARAMETER => &JS_REST_PARAMETER_FIELDS,
+            JsSyntaxKind::JS_RETURN_STATEMENT => &JS_RETURN_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_SCRIPT => &JS_SCRIPT_FIELDS,
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => &JS_SEQUENCE_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_SETTER_CLASS_MEMBER => &JS_SETTER_CLASS_MEMBER_FIELDS,
+            JsSyntaxKind::JS_SETTER_OBJECT_MEMBER => &JS_SETTER_OBJECT_MEMBER_FIELDS,
+            JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER => {
+                &JS_SHORTHAND_NAMED_IMPORT_SPECIFIER_FIELDS
+            }
+            JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER => {
+                &JS_SHORTHAND_PROPERTY_OBJECT_MEMBER_FIELDS
+            }
+            JsSyntaxKind::JS_SPREAD => &JS_SPREAD_FIELDS,
+            JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER => {
+                &JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => &JS_STATIC_MEMBER_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION => &JS_STATIC_MEMBER_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_STATIC_MODIFIER => &JS_STATIC_MODIFIER_FIELDS,
+            JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION => &JS_STRING_LITERAL_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_SUPER_EXPRESSION => &JS_SUPER_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => &JS_SVELTE_DECLARATION_ROOT_FIELDS,
+            JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => &JS_SVELTE_SNIPPET_ROOT_FIELDS,
+            JsSyntaxKind::JS_SWITCH_STATEMENT => &JS_SWITCH_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT => &JS_TEMPLATE_CHUNK_ELEMENT_FIELDS,
+            JsSyntaxKind::JS_TEMPLATE_ELEMENT => &JS_TEMPLATE_ELEMENT_FIELDS,
+            JsSyntaxKind::JS_TEMPLATE_EXPRESSION => &JS_TEMPLATE_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_THIS_EXPRESSION => &JS_THIS_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_THROW_STATEMENT => &JS_THROW_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_TRY_FINALLY_STATEMENT => &JS_TRY_FINALLY_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_TRY_STATEMENT => &JS_TRY_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_UNARY_EXPRESSION => &JS_UNARY_EXPRESSION_FIELDS,
+            JsSyntaxKind::JS_VARIABLE_DECLARATION => &JS_VARIABLE_DECLARATION_FIELDS,
+            JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => &JS_VARIABLE_DECLARATION_CLAUSE_FIELDS,
+            JsSyntaxKind::JS_VARIABLE_DECLARATOR => &JS_VARIABLE_DECLARATOR_FIELDS,
+            JsSyntaxKind::JS_VARIABLE_STATEMENT => &JS_VARIABLE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_WHILE_STATEMENT => &JS_WHILE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_WITH_STATEMENT => &JS_WITH_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_YIELD_ARGUMENT => &JS_YIELD_ARGUMENT_FIELDS,
+            JsSyntaxKind::JS_YIELD_EXPRESSION => &JS_YIELD_EXPRESSION_FIELDS,
+            JsSyntaxKind::JSX_ATTRIBUTE => &JSX_ATTRIBUTE_FIELDS,
+            JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE => {
+                &JSX_ATTRIBUTE_INITIALIZER_CLAUSE_FIELDS
+            }
+            JsSyntaxKind::JSX_CLOSING_ELEMENT => &JSX_CLOSING_ELEMENT_FIELDS,
+            JsSyntaxKind::JSX_CLOSING_FRAGMENT => &JSX_CLOSING_FRAGMENT_FIELDS,
+            JsSyntaxKind::JSX_ELEMENT => &JSX_ELEMENT_FIELDS,
+            JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE => &JSX_EXPRESSION_ATTRIBUTE_VALUE_FIELDS,
+            JsSyntaxKind::JSX_EXPRESSION_CHILD => &JSX_EXPRESSION_CHILD_FIELDS,
+            JsSyntaxKind::JSX_FRAGMENT => &JSX_FRAGMENT_FIELDS,
+            JsSyntaxKind::JSX_MEMBER_NAME => &JSX_MEMBER_NAME_FIELDS,
+            JsSyntaxKind::JSX_NAME => &JSX_NAME_FIELDS,
+            JsSyntaxKind::JSX_NAMESPACE_NAME => &JSX_NAMESPACE_NAME_FIELDS,
+            JsSyntaxKind::JSX_OPENING_ELEMENT => &JSX_OPENING_ELEMENT_FIELDS,
+            JsSyntaxKind::JSX_OPENING_FRAGMENT => &JSX_OPENING_FRAGMENT_FIELDS,
+            JsSyntaxKind::JSX_REFERENCE_IDENTIFIER => &JSX_REFERENCE_IDENTIFIER_FIELDS,
+            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => &JSX_SELF_CLOSING_ELEMENT_FIELDS,
+            JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE => &JSX_SHORTHAND_ATTRIBUTE_FIELDS,
+            JsSyntaxKind::JSX_SPREAD_ATTRIBUTE => &JSX_SPREAD_ATTRIBUTE_FIELDS,
+            JsSyntaxKind::JSX_SPREAD_CHILD => &JSX_SPREAD_CHILD_FIELDS,
+            JsSyntaxKind::JSX_STRING => &JSX_STRING_FIELDS,
+            JsSyntaxKind::JSX_TAG_EXPRESSION => &JSX_TAG_EXPRESSION_FIELDS,
+            JsSyntaxKind::JSX_TEXT => &JSX_TEXT_FIELDS,
+            JsSyntaxKind::TS_ABSTRACT_MODIFIER => &TS_ABSTRACT_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER => &TS_ACCESSIBILITY_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_ANY_TYPE => &TS_ANY_TYPE_FIELDS,
+            JsSyntaxKind::TS_ARRAY_TYPE => &TS_ARRAY_TYPE_FIELDS,
+            JsSyntaxKind::TS_AS_ASSIGNMENT => &TS_AS_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::TS_AS_EXPRESSION => &TS_AS_EXPRESSION_FIELDS,
+            JsSyntaxKind::TS_ASSERTS_CONDITION => &TS_ASSERTS_CONDITION_FIELDS,
+            JsSyntaxKind::TS_ASSERTS_RETURN_TYPE => &TS_ASSERTS_RETURN_TYPE_FIELDS,
+            JsSyntaxKind::TS_BIGINT_LITERAL_TYPE => &TS_BIGINT_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_BIGINT_TYPE => &TS_BIGINT_TYPE_FIELDS,
+            JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE => &TS_BOOLEAN_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_BOOLEAN_TYPE => &TS_BOOLEAN_TYPE_FIELDS,
+            JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER => &TS_CALL_SIGNATURE_TYPE_MEMBER_FIELDS,
+            JsSyntaxKind::TS_CONDITIONAL_TYPE => &TS_CONDITIONAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_CONST_MODIFIER => &TS_CONST_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER => {
+                &TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER => {
+                &TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_CONSTRUCTOR_TYPE => &TS_CONSTRUCTOR_TYPE_FIELDS,
+            JsSyntaxKind::TS_DECLARATION_MODULE => &TS_DECLARATION_MODULE_FIELDS,
+            JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
+                &TS_DECLARE_FUNCTION_DECLARATION_FIELDS
+            }
+            JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+                &TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION_FIELDS
+            }
+            JsSyntaxKind::TS_DECLARE_MODIFIER => &TS_DECLARE_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_DECLARE_STATEMENT => &TS_DECLARE_STATEMENT_FIELDS,
+            JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE => &TS_DEFAULT_TYPE_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION => {
+                &TS_DEFINITE_PROPERTY_ANNOTATION_FIELDS
+            }
+            JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION => {
+                &TS_DEFINITE_VARIABLE_ANNOTATION_FIELDS
+            }
+            JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY => {
+                &TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY_FIELDS
+            }
+            JsSyntaxKind::TS_ENUM_DECLARATION => &TS_ENUM_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_ENUM_MEMBER => &TS_ENUM_MEMBER_FIELDS,
+            JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE => &TS_EXPORT_AS_NAMESPACE_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE => &TS_EXPORT_ASSIGNMENT_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE => &TS_EXPORT_DECLARE_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_EXTENDS_CLAUSE => &TS_EXTENDS_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => &TS_EXTERNAL_MODULE_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE => &TS_EXTERNAL_MODULE_REFERENCE_FIELDS,
+            JsSyntaxKind::TS_FUNCTION_TYPE => &TS_FUNCTION_TYPE_FIELDS,
+            JsSyntaxKind::TS_GETTER_SIGNATURE_CLASS_MEMBER => {
+                &TS_GETTER_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER => {
+                &TS_GETTER_SIGNATURE_TYPE_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_GLOBAL_DECLARATION => &TS_GLOBAL_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_IDENTIFIER_BINDING => &TS_IDENTIFIER_BINDING_FIELDS,
+            JsSyntaxKind::TS_IMPLEMENTS_CLAUSE => &TS_IMPLEMENTS_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION => &TS_IMPORT_EQUALS_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_IMPORT_TYPE => &TS_IMPORT_TYPE_FIELDS,
+            JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS => &TS_IMPORT_TYPE_ARGUMENTS_FIELDS,
+            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION => &TS_IMPORT_TYPE_ASSERTION_FIELDS,
+            JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK => &TS_IMPORT_TYPE_ASSERTION_BLOCK_FIELDS,
+            JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER => &TS_IMPORT_TYPE_QUALIFIER_FIELDS,
+            JsSyntaxKind::TS_IN_MODIFIER => &TS_IN_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER => {
+                &TS_INDEX_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER => &TS_INDEX_SIGNATURE_PARAMETER_FIELDS,
+            JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER => &TS_INDEX_SIGNATURE_TYPE_MEMBER_FIELDS,
+            JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => &TS_INDEXED_ACCESS_TYPE_FIELDS,
+            JsSyntaxKind::TS_INFER_TYPE => &TS_INFER_TYPE_FIELDS,
+            JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER => {
+                &TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_INSTANTIATION_EXPRESSION => &TS_INSTANTIATION_EXPRESSION_FIELDS,
+            JsSyntaxKind::TS_INTERFACE_DECLARATION => &TS_INTERFACE_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_INTERSECTION_TYPE => &TS_INTERSECTION_TYPE_FIELDS,
+            JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME => &TS_LITERAL_ENUM_MEMBER_NAME_FIELDS,
+            JsSyntaxKind::TS_MAPPED_TYPE => &TS_MAPPED_TYPE_FIELDS,
+            JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE => &TS_MAPPED_TYPE_AS_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE => {
+                &TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE_FIELDS
+            }
+            JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE => {
+                &TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE_FIELDS
+            }
+            JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER => {
+                &TS_METHOD_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER => {
+                &TS_METHOD_SIGNATURE_TYPE_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_MODULE_BLOCK => &TS_MODULE_BLOCK_FIELDS,
+            JsSyntaxKind::TS_MODULE_DECLARATION => &TS_MODULE_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT => &TS_NAMED_TUPLE_TYPE_ELEMENT_FIELDS,
+            JsSyntaxKind::TS_NEVER_TYPE => &TS_NEVER_TYPE_FIELDS,
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT => {
+                &TS_NON_NULL_ASSERTION_ASSIGNMENT_FIELDS
+            }
+            JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION => {
+                &TS_NON_NULL_ASSERTION_EXPRESSION_FIELDS
+            }
+            JsSyntaxKind::TS_NON_PRIMITIVE_TYPE => &TS_NON_PRIMITIVE_TYPE_FIELDS,
+            JsSyntaxKind::TS_NULL_LITERAL_TYPE => &TS_NULL_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_NUMBER_LITERAL_TYPE => &TS_NUMBER_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_NUMBER_TYPE => &TS_NUMBER_TYPE_FIELDS,
+            JsSyntaxKind::TS_OBJECT_TYPE => &TS_OBJECT_TYPE_FIELDS,
+            JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION => {
+                &TS_OPTIONAL_PROPERTY_ANNOTATION_FIELDS
+            }
+            JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT => &TS_OPTIONAL_TUPLE_TYPE_ELEMENT_FIELDS,
+            JsSyntaxKind::TS_OUT_MODIFIER => &TS_OUT_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_OVERRIDE_MODIFIER => &TS_OVERRIDE_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_PARENTHESIZED_TYPE => &TS_PARENTHESIZED_TYPE_FIELDS,
+            JsSyntaxKind::TS_PREDICATE_RETURN_TYPE => &TS_PREDICATE_RETURN_TYPE_FIELDS,
+            JsSyntaxKind::TS_PROPERTY_PARAMETER => &TS_PROPERTY_PARAMETER_FIELDS,
+            JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER => {
+                &TS_PROPERTY_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER => {
+                &TS_PROPERTY_SIGNATURE_TYPE_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_QUALIFIED_MODULE_NAME => &TS_QUALIFIED_MODULE_NAME_FIELDS,
+            JsSyntaxKind::TS_QUALIFIED_NAME => &TS_QUALIFIED_NAME_FIELDS,
+            JsSyntaxKind::TS_READONLY_MODIFIER => &TS_READONLY_MODIFIER_FIELDS,
+            JsSyntaxKind::TS_REFERENCE_TYPE => &TS_REFERENCE_TYPE_FIELDS,
+            JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT => &TS_REST_TUPLE_TYPE_ELEMENT_FIELDS,
+            JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION => &TS_RETURN_TYPE_ANNOTATION_FIELDS,
+            JsSyntaxKind::TS_SATISFIES_ASSIGNMENT => &TS_SATISFIES_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::TS_SATISFIES_EXPRESSION => &TS_SATISFIES_EXPRESSION_FIELDS,
+            JsSyntaxKind::TS_SETTER_SIGNATURE_CLASS_MEMBER => {
+                &TS_SETTER_SIGNATURE_CLASS_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER => {
+                &TS_SETTER_SIGNATURE_TYPE_MEMBER_FIELDS
+            }
+            JsSyntaxKind::TS_STRING_LITERAL_TYPE => &TS_STRING_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_STRING_TYPE => &TS_STRING_TYPE_FIELDS,
+            JsSyntaxKind::TS_SYMBOL_TYPE => &TS_SYMBOL_TYPE_FIELDS,
+            JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT => &TS_TEMPLATE_CHUNK_ELEMENT_FIELDS,
+            JsSyntaxKind::TS_TEMPLATE_ELEMENT => &TS_TEMPLATE_ELEMENT_FIELDS,
+            JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE => &TS_TEMPLATE_LITERAL_TYPE_FIELDS,
+            JsSyntaxKind::TS_THIS_PARAMETER => &TS_THIS_PARAMETER_FIELDS,
+            JsSyntaxKind::TS_THIS_TYPE => &TS_THIS_TYPE_FIELDS,
+            JsSyntaxKind::TS_TUPLE_TYPE => &TS_TUPLE_TYPE_FIELDS,
+            JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION => &TS_TYPE_ALIAS_DECLARATION_FIELDS,
+            JsSyntaxKind::TS_TYPE_ANNOTATION => &TS_TYPE_ANNOTATION_FIELDS,
+            JsSyntaxKind::TS_TYPE_ARGUMENTS => &TS_TYPE_ARGUMENTS_FIELDS,
+            JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT => &TS_TYPE_ASSERTION_ASSIGNMENT_FIELDS,
+            JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION => &TS_TYPE_ASSERTION_EXPRESSION_FIELDS,
+            JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE => &TS_TYPE_CONSTRAINT_CLAUSE_FIELDS,
+            JsSyntaxKind::TS_TYPE_OPERATOR_TYPE => &TS_TYPE_OPERATOR_TYPE_FIELDS,
+            JsSyntaxKind::TS_TYPE_PARAMETER => &TS_TYPE_PARAMETER_FIELDS,
+            JsSyntaxKind::TS_TYPE_PARAMETER_NAME => &TS_TYPE_PARAMETER_NAME_FIELDS,
+            JsSyntaxKind::TS_TYPE_PARAMETERS => &TS_TYPE_PARAMETERS_FIELDS,
+            JsSyntaxKind::TS_TYPEOF_TYPE => &TS_TYPEOF_TYPE_FIELDS,
+            JsSyntaxKind::TS_UNDEFINED_TYPE => &TS_UNDEFINED_TYPE_FIELDS,
+            JsSyntaxKind::TS_UNION_TYPE => &TS_UNION_TYPE_FIELDS,
+            JsSyntaxKind::TS_UNKNOWN_TYPE => &TS_UNKNOWN_TYPE_FIELDS,
+            JsSyntaxKind::TS_VOID_TYPE => &TS_VOID_TYPE_FIELDS,
+            _ => return None,
+        })
+    }
 }
+static ASTRO_IMPLICIT_FRAGMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
+    name: "AstroImplicitFragment",
+    fields: &[JsAstField {
+        property: "elements",
+        updater: "withElements",
+        optional: false,
+        value: JsAstFieldValue::List {
+            ty: "JsxChildList",
+            can_cast: JsxChildList::can_cast,
+        },
+    }],
+};
+static JS_ACCESSOR_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ACCESSOR_MODIFIER,
+    name: "JsAccessorModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![accessor]],
+            expected: "\"accessor\"",
+        },
+    }],
+};
+static JS_ARRAY_ASSIGNMENT_PATTERN_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN,
+    name: "JsArrayAssignmentPattern",
+    fields: &[
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsArrayAssignmentPatternElementList",
+                can_cast: JsArrayAssignmentPatternElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_ELEMENT,
+    name: "JsArrayAssignmentPatternElement",
+    fields: &[
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignmentPattern",
+                can_cast: AnyJsAssignmentPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN_REST_ELEMENT,
+    name: "JsArrayAssignmentPatternRestElement",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignmentPattern",
+                can_cast: AnyJsAssignmentPattern::can_cast,
+            },
+        },
+    ],
+};
+static JS_ARRAY_BINDING_PATTERN_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_BINDING_PATTERN,
+    name: "JsArrayBindingPattern",
+    fields: &[
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsArrayBindingPatternElementList",
+                can_cast: JsArrayBindingPatternElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_ARRAY_BINDING_PATTERN_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_ELEMENT,
+    name: "JsArrayBindingPatternElement",
+    fields: &[
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_ARRAY_BINDING_PATTERN_REST_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_BINDING_PATTERN_REST_ELEMENT,
+    name: "JsArrayBindingPatternRestElement",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+    ],
+};
+static JS_ARRAY_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARRAY_EXPRESSION,
+    name: "JsArrayExpression",
+    fields: &[
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsArrayElementList",
+                can_cast: JsArrayElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_ARROW_FUNCTION_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION,
+    name: "JsArrowFunctionExpression",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsArrowFunctionParameters",
+                can_cast: AnyJsArrowFunctionParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fatArrowToken",
+            updater: "withFatArrowToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=>]],
+                expected: "\"=>\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFunctionBody",
+                can_cast: AnyJsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_ASSIGNMENT_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION,
+    name: "JsAssignmentExpression",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignmentPattern",
+                can_cast: AnyJsAssignmentPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[
+                    T![=],
+                    T![+=],
+                    T![-=],
+                    T![*=],
+                    T![/=],
+                    T![%=],
+                    T![**=],
+                    T![>>=],
+                    T![<<=],
+                    T![>>>=],
+                    T![&=],
+                    T![|=],
+                    T![^=],
+                    T![&&=],
+                    T![||=],
+                    T![??=],
+                ],
+                expected: "\"=\", \"+=\", \"-=\", \"*=\", \"/=\", \"%=\", \"**=\", \">>=\", \"<<=\", \">>>=\", \"&=\", \"|=\", \"^=\", \"&&=\", \"||=\", \"??=\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_AWAIT_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_AWAIT_EXPRESSION,
+    name: "JsAwaitExpression",
+    fields: &[
+        JsAstField {
+            property: "awaitToken",
+            updater: "withAwaitToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![await]],
+                expected: "\"await\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_BIGINT_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_BIGINT_LITERAL_EXPRESSION,
+    name: "JsBigintLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_BIGINT_LITERAL],
+            expected: "\"js_bigint_literal\"",
+        },
+    }],
+};
+static JS_BINARY_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_BINARY_EXPRESSION,
+    name: "JsBinaryExpression",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[
+                    T![<],
+                    T![>],
+                    T![<=],
+                    T![>=],
+                    T![==],
+                    T![===],
+                    T![!=],
+                    T![!==],
+                    T![+],
+                    T![-],
+                    T![*],
+                    T![/],
+                    T![%],
+                    T![**],
+                    T![<<],
+                    T![>>],
+                    T![>>>],
+                    T![&],
+                    T![|],
+                    T![^],
+                ],
+                expected: "\"<\", \">\", \"<=\", \">=\", \"==\", \"===\", \"!=\", \"!==\", \"+\", \"-\", \"*\", \"/\", \"%\", \"**\", \"<<\", \">>\", \">>>\", \"&\", \"|\", \"^\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_BLOCK_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_BLOCK_STATEMENT,
+    name: "JsBlockStatement",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "statements",
+            updater: "withStatements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_BOOLEAN_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_BOOLEAN_LITERAL_EXPRESSION,
+    name: "JsBooleanLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![true], T![false]],
+            expected: "\"true\", \"false\"",
+        },
+    }],
+};
+static JS_BREAK_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_BREAK_STATEMENT,
+    name: "JsBreakStatement",
+    fields: &[
+        JsAstField {
+            property: "breakToken",
+            updater: "withBreakToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![break]],
+                expected: "\"break\"",
+            },
+        },
+        JsAstField {
+            property: "label",
+            updater: "withLabel",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsLabel",
+                can_cast: JsLabel::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_CALL_ARGUMENTS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CALL_ARGUMENTS,
+    name: "JsCallArguments",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "args",
+            updater: "withArgs",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsCallArgumentList",
+                can_cast: JsCallArgumentList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_CALL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CALL_EXPRESSION,
+    name: "JsCallExpression",
+    fields: &[
+        JsAstField {
+            property: "callee",
+            updater: "withCallee",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "optionalChainToken",
+            updater: "withOptionalChainToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?.]],
+                expected: "\"?.\"",
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "arguments",
+            updater: "withArguments",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsCallArguments",
+                can_cast: JsCallArguments::can_cast,
+            },
+        },
+    ],
+};
+static JS_CASE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CASE_CLAUSE,
+    name: "JsCaseClause",
+    fields: &[
+        JsAstField {
+            property: "caseToken",
+            updater: "withCaseToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![case]],
+                expected: "\"case\"",
+            },
+        },
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "consequent",
+            updater: "withConsequent",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+    ],
+};
+static JS_CATCH_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CATCH_CLAUSE,
+    name: "JsCatchClause",
+    fields: &[
+        JsAstField {
+            property: "catchToken",
+            updater: "withCatchToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![catch]],
+                expected: "\"catch\"",
+            },
+        },
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsCatchDeclaration",
+                can_cast: JsCatchDeclaration::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsBlockStatement",
+                can_cast: JsBlockStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_CATCH_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CATCH_DECLARATION,
+    name: "JsCatchDeclaration",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_CLASS_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CLASS_DECLARATION,
+    name: "JsClassDeclaration",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "abstractToken",
+            updater: "withAbstractToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![abstract]],
+                expected: "\"abstract\"",
+            },
+        },
+        JsAstField {
+            property: "classToken",
+            updater: "withClassToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![class]],
+                expected: "\"class\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "extendsClause",
+            updater: "withExtendsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsExtendsClause",
+                can_cast: JsExtendsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "implementsClause",
+            updater: "withImplementsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsImplementsClause",
+                can_cast: TsImplementsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsClassMemberList",
+                can_cast: JsClassMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_CLASS_EXPORT_DEFAULT_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION,
+    name: "JsClassExportDefaultDeclaration",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "abstractToken",
+            updater: "withAbstractToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![abstract]],
+                expected: "\"abstract\"",
+            },
+        },
+        JsAstField {
+            property: "classToken",
+            updater: "withClassToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![class]],
+                expected: "\"class\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "extendsClause",
+            updater: "withExtendsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsExtendsClause",
+                can_cast: JsExtendsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "implementsClause",
+            updater: "withImplementsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsImplementsClause",
+                can_cast: TsImplementsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsClassMemberList",
+                can_cast: JsClassMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_CLASS_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CLASS_EXPRESSION,
+    name: "JsClassExpression",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "classToken",
+            updater: "withClassToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![class]],
+                expected: "\"class\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "extendsClause",
+            updater: "withExtendsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsExtendsClause",
+                can_cast: JsExtendsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "implementsClause",
+            updater: "withImplementsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsImplementsClause",
+                can_cast: TsImplementsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsClassMemberList",
+                can_cast: JsClassMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_COMPUTED_MEMBER_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT,
+    name: "JsComputedMemberAssignment",
+    fields: &[
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_COMPUTED_MEMBER_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_COMPUTED_MEMBER_EXPRESSION,
+    name: "JsComputedMemberExpression",
+    fields: &[
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "optionalChainToken",
+            updater: "withOptionalChainToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?.]],
+                expected: "\"?.\"",
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_COMPUTED_MEMBER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_COMPUTED_MEMBER_NAME,
+    name: "JsComputedMemberName",
+    fields: &[
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static JS_CONDITIONAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CONDITIONAL_EXPRESSION,
+    name: "JsConditionalExpression",
+    fields: &[
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "consequent",
+            updater: "withConsequent",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "alternate",
+            updater: "withAlternate",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_CONSTRUCTOR_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER,
+    name: "JsConstructorClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsConstructorModifierList",
+                can_cast: JsConstructorModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsLiteralMemberName",
+                can_cast: JsLiteralMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsConstructorParameters",
+                can_cast: JsConstructorParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_CONSTRUCTOR_PARAMETERS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CONSTRUCTOR_PARAMETERS,
+    name: "JsConstructorParameters",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsConstructorParameterList",
+                can_cast: JsConstructorParameterList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_CONTINUE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_CONTINUE_STATEMENT,
+    name: "JsContinueStatement",
+    fields: &[
+        JsAstField {
+            property: "continueToken",
+            updater: "withContinueToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![continue]],
+                expected: "\"continue\"",
+            },
+        },
+        JsAstField {
+            property: "label",
+            updater: "withLabel",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsLabel",
+                can_cast: JsLabel::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_DEBUGGER_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DEBUGGER_STATEMENT,
+    name: "JsDebuggerStatement",
+    fields: &[
+        JsAstField {
+            property: "debuggerToken",
+            updater: "withDebuggerToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![debugger]],
+                expected: "\"debugger\"",
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_DECORATOR_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DECORATOR,
+    name: "JsDecorator",
+    fields: &[
+        JsAstField {
+            property: "atToken",
+            updater: "withAtToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![@]],
+                expected: "\"@\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsDecorator",
+                can_cast: AnyJsDecorator::can_cast,
+            },
+        },
+    ],
+};
+static JS_DEFAULT_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DEFAULT_CLAUSE,
+    name: "JsDefaultClause",
+    fields: &[
+        JsAstField {
+            property: "defaultToken",
+            updater: "withDefaultToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![default]],
+                expected: "\"default\"",
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "consequent",
+            updater: "withConsequent",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+    ],
+};
+static JS_DEFAULT_IMPORT_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER,
+    name: "JsDefaultImportSpecifier",
+    fields: &[JsAstField {
+        property: "localName",
+        updater: "withLocalName",
+        optional: false,
+        value: JsAstFieldValue::Node {
+            ty: "AnyJsBinding",
+            can_cast: AnyJsBinding::can_cast,
+        },
+    }],
+};
+static JS_DIRECTIVE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DIRECTIVE,
+    name: "JsDirective",
+    fields: &[
+        JsAstField {
+            property: "valueToken",
+            updater: "withValueToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_STRING_LITERAL],
+                expected: "\"js_string_literal\"",
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_DO_WHILE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_DO_WHILE_STATEMENT,
+    name: "JsDoWhileStatement",
+    fields: &[
+        JsAstField {
+            property: "doToken",
+            updater: "withDoToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![do]],
+                expected: "\"do\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+        JsAstField {
+            property: "whileToken",
+            updater: "withWhileToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![while]],
+                expected: "\"while\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_ELSE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_ELSE_CLAUSE,
+    name: "JsElseClause",
+    fields: &[
+        JsAstField {
+            property: "elseToken",
+            updater: "withElseToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![else]],
+                expected: "\"else\"",
+            },
+        },
+        JsAstField {
+            property: "alternate",
+            updater: "withAlternate",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_EMPTY_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EMPTY_CLASS_MEMBER,
+    name: "JsEmptyClassMember",
+    fields: &[JsAstField {
+        property: "semicolonToken",
+        updater: "withSemicolonToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![;]],
+            expected: "\";\"",
+        },
+    }],
+};
+static JS_EMPTY_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EMPTY_STATEMENT,
+    name: "JsEmptyStatement",
+    fields: &[JsAstField {
+        property: "semicolonToken",
+        updater: "withSemicolonToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![;]],
+            expected: "\";\"",
+        },
+    }],
+};
+static JS_EXPORT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT,
+    name: "JsExport",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "exportToken",
+            updater: "withExportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![export]],
+                expected: "\"export\"",
+            },
+        },
+        JsAstField {
+            property: "exportClause",
+            updater: "withExportClause",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExportClause",
+                can_cast: AnyJsExportClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_EXPORT_AS_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_AS_CLAUSE,
+    name: "JsExportAsClause",
+    fields: &[
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "exportedName",
+            updater: "withExportedName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsLiteralExportName",
+                can_cast: AnyJsLiteralExportName::can_cast,
+            },
+        },
+    ],
+};
+static JS_EXPORT_DEFAULT_DECLARATION_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_DEFAULT_DECLARATION_CLAUSE,
+    name: "JsExportDefaultDeclarationClause",
+    fields: &[
+        JsAstField {
+            property: "defaultToken",
+            updater: "withDefaultToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![default]],
+                expected: "\"default\"",
+            },
+        },
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExportDefaultDeclaration",
+                can_cast: AnyJsExportDefaultDeclaration::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE,
+    name: "JsExportDefaultExpressionClause",
+    fields: &[
+        JsAstField {
+            property: "defaultToken",
+            updater: "withDefaultToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![default]],
+                expected: "\"default\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPORT_FROM_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_FROM_CLAUSE,
+    name: "JsExportFromClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "exportAs",
+            updater: "withExportAs",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsExportAsClause",
+                can_cast: JsExportAsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPORT_NAMED_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_NAMED_CLAUSE,
+    name: "JsExportNamedClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "specifiers",
+            updater: "withSpecifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsExportNamedSpecifierList",
+                can_cast: JsExportNamedSpecifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPORT_NAMED_FROM_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE,
+    name: "JsExportNamedFromClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "specifiers",
+            updater: "withSpecifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsExportNamedFromSpecifierList",
+                can_cast: JsExportNamedFromSpecifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPORT_NAMED_FROM_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_NAMED_FROM_SPECIFIER,
+    name: "JsExportNamedFromSpecifier",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "sourceName",
+            updater: "withSourceName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsLiteralExportName",
+                can_cast: AnyJsLiteralExportName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "exportAs",
+            updater: "withExportAs",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsExportAsClause",
+                can_cast: JsExportAsClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_EXPORT_NAMED_SHORTHAND_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_NAMED_SHORTHAND_SPECIFIER,
+    name: "JsExportNamedShorthandSpecifier",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsReferenceIdentifier",
+                can_cast: JsReferenceIdentifier::can_cast,
+            },
+        },
+    ],
+};
+static JS_EXPORT_NAMED_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPORT_NAMED_SPECIFIER,
+    name: "JsExportNamedSpecifier",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "localName",
+            updater: "withLocalName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsReferenceIdentifier",
+                can_cast: JsReferenceIdentifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "exportedName",
+            updater: "withExportedName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsLiteralExportName",
+                can_cast: AnyJsLiteralExportName::can_cast,
+            },
+        },
+    ],
+};
+static JS_EXPRESSION_SNIPPET_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPRESSION_SNIPPET,
+    name: "JsExpressionSnippet",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_EXPRESSION_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+    name: "JsExpressionStatement",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_EXPRESSION_TEMPLATE_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT,
+    name: "JsExpressionTemplateRoot",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_EXTENDS_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_EXTENDS_CLAUSE,
+    name: "JsExtendsClause",
+    fields: &[
+        JsAstField {
+            property: "extendsToken",
+            updater: "withExtendsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![extends]],
+                expected: "\"extends\"",
+            },
+        },
+        JsAstField {
+            property: "superClass",
+            updater: "withSuperClass",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+    ],
+};
+static JS_FINALLY_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FINALLY_CLAUSE,
+    name: "JsFinallyClause",
+    fields: &[
+        JsAstField {
+            property: "finallyToken",
+            updater: "withFinallyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![finally]],
+                expected: "\"finally\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsBlockStatement",
+                can_cast: JsBlockStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_FOR_IN_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FOR_IN_STATEMENT,
+    name: "JsForInStatement",
+    fields: &[
+        JsAstField {
+            property: "forToken",
+            updater: "withForToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![for]],
+                expected: "\"for\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsForInOrOfInitializer",
+                can_cast: AnyJsForInOrOfInitializer::can_cast,
+            },
+        },
+        JsAstField {
+            property: "inToken",
+            updater: "withInToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![in]],
+                expected: "\"in\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_FOR_OF_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FOR_OF_STATEMENT,
+    name: "JsForOfStatement",
+    fields: &[
+        JsAstField {
+            property: "forToken",
+            updater: "withForToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![for]],
+                expected: "\"for\"",
+            },
+        },
+        JsAstField {
+            property: "awaitToken",
+            updater: "withAwaitToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![await]],
+                expected: "\"await\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsForInOrOfInitializer",
+                can_cast: AnyJsForInOrOfInitializer::can_cast,
+            },
+        },
+        JsAstField {
+            property: "ofToken",
+            updater: "withOfToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![of]],
+                expected: "\"of\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_FOR_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FOR_STATEMENT,
+    name: "JsForStatement",
+    fields: &[
+        JsAstField {
+            property: "forToken",
+            updater: "withForToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![for]],
+                expected: "\"for\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsForInitializer",
+                can_cast: AnyJsForInitializer::can_cast,
+            },
+        },
+        JsAstField {
+            property: "firstSemiToken",
+            updater: "withFirstSemiToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "secondSemiToken",
+            updater: "withSecondSemiToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+        JsAstField {
+            property: "update",
+            updater: "withUpdate",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_FOR_VARIABLE_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FOR_VARIABLE_DECLARATION,
+    name: "JsForVariableDeclaration",
+    fields: &[
+        JsAstField {
+            property: "awaitToken",
+            updater: "withAwaitToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![await]],
+                expected: "\"await\"",
+            },
+        },
+        JsAstField {
+            property: "kindToken",
+            updater: "withKindToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![var], T![let], T![const], T![using]],
+                expected: "\"var\", \"let\", \"const\", \"using\"",
+            },
+        },
+        JsAstField {
+            property: "declarator",
+            updater: "withDeclarator",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsVariableDeclarator",
+                can_cast: JsVariableDeclarator::can_cast,
+            },
+        },
+    ],
+};
+static JS_FORMAL_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FORMAL_PARAMETER,
+    name: "JsFormalParameter",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_FUNCTION_BODY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FUNCTION_BODY,
+    name: "JsFunctionBody",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "directives",
+            updater: "withDirectives",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDirectiveList",
+                can_cast: JsDirectiveList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "statements",
+            updater: "withStatements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_FUNCTION_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FUNCTION_DECLARATION,
+    name: "JsFunctionDeclaration",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "functionToken",
+            updater: "withFunctionToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![function]],
+                expected: "\"function\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_FUNCTION_EXPORT_DEFAULT_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+    name: "JsFunctionExportDefaultDeclaration",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "functionToken",
+            updater: "withFunctionToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![function]],
+                expected: "\"function\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_FUNCTION_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_FUNCTION_EXPRESSION,
+    name: "JsFunctionExpression",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "functionToken",
+            updater: "withFunctionToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![function]],
+                expected: "\"function\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_GETTER_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_GETTER_CLASS_MEMBER,
+    name: "JsGetterClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsMethodModifierList",
+                can_cast: JsMethodModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "getToken",
+            updater: "withGetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![get]],
+                expected: "\"get\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "returnType",
+            updater: "withReturnType",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_GETTER_OBJECT_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_GETTER_OBJECT_MEMBER,
+    name: "JsGetterObjectMember",
+    fields: &[
+        JsAstField {
+            property: "getToken",
+            updater: "withGetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![get]],
+                expected: "\"get\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "returnType",
+            updater: "withReturnType",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_IDENTIFIER_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT,
+    name: "JsIdentifierAssignment",
+    fields: &[JsAstField {
+        property: "nameToken",
+        updater: "withNameToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static JS_IDENTIFIER_BINDING_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IDENTIFIER_BINDING,
+    name: "JsIdentifierBinding",
+    fields: &[JsAstField {
+        property: "nameToken",
+        updater: "withNameToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static JS_IDENTIFIER_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IDENTIFIER_EXPRESSION,
+    name: "JsIdentifierExpression",
+    fields: &[JsAstField {
+        property: "name",
+        updater: "withName",
+        optional: false,
+        value: JsAstFieldValue::Node {
+            ty: "JsReferenceIdentifier",
+            can_cast: JsReferenceIdentifier::can_cast,
+        },
+    }],
+};
+static JS_IF_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IF_STATEMENT,
+    name: "JsIfStatement",
+    fields: &[
+        JsAstField {
+            property: "ifToken",
+            updater: "withIfToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![if]],
+                expected: "\"if\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "consequent",
+            updater: "withConsequent",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+        JsAstField {
+            property: "elseClause",
+            updater: "withElseClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsElseClause",
+                can_cast: JsElseClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT,
+    name: "JsImport",
+    fields: &[
+        JsAstField {
+            property: "importToken",
+            updater: "withImportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![import]],
+                expected: "\"import\"",
+            },
+        },
+        JsAstField {
+            property: "importClause",
+            updater: "withImportClause",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsImportClause",
+                can_cast: AnyJsImportClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_IMPORT_ASSERTION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_ASSERTION,
+    name: "JsImportAssertion",
+    fields: &[
+        JsAstField {
+            property: "withToken",
+            updater: "withWithToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![with]],
+                expected: "\"with\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "assertions",
+            updater: "withAssertions",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsImportAssertionEntryList",
+                can_cast: JsImportAssertionEntryList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_IMPORT_ASSERTION_ENTRY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY,
+    name: "JsImportAssertionEntry",
+    fields: &[
+        JsAstField {
+            property: "key",
+            updater: "withKey",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[IDENT, JS_STRING_LITERAL],
+                expected: "\"ident\", \"js_string_literal\"",
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "valueToken",
+            updater: "withValueToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_STRING_LITERAL],
+                expected: "\"js_string_literal\"",
+            },
+        },
+    ],
+};
+static JS_IMPORT_BARE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_BARE_CLAUSE,
+    name: "JsImportBareClause",
+    fields: &[
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_CALL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_CALL_EXPRESSION,
+    name: "JsImportCallExpression",
+    fields: &[
+        JsAstField {
+            property: "importToken",
+            updater: "withImportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![import]],
+                expected: "\"import\"",
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "phase",
+            updater: "withPhase",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![source], T![defer]],
+                expected: "\"source\", \"defer\"",
+            },
+        },
+        JsAstField {
+            property: "arguments",
+            updater: "withArguments",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsCallArguments",
+                can_cast: JsCallArguments::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_COMBINED_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE,
+    name: "JsImportCombinedClause",
+    fields: &[
+        JsAstField {
+            property: "defaultSpecifier",
+            updater: "withDefaultSpecifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsDefaultImportSpecifier",
+                can_cast: JsDefaultImportSpecifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "specifier",
+            updater: "withSpecifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsCombinedSpecifier",
+                can_cast: AnyJsCombinedSpecifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_DEFAULT_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE,
+    name: "JsImportDefaultClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "phaseToken",
+            updater: "withPhaseToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![source]],
+                expected: "\"source\"",
+            },
+        },
+        JsAstField {
+            property: "defaultSpecifier",
+            updater: "withDefaultSpecifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsDefaultImportSpecifier",
+                can_cast: JsDefaultImportSpecifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_META_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_META_EXPRESSION,
+    name: "JsImportMetaExpression",
+    fields: &[
+        JsAstField {
+            property: "importToken",
+            updater: "withImportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![import]],
+                expected: "\"import\"",
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "metaToken",
+            updater: "withMetaToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[META],
+                expected: "\"meta\"",
+            },
+        },
+    ],
+};
+static JS_IMPORT_NAMED_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE,
+    name: "JsImportNamedClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "namedSpecifiers",
+            updater: "withNamedSpecifiers",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsNamedImportSpecifiers",
+                can_cast: JsNamedImportSpecifiers::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+    ],
+};
+static JS_IMPORT_NAMESPACE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE,
+    name: "JsImportNamespaceClause",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "phaseToken",
+            updater: "withPhaseToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![defer]],
+                expected: "\"defer\"",
+            },
+        },
+        JsAstField {
+            property: "namespaceSpecifier",
+            updater: "withNamespaceSpecifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsNamespaceImportSpecifier",
+                can_cast: JsNamespaceImportSpecifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fromToken",
+            updater: "withFromToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![from]],
+                expected: "\"from\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "assertion",
+            updater: "withAssertion",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsImportAssertion",
+                can_cast: JsImportAssertion::can_cast,
+            },
+        },
+    ],
+};
+static JS_IN_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_IN_EXPRESSION,
+    name: "JsInExpression",
+    fields: &[
+        JsAstField {
+            property: "property",
+            updater: "withProperty",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsInProperty",
+                can_cast: AnyJsInProperty::can_cast,
+            },
+        },
+        JsAstField {
+            property: "inToken",
+            updater: "withInToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![in]],
+                expected: "\"in\"",
+            },
+        },
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_INITIALIZER_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_INITIALIZER_CLAUSE,
+    name: "JsInitializerClause",
+    fields: &[
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_INSTANCEOF_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_INSTANCEOF_EXPRESSION,
+    name: "JsInstanceofExpression",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "instanceofToken",
+            updater: "withInstanceofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![instanceof]],
+                expected: "\"instanceof\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_LABEL_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_LABEL,
+    name: "JsLabel",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static JS_LABELED_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_LABELED_STATEMENT,
+    name: "JsLabeledStatement",
+    fields: &[
+        JsAstField {
+            property: "label",
+            updater: "withLabel",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsLabel",
+                can_cast: JsLabel::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_LITERAL_EXPORT_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_LITERAL_EXPORT_NAME,
+    name: "JsLiteralExportName",
+    fields: &[JsAstField {
+        property: "value",
+        updater: "withValue",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT, JS_STRING_LITERAL],
+            expected: "\"ident\", \"js_string_literal\"",
+        },
+    }],
+};
+static JS_LITERAL_MEMBER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_LITERAL_MEMBER_NAME,
+    name: "JsLiteralMemberName",
+    fields: &[JsAstField {
+        property: "value",
+        updater: "withValue",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT, JS_STRING_LITERAL, JS_NUMBER_LITERAL],
+            expected: "\"ident\", \"js_string_literal\", \"js_number_literal\"",
+        },
+    }],
+};
+static JS_LOGICAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_LOGICAL_EXPRESSION,
+    name: "JsLogicalExpression",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![??], T![||], T![&&]],
+                expected: "\"??\", \"||\", \"&&\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_METAVARIABLE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_METAVARIABLE,
+    name: "JsMetavariable",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[GRIT_METAVARIABLE],
+            expected: "\"grit_metavariable\"",
+        },
+    }],
+};
+static JS_METHOD_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_METHOD_CLASS_MEMBER,
+    name: "JsMethodClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsMethodModifierList",
+                can_cast: JsMethodModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_METHOD_OBJECT_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_METHOD_OBJECT_MEMBER,
+    name: "JsMethodObjectMember",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_MODULE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_MODULE,
+    name: "JsModule",
+    fields: &[
+        JsAstField {
+            property: "bomToken",
+            updater: "withBomToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![UNICODE_BOM]],
+                expected: "\"UNICODE_BOM\"",
+            },
+        },
+        JsAstField {
+            property: "interpreterToken",
+            updater: "withInterpreterToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_SHEBANG],
+                expected: "\"js_shebang\"",
+            },
+        },
+        JsAstField {
+            property: "directives",
+            updater: "withDirectives",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDirectiveList",
+                can_cast: JsDirectiveList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsModuleItemList",
+                can_cast: JsModuleItemList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_MODULE_SOURCE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_MODULE_SOURCE,
+    name: "JsModuleSource",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_STRING_LITERAL],
+            expected: "\"js_string_literal\"",
+        },
+    }],
+};
+static JS_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NAME,
+    name: "JsName",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static JS_NAMED_IMPORT_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIER,
+    name: "JsNamedImportSpecifier",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsLiteralExportName",
+                can_cast: AnyJsLiteralExportName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "localName",
+            updater: "withLocalName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_NAMED_IMPORT_SPECIFIERS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS,
+    name: "JsNamedImportSpecifiers",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "specifiers",
+            updater: "withSpecifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsNamedImportSpecifierList",
+                can_cast: JsNamedImportSpecifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_NAMESPACE_IMPORT_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NAMESPACE_IMPORT_SPECIFIER,
+    name: "JsNamespaceImportSpecifier",
+    fields: &[
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "localName",
+            updater: "withLocalName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_NEW_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NEW_EXPRESSION,
+    name: "JsNewExpression",
+    fields: &[
+        JsAstField {
+            property: "newToken",
+            updater: "withNewToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![new]],
+                expected: "\"new\"",
+            },
+        },
+        JsAstField {
+            property: "callee",
+            updater: "withCallee",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "arguments",
+            updater: "withArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsCallArguments",
+                can_cast: JsCallArguments::can_cast,
+            },
+        },
+    ],
+};
+static JS_NEW_TARGET_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NEW_TARGET_EXPRESSION,
+    name: "JsNewTargetExpression",
+    fields: &[
+        JsAstField {
+            property: "newToken",
+            updater: "withNewToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![new]],
+                expected: "\"new\"",
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "targetToken",
+            updater: "withTargetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[TARGET],
+                expected: "\"target\"",
+            },
+        },
+    ],
+};
+static JS_NULL_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NULL_LITERAL_EXPRESSION,
+    name: "JsNullLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![null]],
+            expected: "\"null\"",
+        },
+    }],
+};
+static JS_NUMBER_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION,
+    name: "JsNumberLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_NUMBER_LITERAL],
+            expected: "\"js_number_literal\"",
+        },
+    }],
+};
+static JS_OBJECT_ASSIGNMENT_PATTERN_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN,
+    name: "JsObjectAssignmentPattern",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "properties",
+            updater: "withProperties",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsObjectAssignmentPatternPropertyList",
+                can_cast: JsObjectAssignmentPatternPropertyList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY,
+    name: "JsObjectAssignmentPatternProperty",
+    fields: &[
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignmentPattern",
+                can_cast: AnyJsAssignmentPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_ASSIGNMENT_PATTERN_REST_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_REST,
+    name: "JsObjectAssignmentPatternRest",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "target",
+            updater: "withTarget",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY,
+    name: "JsObjectAssignmentPatternShorthandProperty",
+    fields: &[
+        JsAstField {
+            property: "identifier",
+            updater: "withIdentifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsIdentifierAssignment",
+                can_cast: JsIdentifierAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_BINDING_PATTERN_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_BINDING_PATTERN,
+    name: "JsObjectBindingPattern",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "properties",
+            updater: "withProperties",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsObjectBindingPatternPropertyList",
+                can_cast: JsObjectBindingPatternPropertyList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_OBJECT_BINDING_PATTERN_PROPERTY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_PROPERTY,
+    name: "JsObjectBindingPatternProperty",
+    fields: &[
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "pattern",
+            updater: "withPattern",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_BINDING_PATTERN_REST_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST,
+    name: "JsObjectBindingPatternRest",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY,
+    name: "JsObjectBindingPatternShorthandProperty",
+    fields: &[
+        JsAstField {
+            property: "identifier",
+            updater: "withIdentifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "init",
+            updater: "withInit",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_OBJECT_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_OBJECT_EXPRESSION,
+    name: "JsObjectExpression",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsObjectMemberList",
+                can_cast: JsObjectMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_PARAMETERS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PARAMETERS,
+    name: "JsParameters",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsParameterList",
+                can_cast: JsParameterList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_PARENTHESIZED_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PARENTHESIZED_ASSIGNMENT,
+    name: "JsParenthesizedAssignment",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "assignment",
+            updater: "withAssignment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_PARENTHESIZED_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION,
+    name: "JsParenthesizedExpression",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static JS_POST_UPDATE_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_POST_UPDATE_EXPRESSION,
+    name: "JsPostUpdateExpression",
+    fields: &[
+        JsAstField {
+            property: "operand",
+            updater: "withOperand",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![++], T![--]],
+                expected: "\"++\", \"--\"",
+            },
+        },
+    ],
+};
+static JS_PRE_UPDATE_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION,
+    name: "JsPreUpdateExpression",
+    fields: &[
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![++], T![--]],
+                expected: "\"++\", \"--\"",
+            },
+        },
+        JsAstField {
+            property: "operand",
+            updater: "withOperand",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+    ],
+};
+static JS_PRIVATE_CLASS_MEMBER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PRIVATE_CLASS_MEMBER_NAME,
+    name: "JsPrivateClassMemberName",
+    fields: &[
+        JsAstField {
+            property: "hashToken",
+            updater: "withHashToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![#]],
+                expected: "\"#\"",
+            },
+        },
+        JsAstField {
+            property: "idToken",
+            updater: "withIdToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[IDENT],
+                expected: "\"ident\"",
+            },
+        },
+    ],
+};
+static JS_PRIVATE_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PRIVATE_NAME,
+    name: "JsPrivateName",
+    fields: &[
+        JsAstField {
+            property: "hashToken",
+            updater: "withHashToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![#]],
+                expected: "\"#\"",
+            },
+        },
+        JsAstField {
+            property: "valueToken",
+            updater: "withValueToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[IDENT],
+                expected: "\"ident\"",
+            },
+        },
+    ],
+};
+static JS_PROPERTY_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER,
+    name: "JsPropertyClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsPropertyModifierList",
+                can_cast: JsPropertyModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "propertyAnnotation",
+            updater: "withPropertyAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsPropertyAnnotation",
+                can_cast: AnyTsPropertyAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "value",
+            updater: "withValue",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_PROPERTY_OBJECT_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER,
+    name: "JsPropertyObjectMember",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "value",
+            updater: "withValue",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_REFERENCE_IDENTIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_REFERENCE_IDENTIFIER,
+    name: "JsReferenceIdentifier",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static JS_REGEX_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_REGEX_LITERAL_EXPRESSION,
+    name: "JsRegexLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_REGEX_LITERAL],
+            expected: "\"js_regex_literal\"",
+        },
+    }],
+};
+static JS_REST_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_REST_PARAMETER,
+    name: "JsRestParameter",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static JS_RETURN_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_RETURN_STATEMENT,
+    name: "JsReturnStatement",
+    fields: &[
+        JsAstField {
+            property: "returnToken",
+            updater: "withReturnToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![return]],
+                expected: "\"return\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_SCRIPT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SCRIPT,
+    name: "JsScript",
+    fields: &[
+        JsAstField {
+            property: "bomToken",
+            updater: "withBomToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![UNICODE_BOM]],
+                expected: "\"UNICODE_BOM\"",
+            },
+        },
+        JsAstField {
+            property: "interpreterToken",
+            updater: "withInterpreterToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_SHEBANG],
+                expected: "\"js_shebang\"",
+            },
+        },
+        JsAstField {
+            property: "directives",
+            updater: "withDirectives",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDirectiveList",
+                can_cast: JsDirectiveList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "statements",
+            updater: "withStatements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SEQUENCE_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SEQUENCE_EXPRESSION,
+    name: "JsSequenceExpression",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_SETTER_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SETTER_CLASS_MEMBER,
+    name: "JsSetterClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsMethodModifierList",
+                can_cast: JsMethodModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "setToken",
+            updater: "withSetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![set]],
+                expected: "\"set\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFormalParameter",
+                can_cast: AnyJsFormalParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_SETTER_OBJECT_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
+    name: "JsSetterObjectMember",
+    fields: &[
+        JsAstField {
+            property: "setToken",
+            updater: "withSetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![set]],
+                expected: "\"set\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFormalParameter",
+                can_cast: AnyJsFormalParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFunctionBody",
+                can_cast: JsFunctionBody::can_cast,
+            },
+        },
+    ],
+};
+static JS_SHORTHAND_NAMED_IMPORT_SPECIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SHORTHAND_NAMED_IMPORT_SPECIFIER,
+    name: "JsShorthandNamedImportSpecifier",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "localName",
+            updater: "withLocalName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+    ],
+};
+static JS_SHORTHAND_PROPERTY_OBJECT_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SHORTHAND_PROPERTY_OBJECT_MEMBER,
+    name: "JsShorthandPropertyObjectMember",
+    fields: &[JsAstField {
+        property: "name",
+        updater: "withName",
+        optional: false,
+        value: JsAstFieldValue::Node {
+            ty: "JsReferenceIdentifier",
+            can_cast: JsReferenceIdentifier::can_cast,
+        },
+    }],
+};
+static JS_SPREAD_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SPREAD,
+    name: "JsSpread",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER,
+    name: "JsStaticInitializationBlockClassMember",
+    fields: &[
+        JsAstField {
+            property: "staticToken",
+            updater: "withStaticToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![static]],
+                expected: "\"static\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "statements",
+            updater: "withStatements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsStatementList",
+                can_cast: JsStatementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_STATIC_MEMBER_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT,
+    name: "JsStaticMemberAssignment",
+    fields: &[
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsName",
+                can_cast: AnyJsName::can_cast,
+            },
+        },
+    ],
+};
+static JS_STATIC_MEMBER_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION,
+    name: "JsStaticMemberExpression",
+    fields: &[
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.], T![?.]],
+                expected: "\".\", \"?.\"",
+            },
+        },
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsName",
+                can_cast: AnyJsName::can_cast,
+            },
+        },
+    ],
+};
+static JS_STATIC_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_STATIC_MODIFIER,
+    name: "JsStaticModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![static]],
+            expected: "\"static\"",
+        },
+    }],
+};
+static JS_STRING_LITERAL_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_STRING_LITERAL_EXPRESSION,
+    name: "JsStringLiteralExpression",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_STRING_LITERAL],
+            expected: "\"js_string_literal\"",
+        },
+    }],
+};
+static JS_SUPER_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SUPER_EXPRESSION,
+    name: "JsSuperExpression",
+    fields: &[JsAstField {
+        property: "superToken",
+        updater: "withSuperToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![super]],
+            expected: "\"super\"",
+        },
+    }],
+};
+static JS_SVELTE_DECLARATION_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT,
+    name: "JsSvelteDeclarationRoot",
+    fields: &[
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsSvelteDeclaration",
+                can_cast: AnyJsSvelteDeclaration::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SVELTE_SNIPPET_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT,
+    name: "JsSvelteSnippetRoot",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static JS_SWITCH_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_SWITCH_STATEMENT,
+    name: "JsSwitchStatement",
+    fields: &[
+        JsAstField {
+            property: "switchToken",
+            updater: "withSwitchToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![switch]],
+                expected: "\"switch\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "discriminant",
+            updater: "withDiscriminant",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "cases",
+            updater: "withCases",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsSwitchCaseList",
+                can_cast: JsSwitchCaseList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_TEMPLATE_CHUNK_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_TEMPLATE_CHUNK_ELEMENT,
+    name: "JsTemplateChunkElement",
+    fields: &[JsAstField {
+        property: "templateChunkToken",
+        updater: "withTemplateChunkToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[TEMPLATE_CHUNK],
+            expected: "\"template_chunk\"",
+        },
+    }],
+};
+static JS_TEMPLATE_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_TEMPLATE_ELEMENT,
+    name: "JsTemplateElement",
+    fields: &[
+        JsAstField {
+            property: "dollarCurlyToken",
+            updater: "withDollarCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[DOLLAR_CURLY],
+                expected: "\"dollar_curly\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JS_TEMPLATE_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_TEMPLATE_EXPRESSION,
+    name: "JsTemplateExpression",
+    fields: &[
+        JsAstField {
+            property: "tag",
+            updater: "withTag",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lTickToken",
+            updater: "withLTickToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['`']],
+                expected: "\"'`'\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsTemplateElementList",
+                can_cast: JsTemplateElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rTickToken",
+            updater: "withRTickToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['`']],
+                expected: "\"'`'\"",
+            },
+        },
+    ],
+};
+static JS_THIS_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_THIS_EXPRESSION,
+    name: "JsThisExpression",
+    fields: &[JsAstField {
+        property: "thisToken",
+        updater: "withThisToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![this]],
+            expected: "\"this\"",
+        },
+    }],
+};
+static JS_THROW_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_THROW_STATEMENT,
+    name: "JsThrowStatement",
+    fields: &[
+        JsAstField {
+            property: "throwToken",
+            updater: "withThrowToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![throw]],
+                expected: "\"throw\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_TRY_FINALLY_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_TRY_FINALLY_STATEMENT,
+    name: "JsTryFinallyStatement",
+    fields: &[
+        JsAstField {
+            property: "tryToken",
+            updater: "withTryToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![try]],
+                expected: "\"try\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsBlockStatement",
+                can_cast: JsBlockStatement::can_cast,
+            },
+        },
+        JsAstField {
+            property: "catchClause",
+            updater: "withCatchClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsCatchClause",
+                can_cast: JsCatchClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "finallyClause",
+            updater: "withFinallyClause",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsFinallyClause",
+                can_cast: JsFinallyClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_TRY_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_TRY_STATEMENT,
+    name: "JsTryStatement",
+    fields: &[
+        JsAstField {
+            property: "tryToken",
+            updater: "withTryToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![try]],
+                expected: "\"try\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsBlockStatement",
+                can_cast: JsBlockStatement::can_cast,
+            },
+        },
+        JsAstField {
+            property: "catchClause",
+            updater: "withCatchClause",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsCatchClause",
+                can_cast: JsCatchClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_UNARY_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_UNARY_EXPRESSION,
+    name: "JsUnaryExpression",
+    fields: &[
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![delete], T![void], T![typeof], T![+], T![-], T![~], T![!]],
+                expected: "\"delete\", \"void\", \"typeof\", \"+\", \"-\", \"~\", \"!\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_VARIABLE_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VARIABLE_DECLARATION,
+    name: "JsVariableDeclaration",
+    fields: &[
+        JsAstField {
+            property: "awaitToken",
+            updater: "withAwaitToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![await]],
+                expected: "\"await\"",
+            },
+        },
+        JsAstField {
+            property: "kindToken",
+            updater: "withKindToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![var], T![const], T![let], T![using]],
+                expected: "\"var\", \"const\", \"let\", \"using\"",
+            },
+        },
+        JsAstField {
+            property: "declarators",
+            updater: "withDeclarators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsVariableDeclaratorList",
+                can_cast: JsVariableDeclaratorList::can_cast,
+            },
+        },
+    ],
+};
+static JS_VARIABLE_DECLARATION_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE,
+    name: "JsVariableDeclarationClause",
+    fields: &[
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsVariableDeclaration",
+                can_cast: JsVariableDeclaration::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_VARIABLE_DECLARATOR_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VARIABLE_DECLARATOR,
+    name: "JsVariableDeclarator",
+    fields: &[
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBindingPattern",
+                can_cast: AnyJsBindingPattern::can_cast,
+            },
+        },
+        JsAstField {
+            property: "variableAnnotation",
+            updater: "withVariableAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsVariableAnnotation",
+                can_cast: AnyTsVariableAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JS_VARIABLE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VARIABLE_STATEMENT,
+    name: "JsVariableStatement",
+    fields: &[
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsVariableDeclaration",
+                can_cast: JsVariableDeclaration::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_WHILE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_WHILE_STATEMENT,
+    name: "JsWhileStatement",
+    fields: &[
+        JsAstField {
+            property: "whileToken",
+            updater: "withWhileToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![while]],
+                expected: "\"while\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "test",
+            updater: "withTest",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_WITH_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_WITH_STATEMENT,
+    name: "JsWithStatement",
+    fields: &[
+        JsAstField {
+            property: "withToken",
+            updater: "withWithToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![with]],
+                expected: "\"with\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsStatement",
+                can_cast: AnyJsStatement::can_cast,
+            },
+        },
+    ],
+};
+static JS_YIELD_ARGUMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_YIELD_ARGUMENT,
+    name: "JsYieldArgument",
+    fields: &[
+        JsAstField {
+            property: "starToken",
+            updater: "withStarToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![*]],
+                expected: "\"*\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static JS_YIELD_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_YIELD_EXPRESSION,
+    name: "JsYieldExpression",
+    fields: &[
+        JsAstField {
+            property: "yieldToken",
+            updater: "withYieldToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![yield]],
+                expected: "\"yield\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsYieldArgument",
+                can_cast: JsYieldArgument::can_cast,
+            },
+        },
+    ],
+};
+static JSX_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_ATTRIBUTE,
+    name: "JsxAttribute",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxAttributeName",
+                can_cast: AnyJsxAttributeName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsxAttributeInitializerClause",
+                can_cast: JsxAttributeInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static JSX_ATTRIBUTE_INITIALIZER_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_ATTRIBUTE_INITIALIZER_CLAUSE,
+    name: "JsxAttributeInitializerClause",
+    fields: &[
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "value",
+            updater: "withValue",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxAttributeValue",
+                can_cast: AnyJsxAttributeValue::can_cast,
+            },
+        },
+    ],
+};
+static JSX_CLOSING_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_CLOSING_ELEMENT,
+    name: "JsxClosingElement",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "slashToken",
+            updater: "withSlashToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![/]],
+                expected: "\"/\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxElementName",
+                can_cast: AnyJsxElementName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static JSX_CLOSING_FRAGMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_CLOSING_FRAGMENT,
+    name: "JsxClosingFragment",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "slashToken",
+            updater: "withSlashToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![/]],
+                expected: "\"/\"",
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static JSX_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_ELEMENT,
+    name: "JsxElement",
+    fields: &[
+        JsAstField {
+            property: "openingElement",
+            updater: "withOpeningElement",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxOpeningElement",
+                can_cast: JsxOpeningElement::can_cast,
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsxChildList",
+                can_cast: JsxChildList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "closingElement",
+            updater: "withClosingElement",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxClosingElement",
+                can_cast: JsxClosingElement::can_cast,
+            },
+        },
+    ],
+};
+static JSX_EXPRESSION_ATTRIBUTE_VALUE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_EXPRESSION_ATTRIBUTE_VALUE,
+    name: "JsxExpressionAttributeValue",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_EXPRESSION_CHILD_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_EXPRESSION_CHILD,
+    name: "JsxExpressionChild",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_FRAGMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_FRAGMENT,
+    name: "JsxFragment",
+    fields: &[
+        JsAstField {
+            property: "openingFragment",
+            updater: "withOpeningFragment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxOpeningFragment",
+                can_cast: JsxOpeningFragment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsxChildList",
+                can_cast: JsxChildList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "closingFragment",
+            updater: "withClosingFragment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxClosingFragment",
+                can_cast: JsxClosingFragment::can_cast,
+            },
+        },
+    ],
+};
+static JSX_MEMBER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_MEMBER_NAME,
+    name: "JsxMemberName",
+    fields: &[
+        JsAstField {
+            property: "object",
+            updater: "withObject",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxObjectName",
+                can_cast: AnyJsxObjectName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "member",
+            updater: "withMember",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsName",
+                can_cast: JsName::can_cast,
+            },
+        },
+    ],
+};
+static JSX_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_NAME,
+    name: "JsxName",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JSX_IDENT],
+            expected: "\"jsx_ident\"",
+        },
+    }],
+};
+static JSX_NAMESPACE_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_NAMESPACE_NAME,
+    name: "JsxNamespaceName",
+    fields: &[
+        JsAstField {
+            property: "namespace",
+            updater: "withNamespace",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxName",
+                can_cast: JsxName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsxName",
+                can_cast: JsxName::can_cast,
+            },
+        },
+    ],
+};
+static JSX_OPENING_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_OPENING_ELEMENT,
+    name: "JsxOpeningElement",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxElementName",
+                can_cast: AnyJsxElementName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "attributes",
+            updater: "withAttributes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsxAttributeList",
+                can_cast: JsxAttributeList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static JSX_OPENING_FRAGMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_OPENING_FRAGMENT,
+    name: "JsxOpeningFragment",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static JSX_REFERENCE_IDENTIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_REFERENCE_IDENTIFIER,
+    name: "JsxReferenceIdentifier",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JSX_IDENT],
+            expected: "\"jsx_ident\"",
+        },
+    }],
+};
+static JSX_SELF_CLOSING_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT,
+    name: "JsxSelfClosingElement",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsxElementName",
+                can_cast: AnyJsxElementName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "attributes",
+            updater: "withAttributes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsxAttributeList",
+                can_cast: JsxAttributeList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "slashToken",
+            updater: "withSlashToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![/]],
+                expected: "\"/\"",
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static JSX_SHORTHAND_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
+    name: "JsxShorthandAttribute",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsReferenceIdentifier",
+                can_cast: JsReferenceIdentifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_SPREAD_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SPREAD_ATTRIBUTE,
+    name: "JsxSpreadAttribute",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_SPREAD_CHILD_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_SPREAD_CHILD,
+    name: "JsxSpreadChild",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static JSX_STRING_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_STRING,
+    name: "JsxString",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JSX_STRING_LITERAL],
+            expected: "\"jsx_string_literal\"",
+        },
+    }],
+};
+static JSX_TAG_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_TAG_EXPRESSION,
+    name: "JsxTagExpression",
+    fields: &[JsAstField {
+        property: "tag",
+        updater: "withTag",
+        optional: false,
+        value: JsAstFieldValue::Node {
+            ty: "AnyJsxTag",
+            can_cast: AnyJsxTag::can_cast,
+        },
+    }],
+};
+static JSX_TEXT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JSX_TEXT,
+    name: "JsxText",
+    fields: &[JsAstField {
+        property: "valueToken",
+        updater: "withValueToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JSX_TEXT_LITERAL],
+            expected: "\"jsx_text_literal\"",
+        },
+    }],
+};
+static TS_ABSTRACT_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ABSTRACT_MODIFIER,
+    name: "TsAbstractModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![abstract]],
+            expected: "\"abstract\"",
+        },
+    }],
+};
+static TS_ACCESSIBILITY_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ACCESSIBILITY_MODIFIER,
+    name: "TsAccessibilityModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![private], T![protected], T![public]],
+            expected: "\"private\", \"protected\", \"public\"",
+        },
+    }],
+};
+static TS_ANY_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ANY_TYPE,
+    name: "TsAnyType",
+    fields: &[JsAstField {
+        property: "anyToken",
+        updater: "withAnyToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![any]],
+            expected: "\"any\"",
+        },
+    }],
+};
+static TS_ARRAY_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ARRAY_TYPE,
+    name: "TsArrayType",
+    fields: &[
+        JsAstField {
+            property: "elementType",
+            updater: "withElementType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static TS_AS_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_AS_ASSIGNMENT,
+    name: "TsAsAssignment",
+    fields: &[
+        JsAstField {
+            property: "assignment",
+            updater: "withAssignment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_AS_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_AS_EXPRESSION,
+    name: "TsAsExpression",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_ASSERTS_CONDITION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ASSERTS_CONDITION,
+    name: "TsAssertsCondition",
+    fields: &[
+        JsAstField {
+            property: "isToken",
+            updater: "withIsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![is]],
+                expected: "\"is\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_ASSERTS_RETURN_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ASSERTS_RETURN_TYPE,
+    name: "TsAssertsReturnType",
+    fields: &[
+        JsAstField {
+            property: "assertsToken",
+            updater: "withAssertsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![asserts]],
+                expected: "\"asserts\"",
+            },
+        },
+        JsAstField {
+            property: "parameterName",
+            updater: "withParameterName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsTypePredicateParameterName",
+                can_cast: AnyTsTypePredicateParameterName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "predicate",
+            updater: "withPredicate",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsAssertsCondition",
+                can_cast: TsAssertsCondition::can_cast,
+            },
+        },
+    ],
+};
+static TS_BIGINT_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_BIGINT_LITERAL_TYPE,
+    name: "TsBigintLiteralType",
+    fields: &[
+        JsAstField {
+            property: "minusToken",
+            updater: "withMinusToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![-]],
+                expected: "\"-\"",
+            },
+        },
+        JsAstField {
+            property: "literalToken",
+            updater: "withLiteralToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_BIGINT_LITERAL],
+                expected: "\"js_bigint_literal\"",
+            },
+        },
+    ],
+};
+static TS_BIGINT_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_BIGINT_TYPE,
+    name: "TsBigintType",
+    fields: &[JsAstField {
+        property: "bigintToken",
+        updater: "withBigintToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![bigint]],
+            expected: "\"bigint\"",
+        },
+    }],
+};
+static TS_BOOLEAN_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_BOOLEAN_LITERAL_TYPE,
+    name: "TsBooleanLiteralType",
+    fields: &[JsAstField {
+        property: "literal",
+        updater: "withLiteral",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![true], T![false]],
+            expected: "\"true\", \"false\"",
+        },
+    }],
+};
+static TS_BOOLEAN_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_BOOLEAN_TYPE,
+    name: "TsBooleanType",
+    fields: &[JsAstField {
+        property: "booleanToken",
+        updater: "withBooleanToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![boolean]],
+            expected: "\"boolean\"",
+        },
+    }],
+};
+static TS_CALL_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CALL_SIGNATURE_TYPE_MEMBER,
+    name: "TsCallSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_CONDITIONAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CONDITIONAL_TYPE,
+    name: "TsConditionalType",
+    fields: &[
+        JsAstField {
+            property: "checkType",
+            updater: "withCheckType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "extendsToken",
+            updater: "withExtendsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![extends]],
+                expected: "\"extends\"",
+            },
+        },
+        JsAstField {
+            property: "extendsType",
+            updater: "withExtendsType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "trueType",
+            updater: "withTrueType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "falseType",
+            updater: "withFalseType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_CONST_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CONST_MODIFIER,
+    name: "TsConstModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![const]],
+            expected: "\"const\"",
+        },
+    }],
+};
+static TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER,
+    name: "TsConstructSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "newToken",
+            updater: "withNewToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![new]],
+                expected: "\"new\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER,
+    name: "TsConstructorSignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsConstructorModifierList",
+                can_cast: JsConstructorModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsLiteralMemberName",
+                can_cast: JsLiteralMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsConstructorParameters",
+                can_cast: JsConstructorParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_CONSTRUCTOR_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_CONSTRUCTOR_TYPE,
+    name: "TsConstructorType",
+    fields: &[
+        JsAstField {
+            property: "abstractToken",
+            updater: "withAbstractToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![abstract]],
+                expected: "\"abstract\"",
+            },
+        },
+        JsAstField {
+            property: "newToken",
+            updater: "withNewToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![new]],
+                expected: "\"new\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fatArrowToken",
+            updater: "withFatArrowToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=>]],
+                expected: "\"=>\"",
+            },
+        },
+        JsAstField {
+            property: "returnType",
+            updater: "withReturnType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_DECLARATION_MODULE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DECLARATION_MODULE,
+    name: "TsDeclarationModule",
+    fields: &[
+        JsAstField {
+            property: "bomToken",
+            updater: "withBomToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![UNICODE_BOM]],
+                expected: "\"UNICODE_BOM\"",
+            },
+        },
+        JsAstField {
+            property: "interpreterToken",
+            updater: "withInterpreterToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_SHEBANG],
+                expected: "\"js_shebang\"",
+            },
+        },
+        JsAstField {
+            property: "directives",
+            updater: "withDirectives",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDirectiveList",
+                can_cast: JsDirectiveList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsModuleItemList",
+                can_cast: JsModuleItemList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
+            },
+        },
+    ],
+};
+static TS_DECLARE_FUNCTION_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION,
+    name: "TsDeclareFunctionDeclaration",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "functionToken",
+            updater: "withFunctionToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![function]],
+                expected: "\"function\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+    name: "TsDeclareFunctionExportDefaultDeclaration",
+    fields: &[
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "functionToken",
+            updater: "withFunctionToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![function]],
+                expected: "\"function\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_DECLARE_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DECLARE_MODIFIER,
+    name: "TsDeclareModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![declare]],
+            expected: "\"declare\"",
+        },
+    }],
+};
+static TS_DECLARE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DECLARE_STATEMENT,
+    name: "TsDeclareStatement",
+    fields: &[
+        JsAstField {
+            property: "declareToken",
+            updater: "withDeclareToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![declare]],
+                expected: "\"declare\"",
+            },
+        },
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsDeclarationClause",
+                can_cast: AnyJsDeclarationClause::can_cast,
+            },
+        },
+    ],
+};
+static TS_DEFAULT_TYPE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DEFAULT_TYPE_CLAUSE,
+    name: "TsDefaultTypeClause",
+    fields: &[
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_DEFINITE_PROPERTY_ANNOTATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DEFINITE_PROPERTY_ANNOTATION,
+    name: "TsDefinitePropertyAnnotation",
+    fields: &[
+        JsAstField {
+            property: "exclToken",
+            updater: "withExclToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![!]],
+                expected: "\"!\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static TS_DEFINITE_VARIABLE_ANNOTATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_DEFINITE_VARIABLE_ANNOTATION,
+    name: "TsDefiniteVariableAnnotation",
+    fields: &[
+        JsAstField {
+            property: "exclToken",
+            updater: "withExclToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![!]],
+                expected: "\"!\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY,
+    name: "TsEmptyExternalModuleDeclarationBody",
+    fields: &[JsAstField {
+        property: "semicolonToken",
+        updater: "withSemicolonToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![;]],
+            expected: "\";\"",
+        },
+    }],
+};
+static TS_ENUM_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ENUM_DECLARATION,
+    name: "TsEnumDeclaration",
+    fields: &[
+        JsAstField {
+            property: "constToken",
+            updater: "withConstToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![const]],
+                expected: "\"const\"",
+            },
+        },
+        JsAstField {
+            property: "enumToken",
+            updater: "withEnumToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![enum]],
+                expected: "\"enum\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsEnumMemberList",
+                can_cast: TsEnumMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_ENUM_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_ENUM_MEMBER,
+    name: "TsEnumMember",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsEnumMemberName",
+                can_cast: AnyTsEnumMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "initializer",
+            updater: "withInitializer",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+    ],
+};
+static TS_EXPORT_AS_NAMESPACE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXPORT_AS_NAMESPACE_CLAUSE,
+    name: "TsExportAsNamespaceClause",
+    fields: &[
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "namespaceToken",
+            updater: "withNamespaceToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![namespace]],
+                expected: "\"namespace\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsName",
+                can_cast: JsName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_EXPORT_ASSIGNMENT_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXPORT_ASSIGNMENT_CLAUSE,
+    name: "TsExportAssignmentClause",
+    fields: &[
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_EXPORT_DECLARE_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXPORT_DECLARE_CLAUSE,
+    name: "TsExportDeclareClause",
+    fields: &[
+        JsAstField {
+            property: "declareToken",
+            updater: "withDeclareToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![declare]],
+                expected: "\"declare\"",
+            },
+        },
+        JsAstField {
+            property: "declaration",
+            updater: "withDeclaration",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsDeclarationClause",
+                can_cast: AnyJsDeclarationClause::can_cast,
+            },
+        },
+    ],
+};
+static TS_EXTENDS_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXTENDS_CLAUSE,
+    name: "TsExtendsClause",
+    fields: &[
+        JsAstField {
+            property: "extendsToken",
+            updater: "withExtendsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![extends]],
+                expected: "\"extends\"",
+            },
+        },
+        JsAstField {
+            property: "types",
+            updater: "withTypes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeList",
+                can_cast: TsTypeList::can_cast,
+            },
+        },
+    ],
+};
+static TS_EXTERNAL_MODULE_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION,
+    name: "TsExternalModuleDeclaration",
+    fields: &[
+        JsAstField {
+            property: "moduleToken",
+            updater: "withModuleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![module]],
+                expected: "\"module\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsExternalModuleDeclarationBody",
+                can_cast: AnyTsExternalModuleDeclarationBody::can_cast,
+            },
+        },
+    ],
+};
+static TS_EXTERNAL_MODULE_REFERENCE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_EXTERNAL_MODULE_REFERENCE,
+    name: "TsExternalModuleReference",
+    fields: &[
+        JsAstField {
+            property: "requireToken",
+            updater: "withRequireToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![require]],
+                expected: "\"require\"",
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "source",
+            updater: "withSource",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsModuleSource",
+                can_cast: AnyJsModuleSource::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static TS_FUNCTION_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_FUNCTION_TYPE,
+    name: "TsFunctionType",
+    fields: &[
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "fatArrowToken",
+            updater: "withFatArrowToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=>]],
+                expected: "\"=>\"",
+            },
+        },
+        JsAstField {
+            property: "returnType",
+            updater: "withReturnType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsReturnType",
+                can_cast: AnyTsReturnType::can_cast,
+            },
+        },
+    ],
+};
+static TS_GETTER_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_GETTER_SIGNATURE_CLASS_MEMBER,
+    name: "TsGetterSignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsMethodSignatureModifierList",
+                can_cast: TsMethodSignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "getToken",
+            updater: "withGetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![get]],
+                expected: "\"get\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "returnType",
+            updater: "withReturnType",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_GETTER_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_GETTER_SIGNATURE_TYPE_MEMBER,
+    name: "TsGetterSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "getToken",
+            updater: "withGetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![get]],
+                expected: "\"get\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_GLOBAL_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_GLOBAL_DECLARATION,
+    name: "TsGlobalDeclaration",
+    fields: &[
+        JsAstField {
+            property: "globalToken",
+            updater: "withGlobalToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![global]],
+                expected: "\"global\"",
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsModuleBlock",
+                can_cast: TsModuleBlock::can_cast,
+            },
+        },
+    ],
+};
+static TS_IDENTIFIER_BINDING_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IDENTIFIER_BINDING,
+    name: "TsIdentifierBinding",
+    fields: &[JsAstField {
+        property: "nameToken",
+        updater: "withNameToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static TS_IMPLEMENTS_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPLEMENTS_CLAUSE,
+    name: "TsImplementsClause",
+    fields: &[
+        JsAstField {
+            property: "implementsToken",
+            updater: "withImplementsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![implements]],
+                expected: "\"implements\"",
+            },
+        },
+        JsAstField {
+            property: "types",
+            updater: "withTypes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeList",
+                can_cast: TsTypeList::can_cast,
+            },
+        },
+    ],
+};
+static TS_IMPORT_EQUALS_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_EQUALS_DECLARATION,
+    name: "TsImportEqualsDeclaration",
+    fields: &[
+        JsAstField {
+            property: "importToken",
+            updater: "withImportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![import]],
+                expected: "\"import\"",
+            },
+        },
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsBinding",
+                can_cast: AnyJsBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "moduleReference",
+            updater: "withModuleReference",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsModuleReference",
+                can_cast: AnyTsModuleReference::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_IMPORT_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_TYPE,
+    name: "TsImportType",
+    fields: &[
+        JsAstField {
+            property: "typeofToken",
+            updater: "withTypeofToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![typeof]],
+                expected: "\"typeof\"",
+            },
+        },
+        JsAstField {
+            property: "importToken",
+            updater: "withImportToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![import]],
+                expected: "\"import\"",
+            },
+        },
+        JsAstField {
+            property: "arguments",
+            updater: "withArguments",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsImportTypeArguments",
+                can_cast: TsImportTypeArguments::can_cast,
+            },
+        },
+        JsAstField {
+            property: "qualifierClause",
+            updater: "withQualifierClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsImportTypeQualifier",
+                can_cast: TsImportTypeQualifier::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+    ],
+};
+static TS_IMPORT_TYPE_ARGUMENTS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS,
+    name: "TsImportTypeArguments",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "argument",
+            updater: "withArgument",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "tsImportTypeAssertionBlock",
+            updater: "withTsImportTypeAssertionBlock",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsImportTypeAssertionBlock",
+                can_cast: TsImportTypeAssertionBlock::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static TS_IMPORT_TYPE_ASSERTION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
+    name: "TsImportTypeAssertion",
+    fields: &[
+        JsAstField {
+            property: "withToken",
+            updater: "withWithToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![with]],
+                expected: "\"with\"",
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "assertions",
+            updater: "withAssertions",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsImportAssertionEntryList",
+                can_cast: JsImportAssertionEntryList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_IMPORT_TYPE_ASSERTION_BLOCK_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK,
+    name: "TsImportTypeAssertionBlock",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "typeAssertion",
+            updater: "withTypeAssertion",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsImportTypeAssertion",
+                can_cast: TsImportTypeAssertion::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_IMPORT_TYPE_QUALIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IMPORT_TYPE_QUALIFIER,
+    name: "TsImportTypeQualifier",
+    fields: &[
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsName",
+                can_cast: AnyTsName::can_cast,
+            },
+        },
+    ],
+};
+static TS_IN_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_IN_MODIFIER,
+    name: "TsInModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![in]],
+            expected: "\"in\"",
+        },
+    }],
+};
+static TS_INDEX_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INDEX_SIGNATURE_CLASS_MEMBER,
+    name: "TsIndexSignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsIndexSignatureModifierList",
+                can_cast: TsIndexSignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsIndexSignatureParameter",
+                can_cast: TsIndexSignatureParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_INDEX_SIGNATURE_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INDEX_SIGNATURE_PARAMETER,
+    name: "TsIndexSignatureParameter",
+    fields: &[
+        JsAstField {
+            property: "binding",
+            updater: "withBinding",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsIdentifierBinding",
+                can_cast: JsIdentifierBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static TS_INDEX_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INDEX_SIGNATURE_TYPE_MEMBER,
+    name: "TsIndexSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "readonlyToken",
+            updater: "withReadonlyToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![readonly]],
+                expected: "\"readonly\"",
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsIndexSignatureParameter",
+                can_cast: TsIndexSignatureParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_INDEXED_ACCESS_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INDEXED_ACCESS_TYPE,
+    name: "TsIndexedAccessType",
+    fields: &[
+        JsAstField {
+            property: "objectType",
+            updater: "withObjectType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "indexType",
+            updater: "withIndexType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static TS_INFER_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INFER_TYPE,
+    name: "TsInferType",
+    fields: &[
+        JsAstField {
+            property: "inferToken",
+            updater: "withInferToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![infer]],
+                expected: "\"infer\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameterName",
+                can_cast: TsTypeParameterName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "constraint",
+            updater: "withConstraint",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeConstraintClause",
+                can_cast: TsTypeConstraintClause::can_cast,
+            },
+        },
+    ],
+};
+static TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER,
+    name: "TsInitializedPropertySignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsPropertySignatureModifierList",
+                can_cast: TsPropertySignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "value",
+            updater: "withValue",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsInitializerClause",
+                can_cast: JsInitializerClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_INSTANTIATION_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INSTANTIATION_EXPRESSION,
+    name: "TsInstantiationExpression",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "arguments",
+            updater: "withArguments",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+    ],
+};
+static TS_INTERFACE_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INTERFACE_DECLARATION,
+    name: "TsInterfaceDeclaration",
+    fields: &[
+        JsAstField {
+            property: "interfaceToken",
+            updater: "withInterfaceToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![interface]],
+                expected: "\"interface\"",
+            },
+        },
+        JsAstField {
+            property: "id",
+            updater: "withId",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsIdentifierBinding",
+                can_cast: AnyTsIdentifierBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "extendsClause",
+            updater: "withExtendsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsExtendsClause",
+                can_cast: TsExtendsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeMemberList",
+                can_cast: TsTypeMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_INTERSECTION_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_INTERSECTION_TYPE,
+    name: "TsIntersectionType",
+    fields: &[
+        JsAstField {
+            property: "leadingSeparatorToken",
+            updater: "withLeadingSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![&]],
+                expected: "\"&\"",
+            },
+        },
+        JsAstField {
+            property: "types",
+            updater: "withTypes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsIntersectionTypeElementList",
+                can_cast: TsIntersectionTypeElementList::can_cast,
+            },
+        },
+    ],
+};
+static TS_LITERAL_ENUM_MEMBER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_LITERAL_ENUM_MEMBER_NAME,
+    name: "TsLiteralEnumMemberName",
+    fields: &[JsAstField {
+        property: "value",
+        updater: "withValue",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT, JS_STRING_LITERAL],
+            expected: "\"ident\", \"js_string_literal\"",
+        },
+    }],
+};
+static TS_MAPPED_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MAPPED_TYPE,
+    name: "TsMappedType",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "readonlyModifier",
+            updater: "withReadonlyModifier",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsMappedTypeReadonlyModifierClause",
+                can_cast: TsMappedTypeReadonlyModifierClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "propertyName",
+            updater: "withPropertyName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameterName",
+                can_cast: TsTypeParameterName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "inToken",
+            updater: "withInToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![in]],
+                expected: "\"in\"",
+            },
+        },
+        JsAstField {
+            property: "keysType",
+            updater: "withKeysType",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asClause",
+            updater: "withAsClause",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsMappedTypeAsClause",
+                can_cast: TsMappedTypeAsClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+        JsAstField {
+            property: "optionalModifier",
+            updater: "withOptionalModifier",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsMappedTypeOptionalModifierClause",
+                can_cast: TsMappedTypeOptionalModifierClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "mappedType",
+            updater: "withMappedType",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_MAPPED_TYPE_AS_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MAPPED_TYPE_AS_CLAUSE,
+    name: "TsMappedTypeAsClause",
+    fields: &[
+        JsAstField {
+            property: "asToken",
+            updater: "withAsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![as]],
+                expected: "\"as\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE,
+    name: "TsMappedTypeOptionalModifierClause",
+    fields: &[
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![+], T![-]],
+                expected: "\"+\", \"-\"",
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+    ],
+};
+static TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE,
+    name: "TsMappedTypeReadonlyModifierClause",
+    fields: &[
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![+], T![-]],
+                expected: "\"+\", \"-\"",
+            },
+        },
+        JsAstField {
+            property: "readonlyToken",
+            updater: "withReadonlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![readonly]],
+                expected: "\"readonly\"",
+            },
+        },
+    ],
+};
+static TS_METHOD_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_METHOD_SIGNATURE_CLASS_MEMBER,
+    name: "TsMethodSignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsMethodSignatureModifierList",
+                can_cast: TsMethodSignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "asyncToken",
+            updater: "withAsyncToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![async]],
+                expected: "\"async\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_METHOD_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_METHOD_SIGNATURE_TYPE_MEMBER,
+    name: "TsMethodSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "optionalToken",
+            updater: "withOptionalToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsParameters",
+                can_cast: JsParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "returnTypeAnnotation",
+            updater: "withReturnTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsReturnTypeAnnotation",
+                can_cast: TsReturnTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_MODULE_BLOCK_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MODULE_BLOCK,
+    name: "TsModuleBlock",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsModuleItemList",
+                can_cast: JsModuleItemList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_MODULE_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_MODULE_DECLARATION,
+    name: "TsModuleDeclaration",
+    fields: &[
+        JsAstField {
+            property: "moduleOrNamespace",
+            updater: "withModuleOrNamespace",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![module], T![namespace]],
+                expected: "\"module\", \"namespace\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsModuleName",
+                can_cast: AnyTsModuleName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "body",
+            updater: "withBody",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsModuleBlock",
+                can_cast: TsModuleBlock::can_cast,
+            },
+        },
+    ],
+};
+static TS_NAMED_TUPLE_TYPE_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NAMED_TUPLE_TYPE_ELEMENT,
+    name: "TsNamedTupleTypeElement",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsName",
+                can_cast: JsName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_NEVER_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NEVER_TYPE,
+    name: "TsNeverType",
+    fields: &[JsAstField {
+        property: "neverToken",
+        updater: "withNeverToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![never]],
+            expected: "\"never\"",
+        },
+    }],
+};
+static TS_NON_NULL_ASSERTION_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT,
+    name: "TsNonNullAssertionAssignment",
+    fields: &[
+        JsAstField {
+            property: "assignment",
+            updater: "withAssignment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "exclToken",
+            updater: "withExclToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![!]],
+                expected: "\"!\"",
+            },
+        },
+    ],
+};
+static TS_NON_NULL_ASSERTION_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION,
+    name: "TsNonNullAssertionExpression",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "exclToken",
+            updater: "withExclToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![!]],
+                expected: "\"!\"",
+            },
+        },
+    ],
+};
+static TS_NON_PRIMITIVE_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NON_PRIMITIVE_TYPE,
+    name: "TsNonPrimitiveType",
+    fields: &[JsAstField {
+        property: "objectToken",
+        updater: "withObjectToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![object]],
+            expected: "\"object\"",
+        },
+    }],
+};
+static TS_NULL_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NULL_LITERAL_TYPE,
+    name: "TsNullLiteralType",
+    fields: &[JsAstField {
+        property: "literalToken",
+        updater: "withLiteralToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![null]],
+            expected: "\"null\"",
+        },
+    }],
+};
+static TS_NUMBER_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NUMBER_LITERAL_TYPE,
+    name: "TsNumberLiteralType",
+    fields: &[
+        JsAstField {
+            property: "minusToken",
+            updater: "withMinusToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![-]],
+                expected: "\"-\"",
+            },
+        },
+        JsAstField {
+            property: "literalToken",
+            updater: "withLiteralToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[JS_NUMBER_LITERAL],
+                expected: "\"js_number_literal\"",
+            },
+        },
+    ],
+};
+static TS_NUMBER_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_NUMBER_TYPE,
+    name: "TsNumberType",
+    fields: &[JsAstField {
+        property: "numberToken",
+        updater: "withNumberToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![number]],
+            expected: "\"number\"",
+        },
+    }],
+};
+static TS_OBJECT_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_OBJECT_TYPE,
+    name: "TsObjectType",
+    fields: &[
+        JsAstField {
+            property: "lCurlyToken",
+            updater: "withLCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['{']],
+                expected: "\"'{'\"",
+            },
+        },
+        JsAstField {
+            property: "members",
+            updater: "withMembers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeMemberList",
+                can_cast: TsTypeMemberList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_OPTIONAL_PROPERTY_ANNOTATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_OPTIONAL_PROPERTY_ANNOTATION,
+    name: "TsOptionalPropertyAnnotation",
+    fields: &[
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static TS_OPTIONAL_TUPLE_TYPE_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_OPTIONAL_TUPLE_TYPE_ELEMENT,
+    name: "TsOptionalTupleTypeElement",
+    fields: &[
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "questionMarkToken",
+            updater: "withQuestionMarkToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+    ],
+};
+static TS_OUT_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_OUT_MODIFIER,
+    name: "TsOutModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![out]],
+            expected: "\"out\"",
+        },
+    }],
+};
+static TS_OVERRIDE_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_OVERRIDE_MODIFIER,
+    name: "TsOverrideModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![override]],
+            expected: "\"override\"",
+        },
+    }],
+};
+static TS_PARENTHESIZED_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_PARENTHESIZED_TYPE,
+    name: "TsParenthesizedType",
+    fields: &[
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+    ],
+};
+static TS_PREDICATE_RETURN_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_PREDICATE_RETURN_TYPE,
+    name: "TsPredicateReturnType",
+    fields: &[
+        JsAstField {
+            property: "parameterName",
+            updater: "withParameterName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsTypePredicateParameterName",
+                can_cast: AnyTsTypePredicateParameterName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "isToken",
+            updater: "withIsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![is]],
+                expected: "\"is\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_PROPERTY_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_PROPERTY_PARAMETER,
+    name: "TsPropertyParameter",
+    fields: &[
+        JsAstField {
+            property: "decorators",
+            updater: "withDecorators",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsDecoratorList",
+                can_cast: JsDecoratorList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsPropertyParameterModifierList",
+                can_cast: TsPropertyParameterModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "formalParameter",
+            updater: "withFormalParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFormalParameter",
+                can_cast: AnyJsFormalParameter::can_cast,
+            },
+        },
+    ],
+};
+static TS_PROPERTY_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_PROPERTY_SIGNATURE_CLASS_MEMBER,
+    name: "TsPropertySignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsPropertySignatureModifierList",
+                can_cast: TsPropertySignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "propertyAnnotation",
+            updater: "withPropertyAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsPropertySignatureAnnotation",
+                can_cast: AnyTsPropertySignatureAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_PROPERTY_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER,
+    name: "TsPropertySignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "readonlyToken",
+            updater: "withReadonlyToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![readonly]],
+                expected: "\"readonly\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "optionalToken",
+            updater: "withOptionalToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![?]],
+                expected: "\"?\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_QUALIFIED_MODULE_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_QUALIFIED_MODULE_NAME,
+    name: "TsQualifiedModuleName",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsModuleName",
+                can_cast: AnyTsModuleName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsName",
+                can_cast: JsName::can_cast,
+            },
+        },
+    ],
+};
+static TS_QUALIFIED_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_QUALIFIED_NAME,
+    name: "TsQualifiedName",
+    fields: &[
+        JsAstField {
+            property: "left",
+            updater: "withLeft",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsName",
+                can_cast: AnyTsName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "dotToken",
+            updater: "withDotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![.]],
+                expected: "\".\"",
+            },
+        },
+        JsAstField {
+            property: "right",
+            updater: "withRight",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "JsName",
+                can_cast: JsName::can_cast,
+            },
+        },
+    ],
+};
+static TS_READONLY_MODIFIER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_READONLY_MODIFIER,
+    name: "TsReadonlyModifier",
+    fields: &[JsAstField {
+        property: "modifierToken",
+        updater: "withModifierToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![readonly]],
+            expected: "\"readonly\"",
+        },
+    }],
+};
+static TS_REFERENCE_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_REFERENCE_TYPE,
+    name: "TsReferenceType",
+    fields: &[
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsName",
+                can_cast: AnyTsName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+    ],
+};
+static TS_REST_TUPLE_TYPE_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT,
+    name: "TsRestTupleTypeElement",
+    fields: &[
+        JsAstField {
+            property: "dotdotdotToken",
+            updater: "withDotdotdotToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![...]],
+                expected: "\"...\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_RETURN_TYPE_ANNOTATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_RETURN_TYPE_ANNOTATION,
+    name: "TsReturnTypeAnnotation",
+    fields: &[
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsReturnType",
+                can_cast: AnyTsReturnType::can_cast,
+            },
+        },
+    ],
+};
+static TS_SATISFIES_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_SATISFIES_ASSIGNMENT,
+    name: "TsSatisfiesAssignment",
+    fields: &[
+        JsAstField {
+            property: "assignment",
+            updater: "withAssignment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+        JsAstField {
+            property: "satisfiesToken",
+            updater: "withSatisfiesToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![satisfies]],
+                expected: "\"satisfies\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_SATISFIES_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_SATISFIES_EXPRESSION,
+    name: "TsSatisfiesExpression",
+    fields: &[
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+        JsAstField {
+            property: "satisfiesToken",
+            updater: "withSatisfiesToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![satisfies]],
+                expected: "\"satisfies\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_SETTER_SIGNATURE_CLASS_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_SETTER_SIGNATURE_CLASS_MEMBER,
+    name: "TsSetterSignatureClassMember",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsMethodSignatureModifierList",
+                can_cast: TsMethodSignatureModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "setToken",
+            updater: "withSetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![set]],
+                expected: "\"set\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsClassMemberName",
+                can_cast: AnyJsClassMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFormalParameter",
+                can_cast: AnyJsFormalParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_SETTER_SIGNATURE_TYPE_MEMBER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_SETTER_SIGNATURE_TYPE_MEMBER,
+    name: "TsSetterSignatureTypeMember",
+    fields: &[
+        JsAstField {
+            property: "setToken",
+            updater: "withSetToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![set]],
+                expected: "\"set\"",
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsObjectMemberName",
+                can_cast: AnyJsObjectMemberName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "lParenToken",
+            updater: "withLParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['(']],
+                expected: "\"'('\"",
+            },
+        },
+        JsAstField {
+            property: "parameter",
+            updater: "withParameter",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsFormalParameter",
+                can_cast: AnyJsFormalParameter::can_cast,
+            },
+        },
+        JsAstField {
+            property: "commaToken",
+            updater: "withCommaToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,]],
+                expected: "\",\"",
+            },
+        },
+        JsAstField {
+            property: "rParenToken",
+            updater: "withRParenToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![')']],
+                expected: "\"')'\"",
+            },
+        },
+        JsAstField {
+            property: "separatorToken",
+            updater: "withSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![,], T![;]],
+                expected: "\",\", \";\"",
+            },
+        },
+    ],
+};
+static TS_STRING_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_STRING_LITERAL_TYPE,
+    name: "TsStringLiteralType",
+    fields: &[JsAstField {
+        property: "literalToken",
+        updater: "withLiteralToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[JS_STRING_LITERAL],
+            expected: "\"js_string_literal\"",
+        },
+    }],
+};
+static TS_STRING_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_STRING_TYPE,
+    name: "TsStringType",
+    fields: &[JsAstField {
+        property: "stringToken",
+        updater: "withStringToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![string]],
+            expected: "\"string\"",
+        },
+    }],
+};
+static TS_SYMBOL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_SYMBOL_TYPE,
+    name: "TsSymbolType",
+    fields: &[JsAstField {
+        property: "symbolToken",
+        updater: "withSymbolToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![symbol]],
+            expected: "\"symbol\"",
+        },
+    }],
+};
+static TS_TEMPLATE_CHUNK_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TEMPLATE_CHUNK_ELEMENT,
+    name: "TsTemplateChunkElement",
+    fields: &[JsAstField {
+        property: "templateChunkToken",
+        updater: "withTemplateChunkToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[TEMPLATE_CHUNK],
+            expected: "\"template_chunk\"",
+        },
+    }],
+};
+static TS_TEMPLATE_ELEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TEMPLATE_ELEMENT,
+    name: "TsTemplateElement",
+    fields: &[
+        JsAstField {
+            property: "dollarCurlyToken",
+            updater: "withDollarCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[DOLLAR_CURLY],
+                expected: "\"dollar_curly\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rCurlyToken",
+            updater: "withRCurlyToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['}']],
+                expected: "\"'}'\"",
+            },
+        },
+    ],
+};
+static TS_TEMPLATE_LITERAL_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TEMPLATE_LITERAL_TYPE,
+    name: "TsTemplateLiteralType",
+    fields: &[
+        JsAstField {
+            property: "lTickToken",
+            updater: "withLTickToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['`']],
+                expected: "\"'`'\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTemplateElementList",
+                can_cast: TsTemplateElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rTickToken",
+            updater: "withRTickToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['`']],
+                expected: "\"'`'\"",
+            },
+        },
+    ],
+};
+static TS_THIS_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_THIS_PARAMETER,
+    name: "TsThisParameter",
+    fields: &[
+        JsAstField {
+            property: "thisToken",
+            updater: "withThisToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![this]],
+                expected: "\"this\"",
+            },
+        },
+        JsAstField {
+            property: "typeAnnotation",
+            updater: "withTypeAnnotation",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeAnnotation",
+                can_cast: TsTypeAnnotation::can_cast,
+            },
+        },
+    ],
+};
+static TS_THIS_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_THIS_TYPE,
+    name: "TsThisType",
+    fields: &[JsAstField {
+        property: "thisToken",
+        updater: "withThisToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![this]],
+            expected: "\"this\"",
+        },
+    }],
+};
+static TS_TUPLE_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TUPLE_TYPE,
+    name: "TsTupleType",
+    fields: &[
+        JsAstField {
+            property: "lBrackToken",
+            updater: "withLBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T!['[']],
+                expected: "\"'['\"",
+            },
+        },
+        JsAstField {
+            property: "elements",
+            updater: "withElements",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTupleTypeElementList",
+                can_cast: TsTupleTypeElementList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rBrackToken",
+            updater: "withRBrackToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![']']],
+                expected: "\"']'\"",
+            },
+        },
+    ],
+};
+static TS_TYPE_ALIAS_DECLARATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_ALIAS_DECLARATION,
+    name: "TsTypeAliasDeclaration",
+    fields: &[
+        JsAstField {
+            property: "typeToken",
+            updater: "withTypeToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![type]],
+                expected: "\"type\"",
+            },
+        },
+        JsAstField {
+            property: "bindingIdentifier",
+            updater: "withBindingIdentifier",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsIdentifierBinding",
+                can_cast: AnyTsIdentifierBinding::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeParameters",
+            updater: "withTypeParameters",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameters",
+                can_cast: TsTypeParameters::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eqToken",
+            updater: "withEqToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![=]],
+                expected: "\"=\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "semicolonToken",
+            updater: "withSemicolonToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![;]],
+                expected: "\";\"",
+            },
+        },
+    ],
+};
+static TS_TYPE_ANNOTATION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_ANNOTATION,
+    name: "TsTypeAnnotation",
+    fields: &[
+        JsAstField {
+            property: "colonToken",
+            updater: "withColonToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![:]],
+                expected: "\":\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_ARGUMENTS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_ARGUMENTS,
+    name: "TsTypeArguments",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "tsTypeArgumentList",
+            updater: "withTsTypeArgumentList",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeArgumentList",
+                can_cast: TsTypeArgumentList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static TS_TYPE_ASSERTION_ASSIGNMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT,
+    name: "TsTypeAssertionAssignment",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+        JsAstField {
+            property: "assignment",
+            updater: "withAssignment",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsAssignment",
+                can_cast: AnyJsAssignment::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_ASSERTION_EXPRESSION_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION,
+    name: "TsTypeAssertionExpression",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+        JsAstField {
+            property: "expression",
+            updater: "withExpression",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_CONSTRAINT_CLAUSE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_CONSTRAINT_CLAUSE,
+    name: "TsTypeConstraintClause",
+    fields: &[
+        JsAstField {
+            property: "extendsToken",
+            updater: "withExtendsToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![extends]],
+                expected: "\"extends\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_OPERATOR_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_OPERATOR_TYPE,
+    name: "TsTypeOperatorType",
+    fields: &[
+        JsAstField {
+            property: "operatorToken",
+            updater: "withOperatorToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![keyof], T![unique], T![readonly]],
+                expected: "\"keyof\", \"unique\", \"readonly\"",
+            },
+        },
+        JsAstField {
+            property: "ty",
+            updater: "withTy",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsType",
+                can_cast: AnyTsType::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_PARAMETER_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_PARAMETER,
+    name: "TsTypeParameter",
+    fields: &[
+        JsAstField {
+            property: "modifiers",
+            updater: "withModifiers",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeParameterModifierList",
+                can_cast: TsTypeParameterModifierList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "name",
+            updater: "withName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeParameterName",
+                can_cast: TsTypeParameterName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "constraint",
+            updater: "withConstraint",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeConstraintClause",
+                can_cast: TsTypeConstraintClause::can_cast,
+            },
+        },
+        JsAstField {
+            property: "default",
+            updater: "withDefault",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsDefaultTypeClause",
+                can_cast: TsDefaultTypeClause::can_cast,
+            },
+        },
+    ],
+};
+static TS_TYPE_PARAMETER_NAME_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_PARAMETER_NAME,
+    name: "TsTypeParameterName",
+    fields: &[JsAstField {
+        property: "identToken",
+        updater: "withIdentToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[IDENT],
+            expected: "\"ident\"",
+        },
+    }],
+};
+static TS_TYPE_PARAMETERS_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPE_PARAMETERS,
+    name: "TsTypeParameters",
+    fields: &[
+        JsAstField {
+            property: "lAngleToken",
+            updater: "withLAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![<]],
+                expected: "\"<\"",
+            },
+        },
+        JsAstField {
+            property: "items",
+            updater: "withItems",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsTypeParameterList",
+                can_cast: TsTypeParameterList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "rAngleToken",
+            updater: "withRAngleToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![>]],
+                expected: "\">\"",
+            },
+        },
+    ],
+};
+static TS_TYPEOF_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_TYPEOF_TYPE,
+    name: "TsTypeofType",
+    fields: &[
+        JsAstField {
+            property: "typeofToken",
+            updater: "withTypeofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![typeof]],
+                expected: "\"typeof\"",
+            },
+        },
+        JsAstField {
+            property: "expressionName",
+            updater: "withExpressionName",
+            optional: false,
+            value: JsAstFieldValue::Node {
+                ty: "AnyTsName",
+                can_cast: AnyTsName::can_cast,
+            },
+        },
+        JsAstField {
+            property: "typeArguments",
+            updater: "withTypeArguments",
+            optional: true,
+            value: JsAstFieldValue::Node {
+                ty: "TsTypeArguments",
+                can_cast: TsTypeArguments::can_cast,
+            },
+        },
+    ],
+};
+static TS_UNDEFINED_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_UNDEFINED_TYPE,
+    name: "TsUndefinedType",
+    fields: &[JsAstField {
+        property: "undefinedToken",
+        updater: "withUndefinedToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![undefined]],
+            expected: "\"undefined\"",
+        },
+    }],
+};
+static TS_UNION_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_UNION_TYPE,
+    name: "TsUnionType",
+    fields: &[
+        JsAstField {
+            property: "leadingSeparatorToken",
+            updater: "withLeadingSeparatorToken",
+            optional: true,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![|]],
+                expected: "\"|\"",
+            },
+        },
+        JsAstField {
+            property: "types",
+            updater: "withTypes",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "TsUnionTypeVariantList",
+                can_cast: TsUnionTypeVariantList::can_cast,
+            },
+        },
+    ],
+};
+static TS_UNKNOWN_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_UNKNOWN_TYPE,
+    name: "TsUnknownType",
+    fields: &[JsAstField {
+        property: "unknownToken",
+        updater: "withUnknownToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![unknown]],
+            expected: "\"unknown\"",
+        },
+    }],
+};
+static TS_VOID_TYPE_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::TS_VOID_TYPE,
+    name: "TsVoidType",
+    fields: &[JsAstField {
+        property: "voidToken",
+        updater: "withVoidToken",
+        optional: false,
+        value: JsAstFieldValue::Token {
+            kinds: &[T![void]],
+            expected: "\"void\"",
+        },
+    }],
+};

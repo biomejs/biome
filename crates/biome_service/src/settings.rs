@@ -1376,12 +1376,14 @@ impl VcsIgnoredPatterns {
     ) -> bool {
         let root_ignored = {
             let path = path.strip_prefix(root.path()).unwrap_or(path);
-            root.matched(path, is_dir).is_ignore()
+            root.matched_path_or_any_parents(path, is_dir).is_ignore()
         };
 
         let nested_ignored = nested.iter().any(|gitignore| {
             if let Ok(stripped_path) = path.strip_prefix(gitignore.path()) {
-                gitignore.matched(stripped_path, is_dir).is_ignore()
+                // Ignore patterns apply to descendants, not the containing directory itself.
+                !stripped_path.as_str().is_empty()
+                    && gitignore.matched(stripped_path, is_dir).is_ignore()
             } else {
                 false
             }

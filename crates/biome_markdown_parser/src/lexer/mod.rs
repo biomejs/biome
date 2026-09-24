@@ -1784,6 +1784,18 @@ impl<'src> MarkdownLexer<'src> {
     }
 }
 
+/// Returns the byte length of a valid HTML comment at the start of `text`.
+pub(crate) fn html_comment_len(text: &str) -> Option<usize> {
+    let rest = text.strip_prefix("<!--")?;
+    if rest.starts_with('>') || rest.starts_with("->") {
+        return None;
+    }
+
+    let close = rest.find("-->")?;
+    let body = rest.get(..close)?;
+    (!body.ends_with('-') && !body.contains("--")).then_some(4 + close + 3)
+}
+
 #[inline]
 fn is_space_or_tab_byte(byte: u8) -> bool {
     byte == b' ' || byte == b'\t'

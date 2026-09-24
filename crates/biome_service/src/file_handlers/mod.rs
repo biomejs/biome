@@ -53,8 +53,9 @@ use crate::workspace::{
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
-    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, PLUGIN_GROUP, Queryable,
-    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
+    AnalyzerSignal, ControlFlow, EmbeddedSignalInspector, FixKind, GroupCategory, Never,
+    PLUGIN_GROUP, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError,
+    RuleFilter, RuleGroup, SnippetAnalyzer,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::assist::Actions;
@@ -516,6 +517,39 @@ pub(crate) struct LintParams<'a> {
     pub(crate) enforce_assist: bool,
 }
 
+impl<'a> LintParams<'a> {
+    /// Builds lint parameters for a snippet using the containing file's settings.
+    pub(crate) fn for_snippet(
+        &self,
+        snippet: &ParsedSnippetOrigin,
+        language: DocumentFileSource,
+    ) -> Self {
+        Self {
+            parsed_source: snippet.parsed_origin(),
+            settings: self.settings,
+            language,
+            path: self.path,
+            only: self.only,
+            skip: self.skip,
+            categories: self.categories,
+            workspace_db: self.workspace_db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data: self.embedded_data.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db: self.module_db.clone(),
+            project_layout: self.project_layout.clone(),
+            suppression_reason: self.suppression_reason.clone(),
+            enabled_selectors: self.enabled_selectors,
+            plugins: self.plugins.clone(),
+            pull_code_actions: self.pull_code_actions,
+            working_directory: self.working_directory,
+            max_diagnostics: self.max_diagnostics,
+            diagnostic_level: self.diagnostic_level,
+            enforce_assist: self.enforce_assist,
+        }
+    }
+}
+
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) parsed_source: AnyParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
@@ -539,6 +573,69 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u32,
     pub(crate) infos: usize,
     pub(crate) warnings: usize,
+}
+
+impl LintResults {
+    pub(crate) fn extend(&mut self, other: Self) {
+        self.diagnostics.extend(other.diagnostics);
+        self.errors += other.errors;
+        self.skipped_diagnostics += other.skipped_diagnostics;
+        self.infos += other.infos;
+        self.warnings += other.warnings;
+    }
+}
+
+/// Runs a guest-language linter and retains its diagnostics for the containing file.
+pub(crate) struct LintSnippetAnalyzer<'a> {
+    params: LintParams<'a>,
+    offset: TextSize,
+    metadata: &'static biome_analyze::MetadataRegistry,
+    lint: for<'guest, 'registry> fn(
+        &LintParams<'_>,
+        Option<EmbeddedSignalInspector<'guest, 'registry>>,
+    ) -> LintResults,
+    result: LintResults,
+}
+
+impl<'a> LintSnippetAnalyzer<'a> {
+    pub(crate) fn new(
+        params: LintParams<'a>,
+        offset: TextSize,
+        metadata: &'static biome_analyze::MetadataRegistry,
+        lint: for<'guest, 'registry> fn(
+            &LintParams<'_>,
+            Option<EmbeddedSignalInspector<'guest, 'registry>>,
+        ) -> LintResults,
+    ) -> Self {
+        Self {
+            params,
+            offset,
+            metadata,
+            lint,
+            result: LintResults::default(),
+        }
+    }
+}
+
+impl SnippetAnalyzer<Never> for LintSnippetAnalyzer<'_> {
+    type Output = LintResults;
+
+    fn diagnostics_offset(&self) -> TextSize {
+        self.offset
+    }
+
+    fn metadata(&self) -> &'static biome_analyze::MetadataRegistry {
+        self.metadata
+    }
+
+    fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<Never> {
+        self.result = (self.lint)(&self.params, Some(inspector));
+        ControlFlow::Continue(())
+    }
+
+    fn into_output(self: Box<Self>) -> Self::Output {
+        self.result
+    }
 }
 
 pub(crate) struct ProcessLint<'a> {
@@ -945,7 +1042,7 @@ impl<'a> ProcessFixAll<'a> {
         if new_text == current_text {
             return Ok(None);
         }
-        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "anonymous")))?;
         Ok(Some(new_text))
     }
 

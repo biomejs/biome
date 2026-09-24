@@ -99,6 +99,100 @@ const Bar = styled.div`background-color: red !important; align: center; padding:
 }
 
 #[test]
+fn javascript_comments_suppress_embedded_css_and_graphql_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        r#"// biome-ignore lint/correctness/useGraphqlNamedOperations: expected anonymous query
+const first = gql`query { people { name } }`;
+const second = gql`query { people { name } }`;
+// biome-ignore lint/correctness/noUnknownProperty: expected typo
+const ignored = styled.div`colr: red;`;
+const reported = styled.div`colr: red;`;"#
+            .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": {
+        "useGraphqlNamedOperations": "error",
+        "noUnknownProperty": "error"
+      }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "javascript_comments_suppress_embedded_css_and_graphql_rules",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn host_and_css_suppressions_are_both_used() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        r#"// biome-ignore-start lint/correctness/noUnknownProperty: temporary migration
+const ignored = styled.div`
+  /* biome-ignore lint/correctness/noUnknownProperty: generated declaration */
+  colr: red;
+  backgrond-color: red;
+`;
+// biome-ignore-end lint/correctness/noUnknownProperty: temporary migration"#
+            .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUnknownProperty": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "host_and_css_suppressions_are_both_used",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_apply_fixes_to_embedded_languages() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

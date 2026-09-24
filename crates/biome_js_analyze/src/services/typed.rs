@@ -1,3 +1,4 @@
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryKey, QueryMatch, Queryable, RuleDomain, RuleKey,
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor,
@@ -16,9 +17,9 @@ use biome_module_graph::{
         ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
         FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedBindingTypeRequest,
         NormalizedExpressionTypeRequest, PromiseClassificationRequest,
-        PromiseReturningFunctionClassificationRequest, TypeInferenceArgument, TypeInferenceCaller,
-        TypeInferenceClassification, TypeInferenceRequest, TypeInferenceSource,
-        execute_type_inference_request,
+        PromiseReturningFunctionClassificationRequest, ThenableClassificationRequest,
+        TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
+        TypeInferenceRequest, TypeInferenceSource, execute_type_inference_request,
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
@@ -94,6 +95,21 @@ impl TypedService {
         self.execute_request(
             typed_module,
             PromiseClassificationRequest::new(typed_module.module, expression.range()),
+        )
+    }
+
+    /// Classifies whether an expression has a `then` method accepting a callback.
+    /// Returns `Indeterminate` when inference is unavailable or inconclusive.
+    pub fn classify_expression_as_thenable(
+        &self,
+        expression: &AnyJsExpression,
+    ) -> TypeInferenceClassification {
+        let Some(typed_module) = self.module.as_ref() else {
+            return TypeInferenceClassification::Indeterminate;
+        };
+        self.execute_request(
+            typed_module,
+            ThenableClassificationRequest::new(typed_module.module, expression.range()),
         )
     }
 
@@ -368,6 +384,7 @@ where
     type Services = TypedService;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Semantic, SyntaxVisitor::default);
     }
 

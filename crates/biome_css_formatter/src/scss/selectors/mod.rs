@@ -1,6 +1,7 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod at_root_selector;
+pub(crate) mod interpolated_sub_selector;
 pub(crate) mod keyframes_selector;
 pub(crate) mod parent_selector;
 pub(crate) mod partial_combinator_selector;

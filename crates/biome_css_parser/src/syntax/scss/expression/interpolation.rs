@@ -47,7 +47,12 @@ pub(crate) fn parse_scss_selector_interpolation(p: &mut CssParser) -> ParsedSynt
         return Absent;
     };
 
-    parse_scss_interpolation_inner_expression(p);
+    // A missing interpolation close must leave the style-rule block to its caller.
+    parse_scss_inner_expression_until(
+        p,
+        SCSS_INTERPOLATION_END_TOKEN_SET.union(token_set![T!['{']]),
+    )
+    .or_add_diagnostic(p, expected_scss_expression);
     let closing_context = selector_lex_context(p);
     p.expect_with_context(T!['}'], closing_context);
 

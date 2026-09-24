@@ -2,6 +2,22 @@
 source: crates/biome_plugin_loader/src/lib.rs
 expression: content
 ---
+# Plugin
+
+## `/my-plugin/rules/1.grit`
+
+```grit
+`hello`
+```
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Failed to resolve the plugin manifest from /my-plugin/biome-manifest.jsonc
+```

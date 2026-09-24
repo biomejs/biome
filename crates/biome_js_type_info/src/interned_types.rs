@@ -21,7 +21,6 @@ use crate::{
         ARRAY_ID_GLOBAL_TYPE_ID, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, DATE_ID_GLOBAL_TYPE_ID,
         DISPOSABLE_ID_GLOBAL_TYPE_ID, ERROR_ID_GLOBAL_TYPE_ID, GlobalTypeId, MAP_ID_GLOBAL_TYPE_ID,
         PROMISE_ID_GLOBAL_TYPE_ID, REGEXP_ID_GLOBAL_TYPE_ID, SET_ID_GLOBAL_TYPE_ID,
-        SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
         SYMBOL_ID_GLOBAL_TYPE_ID, WEAK_MAP_ID_GLOBAL_TYPE_ID,
     },
     literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral},
@@ -37,24 +36,19 @@ const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
 pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
-    match ty {
-        TypeData::GlobalType(id) if id == SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID => {
-            Some(Text::new_static("Symbol.dispose"))
-        }
-        TypeData::GlobalType(id) if id == SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID => {
-            Some(Text::new_static("Symbol.asyncDispose"))
-        }
-        _ => None,
-    }
+    let TypeData::GlobalType(id) = ty else {
+        return None;
+    };
+    let name = crate::globals_ids::global_type_name(id.as_type_id())?;
+    name.starts_with("Symbol.").then(|| Text::new_static(name))
 }
 
 pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
-    let id = match member_name {
-        "dispose" => SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID,
-        "asyncDispose" => SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID,
-        _ => return None,
-    };
-    Some(TypeData::GlobalType(id))
+    crate::globals_ids::PREDEFINED_ID_ROWS
+        .iter()
+        .position(|name| name.strip_prefix("Symbol.") == Some(member_name))
+        .and_then(|index| GlobalTypeId::try_from_type_id(raw::TypeId::new(index)))
+        .map(TypeData::GlobalType)
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
@@ -124,6 +118,7 @@ pub enum TypeData<'db> {
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
+    IndexedAccess(InternedIndexedAccessType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -252,6 +247,7 @@ impl<'db> TypeData<'db> {
             Self::Unknown
                 | Self::Local(_)
                 | Self::TypeofExpression(_)
+                | Self::IndexedAccess(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -329,6 +325,7 @@ impl<'db> TypeData<'db> {
                 Self::Local(_) => "unresolved",
                 Self::MergedReference(_) => "merged type",
                 Self::TypeOperator(_) => "type operator",
+                Self::IndexedAccess(_) => "indexed access",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -587,6 +584,7 @@ impl<'db> TypeData<'db> {
             | Self::GlobalType(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -632,6 +630,7 @@ impl<'db> TypeData<'db> {
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::TypeofExpression(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
@@ -889,6 +888,7 @@ impl<'db> TypeData<'db> {
             | Self::Intersection(_)
             | Self::Union(_)
             | Self::TypeOperator(_)
+            | Self::IndexedAccess(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1059,9 +1059,11 @@ impl<'db> TypeData<'db> {
                         is_rest: element.is_rest,
                     })
                     .collect::<Box<[_]>>(),
+                tuple.is_inferred_array,
             )),
             raw::TypeData::Generic(generic) => Self::Generic(InternedGenericTypeParameter::new(
                 db,
+                generic.is_const,
                 generic
                     .constraint
                     .is_known()
@@ -1085,6 +1087,13 @@ impl<'db> TypeData<'db> {
                     db,
                     resolve_reference(&type_operator.ty),
                     type_operator.operator,
+                ))
+            }
+            raw::TypeData::IndexedAccess(access) => {
+                Self::IndexedAccess(InternedIndexedAccessType::new(
+                    db,
+                    resolve_reference(&access.object),
+                    resolve_reference(&access.index),
                 ))
             }
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
@@ -1215,6 +1224,9 @@ impl<'db> TypeDataSlots<'db> {
             }
             TypeData::Union(union) => result.slots.extend_from_slice(union.types(db)),
             TypeData::TypeOperator(operator) => result.slots.push(operator.ty(db)),
+            TypeData::IndexedAccess(access) => {
+                result.slots.extend([access.object(db), access.index(db)])
+            }
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1287,9 +1299,13 @@ impl<'db> TypeDataSlots<'db> {
     fn push_type_member_slots(&mut self, member: &TypeMember<'db>) {
         match &member.kind {
             TypeMemberKind::ComputedValue(ty)
+            | TypeMemberKind::ComputedStatic(ty)
             | TypeMemberKind::ComputedValueNamed(_, ty)
+            | TypeMemberKind::ComputedStaticNamed(_, ty)
             | TypeMemberKind::ConstAssertedComputedValue(ty)
+            | TypeMemberKind::ConstAssertedComputedStatic(ty)
             | TypeMemberKind::ConstAssertedComputedValueNamed(_, ty)
+            | TypeMemberKind::ConstAssertedComputedStaticNamed(_, ty)
             | TypeMemberKind::ConstAssertedIndexSignature(ty)
             | TypeMemberKind::IndexSignature(ty) => self.slots.push(*ty),
             TypeMemberKind::CallSignature
@@ -1319,6 +1335,14 @@ impl<'db> TypeDataSlots<'db> {
             TypeofExpression::Call(expression) => {
                 self.slots.push(expression.callee);
                 self.push_call_argument_slots(&expression.arguments);
+            }
+            TypeofExpression::CallArgument(expression) => {
+                self.slots.push(expression.callee);
+                self.push_call_argument_slots(&expression.arguments);
+            }
+            TypeofExpression::Parameter(expression) => self.slots.push(expression.function),
+            TypeofExpression::ComputedMember(expression) => {
+                self.slots.extend([expression.object, expression.member]);
             }
             TypeofExpression::Conditional(expression) => {
                 self.slots
@@ -1489,9 +1513,11 @@ impl<'db> TypeDataSlotReplacements<'db> {
                         Some(element)
                     })
                     .collect::<Option<Box<[_]>>>()?,
+                tuple.is_inferred_array(db),
             )),
             TypeData::Generic(generic) => TypeData::Generic(InternedGenericTypeParameter::new(
                 db,
+                generic.is_const(db),
                 self.take_optional_type(generic.constraint(db))?,
                 self.take_optional_type(generic.default(db))?,
                 generic.name(db).clone(),
@@ -1506,6 +1532,11 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeData::TypeOperator(operator) => TypeData::TypeOperator(
                 InternedTypeOperatorType::new(db, self.take_type()?, operator.operator(db)),
             ),
+            TypeData::IndexedAccess(_) => TypeData::IndexedAccess(InternedIndexedAccessType::new(
+                db,
+                self.take_type()?,
+                self.take_type()?,
+            )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
@@ -1640,12 +1671,22 @@ impl<'db> TypeDataSlotReplacements<'db> {
     ) -> Option<TypeMemberKind<'db>> {
         Some(match kind {
             TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
+            TypeMemberKind::ComputedStatic(_) => TypeMemberKind::ComputedStatic(self.take_type()?),
+            TypeMemberKind::ComputedStaticNamed(name, _) => {
+                TypeMemberKind::ComputedStaticNamed(name.clone(), self.take_type()?)
+            }
             TypeMemberKind::ComputedValue(_) => TypeMemberKind::ComputedValue(self.take_type()?),
             TypeMemberKind::ComputedValueNamed(name, _) => {
                 TypeMemberKind::ComputedValueNamed(name.clone(), self.take_type()?)
             }
             TypeMemberKind::ConstAssertedCallSignature => {
                 TypeMemberKind::ConstAssertedCallSignature
+            }
+            TypeMemberKind::ConstAssertedComputedStatic(_) => {
+                TypeMemberKind::ConstAssertedComputedStatic(self.take_type()?)
+            }
+            TypeMemberKind::ConstAssertedComputedStaticNamed(name, _) => {
+                TypeMemberKind::ConstAssertedComputedStaticNamed(name.clone(), self.take_type()?)
             }
             TypeMemberKind::ConstAssertedComputedValue(_) => {
                 TypeMemberKind::ConstAssertedComputedValue(self.take_type()?)
@@ -1699,6 +1740,28 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 callee: self.take_type()?,
                 arguments: self.rebuild_call_arguments(&expression.arguments)?,
             }),
+            TypeofExpression::CallArgument(expression) => {
+                TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                    callee: self.take_type()?,
+                    arguments: self.rebuild_call_arguments(&expression.arguments)?,
+                    index: expression.index,
+                    is_constructor: expression.is_constructor,
+                })
+            }
+            TypeofExpression::Parameter(expression) => {
+                TypeofExpression::Parameter(TypeofParameterExpression {
+                    function: self.take_type()?,
+                    index: expression.index,
+                    has_initializer: expression.has_initializer,
+                })
+            }
+            TypeofExpression::ComputedMember(expression) => {
+                TypeofExpression::ComputedMember(TypeofComputedMemberExpression {
+                    object: self.take_type()?,
+                    member: self.take_type()?,
+                    is_optional_chain: expression.is_optional_chain,
+                })
+            }
             TypeofExpression::Conditional(_) => {
                 TypeofExpression::Conditional(TypeofConditionalExpression {
                     test: self.take_type()?,
@@ -1862,6 +1925,15 @@ impl<'db> FunctionParameter<'db> {
             Self::Pattern(parameter) => parameter.is_rest,
         }
     }
+
+    /// Returns whether this is a `this` parameter, which occupies no argument
+    /// position.
+    pub fn is_this(&self) -> bool {
+        match self {
+            Self::Named(parameter) => parameter.name.text() == "this",
+            Self::Pattern(_) => false,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -1923,10 +1995,14 @@ impl TypeMember<'_> {
 pub enum TypeMemberKind<'db> {
     CallSignature,
     ComputedValue(TypeData<'db>),
+    ComputedStatic(TypeData<'db>),
     ComputedValueNamed(Text, TypeData<'db>),
+    ComputedStaticNamed(Text, TypeData<'db>),
     ConstAssertedCallSignature,
     ConstAssertedComputedValue(TypeData<'db>),
+    ConstAssertedComputedStatic(TypeData<'db>),
     ConstAssertedComputedValueNamed(Text, TypeData<'db>),
+    ConstAssertedComputedStaticNamed(Text, TypeData<'db>),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeData<'db>),
@@ -1948,7 +2024,9 @@ impl<'db> TypeMemberKind<'db> {
             Self::Getter(own_name)
             | Self::ConstAssertedGetter(own_name)
             | Self::ComputedValueNamed(own_name, _)
+            | Self::ComputedStaticNamed(own_name, _)
             | Self::ConstAssertedComputedValueNamed(own_name, _)
+            | Self::ConstAssertedComputedStaticNamed(own_name, _)
             | Self::Named(own_name)
             | Self::ConstAssertedNamed(own_name)
             | Self::NamedOptional(own_name)
@@ -1957,8 +2035,10 @@ impl<'db> TypeMemberKind<'db> {
             | Self::ConstAssertedNamedStatic(own_name) => own_name.text() == name,
             Self::CallSignature
             | Self::ComputedValue(_)
+            | Self::ComputedStatic(_)
             | Self::ConstAssertedCallSignature
             | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ConstAssertedIndexSignature(_)
             | Self::IndexSignature(_) => false,
         }
@@ -1976,6 +2056,10 @@ impl<'db> TypeMemberKind<'db> {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedStatic(_)
+                | Self::ComputedStaticNamed(_, _)
+                | Self::ConstAssertedComputedStatic(_)
+                | Self::ConstAssertedComputedStaticNamed(_, _)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
@@ -1997,7 +2081,9 @@ impl<'db> TypeMemberKind<'db> {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::ConstAssertedComputedValueNamed(_, _)
+                | Self::ConstAssertedComputedStaticNamed(_, _)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -2031,8 +2117,10 @@ impl<'db> TypeMemberKind<'db> {
         match self {
             Self::CallSignature
             | Self::ComputedValue(_)
+            | Self::ComputedStatic(_)
             | Self::ConstAssertedCallSignature
             | Self::ConstAssertedComputedValue(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ConstAssertedIndexSignature(_)
             | Self::IndexSignature(_) => None,
             Self::ConstAssertedConstructor | Self::Constructor => {
@@ -2040,11 +2128,13 @@ impl<'db> TypeMemberKind<'db> {
             }
             Self::ConstAssertedGetter(name)
             | Self::ConstAssertedComputedValueNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _)
             | Self::ConstAssertedNamed(name)
             | Self::ConstAssertedNamedOptional(name)
             | Self::ConstAssertedNamedStatic(name)
             | Self::Getter(name)
             | Self::ComputedValueNamed(name, _)
+            | Self::ComputedStaticNamed(name, _)
             | Self::Named(name)
             | Self::NamedOptional(name)
             | Self::NamedStatic(name) => Some(name.clone()),
@@ -2053,9 +2143,10 @@ impl<'db> TypeMemberKind<'db> {
 
     pub fn computed_name(&self) -> Option<&str> {
         match self {
-            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
-                Some(name.text())
-            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _)
+            | Self::ComputedValueNamed(name, _)
+            | Self::ConstAssertedComputedValueNamed(name, _) => Some(name.text()),
             _ => None,
         }
     }
@@ -2063,8 +2154,12 @@ impl<'db> TypeMemberKind<'db> {
     pub fn computed_value_type(&self) -> Option<TypeData<'db>> {
         match self {
             Self::ComputedValue(ty)
+            | Self::ComputedStatic(ty)
             | Self::ComputedValueNamed(_, ty)
+            | Self::ComputedStaticNamed(_, ty)
             | Self::ConstAssertedComputedValue(ty)
+            | Self::ConstAssertedComputedStatic(ty)
+            | Self::ConstAssertedComputedStaticNamed(_, ty)
             | Self::ConstAssertedComputedValueNamed(_, ty) => Some(*ty),
             _ => None,
         }
@@ -2077,6 +2172,8 @@ pub enum TypeofExpression<'db> {
     Await(TypeofAwaitExpression<'db>),
     BitwiseNot(TypeofBitwiseNotExpression<'db>),
     Call(TypeofCallExpression<'db>),
+    CallArgument(TypeofCallArgumentExpression<'db>),
+    ComputedMember(TypeofComputedMemberExpression<'db>),
     Conditional(TypeofConditionalExpression<'db>),
     Destructure(TypeofDestructureExpression<'db>),
     Index(TypeofIndexExpression<'db>),
@@ -2086,6 +2183,7 @@ pub enum TypeofExpression<'db> {
     LogicalOr(TypeofLogicalOrExpression<'db>),
     New(TypeofNewExpression<'db>),
     NullishCoalescing(TypeofNullishCoalescingExpression<'db>),
+    Parameter(TypeofParameterExpression<'db>),
     StaticMember(TypeofStaticMemberExpression<'db>),
     OptionalChainStaticMember(TypeofStaticMemberExpression<'db>),
     Super(TypeofThisOrSuperExpression<'db>),
@@ -2114,6 +2212,21 @@ pub struct TypeofBitwiseNotExpression<'db> {
 pub struct TypeofCallExpression<'db> {
     pub callee: TypeData<'db>,
     pub arguments: Box<[CallArgumentType<'db>]>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofCallArgumentExpression<'db> {
+    pub callee: TypeData<'db>,
+    pub arguments: Box<[CallArgumentType<'db>]>,
+    pub index: u16,
+    pub is_constructor: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofParameterExpression<'db> {
+    pub function: TypeData<'db>,
+    pub index: u16,
+    pub has_initializer: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2156,6 +2269,13 @@ pub struct TypeofNewExpression<'db> {
 pub enum CallArgumentType<'db> {
     Argument(TypeData<'db>),
     Spread(TypeData<'db>),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofComputedMemberExpression<'db> {
+    pub object: TypeData<'db>,
+    pub member: TypeData<'db>,
+    pub is_optional_chain: bool,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2312,6 +2432,9 @@ pub struct InternedIntersection<'db> {
 pub struct InternedTuple<'db> {
     #[returns(ref)]
     pub elements: Box<[TupleElementType<'db>]>,
+    /// Whether these elements describe an ordinary mutable array expression.
+    /// See [`raw::Tuple::is_inferred_array`] for examples.
+    pub is_inferred_array: bool,
 }
 
 #[salsa::interned]
@@ -2371,6 +2494,7 @@ impl<'db> InternedMergedReference<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedGenericTypeParameter<'db> {
+    pub is_const: bool,
     pub constraint: Option<TypeData<'db>>,
     pub default: Option<TypeData<'db>>,
     #[returns(ref)]
@@ -2389,6 +2513,15 @@ pub struct LocalTypeHandle<'db> {
 pub struct InternedTypeOperatorType<'db> {
     pub ty: TypeData<'db>,
     pub operator: raw::TypeOperator,
+}
+
+/// The object and index types of a TypeScript indexed access, stored in the
+/// database. See [`raw::IndexedAccessType`] for an example of the two operands.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedIndexedAccessType<'db> {
+    pub object: TypeData<'db>,
+    pub index: TypeData<'db>,
 }
 
 #[salsa::interned]
@@ -2444,6 +2577,13 @@ fn convert_type_member_kind<'db>(
     let _ = db;
     match kind {
         raw::TypeMemberKind::CallSignature => TypeMemberKind::CallSignature,
+        raw::TypeMemberKind::ComputedStatic(ty) => {
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(resolved)
+                .map_or(TypeMemberKind::ComputedStatic(resolved), |name| {
+                    TypeMemberKind::ComputedStaticNamed(name, resolved)
+                })
+        }
         raw::TypeMemberKind::ComputedValue(ty) => {
             let resolved = resolve_reference(ty);
             well_known_symbol_name(resolved)
@@ -2453,6 +2593,13 @@ fn convert_type_member_kind<'db>(
         }
         raw::TypeMemberKind::ConstAssertedCallSignature => {
             TypeMemberKind::ConstAssertedCallSignature
+        }
+        raw::TypeMemberKind::ConstAssertedComputedStatic(ty) => {
+            let resolved = resolve_reference(ty);
+            well_known_symbol_name(resolved).map_or(
+                TypeMemberKind::ConstAssertedComputedStatic(resolved),
+                |name| TypeMemberKind::ConstAssertedComputedStaticNamed(name, resolved),
+            )
         }
         raw::TypeMemberKind::ConstAssertedComputedValue(ty) => {
             let resolved = resolve_reference(ty);
@@ -2610,6 +2757,28 @@ fn convert_typeof_expression<'db>(
             callee: resolve_reference(&expression.callee),
             arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
         }),
+        raw::TypeofExpression::CallArgument(expression) => {
+            TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                callee: resolve_reference(&expression.callee),
+                arguments: convert_call_arguments(db, &expression.arguments, resolve_reference),
+                index: expression.index,
+                is_constructor: expression.is_constructor,
+            })
+        }
+        raw::TypeofExpression::Parameter(expression) => {
+            TypeofExpression::Parameter(TypeofParameterExpression {
+                function: resolve_reference(&expression.function),
+                index: expression.index,
+                has_initializer: expression.has_initializer,
+            })
+        }
+        raw::TypeofExpression::ComputedMember(expression) => {
+            TypeofExpression::ComputedMember(TypeofComputedMemberExpression {
+                object: resolve_reference(&expression.object),
+                member: resolve_reference(&expression.member),
+                is_optional_chain: expression.is_optional_chain,
+            })
+        }
         raw::TypeofExpression::Conditional(expression) => {
             TypeofExpression::Conditional(TypeofConditionalExpression {
                 test: resolve_reference(&expression.test),
@@ -2912,7 +3081,13 @@ mod tests {
     }
 
     fn generic<'db>(db: &'db TestDb) -> TypeData<'db> {
-        TypeData::Generic(InternedGenericTypeParameter::new(db, None, None, text("T")))
+        TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            text("T"),
+        ))
     }
 
     #[test]
@@ -2944,6 +3119,7 @@ mod tests {
         let reference_t = TypeData::instance_of(&db, generic_t, Box::default());
         let generic_u = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             Some(reference_t),
             text("U"),
@@ -3133,6 +3309,7 @@ mod tests {
         let db = TestDb::default();
         let generic = TypeData::Generic(InternedGenericTypeParameter::new(
             &db,
+            false,
             None,
             None,
             text("T"),
@@ -3273,16 +3450,20 @@ mod tests {
                         is_rest: true,
                     },
                 ]),
+                true,
             ))
         });
-        assert_identity(&db, |s| {
-            TypeData::Generic(InternedGenericTypeParameter::new(
-                &db,
-                Some(s.next()),
-                Some(s.next()),
-                text("T"),
-            ))
-        });
+        for is_const in [false, true] {
+            assert_identity(&db, |s| {
+                TypeData::Generic(InternedGenericTypeParameter::new(
+                    &db,
+                    is_const,
+                    Some(s.next()),
+                    Some(s.next()),
+                    text("T"),
+                ))
+            });
+        }
         assert_identity(&db, |s| {
             TypeData::Intersection(InternedIntersection::new(&db, boxed([s.next(), s.next()])))
         });
@@ -3295,6 +3476,9 @@ mod tests {
                 s.next(),
                 raw::TypeOperator::Readonly,
             ))
+        });
+        assert_identity(&db, |s| {
+            TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, s.next(), s.next()))
         });
         assert_identity(&db, |s| {
             TypeData::Literal(InternedLiteral::new(
@@ -3349,6 +3533,31 @@ mod tests {
                         CallArgumentType::Spread(s.next()),
                     ]
                     .into(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                    callee: s.next(),
+                    arguments: [
+                        CallArgumentType::Argument(s.next()),
+                        CallArgumentType::Spread(s.next()),
+                    ]
+                    .into(),
+                    index: 0,
+                    is_constructor: false,
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Parameter(TypeofParameterExpression {
+                    function: s.next(),
+                    index: 1,
+                    has_initializer: true,
                 }),
             )
         });

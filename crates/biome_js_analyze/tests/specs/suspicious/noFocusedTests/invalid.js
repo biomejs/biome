@@ -28,3 +28,9 @@ test.only(name = name || "bar", () => {});
 describe.only.each([["a"], ["b"]])("%s", (a) => {});
 it.only.each([["a"], ["b"]])("%s", (a) => {});
 test.only.each([["a"], ["b"]])("%s", (a) => {});
+
+fsuite("foo", () => {});
+suite.only("bar", () => {});
+suite["only"]("bar", function () {});
+suite.only.each([["a"], ["b"]])("%s", (a) => {});
+

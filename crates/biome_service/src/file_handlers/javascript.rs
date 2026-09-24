@@ -8,6 +8,8 @@ use super::{
     ProcessDiagnosticsAndActions, ProcessFixAll, ProcessLint, SearchCapabilities,
     UpdateSnippetsNodes, format_on_type_noop, matches_on_type_char,
 };
+#[cfg(feature = "js_embeds")]
+use super::{LintSnippetAnalyzer, css, graphql};
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
 #[cfg(feature = "js_embeds")]
@@ -30,10 +32,12 @@ use crate::{
     workspace::{CodeAction, GetSyntaxTreeResult, PullActionsResult, RenameResult},
 };
 use biome_analyze::ActionFilter;
+#[cfg(feature = "js_embeds")]
+use biome_analyze::SnippetAnalyzer;
 use biome_analyze::options::{PreferredIndentation, PreferredQuote};
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
-    RuleCategoriesBuilder, RuleFilter,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, EmbeddedSignalInspector,
+    Never,
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
@@ -58,10 +62,11 @@ use biome_fs::BiomePath;
 use biome_graphql_parser::parse_graphql_with_offset_and_cache;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]
 use biome_graphql_syntax::GraphqlLanguage;
+#[cfg(feature = "js_embeds")]
+use biome_js_analyze::analyze_with_snippets;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{
-    ControlFlowGraph, JsAnalyzerServices, analyze, analyze_with_inspect_matcher,
-};
+use biome_js_analyze::{JsAnalyzerServices, analyze, analyze_snippet};
+use biome_js_control_flow::js_control_flow_model;
 use biome_js_factory::make::ident;
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
@@ -69,9 +74,7 @@ use biome_js_formatter::context::{
 };
 use biome_js_formatter::format_node;
 use biome_js_parser::JsParserOptions;
-use biome_js_semantic::{
-    SVELTE_RUNES, SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model,
-};
+use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, js_semantic_model, semantic_model};
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeName, AnyJsxAttributeValue,
@@ -997,47 +1000,17 @@ fn debug_control_flow(
     cursor: TextSize,
     workspace_db: WorkspaceDb,
 ) -> String {
-    let mut control_flow_graph = None;
-
-    let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default().with_lint().build(),
-        enabled_rules: Some(&[RuleFilter::Rule("correctness", "noUnreachable")]),
-        ..AnalysisFilter::default()
-    };
-    let options = AnalyzerOptions::default();
-
-    analyze_with_inspect_matcher(
-        &parse.tree(&workspace_db),
-        filter,
-        |match_params| {
-            let cfg = match match_params.query.downcast_ref::<ControlFlowGraph>() {
-                Some(cfg) => cfg,
-                _ => return,
-            };
-
-            let range = cfg.text_range();
-            if !range.contains(cursor) {
-                return;
-            }
-
-            match &control_flow_graph {
-                None => {
-                    control_flow_graph = Some((cfg.graph.to_string(), range));
-                }
-                Some((_, prev_range)) => {
-                    if range.len() < prev_range.len() {
-                        control_flow_graph = Some((cfg.graph.to_string(), range));
-                    }
-                }
-            }
-        },
-        &options,
-        &[],
-        Default::default(),
-        |_| ControlFlow::<Never>::Continue(()),
-    );
-
-    control_flow_graph.map(|(cfg, _)| cfg).unwrap_or_default()
+    js_control_flow_model(&workspace_db, &parse)
+        .graphs()
+        .filter(|graph| graph.node.text_trimmed_range().contains(cursor))
+        .min_by_key(|graph| {
+            (
+                graph.node.text_trimmed_range().len(),
+                std::cmp::Reverse(graph.node.ancestors().count()),
+            )
+        })
+        .map(|graph| graph.to_string())
+        .unwrap_or_default()
 }
 
 fn debug_formatter_ir(
@@ -1204,13 +1177,14 @@ fn debug_semantic_model(
     Ok(model.to_string())
 }
 
-fn js_analyzer_services<'a>(
-    root: &'a AnyJsRoot,
+fn js_analyzer_services(
+    root: &AnyJsRoot,
+    parsed_source: Option<&AnyParsedSource>,
     workspace_db: &WorkspaceDb,
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
-) -> JsAnalyzerServices<'a> {
+) -> JsAnalyzerServices {
     #[cfg(feature = "module_graph")]
     let services = {
         let _ = root;
@@ -1221,17 +1195,22 @@ fn js_analyzer_services<'a>(
         .with_project_layout(project_layout)
         .with_source_type(source_type);
 
-    services.with_language_db(workspace_db.rc_language_db())
+    let services = services.with_language_db(workspace_db.rc_language_db());
+    match parsed_source {
+        Some(source) => services.with_parsed_source(source.clone()),
+        None => services,
+    }
 }
 
-fn js_analyzer_services_for_fix<'a>(
-    root: &'a AnyJsRoot,
-    semantic_model: &'a SemanticModel,
+fn js_analyzer_services_for_fix(
+    root: &AnyJsRoot,
+    parsed_source: Option<&AnyParsedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
-) -> JsAnalyzerServices<'a> {
+) -> JsAnalyzerServices {
     let services = js_analyzer_services(
         root,
+        parsed_source,
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
@@ -1241,10 +1220,17 @@ fn js_analyzer_services_for_fix<'a>(
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
-    services.with_semantic_model(semantic_model)
+    services
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ =
         debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
             .entered();
@@ -1282,18 +1268,49 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    #[cfg(feature = "js_embeds")]
+    let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> = Vec::new();
+    #[cfg(feature = "js_embeds")]
+    if inspector.is_none() {
+        for snippet in params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+        {
+            let Some(language) = snippet.file_source(&params.workspace_db) else {
+                continue;
+            };
+            let offset = snippet.content_offset(&params.workspace_db);
+            let snippet_params = params.for_snippet(&snippet, language);
+            let analyzer = if language.to_css_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_css_analyze::METADATA,
+                    css::lint_with_inspector,
+                )
+            } else if language.to_graphql_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_graphql_analyze::METADATA,
+                    graphql::lint_with_inspector,
+                )
+            } else {
+                continue;
+            };
+            snippets.push(Box::new(analyzer));
+        }
+    }
 
-    let semantic_model = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => {
-            js_semantic_model(&params.workspace_db, source).clone()
-        }
-        super::ParsedOrigin::Interned { .. } => {
-            semantic_model(&tree, SemanticModelOptions::from(&files_source))
-        }
-    };
+    let mut process_lint = ProcessLint::new(params);
+
     let services = js_analyzer_services(
         &tree,
+        match &params.parsed_source {
+            super::ParsedOrigin::Workspace(source) => Some(source),
+            super::ParsedOrigin::Interned { .. } => None,
+        },
         &params.workspace_db,
         #[cfg(feature = "module_graph")]
         params.module_db.clone(),
@@ -1302,21 +1319,55 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
     );
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
-    let services = services.with_semantic_model(&semantic_model);
 
-    let (_, analyze_diagnostics) = analyze(
-        &tree,
-        filter,
-        &analyzer_options,
-        &params.plugins,
-        services,
-        |signal| process_lint.process_signal(signal),
-    );
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(
+            &tree,
+            filter,
+            &analyzer_options,
+            &params.plugins,
+            services,
+            inspector,
+            |signal| process_lint.process_signal(signal),
+        ),
+        None => {
+            #[cfg(feature = "js_embeds")]
+            {
+                analyze_with_snippets(
+                    &tree,
+                    filter,
+                    &analyzer_options,
+                    &params.plugins,
+                    services,
+                    &mut snippets,
+                    |signal| process_lint.process_signal(signal),
+                )
+            }
+            #[cfg(not(feature = "js_embeds"))]
+            {
+                analyze(
+                    &tree,
+                    filter,
+                    &analyzer_options,
+                    &params.plugins,
+                    services,
+                    |signal| process_lint.process_signal(signal),
+                )
+            }
+        }
+    };
 
-    process_lint.into_result(
+    let results = process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),
         analyze_diagnostics,
-    )
+    );
+    #[cfg(feature = "js_embeds")]
+    let mut results = results;
+    #[cfg(feature = "js_embeds")]
+    for snippet in snippets {
+        results.extend(snippet.into_output());
+    }
+    results
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -1380,17 +1431,16 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
     let services = js_analyzer_services(
         &tree,
+        Some(&parsed_source),
         &workspace_db,
         #[cfg(feature = "module_graph")]
         workspace_db.rc_module_db(),
         project_layout,
         source_type,
-    )
-    .with_semantic_model(semantic_model);
+    );
 
     debug!("Javascript runs the analyzer");
     analyze(
@@ -1442,6 +1492,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyJsRoot = params.parsed_source.tree(&params.workspace_db);
+    let mut parsed_source = match &params.parsed_source {
+        super::ParsedOrigin::Workspace(source) => Some(source),
+        super::ParsedOrigin::Interned { .. } => None,
+    };
 
     let analyzer_options = resolve_analyzer_options(
         params.biome_path,
@@ -1486,9 +1540,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         // Suppressions apply to all rules -- keep original single-phase loop
         loop {
-            let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-            let services =
-                js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+            let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
             let mut pending_actions = Vec::new();
 
@@ -1512,6 +1564,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     Some(tree) => tree,
                     None => return None,
                 };
+                parsed_source = None;
                 Some(tree.syntax().text_range_with_trivia().len().into())
             })?;
 
@@ -1533,8 +1586,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         range: None,
     };
     loop {
-        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-        let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
         let mut pending_actions = Vec::new();
 
@@ -1561,6 +1613,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 Some(tree) => tree,
                 None => return None,
             };
+            parsed_source = None;
             Some(tree.syntax().text_range_with_trivia().len().into())
         })?;
 
@@ -1577,6 +1630,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     );
                     let parse = biome_js_parser::parse(&new_text, file_source, options);
                     tree = parse.tree();
+                    parsed_source = None;
                     continue;
                 }
             }
@@ -1587,8 +1641,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: run all rules on the fixed tree for final diagnostics
     if params.collect_final_diagnostics {
-        let semantic_model = semantic_model(&tree, SemanticModelOptions::from(&file_source));
-        let services = js_analyzer_services_for_fix(&tree, &semantic_model, &params, file_source);
+        let services = js_analyzer_services_for_fix(&tree, parsed_source, &params, file_source);
 
         let (_, _) = analyze(
             &tree,
@@ -1858,16 +1911,15 @@ pub(crate) fn pull_diagnostics_and_actions(
             diagnostics: Vec::new(),
         };
     };
-    let semantic_model = js_semantic_model(&workspace_db, &parsed_source);
     let services = js_analyzer_services(
         &tree,
+        Some(&parsed_source),
         &workspace_db,
         #[cfg(feature = "module_graph")]
         workspace_db.rc_module_db(),
         project_layout,
         source_type,
-    )
-    .with_semantic_model(semantic_model);
+    );
     let mut process_pull_diagnostics_and_actions =
         ProcessDiagnosticsAndActions::new(diagnostic_offset);
     analyze(

@@ -743,6 +743,7 @@ mod tests {
             "//! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.",
             "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
             "pub(crate) fn set_generated_global_type_data(",
+            "pub(crate) fn generated_local_types(",
         ] {
             assert!(
                 content.contains(needle),
@@ -1007,6 +1008,7 @@ mod tests {
             generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
         );
         assert!(generated.contains("crate::globals::DATE_ID_GLOBAL_TYPE_ID"));
+        assert!(generated.contains("crate::globals::MATH_ID_GLOBAL_TYPE_ID"));
         assert!(generated.contains("builder.set_type_data("));
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
@@ -1316,7 +1318,6 @@ mod tests {
             async_dispose.type_reference(),
             &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
         );
-        assert_eq!(symbol_class.members().len(), 2);
 
         let dispose_helper = lowered
             .global("Symbol.dispose")
@@ -1354,13 +1355,6 @@ mod tests {
             bail!("WeakMap should lower to class data");
         };
         assert_eq!(weak_map_class.name(), "WeakMap");
-        assert_eq!(
-            weak_map_class.type_parameters(),
-            &[
-                LoweredTypeReference::Predefined("GLOBAL_T_ID"),
-                LoweredTypeReference::Predefined("GLOBAL_U_ID"),
-            ]
-        );
         assert!(weak_map_class.members().is_empty());
 
         Ok(())
@@ -1377,32 +1371,29 @@ mod tests {
         };
         assert_eq!(date_class.name(), "Date");
         assert!(date_class.type_parameters().is_empty());
-        assert!(date_class.members().is_empty());
+        assert!(!date_class.members().is_empty());
 
         Ok(())
     }
 
     #[test]
-    fn lowerer_rejects_date_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.date-extends.d.ts"),
-            "Date interface extends clauses are not supported",
-        )
+    fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
+        let LoweredTypeData::Class(class) = lowered.global("Date").unwrap().data() else {
+            bail!("expected class");
+        };
+        assert_eq!(
+            class.member("value").unwrap().type_reference(),
+            &class.type_parameters()[0]
+        );
+        Ok(())
     }
 
     #[test]
-    fn lowerer_rejects_date_type_parameters() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.date-type-parameters.d.ts"),
-            "Date interface has 1 type parameters, expected 0",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_wrong_weak_map_type_parameter_count() -> Result<()> {
+    fn lowerer_rejects_inconsistent_weak_map_type_parameter_count() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts"),
-            "WeakMap interface has 1 type parameters, expected 2",
+            "inconsistent type parameter count across merged class WeakMap declarations",
         )
     }
 
@@ -1423,42 +1414,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_wrong_symbol_constructor_reference() -> Result<()> {
+    fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
-            "declare var Symbol must reference SymbolConstructor",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-extends.d.ts"),
-            "Error interface extends clauses are not supported",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_extends_clause() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-extends.d.ts"),
-            "ErrorConstructor extends clauses are not supported",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_type_alias() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-type-alias.d.ts"),
-            "type aliases are not supported in ErrorConstructor",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-unsupported-value.d.ts"),
-            "value-side ErrorConstructor declarations are not supported",
+            "SymbolConstructor is missing dispose",
         )
     }
 
@@ -1502,26 +1461,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_unsupported_error_members() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-index.d.ts"),
-            "index signatures are not supported in the Error global",
-        )
-    }
-
-    #[test]
     fn lowerer_rejects_unresolved_error_member_references() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.error-named-reference.d.ts"),
             "unresolved type reference ErrorOptions in Error global",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_unsupported_error_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-value.d.ts"),
-            "unsupported value-side Error declaration",
         )
     }
 

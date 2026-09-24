@@ -20,7 +20,22 @@ pub struct GlobalManifest {
 impl GlobalManifest {
     /// Returns the global group with the given name.
     pub fn global_group(&self, name: &str) -> Option<&GlobalDeclarationGroup> {
-        self.groups.iter().find(|group| group.name.text() == name)
+        self.group(&ScopePath::Global, name)
+    }
+
+    pub(super) fn group(&self, scope: &ScopePath, name: &str) -> Option<&GlobalDeclarationGroup> {
+        self.groups
+            .iter()
+            .find(|group| &group.scope == scope && group.name.text() == name)
+    }
+
+    pub(super) fn groups_in_scope(
+        &self,
+        scope: &ScopePath,
+    ) -> impl Iterator<Item = &GlobalDeclarationGroup> {
+        self.groups
+            .iter()
+            .filter(move |group| &group.scope == scope)
     }
 }
 
@@ -97,7 +112,7 @@ pub fn build_global_manifest(records: Vec<DeclarationRecord>) -> GlobalManifest 
     let mut groups: Vec<GlobalDeclarationGroupBuilder> = Vec::new();
 
     for record in records {
-        if !is_global_scope(&record.scope) {
+        if !matches!(record.scope, ScopePath::Global | ScopePath::Namespace(_)) {
             continue;
         }
 
@@ -116,11 +131,6 @@ pub fn build_global_manifest(records: Vec<DeclarationRecord>) -> GlobalManifest 
             .map(GlobalDeclarationGroupBuilder::into_group)
             .collect(),
     }
-}
-
-/// Returns whether a record belongs to the top-level global scope.
-fn is_global_scope(scope: &ScopePath) -> bool {
-    matches!(scope, ScopePath::Global)
 }
 
 /// Classifies a declaration kind by its TypeScript global role.

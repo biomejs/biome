@@ -418,3 +418,35 @@ fn test_specificity_scss_partial_combinator_selector() {
         .expect("expected the nested rule in the semantic model");
     assert_eq!(child.selectors[0].specificity, Specificity(0, 2, 0));
 }
+
+#[test]
+fn test_specificity_scss_interpolated_sub_selector() {
+    let parse = parse_css(
+        "*#{$suffix}, [hidden]#{$suffix}, :not(.item)#{$suffix}, [hidden]#{$suffix}.active#id {}",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let rule = rules
+        .first()
+        .expect("expected the interpolated selector rule");
+    let specificities = rule
+        .selectors
+        .iter()
+        .map(|selector| selector.specificity)
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        specificities,
+        [
+            Specificity(0, 0, 0),
+            Specificity(0, 1, 0),
+            Specificity(0, 1, 0),
+            Specificity(1, 2, 0),
+        ]
+    );
+}

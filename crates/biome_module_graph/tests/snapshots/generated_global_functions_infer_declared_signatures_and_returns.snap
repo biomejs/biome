@@ -1,0 +1,406 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const evaluated = eval("1 + 1");
+export const integer = parseInt("42");
+export const hexadecimal = parseInt("ff", 16);
+export const float = parseFloat("1.5");
+export const nan = isNaN(0);
+export const finite = isFinite(42);
+export const decoded = decodeURI("https://example.com/a%20b");
+export const decodedComponent = decodeURIComponent("a%20b");
+export const encoded = encodeURI("https://example.com/a b");
+export const encodedComponent = encodeURIComponent("a b");
+export const encodedNumber = encodeURIComponent(42);
+export const encodedBoolean = encodeURIComponent(true);
+export const escaped = escape("a b");
+export const unescaped = unescape("a%20b");
+export const parse = parseInt;
+export const aliased = parse("101", 2);
+export const encode = encodeURIComponent;
+export const checked = globalThis.isFinite(42);
+export const qualified = globalThis.parseFloat("1.5");
+export function shadowed(parseInt: (value: string) => boolean) {
+	return parseInt("42");
+}
+```
+
+## Inferred types
+
+```
+Binding evaluated "evaluated" => any
+
+Expression "eval" => sync Function "eval" {
+  accepts: {
+    params: [
+      required x: string
+    ]
+    type_args: []
+  }
+  returns: any
+}
+
+Expression "eval(\"1 + 1\")" => any
+
+Expression "\"1 + 1\"" => string: 1 + 1
+
+Binding integer "integer" => number
+
+Expression "parseInt" => sync Function "parseInt" {
+  accepts: {
+    params: [
+      required string: string
+      optional radix: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parseInt(\"42\")" => number
+
+Expression "\"42\"" => string: 42
+
+Binding hexadecimal "hexadecimal" => number
+
+Expression "parseInt" => sync Function "parseInt" {
+  accepts: {
+    params: [
+      required string: string
+      optional radix: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parseInt(\"ff\", 16)" => number
+
+Expression "\"ff\"" => string: ff
+
+Expression "16" => number: 16
+
+Binding float "float" => number
+
+Expression "parseFloat" => sync Function "parseFloat" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parseFloat(\"1.5\")" => number
+
+Expression "\"1.5\"" => string: 1.5
+
+Binding nan "nan" => boolean
+
+Expression "isNaN" => sync Function "isNaN" {
+  accepts: {
+    params: [
+      required number: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "isNaN(0)" => boolean
+
+Expression "0" => number: 0
+
+Binding finite "finite" => boolean
+
+Expression "isFinite" => sync Function "isFinite" {
+  accepts: {
+    params: [
+      required number: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "isFinite(42)" => boolean
+
+Expression "42" => number: 42
+
+Binding decoded "decoded" => string
+
+Expression "decodeURI" => sync Function "decodeURI" {
+  accepts: {
+    params: [
+      required encodedURI: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "decodeURI(\"https://example.com/a%20b\")" => string
+
+Expression "\"https://example.com/a%20b\"" => string: https://example.com/a%20b
+
+Binding decodedComponent "decodedComponent" => string
+
+Expression "decodeURIComponent" => sync Function "decodeURIComponent" {
+  accepts: {
+    params: [
+      required encodedURIComponent: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "decodeURIComponent(\"a%20b\")" => string
+
+Expression "\"a%20b\"" => string: a%20b
+
+Binding encoded "encoded" => string
+
+Expression "encodeURI" => sync Function "encodeURI" {
+  accepts: {
+    params: [
+      required uri: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "encodeURI(\"https://example.com/a b\")" => string
+
+Expression "\"https://example.com/a b\"" => string: https://example.com/a b
+
+Binding encodedComponent "encodedComponent" => string
+
+Expression "encodeURIComponent" => sync Function "encodeURIComponent" {
+  accepts: {
+    params: [
+      required uriComponent: string | number | boolean
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "encodeURIComponent(\"a b\")" => string
+
+Expression "\"a b\"" => string: a b
+
+Binding encodedNumber "encodedNumber" => string
+
+Expression "encodeURIComponent" => sync Function "encodeURIComponent" {
+  accepts: {
+    params: [
+      required uriComponent: string | number | boolean
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "encodeURIComponent(42)" => string
+
+Expression "42" => number: 42
+
+Binding encodedBoolean "encodedBoolean" => string
+
+Expression "encodeURIComponent" => sync Function "encodeURIComponent" {
+  accepts: {
+    params: [
+      required uriComponent: string | number | boolean
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "encodeURIComponent(true)" => string
+
+Expression "true" => bool: true
+
+Binding escaped "escaped" => string
+
+Expression "escape" => sync Function "escape" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "escape(\"a b\")" => string
+
+Expression "\"a b\"" => string: a b
+
+Binding unescaped "unescaped" => string
+
+Expression "unescape" => sync Function "unescape" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "unescape(\"a%20b\")" => string
+
+Expression "\"a%20b\"" => string: a%20b
+
+Binding parse "parse" => sync Function "parseInt" {
+  accepts: {
+    params: [
+      required string: string
+      optional radix: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parseInt" => sync Function "parseInt" {
+  accepts: {
+    params: [
+      required string: string
+      optional radix: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding aliased "aliased" => number
+
+Expression "parse" => sync Function "parseInt" {
+  accepts: {
+    params: [
+      required string: string
+      optional radix: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parse(\"101\", 2)" => number
+
+Expression "\"101\"" => string: 101
+
+Expression "2" => number: 2
+
+Binding encode "encode" => sync Function "encodeURIComponent" {
+  accepts: {
+    params: [
+      required uriComponent: string | number | boolean
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "encodeURIComponent" => sync Function "encodeURIComponent" {
+  accepts: {
+    params: [
+      required uriComponent: string | number | boolean
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding checked "checked" => boolean
+
+Expression "globalThis" => globalThis
+
+Expression "globalThis.isFinite" => sync Function "isFinite" {
+  accepts: {
+    params: [
+      required number: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "globalThis.isFinite(42)" => boolean
+
+Expression "42" => number: 42
+
+Binding qualified "qualified" => number
+
+Expression "globalThis" => globalThis
+
+Expression "globalThis.parseFloat" => sync Function "parseFloat" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "globalThis.parseFloat(\"1.5\")" => number
+
+Expression "\"1.5\"" => string: 1.5
+
+Binding shadowed "shadowed" => sync Function "shadowed" {
+  accepts: {
+    params: [
+      required parseInt: sync Function {
+        accepts: {
+          params: [
+            required value: string
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding parseInt "parseInt" => sync Function {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding value "value" => string
+
+Expression "parseInt" => sync Function {
+  accepts: {
+    params: [
+      required value: string
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "parseInt(\"42\")" => boolean
+
+Expression "\"42\"" => string: 42
+```

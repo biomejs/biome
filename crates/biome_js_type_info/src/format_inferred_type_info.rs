@@ -152,6 +152,16 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                 ]]
             ),
             Self::Literal(literal) => write!(f, [literal]),
+            Self::IndexedAccess(access) => write!(
+                f,
+                [
+                    token("("),
+                    access.object(db),
+                    token(")["),
+                    access.index(db),
+                    token("]")
+                ]
+            ),
             Self::InstanceOf(instance) => {
                 write!(f, [&format_args![token("instanceof"), space(), instance]])
             }
@@ -402,8 +412,24 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
                 write!(f, [token("["), ty, token("]")])
             }
+            Self::ComputedStatic(ty) | Self::ConstAssertedComputedStatic(ty) => {
+                write!(
+                    f,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        ty,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]"), None)])
             }
             Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
                 write!(f, [text(&std::format!("computed [{name}]"), None)])
@@ -578,6 +604,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedTypeInstance<'db> {
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for InternedGenericTypeParameter<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        if self.is_const(f.context().db()) {
+            write!(f, [token("const"), space()])?;
+        }
         let db = f.context().db();
         let constraint = format_with(|f| {
             if let Some(constraint) = self.constraint(db) {
@@ -741,6 +770,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     token(")")
                 ]]
             ),
+            Self::CallArgument(argument) => {
+                write!(f, [token("CallArgument"), space()])?;
+                if argument.is_constructor {
+                    write!(f, [token("new"), space()])?;
+                }
+                write!(
+                    f,
+                    [&format_args![
+                        &argument.callee,
+                        token("("),
+                        group(&soft_block_indent(&FmtInferredCallArgumentTypes(
+                            &argument.arguments
+                        ))),
+                        token(")"),
+                        token("["),
+                        text(&argument.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
+            }
             Self::Conditional(expr) => write!(
                 f,
                 [&group(&format_args![
@@ -789,6 +838,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     ]]
                 ),
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => write!(
                 f,
                 [&format_args![
@@ -842,6 +900,17 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                         &expr.arguments
                     ))),
                     token(")")
+                ]]
+            ),
+            Self::Parameter(parameter) => write!(
+                f,
+                [&format_args![
+                    token("Parameter"),
+                    space(),
+                    &parameter.function,
+                    token("["),
+                    text(&parameter.index.to_string(), None),
+                    token("]"),
                 ]]
             ),
             Self::NullishCoalescing(expr) => write!(

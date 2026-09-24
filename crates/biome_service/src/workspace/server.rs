@@ -1682,7 +1682,13 @@ impl WorkspaceServerWithDb<'_> {
                 EditorFeatures::default(),
                 query_context,
             );
-            let results = lint(LintParams {
+            let LintResults {
+                diagnostics,
+                errors,
+                skipped_diagnostics,
+                warnings,
+                infos,
+            } = lint(LintParams {
                 parsed_source: state.parsed.clone(),
                 settings: &settings,
                 path: &path,
@@ -1692,69 +1698,19 @@ impl WorkspaceServerWithDb<'_> {
                 categories,
                 workspace_db: state.db.clone(),
                 #[cfg(feature = "html_embeds")]
-                embedded_data: embedded_data.clone(),
+                embedded_data,
                 #[cfg(feature = "module_graph")]
-                module_db: module_db.clone(),
+                module_db,
                 project_layout: self.project_layout.clone(),
                 suppression_reason: None,
                 enabled_selectors: &enabled_rules,
                 pull_code_actions,
-                plugins: plugins.clone(),
+                plugins,
                 working_directory: Some(working_directory.as_path()),
                 max_diagnostics,
                 diagnostic_level,
                 enforce_assist,
             });
-            let LintResults {
-                mut diagnostics,
-                mut errors,
-                mut skipped_diagnostics,
-                mut warnings,
-                mut infos,
-            } = results;
-
-            for embedded_node in
-                state
-                    .iter_snippets()
-                    .for_analysis(&state.parsed, state.file_source, &state.db)
-            {
-                let Some(file_source) = embedded_node.file_source(&state.db) else {
-                    continue;
-                };
-                let capabilities = self.features.get_deprecated_capabilities(file_source);
-                let Some(lint) = capabilities.analyzer.lint else {
-                    continue;
-                };
-                let results = lint(LintParams {
-                    parsed_source: embedded_node.parsed_origin(),
-                    settings: &settings,
-                    path: &path,
-                    only: &only,
-                    skip: &skip,
-                    language: file_source,
-                    categories,
-                    workspace_db: state.db.clone(),
-                    #[cfg(feature = "html_embeds")]
-                    embedded_data: embedded_data.clone(),
-                    #[cfg(feature = "module_graph")]
-                    module_db: module_db.clone(),
-                    project_layout: self.project_layout.clone(),
-                    suppression_reason: None,
-                    enabled_selectors: &enabled_rules,
-                    pull_code_actions,
-                    plugins: plugins.clone(),
-                    working_directory: Some(working_directory.as_path()),
-                    max_diagnostics,
-                    diagnostic_level,
-                    enforce_assist,
-                });
-                diagnostics.extend(results.diagnostics);
-                skipped_diagnostics += results.skipped_diagnostics;
-                errors += results.errors;
-                warnings += results.warnings;
-                infos += results.infos;
-            }
-
             (diagnostics, errors, warnings, infos, skipped_diagnostics)
         } else {
             let mut diagnostics: Vec<_> = state
@@ -3651,6 +3607,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
         let (parsed_source, parsed_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
 
+        let plugins = cfg_select! {
+            feature = "plugins" => {
+                if categories.contains(biome_analyze::RuleCategory::Lint) {
+                    self.get_analyzer_plugins_for_project(
+                        settings.as_ref().source_path().unwrap_or_default().as_path(),
+                        &settings.as_ref().get_plugins_for_path(&path),
+                    )
+                    .map_err(WorkspaceError::plugin_errors)?
+                } else {
+                    Vec::new()
+                }
+            },
+            _ => biome_analyze::AnalyzerPluginVec::new()
+        };
+
         let mut result = code_actions(CodeActionsParams {
             parsed_source: parsed_source.into(),
             range,
@@ -3663,11 +3634,23 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             skip: &skip,
             suppression_reason: None,
             enabled_rules: &enabled_rules,
-            plugins: Vec::new(),
+            plugins: plugins.clone(),
             categories,
             working_directory: Some(working_directory.as_path()),
             compute_actions,
         });
+
+        // TODO: remove this once legacy HTML-ish support is removed
+        if let Some(offset) = self
+            .documents
+            .pin()
+            .get(path.as_path())
+            .and_then(|document| Self::legacy_diagnostic_offset(&path, language, &document.content))
+        {
+            for action in &mut result.actions {
+                action.offset.get_or_insert(TextSize::from(offset));
+            }
+        }
 
         for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
             &parsed_source.into(),
@@ -3699,7 +3682,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 skip: &skip,
                 suppression_reason: None,
                 enabled_rules: &enabled_rules,
-                plugins: Vec::new(),
+                plugins: plugins.clone(),
                 categories,
                 working_directory: Some(working_directory.as_path()),
                 compute_actions,
@@ -3875,10 +3858,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             should_format = display(&params.should_format),
         )
     )]
-    fn fix_file(&self, params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
+    fn fix_file(&self, mut params: FixFileParams) -> Result<FixFileResult, WorkspaceError> {
         let project_key = params.project_key;
         let path = params.path.clone();
-        let should_format = params.should_format;
         let documents = self.documents.pin();
         let source = &documents
             .get(path.as_path())
@@ -3888,6 +3870,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let (_, settings, query) = self
             .project_get_settings_query(&state.db, project_key, &path, params.inline_config.clone())
             .ok_or_else(WorkspaceError::no_project)?;
+        let format_with_errors = query.inline_settings().map_or_else(
+            || settings.format_with_errors_enabled_for_this_file_path(&path),
+            |settings| {
+                settings
+                    .as_ref()
+                    .format_with_errors_enabled_for_this_file_path(&path)
+            },
+        );
+        let should_format = params.should_format && (format_with_errors || !state.has_errors());
+        params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);
         #[cfg(feature = "module_graph")]

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_grit_patterns"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome implementation for Grit Patterns"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 [[bench]]
 harness = false

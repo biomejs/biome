@@ -396,6 +396,7 @@ pub(crate) const CHANNEL_BUFFER_SIZE: usize = 8;
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum ServerNotification {
     PublishDiagnostics(PublishDiagnosticsParams),
+    RegisterCapability(lsp::RegistrationParams),
     ShowMessage(ShowMessageParams),
 }
 
@@ -476,10 +477,10 @@ where
         let params = req.params().expect("invalid request").clone();
         if let Some(notification) = match req.method() {
             "textDocument/publishDiagnostics" => Some(ServerNotification::PublishDiagnostics(
-                from_value(params).expect("invalid params"),
+                from_value(params.clone()).expect("invalid params"),
             )),
             "window/showMessage" => Some(ServerNotification::ShowMessage(
-                from_value(params).expect("invalid params"),
+                from_value(params.clone()).expect("invalid params"),
             )),
             _ => None,
         } {
@@ -495,6 +496,21 @@ where
         };
 
         let res = match req.method() {
+            "client/registerCapability" => {
+                let params: lsp::RegistrationParams =
+                    from_value(params).context("invalid registration params")?;
+                if params
+                    .registrations
+                    .iter()
+                    .any(|registration| registration.id == "biome_did_change_watched_files")
+                {
+                    let _ = notify
+                        .send(ServerNotification::RegisterCapability(params))
+                        .await;
+                }
+                Response::from_ok(id.clone(), to_value(())?)
+            }
+            "client/unregisterCapability" => Response::from_ok(id.clone(), to_value(())?),
             "workspace/configuration" => {
                 let result =
                     to_value(slice::from_ref(&settings)).context("failed to serialize settings")?;

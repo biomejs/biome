@@ -1,9 +1,14 @@
-use anyhow::Context;
+use crate::generate_nodes::token_kind_to_code;
+use crate::js_kinds_src::{AstSrc, Field, JS_KINDS_SRC, TokenKind};
+use crate::language_kind::LanguageKind;
+use crate::update;
+use anyhow::{Context, ensure};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_formatter::{context::JsFormatOptions, format_node};
 use biome_js_syntax::{
-    AnyJsDeclarationClause, AnyJsExportClause, AnyJsModuleItem, AnyJsObjectMemberName, AnyTsName,
+    AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause, AnyJsExportClause,
+    AnyJsFormalParameter, AnyJsModuleItem, AnyJsObjectMemberName, AnyJsParameter, AnyTsName,
     AnyTsReturnType, AnyTsType, AnyTsTypeMember, JsSyntaxToken, T, TriviaPieceKind,
     TsReferenceType,
 };
@@ -12,22 +17,19 @@ use biome_rowan::AstNode;
 use biome_string_case::Case;
 use quote::{format_ident, quote};
 use schemars::schema_for;
+use std::collections::HashSet;
 use xtask_glue::{Mode, Result, project_root};
-
-use crate::js_kinds_src::{AstSrc, Field, TokenKind};
-use crate::language_kind::LanguageKind;
-use crate::update;
 
 pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
     let rust_path = project_root().join("crates/biome_js_runtime/src/generated/js_ast.rs");
     let rust = generate_rust(ast)?;
     update(&rust_path, &rust, mode)?;
 
-    let types_path = project_root().join("packages/@biomejs/plugin-api/js_ast.d.ts");
+    let types_path = project_root().join("packages/@biomejs/runtime/js_ast.d.ts");
     let types = generate_typescript(ast);
     update(&types_path, &types, mode)?;
 
-    let diagnostics_path = project_root().join("packages/@biomejs/plugin-api/diagnostics.d.ts");
+    let diagnostics_path = project_root().join("packages/@biomejs/runtime/diagnostics.d.ts");
     let diagnostics = generate_diagnostics_typescript()?;
     update(&diagnostics_path, &diagnostics, mode)?;
 
@@ -35,8 +37,10 @@ pub(crate) fn generate_js_plugin_ast(ast: &AstSrc, mode: &Mode) -> Result<()> {
 }
 
 fn generate_rust(ast: &AstSrc) -> Result<String> {
-    let mut prototype_arms = Vec::new();
+    validate_bindings(ast)?;
     let mut kind_name_arms = Vec::new();
+    let mut field_arms = Vec::new();
+    let mut field_tables = Vec::new();
 
     for name in ast
         .nodes
@@ -50,85 +54,100 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
         kind_name_arms.push(quote! { #kind_name => JsSyntaxKind::#node_kind });
     }
 
+    // Every node kind shares the same native getter and update functions, defined in
+    // `crate::ast`. The generated code only describes the fields of each node kind.
     for node in &ast.nodes {
-        let node_type = format_ident!("{}", node.name);
-        let node_kind = format_ident!("{}", Case::Constant.convert(&node.name));
-        let mut prototype_fields = Vec::new();
+        if node.fields.is_empty() {
+            continue;
+        }
+        let node_type = node.name.as_str();
+        let kind_name = Case::Constant.convert(&node.name);
+        let node_kind = format_ident!("{kind_name}");
+        let table_name = format_ident!("{kind_name}_FIELDS");
 
-        for field in &node.fields {
-            let method_name = rust_method_name(field);
+        let fields = node.fields.iter().map(|field| {
             let property_name = property_name(field);
-            let accessor_value = match field {
-                Field::Token { optional, .. } => {
-                    let value = if *optional {
-                        quote! { node.#method_name() }
-                    } else {
-                        quote! { node.#method_name().ok() }
+            let updater_name = updater_name_for_field(field);
+            let optional = field.is_optional();
+            let value = match field {
+                Field::Token { kind, .. } => {
+                    let (kinds, expected) = match kind {
+                        TokenKind::Single(kind) => (
+                            vec![token_kind_to_code(kind, LanguageKind::Js)],
+                            format!("{kind:?}"),
+                        ),
+                        TokenKind::Many(kinds) => (
+                            kinds
+                                .iter()
+                                .map(|kind| token_kind_to_code(kind, LanguageKind::Js))
+                                .collect(),
+                            kinds
+                                .iter()
+                                .map(|kind| format!("{kind:?}"))
+                                .collect::<Vec<_>>()
+                                .join(", "),
+                        ),
                     };
-
-                    quote! { Self::wrap_token(#value) }
+                    quote! {
+                        JsAstFieldValue::Token {
+                            kinds: &[#(#kinds),*],
+                            expected: #expected,
+                        }
+                    }
                 }
-                Field::Node { ty, .. } if ast.is_list(ty) => {
-                    let list = if ast
-                        .lists
-                        .get(ty)
-                        .is_some_and(|list| list.separator.is_some())
-                    {
-                        quote! { node.#method_name().into_iter().flatten() }
+                Field::Node { ty, .. } => {
+                    let variant = if ast.is_list(ty) {
+                        quote! { List }
                     } else {
-                        quote! { node.#method_name() }
+                        quote! { Node }
                     };
-
-                    quote! { Self::wrap_node_list(#list, context) }
-                }
-                Field::Node { optional, .. } => {
-                    let value = if *optional {
-                        quote! { node.#method_name() }
-                    } else {
-                        quote! { node.#method_name().ok() }
-                    };
-
-                    quote! { Self::wrap_optional_node(#value, context) }
+                    let ty_ident = format_ident!("{ty}");
+                    quote! {
+                        JsAstFieldValue::#variant {
+                            ty: #ty,
+                            can_cast: #ty_ident::can_cast,
+                        }
+                    }
                 }
             };
-
-            prototype_fields.push(quote! {
-                (#property_name, |node, context| #accessor_value)
-            });
-        }
-
-        prototype_arms.push(quote! {
-            JsSyntaxKind::#node_kind => {
-                register_js_ast_fields!(
-                    prototype,
-                    JsSyntaxKind::#node_kind,
-                    #node_type,
-                    #(#prototype_fields,)*
-                );
+            quote! {
+                JsAstField {
+                    property: #property_name,
+                    updater: #updater_name,
+                    optional: #optional,
+                    value: #value,
+                }
             }
+        });
+
+        field_tables.push(quote! {
+            static #table_name: JsAstNodeFields = JsAstNodeFields {
+                kind: JsSyntaxKind::#node_kind,
+                name: #node_type,
+                fields: &[#(#fields),*],
+            };
+        });
+        field_arms.push(quote! {
+            JsSyntaxKind::#node_kind => &#table_name
         });
     }
 
+    let token_kind_arms = token_kind_names().into_iter().map(|name| {
+        let kind = format_ident!("{name}");
+        quote! { #name => JsSyntaxKind::#kind }
+    });
     let tokens = quote! {
-        use super::*;
-        use biome_js_syntax::*;
+        use crate::ast::{JsAstField, JsAstFieldValue, JsAstNode, JsAstNodeFields};
+        use biome_js_syntax::{*, JsSyntaxKind::*};
+        use biome_rowan::AstNode;
 
         impl JsAstNode {
-            pub(super) fn create_generated_prototype(
-                kind: JsSyntaxKind,
-                base_prototype: JsObject,
-                context: &mut Context,
-            ) -> JsObject {
-                let mut prototype = ObjectInitializer::with_native_data_and_proto(
-                    OrdinaryObject,
-                    base_prototype,
-                    context,
-                );
-                match kind {
-                    #(#prototype_arms,)*
-                    _ => {}
-                }
-                prototype.build()
+            /// Resolves a constructible token kind by its exact native enum name.
+            pub(crate) fn token_kind_from_name(name: &str) -> Option<JsSyntaxKind> {
+                Some(match name {
+                    #(#token_kind_arms,)*
+                    _ => return None,
+                })
             }
 
             /// Resolves a syntax kind from the name used in the plugin API type definitions,
@@ -139,10 +158,23 @@ fn generate_rust(ast: &AstSrc) -> Result<String> {
                     _ => return None,
                 })
             }
+
+            /// Returns the plugin API fields of `kind`, one per slot in slot order.
+            /// Node kinds without fields, lists, and bogus nodes have no descriptor.
+            pub(crate) fn node_fields(kind: JsSyntaxKind) -> Option<&'static JsAstNodeFields> {
+                Some(match kind {
+                    #(#field_arms,)*
+                    _ => return None,
+                })
+            }
         }
+
+        #(#field_tables)*
     };
 
-    Ok(xtask_glue::reformat(tokens)?.replacen("//!", "//", 1))
+    // Establish line breaks before rustfmt, which can leave oversized expressions unchanged.
+    let file = syn::parse2::<syn::File>(tokens)?;
+    Ok(xtask_glue::reformat(prettyplease::unparse(&file))?.replacen("//!", "//", 1))
 }
 
 fn generate_typescript(ast: &AstSrc) -> String {
@@ -213,8 +245,80 @@ fn generate_typescript(ast: &AstSrc) -> String {
             parent.into(),
             ancestors.into(),
             children.into(),
+            method(
+                "token",
+                [("field", string_type())],
+                union_type([reference_type("JsAstToken").into(), undefined_type()]),
+                Some(
+                    "/**\n * Returns the native token handle for a named token field.\n * Use the public field name, such as `kindToken` or `operatorToken`. Unlike the\n * string-valued field getter, this handle can be passed to token mutation methods.\n * Returns `undefined` when the field is recognized but its token is absent.\n * Repeated access does not guarantee the same JavaScript object identity.\n *\n * @throws {TypeError} If the field name is unknown, names a non-token field,\n * or the receiver or arguments are invalid.\n */",
+                ),
+            ),
+            method(
+                "childrenWithTokens",
+                [],
+                make::ts_type_operator_type(
+                    make::token(T![readonly]),
+                    make::ts_array_type(
+                        reference_type("JsAstElement").into(),
+                        make::token(T!['[']),
+                        make::token(T![']']),
+                    )
+                    .into(),
+                )
+                .into(),
+                Some(
+                    "/**\n * Returns a fresh array of immediate child nodes and tokens in source order.\n * Includes list containers without flattening them or descending into child nodes.\n * Call this method on a list node to obtain its elements and separator tokens.\n * Whitespace and comments remain token trivia, not separate array entries. Missing\n * slots are omitted; nodes without child nodes or tokens return an empty array.\n * The returned handles can be passed to element mutation methods. Changing the\n * array does not change the syntax tree, and handles have no stable JavaScript identity.\n */",
+                ),
+            ),
         ],
     )];
+
+    // Source tokens include kinds, such as EOF, that the token factory cannot construct.
+    let constructible_kinds = token_kind_names();
+    let source_token_kind = union_type(
+        std::iter::once(reference_type("JsTokenKind").into()).chain(
+            JS_KINDS_SRC
+                .tokens
+                .iter()
+                .copied()
+                .chain(["EOF", "UNICODE_BOM"])
+                .filter(|name| {
+                    *name != "GRIT_METAVARIABLE"
+                        && !constructible_kinds.iter().any(|kind| kind == *name)
+                })
+                .map(string_literal_type),
+        ),
+    );
+    items.push(export_interface(
+        make::token(T![export]),
+        "JsAstToken",
+        None,
+        [
+            property("kind", source_token_kind),
+            property("text", string_type()),
+            property(
+                "parent",
+                union_type([reference_type("AnyJsAstNode").into(), undefined_type()]),
+            ),
+        ],
+    ));
+    items.push(export_type_alias(
+        make::token(T![export]),
+        "JsAstElement",
+        union_type([
+            reference_type("AnyJsAstNode").into(),
+            reference_type("JsAstToken").into(),
+        ]),
+    ));
+    items.push(export_type_alias(
+        make::token(T![export]),
+        "JsTokenKind",
+        union_type(
+            constructible_kinds
+                .iter()
+                .map(|name| string_literal_type(name)),
+        ),
+    ));
 
     items.push(export_type_alias(
         make::token(T![export]),
@@ -244,6 +348,41 @@ fn generate_typescript(ast: &AstSrc) -> String {
                 Field::Node { ty, .. } => union_type([reference_type(ty).into(), undefined_type()]),
             };
             members.push(property(&property_name, field_type));
+            let replacement_type = match field {
+                Field::Token { .. } => reference_type("JsAstToken").into(),
+                Field::Node { ty, .. } if ast.is_list(ty) => {
+                    reference_type(&format!("{ty}Node")).into()
+                }
+                Field::Node { ty, .. } => reference_type(ty).into(),
+            };
+            let replacement_type = if field.is_optional() {
+                union_type([replacement_type, undefined_type()])
+            } else {
+                replacement_type
+            };
+            members.push(method(
+                &updater_name_for_field(field),
+                [("value", replacement_type)],
+                reference_type(&node.name).into(),
+                None,
+            ));
+        }
+
+        let token_fields = node
+            .fields
+            .iter()
+            .filter(|field| matches!(field, Field::Token { .. }))
+            .map(|field| string_literal_type(&property_name(field)))
+            .collect::<Vec<_>>();
+        if !token_fields.is_empty() {
+            for field_type in [union_type(token_fields), string_type()] {
+                members.push(method(
+                    "token",
+                    [("field", field_type)],
+                    union_type([reference_type("JsAstToken").into(), undefined_type()]),
+                    None,
+                ));
+            }
         }
 
         items.push(export_interface(
@@ -441,6 +580,53 @@ fn property(name: &str, ty: AnyTsType) -> AnyTsTypeMember {
     .into()
 }
 
+fn method(
+    name: &str,
+    parameters: impl IntoIterator<Item = (&'static str, AnyTsType)>,
+    return_type: AnyTsType,
+    documentation: Option<&str>,
+) -> AnyTsTypeMember {
+    let mut name = make::ident(name);
+    if let Some(documentation) = documentation {
+        name = name.with_leading_trivia([
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::MultiLineComment, documentation),
+            (TriviaPieceKind::Newline, "\n"),
+        ]);
+    }
+    let parameters = parameters
+        .into_iter()
+        .map(|(name, ty)| {
+            AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
+                make::js_formal_parameter(
+                    make::js_decorator_list([]),
+                    AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
+                        make::js_identifier_binding(make::ident(name)),
+                    )),
+                )
+                .with_type_annotation(make::ts_type_annotation(make::token(T![:]), ty))
+                .build(),
+            ))
+        })
+        .collect::<Vec<_>>();
+    let separators = (1..parameters.len()).map(|_| make::token(T![,]));
+    make::ts_method_signature_type_member(
+        make::js_literal_member_name(name).into(),
+        make::js_parameters(
+            make::token(T!['(']),
+            make::js_parameter_list(parameters, separators),
+            make::token(T![')']),
+        ),
+    )
+    .with_return_type_annotation(make::ts_return_type_annotation(
+        make::token(T![:]),
+        AnyTsReturnType::AnyTsType(return_type),
+    ))
+    .with_separator_token_token(make::token(T![;]))
+    .build()
+    .into()
+}
+
 fn string_type() -> AnyTsType {
     make::ts_string_type(make::token(T![string])).into()
 }
@@ -484,13 +670,88 @@ fn property_name(field: &Field) -> String {
     let method_name = rust_method_name(field);
     let name = Case::Camel.convert(&method_name.to_string());
 
-    match (name.as_str(), field) {
-        ("kind" | "text" | "parent" | "ancestors" | "children", Field::Token { .. }) => {
-            format!("{name}Token")
+    if BASE_MEMBERS.contains(&name.as_str()) {
+        match field {
+            Field::Token { .. } => format!("{name}Token"),
+            Field::Node { .. } => format!("{name}Node"),
         }
-        ("kind" | "text" | "parent" | "ancestors" | "children", Field::Node { .. }) => {
-            format!("{name}Node")
-        }
-        _ => name,
+    } else {
+        name
     }
+}
+
+const BASE_MEMBERS: &[&str] = &[
+    "kind",
+    "text",
+    "parent",
+    "ancestors",
+    "children",
+    "token",
+    "childrenWithTokens",
+];
+
+fn updater_name_for_field(field: &Field) -> String {
+    format!("with{}", Case::Pascal.convert(&property_name(field)))
+}
+
+fn validate_bindings(ast: &AstSrc) -> Result<()> {
+    for node in &ast.nodes {
+        ensure!(
+            !node.dynamic,
+            "JS plugin AST bindings do not support dynamic slots: {}",
+            node.name
+        );
+        let mut names = BASE_MEMBERS
+            .iter()
+            .map(|name| (*name).to_owned())
+            .collect::<HashSet<_>>();
+        for field in &node.fields {
+            for name in [property_name(field), updater_name_for_field(field)] {
+                ensure!(
+                    names.insert(name.clone()),
+                    "Duplicate JS plugin AST member {}.{name}",
+                    node.name
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
+fn token_kind_names() -> Vec<String> {
+    JS_KINDS_SRC
+        .punct
+        .iter()
+        .map(|(_, name)| (*name).to_owned())
+        .chain(
+            JS_KINDS_SRC
+                .keywords
+                .iter()
+                // import.meta uses the META token, not META_KW.
+                .filter(|keyword| **keyword != "meta")
+                .map(|keyword| format!("{}_KW", Case::Constant.convert(keyword))),
+        )
+        .chain(JS_KINDS_SRC.literals.iter().map(|name| (*name).to_owned()))
+        .chain(
+            JS_KINDS_SRC
+                .tokens
+                .iter()
+                .copied()
+                // Whitespace and comments are attached to tokens as trivia. ERROR_TOKEN
+                // represents a lexer error, and GRIT_METAVARIABLE belongs to Grit patterns.
+                // None of these are replacement tokens for JavaScript plugin fixes.
+                .filter(|name| {
+                    !matches!(
+                        *name,
+                        "ERROR_TOKEN"
+                            | "NEWLINE"
+                            | "WHITESPACE"
+                            | "COMMENT"
+                            | "MULTILINE_COMMENT"
+                            | "GRIT_METAVARIABLE"
+                    )
+                })
+                .map(str::to_owned),
+        )
+        .collect()
 }

@@ -93,6 +93,32 @@ for (let x = 0; x < arr.length; x++) {
   x++;
 }
 
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "-o") {
+    i += 1;
+    out.push(argv[i]);
+  }
+}
+
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === "-o") {
+    out.push(argv[++i]);
+  }
+}
+
+for (let i = 0; i < argv.length; i++) {
+  out.push(argv[i++]);
+}
+
+for (let i = 0; i < argv.length; i++) {
+  out.push(argv[i += 1]);
+}
+
+for (let i = 0; i < argv.length; i++) {
+  i = i + 1;
+  out.push(argv[i]);
+}
+
 for (let x = 0; true; x++) {}
 
 for (var q in obj) {

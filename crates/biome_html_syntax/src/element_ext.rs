@@ -6,8 +6,8 @@ use crate::{
     AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyHtmlTagName,
     AnyHtmlTextExpression, AnySvelteBlock, AnyVueDirective, AstroEmbeddedContent,
     HtmlAttributeList, HtmlElement, HtmlEmbeddedContent, HtmlOpeningElement,
-    HtmlProcessingInstruction, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName, ScriptType,
-    inner_string_text,
+    HtmlProcessingInstruction, HtmlSelfClosingElement, HtmlSyntaxToken, HtmlTagName,
+    HtmlTextExpression, ScriptType, inner_string_text,
 };
 use biome_aria::Attribute;
 use biome_parser::{TokenSet, token_set};
@@ -670,7 +670,7 @@ impl biome_aria::Element for AnyHtmlTagElement {
 }
 
 declare_node_union! {
-    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent
+    pub AnyEmbeddedContent = HtmlEmbeddedContent | AstroEmbeddedContent | HtmlTextExpression
 }
 
 impl AnyEmbeddedContent {
@@ -678,6 +678,12 @@ impl AnyEmbeddedContent {
         match self {
             Self::HtmlEmbeddedContent(node) => node.value_token().ok(),
             Self::AstroEmbeddedContent(node) => node.content_token(),
+            // The `{...}` in an attribute expression (`onclick={...}`), a
+            // Svelte/Vue directive value, or a text/mustache expression
+            // (`{count}`) all carry their raw snippet text as this token.
+            // See `parse_embedded_nodes.rs`, which records `element_range`
+            // as this node's own range for each of those candidate kinds.
+            Self::HtmlTextExpression(node) => node.html_literal_token().ok(),
         }
     }
 }

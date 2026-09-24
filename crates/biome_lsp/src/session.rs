@@ -817,6 +817,15 @@ impl Session {
         result
     }
 
+    pub(crate) fn supports_relative_watched_file_patterns(&self) -> bool {
+        self.initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.workspace.as_ref())
+            .and_then(|c| c.did_change_watched_files)
+            .and_then(|c| c.relative_pattern_support)
+            == Some(true)
+    }
+
     /// Whether the client supports `codeAction/resolve` for deferred edit computation.
     /// Whether the client supports `codeAction/resolve` for deferred edit computation.
     ///
@@ -889,7 +898,7 @@ impl Session {
     }
 
     /// Returns the root URI of the workspace as provided by the client
-    pub(crate) fn base_uri(&self) -> Option<Uri> {
+    pub(crate) fn root_uri(&self) -> Option<Uri> {
         let initialize_params = self.initialize_params.get()?;
         initialize_params.root_uri.clone()
     }

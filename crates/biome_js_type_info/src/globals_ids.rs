@@ -1,13 +1,13 @@
-//! Predefined global type IDs derived from one ordered manifest, [`PREDEFINED_ID_ROWS`].
-//! Row position is the `TypeId` value, so the manifest is append-only: reordering
-//! or removing rows shifts every consumer's `*_ID` constant.
+//! Global IDs consist of a fixed manifest followed by generated declarations.
+//! Row position in [`PREDEFINED_ID_ROWS`] is the fixed `TypeId` value, so the
+//! manifest is append-only. Generated function IDs follow it in source order.
 
 use std::cmp::Ordering;
 
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 65;
+const PREDEFINED_TYPE_COUNT: usize = 89;
 
 /// Type ID that is known to index the predefined global resolver.
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -72,7 +72,7 @@ macro_rules! predefined_globals {
     ($(($id:ident, $id_name:ident, $global_type_id:ident, $resolved_id:tt, $name:literal, $role:ident $(,)?)),+ $(,)?) => {
         predefined_global_ids!(0usize; $(($id, $id_name, $global_type_id, $resolved_id, $name, $role)),+);
 
-        /// Single ordered manifest of every predefined global type ID.
+        /// Ordered manifest of fixed predefined global type IDs.
         pub(crate) const PREDEFINED_ID_ROWS: &[&str] = &[
             $(
                 $id_name,
@@ -81,12 +81,16 @@ macro_rules! predefined_globals {
 
         const _: () = assert!(PREDEFINED_ID_ROWS.len() == PREDEFINED_TYPE_COUNT);
 
-        /// Number of predefined global type IDs derived from the manifest.
-        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len();
+        /// Number of fixed and generated global type IDs.
+        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len()
+            + crate::generated::global_types::VALUE_GLOBALS.len();
 
         /// Returns a string for formatting global IDs in test snapshots.
         pub(crate) fn global_type_name(id: TypeId) -> Option<&'static str> {
-            PREDEFINED_ID_ROWS.get(id.index()).copied()
+            PREDEFINED_ID_ROWS.get(id.index()).copied().or_else(|| {
+                let index = id.index().checked_sub(PREDEFINED_ID_ROWS.len())?;
+                crate::generated::global_types::VALUE_GLOBALS.get(index).map(|(name, _)| *name)
+            })
         }
     };
 }
@@ -156,14 +160,14 @@ predefined_globals! {
     (MAP_CALLBACK_ID, MAP_CALLBACK_ID_NAME, MAP_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_MAP_CALLBACK_ID, "<U>(item: T) => U", Helper),
     (VOID_CALLBACK_ID, VOID_CALLBACK_ID_NAME, VOID_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_VOID_CALLBACK_ID, "() => void", Helper),
     (FETCH_ID, FETCH_ID_NAME, FETCH_ID_GLOBAL_TYPE_ID, _, "fetch", HostManual),
-    (INSTANCEOF_REGEXP_ID, INSTANCEOF_REGEXP_ID_NAME, INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_REGEXP_ID, "instanceof RegExp", Helper),
+    (INSTANCEOF_REGEXP_ID, INSTANCEOF_REGEXP_ID_NAME, INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, _, "instanceof RegExp", Helper),
     (REGEXP_ID, REGEXP_ID_NAME, REGEXP_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_ID, "RegExp", ManualGlobal),
     (REGEXP_EXEC_ID, REGEXP_EXEC_ID_NAME, REGEXP_EXEC_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_EXEC_ID, "RegExp.exec", ManualSynthetic),
     (INSTANCEOF_SYMBOL_ID, INSTANCEOF_SYMBOL_ID_NAME, INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, _, "instanceof Symbol", Helper),
     (SYMBOL_ID, SYMBOL_ID_NAME, SYMBOL_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ID, "Symbol", ManualGlobal),
     (SYMBOL_DISPOSE_ID, SYMBOL_DISPOSE_ID_NAME, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_DISPOSE_ID, "Symbol.dispose", ManualSynthetic),
     (SYMBOL_ASYNC_DISPOSE_ID, SYMBOL_ASYNC_DISPOSE_ID_NAME, SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, "Symbol.asyncDispose", ManualSynthetic),
-    (DISPOSABLE_ID, DISPOSABLE_ID_NAME, DISPOSABLE_ID_GLOBAL_TYPE_ID, _, "Disposable", ManualGlobal),
+    (DISPOSABLE_ID, DISPOSABLE_ID_NAME, DISPOSABLE_ID_GLOBAL_TYPE_ID, GLOBAL_DISPOSABLE_ID, "Disposable", ManualGlobal),
     (DISPOSABLE_DISPOSE_ID, DISPOSABLE_DISPOSE_ID_NAME, DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_DISPOSABLE_DISPOSE_ID, "Disposable[Symbol.dispose]", ManualSynthetic),
     (ASYNC_DISPOSABLE_ID, ASYNC_DISPOSABLE_ID_NAME, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, _, "AsyncDisposable", ManualGlobal),
     (ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID, ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME, ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
@@ -183,4 +187,28 @@ predefined_globals! {
     (BOOLEAN_ID, BOOLEAN_ID_NAME, BOOLEAN_ID_GLOBAL_TYPE_ID, _, "boolean", Primitive),
     (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME, ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CONSTRUCTOR_ID, "Error.constructor", ManualSynthetic),
     (ERROR_CALL_ID, ERROR_CALL_ID_NAME, ERROR_CALL_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CALL_ID, "Error.call", ManualSynthetic),
+    (ITERATOR_YIELD_RESULT_ID, ITERATOR_YIELD_RESULT_ID_NAME, ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_YIELD_RESULT_ID, "IteratorYieldResult", Helper),
+    (ITERATOR_RETURN_RESULT_ID, ITERATOR_RETURN_RESULT_ID_NAME, ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RETURN_RESULT_ID, "IteratorReturnResult", Helper),
+    (ITERATOR_RESULT_ID, ITERATOR_RESULT_ID_NAME, ITERATOR_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RESULT_ID, "IteratorResult", Helper),
+    (ITERATOR_ID, ITERATOR_ID_NAME, ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_ID, "Iterator", Helper),
+    (MATH_ID, MATH_ID_NAME, MATH_ID_GLOBAL_TYPE_ID, _, "Math", ManualGlobal),
+    (ITERABLE_ID, ITERABLE_ID_NAME, ITERABLE_ID_GLOBAL_TYPE_ID, GLOBAL_ITERABLE_ID, "Iterable", Helper),
+    (SYMBOL_ITERATOR_ID, SYMBOL_ITERATOR_ID_NAME, SYMBOL_ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ITERATOR_ID, "Symbol.iterator", ManualSynthetic),
+    (REGEXP_EXEC_ARRAY_ID, REGEXP_EXEC_ARRAY_ID_NAME, REGEXP_EXEC_ARRAY_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_EXEC_ARRAY_ID, "RegExpExecArray", Helper),
+    (ARRAY_LIKE_ID, ARRAY_LIKE_ID_NAME, ARRAY_LIKE_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_LIKE_ID, "ArrayLike", Helper),
+    (SYMBOL_TO_STRING_TAG_ID, SYMBOL_TO_STRING_TAG_ID_NAME, SYMBOL_TO_STRING_TAG_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_TO_STRING_TAG_ID, "Symbol.toStringTag", ManualSynthetic),
+    (SYMBOL_TO_PRIMITIVE_ID, SYMBOL_TO_PRIMITIVE_ID_NAME, SYMBOL_TO_PRIMITIVE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_TO_PRIMITIVE_ID, "Symbol.toPrimitive", ManualSynthetic),
+    (SYMBOL_MATCH_ID, SYMBOL_MATCH_ID_NAME, SYMBOL_MATCH_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_MATCH_ID, "Symbol.match", ManualSynthetic),
+    (SYMBOL_REPLACE_ID, SYMBOL_REPLACE_ID_NAME, SYMBOL_REPLACE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_REPLACE_ID, "Symbol.replace", ManualSynthetic),
+    (SYMBOL_SEARCH_ID, SYMBOL_SEARCH_ID_NAME, SYMBOL_SEARCH_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_SEARCH_ID, "Symbol.search", ManualSynthetic),
+    (SYMBOL_SPLIT_ID, SYMBOL_SPLIT_ID_NAME, SYMBOL_SPLIT_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_SPLIT_ID, "Symbol.split", ManualSynthetic),
+    (SYMBOL_SPECIES_ID, SYMBOL_SPECIES_ID_NAME, SYMBOL_SPECIES_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_SPECIES_ID, "Symbol.species", ManualSynthetic),
+    (SYMBOL_HAS_INSTANCE_ID, SYMBOL_HAS_INSTANCE_ID_NAME, SYMBOL_HAS_INSTANCE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_HAS_INSTANCE_ID, "Symbol.hasInstance", ManualSynthetic),
+    (SYMBOL_UNSCOPABLES_ID, SYMBOL_UNSCOPABLES_ID_NAME, SYMBOL_UNSCOPABLES_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_UNSCOPABLES_ID, "Symbol.unscopables", ManualSynthetic),
+    (REGEXP_MATCH_ARRAY_ID, REGEXP_MATCH_ARRAY_ID_NAME, REGEXP_MATCH_ARRAY_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_MATCH_ARRAY_ID, "RegExpMatchArray", Helper),
+    (ITERATOR_OBJECT_ID, ITERATOR_OBJECT_ID_NAME, ITERATOR_OBJECT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_OBJECT_ID, "IteratorObject", Helper),
+    (MAP_ITERATOR_ID, MAP_ITERATOR_ID_NAME, MAP_ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_MAP_ITERATOR_ID, "MapIterator", Helper),
+    (SET_ITERATOR_ID, SET_ITERATOR_ID_NAME, SET_ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_SET_ITERATOR_ID, "SetIterator", Helper),
+    (BUILTIN_ITERATOR_RETURN_ID, BUILTIN_ITERATOR_RETURN_ID_NAME, BUILTIN_ITERATOR_RETURN_ID_GLOBAL_TYPE_ID, GLOBAL_BUILTIN_ITERATOR_RETURN_ID, "BuiltinIteratorReturn", Helper),
+    (INTL_ID, INTL_ID_NAME, INTL_ID_GLOBAL_TYPE_ID, _, "Intl", ManualGlobal),
 }

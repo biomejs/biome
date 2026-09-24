@@ -11,7 +11,6 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
-use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
 use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
 use biome_tailwind_logic::syntax_service::{TailwindClassString, TailwindClassStringHost};
 
@@ -46,36 +45,13 @@ impl ClassStringOptions for NoDuplicateClassesOptions {
     }
 }
 
-const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
-
-impl ClassStringOptions for NoTailwindArbitraryValueOptions {
-    fn has_attribute(&self, name: &str) -> bool {
-        CLASS_ATTRIBUTES.contains(&name)
-            || self.attributes.iter().flatten().any(|v| v.as_ref() == name)
-    }
-    fn has_function(&self, name: &str) -> bool {
-        self.functions.iter().flatten().any(|v| v.as_ref() == name)
-    }
-    fn match_function(&self, name: &str) -> bool {
-        self.functions.iter().flatten().any(|matcher| {
-            let mut matcher_parts = matcher.split('.');
-            let mut name_parts = name.split('.');
-            let all_parts_match = matcher_parts
-                .by_ref()
-                .zip(name_parts.by_ref())
-                .all(|(m, p)| m == "*" || m == p);
-            all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
-        })
-    }
-}
-
 impl TailwindClassStringHost for AnyClassStringLike {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString> {
         match self {
-            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(),
-            Self::JsxString(node) => node.tailwind_class_string(),
-            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(),
-            Self::JsLiteralMemberName(node) => node.tailwind_class_string(),
+            Self::JsStringLiteralExpression(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsxString(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsTemplateChunkElement(node) => node.tailwind_class_string(is_class_attribute),
+            Self::JsLiteralMemberName(node) => node.tailwind_class_string(is_class_attribute),
         }
     }
 }
