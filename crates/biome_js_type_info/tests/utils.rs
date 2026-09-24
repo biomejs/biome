@@ -10,7 +10,8 @@ use biome_js_syntax::{
 };
 use biome_js_syntax::{AnyJsModuleItem, AnyJsRoot, AnyJsStatement, JsFunctionDeclaration};
 use biome_js_type_info::{
-    RawTypeCollector, RawTypeId, ScopeId, TypeData, TypeId, TypeReference, TypeStore,
+    NarrowingInvalidationCache, RawTypeCollector, RawTypeId, ScopeId, TypeData, TypeId,
+    TypeReference, TypeStore,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, Text};
@@ -95,9 +96,18 @@ pub fn assert_typed_bindings_snapshot(
 #[derive(Default)]
 pub struct TestTypeCollector {
     pub types: TypeStore,
+    narrowing_invalidation_cache: NarrowingInvalidationCache,
 }
 
 impl RawTypeCollector for TestTypeCollector {
+    fn narrowing_enabled(&self) -> bool {
+        true
+    }
+
+    fn narrowing_invalidation_cache(&mut self) -> &mut NarrowingInvalidationCache {
+        &mut self.narrowing_invalidation_cache
+    }
+
     fn find_type(&self, type_data: &TypeData) -> Option<TypeId> {
         self.types.find(type_data)
     }
