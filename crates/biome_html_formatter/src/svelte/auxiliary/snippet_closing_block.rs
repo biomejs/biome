@@ -24,4 +24,13 @@ impl FormatNodeRule<SvelteSnippetClosingBlock> for FormatSvelteSnippetClosingBlo
             ]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteSnippetClosingBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }
