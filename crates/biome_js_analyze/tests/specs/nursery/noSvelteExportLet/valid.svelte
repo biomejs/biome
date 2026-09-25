@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+<script>
+	let { name, class: className, count = 0 } = $props();
+
+	// Exporting constants, functions, and classes is allowed in runes mode.
+	export const version = "1.0.0";
+	export function greet() {
+		return `Hello ${name}`;
+	}
+	export class Greeter {}
+
+	const answer = 42;
+	export { answer };
+</script>
+
+<p class={className}>{name} {count}</p>

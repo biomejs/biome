@@ -200,6 +200,9 @@ pub enum JsEmbeddingKind {
         /// Whether this snippet is from a class attribute
         /// (e.g. class={...})
         is_class_attribute: bool,
+        /// Whether this snippet is from a `<script module>` block, or the legacy
+        /// `<script context="module">` block.
+        is_module_script: bool,
     },
     #[default]
     None,
@@ -286,6 +289,19 @@ impl JsEmbeddingKind {
             self,
             Self::Svelte {
                 file_kind: SvelteFileKind::SourceModule,
+                ..
+            }
+        )
+    }
+    /// Returns `true` if the code comes from the instance `<script>` block of a Svelte component,
+    /// i.e. not from a `<script module>` block.
+    pub const fn is_svelte_instance_script(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                file_kind: SvelteFileKind::Component,
+                embedding_kind: SvelteEmbeddingKind::Source,
+                is_module_script: false,
                 ..
             }
         )
@@ -404,6 +420,7 @@ impl JsFileSource {
     /// Svelte file definition
     pub fn svelte() -> Self {
         Self::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
             is_class_attribute: false,
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::Source,
@@ -623,6 +640,7 @@ impl JsFileSource {
             };
 
             return Ok(source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                is_module_script: false,
                 is_class_attribute: false,
                 file_kind: SvelteFileKind::SourceModule,
                 embedding_kind: SvelteEmbeddingKind::Source,
@@ -761,6 +779,7 @@ mod tests {
                 is_class_attribute: true,
             },
             JsEmbeddingKind::Svelte {
+                is_module_script: false,
                 is_class_attribute: true,
                 file_kind: SvelteFileKind::Component,
                 embedding_kind: SvelteEmbeddingKind::Expression,

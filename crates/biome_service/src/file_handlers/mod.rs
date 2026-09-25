@@ -1475,6 +1475,8 @@ pub struct ParsedLangAndSetup {
     language: Language,
     variant: LanguageVariant,
     setup: bool,
+    /// Whether the Svelte `<script>` has the `module` attribute, or the legacy `context="module"`.
+    module: bool,
 }
 
 #[cfg(feature = "lang_js")]
@@ -1496,7 +1498,7 @@ fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
     Some(attribute_inner_string)
 }
 
-/// Parse the "lang" and "setup" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
+/// Parse the "lang", "setup", and "module" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
 /// This function will return the language based on the existence or the value of the "lang" attribute.
 /// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
 /// matched by regular expressions.
@@ -1526,6 +1528,14 @@ pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
         };
         if attributes.find_by_name("setup").is_some() {
             lang_and_setup.setup = true;
+        }
+        if attributes.find_by_name("module").is_some()
+            || attributes
+                .find_by_name("context")
+                .and_then(|attribute| get_attribute_value(&attribute))
+                .is_some_and(|value| value.text() == "module")
+        {
+            lang_and_setup.module = true;
         }
         if let Some(lang_attribute) = attributes.find_by_name("lang")
             && let Some(lang_value) = get_attribute_value(&lang_attribute)
