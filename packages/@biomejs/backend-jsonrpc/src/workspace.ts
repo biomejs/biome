@@ -2928,6 +2928,11 @@ See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	* Require internal navigation in SvelteKit apps to use paths built with resolve().
+See https://biomejs.dev/linter/rules/use-svelte-kit-resolve 
+	 */
+	useSvelteKitResolve?: UseSvelteKitResolveConfiguration;
+	/**
 	* Require keyed {#each} blocks in Svelte templates.
 See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
 	 */
@@ -5182,6 +5187,9 @@ export type UseSortedClassesConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteKitResolveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteKitResolveOptions;
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
@@ -7295,6 +7303,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseSvelteKitResolveOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteKitResolveOptions;
+}
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
@@ -9166,6 +9178,24 @@ export interface UseSortedClassesOptions {
 	functions?: string[];
 }
 export type UseStringStartsEndsWithOptions = {};
+export interface UseSvelteKitResolveOptions {
+	/**
+	 * Whether to ignore all `goto()` calls. Default: `false`.
+	 */
+	ignoreGoto?: boolean;
+	/**
+	 * Whether to ignore all `<a>` elements. Default: `false`.
+	 */
+	ignoreLinks?: boolean;
+	/**
+	 * Whether to ignore all `pushState()` calls. Default: `false`.
+	 */
+	ignorePushState?: boolean;
+	/**
+	 * Whether to ignore all `replaceState()` calls. Default: `false`.
+	 */
+	ignoreReplaceState?: boolean;
+}
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
@@ -10475,8 +10505,8 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLayeredStyles"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
@@ -10500,6 +10530,7 @@ export type Category =
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"

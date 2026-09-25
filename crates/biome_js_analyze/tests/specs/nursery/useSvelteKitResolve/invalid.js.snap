@@ -1,0 +1,392 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+import { goto, pushState, replaceState } from "$app/navigation";
+import * as navigation from "$app/navigation";
+import { goto as navigate } from "$app/navigation";
+import { resolve, base } from "$app/paths";
+
+goto("/foo");
+goto(`/foo`);
+goto("https://svelte.dev");
+goto("");
+goto("/foo" + resolve("/bar"));
+goto(resolve("/foo") + "/bar");
+goto(base + "/foo");
+goto(condition ? resolve("/foo") : "/bar");
+goto((("/foo")));
+
+pushState("/foo", {});
+replaceState("/foo", {});
+
+navigation.goto("/foo");
+navigate("/foo");
+
+const path = "/foo";
+goto(path);
+
+const indirectPath = path;
+goto(indirectPath);
+
+let uninitializedPath;
+goto(uninitializedPath);
+
+function navigateTo(path) {
+	goto(path);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:6:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    4 │ import { resolve, base } from "$app/paths";
+    5 │ 
+  > 6 │ goto("/foo");
+      │      ^^^^^^
+    7 │ goto(`/foo`);
+    8 │ goto("https://svelte.dev");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    6 │ goto("/foo");
+  > 7 │ goto(`/foo`);
+      │      ^^^^^^
+    8 │ goto("https://svelte.dev");
+    9 │ goto("");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+     6 │ goto("/foo");
+     7 │ goto(`/foo`);
+   > 8 │ goto("https://svelte.dev");
+       │      ^^^^^^^^^^^^^^^^^^^^
+     9 │ goto("");
+    10 │ goto("/foo" + resolve("/bar"));
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+     7 │ goto(`/foo`);
+     8 │ goto("https://svelte.dev");
+   > 9 │ goto("");
+       │      ^^
+    10 │ goto("/foo" + resolve("/bar"));
+    11 │ goto(resolve("/foo") + "/bar");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+     8 │ goto("https://svelte.dev");
+     9 │ goto("");
+  > 10 │ goto("/foo" + resolve("/bar"));
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ goto(resolve("/foo") + "/bar");
+    12 │ goto(base + "/foo");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+     9 │ goto("");
+    10 │ goto("/foo" + resolve("/bar"));
+  > 11 │ goto(resolve("/foo") + "/bar");
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ goto(base + "/foo");
+    13 │ goto(condition ? resolve("/foo") : "/bar");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    10 │ goto("/foo" + resolve("/bar"));
+    11 │ goto(resolve("/foo") + "/bar");
+  > 12 │ goto(base + "/foo");
+       │      ^^^^^^^^^^^^^
+    13 │ goto(condition ? resolve("/foo") : "/bar");
+    14 │ goto((("/foo")));
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    11 │ goto(resolve("/foo") + "/bar");
+    12 │ goto(base + "/foo");
+  > 13 │ goto(condition ? resolve("/foo") : "/bar");
+       │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ goto((("/foo")));
+    15 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    12 │ goto(base + "/foo");
+    13 │ goto(condition ? resolve("/foo") : "/bar");
+  > 14 │ goto((("/foo")));
+       │      ^^^^^^^^^^
+    15 │ 
+    16 │ pushState("/foo", {});
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:11 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to pushState() isn't built with resolve().
+  
+    14 │ goto((("/foo")));
+    15 │ 
+  > 16 │ pushState("/foo", {});
+       │           ^^^^^^
+    17 │ replaceState("/foo", {});
+    18 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths, or pass an empty string to keep the current URL.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:14 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to replaceState() isn't built with resolve().
+  
+    16 │ pushState("/foo", {});
+  > 17 │ replaceState("/foo", {});
+       │              ^^^^^^
+    18 │ 
+    19 │ navigation.goto("/foo");
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths, or pass an empty string to keep the current URL.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:17 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    17 │ replaceState("/foo", {});
+    18 │ 
+  > 19 │ navigation.goto("/foo");
+       │                 ^^^^^^
+    20 │ navigate("/foo");
+    21 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:10 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    19 │ navigation.goto("/foo");
+  > 20 │ navigate("/foo");
+       │          ^^^^^^
+    21 │ 
+    22 │ const path = "/foo";
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    22 │ const path = "/foo";
+  > 23 │ goto(path);
+       │      ^^^^
+    24 │ 
+    25 │ const indirectPath = path;
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    25 │ const indirectPath = path;
+  > 26 │ goto(indirectPath);
+       │      ^^^^^^^^^^^^
+    27 │ 
+    28 │ let uninitializedPath;
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:6 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    28 │ let uninitializedPath;
+  > 29 │ goto(uninitializedPath);
+       │      ^^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ function navigateTo(path) {
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:7 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    31 │ function navigateTo(path) {
+  > 32 │ 	goto(path);
+       │ 	     ^^^^
+    33 │ }
+    34 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
