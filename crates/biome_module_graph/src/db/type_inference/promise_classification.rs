@@ -392,9 +392,7 @@ fn classify_expression(
                                 None => Indeterminate,
                             },
                             Projection::FunctionReturn => {
-                                if let InferredTypeData::GlobalType(id) = ty {
-                                    ty = global_types(db).get(id);
-                                }
+                                ty = ty.expand_canonical_global(db);
                                 let result = function_returns_promise(db, ty);
                                 match result {
                                     Some(true) => ReturnsPromise,
@@ -408,9 +406,7 @@ fn classify_expression(
                                 None => Indeterminate,
                             },
                             Projection::ArrayFunctionReturn => {
-                                if let InferredTypeData::GlobalType(id) = ty {
-                                    ty = global_types(db).get(id);
-                                }
+                                ty = ty.expand_canonical_global(db);
                                 let Some(function) = ty.callable_function(db) else {
                                     return DoesNotReturnPromise;
                                 };
@@ -434,9 +430,7 @@ fn classify_expression(
                                 }
                             }
                             Projection::AwaitedArrayFunctionReturn => {
-                                if let InferredTypeData::GlobalType(id) = ty {
-                                    ty = global_types(db).get(id);
-                                }
+                                ty = ty.expand_canonical_global(db);
                                 let Some(function) = ty.callable_function(db) else {
                                     return DoesNotReturnPromise;
                                 };

@@ -531,6 +531,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredTypeData::Generic(_)
                 | InferredTypeData::Local(_)
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::IndexedAccess(_)
                 | InferredTypeData::Intersection(_)
                 | InferredTypeData::TypeOperator(_)
@@ -819,6 +820,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1011,6 +1013,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1091,6 +1094,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1138,6 +1142,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -1426,6 +1431,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1471,6 +1477,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -1628,6 +1635,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         InferredTypeData::Unknown => types.push(InferredTypeData::Unknown),
                         ty @ (InferredTypeData::Global
                         | InferredTypeData::GlobalType(_)
+                        | InferredTypeData::GlobalLocal(_)
                         | InferredTypeData::BigInt
                         | InferredTypeData::Boolean
                         | InferredTypeData::Null
@@ -1698,6 +1706,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             ty @ (InferredTypeData::Unknown
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -2095,6 +2104,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Number
@@ -2197,6 +2207,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -2270,6 +2281,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -2331,6 +2343,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             subject @ (InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -2445,6 +2458,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -2563,6 +2577,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown => Some(InferredTypeData::Unknown),
             InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::Symbol
             | InferredTypeData::Conditional
             | InferredTypeData::Constructor(_)
@@ -2596,6 +2611,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::Boolean
             | InferredTypeData::Null
             | InferredTypeData::Number
@@ -2662,6 +2678,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::Conditional
             | InferredTypeData::Class(_)
             | InferredTypeData::Constructor(_)
@@ -2743,6 +2760,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Global
                     | InferredTypeData::GlobalType(_)
+                    | InferredTypeData::GlobalLocal(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -2822,6 +2840,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     InferredTypeData::Unknown
                     | InferredTypeData::Global
                     | InferredTypeData::GlobalType(_)
+                    | InferredTypeData::GlobalLocal(_)
                     | InferredTypeData::BigInt
                     | InferredTypeData::Boolean
                     | InferredTypeData::Null
@@ -2873,6 +2892,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Null
                 | InferredTypeData::Symbol
                 | InferredTypeData::Undefined
@@ -2918,6 +2938,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Null
                 | InferredTypeData::Number

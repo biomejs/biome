@@ -27,7 +27,8 @@ mod type_transform;
 mod type_traversal;
 
 pub use globals::{
-    GlobalTypes, global_type_id_for_qualifier, global_type_id_for_value, global_types,
+    GlobalTypeInput, GlobalTypes, global_type_id_for_qualifier, global_type_id_for_value,
+    global_types,
 };
 pub use globals_ids::GlobalTypeId;
 pub use inferred_type::{
