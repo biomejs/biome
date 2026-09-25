@@ -6,12 +6,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember,
-    AnyJsObjectMemberName, JsConditionalExpression, JsExpressionTemplateRoot, OperatorPrecedence,
-    T, unescape_js_string,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsObjectMember, AnyJsObjectMemberName,
+    JsArrayElementList, JsArrayExpression, JsConditionalExpression, JsExpressionTemplateRoot,
+    JsParenthesizedExpression, JsSyntaxToken, OperatorPrecedence, T, unescape_js_string,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Text};
+use biome_rowan::{AstNode, BatchMutationExt, Text};
 use biome_rule_options::use_astro_object_class_list::UseAstroObjectClassListOptions;
 
 declare_lint_rule! {
@@ -46,6 +46,7 @@ declare_lint_rule! {
 
 #[derive(Clone)]
 pub struct UseAstroObjectClassListState {
+    class_token: JsSyntaxToken,
     class_name: Text,
     fix: Option<ConditionalClassFix>,
 }
@@ -63,58 +64,57 @@ impl Rule for UseAstroObjectClassList {
     type Options = UseAstroObjectClassListOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let root = ctx
-            .query()
-            .syntax()
-            .ancestors()
-            .find_map(JsExpressionTemplateRoot::cast)?;
-        let root_expression = root.expression()?.omit_parentheses();
-        let is_direct_value = root_expression.syntax() == ctx.query().syntax()
-            || root_expression
-                .as_js_array_expression()
-                .is_some_and(|array| {
-                    array.elements().iter().any(|element| {
-                        matches!(
-                            element,
-                            Ok(AnyJsArrayElement::AnyJsExpression(expression))
-                                if expression.clone().omit_parentheses().syntax()
-                                    == ctx.query().syntax()
-                        )
-                    })
-                });
         if !ctx
             .source_type::<JsFileSource>()
             .as_embedding_kind()
             .is_class_list_attribute()
-            || !is_direct_value
         {
             return None;
+        }
+        let mut expression = AnyJsExpression::JsConditionalExpression(ctx.query().clone());
+        loop {
+            let parent = expression.syntax().parent()?;
+            if let Some(parenthesized) = JsParenthesizedExpression::cast(parent.clone()) {
+                expression = parenthesized.into();
+            } else if JsArrayElementList::can_cast(parent.kind()) {
+                expression = JsArrayExpression::cast(parent.parent()?)?.into();
+            } else {
+                let root = JsExpressionTemplateRoot::cast(parent)?;
+                if root.expression()?.syntax() != expression.syntax() {
+                    return None;
+                }
+                break;
+            }
         }
 
         let consequent = string_value(&ctx.query().consequent().ok()?.omit_parentheses())?;
         let alternate = string_value(&ctx.query().alternate().ok()?.omit_parentheses())?;
-        let consequent_is_empty = consequent.text().is_empty();
-        let alternate_is_empty = alternate.text().is_empty();
+        let consequent_is_empty = consequent.1.is_empty();
+        let alternate_is_empty = alternate.1.is_empty();
 
         if consequent_is_empty && alternate_is_empty {
             return None;
         }
 
-        let (class_name, mut fix) = match (consequent_is_empty, alternate_is_empty) {
+        let ((class_token, class_name), mut fix) = match (consequent_is_empty, alternate_is_empty) {
             (false, true) => (consequent, Some(ConditionalClassFix::Consequent)),
             (true, false) => (alternate, Some(ConditionalClassFix::Alternate)),
             (false, false) => (consequent, None),
             (true, true) => return None,
         };
 
-        if class_name.text() == "__proto__"
+        if class_name == "__proto__"
             || ctx.query().syntax().has_comments_direct()
             || ctx.query().syntax().has_comments_descendants()
         {
             fix = None;
         }
 
-        Some(UseAstroObjectClassListState { class_name, fix })
+        Some(UseAstroObjectClassListState {
+            class_token,
+            class_name,
+            fix,
+        })
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -155,7 +155,10 @@ impl Rule for UseAstroObjectClassList {
 
         let member = make::js_property_object_member(
             AnyJsObjectMemberName::JsLiteralMemberName(make::js_literal_member_name(
-                make::js_string_literal(state.class_name.text()),
+                state
+                    .class_token
+                    .trim_leading_trivia()
+                    .trim_trailing_trivia(),
             )),
             make::token(T![:]).with_trailing_trivia([(
                 biome_rowan::TriviaPieceKind::Whitespace,
@@ -184,12 +187,28 @@ impl Rule for UseAstroObjectClassList {
     }
 }
 
-fn string_value(expression: &AnyJsExpression) -> Option<Text> {
+fn string_value(expression: &AnyJsExpression) -> Option<(JsSyntaxToken, Text)> {
     let AnyJsExpression::AnyJsLiteralExpression(
         AnyJsLiteralExpression::JsStringLiteralExpression(string),
     ) = expression
     else {
         return None;
     };
-    Some(unescape_js_string(string.inner_string_text().ok()?))
+    let token = string.value_token().ok()?;
+    let text = string.inner_string_text().ok()?;
+    let bytes = text.as_bytes();
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == b'\\' {
+            index += 1;
+            let &escaped = bytes.get(index)?;
+            if escaped.is_ascii_digit()
+                && (escaped != b'0' || bytes.get(index + 1).is_some_and(u8::is_ascii_digit))
+            {
+                return None;
+            }
+        }
+        index += 1;
+    }
+    Some((token, unescape_js_string(text)))
 }
