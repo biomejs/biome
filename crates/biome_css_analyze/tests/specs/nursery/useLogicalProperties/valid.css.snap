@@ -83,6 +83,7 @@ expression: valid.css
 .anchor-functions {
 	inline-size: anchor-size(inline);
 	block-size: anchor-size(block);
+	inline-size: var(--size, anchor-size(inline));
 	inset-block-start: anchor(end);
 	inset-inline-start: anchor(end);
 }

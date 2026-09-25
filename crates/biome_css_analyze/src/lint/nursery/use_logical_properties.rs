@@ -2,11 +2,11 @@ use crate::CssRuleAction;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, AnyCssValue, CssFunction, CssGenericProperty,
-    CssSyntaxToken, decode_css_identifier,
+    AnyCssFunction, AnyCssGenericPropertyValueOrExpression, AnyCssValue, CssFunction,
+    CssGenericProperty, CssSyntaxToken, decode_css_identifier,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::use_logical_properties::{
     UseLogicalPropertiesDirection, UseLogicalPropertiesOptions,
 };
@@ -360,8 +360,13 @@ fn collect_value_violations(
         }
     }
 
-    for function in values.syntax().descendants().filter_map(CssFunction::cast) {
-        collect_function_violations(&function, direction, states);
+    for component in values.iter() {
+        let Some(AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function))) =
+            component.as_any_css_value()
+        else {
+            continue;
+        };
+        collect_function_violations(function, direction, states);
     }
 }
 
@@ -374,45 +379,64 @@ fn collect_function_violations(
         return;
     };
 
-    let is_anchor_size = function_name == "anchor-size";
-    let is_anchor = function_name == "anchor";
+    let function_kind = match function_name.as_str() {
+        "anchor-size" => Some(true),
+        "anchor" => Some(false),
+        _ => None,
+    };
 
-    if !is_anchor_size && !is_anchor {
-        return;
+    for expression in function.items().iter().flatten() {
+        collect_function_expression_violations(
+            expression.syntax(),
+            function_kind,
+            direction,
+            states,
+        );
     }
+}
 
-    for value in function
-        .items()
-        .syntax()
-        .descendants()
-        .filter_map(AnyCssValue::cast)
-    {
-        let Some((token, physical)) = value_identifier_token(&value) else {
+fn collect_function_expression_violations(
+    expression: &biome_rowan::SyntaxNode<biome_css_syntax::CssLanguage>,
+    function_kind: Option<bool>,
+    direction: UseLogicalPropertiesDirection,
+    states: &mut Vec<UseLogicalPropertiesState>,
+) {
+    for child in expression.children() {
+        let Some(value) = AnyCssValue::cast(child.clone()) else {
+            collect_function_expression_violations(&child, function_kind, direction, states);
             continue;
         };
 
-        let replacement = if is_anchor_size {
-            physical_to_logical_anchor_size(physical.as_str())
-        } else {
-            physical_to_logical_anchor_side(physical.as_str(), direction)
-        };
+        if let Some((token, physical)) = value_identifier_token(&value)
+            && let Some(is_anchor_size) = function_kind
+        {
+            let replacement = if is_anchor_size {
+                physical_to_logical_anchor_size(physical.as_str())
+            } else {
+                physical_to_logical_anchor_side(physical.as_str(), direction)
+            };
 
-        if let Some(replacement) = replacement {
-            states.push(UseLogicalPropertiesState {
-                span: token.text_trimmed_range(),
-                token,
-                violation: if is_anchor_size {
-                    LogicalPropertiesViolation::AnchorSizeValue {
-                        physical,
-                        replacement,
-                    }
-                } else {
-                    LogicalPropertiesViolation::AnchorValue {
-                        physical,
-                        replacement,
-                    }
-                },
-            });
+            if let Some(replacement) = replacement {
+                states.push(UseLogicalPropertiesState {
+                    span: token.text_trimmed_range(),
+                    token,
+                    violation: if is_anchor_size {
+                        LogicalPropertiesViolation::AnchorSizeValue {
+                            physical,
+                            replacement,
+                        }
+                    } else {
+                        LogicalPropertiesViolation::AnchorValue {
+                            physical,
+                            replacement,
+                        }
+                    },
+                });
+            }
+        }
+
+        if let AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function)) = value {
+            collect_function_violations(&function, direction, states);
         }
     }
 }

@@ -75,6 +75,7 @@
 .anchor-functions {
 	width: anchor-size(width);
 	height: anchor-size(height);
+	width: var(--size, anchor-size(width));
 	top: anchor(bottom);
 	left: anchor(right);
 }

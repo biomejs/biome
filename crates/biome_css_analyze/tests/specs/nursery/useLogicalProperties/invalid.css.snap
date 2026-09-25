@@ -82,6 +82,7 @@ expression: invalid.css
 .anchor-functions {
 	width: anchor-size(width);
 	height: anchor-size(height);
+	width: var(--size, anchor-size(width));
 	top: anchor(bottom);
 	left: anchor(right);
 }
@@ -1652,7 +1653,7 @@ invalid.css:76:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   > 76 │ 	width: anchor-size(width);
        │ 	^^^^^
     77 │ 	height: anchor-size(height);
-    78 │ 	top: anchor(bottom);
+    78 │ 	width: var(--size, anchor-size(width));
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1667,7 +1668,7 @@ invalid.css:76:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
     76    │ - → width:·anchor-size(width);
        76 │ + → inline-size:·anchor-size(width);
     77 77 │     height: anchor-size(height);
-    78 78 │     top: anchor(bottom);
+    78 78 │     width: var(--size, anchor-size(width));
   
 
 ```
@@ -1681,7 +1682,7 @@ invalid.css:76:21 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   > 76 │ 	width: anchor-size(width);
        │ 	                   ^^^^^
     77 │ 	height: anchor-size(height);
-    78 │ 	top: anchor(bottom);
+    78 │ 	width: var(--size, anchor-size(width));
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1696,7 +1697,7 @@ invalid.css:76:21 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     76    │ - → width:·anchor-size(width);
        76 │ + → width:·anchor-size(inline);
     77 77 │     height: anchor-size(height);
-    78 78 │     top: anchor(bottom);
+    78 78 │     width: var(--size, anchor-size(width));
   
 
 ```
@@ -1710,8 +1711,8 @@ invalid.css:77:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
     76 │ 	width: anchor-size(width);
   > 77 │ 	height: anchor-size(height);
        │ 	^^^^^^
-    78 │ 	top: anchor(bottom);
-    79 │ 	left: anchor(right);
+    78 │ 	width: var(--size, anchor-size(width));
+    79 │ 	top: anchor(bottom);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1725,8 +1726,8 @@ invalid.css:77:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
     76 76 │     width: anchor-size(width);
     77    │ - → height:·anchor-size(height);
        77 │ + → block-size:·anchor-size(height);
-    78 78 │     top: anchor(bottom);
-    79 79 │     left: anchor(right);
+    78 78 │     width: var(--size, anchor-size(width));
+    79 79 │     top: anchor(bottom);
   
 
 ```
@@ -1740,8 +1741,8 @@ invalid.css:77:22 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     76 │ 	width: anchor-size(width);
   > 77 │ 	height: anchor-size(height);
        │ 	                    ^^^^^^
-    78 │ 	top: anchor(bottom);
-    79 │ 	left: anchor(right);
+    78 │ 	width: var(--size, anchor-size(width));
+    79 │ 	top: anchor(bottom);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1755,8 +1756,8 @@ invalid.css:77:22 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     76 76 │     width: anchor-size(width);
     77    │ - → height:·anchor-size(height);
        77 │ + → height:·anchor-size(block);
-    78 78 │     top: anchor(bottom);
-    79 79 │     left: anchor(right);
+    78 78 │     width: var(--size, anchor-size(width));
+    79 79 │     top: anchor(bottom);
   
 
 ```
@@ -1768,14 +1769,14 @@ invalid.css:78:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
     76 │ 	width: anchor-size(width);
     77 │ 	height: anchor-size(height);
-  > 78 │ 	top: anchor(bottom);
-       │ 	^^^
-    79 │ 	left: anchor(right);
-    80 │ }
+  > 78 │ 	width: var(--size, anchor-size(width));
+       │ 	^^^^^
+    79 │ 	top: anchor(bottom);
+    80 │ 	left: anchor(right);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace top with inset-block-start.
+  i Replace width with inline-size.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1783,29 +1784,29 @@ invalid.css:78:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
     76 76 │     width: anchor-size(width);
     77 77 │     height: anchor-size(height);
-    78    │ - → top:·anchor(bottom);
-       78 │ + → inset-block-start:·anchor(bottom);
-    79 79 │     left: anchor(right);
-    80 80 │   }
+    78    │ - → width:·var(--size,·anchor-size(width));
+       78 │ + → inline-size:·var(--size,·anchor-size(width));
+    79 79 │     top: anchor(bottom);
+    80 80 │     left: anchor(right);
   
 
 ```
 
 ```
-invalid.css:78:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:78:33 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a logical side in anchor().
+  ! Use a logical size in anchor-size().
   
     76 │ 	width: anchor-size(width);
     77 │ 	height: anchor-size(height);
-  > 78 │ 	top: anchor(bottom);
-       │ 	            ^^^^^^
-    79 │ 	left: anchor(right);
-    80 │ }
+  > 78 │ 	width: var(--size, anchor-size(width));
+       │ 	                               ^^^^^
+    79 │ 	top: anchor(bottom);
+    80 │ 	left: anchor(right);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace bottom with end.
+  i Replace width with inline.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -1813,10 +1814,10 @@ invalid.css:78:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
     76 76 │     width: anchor-size(width);
     77 77 │     height: anchor-size(height);
-    78    │ - → top:·anchor(bottom);
-       78 │ + → top:·anchor(end);
-    79 79 │     left: anchor(right);
-    80 80 │   }
+    78    │ - → width:·var(--size,·anchor-size(width));
+       78 │ + → width:·var(--size,·anchor-size(inline));
+    79 79 │     top: anchor(bottom);
+    80 80 │     left: anchor(right);
   
 
 ```
@@ -1827,11 +1828,71 @@ invalid.css:79:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   ! Use logical CSS properties over physical ones.
   
     77 │ 	height: anchor-size(height);
-    78 │ 	top: anchor(bottom);
-  > 79 │ 	left: anchor(right);
+    78 │ 	width: var(--size, anchor-size(width));
+  > 79 │ 	top: anchor(bottom);
+       │ 	^^^
+    80 │ 	left: anchor(right);
+    81 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace top with inset-block-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    77 77 │     height: anchor-size(height);
+    78 78 │     width: var(--size, anchor-size(width));
+    79    │ - → top:·anchor(bottom);
+       79 │ + → inset-block-start:·anchor(bottom);
+    80 80 │     left: anchor(right);
+    81 81 │   }
+  
+
+```
+
+```
+invalid.css:79:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a logical side in anchor().
+  
+    77 │ 	height: anchor-size(height);
+    78 │ 	width: var(--size, anchor-size(width));
+  > 79 │ 	top: anchor(bottom);
+       │ 	            ^^^^^^
+    80 │ 	left: anchor(right);
+    81 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace bottom with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    77 77 │     height: anchor-size(height);
+    78 78 │     width: var(--size, anchor-size(width));
+    79    │ - → top:·anchor(bottom);
+       79 │ + → top:·anchor(end);
+    80 80 │     left: anchor(right);
+    81 81 │   }
+  
+
+```
+
+```
+invalid.css:80:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    78 │ 	width: var(--size, anchor-size(width));
+    79 │ 	top: anchor(bottom);
+  > 80 │ 	left: anchor(right);
        │ 	^^^^
-    80 │ }
-    81 │ 
+    81 │ }
+    82 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1841,27 +1902,27 @@ invalid.css:79:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
   i Safe fix: Use the logical CSS replacement.
   
-    77 77 │     height: anchor-size(height);
-    78 78 │     top: anchor(bottom);
-    79    │ - → left:·anchor(right);
-       79 │ + → inset-inline-start:·anchor(right);
-    80 80 │   }
-    81 81 │   
+    78 78 │     width: var(--size, anchor-size(width));
+    79 79 │     top: anchor(bottom);
+    80    │ - → left:·anchor(right);
+       80 │ + → inset-inline-start:·anchor(right);
+    81 81 │   }
+    82 82 │   
   
 
 ```
 
 ```
-invalid.css:79:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:80:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a logical side in anchor().
   
-    77 │ 	height: anchor-size(height);
-    78 │ 	top: anchor(bottom);
-  > 79 │ 	left: anchor(right);
+    78 │ 	width: var(--size, anchor-size(width));
+    79 │ 	top: anchor(bottom);
+  > 80 │ 	left: anchor(right);
        │ 	             ^^^^^
-    80 │ }
-    81 │ 
+    81 │ }
+    82 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1871,12 +1932,12 @@ invalid.css:79:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    77 77 │     height: anchor-size(height);
-    78 78 │     top: anchor(bottom);
-    79    │ - → left:·anchor(right);
-       79 │ + → left:·anchor(end);
-    80 80 │   }
-    81 81 │   
+    78 78 │     width: var(--size, anchor-size(width));
+    79 79 │     top: anchor(bottom);
+    80    │ - → left:·anchor(right);
+       80 │ + → left:·anchor(end);
+    81 81 │   }
+    82 82 │   
   
 
 ```
