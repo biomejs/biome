@@ -192,3 +192,46 @@ fn snippet_query_tracks_its_parse_and_preserves_local_coordinates() {
         &db.take_events(),
     );
 }
+
+#[test]
+fn loop_literal_truthiness() {
+    for (condition, expected) in [
+        ("true", true),
+        ("((true))", true),
+        ("false", false),
+        ("1", true),
+        ("0.0", false),
+        ("0x0", false),
+        ("0b0", false),
+        ("0o0", false),
+        ("1e-999", false),
+        ("1e999", true),
+        ("1_000", true),
+        ("1n", true),
+        ("0x0n", false),
+        ("\"yes\"", true),
+        ("\"\"", false),
+        ("\"\\n\"", true),
+        ("\"\\\\\"", true),
+        ("\"\\\n\"", false),
+        ("\"\\\r\n\"", false),
+        ("\"\\\u{2028}\\\u{2029}\"", false),
+        ("/pattern/", true),
+        ("null", false),
+        ("condition", false),
+        ("test()", false),
+    ] {
+        let parse = parsed(&format!("while ({condition}) {{}}"));
+        assert!(!parse.has_errors(), "{condition}");
+        let statement = parse
+            .syntax()
+            .descendants()
+            .find_map(biome_js_syntax::JsWhileStatement::cast)
+            .unwrap();
+        assert_eq!(
+            nodes::is_truthy_literal(&statement.test().unwrap()),
+            expected,
+            "{condition}"
+        );
+    }
+}
