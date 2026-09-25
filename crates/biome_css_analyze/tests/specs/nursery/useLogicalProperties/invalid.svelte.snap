@@ -12,6 +12,7 @@ expression: invalid.svelte
 	.card {
 		width: 100%;
 		margin-left: 1rem;
+		float: left;
 	}
 </style>
 
@@ -28,7 +29,7 @@ invalid.svelte:6:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   > 6 │ 		width: 100%;
       │ 		^^^^^
     7 │ 		margin-left: 1rem;
-    8 │ 	}
+    8 │ 		float: left;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -43,7 +44,7 @@ invalid.svelte:6:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
     3   │ - → → width:·100%;
       3 │ + → → inline-size:·100%;
     4 4 │       margin-left: 1rem;
-    5 5 │     }
+    5 5 │       float: left;
   
 
 ```
@@ -57,8 +58,8 @@ invalid.svelte:7:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
     6 │ 		width: 100%;
   > 7 │ 		margin-left: 1rem;
       │ 		^^^^^^^^^^^
-    8 │ 	}
-    9 │ </style>
+    8 │ 		float: left;
+    9 │ 	}
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -72,8 +73,38 @@ invalid.svelte:7:3 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
     3 3 │       width: 100%;
     4   │ - → → margin-left:·1rem;
       4 │ + → → margin-inline-start:·1rem;
-    5 5 │     }
-    6 6 │   
+    5 5 │       float: left;
+    6 6 │     }
+  
+
+```
+
+```
+invalid.svelte:8:10 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+     6 │ 		width: 100%;
+     7 │ 		margin-left: 1rem;
+   > 8 │ 		float: left;
+       │ 		       ^^^^
+     9 │ 	}
+    10 │ </style>
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    3 3 │       width: 100%;
+    4 4 │       margin-left: 1rem;
+    5   │ - → → float:·left;
+      5 │ + → → float:·inline-start;
+    6 6 │     }
+    7 7 │   
   
 
 ```
