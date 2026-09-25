@@ -1,0 +1,71 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 588
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc`
+
+```stylelintrc
+{
+        "rules": {
+            "block-no-empty": true,
+            "font-family-no-duplicate-names": [true],
+            "color-no-hex": [true, { "severity": "warning" }]
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "style":·{·"noHexColors":·"warn"·},
+       7 │ + → → → "suspicious":·{·"noDuplicateFontNames":·"error",·"noEmptyBlock":·"error"·}
+       8 │ + → → }
+       9 │ + → }
+      10 │ + }
+      11 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 3 Stylelint rules found
+    - 3 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (3) of your Stylelint rules are fully covered by Biome
+      - 100% (3) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```
