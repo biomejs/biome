@@ -1,3 +1,5 @@
+use super::migration::{IgnorePattern, ShorthandVec};
+use super::{eslint_jest, eslint_jsxa11y, eslint_typescript, eslint_unicorn};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
     DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
@@ -13,8 +15,6 @@ use std::hash::{Hash, Hasher};
 use std::ops::DerefMut;
 use std::vec;
 use std::{any::TypeId, marker::PhantomData, ops::Deref};
-
-use super::{eslint_jest, eslint_jsxa11y, eslint_typescript, eslint_unicorn, ignorefile};
 
 /// This modules includes implementations for deserializing an eslint configuration.
 ///
@@ -117,30 +117,6 @@ impl Merge for LegacyConfigData {
     }
 }
 
-#[derive(Debug, Default)]
-pub(crate) struct IgnorePattern(pub(crate) Box<str>);
-impl Deref for IgnorePattern {
-    type Target = Box<str>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl AsRef<str> for IgnorePattern {
-    fn as_ref(&self) -> &str {
-        self.0.as_ref()
-    }
-}
-impl biome_deserialize::Deserializable for IgnorePattern {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
-        Some(Self(ignorefile::convert_pattern(s.text()).into_boxed_str()))
-    }
-}
-
 //? ESLint plugins export metadata in their main export.
 /// This includes presets in the `configs` field.
 #[derive(Debug, Default, Deserializable)]
@@ -216,52 +192,6 @@ pub(crate) struct OverrideConfigData {
     /// The glob patterns for target files.
     pub(crate) files: ShorthandVec<Box<str>>,
     pub(crate) rules: Rules,
-}
-
-#[derive(Debug, Default)]
-pub(crate) struct ShorthandVec<T>(Vec<T>);
-impl<T> Merge for ShorthandVec<T> {
-    fn merge_with(&mut self, mut other: Self) {
-        self.0.append(&mut other.0);
-    }
-}
-impl<T> From<T> for ShorthandVec<T> {
-    fn from(value: T) -> Self {
-        Self(vec![value])
-    }
-}
-impl<T> Deref for ShorthandVec<T> {
-    type Target = Vec<T>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl<T> DerefMut for ShorthandVec<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl<T> IntoIterator for ShorthandVec<T> {
-    type Item = T;
-    type IntoIter = vec::IntoIter<T>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
-impl<T: Deserializable> Deserializable for ShorthandVec<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
-        name: &str,
-    ) -> Option<Self> {
-        Some(Self(
-            if value.visitable_type()? == DeserializableType::Array {
-                Deserializable::deserialize(ctx, value, name)?
-            } else {
-                Vec::from_iter([Deserializable::deserialize(ctx, value, name)?])
-            },
-        ))
-    }
 }
 
 #[derive(Debug, Default)]

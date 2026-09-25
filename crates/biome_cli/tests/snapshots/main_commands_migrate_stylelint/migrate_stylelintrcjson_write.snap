@@ -1,0 +1,54 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 588
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "none",
+      "style": { "noHexColors": "error" },
+      "suspicious": { "noEmptyBlock": "error" }
+    }
+  }
+}
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "block-no-empty": true,
+            "color-no-hex": true
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 2 Stylelint rules found
+    - 2 have been migrated to Biome's rules
+    - 100% (2) of your Stylelint rules are fully covered by Biome
+      - 100% (2) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```

@@ -1,4 +1,5 @@
-use super::{eslint_eslint::ShorthandVec, node};
+use super::migration::ShorthandVec;
+use super::node;
 use crate::CliDiagnostic;
 use crate::diagnostics::MigrationDiagnostic;
 use anyhow::{Context, Error};
