@@ -7752,6 +7752,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteKitRuneImports": {
+					"description": "Require importing SvelteKit's app state from $app/state instead of $app/stores.\nSee https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteKitRuneImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSvelteRequireEachKey": {
 					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
 					"anyOf": [
@@ -13227,6 +13234,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteKitRuneImportsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteKitRuneImportsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteRequireEachKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -17613,6 +17629,16 @@
 			]
 		},
 		"UseStringStartsEndsWithOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteKitRuneImportsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteKitRuneImportsOptions" }
+			]
+		},
+		"UseSvelteKitRuneImportsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
