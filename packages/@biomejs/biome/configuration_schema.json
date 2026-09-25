@@ -7964,6 +7964,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTailwindStaticClassStrings": {
+					"description": "Require complete, statically written class names.\nSee https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindStaticClassStringsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTopLevelHeading": {
 					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
 					"anyOf": [
@@ -14272,6 +14279,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTailwindStaticClassStringsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindStaticClassStringsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTemplateOptions": {
 			"type": "object",
 			"properties": {
@@ -19178,6 +19194,16 @@
 			]
 		},
 		"UseTailwindSortedClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindStaticClassStringsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindStaticClassStringsOptions" }
+			]
+		},
+		"UseTailwindStaticClassStringsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
