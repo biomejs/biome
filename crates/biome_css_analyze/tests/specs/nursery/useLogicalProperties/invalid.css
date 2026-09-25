@@ -56,6 +56,8 @@
 }
 
 .values {
+	frame-sizing: content-width;
+	frame-sizing: content-height;
 	float: left;
 	float: right;
 	clear: left;

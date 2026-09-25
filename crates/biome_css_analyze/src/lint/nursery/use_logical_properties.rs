@@ -453,6 +453,11 @@ fn physical_to_logical_value(
     direction: UseLogicalPropertiesDirection,
 ) -> Option<&'static str> {
     match property {
+        "frame-sizing" => match value {
+            "content-width" => Some("content-inline-size"),
+            "content-height" => Some("content-block-size"),
+            _ => None,
+        },
         "float" | "clear" => physical_to_logical_inline_value(value, direction),
         "text-align" | "justify-content" | "justify-items" | "justify-self" => {
             physical_to_logical_start_end_value(value, direction)

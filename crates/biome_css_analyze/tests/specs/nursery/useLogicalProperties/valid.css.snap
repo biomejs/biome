@@ -64,6 +64,8 @@ expression: valid.css
 }
 
 .values {
+	frame-sizing: content-inline-size;
+	frame-sizing: content-block-size;
 	float: inline-start;
 	float: inline-end;
 	clear: inline-start;
