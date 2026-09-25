@@ -2939,7 +2939,7 @@ See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes
 	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
 	/**
 	* Require complete, statically written class names.
-See https://biomejs.dev/linter/rules/use-tailwind-static-class-strings
+See https://biomejs.dev/linter/rules/use-tailwind-static-class-strings 
 	 */
 	useTailwindStaticClassStrings?: UseTailwindStaticClassStringsConfiguration;
 	/**
