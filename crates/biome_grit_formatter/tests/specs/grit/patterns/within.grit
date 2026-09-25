@@ -1,0 +1,12 @@
+engine biome(1.0)
+language js
+
+`foo($arg)` where {
+	$arg <: within `bar($_)`,
+	$arg <: within TsExternalModuleDeclaration(),
+	$arg <: not within TsExternalModuleDeclaration(),
+	$arg <: ! within `bar($_)`,
+	$arg <: bubble within `bar($_)`,
+	$arg <: within `bar($_)` until `baz($_)`,
+	register_diagnostic(span=$arg, message="example")
+}
