@@ -327,6 +327,8 @@ impl<'db> TypeSubstituter<'db> {
 
 impl<'db> TypeTransform<'db> for TypeSubstituter<'db> {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
+        // A global's supporting type may mention the global's type parameters.
+        let ty = ty.expand_global_local(db);
         if ty == self.substitution.generic {
             TypeTransformAction::Replace(self.substitution.replacement)
         } else if matches!(ty, TypeData::Generic(_)) || ty.declares_generic(db, self.binder_generic)

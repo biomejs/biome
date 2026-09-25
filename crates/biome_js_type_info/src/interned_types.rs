@@ -112,6 +112,11 @@ pub enum TypeData<'db> {
     Generic(InternedGenericTypeParameter<'db>),
     Local(LocalTypeHandle<'db>),
     GlobalType(GlobalTypeId),
+    /// An entry in a global's supporting-type table, resolved on demand.
+    ///
+    /// Unlike [`Self::GlobalType`], the handle carries no nominal identity:
+    /// expansion always replaces it with its data.
+    GlobalLocal(crate::GlobalTypeInput),
     Intersection(InternedIntersection<'db>),
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
@@ -306,6 +311,10 @@ impl<'db> TypeData<'db> {
                 Self::Constructor(_) => "constructor",
                 Self::InstanceOf(instance) => {
                     self = instance.ty(db);
+                    continue;
+                }
+                Self::GlobalLocal(local) => {
+                    self = local.expand(db);
                     continue;
                 }
                 Self::Intersection(_) => "intersection",
@@ -579,6 +588,7 @@ impl<'db> TypeData<'db> {
             Self::Null | Self::Undefined | Self::VoidKeyword => Some(ConditionalType::Nullish),
             Self::Generic(_)
             | Self::GlobalType(_)
+            | Self::GlobalLocal(_)
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
@@ -624,6 +634,7 @@ impl<'db> TypeData<'db> {
             Self::Class(_)
             | Self::Generic(_)
             | Self::GlobalType(_)
+            | Self::GlobalLocal(_)
             | Self::Local(_)
             | Self::MergedReference(_)
             | Self::TypeOperator(_)
@@ -829,11 +840,21 @@ impl<'db> TypeData<'db> {
     /// lookup uses the expanded definition; the canonical handle remains
     /// unchanged elsewhere.
     pub fn expand_canonical_global(self, db: &'db dyn TypeDb) -> Self {
-        if let Self::GlobalType(id) = self {
-            crate::global_types(db).get(id)
-        } else {
-            self
+        match self.expand_global_local(db) {
+            Self::GlobalType(id) => crate::global_types(db).get(id),
+            ty => ty,
         }
+    }
+
+    /// Replaces a handle to a global's supporting type with its data.
+    ///
+    /// Other types are returned unchanged. Supporting types are ordered so that
+    /// each only refers to earlier entries, so repeated expansion terminates.
+    pub fn expand_global_local(mut self, db: &'db dyn TypeDb) -> Self {
+        while let Self::GlobalLocal(local) = self {
+            self = local.expand(db);
+        }
+        self
     }
 
     /// Resolves a canonical global handle unless doing so would discard an
@@ -857,18 +878,20 @@ impl<'db> TypeData<'db> {
     /// carries no identity that structural operations preserve, so the helper
     /// expands to the union of string literals that `typeof` can return.
     pub fn expand_structural_global(self, db: &'db dyn TypeDb) -> Self {
-        let Self::GlobalType(id) = self else {
-            return self;
+        let handle = self.expand_global_local(db);
+        let Self::GlobalType(id) = handle else {
+            return handle;
         };
         match crate::global_types(db).get(id) {
             Self::Class(_)
             | Self::Interface(_)
             | Self::Module(_)
             | Self::Namespace(_)
-            | Self::Object(_) => self,
+            | Self::Object(_) => handle,
             expanded @ (Self::Unknown
             | Self::Global
             | Self::GlobalType(_)
+            | Self::GlobalLocal(_)
             | Self::BigInt
             | Self::Boolean
             | Self::Null
@@ -983,6 +1006,18 @@ impl<'db> TypeData<'db> {
         is_builtin: bool,
         resolve_reference: &mut ReferenceResolver<'db, '_>,
     ) -> Self {
+        Self::from_raw_with_member_resolver(db, raw, is_builtin, resolve_reference, None)
+    }
+
+    /// Converts `raw` like [`Self::from_raw_with_resolver`], but resolves the
+    /// types of `raw`'s own members with `resolve_member` when one is given.
+    pub fn from_raw_with_member_resolver(
+        db: &'db dyn TypeDb,
+        raw: &RawTypeData,
+        is_builtin: bool,
+        resolve_reference: &mut ReferenceResolver<'db, '_>,
+        resolve_member: Option<&mut ReferenceResolver<'db, '_>>,
+    ) -> Self {
         match raw {
             raw::TypeData::Unknown => Self::Unknown,
             raw::TypeData::Global => Self::Global,
@@ -1000,7 +1035,7 @@ impl<'db> TypeData<'db> {
                 convert_references(db, &class.type_parameters, resolve_reference),
                 class.extends.as_ref().map(&mut *resolve_reference),
                 convert_references(db, &class.implements, resolve_reference),
-                convert_type_members(db, &class.members, resolve_reference),
+                convert_type_members(db, &class.members, resolve_reference, resolve_member),
                 class.name.clone(),
                 is_builtin,
             )),
@@ -1025,23 +1060,23 @@ impl<'db> TypeData<'db> {
                 db,
                 convert_references(db, &interface.type_parameters, resolve_reference),
                 convert_references(db, &interface.extends, resolve_reference),
-                convert_type_members(db, &interface.members, resolve_reference),
+                convert_type_members(db, &interface.members, resolve_reference, resolve_member),
                 interface.name.clone(),
             )),
             raw::TypeData::Module(module) => Self::Module(InternedModule::new(
                 db,
-                convert_type_members(db, &module.members, resolve_reference),
+                convert_type_members(db, &module.members, resolve_reference, resolve_member),
                 module.name.clone(),
             )),
             raw::TypeData::Namespace(namespace) => Self::Namespace(InternedNamespace::new(
                 db,
-                convert_type_members(db, &namespace.members, resolve_reference),
+                convert_type_members(db, &namespace.members, resolve_reference, resolve_member),
                 namespace.path.clone(),
             )),
             raw::TypeData::Object(object) => Self::Object(InternedObject::new(
                 db,
                 object.prototype.as_ref().map(&mut *resolve_reference),
-                convert_type_members(db, &object.members, resolve_reference),
+                convert_type_members(db, &object.members, resolve_reference, resolve_member),
                 object.has_unknown_members,
             )),
             raw::TypeData::Tuple(tuple) => Self::Tuple(InternedTuple::new(
@@ -2595,12 +2630,16 @@ fn convert_type_members<'db>(
     db: &'db dyn TypeDb,
     members: &[raw::TypeMember],
     resolve_reference: &mut ReferenceResolver<'db, '_>,
+    mut resolve_member: Option<&mut ReferenceResolver<'db, '_>>,
 ) -> Box<[TypeMember<'db>]> {
     members
         .iter()
         .map(|member| TypeMember {
             kind: convert_type_member_kind(db, &member.kind, resolve_reference),
-            ty: resolve_reference(&member.ty),
+            ty: match resolve_member.as_deref_mut() {
+                Some(resolve_member) => resolve_member(&member.ty),
+                None => resolve_reference(&member.ty),
+            },
         })
         .collect()
 }
@@ -2759,6 +2798,7 @@ fn convert_literal<'db>(
             db,
             object.members(),
             resolve_reference,
+            None,
         )),
         raw::Literal::RegExp(regexp) => Literal::RegExp(regexp.clone()),
         raw::Literal::String(string) => Literal::String(string.clone()),

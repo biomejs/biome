@@ -437,7 +437,7 @@ fn infer_call_signature_argument_type<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db));
+        .filter_map(|member| member.ty.expand_global_local(db).callable_function(db));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_parameter_type(db, first, args, argument_index);
@@ -532,6 +532,9 @@ fn infer_argument_type<'db>(
                 InferredTypeData::GlobalType(id) => {
                     pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
                 }
+                InferredTypeData::GlobalLocal(local) => {
+                    pending.push(ArgumentTypeItem::Type(local.expand(db)));
+                }
                 InferredTypeData::InstanceOf(instance) => {
                     let target = resolve_local_type_on_demand(db, instance.ty(db));
                     let substitutions =
@@ -602,7 +605,9 @@ fn select_constructor_argument_type<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_constructor())
-        .filter_map(|member| ResolvedParameters::from_constructor_signature(db, member.ty));
+        .filter_map(|member| {
+            ResolvedParameters::from_constructor_signature(db, member.ty.expand_global_local(db))
+        });
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_resolved_parameter_type(
@@ -1251,6 +1256,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
@@ -1263,6 +1269,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)

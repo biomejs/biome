@@ -232,10 +232,20 @@ pub fn global_types(db: &dyn crate::TypeDb) -> GlobalTypes<'_> {
 }
 
 /// A predefined global or a local entry scoped to that global's supporting-type table.
-#[salsa::interned(no_lifetime)]
-struct GlobalTypeInput {
+///
+/// Entries with a `local` index also serve as the payload of
+/// [`InferredTypeData::GlobalLocal`], a handle whose data is resolved on demand.
+#[salsa::interned(no_lifetime, debug)]
+pub struct GlobalTypeInput {
     owner: GlobalTypeId,
     local: Option<crate::TypeId>,
+}
+
+impl GlobalTypeInput {
+    /// Resolves the type data this entry identifies.
+    pub fn expand<'db>(self, db: &'db dyn crate::TypeDb) -> InferredTypeData<'db> {
+        resolve_global_type(db, self)
+    }
 }
 
 /// Returns whether `id` is a predefined keyword type such as `any` or `string`.
@@ -278,33 +288,61 @@ fn resolve_global_type<'db>(
             raw
         }
     };
-    InferredTypeData::from_raw_with_resolver(db, raw, true, &mut |reference| {
-        match reference {
-            TypeReference::Resolved(RawTypeId::Global(target)) => {
-                // Keywords and the typeof result's literals resolve to their data rather than
-                // deferred global handles, because matchers such as `is_any_keyword()` don't
-                // expand handles.
-                if is_keyword(*target)
-                    || (local.is_none() && owner == TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
-                {
-                    global_types(db).get(*target)
-                } else {
-                    InferredTypeData::GlobalType(*target)
-                }
+    InferredTypeData::from_raw_with_member_resolver(
+        db,
+        raw,
+        true,
+        &mut |reference| resolve_global_reference(db, owner, local, reference),
+        Some(&mut |reference| match reference {
+            // Member types stay deferred until a lookup reaches them, so a global
+            // with many members only resolves the ones that are used. Type
+            // parameters resolve to their data because substitution identifies
+            // them structurally.
+            TypeReference::Resolved(RawTypeId::Local(target))
+                if !matches!(
+                    generated_local_types(owner).get(target.index()),
+                    Some(TypeData::Generic(_))
+                ) =>
+            {
+                InferredTypeData::GlobalLocal(GlobalTypeInput::new(db, owner, Some(*target)))
             }
-            TypeReference::Resolved(RawTypeId::Local(target)) => {
-                if let Some(source) = local {
-                    // Dependency order prevents recursive queries from cycling.
-                    debug_assert!(
-                        target.index() < source.index(),
-                        "generated local types must be in dependency order"
-                    );
-                }
-                resolve_global_type(db, GlobalTypeInput::new(db, owner, Some(*target)))
+            reference => resolve_global_reference(db, owner, local, reference),
+        }),
+    )
+}
+
+/// Resolves a reference inside the data of `owner`, or of its supporting type `local`.
+fn resolve_global_reference<'db>(
+    db: &'db dyn crate::TypeDb,
+    owner: GlobalTypeId,
+    local: Option<crate::TypeId>,
+    reference: &TypeReference,
+) -> InferredTypeData<'db> {
+    match reference {
+        TypeReference::Resolved(RawTypeId::Global(target)) => {
+            // Keywords and the typeof result's literals resolve to their data rather than
+            // deferred global handles, because matchers such as `is_any_keyword()` don't
+            // expand handles.
+            if is_keyword(*target)
+                || (local.is_none() && owner == TYPEOF_OPERATOR_RETURN_UNION_ID_GLOBAL_TYPE_ID)
+            {
+                global_types(db).get(*target)
+            } else {
+                InferredTypeData::GlobalType(*target)
             }
-            TypeReference::Qualifier(_) | TypeReference::Import(_) => InferredTypeData::Unknown,
         }
-    })
+        TypeReference::Resolved(RawTypeId::Local(target)) => {
+            if let Some(source) = local {
+                // Dependency order prevents recursive queries from cycling.
+                debug_assert!(
+                    target.index() < source.index(),
+                    "generated local types must be in dependency order"
+                );
+            }
+            resolve_global_type(db, GlobalTypeInput::new(db, owner, Some(*target)))
+        }
+        TypeReference::Qualifier(_) | TypeReference::Import(_) => InferredTypeData::Unknown,
+    }
 }
 
 #[cfg(test)]
