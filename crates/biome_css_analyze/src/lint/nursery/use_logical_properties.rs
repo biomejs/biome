@@ -69,13 +69,13 @@ declare_lint_rule! {
     ///
     /// ```css,expect_diagnostic
     /// p {
-    ///   width: anchor-size(width);
+    ///   inline-size: anchor-size(width);
     /// }
     /// ```
     ///
     /// ```css,expect_diagnostic
     /// p {
-    ///   top: anchor(bottom);
+    ///   inset-block-start: anchor(bottom);
     /// }
     /// ```
     ///
