@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidContexts.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+<div className={`[${value}`} />;
+cn(`[${value}`);
+<div className={"p-4 " + "" + "text-white"} />;
+
+```
+
+# Diagnostics
+```
+invalidContexts.jsx:2:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+  > 2 │ <div className={`[${value}`} />;
+      │                 ^^^^^^^^^^^
+    3 │ cn(`[${value}`);
+    4 │ <div className={"p-4 " + "" + "text-white"} />;
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidContexts.jsx:3:4 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    1 │ // should generate diagnostics
+    2 │ <div className={`[${value}`} />;
+  > 3 │ cn(`[${value}`);
+      │    ^^^^^^^^^^^
+    4 │ <div className={"p-4 " + "" + "text-white"} />;
+    5 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidContexts.jsx:4:17 lint/nursery/useTailwindStaticClassStrings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class string is constructed dynamically.
+  
+    2 │ <div className={`[${value}`} />;
+    3 │ cn(`[${value}`);
+  > 4 │ <div className={"p-4 " + "" + "text-white"} />;
+      │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i Tailwind scans source text for complete class names.
+  
+  i Use complete class names, choosing between them with a conditional expression or a lookup.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

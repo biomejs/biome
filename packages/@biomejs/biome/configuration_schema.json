@@ -7749,6 +7749,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTailwindStaticClassStrings": {
+					"description": "Require complete, statically written class names.\nSee https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindStaticClassStringsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTestHooksInOrder": {
 					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
 					"anyOf": [
@@ -13229,6 +13236,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTailwindStaticClassStringsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindStaticClassStringsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTemplateOptions": {
 			"type": "object",
 			"properties": {
@@ -17617,6 +17633,16 @@
 			]
 		},
 		"UseTailwindShorthandClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindStaticClassStringsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindStaticClassStringsOptions" }
+			]
+		},
+		"UseTailwindStaticClassStringsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
