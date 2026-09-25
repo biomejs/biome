@@ -3372,21 +3372,24 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 })
                 .collect();
 
-            if should_format && !write && from_server {
-                let formatted = self
-                    .format_file(FormatFileParams {
-                        project_key,
-                        path: path.clone(),
-                        inline_config: None,
-                    })?
-                    .into_code();
-                output = Some(Self::reconstruct_legacy_file(
-                    &path,
-                    state.file_source,
-                    source,
-                    formatted,
-                ))
-                .filter(|output| output != source);
+            if should_format && !write {
+                let formatted = if from_server {
+                    Some(
+                        self.format_file(FormatFileParams {
+                            project_key,
+                            path: path.clone(),
+                            inline_config: None,
+                        })?
+                        .into_code(),
+                    )
+                } else {
+                    self.format_file_state(project_key, &path, &state, true)?
+                };
+                output = formatted
+                    .map(|formatted| {
+                        Self::reconstruct_legacy_file(&path, state.file_source, source, formatted)
+                    })
+                    .filter(|output| output != source);
             }
 
             Ok(ProcessFileResult {
