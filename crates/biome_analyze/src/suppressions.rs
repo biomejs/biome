@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use crate::{
     AnalyzerSuppression, AnalyzerSuppressionDiagnostic, AnalyzerSuppressionKind,
     AnalyzerSuppressionVariant, MetadataRegistry, RuleCategories, RuleCategory, RuleFilter,
-    RuleKey,
+    RuleKey, SignalRuleKey,
 };
 use biome_console::markup;
 use biome_diagnostics::category;
@@ -414,11 +414,11 @@ impl RangeSuppressions {
 }
 
 #[derive(Debug)]
-pub struct Suppressions<'analyzer> {
+pub struct Suppressions<'registry> {
     /// Current line index
     pub(crate) line_index: usize,
     /// Registry metadata, used to find match the rules
-    metadata: &'analyzer MetadataRegistry,
+    metadata: &'registry MetadataRegistry,
     /// Used to track the last suppression pushed.
     last_suppression: Option<AnalyzerSuppressionVariant>,
     pub(crate) line_suppressions: Vec<LineSuppression>,
@@ -426,8 +426,8 @@ pub struct Suppressions<'analyzer> {
     pub(crate) range_suppressions: RangeSuppressions,
 }
 
-impl<'analyzer> Suppressions<'analyzer> {
-    pub(crate) fn new(metadata: &'analyzer MetadataRegistry) -> Self {
+impl<'registry> Suppressions<'registry> {
+    pub(crate) fn new(metadata: &'registry MetadataRegistry) -> Self {
         Self {
             line_index: 0,
             metadata,
@@ -436,6 +436,90 @@ impl<'analyzer> Suppressions<'analyzer> {
             range_suppressions: RangeSuppressions::default(),
             last_suppression: None,
         }
+    }
+
+    /// Checks whether a signal is suppressed and marks matching line and range suppressions as used.
+    pub(crate) fn suppresses(
+        &mut self,
+        category: RuleCategory,
+        rule: &SignalRuleKey,
+        signal_instances: &[Box<str>],
+        text_range: TextRange,
+    ) -> bool {
+        if self
+            .top_level_suppression
+            .suppressed_categories
+            .contains(category)
+        {
+            return true;
+        }
+
+        let is_suppressed = match rule {
+            SignalRuleKey::Rule(rule) => {
+                self.top_level_suppression
+                    .contains_rule_key(&category, rule)
+                    || self
+                        .range_suppressions
+                        .suppress_rule(&category, rule, &text_range)
+            }
+            SignalRuleKey::Plugin(plugin) => {
+                self.top_level_suppression.suppressed_plugin(plugin)
+                    || self
+                        .range_suppressions
+                        .suppress_plugin(plugin.as_ref(), &text_range)
+            }
+        };
+        if is_suppressed {
+            return true;
+        }
+
+        // The overlap search includes consecutive comments targeting the same
+        // line, so each matching suppression can contribute to this signal.
+        let start = text_range.start();
+        let mut is_fully_suppressed = false;
+        // Instance-specific comments consume matching signal instances. Build
+        // the set only when such a comment is encountered.
+        let mut instances: Option<FxHashSet<&Box<str>>> = None;
+        for suppression in self.overlapping_line_suppressions(&text_range).iter_mut() {
+            if !suppression.text_range.contains(start) {
+                continue;
+            }
+            let (is_match, is_exhaustive) = if suppression.suppressed_categories.contains(category)
+            {
+                (true, true)
+            } else {
+                match rule {
+                    SignalRuleKey::Rule(rule) if suppression.matches_rule(&category, rule) => {
+                        match suppression.suppressed_instance.as_ref() {
+                            None => (true, true),
+                            Some(v) => {
+                                let matches_instance = instances
+                                    .get_or_insert_with(|| signal_instances.iter().collect())
+                                    .remove(v);
+                                (matches_instance, false)
+                            }
+                        }
+                    }
+                    SignalRuleKey::Plugin(plugin)
+                        if suppression.suppress_all_plugins
+                            || suppression.suppressed_plugins.contains(plugin.as_ref()) =>
+                    {
+                        (true, true)
+                    }
+                    _ => (false, false),
+                }
+            };
+            if is_match {
+                suppression.did_suppress_signal = true;
+                is_fully_suppressed =
+                    is_exhaustive || instances.as_ref().is_some_and(|v| v.is_empty());
+                if is_fully_suppressed {
+                    break;
+                }
+            }
+        }
+
+        is_fully_suppressed
     }
 
     fn push_line_suppression(

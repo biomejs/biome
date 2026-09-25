@@ -1,0 +1,37 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "plugins": ["missingOne.grit", "missingTwo.grit"]
+}
+```
+
+## `file.js`
+
+```js
+debugger
+
+```
+
+# Termination Message
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Error(s) during loading of plugins:
+    missingOne.grit: Cannot read file.
+    missingTwo.grit: Cannot read file.
+  
+
+
+```

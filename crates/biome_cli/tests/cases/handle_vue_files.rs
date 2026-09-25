@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const VUE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
@@ -1079,6 +1079,49 @@ import { computed } from "vue";
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_vue_should_not_add_extra_newlines_in_embedded_snippet",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn html_comment_suppresses_vue_expression_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUndeclaredVariables": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <!-- biome-ignore lint/correctness/noUndeclaredVariables: intentionally external -->
+  <div :title="missingValue" />
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_comment_suppresses_vue_expression_rule",
         fs,
         console,
         result,

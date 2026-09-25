@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --since=main file.js file2.js
+```
+
 ## `file.js`
 
 ```js

@@ -1,10 +1,10 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{
     SnapshotPayload, assert_cli_snapshot, assert_file_contents, markup_to_string,
 };
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const ASTRO_FILE_UNFORMATTED: &str = r#"---
@@ -294,14 +294,17 @@ fn astro_template_suppressions_have_one_owner() {
 "#,
     );
 
-    let (fs, result) = run_cli(
+    let (fs, first_lint_result) = run_cli(
         fs,
         &mut console,
         Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
     );
 
-    assert!(result.is_ok(), "{result:?}\n{console:#?}");
-    let (fs, result) = run_cli(
+    assert!(
+        first_lint_result.is_ok(),
+        "{first_lint_result:?}\n{console:#?}"
+    );
+    let (fs, check_result) = run_cli(
         fs,
         &mut console,
         Args::from(
@@ -315,7 +318,7 @@ fn astro_template_suppressions_have_one_owner() {
             .as_slice(),
         ),
     );
-    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert!(check_result.is_ok(), "{check_result:?}\n{console:#?}");
     let (fs, result) = run_cli(
         fs,
         &mut console,
@@ -323,6 +326,9 @@ fn astro_template_suppressions_have_one_owner() {
     );
 
     assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let result = first_lint_result
+        .followed_by(check_result)
+        .followed_by(result);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_template_suppressions_have_one_owner",

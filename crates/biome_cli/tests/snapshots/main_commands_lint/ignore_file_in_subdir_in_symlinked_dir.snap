@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/ignore_file_in_subdir_in_symlinked_dir'
+```
+
 # Termination Message
 
 ```block

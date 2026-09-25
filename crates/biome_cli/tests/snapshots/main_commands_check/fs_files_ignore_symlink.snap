@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --config-path '<TEMP_DIR>/check_rome_test_files_ignore_symlink' --write --unsafe '<TEMP_DIR>/check_rome_test_files_ignore_symlink/src'
+```
+
 # Emitted Messages
 
 ```block

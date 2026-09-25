@@ -385,6 +385,7 @@ fn generate_for_groups(
     let mut group_strings = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
     let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
+    let mut group_as_explicitly_enabled_rules = Vec::with_capacity(groups.len());
     #[derive(Debug)]
     struct RuleGroup {
         group_name: &'static str,
@@ -421,6 +422,12 @@ fn generate_for_groups(
         group_as_disabled_rules.push(quote! {
             if let Some(group) = self.#group_ident.as_ref() {
                 disabled_rules.extend(&group.get_disabled_rules());
+            }
+        });
+
+        group_as_explicitly_enabled_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                enabled_rules.extend(&group.get_enabled_rules());
             }
         });
 
@@ -833,6 +840,13 @@ fn generate_for_groups(
                     let mut disabled_rules = FxHashSet::default();
                     #( #group_as_disabled_rules )*
                     disabled_rules
+                }
+
+                /// It returns the rules enabled by configuration, excluding the ones enabled by presets
+                pub fn as_explicitly_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut enabled_rules = FxHashSet::default();
+                    #( #group_as_explicitly_enabled_rules )*
+                    enabled_rules
                 }
             }
 

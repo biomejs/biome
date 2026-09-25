@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format '<TEMP_DIR>/should_error_when_no_root_config_is_found/packages/lib'
+```
+
 ## `biome.json`
 
 ```json

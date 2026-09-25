@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOverloads.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import { Overloaded } from "./overloaded";
+declare const instance: Overloaded;
+void instance.run(1);
+
+```

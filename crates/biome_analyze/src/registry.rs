@@ -61,6 +61,11 @@ pub struct MetadataRegistry {
 }
 
 impl MetadataRegistry {
+    /// Adds the rule names registered in `other`.
+    pub fn extend(&mut self, other: &Self) {
+        self.inner.extend(other.inner.iter().copied());
+    }
+
     /// Return a unique identifier for a rule group if it's known by this registry
     pub fn find_group(&self, group: &str) -> Option<GroupKey> {
         let key = self.inner.get(group)?;

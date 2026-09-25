@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --write --unsafe --reporter=json-pretty fix.js
+```
+
 ## `fix.js`
 
 ```js

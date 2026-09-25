@@ -1,0 +1,41 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --error-on-warnings file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUnknownProperty": "error" }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+// biome-ignore-start lint/correctness/noUnknownProperty: temporary migration
+const ignored = styled.div`
+  /* biome-ignore lint/correctness/noUnknownProperty: generated declaration */
+  colr: red;
+  backgrond-color: red;
+`;
+// biome-ignore-end lint/correctness/noUnknownProperty: temporary migration
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

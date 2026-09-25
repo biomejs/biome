@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --reporter=junit --reporter-file=file.xml main.ts index.ts
+```
+
 ## `file.xml`
 
 ```xml

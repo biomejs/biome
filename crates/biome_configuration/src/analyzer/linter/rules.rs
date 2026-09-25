@@ -251,6 +251,7 @@ pub enum RuleName {
     NoLeakedRender,
     NoLoopFunc,
     NoMagicNumbers,
+    NoMeaninglessVoidOperator,
     NoMisleadingCharacterClass,
     NoMisleadingInstantiator,
     NoMisleadingReturnType,
@@ -814,6 +815,7 @@ impl RuleName {
             Self::NoLeakedRender => "noLeakedRender",
             Self::NoLoopFunc => "noLoopFunc",
             Self::NoMagicNumbers => "noMagicNumbers",
+            Self::NoMeaninglessVoidOperator => "noMeaninglessVoidOperator",
             Self::NoMisleadingCharacterClass => "noMisleadingCharacterClass",
             Self::NoMisleadingInstantiator => "noMisleadingInstantiator",
             Self::NoMisleadingReturnType => "noMisleadingReturnType",
@@ -1377,6 +1379,7 @@ impl RuleName {
             Self::NoLeakedRender => RuleGroup::Suspicious,
             Self::NoLoopFunc => RuleGroup::Nursery,
             Self::NoMagicNumbers => RuleGroup::Style,
+            Self::NoMeaninglessVoidOperator => RuleGroup::Nursery,
             Self::NoMisleadingCharacterClass => RuleGroup::Suspicious,
             Self::NoMisleadingInstantiator => RuleGroup::Suspicious,
             Self::NoMisleadingReturnType => RuleGroup::Nursery,
@@ -1945,6 +1948,7 @@ impl std::str::FromStr for RuleName {
             "noLeakedRender" => Ok(Self::NoLeakedRender),
             "noLoopFunc" => Ok(Self::NoLoopFunc),
             "noMagicNumbers" => Ok(Self::NoMagicNumbers),
+            "noMeaninglessVoidOperator" => Ok(Self::NoMeaninglessVoidOperator),
             "noMisleadingCharacterClass" => Ok(Self::NoMisleadingCharacterClass),
             "noMisleadingInstantiator" => Ok(Self::NoMisleadingInstantiator),
             "noMisleadingReturnType" => Ok(Self::NoMisleadingReturnType),
@@ -2640,6 +2644,35 @@ impl Rules {
             disabled_rules.extend(&group.get_disabled_rules());
         }
         disabled_rules
+    }
+    #[doc = r" It returns the rules enabled by configuration, excluding the ones enabled by presets"]
+    pub fn as_explicitly_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut enabled_rules = FxHashSet::default();
+        if let Some(group) = self.a11y.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.complexity.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.correctness.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.nursery.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.performance.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.security.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.style.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        if let Some(group) = self.suspicious.as_ref() {
+            enabled_rules.extend(&group.get_enabled_rules());
+        }
+        enabled_rules
     }
 }
 biome_configuration_macros::lint_group_structs!();

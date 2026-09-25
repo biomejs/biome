@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/comments/comment-same-line-before-closing-block.svelte
+---
+
+# Input
+
+```svelte
+<div>
+	{#if a}
+		<span>a</span><!-- same line -->{/if}
+	{#if a}
+		<span>a</span><!-- before else -->{:else}
+		<span>b</span><!-- before /if -->{/if}
+	{#each items as item}
+		<span>{item}</span><!-- before /each -->{/each}
+	{#await p}
+		<span>l</span><!-- before then -->{:then v}
+		<span>{v}</span><!-- before /await -->{/await}
+	{#if a}
+		text<!-- after text -->{/if}
+</div>
+
+```
+
+
+# Formatted
+
+```svelte
+<div>
+	{#if a}
+		<span>a</span><!-- same line -->
+	{/if}
+	{#if a}
+		<span>a</span><!-- before else -->
+	{:else}
+		<span>b</span><!-- before /if -->
+	{/if}
+	{#each items as item}
+		<span>{item}</span><!-- before /each -->
+	{/each}
+	{#await p}
+		<span>l</span><!-- before then -->
+	{:then v}
+		<span>{v}</span><!-- before /await -->
+	{/await}
+	{#if a}
+		text<!-- after text -->
+	{/if}
+</div>
+
+```

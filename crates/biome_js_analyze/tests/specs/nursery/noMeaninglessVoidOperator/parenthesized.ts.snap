@@ -1,0 +1,259 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: parenthesized.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+declare function log(): void;
+void (log());
+void /* before parentheses */ (log() as void);
+void // before parentheses
+    (log() as void);
+void (/* inside parentheses */ log() as void);
+void ((log() as void));
+void (log() as void) // after parentheses
+;
+function returns() {
+    return void // after return
+        (log());
+}
+function throws() {
+    throw void // after throw
+        (log());
+}
+
+```
+
+# Diagnostics
+```
+parenthesized.ts:3:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ declare function log(): void;
+  > 3 │ void (log());
+      │ ^^^^^^^^^^^^
+    4 │ void /* before parentheses */ (log() as void);
+    5 │ void // before parentheses
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    3 │ void·(log());
+      │ -----        
+
+```
+
+```
+parenthesized.ts:4:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    2 │ declare function log(): void;
+    3 │ void (log());
+  > 4 │ void /* before parentheses */ (log() as void);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ void // before parentheses
+    6 │     (log() as void);
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     2  2 │   declare function log(): void;
+     3  3 │   void (log());
+     4    │ - void·/*·before·parentheses·*/·(log()·as·void);
+        4 │ + (/*·before·parentheses·*/·log()·as·void);
+     5  5 │   void // before parentheses
+     6  6 │       (log() as void);
+  
+
+```
+
+```
+parenthesized.ts:5:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    3 │ void (log());
+    4 │ void /* before parentheses */ (log() as void);
+  > 5 │ void // before parentheses
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │     (log() as void);
+      │     ^^^^^^^^^^^^^^^
+    7 │ void (/* inside parentheses */ log() as void);
+    8 │ void ((log() as void));
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+     3  3 │   void (log());
+     4  4 │   void /* before parentheses */ (log() as void);
+     5    │ - void·//·before·parentheses
+     6    │ - ····(log()·as·void);
+        5 │ + (//·before·parentheses
+        6 │ + ····log()·as·void);
+     7  7 │   void (/* inside parentheses */ log() as void);
+     8  8 │   void ((log() as void));
+  
+
+```
+
+```
+parenthesized.ts:7:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    5 │ void // before parentheses
+    6 │     (log() as void);
+  > 7 │ void (/* inside parentheses */ log() as void);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ void ((log() as void));
+    9 │ void (log() as void) // after parentheses
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    7 │ void·(/*·inside·parentheses·*/·log()·as·void);
+      │ -----                                         
+
+```
+
+```
+parenthesized.ts:8:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     6 │     (log() as void);
+     7 │ void (/* inside parentheses */ log() as void);
+   > 8 │ void ((log() as void));
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+     9 │ void (log() as void) // after parentheses
+    10 │ ;
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    8 │ void·((log()·as·void));
+      │ -----                  
+
+```
+
+```
+parenthesized.ts:9:1 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+     7 │ void (/* inside parentheses */ log() as void);
+     8 │ void ((log() as void));
+   > 9 │ void (log() as void) // after parentheses
+       │ ^^^^^^^^^^^^^^^^^^^^
+    10 │ ;
+    11 │ function returns() {
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    9 │ void·(log()·as·void)·//·after·parentheses
+      │ -----                                    
+
+```
+
+```
+parenthesized.ts:12:12 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    10 │ ;
+    11 │ function returns() {
+  > 12 │     return void // after return
+       │            ^^^^^^^^^^^^^^^^^^^^
+  > 13 │         (log());
+       │         ^^^^^^^
+    14 │ }
+    15 │ function throws() {
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    10 10 │   ;
+    11 11 │   function returns() {
+    12    │ - ····return·void·//·after·return
+    13    │ - ········(log());
+       12 │ + ····return·(//·after·return
+       13 │ + ········log());
+    14 14 │   }
+    15 15 │   function throws() {
+  
+
+```
+
+```
+parenthesized.ts:16:11 lint/nursery/noMeaninglessVoidOperator  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This void operator is unnecessary.
+  
+    14 │ }
+    15 │ function throws() {
+  > 16 │     throw void // after throw
+       │           ^^^^^^^^^^^^^^^^^^^
+  > 17 │         (log());
+       │         ^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i This call already returns void or undefined.
+  
+  i Use void to explicitly discard a call's return value or a thenable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the void operator.
+  
+    14 14 │   }
+    15 15 │   function throws() {
+    16    │ - ····throw·void·//·after·throw
+    17    │ - ········(log());
+       16 │ + ····throw·(//·after·throw
+       17 │ + ········log());
+    18 18 │   }
+    19 19 │   
+  
+
+```

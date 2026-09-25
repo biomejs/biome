@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_DISABLED_FORMATTER_JSONC, CONFIG_FILE_SIZE_LIMIT,
     CONFIG_LINTER_DISABLED,
@@ -9,7 +10,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 const INCORRECT_CODE: &str = "let a = !b || !c";

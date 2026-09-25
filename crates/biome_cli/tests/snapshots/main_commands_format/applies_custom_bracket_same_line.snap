@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --bracket-same-line true --write file.jsx
+```
+
 ## `file.jsx`
 
 ```jsx

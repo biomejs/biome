@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]
@@ -270,6 +270,51 @@ fn should_pull_diagnostics_from_embedded_languages_when_linting() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_pull_diagnostics_from_embedded_languages_when_linting",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn html_comments_suppress_embedded_css_and_json_rules() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.html");
+    fs.insert(
+        file.into(),
+        r#"<!-- biome-ignore lint/correctness/noUnknownProperty: expected typo -->
+<style>.ignored { colr: red; }</style>
+<style>.reported { colr: red; }</style>
+<!-- biome-ignore lint/suspicious/noDuplicateObjectKeys: expected duplicate -->
+<script type="application/json">{"key":1,"key":2}</script>
+<script type="application/json">{"key":1,"key":2}</script>"#
+            .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUnknownProperty": "error" },
+      "suspicious": { "noDuplicateObjectKeys": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_comments_suppress_embedded_css_and_json_rules",
         fs,
         console,
         result,

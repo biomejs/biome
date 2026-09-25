@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/should_not_lint_when_root_is_disabled_but_nested_is_enabled'
+```
+
 ## `biome.json`
 
 ```json

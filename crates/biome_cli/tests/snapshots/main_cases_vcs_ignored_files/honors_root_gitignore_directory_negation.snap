@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write '<TEMP_DIR>/honors_root_gitignore_directory_negation'
+```
+
 ## `biome.jsonc`
 
 ```json
