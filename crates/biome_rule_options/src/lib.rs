@@ -520,6 +520,7 @@ pub mod use_spread_over_apply;
 pub mod use_static_response_methods;
 pub mod use_strict_mode;
 pub mod use_string_starts_ends_with;
+pub mod use_svelte_kit_resolve;
 pub mod use_svelte_kit_rune_imports;
 pub mod use_svelte_require_each_key;
 pub mod use_symbol_description;
