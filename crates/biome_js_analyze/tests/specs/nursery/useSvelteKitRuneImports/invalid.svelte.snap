@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { page } from "$app/stores";
+</script>
+
+<h1>{$page.url.pathname}</h1>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:3:23 lint/nursery/useSvelteKitRuneImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The $app/stores module is deprecated.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>
+  > 3 │ 	import { page } from "$app/stores";
+      │ 	                     ^^^^^^^^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i SvelteKit deprecated $app/stores in favor of $app/state, which provides the same values as reactive objects built on runes.
+  
+  i Import from $app/state instead, and read its values directly, for example page.url instead of $page.url.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

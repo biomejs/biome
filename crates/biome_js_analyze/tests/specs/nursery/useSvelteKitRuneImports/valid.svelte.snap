@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	import { page } from "$app/state";
+</script>
+
+<h1>{page.url.pathname}</h1>
+
+```
