@@ -1357,6 +1357,13 @@ const active = true;
 ---
 <div class:list={active ? "selected" : ""}></div>
 <div class:list={"card active"}></div>
+<div class:list={active ? 'say "hi"' : ""}></div>
+<div class:list={active ? 'it\'s' : ""}></div>
+<div class:list={active ? 'line\nbreak' : ""}></div>
+<div class:list={active ? 'caf\u00e9' : ""}></div>
+<div class:list={[[active ? "nested" : ""]]}></div>
+<div class:list={[(active ? "wrapped" : "")]}></div>
+<div class:list={[[(active && true ? "" : "inactive")]]}></div>
 "#,
     );
 
@@ -1372,6 +1379,13 @@ const active = true;
 ---
 <div class:list={{"selected": active}}></div>
 <div class:list={["card", "active"]}></div>
+<div class:list={{'say "hi"': active}}></div>
+<div class:list={{'it\'s': active}}></div>
+<div class:list={{'line\nbreak': active}}></div>
+<div class:list={{'caf\u00e9': active}}></div>
+<div class:list={[[{"nested": active}]]}></div>
+<div class:list={[({"wrapped": active})]}></div>
+<div class:list={[[({"inactive": !(active && true)})]]}></div>
 "#;
     assert_file_contents(&fs, astro_file_path, expected);
 
@@ -1383,4 +1397,11 @@ const active = true;
     );
     assert!(result.is_ok(), "second run_cli returned {result:?}");
     assert_file_contents(&fs, astro_file_path, expected);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "astro_class_list_safe_fixes_are_idempotent",
+        fs,
+        second_console,
+        result,
+    ));
 }
