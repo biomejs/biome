@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<script>
+	import { goto, pushState } from "$app/navigation";
+	import { resolve } from "$app/paths";
+
+	goto("/foo");
+	pushState("/foo", {});
+
+	function onclick() {
+		goto(resolve("/foo") + "/bar");
+	}
+</script>
+
+<button {onclick}>Click me!</button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:5:7 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    3 │ 	import { resolve } from "$app/paths";
+    4 │ 
+  > 5 │ 	goto("/foo");
+      │ 	     ^^^^^^
+    6 │ 	pushState("/foo", {});
+    7 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:12 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to pushState() isn't built with resolve().
+  
+    5 │ 	goto("/foo");
+  > 6 │ 	pushState("/foo", {});
+      │ 	          ^^^^^^
+    7 │ 
+    8 │ 	function onclick() {
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths, or pass an empty string to keep the current URL.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:8 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+     8 │ 	function onclick() {
+   > 9 │ 		goto(resolve("/foo") + "/bar");
+       │ 		     ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	}
+    11 │ </script>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
