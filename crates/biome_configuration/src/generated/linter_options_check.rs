@@ -2447,6 +2447,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_tailwind_shorthand_classes::UseTailwindShorthandClassesOptions,
         >(),
     ));
+    result.push(("nursery", "useTailwindStaticClassStrings", TypeId::of::<biome_rule_options::use_tailwind_static_class_strings::UseTailwindStaticClassStringsOptions>()));
     result.push((
         "style",
         "useTemplate",
