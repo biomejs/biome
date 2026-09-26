@@ -7735,6 +7735,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteKitResolve": {
+					"description": "Require internal navigation in SvelteKit apps to use paths built with resolve().\nSee https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteKitResolveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSvelteRequireEachKey": {
 					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
 					"anyOf": [
@@ -13201,6 +13208,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteKitResolveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteKitResolveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteRequireEachKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -17588,6 +17604,34 @@
 		},
 		"UseStringStartsEndsWithOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteKitResolveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteKitResolveOptions" }
+			]
+		},
+		"UseSvelteKitResolveOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreGoto": {
+					"description": "Whether to ignore all `goto()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreLinks": {
+					"description": "Whether to ignore all `<a>` elements. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignorePushState": {
+					"description": "Whether to ignore all `pushState()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreReplaceState": {
+					"description": "Whether to ignore all `replaceState()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSvelteRequireEachKeyConfiguration": {
