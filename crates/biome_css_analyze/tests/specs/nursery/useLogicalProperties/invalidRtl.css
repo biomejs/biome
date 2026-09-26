@@ -31,3 +31,23 @@
 	border-bottom-left-radius: 12px;
 	border-bottom-right-radius: 16px;
 }
+
+.values {
+	float: right;
+	float: left;
+	clear: right;
+	clear: left;
+	text-align: right;
+	text-align: left;
+	justify-content: right;
+	justify-content: left;
+	justify-items: right;
+	justify-items: left;
+	justify-self: right;
+	justify-self: left;
+}
+
+.anchor-functions {
+	right: anchor(left);
+	left: anchor(right);
+}

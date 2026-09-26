@@ -39,11 +39,31 @@ expression: invalidRtl.css
 	border-bottom-right-radius: 16px;
 }
 
+.values {
+	float: right;
+	float: left;
+	clear: right;
+	clear: left;
+	text-align: right;
+	text-align: left;
+	justify-content: right;
+	justify-content: left;
+	justify-items: right;
+	justify-items: left;
+	justify-self: right;
+	justify-self: left;
+}
+
+.anchor-functions {
+	right: anchor(left);
+	left: anchor(right);
+}
+
 ```
 
 # Diagnostics
 ```
-invalidRtl.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:3:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -60,11 +80,20 @@ invalidRtl.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+     1  1 │   /* should generate diagnostics with rtl replacements */
+     2  2 │   .position {
+     3    │ - → right:·1rem;
+        3 │ + → inset-inline-start:·1rem;
+     4  4 │     left: 3rem;
+     5  5 │   }
+  
 
 ```
 
 ```
-invalidRtl.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:4:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -81,11 +110,20 @@ invalidRtl.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+     2  2 │   .position {
+     3  3 │     right: 1rem;
+     4    │ - → left:·3rem;
+        4 │ + → inset-inline-end:·3rem;
+     5  5 │   }
+     6  6 │   
+  
 
 ```
 
 ```
-invalidRtl.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:8:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -101,11 +139,20 @@ invalidRtl.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+     6  6 │   
+     7  7 │   .margin {
+     8    │ - → margin-right:·2rem;
+        8 │ + → margin-inline-start:·2rem;
+     9  9 │     margin-left: 4rem;
+    10 10 │   }
+  
 
 ```
 
 ```
-invalidRtl.css:9:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:9:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -122,11 +169,20 @@ invalidRtl.css:9:2 lint/nursery/useLogicalProperties ━━━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+     7  7 │   .margin {
+     8  8 │     margin-right: 2rem;
+     9    │ - → margin-left:·4rem;
+        9 │ + → margin-inline-end:·4rem;
+    10 10 │   }
+    11 11 │   
+  
 
 ```
 
 ```
-invalidRtl.css:13:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:13:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -142,11 +198,20 @@ invalidRtl.css:13:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    11 11 │   
+    12 12 │   .padding {
+    13    │ - → padding-right:·10px;
+       13 │ + → padding-inline-start:·10px;
+    14 14 │     padding-left: 20px;
+    15 15 │   }
+  
 
 ```
 
 ```
-invalidRtl.css:14:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:14:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -163,11 +228,20 @@ invalidRtl.css:14:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    12 12 │   .padding {
+    13 13 │     padding-right: 10px;
+    14    │ - → padding-left:·20px;
+       14 │ + → padding-inline-end:·20px;
+    15 15 │   }
+    16 16 │   
+  
 
 ```
 
 ```
-invalidRtl.css:18:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:18:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -183,11 +257,20 @@ invalidRtl.css:18:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    16 16 │   
+    17 17 │   .border {
+    18    │ - → border-left:·5px·dotted·green;
+       18 │ + → border-inline-end:·5px·dotted·green;
+    19 19 │     border-left-color: green;
+    20 20 │     border-left-style: dotted;
+  
 
 ```
 
 ```
-invalidRtl.css:19:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:19:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -204,11 +287,20 @@ invalidRtl.css:19:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    17 17 │   .border {
+    18 18 │     border-left: 5px dotted green;
+    19    │ - → border-left-color:·green;
+       19 │ + → border-inline-end-color:·green;
+    20 20 │     border-left-style: dotted;
+    21 21 │     border-left-width: 6px;
+  
 
 ```
 
 ```
-invalidRtl.css:20:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:20:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -225,11 +317,20 @@ invalidRtl.css:20:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    18 18 │     border-left: 5px dotted green;
+    19 19 │     border-left-color: green;
+    20    │ - → border-left-style:·dotted;
+       20 │ + → border-inline-end-style:·dotted;
+    21 21 │     border-left-width: 6px;
+    22 22 │     border-right: 7px double yellow;
+  
 
 ```
 
 ```
-invalidRtl.css:21:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:21:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -246,11 +347,20 @@ invalidRtl.css:21:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    19 19 │     border-left-color: green;
+    20 20 │     border-left-style: dotted;
+    21    │ - → border-left-width:·6px;
+       21 │ + → border-inline-end-width:·6px;
+    22 22 │     border-right: 7px double yellow;
+    23 23 │     border-right-color: yellow;
+  
 
 ```
 
 ```
-invalidRtl.css:22:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:22:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -267,11 +377,20 @@ invalidRtl.css:22:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    20 20 │     border-left-style: dotted;
+    21 21 │     border-left-width: 6px;
+    22    │ - → border-right:·7px·double·yellow;
+       22 │ + → border-inline-start:·7px·double·yellow;
+    23 23 │     border-right-color: yellow;
+    24 24 │     border-right-style: double;
+  
 
 ```
 
 ```
-invalidRtl.css:23:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:23:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -288,11 +407,20 @@ invalidRtl.css:23:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    21 21 │     border-left-width: 6px;
+    22 22 │     border-right: 7px double yellow;
+    23    │ - → border-right-color:·yellow;
+       23 │ + → border-inline-start-color:·yellow;
+    24 24 │     border-right-style: double;
+    25 25 │     border-right-width: 8px;
+  
 
 ```
 
 ```
-invalidRtl.css:24:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:24:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -309,11 +437,20 @@ invalidRtl.css:24:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    22 22 │     border-right: 7px double yellow;
+    23 23 │     border-right-color: yellow;
+    24    │ - → border-right-style:·double;
+       24 │ + → border-inline-start-style:·double;
+    25 25 │     border-right-width: 8px;
+    26 26 │   }
+  
 
 ```
 
 ```
-invalidRtl.css:25:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:25:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -330,11 +467,20 @@ invalidRtl.css:25:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    23 23 │     border-right-color: yellow;
+    24 24 │     border-right-style: double;
+    25    │ - → border-right-width:·8px;
+       25 │ + → border-inline-start-width:·8px;
+    26 26 │   }
+    27 27 │   
+  
 
 ```
 
 ```
-invalidRtl.css:29:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:29:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -350,11 +496,20 @@ invalidRtl.css:29:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    27 27 │   
+    28 28 │   .border-radius {
+    29    │ - → border-top-left-radius:·4px;
+       29 │ + → border-start-end-radius:·4px;
+    30 30 │     border-top-right-radius: 8px;
+    31 31 │     border-bottom-left-radius: 12px;
+  
 
 ```
 
 ```
-invalidRtl.css:30:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:30:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -371,11 +526,20 @@ invalidRtl.css:30:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    28 28 │   .border-radius {
+    29 29 │     border-top-left-radius: 4px;
+    30    │ - → border-top-right-radius:·8px;
+       30 │ + → border-start-start-radius:·8px;
+    31 31 │     border-bottom-left-radius: 12px;
+    32 32 │     border-bottom-right-radius: 16px;
+  
 
 ```
 
 ```
-invalidRtl.css:31:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:31:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -392,11 +556,20 @@ invalidRtl.css:31:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Use the logical CSS replacement.
+  
+    29 29 │     border-top-left-radius: 4px;
+    30 30 │     border-top-right-radius: 8px;
+    31    │ - → border-bottom-left-radius:·12px;
+       31 │ + → border-end-end-radius:·12px;
+    32 32 │     border-bottom-right-radius: 16px;
+    33 33 │   }
+  
 
 ```
 
 ```
-invalidRtl.css:32:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:32:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
@@ -412,6 +585,492 @@ invalidRtl.css:32:2 lint/nursery/useLogicalProperties ━━━━━━━━�
   i Replace border-bottom-right-radius with border-end-start-radius.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    30 30 │     border-top-right-radius: 8px;
+    31 31 │     border-bottom-left-radius: 12px;
+    32    │ - → border-bottom-right-radius:·16px;
+       32 │ + → border-end-start-radius:·16px;
+    33 33 │   }
+    34 34 │   
+  
+
+```
+
+```
+invalidRtl.css:36:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    35 │ .values {
+  > 36 │ 	float: right;
+       │ 	       ^^^^^
+    37 │ 	float: left;
+    38 │ 	clear: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    34 34 │   
+    35 35 │   .values {
+    36    │ - → float:·right;
+       36 │ + → float:·inline-start;
+    37 37 │     float: left;
+    38 38 │     clear: right;
+  
+
+```
+
+```
+invalidRtl.css:37:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    35 │ .values {
+    36 │ 	float: right;
+  > 37 │ 	float: left;
+       │ 	       ^^^^
+    38 │ 	clear: right;
+    39 │ 	clear: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    35 35 │   .values {
+    36 36 │     float: right;
+    37    │ - → float:·left;
+       37 │ + → float:·inline-end;
+    38 38 │     clear: right;
+    39 39 │     clear: left;
+  
+
+```
+
+```
+invalidRtl.css:38:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    36 │ 	float: right;
+    37 │ 	float: left;
+  > 38 │ 	clear: right;
+       │ 	       ^^^^^
+    39 │ 	clear: left;
+    40 │ 	text-align: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    36 36 │     float: right;
+    37 37 │     float: left;
+    38    │ - → clear:·right;
+       38 │ + → clear:·inline-start;
+    39 39 │     clear: left;
+    40 40 │     text-align: right;
+  
+
+```
+
+```
+invalidRtl.css:39:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    37 │ 	float: left;
+    38 │ 	clear: right;
+  > 39 │ 	clear: left;
+       │ 	       ^^^^
+    40 │ 	text-align: right;
+    41 │ 	text-align: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    37 37 │     float: left;
+    38 38 │     clear: right;
+    39    │ - → clear:·left;
+       39 │ + → clear:·inline-end;
+    40 40 │     text-align: right;
+    41 41 │     text-align: left;
+  
+
+```
+
+```
+invalidRtl.css:40:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    38 │ 	clear: right;
+    39 │ 	clear: left;
+  > 40 │ 	text-align: right;
+       │ 	            ^^^^^
+    41 │ 	text-align: left;
+    42 │ 	justify-content: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    38 38 │     clear: right;
+    39 39 │     clear: left;
+    40    │ - → text-align:·right;
+       40 │ + → text-align:·start;
+    41 41 │     text-align: left;
+    42 42 │     justify-content: right;
+  
+
+```
+
+```
+invalidRtl.css:41:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    39 │ 	clear: left;
+    40 │ 	text-align: right;
+  > 41 │ 	text-align: left;
+       │ 	            ^^^^
+    42 │ 	justify-content: right;
+    43 │ 	justify-content: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    39 39 │     clear: left;
+    40 40 │     text-align: right;
+    41    │ - → text-align:·left;
+       41 │ + → text-align:·end;
+    42 42 │     justify-content: right;
+    43 43 │     justify-content: left;
+  
+
+```
+
+```
+invalidRtl.css:42:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    40 │ 	text-align: right;
+    41 │ 	text-align: left;
+  > 42 │ 	justify-content: right;
+       │ 	                 ^^^^^
+    43 │ 	justify-content: left;
+    44 │ 	justify-items: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    40 40 │     text-align: right;
+    41 41 │     text-align: left;
+    42    │ - → justify-content:·right;
+       42 │ + → justify-content:·start;
+    43 43 │     justify-content: left;
+    44 44 │     justify-items: right;
+  
+
+```
+
+```
+invalidRtl.css:43:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    41 │ 	text-align: left;
+    42 │ 	justify-content: right;
+  > 43 │ 	justify-content: left;
+       │ 	                 ^^^^
+    44 │ 	justify-items: right;
+    45 │ 	justify-items: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    41 41 │     text-align: left;
+    42 42 │     justify-content: right;
+    43    │ - → justify-content:·left;
+       43 │ + → justify-content:·end;
+    44 44 │     justify-items: right;
+    45 45 │     justify-items: left;
+  
+
+```
+
+```
+invalidRtl.css:44:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    42 │ 	justify-content: right;
+    43 │ 	justify-content: left;
+  > 44 │ 	justify-items: right;
+       │ 	               ^^^^^
+    45 │ 	justify-items: left;
+    46 │ 	justify-self: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    42 42 │     justify-content: right;
+    43 43 │     justify-content: left;
+    44    │ - → justify-items:·right;
+       44 │ + → justify-items:·start;
+    45 45 │     justify-items: left;
+    46 46 │     justify-self: right;
+  
+
+```
+
+```
+invalidRtl.css:45:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    43 │ 	justify-content: left;
+    44 │ 	justify-items: right;
+  > 45 │ 	justify-items: left;
+       │ 	               ^^^^
+    46 │ 	justify-self: right;
+    47 │ 	justify-self: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    43 43 │     justify-content: left;
+    44 44 │     justify-items: right;
+    45    │ - → justify-items:·left;
+       45 │ + → justify-items:·end;
+    46 46 │     justify-self: right;
+    47 47 │     justify-self: left;
+  
+
+```
+
+```
+invalidRtl.css:46:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    44 │ 	justify-items: right;
+    45 │ 	justify-items: left;
+  > 46 │ 	justify-self: right;
+       │ 	              ^^^^^
+    47 │ 	justify-self: left;
+    48 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    44 44 │     justify-items: right;
+    45 45 │     justify-items: left;
+    46    │ - → justify-self:·right;
+       46 │ + → justify-self:·start;
+    47 47 │     justify-self: left;
+    48 48 │   }
+  
+
+```
+
+```
+invalidRtl.css:47:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    45 │ 	justify-items: left;
+    46 │ 	justify-self: right;
+  > 47 │ 	justify-self: left;
+       │ 	              ^^^^
+    48 │ }
+    49 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    45 45 │     justify-items: left;
+    46 46 │     justify-self: right;
+    47    │ - → justify-self:·left;
+       47 │ + → justify-self:·end;
+    48 48 │   }
+    49 49 │   
+  
+
+```
+
+```
+invalidRtl.css:51:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    50 │ .anchor-functions {
+  > 51 │ 	right: anchor(left);
+       │ 	^^^^^
+    52 │ 	left: anchor(right);
+    53 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with inset-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    49 49 │   
+    50 50 │   .anchor-functions {
+    51    │ - → right:·anchor(left);
+       51 │ + → inset-inline-start:·anchor(left);
+    52 52 │     left: anchor(right);
+    53 53 │   }
+  
+
+```
+
+```
+invalidRtl.css:51:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a logical side in anchor().
+  
+    50 │ .anchor-functions {
+  > 51 │ 	right: anchor(left);
+       │ 	              ^^^^
+    52 │ 	left: anchor(right);
+    53 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    49 49 │   
+    50 50 │   .anchor-functions {
+    51    │ - → right:·anchor(left);
+       51 │ + → right:·anchor(end);
+    52 52 │     left: anchor(right);
+    53 53 │   }
+  
+
+```
+
+```
+invalidRtl.css:52:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    50 │ .anchor-functions {
+    51 │ 	right: anchor(left);
+  > 52 │ 	left: anchor(right);
+       │ 	^^^^
+    53 │ }
+    54 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inset-inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    50 50 │   .anchor-functions {
+    51 51 │     right: anchor(left);
+    52    │ - → left:·anchor(right);
+       52 │ + → inset-inline-end:·anchor(right);
+    53 53 │   }
+    54 54 │   
+  
+
+```
+
+```
+invalidRtl.css:52:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a logical side in anchor().
+  
+    50 │ .anchor-functions {
+    51 │ 	right: anchor(left);
+  > 52 │ 	left: anchor(right);
+       │ 	             ^^^^^
+    53 │ }
+    54 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    50 50 │   .anchor-functions {
+    51 51 │     right: anchor(left);
+    52    │ - → left:·anchor(right);
+       52 │ + → left:·anchor(start);
+    53 53 │   }
+    54 54 │   
   
 
 ```

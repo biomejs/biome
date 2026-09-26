@@ -7206,6 +7206,7 @@ export interface RuleWithUseLayeredStylesOptions {
 	options?: UseLayeredStylesOptions;
 }
 export interface RuleWithUseLogicalPropertiesOptions {
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseLogicalPropertiesOptions;
 }

@@ -1,10 +1,12 @@
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
-};
+use crate::CssRuleAction;
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::CssGenericProperty;
+use biome_css_syntax::{
+    AnyCssFunction, AnyCssGenericPropertyValueOrExpression, AnyCssValue, CssFunction,
+    CssGenericProperty, CssSyntaxToken, decode_css_identifier,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::use_logical_properties::{
     UseLogicalPropertiesDirection, UseLogicalPropertiesOptions,
 };
@@ -47,6 +49,36 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   float: left;
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   text-align: right;
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   justify-content: left;
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   inline-size: anchor-size(width);
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// p {
+    ///   inset-block-start: anchor(bottom);
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -55,6 +87,11 @@ declare_lint_rule! {
     ///   inset-block-start: 0;
     ///   margin-inline-start: 1rem;
     ///   border-inline-start: 1px solid;
+    ///   float: inline-start;
+    ///   text-align: end;
+    ///   justify-content: start;
+    ///   inline-size: anchor-size(inline);
+    ///   inset-block-start: anchor(end);
     /// }
     /// ```
     ///
@@ -95,56 +132,139 @@ declare_lint_rule! {
         language: "css",
         recommended: false,
         severity: Severity::Warning,
+        fix_kind: FixKind::Safe,
     }
 }
 
 impl Rule for UseLogicalProperties {
     type Query = Ast<CssGenericProperty>;
     type State = UseLogicalPropertiesState;
-    type Signals = Option<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = UseLogicalPropertiesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let property = ctx.query();
-        let name = property.name().ok()?;
-        let name_token = name.declaration().ok()?;
-        let normalized_name = name_token.text_trimmed().to_ascii_lowercase_cow();
-        let logical_property =
-            physical_to_logical_property(normalized_name.as_ref(), ctx.options().direction())?;
+        let Ok(name) = property.name() else {
+            return Box::default();
+        };
+        let Ok(name_token) = name.declaration() else {
+            return Box::default();
+        };
+        let normalized_name = name_token
+            .text_trimmed()
+            .to_ascii_lowercase_cow()
+            .into_owned();
+        let direction = ctx.options().direction();
+        let mut states = Vec::new();
 
-        Some(UseLogicalPropertiesState {
-            span: name.range(),
-            logical_property,
-        })
+        if let Some(logical_property) =
+            physical_to_logical_property(normalized_name.as_str(), direction)
+        {
+            states.push(UseLogicalPropertiesState {
+                span: name.range(),
+                token: name_token,
+                violation: LogicalPropertiesViolation::PropertyName {
+                    physical: normalized_name.clone(),
+                    replacement: logical_property,
+                },
+            });
+        }
+
+        collect_value_violations(property, normalized_name.as_str(), direction, &mut states);
+
+        states.into_boxed_slice()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let property = ctx.query();
-        let name = property.name().ok()?;
-        let name_token = name.declaration().ok()?;
-        let normalized_name = name_token.text_trimmed().to_ascii_lowercase_cow();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let (physical, replacement) = state.replacement();
 
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state.span,
-                markup! {
-                    "Use logical CSS properties over physical ones."
-                },
-            )
-            .note(markup! {
-                "Logical properties adapt better to different writing modes and layout directions."
-            })
-            .note(markup! {
-                "Replace "<Emphasis>{normalized_name.as_ref()}</Emphasis>" with "<Emphasis>{state.logical_property}</Emphasis>"."
-            }),
+            RuleDiagnostic::new(rule_category!(), state.span, state.message())
+                .note(markup! {
+                    "Logical properties adapt better to different writing modes and layout directions."
+                })
+                .note(markup! {
+                    "Replace "<Emphasis>{physical}</Emphasis>" with "<Emphasis>{replacement}</Emphasis>"."
+                }),
         )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
+        let (_, replacement) = state.replacement();
+        let mut mutation = ctx.root().begin();
+        let new_token = CssSyntaxToken::new_detached(state.token.kind(), replacement, [], []);
+        mutation.replace_token_transfer_trivia(state.token.clone(), new_token);
+
+        Some(CssRuleAction::new(
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
+            ctx.metadata().applicability(),
+            markup! { "Use the logical CSS replacement." }.to_owned(),
+            mutation,
+        ))
     }
 }
 
 pub struct UseLogicalPropertiesState {
     span: TextRange,
-    logical_property: &'static str,
+    token: CssSyntaxToken,
+    violation: LogicalPropertiesViolation,
+}
+
+enum LogicalPropertiesViolation {
+    PropertyName {
+        physical: String,
+        replacement: &'static str,
+    },
+    PropertyValue {
+        physical: String,
+        replacement: &'static str,
+    },
+    AnchorSizeValue {
+        physical: String,
+        replacement: &'static str,
+    },
+    AnchorValue {
+        physical: String,
+        replacement: &'static str,
+    },
+}
+
+impl UseLogicalPropertiesState {
+    fn message(&self) -> &'static str {
+        match self.violation {
+            LogicalPropertiesViolation::PropertyName { .. } => {
+                "Use logical CSS properties over physical ones."
+            }
+            LogicalPropertiesViolation::PropertyValue { .. } => {
+                "Use logical CSS values over physical ones."
+            }
+            LogicalPropertiesViolation::AnchorSizeValue { .. } => {
+                "Use a logical size in anchor-size()."
+            }
+            LogicalPropertiesViolation::AnchorValue { .. } => "Use a logical side in anchor().",
+        }
+    }
+
+    fn replacement(&self) -> (&str, &'static str) {
+        match &self.violation {
+            LogicalPropertiesViolation::PropertyName {
+                physical,
+                replacement,
+            }
+            | LogicalPropertiesViolation::PropertyValue {
+                physical,
+                replacement,
+            }
+            | LogicalPropertiesViolation::AnchorSizeValue {
+                physical,
+                replacement,
+            }
+            | LogicalPropertiesViolation::AnchorValue {
+                physical,
+                replacement,
+            } => (physical.as_str(), replacement),
+        }
+    }
 }
 
 /// Maps a physical property name to its logical `(ltr, rtl)` replacement names.
@@ -207,4 +327,210 @@ fn physical_to_logical_property(
         UseLogicalPropertiesDirection::Ltr => ltr,
         UseLogicalPropertiesDirection::Rtl => rtl,
     })
+}
+
+fn collect_value_violations(
+    property: &CssGenericProperty,
+    property_name: &str,
+    direction: UseLogicalPropertiesDirection,
+    states: &mut Vec<UseLogicalPropertiesState>,
+) {
+    let Ok(AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(values)) =
+        property.value()
+    else {
+        return;
+    };
+
+    for value in values
+        .iter()
+        .filter_map(|component| component.as_any_css_value().cloned())
+    {
+        if let Some((token, physical)) = value_identifier_token(&value)
+            && let Some(replacement) =
+                physical_to_logical_value(property_name, physical.as_str(), direction)
+        {
+            states.push(UseLogicalPropertiesState {
+                span: token.text_trimmed_range(),
+                token,
+                violation: LogicalPropertiesViolation::PropertyValue {
+                    physical,
+                    replacement,
+                },
+            });
+        }
+    }
+
+    for component in values.iter() {
+        let Some(AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function))) =
+            component.as_any_css_value()
+        else {
+            continue;
+        };
+        collect_function_violations(function, direction, states);
+    }
+}
+
+fn collect_function_violations(
+    function: &CssFunction,
+    direction: UseLogicalPropertiesDirection,
+    states: &mut Vec<UseLogicalPropertiesState>,
+) {
+    let Some(function_name) = function_name(function) else {
+        return;
+    };
+
+    let function_kind = match function_name.as_str() {
+        "anchor-size" => Some(true),
+        "anchor" => Some(false),
+        _ => None,
+    };
+
+    for expression in function.items().iter().flatten() {
+        collect_function_expression_violations(
+            expression.syntax(),
+            function_kind,
+            direction,
+            states,
+        );
+    }
+}
+
+fn collect_function_expression_violations(
+    expression: &biome_rowan::SyntaxNode<biome_css_syntax::CssLanguage>,
+    function_kind: Option<bool>,
+    direction: UseLogicalPropertiesDirection,
+    states: &mut Vec<UseLogicalPropertiesState>,
+) {
+    for child in expression.children() {
+        let Some(value) = AnyCssValue::cast(child.clone()) else {
+            collect_function_expression_violations(&child, function_kind, direction, states);
+            continue;
+        };
+
+        if let Some((token, physical)) = value_identifier_token(&value)
+            && let Some(is_anchor_size) = function_kind
+        {
+            let replacement = if is_anchor_size {
+                physical_to_logical_anchor_size(physical.as_str())
+            } else {
+                physical_to_logical_anchor_side(physical.as_str(), direction)
+            };
+
+            if let Some(replacement) = replacement {
+                states.push(UseLogicalPropertiesState {
+                    span: token.text_trimmed_range(),
+                    token,
+                    violation: if is_anchor_size {
+                        LogicalPropertiesViolation::AnchorSizeValue {
+                            physical,
+                            replacement,
+                        }
+                    } else {
+                        LogicalPropertiesViolation::AnchorValue {
+                            physical,
+                            replacement,
+                        }
+                    },
+                });
+            }
+        }
+
+        if let AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(function)) = value {
+            collect_function_violations(&function, direction, states);
+        }
+    }
+}
+
+fn function_name(function: &CssFunction) -> Option<String> {
+    let token = function
+        .name()
+        .ok()?
+        .as_css_identifier()?
+        .value_token()
+        .ok()?;
+    Some(
+        decode_css_identifier(token.text_trimmed())
+            .to_ascii_lowercase_cow()
+            .into_owned(),
+    )
+}
+
+fn value_identifier_token(value: &AnyCssValue) -> Option<(CssSyntaxToken, String)> {
+    let token = match value {
+        AnyCssValue::CssIdentifier(identifier) => identifier.value_token().ok()?,
+        AnyCssValue::CssCustomIdentifier(identifier) => identifier.value_token().ok()?,
+        AnyCssValue::AnyCssDashedIdentifier(identifier) => {
+            identifier.as_css_dashed_identifier()?.value_token().ok()?
+        }
+        _ => return None,
+    };
+    let physical = decode_css_identifier(token.text_trimmed())
+        .to_ascii_lowercase_cow()
+        .into_owned();
+
+    Some((token, physical))
+}
+
+fn physical_to_logical_value(
+    property: &str,
+    value: &str,
+    direction: UseLogicalPropertiesDirection,
+) -> Option<&'static str> {
+    match property {
+        "frame-sizing" => match value {
+            "content-width" => Some("content-inline-size"),
+            "content-height" => Some("content-block-size"),
+            _ => None,
+        },
+        "float" | "clear" => physical_to_logical_inline_value(value, direction),
+        "text-align" | "justify-content" | "justify-items" | "justify-self" => {
+            physical_to_logical_start_end_value(value, direction)
+        }
+        _ => None,
+    }
+}
+
+fn physical_to_logical_anchor_size(value: &str) -> Option<&'static str> {
+    match value {
+        "width" => Some("inline"),
+        "height" => Some("block"),
+        _ => None,
+    }
+}
+
+fn physical_to_logical_anchor_side(
+    value: &str,
+    direction: UseLogicalPropertiesDirection,
+) -> Option<&'static str> {
+    match value {
+        "top" => Some("start"),
+        "bottom" => Some("end"),
+        _ => physical_to_logical_start_end_value(value, direction),
+    }
+}
+
+fn physical_to_logical_inline_value(
+    value: &str,
+    direction: UseLogicalPropertiesDirection,
+) -> Option<&'static str> {
+    match (value, direction) {
+        ("left", UseLogicalPropertiesDirection::Ltr)
+        | ("right", UseLogicalPropertiesDirection::Rtl) => Some("inline-start"),
+        ("right", UseLogicalPropertiesDirection::Ltr)
+        | ("left", UseLogicalPropertiesDirection::Rtl) => Some("inline-end"),
+        _ => None,
+    }
+}
+
+fn physical_to_logical_start_end_value(
+    value: &str,
+    direction: UseLogicalPropertiesDirection,
+) -> Option<&'static str> {
+    match (value, direction) {
+        ("left", UseLogicalPropertiesDirection::Ltr)
+        | ("right", UseLogicalPropertiesDirection::Rtl) => Some("start"),
+        ("right", UseLogicalPropertiesDirection::Ltr)
+        | ("left", UseLogicalPropertiesDirection::Rtl) => Some("end"),
+        _ => None,
+    }
 }
