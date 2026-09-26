@@ -1,0 +1,5 @@
+[build.env]
+passthrough = ["RUSTFLAGS", "BIOME_VERSION"]
+
+[target.loongarch64-unknown-linux-gnu.env]
+passthrough = ["JEMALLOC_SYS_WITH_LG_PAGE=16"]
