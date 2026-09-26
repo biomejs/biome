@@ -19,6 +19,10 @@ const a = 1 + '1'
 const a = 1 + `1`
 const a = `1` + 1
 const a = 1 + 1 + ""
+const a = "a" + 1e21;
+const a = "a" + 0.1e-6;
+const a = "a" + -0;
+const a = "a" + 1e309;
 
 ```
 
@@ -365,7 +369,7 @@ invalid.js:14:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
   > 14 │ const a = `1` + 1
        │           ^^^^^^^
     15 │ const a = 1 + 1 + ""
-    16 │ 
+    16 │ const a = "a" + 1e21;
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
   
@@ -376,7 +380,7 @@ invalid.js:14:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━
     14    │ - const·a·=·`1`·+·1
        14 │ + const·a·=·"11"
     15 15 │   const a = 1 + 1 + ""
-    16 16 │   
+    16 16 │   const a = "a" + 1e21;
   
 
 ```
@@ -390,9 +394,86 @@ invalid.js:15:11 lint/complexity/noUselessStringConcat ━━━━━━━━�
     14 │ const a = `1` + 1
   > 15 │ const a = 1 + 1 + ""
        │           ^^^^^^^^^^
-    16 │ 
+    16 │ const a = "a" + 1e21;
+    17 │ const a = "a" + 0.1e-6;
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+
+```
+
+```
+invalid.js:16:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    14 │ const a = `1` + 1
+    15 │ const a = 1 + 1 + ""
+  > 16 │ const a = "a" + 1e21;
+       │           ^^^^^^^^^^
+    17 │ const a = "a" + 0.1e-6;
+    18 │ const a = "a" + -0;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    14 14 │   const a = `1` + 1
+    15 15 │   const a = 1 + 1 + ""
+    16    │ - const·a·=·"a"·+·1e21;
+       16 │ + const·a·=·"a1e+21";
+    17 17 │   const a = "a" + 0.1e-6;
+    18 18 │   const a = "a" + -0;
+  
+
+```
+
+```
+invalid.js:17:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    15 │ const a = 1 + 1 + ""
+    16 │ const a = "a" + 1e21;
+  > 17 │ const a = "a" + 0.1e-6;
+       │           ^^^^^^^^^^^^
+    18 │ const a = "a" + -0;
+    19 │ const a = "a" + 1e309;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    15 15 │   const a = 1 + 1 + ""
+    16 16 │   const a = "a" + 1e21;
+    17    │ - const·a·=·"a"·+·0.1e-6;
+       17 │ + const·a·=·"a1e-7";
+    18 18 │   const a = "a" + -0;
+    19 19 │   const a = "a" + 1e309;
+  
+
+```
+
+```
+invalid.js:19:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    17 │ const a = "a" + 0.1e-6;
+    18 │ const a = "a" + -0;
+  > 19 │ const a = "a" + 1e309;
+       │           ^^^^^^^^^^^
+    20 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    17 17 │   const a = "a" + 0.1e-6;
+    18 18 │   const a = "a" + -0;
+    19    │ - const·a·=·"a"·+·1e309;
+       19 │ + const·a·=·"aInfinity";
+    20 20 │   
   
 
 ```
