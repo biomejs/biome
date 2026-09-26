@@ -254,18 +254,22 @@ impl TypeDataTransformer {
                         return TypeTransformResult::LimitExceeded;
                     }
 
-                    let (rebuilder, pending_types) = slots.into_parts();
+                    let rebuilder = slots.into_rebuilder();
                     stack.push(TypeTransformEvent::Exit {
                         source,
                         transformed,
                     });
-                    stack.push(TypeTransformEvent::Rebuild { rebuilder });
+                    let rebuild_index = stack.len();
                     stack.extend(
-                        pending_types
-                            .into_iter()
+                        rebuilder
+                            .slots()
+                            .iter()
                             .rev()
+                            .copied()
                             .map(TypeTransformEvent::Enter),
                     );
+                    // The rebuild runs after every slot has been transformed.
+                    stack.insert(rebuild_index, TypeTransformEvent::Rebuild { rebuilder });
                 }
                 TypeTransformEvent::Rebuild { rebuilder } => {
                     let slot_count = rebuilder.len();
@@ -273,7 +277,7 @@ impl TypeDataTransformer {
                         return TypeTransformResult::InvalidRebuild;
                     };
                     let replacements = results.split_off(start);
-                    match rebuilder.rebuild(db, replacements) {
+                    match rebuilder.rebuild_if_changed(db, replacements) {
                         TypeTransformResult::Transformed(rebuilt) => {
                             results.push(operation.leave(db, rebuilt));
                         }
