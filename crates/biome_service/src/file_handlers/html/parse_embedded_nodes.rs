@@ -1118,6 +1118,8 @@ fn parse_matched_embed(
                 EmbedCandidate::Element { .. } => {
                     if ctx.host_file_source.is_svelte() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_module_script: candidate.has_attribute("module")
+                                || candidate.has_attribute_value("context", "module"),
                             is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind: SvelteEmbeddingKind::Source,
@@ -1154,6 +1156,7 @@ fn parse_matched_embed(
                             _ => SvelteEmbeddingKind::Expression,
                         };
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_module_script: false,
                             is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind,
@@ -1193,6 +1196,7 @@ fn parse_matched_embed(
                         }
                         HtmlVariant::Svelte => {
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                                is_module_script: false,
                                 file_kind: SvelteFileKind::Component,
                                 is_class_attribute: *is_class_attribute,
                                 embedding_kind: SvelteEmbeddingKind::Expression,

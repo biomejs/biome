@@ -74,7 +74,10 @@ impl SvelteFileHandler {
             .captures(text)
             .and_then(|captures| {
                 let ParsedLangAndSetup {
-                    language, variant, ..
+                    language,
+                    variant,
+                    module,
+                    ..
                 } = parse_lang_and_setup_from_script_opening_tag(
                     captures.name("opening")?.as_str(),
                 );
@@ -82,6 +85,7 @@ impl SvelteFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Svelte {
+                            is_module_script: module,
                             is_class_attribute: false,
                             file_kind: SvelteFileKind::Component,
                             embedding_kind: SvelteEmbeddingKind::Source,
