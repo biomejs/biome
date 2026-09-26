@@ -13,3 +13,6 @@ const a = 1 + '1'
 const a = 1 + `1`
 const a = `1` + 1
 const a = 1 + 1 + ""
+const a = "a" + 1e21;
+const a = "a" + 0.1e-6;
+const a = "a" + -0;
