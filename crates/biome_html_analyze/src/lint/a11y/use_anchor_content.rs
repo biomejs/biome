@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList, T};
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
@@ -10,7 +11,7 @@ use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
+    get_truthy_aria_hidden_attribute, has_non_empty_attribute, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
@@ -183,10 +184,28 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
-                false
-            } else {
-                has_accessible_content(&element.children(), is_astro)
+                return false;
             }
+
+            if let Ok(opening) = element.opening_element() {
+                let tag_element = AnyHtmlTagElement::from(opening);
+                let tag_text = tag_element.name().ok().and_then(|n| n.token_text_trimmed());
+
+                // Astro's `Image` renders an `img` and ignores its children,
+                // so it gets the same checks as the self-closing spelling
+                if is_astro && tag_text.as_ref().is_some_and(|t| t.as_ref() == "Image") {
+                    return ["aria-label", "aria-labelledby", "title", "alt"]
+                        .into_iter()
+                        .any(|name| has_non_empty_attribute(&tag_element, name));
+                }
+
+                // Custom components may render accessible content, as in the JSX rule
+                if tag_element.is_custom_component() {
+                    return true;
+                }
+            }
+
+            has_accessible_content(&element.children(), is_astro)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
