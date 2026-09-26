@@ -1,0 +1,222 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: boundaries.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<li>Root item</li>
+<li />
+{#if visible}<li>Root conditional item</li>{/if}
+<List><li>Component child</li><li /></List>
+<svelte:element this="ul"><li>Dynamic element child</li><li /></svelte:element>
+<List><svelte:fragment slot="items"><li>Slotted item</li><li /></svelte:fragment></List>
+{#snippet item()}
+    <li>Snippet item</li>
+    <li />
+{/snippet}
+<div>
+    {#snippet nestedItem()}
+        <li>Nested snippet item</li>
+        <li />
+        {#if visible}<li>Conditional snippet item</li>{/if}
+    {/snippet}
+    {#if visible}
+        <li>Conditional item</li>
+    {:else if pending}
+        <li>Pending item</li>
+    {:else}
+        <li />
+    {/if}
+    {#each items as item}
+        <li>{item}</li>
+    {/each}
+    {#await promise}
+        <li>Loading</li>
+    {:then item}
+        <li>{item}</li>
+    {:catch error}
+        <li>{error}</li>
+    {/await}
+    {#key value}
+        <li />
+    {/key}
+</div>
+<ul>
+    {#if visible}
+        {#each items as item}
+            <li>{item}</li>
+        {/each}
+    {/if}
+</ul>
+
+```
+
+# Diagnostics
+```
+boundaries.svelte:19:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    17 │     {/snippet}
+    18 │     {#if visible}
+  > 19 │         <li>Conditional item</li>
+       │         ^^^^
+    20 │     {:else if pending}
+    21 │         <li>Pending item</li>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:21:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    19 │         <li>Conditional item</li>
+    20 │     {:else if pending}
+  > 21 │         <li>Pending item</li>
+       │         ^^^^
+    22 │     {:else}
+    23 │         <li />
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:23:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    21 │         <li>Pending item</li>
+    22 │     {:else}
+  > 23 │         <li />
+       │         ^^^^^^
+    24 │     {/if}
+    25 │     {#each items as item}
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:26:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    24 │     {/if}
+    25 │     {#each items as item}
+  > 26 │         <li>{item}</li>
+       │         ^^^^
+    27 │     {/each}
+    28 │     {#await promise}
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:29:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    27 │     {/each}
+    28 │     {#await promise}
+  > 29 │         <li>Loading</li>
+       │         ^^^^
+    30 │     {:then item}
+    31 │         <li>{item}</li>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:31:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    29 │         <li>Loading</li>
+    30 │     {:then item}
+  > 31 │         <li>{item}</li>
+       │         ^^^^
+    32 │     {:catch error}
+    33 │         <li>{error}</li>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:33:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    31 │         <li>{item}</li>
+    32 │     {:catch error}
+  > 33 │         <li>{error}</li>
+       │         ^^^^
+    34 │     {/await}
+    35 │     {#key value}
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+boundaries.svelte:36:9 lint/nursery/useLiContainer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    34 │     {/await}
+    35 │     {#key value}
+  > 36 │         <li />
+       │         ^^^^^^
+    37 │     {/key}
+    38 │ </div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
