@@ -68,6 +68,7 @@ use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use camino::Utf8Path;
 use crossbeam::channel::bounded;
+pub use document::DocumentLockGuard;
 use enumflags2::{BitFlags, bitflags};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};

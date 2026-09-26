@@ -1,20 +1,22 @@
 use crate::WorkspaceSettings;
 use crate::capabilities::DEFAULT_CODE_ACTION_CAPABILITIES;
 use crate::server_test_utils::*;
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use biome_analyze::RuleCategories;
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::analyzer::assist::AssistConfiguration;
 use biome_configuration::{Configuration, FormatterConfiguration, LinterConfiguration};
 use biome_diagnostics::PrintDescription;
 use biome_fs::{BiomePath, MemoryFileSystem, TemporaryFs};
+use biome_languages::DocumentFileSource;
 use biome_service::workspace::{
-    FileContent, GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams,
-    OpenProjectResult, PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams,
-    ScanProjectResult,
+    ChangeFileParams, ChangeFileResult, FileContent, FileExistsParams, FormatFileParams,
+    GetFileContentParams, GetModuleGraphParams, GetModuleGraphResult, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, OpenFileParams, OpenFileResult, OpenProjectParams, OpenProjectResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, ScanKind, ScanProjectParams, ScanProjectResult,
 };
-use biome_service::{Watcher, WatcherOptions};
+use biome_service::{Watcher, WatcherOptions, Workspace};
+use futures::StreamExt;
 use futures::channel::mpsc::channel;
 use serde_json::from_value;
 use std::collections::{BTreeMap, HashMap};
@@ -23,6 +25,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::task::spawn_blocking;
 use tokio::time::sleep;
+use tower_lsp_server::jsonrpc;
 use tower_lsp_server::ls_types::{
     self as lsp, ClientCapabilities, CodeAction, CodeActionContext, CodeActionKind,
     CodeActionOrCommand, CodeActionParams, CodeActionResponse, CodeDescription, Diagnostic,
@@ -6449,6 +6452,669 @@ async fn escapes_workspace_paths_in_string_watched_files() -> Result<()> {
         options.watchers[0].glob_pattern,
         lsp::GlobPattern::String(expected.to_string())
     );
+    Ok(())
+}
+
+// #endregion
+
+// #region Multiple clients sharing a document
+
+/// An editor connected to a daemon ([ServerFactory]) shared with other editors.
+struct ConnectedClient {
+    server: Server,
+    reader: tokio::task::JoinHandle<Result<()>>,
+    drain: Option<tokio::task::JoinHandle<()>>,
+}
+
+impl ConnectedClient {
+    async fn connect(factory: &ServerFactory) -> Result<Self> {
+        let (client, mut receiver) = Self::connect_with_notifications(factory).await?;
+        // Drain notifications so server requests never block.
+        let drain = tokio::spawn(async move { while receiver.next().await.is_some() {} });
+        Ok(Self {
+            drain: Some(drain),
+            ..client
+        })
+    }
+
+    /// Like [`Self::connect`], but the caller must drain the notifications.
+    async fn connect_with_notifications(
+        factory: &ServerFactory,
+    ) -> Result<(Self, futures::channel::mpsc::Receiver<ServerNotification>)> {
+        let (service, client) = factory.create().into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+
+        let (sender, receiver) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+        server.initialize().await?;
+        server.initialized().await?;
+
+        Ok((
+            Self {
+                server,
+                reader,
+                drain: None,
+            },
+            receiver,
+        ))
+    }
+
+    async fn open_document_with_version(&mut self, text: &str, version: i32) -> Result<()> {
+        self.server
+            .notify(
+                "textDocument/didOpen",
+                DidOpenTextDocumentParams {
+                    text_document: TextDocumentItem {
+                        uri: uri!("document.js"),
+                        language_id: String::from("javascript"),
+                        version,
+                        text: text.to_string(),
+                    },
+                },
+            )
+            .await
+    }
+
+    async fn replace_document(&mut self, text: &str, version: i32) -> Result<()> {
+        self.server
+            .change_document(
+                version,
+                vec![TextDocumentContentChangeEvent {
+                    range: None,
+                    range_length: None,
+                    text: text.to_string(),
+                }],
+            )
+            .await
+    }
+
+    /// Requests formatting, retrying on `ContentModified` like an editor.
+    async fn format_document(&mut self) -> Result<Vec<TextEdit>> {
+        for _ in 0..5 {
+            match self.request_formatting().await {
+                Err(err)
+                    if err
+                        .downcast_ref::<jsonrpc::Error>()
+                        .is_some_and(|err| err.code == jsonrpc::ErrorCode::ContentModified) => {}
+                result => return result,
+            }
+        }
+        bail!("the server kept answering formatting with ContentModified")
+    }
+
+    async fn request_formatting(&mut self) -> Result<Vec<TextEdit>> {
+        let res: Option<Vec<TextEdit>> = self
+            .server
+            .request(
+                "textDocument/formatting",
+                "formatting",
+                DocumentFormattingParams {
+                    text_document: TextDocumentIdentifier {
+                        uri: uri!("document.js"),
+                    },
+                    options: FormattingOptions::default(),
+                    work_done_progress_params: WorkDoneProgressParams {
+                        work_done_token: None,
+                    },
+                },
+            )
+            .await?
+            .context("formatting returned None")?;
+        res.context("formatting did not return an edit list")
+    }
+
+    async fn shutdown(mut self) -> Result<()> {
+        self.server.shutdown().await?;
+        self.reader.abort();
+        if let Some(drain) = self.drain {
+            drain.abort();
+        }
+        Ok(())
+    }
+}
+
+/// Waits for `idle` without diagnostics; panics if they keep coming for 5s.
+async fn wait_for_diagnostics_to_settle(
+    receiver: &mut futures::channel::mpsc::Receiver<ServerNotification>,
+    idle: Duration,
+) {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    loop {
+        match tokio::time::timeout(idle, receiver.next()).await {
+            Ok(Some(notification)) if notification.is_publish_diagnostics() => {
+                assert!(
+                    tokio::time::Instant::now() < deadline,
+                    "the server kept publishing diagnostics without any change"
+                );
+            }
+            Ok(Some(_)) => {}
+            Ok(None) | Err(_) => return,
+        }
+    }
+}
+
+const SHARED_V1: &str = "const a  =  1;\nconst b  =  2;\n";
+const SHARED_V1_FORMATTED: &str = "const a = 1;\nconst b = 2;\n";
+/// Client A's unsaved edit: shifts every offset and lengthens the output.
+const SHARED_V2: &str = "// changed by client A\nconst a  =  1;\nconst b  =  2;\nconst c  =  3;\n";
+const SHARED_V2_FORMATTED: &str =
+    "// changed by client A\nconst a = 1;\nconst b = 2;\nconst c = 3;\n";
+
+#[tokio::test]
+async fn formatting_with_two_clients_does_not_mix_documents() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+
+    // Only client A edits its buffer.
+    client_a.replace_document(SHARED_V2, 1).await?;
+
+    // Client B's edits must format its own, original text.
+    let edits = client_b.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits), SHARED_V1_FORMATTED);
+
+    let edits = client_a.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V2, edits), SHARED_V2_FORMATTED);
+
+    // Again, now that client A formatted last.
+    let edits = client_b.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits), SHARED_V1_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn did_change_with_two_clients_applies_to_own_text() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+
+    client_a.replace_document(SHARED_V2, 1).await?;
+
+    // Replaces `1` with `10`; the range is only valid on client B's text.
+    client_b
+        .server
+        .change_document(
+            1,
+            vec![TextDocumentContentChangeEvent {
+                range: Some(Range::new(Position::new(0, 12), Position::new(0, 13))),
+                range_length: None,
+                text: String::from("10"),
+            }],
+        )
+        .await?;
+    let expected_b = "const a  =  10;\nconst b  =  2;\n";
+    let expected_b_formatted = "const a = 10;\nconst b = 2;\n";
+
+    let edits = client_b.format_document().await?;
+    assert_eq!(apply_text_edits(expected_b, edits), expected_b_formatted);
+
+    let edits = client_a.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V2, edits), SHARED_V2_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn did_change_with_lower_version_from_other_client_is_not_dropped() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    // Versions are per client; B's are far behind A's.
+    client_a.open_document_with_version(SHARED_V1, 50).await?;
+    client_b.open_document_with_version(SHARED_V1, 3).await?;
+
+    client_a.replace_document(SHARED_V2, 51).await?;
+
+    let text_b = "const   x = 'b';\n";
+    let text_b_formatted = "const x = \"b\";\n";
+    client_b.replace_document(text_b, 4).await?;
+
+    let edits = client_b.format_document().await?;
+    assert_eq!(apply_text_edits(text_b, edits), text_b_formatted);
+
+    let edits = client_a.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V2, edits), SHARED_V2_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn closing_document_in_one_client_keeps_other_client_working() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+
+    client_b.server.close_document().await?;
+
+    let edits = client_a.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits), SHARED_V1_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+/// Writing an indexed file makes every session refresh diagnostics; two
+/// clients with different texts must not keep re-opening it in turn.
+#[tokio::test]
+async fn diagnostics_settle_with_two_clients_on_indexed_file() -> Result<()> {
+    let path = to_utf8_file_path_buf(uri!("document.js"));
+    let fs = MemoryFileSystem::default();
+    fs.insert(path.clone(), SHARED_V1);
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+
+    let (mut client_a, mut notifications_a) =
+        ConnectedClient::connect_with_notifications(&factory).await?;
+    let (mut client_b, mut notifications_b) =
+        ConnectedClient::connect_with_notifications(&factory).await?;
+
+    // Put the file in the module graph, as the scanner would.
+    let db_state = factory.db_state();
+    let workspace = factory.workspace();
+    let workspace = workspace.with_db_state(&db_state);
+    let OpenProjectResult { project_key } = workspace.open_project(OpenProjectParams {
+        path: BiomePath::new(to_utf8_file_path_buf(uri!(""))),
+        open_uninitialized: true,
+    })?;
+    workspace.index_files_for_test(
+        project_key,
+        [(
+            BiomePath::new(path.clone()),
+            DocumentFileSource::from_path(&path, false),
+        )],
+    );
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+    client_a.replace_document(SHARED_V2, 1).await?;
+
+    // Each client gets the diagnostics of its own text...
+    wait_for_notification(&mut notifications_a, |notification| {
+        matches!(
+            notification,
+            ServerNotification::PublishDiagnostics(params) if params.version == Some(1)
+        )
+    })
+    .await;
+    wait_for_notification(&mut notifications_b, |notification| {
+        notification.is_publish_diagnostics()
+    })
+    .await;
+
+    // ...then the refreshes stop.
+    tokio::join!(
+        wait_for_diagnostics_to_settle(&mut notifications_a, Duration::from_millis(750)),
+        wait_for_diagnostics_to_settle(&mut notifications_b, Duration::from_millis(750)),
+    );
+
+    // Configuration-change refreshes may write to the workspace; they must
+    // settle too.
+    client_b.server.load_configuration().await?;
+    wait_for_notification(&mut notifications_b, |notification| {
+        notification.is_publish_diagnostics()
+    })
+    .await;
+    client_a.server.load_configuration().await?;
+    wait_for_notification(&mut notifications_a, |notification| {
+        matches!(
+            notification,
+            ServerNotification::PublishDiagnostics(params) if params.version == Some(1)
+        )
+    })
+    .await;
+    tokio::join!(
+        wait_for_diagnostics_to_settle(&mut notifications_a, Duration::from_millis(750)),
+        wait_for_diagnostics_to_settle(&mut notifications_b, Duration::from_millis(750)),
+    );
+
+    // Both clients still get edits for their own text.
+    let edits = client_b.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits), SHARED_V1_FORMATTED);
+    let edits = client_a.format_document().await?;
+    assert_eq!(apply_text_edits(SHARED_V2, edits), SHARED_V2_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+/// The workspace doesn't store dependency files; requests must not re-open
+/// them.
+#[tokio::test]
+async fn requests_on_dependency_files_do_not_reopen_them() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client = ConnectedClient::connect(&factory).await?;
+    let uri = uri!("node_modules/dep/index.js");
+    client
+        .server
+        .open_named_document(SHARED_V1, uri.clone(), "javascript")
+        .await?;
+
+    // Any `open_file` from now on is a re-open.
+    let reopened = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let flag = reopened.clone();
+    factory
+        .workspace()
+        .set_hook_between_parse_and_content_update(move |_| {
+            flag.store(true, std::sync::atomic::Ordering::Release);
+        });
+
+    let res: Option<Vec<TextEdit>> = client
+        .server
+        .request(
+            "textDocument/formatting",
+            "formatting",
+            DocumentFormattingParams {
+                text_document: TextDocumentIdentifier { uri },
+                options: FormattingOptions::default(),
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+            },
+        )
+        .await?
+        .context("formatting returned no response")?;
+    assert!(res.is_none(), "dependency files are not formatted");
+    assert!(
+        !reopened.load(std::sync::atomic::Ordering::Acquire),
+        "the request re-opened a file the workspace doesn't store"
+    );
+
+    client.shutdown().await?;
+    Ok(())
+}
+
+/// A's request, running while B's change sits between storing the parse and
+/// the content, must not format B's parse.
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
+async fn formatting_does_not_observe_another_clients_change_between_writes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+    // Let the open diagnostics finish before blocking a writer.
+    sleep(Duration::from_millis(500)).await;
+
+    // Hold B's change between the two writes.
+    let (in_window_tx, in_window_rx) = tokio::sync::oneshot::channel::<()>();
+    let (proceed_tx, proceed_rx) = std::sync::mpsc::channel::<()>();
+    factory
+        .workspace()
+        .set_hook_between_parse_and_content_update(move |_| {
+            let _ = in_window_tx.send(());
+            let _ = proceed_rx.recv_timeout(Duration::from_secs(5));
+        });
+    let change_b = tokio::spawn(async move {
+        let result = client_b.replace_document(SHARED_V2, 1).await;
+        (client_b, result)
+    });
+    in_window_rx.await?;
+
+    // A formats while only B's parse is stored.
+    let format_a = tokio::spawn(async move {
+        let result = client_a.format_document().await;
+        (client_a, result)
+    });
+    sleep(Duration::from_millis(200)).await;
+    proceed_tx.send(())?;
+
+    let (client_b, change_result) = change_b.await?;
+    change_result?;
+    let (client_a, edits) = format_a.await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits?), SHARED_V1_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+/// A write through `biome/change_file` (CLI, JS API) must not be observable
+/// between the two stores either.
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
+async fn formatting_does_not_observe_a_workspace_client_change_between_writes() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut client_a = ConnectedClient::connect(&factory).await?;
+    let mut client_b = ConnectedClient::connect(&factory).await?;
+
+    client_a.open_document_with_version(SHARED_V1, 0).await?;
+    client_b.open_document_with_version(SHARED_V1, 0).await?;
+    sleep(Duration::from_millis(500)).await;
+
+    let OpenProjectResult { project_key } = client_b
+        .server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: BiomePath::new(to_utf8_file_path_buf(uri!(""))),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .context("open_project returned None")?;
+
+    let (in_window_tx, in_window_rx) = tokio::sync::oneshot::channel::<()>();
+    let (proceed_tx, proceed_rx) = std::sync::mpsc::channel::<()>();
+    factory
+        .workspace()
+        .set_hook_between_parse_and_content_update(move |_| {
+            let _ = in_window_tx.send(());
+            let _ = proceed_rx.recv_timeout(Duration::from_secs(5));
+        });
+    let change_b = tokio::spawn(async move {
+        let result: Result<Option<ChangeFileResult>> = client_b
+            .server
+            .request(
+                "biome/change_file",
+                "change_file",
+                ChangeFileParams {
+                    project_key,
+                    path: BiomePath::new(to_utf8_file_path_buf(uri!("document.js"))),
+                    content: SHARED_V2.to_string(),
+                    version: 1,
+                    inline_config: None,
+                    editor_features: None,
+                },
+            )
+            .await;
+        (client_b, result)
+    });
+    in_window_rx.await?;
+
+    let format_a = tokio::spawn(async move {
+        let result = client_a.format_document().await;
+        (client_a, result)
+    });
+    sleep(Duration::from_millis(200)).await;
+    proceed_tx.send(())?;
+
+    let (client_b, change_result) = change_b.await?;
+    change_result?.context("change_file returned None")?;
+    let (client_a, edits) = format_a.await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits?), SHARED_V1_FORMATTED);
+
+    client_a.shutdown().await?;
+    client_b.shutdown().await?;
+    Ok(())
+}
+
+/// A scanner or watcher write must not be observable between the two stores
+/// either.
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
+async fn formatting_does_not_observe_a_scanner_write_between_writes() -> Result<()> {
+    let path = to_utf8_file_path_buf(uri!("document.js"));
+    let fs = MemoryFileSystem::default();
+    // Disk differs from the editor's text.
+    fs.insert(path.clone(), SHARED_V2);
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let mut client = ConnectedClient::connect(&factory).await?;
+
+    client.open_document_with_version(SHARED_V1, 0).await?;
+    sleep(Duration::from_millis(500)).await;
+
+    let db_state = factory.db_state();
+    let workspace = factory.workspace();
+    let OpenProjectResult { project_key } =
+        workspace
+            .with_db_state(&db_state)
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(to_utf8_file_path_buf(uri!(""))),
+                open_uninitialized: true,
+            })?;
+
+    let (in_window_tx, in_window_rx) = tokio::sync::oneshot::channel::<()>();
+    let (proceed_tx, proceed_rx) = std::sync::mpsc::channel::<()>();
+    workspace.set_hook_between_parse_and_content_update(move |_| {
+        let _ = in_window_tx.send(());
+        let _ = proceed_rx.recv_timeout(Duration::from_secs(5));
+    });
+    let index_path = path.clone();
+    let index = tokio::task::spawn_blocking(move || {
+        workspace.with_db_state(&db_state).index_files_for_test(
+            project_key,
+            [(
+                BiomePath::new(index_path.clone()),
+                DocumentFileSource::from_path(&index_path, false),
+            )],
+        );
+    });
+    in_window_rx.await?;
+
+    let format = tokio::spawn(async move {
+        let result = client.format_document().await;
+        (client, result)
+    });
+    sleep(Duration::from_millis(200)).await;
+    proceed_tx.send(())?;
+
+    index.await?;
+    let (client, edits) = format.await?;
+    assert_eq!(apply_text_edits(SHARED_V1, edits?), SHARED_V1_FORMATTED);
+
+    client.shutdown().await?;
+    Ok(())
+}
+
+/// An editor opening a file while the scanner is about to store its parse
+/// must not end up with the scanner's parse next to its content.
+///
+/// The reader uses the workspace directly, as a handler can't pause between
+/// locking and reading. Tokio timers are avoided: a task blocked on the lock
+/// (the `didOpen` diagnostics) stalls them.
+#[tokio::test(flavor = "multi_thread", worker_threads = 8)]
+async fn scanner_write_started_before_first_open_is_not_observed() -> Result<()> {
+    let path = to_utf8_file_path_buf(uri!("document.js"));
+    let fs = MemoryFileSystem::default();
+    // Disk differs from the editor's text.
+    fs.insert(path.clone(), SHARED_V2);
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let mut client = ConnectedClient::connect(&factory).await?;
+
+    let db_state = factory.db_state();
+    let workspace = factory.workspace();
+    let OpenProjectResult { project_key } =
+        workspace
+            .with_db_state(&db_state)
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(to_utf8_file_path_buf(uri!(""))),
+                open_uninitialized: true,
+            })?;
+
+    // Hold the scanner right before it stores its parse.
+    let (in_window_tx, in_window_rx) = tokio::sync::oneshot::channel::<()>();
+    let (proceed_tx, proceed_rx) = std::sync::mpsc::channel::<()>();
+    workspace.set_hook_before_parse_update(move |_| {
+        let _ = in_window_tx.send(());
+        let _ = proceed_rx.recv_timeout(Duration::from_secs(5));
+    });
+    let index_workspace = workspace.clone();
+    let index_db_state = db_state.clone();
+    let index_path = path.clone();
+    let index = spawn_blocking(move || {
+        index_workspace
+            .with_db_state(&index_db_state)
+            .index_files_for_test(
+                project_key,
+                [(
+                    BiomePath::new(index_path.clone()),
+                    DocumentFileSource::from_path(&index_path, false),
+                )],
+            );
+    });
+    in_window_rx.await?;
+
+    // Not awaited: it may block on the scanner's lock.
+    let open = tokio::spawn(async move {
+        let result = client.open_document_with_version(SHARED_V1, 0).await;
+        (client, result)
+    });
+
+    // Like a handler: lock once the document is stored, read after the
+    // scanner wrote.
+    let (read_tx, read_rx) = std::sync::mpsc::channel::<()>();
+    let reader_path = path.clone();
+    let reader = spawn_blocking(move || {
+        let workspace = workspace.with_db_state(&db_state);
+        let stored = || {
+            workspace.file_exists(FileExistsParams {
+                file_path: BiomePath::new(reader_path.clone()),
+            })
+        };
+        let deadline = std::time::Instant::now() + Duration::from_secs(5);
+        while !stored()? && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let _guard = workspace.lock_document(&reader_path);
+        let _ = read_rx.recv_timeout(Duration::from_secs(5));
+        let printed = workspace.format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(reader_path.clone()),
+            inline_config: None,
+        })?;
+        let content = workspace.get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(reader_path),
+        })?;
+        Ok::<_, anyhow::Error>((printed.into_code(), content))
+    });
+    spawn_blocking(|| std::thread::sleep(Duration::from_millis(200))).await?;
+    proceed_tx.send(())?;
+    spawn_blocking(|| std::thread::sleep(Duration::from_millis(200))).await?;
+    read_tx.send(())?;
+
+    let (printed, content) = reader.await??;
+    let expected = match content.as_str() {
+        SHARED_V1 => SHARED_V1_FORMATTED,
+        SHARED_V2 => SHARED_V2_FORMATTED,
+        other => bail!("unexpected content: {other:?}"),
+    };
+    assert_eq!(printed, expected, "the parsed file was not the content's");
+
+    index.await?;
+    let (client, opened) = open.await?;
+    opened?;
+    client.shutdown().await?;
     Ok(())
 }
 
