@@ -556,8 +556,10 @@ impl WorkspaceDb {
             // Manifest queries look up the parsed source of a path outside
             // Salsa. Publishing a new parsed source must invalidate them.
             #[cfg(feature = "module_graph")]
-            let change = self.data().resolver_source_change(path);
-            self.sync_resolver_paths(change);
+            {
+                let change = self.data().resolver_source_change(path);
+                self.sync_resolver_paths(change);
+            }
             file
         }
     }
@@ -569,8 +571,10 @@ impl WorkspaceDb {
     pub fn remove_file(&mut self, path: &Utf8Path) {
         if self.files.pin().remove(path).is_some() {
             #[cfg(feature = "module_graph")]
-            let change = self.data().resolver_source_change(path);
-            self.sync_resolver_paths(change);
+            {
+                let change = self.data().resolver_source_change(path);
+                self.sync_resolver_paths(change);
+            }
         }
     }
 
