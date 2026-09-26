@@ -21,7 +21,7 @@ use crate::ModuleDb;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
-use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeData};
+use biome_js_type_info::interned_types::TypeData as InferredTypeData;
 
 // #region CALL INFERENCE QUERIES
 
@@ -119,10 +119,7 @@ pub fn infer_constructor_argument_type<'db>(
                 resolved_call_arguments(db, input.args(db), input.argument_index(db));
             let ty =
                 infer_constructor_argument_type_impl(db, input.callee(db), &args, argument_index)?;
-            Some(match ty {
-                InferredTypeData::GlobalType(id) => global_types(db).get(id),
-                ty => ty,
-            })
+            Some(ty.expand_canonical_global(db))
         },
     )
 }

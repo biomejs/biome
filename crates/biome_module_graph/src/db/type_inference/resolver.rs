@@ -892,6 +892,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -937,6 +938,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         let mut seen = FxHashSet::default();
 
         for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+            ty = ty.expand_global_local(self.db);
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };

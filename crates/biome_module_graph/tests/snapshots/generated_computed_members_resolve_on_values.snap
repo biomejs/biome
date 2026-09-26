@@ -58,11 +58,7 @@ Binding expression "expression" => instanceof RegExp
 
 Binding mathTag "mathTag" => string
 
-Expression "Math" => class "Math" {
-  extends: none
-  implements: []
-  type_args: []
-}
+Expression "Math" => instanceof Math
 
 Expression "Math[Symbol.toStringTag]" => string
 

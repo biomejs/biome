@@ -1,5 +1,4 @@
 use crate::TypeDb;
-use crate::global_types;
 use crate::interned_types::{ConditionalType, Literal, ReturnType, TypeData};
 use crate::return_type_relation::{
     ReturnTypeRelation, compare_declared_return_type_owned,
@@ -365,7 +364,7 @@ impl<'db> InferredType<'db> {
         while let Some((data, path, is_instance_target, is_promise_like_target)) =
             pending.pop_front()
         {
-            let data = resolve(data);
+            let data = resolve(data).expand_global_local(self.db);
             if path.contains(&data) {
                 indeterminate = true;
                 continue;
@@ -551,6 +550,7 @@ impl<'db> InferredType<'db> {
                 }
                 TypeData::Global
                 | TypeData::GlobalType(_)
+                | TypeData::GlobalLocal(_)
                 | TypeData::BigInt
                 | TypeData::Boolean
                 | TypeData::Null
@@ -1028,11 +1028,8 @@ impl<'db> InferredType<'db> {
     }
 
     pub fn function_returns_void(self) -> bool {
-        self.function_return_matches(|ty| match ty {
-            TypeData::GlobalType(id) => {
-                matches!(global_types(self.db).get(id), TypeData::VoidKeyword)
-            }
-            ty => matches!(ty, TypeData::VoidKeyword),
+        self.function_return_matches(|ty| {
+            matches!(ty.expand_canonical_global(self.db), TypeData::VoidKeyword)
         })
     }
 
@@ -1400,6 +1397,7 @@ impl<'db> InferredType<'db> {
                         pending.push(constraint);
                     }
                     TypeData::GlobalType(id) => pending.push(crate::global_types(self.db).get(id)),
+                    TypeData::GlobalLocal(local) => pending.push(local.expand(self.db)),
                     TypeData::InstanceOf(instance) => {
                         let target = instance.ty(self.db);
                         if target.is_array_class(self.db) {
@@ -1414,6 +1412,12 @@ impl<'db> InferredType<'db> {
                     }
                     TypeData::Intersection(intersection) => {
                         pending.extend(intersection.types(self.db).iter().copied());
+                    }
+                    TypeData::IndexedAccess(access) => {
+                        let Some(types) = access.keyof_property_types(self.db) else {
+                            return ConditionalType::Unknown;
+                        };
+                        pending.extend(types);
                     }
                     TypeData::MergedReference(reference) => pending.extend(
                         [
@@ -1605,6 +1609,10 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
         data: TypeData<'db>,
         context: &mut VisitContext<'_, TypeData<'db>>,
     ) -> ControlFlow<Self::Break> {
+        if let TypeData::GlobalLocal(local) = data {
+            context.push(local.expand(self.db));
+            return ControlFlow::Continue(());
+        }
         let has_call_signature = match data {
             TypeData::Interface(interface) => interface
                 .members(self.db)
@@ -1679,6 +1687,10 @@ where
         data: TypeData<'db>,
         context: &mut VisitContext<'_, TypeData<'db>>,
     ) -> ControlFlow<Self::Break> {
+        if let TypeData::GlobalLocal(local) = data {
+            context.push(local.expand(self.db));
+            return ControlFlow::Continue(());
+        }
         match data {
             TypeData::Union(union) => {
                 if union.types(self.db).is_empty() {
@@ -1741,6 +1753,10 @@ where
         data: TypeData<'db>,
         context: &mut VisitContext<'_, TypeData<'db>>,
     ) -> ControlFlow<Self::Break> {
+        if let TypeData::GlobalLocal(local) = data {
+            context.push(local.expand(self.db));
+            return ControlFlow::Continue(());
+        }
         match data {
             TypeData::Intersection(intersection) => {
                 if (self.predicate)(data) {

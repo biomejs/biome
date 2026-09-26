@@ -91,6 +91,7 @@ impl<'db> InferredModuleTypes<'db> {
         let mut seen = FxHashSet::default();
 
         for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+            ty = ty.expand_global_local(db);
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };
@@ -458,6 +459,7 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -539,6 +541,7 @@ fn declared_type_parameters<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
+        | InferredTypeData::GlobalLocal(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -609,6 +612,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         ty @ (InferredTypeData::Unknown
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
+        | InferredTypeData::GlobalLocal(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -719,6 +723,7 @@ fn find_own_member_type<'db>(
         InferredTypeData::Unknown
         | InferredTypeData::Global
         | InferredTypeData::GlobalType(_)
+        | InferredTypeData::GlobalLocal(_)
         | InferredTypeData::BigInt
         | InferredTypeData::Boolean
         | InferredTypeData::Null
@@ -818,14 +823,15 @@ fn member_value_type<'db>(
     db: &'db dyn ModuleDb,
     member: &InferredTypeMember<'db>,
 ) -> InferredTypeData<'db> {
+    let ty = member.ty.expand_global_local(db);
     if matches!(
         member.kind,
         InferredTypeMemberKind::Getter(_) | InferredTypeMemberKind::ConstAssertedGetter(_)
-    ) && let InferredTypeData::Function(function) = member.ty
+    ) && let InferredTypeData::Function(function) = ty
         && let InferredReturnType::Type(return_ty) = function.return_type(db)
     {
         *return_ty
     } else {
-        member.ty
+        ty
     }
 }

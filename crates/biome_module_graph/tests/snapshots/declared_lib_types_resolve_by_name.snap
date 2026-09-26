@@ -1,0 +1,191 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const keyTypes: WeakKeyTypes;
+export const keyTypesObject = keyTypes.object;
+declare const property: PropertyKey;
+export const propertyKey = property;
+declare const list: ReadonlyArray<string>;
+export const joined = list.join(",");
+declare const arrayLike: ArrayLike<number>;
+export const arrayLikeLength = arrayLike.length;
+declare const options: Intl.DateTimeFormatOptions;
+export const timeZone = options.timeZone;
+export const serialized = JSON.stringify({});
+export const pi = Math.PI;
+export const hasKey = Reflect.has({}, "key");
+export const rangeError = new RangeError("out of range").message;
+```
+
+## Inferred types
+
+```
+Binding keyTypes "keyTypes" => instanceof WeakKeyTypes
+
+Binding keyTypesObject "keyTypesObject" => object
+
+Expression "keyTypes" => instanceof WeakKeyTypes
+
+Expression "keyTypes.object" => object
+
+Binding property "property" => string | number | symbol
+
+Binding propertyKey "propertyKey" => string | number | symbol
+
+Expression "property" => string | number | symbol
+
+Binding list "list" => instanceof ReadonlyArray<string>
+
+Binding joined "joined" => string
+
+Expression "list" => instanceof ReadonlyArray<string>
+
+Expression "list.join" => sync Function "join" {
+  accepts: {
+    params: [
+      optional separator: string
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "list.join(\",\")" => string
+
+Expression "\",\"" => string: ,
+
+Binding arrayLike "arrayLike" => instanceof ArrayLike<number>
+
+Binding arrayLikeLength "arrayLikeLength" => number
+
+Expression "arrayLike" => instanceof ArrayLike<number>
+
+Expression "arrayLike.length" => number
+
+Binding options "options" => instanceof Intl.DateTimeFormatOptions
+
+Binding timeZone "timeZone" => string | undefined
+
+Expression "options" => instanceof Intl.DateTimeFormatOptions
+
+Expression "options.timeZone" => string | undefined
+
+Binding serialized "serialized" => string
+
+Expression "JSON" => instanceof JSON
+
+Expression "JSON.stringify" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "stringify" {
+        accepts: {
+          params: [
+            required value: any
+            optional replacer: sync Function {
+              accepts: {
+                params: [
+                  required key: string
+                  required value: any
+                ]
+                type_args: []
+              }
+              returns: any
+            }
+            optional space: string | number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "stringify" {
+        accepts: {
+          params: [
+            required value: any
+            optional replacer: instanceof Array<number | string> | null
+            optional space: string | number
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "JSON.stringify({})" => string
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Binding pi "pi" => number
+
+Expression "Math" => instanceof Math
+
+Expression "Math.PI" => number
+
+Binding hasKey "hasKey" => boolean
+
+Expression "Reflect" => Object {
+  prototype: No prototype
+  members: [
+    "apply": Reflect.apply,
+    "construct": Reflect.construct,
+    "defineProperty": Reflect.defineProperty,
+    "deleteProperty": Reflect.deleteProperty,
+    "get": Reflect.get,
+    "getOwnPropertyDescriptor": Reflect.getOwnPropertyDescriptor,
+    "getPrototypeOf": Reflect.getPrototypeOf,
+    "has": Reflect.has,
+    "isExtensible": Reflect.isExtensible,
+    "ownKeys": Reflect.ownKeys,
+    "preventExtensions": Reflect.preventExtensions,
+    "set": Reflect.set,
+    "setPrototypeOf": Reflect.setPrototypeOf
+  ]
+}
+
+Expression "Reflect.has" => sync Function "has" {
+  accepts: {
+    params: [
+      required target: object
+      required propertyKey: string | number | symbol
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "Reflect.has({}, \"key\")" => boolean
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Expression "\"key\"" => string: key
+
+Binding rangeError "rangeError" => string
+
+Expression "new RangeError(\"out of range\")" => instanceof RangeError
+
+Expression "new RangeError(\"out of range\").message" => string
+
+Expression "RangeError" => class "RangeError" {
+  extends: Error
+  implements: []
+  type_args: []
+}
+
+Expression "\"out of range\"" => string: out of range
+```
