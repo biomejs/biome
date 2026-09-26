@@ -1026,6 +1026,41 @@ mod tests {
     }
 
     #[test]
+    fn recursive_instance_substitutions_stop_growing_after_unknown_indexed_access() {
+        use biome_js_type_info::interned_types::InternedIndexedAccessType;
+
+        let db = TestDb::default();
+        let t = InferredTypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            None,
+            None,
+            Text::from("T"),
+        ));
+        let target = InferredTypeData::Interface(InternedInterface::new(
+            &db,
+            vec![t].into_boxed_slice(),
+            Box::default(),
+            Box::default(),
+            Text::from("Recursive"),
+        ));
+        let argument = InferredTypeData::IndexedAccess(InternedIndexedAccessType::new(
+            &db,
+            t,
+            InferredTypeData::Unknown,
+        ));
+        let initial = substitutions_for_instance(&db, target, &[InferredTypeData::String], &[]);
+        let first = substitutions_for_instance(&db, target, &[argument], &initial);
+        let second = substitutions_for_instance(&db, target, &[argument], &first);
+
+        assert_eq!(first, second);
+        assert_eq!(
+            apply_substitutions(&db, t, &first),
+            InferredTypeData::Unknown
+        );
+    }
+
+    #[test]
     fn member_lookup_state_ignores_substitution_order() {
         let mut first =
             MemberLookupState::new(InferredTypeData::ObjectKeyword, MemberLookupMode::Any);

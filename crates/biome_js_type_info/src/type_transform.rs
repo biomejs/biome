@@ -444,8 +444,10 @@ impl<'db> TypeData<'db> {
     /// Replaces generic references simultaneously, without substituting inside
     /// their replacements. Each generic must have at most one replacement.
     /// Nested declarations shadow only the bindings for their own parameters.
-    /// Type operators and indexed accesses remain unevaluated; callers can use
-    /// [`Self::normalize_nested_types`] after resolving their operands.
+    /// An indexed access becomes [`Self::Unknown`] if either operand is that
+    /// type or an instance of it.
+    /// Other indexed accesses and type operators remain unevaluated; callers can
+    /// use [`Self::normalize_nested_types`] after resolving their operands.
     pub fn substitute_types(
         self,
         db: &'db dyn TypeDb,
@@ -678,37 +680,29 @@ mod tests {
         let t = generic(&db, "T");
         let source =
             TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, TypeData::Number));
-        for replacement in [
-            TypeData::Unknown,
-            TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice()),
-        ] {
-            let substitution = TypeSubstitution {
-                generic: t,
-                replacement,
-            };
-            let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(
-                &db,
-                replacement,
-                TypeData::Number,
-            ));
-            assert_eq!(source.substitute_type(&db, substitution).unwrap(), expected);
-            assert_eq!(
-                source.substitute_types(&db, &[substitution]).unwrap(),
-                expected
-            );
-            assert_eq!(
-                expected.normalize_nested_types(&db, |ty| ty).unwrap(),
-                if replacement == TypeData::Unknown {
-                    TypeData::Unknown
-                } else {
-                    TypeData::String
-                },
-            );
-        }
+        let replacement = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitution = TypeSubstitution {
+            generic: t,
+            replacement,
+        };
+        let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(
+            &db,
+            replacement,
+            TypeData::Number,
+        ));
+        assert_eq!(source.substitute_type(&db, substitution).unwrap(), expected);
+        assert_eq!(
+            source.substitute_types(&db, &[substitution]).unwrap(),
+            expected
+        );
+        assert_eq!(
+            expected.normalize_nested_types(&db, |ty| ty).unwrap(),
+            TypeData::String,
+        );
     }
 
     #[test]
-    fn normalization_propagates_substituted_unknown_indexed_operands() {
+    fn substitution_propagates_unknown_indexed_operands() {
         let db = TestDb::default();
         let t = generic(&db, "T");
         let u = generic(&db, "U");
@@ -735,18 +729,14 @@ mod tests {
             let source =
                 TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
             assert_eq!(
-                source
-                    .substitute_types(&db, &substitutions)
-                    .unwrap()
-                    .normalize_nested_types(&db, |ty| ty)
-                    .unwrap(),
+                source.substitute_types(&db, &substitutions).unwrap(),
                 TypeData::Unknown,
             );
         }
     }
 
     #[test]
-    fn normalization_propagates_substituted_unknown_instances_with_type_arguments() {
+    fn substitution_propagates_unknown_instances_with_type_arguments() {
         let db = TestDb::default();
         let t = generic(&db, "T");
         let instance = TypeData::instance_of(&db, t, vec![TypeData::String].into_boxed_slice());
@@ -759,11 +749,7 @@ mod tests {
             let source =
                 TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
             assert_eq!(
-                source
-                    .substitute_types(&db, &substitutions)
-                    .unwrap()
-                    .normalize_nested_types(&db, |ty| ty)
-                    .unwrap(),
+                source.substitute_types(&db, &substitutions).unwrap(),
                 TypeData::Unknown,
             );
         }
