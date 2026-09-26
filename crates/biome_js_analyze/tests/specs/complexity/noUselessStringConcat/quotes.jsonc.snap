@@ -297,7 +297,7 @@ const s = 'a"' + 1;
 
 # Diagnostics
 ```
-quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
@@ -305,11 +305,6 @@ quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━�
       │           ^^^^^^^^
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
-  
-  i Safe fix: Remove the useless concatenation
-  
-  - const·s·=·'a"'·+·1;
-  + const·s·=·"a\"1";
   
 
 ```
@@ -321,7 +316,7 @@ const s = 1 + '"b';
 
 # Diagnostics
 ```
-quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quotes.jsonc:1:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Useless string concatenation.
   
@@ -329,11 +324,6 @@ quotes.jsonc:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━�
       │           ^^^^^^^^
   
   i Consider turning the expression into a single string to improve readability and runtime performance.
-  
-  i Safe fix: Remove the useless concatenation
-  
-  - const·s·=·1·+·'"b';
-  + const·s·=·"1\"b";
   
 
 ```

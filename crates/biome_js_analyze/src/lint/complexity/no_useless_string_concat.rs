@@ -336,10 +336,8 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
             .ok(),
 
         Some(AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal_expression),
-        )) => number_literal_expression
-            .as_number()
-            .map(|number_value| number_value.to_string()),
+            AnyJsLiteralExpression::JsNumberLiteralExpression(_),
+        )) => None,
 
         Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
             match (
