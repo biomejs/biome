@@ -5,10 +5,11 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
+    JsImportPath, ModuleDb, ModuleInfo, SymbolFromModuleInfo, find_jsdocs_for_exported_symbol,
 };
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_deprecated_imports::NoDeprecatedImportsOptions;
+use biome_jsdoc_comment::JsdocComment;
 use camino::Utf8Path;
 
 use crate::services::database::ResolvedImports;
@@ -154,33 +155,45 @@ fn find_deprecation(
     name: &Text,
 ) -> Option<Option<String>> {
     let symbol = SymbolFromModuleInfo::new(module_db, name.text(), module_info);
-    find_jsdoc_for_exported_symbol(module_db, symbol)
-        .as_ref()
-        .and_then(|jsdoc| {
-            let mut is_deprecated = false;
-            let mut message = String::new();
-            for line in jsdoc.lines() {
-                let line = line.trim();
-                if is_deprecated {
-                    if line.is_empty() {
-                        break;
-                    }
+    let jsdocs = find_jsdocs_for_exported_symbol(module_db, symbol);
+    let mut message = None;
+    let mut found_declaration = false;
 
-                    if !message.is_empty() {
-                        message.push(' ');
-                    }
+    for jsdoc in jsdocs {
+        found_declaration = true;
+        let deprecation = jsdoc.as_ref().and_then(parse_deprecation)?;
+        if message.is_none() {
+            message = deprecation;
+        }
+    }
 
-                    message.push_str(line);
-                } else if let Some((_before, after)) = line.split_once("@deprecated") {
-                    is_deprecated = true;
-                    message.push_str(after.trim_start());
-                }
+    found_declaration.then_some(message)
+}
+
+fn parse_deprecation(jsdoc: &JsdocComment) -> Option<Option<String>> {
+    let mut is_deprecated = false;
+    let mut message = String::new();
+    for line in jsdoc.lines() {
+        let line = line.trim();
+        if is_deprecated {
+            if line.is_empty() {
+                break;
             }
 
-            is_deprecated.then_some(if message.is_empty() {
-                None
-            } else {
-                Some(message)
-            })
-        })
+            if !message.is_empty() {
+                message.push(' ');
+            }
+
+            message.push_str(line);
+        } else if let Some((_before, after)) = line.split_once("@deprecated") {
+            is_deprecated = true;
+            message.push_str(after.trim_start());
+        }
+    }
+
+    is_deprecated.then_some(if message.is_empty() {
+        None
+    } else {
+        Some(message)
+    })
 }

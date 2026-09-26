@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOverloadImport.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { legacyMake } from "./overloads";
+
+legacyMake("https://example.test");
+
+```
+
+# Diagnostics
+```
+invalidOverloadImport.ts:2:10 lint/suspicious/noDeprecatedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Deprecated import: Use `make` instead.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { legacyMake } from "./overloads";
+      │          ^^^^^^^^^^
+    3 │ 
+    4 │ legacyMake("https://example.test");
+  
+  i An @deprecated annotation indicates the author doesn't want you to rely on this import anymore.
+  
+  i You should probably import a different symbol instead.
+  
+
+```

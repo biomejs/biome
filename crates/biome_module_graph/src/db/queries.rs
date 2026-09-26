@@ -166,6 +166,108 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
     None
 }
 
+/// Finds the JSDoc comments for an exported symbol, following re-exports.
+///
+/// Function overloads produce one entry per declaration in source order. An
+/// entry is `None` when its declaration has no associated JSDoc comment.
+#[salsa::tracked(returns(ref))]
+pub fn find_jsdocs_for_exported_symbol<'db>(
+    db: &'db dyn ModuleDb,
+    symbol: SymbolFromModuleInfo<'db>,
+) -> Vec<Option<JsdocComment>> {
+    let mut seen_paths = std::collections::BTreeSet::new();
+    let mut stack = vec![symbol];
+
+    while let Some(symbol) = stack.pop() {
+        let ModuleInfoKind::Js(module) = symbol.module(db).kind(db) else {
+            continue;
+        };
+        match &module.exports.get(symbol.name(db).as_str()) {
+            Some(JsExport::Own(own_export) | JsExport::OwnType(own_export)) => {
+                return match own_export {
+                    JsOwnExport::Binding(binding_range) => {
+                        let Some(binding) =
+                            module.semantic_model.as_binding_by_range(*binding_range)
+                        else {
+                            return Vec::new();
+                        };
+
+                        let overload_set = module
+                            .semantic_model
+                            .global_scope()
+                            .overload_sets()
+                            .into_iter()
+                            .find(|overload_set| {
+                                overload_set.iter().any(|id| {
+                                    module
+                                        .semantic_model
+                                        .binding_by_id(*id)
+                                        .as_ref()
+                                        .is_some_and(|candidate| candidate == &binding)
+                                })
+                            });
+
+                        if let Some(overload_set) = overload_set {
+                            overload_set
+                                .into_iter()
+                                .map(|id| {
+                                    module
+                                        .semantic_model
+                                        .binding_by_id(id)
+                                        .and_then(|binding| binding.jsdoc().cloned())
+                                })
+                                .collect()
+                        } else {
+                            vec![binding.jsdoc().cloned()]
+                        }
+                    }
+                    JsOwnExport::Type(_) => Vec::new(),
+                    JsOwnExport::Namespace(reexport) => vec![
+                        reexport
+                            .export_range
+                            .and_then(|range| module.semantic_model.export_jsdoc(range).cloned()),
+                    ],
+                };
+            }
+            Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
+                match &reexport.import.symbol {
+                    ImportSymbol::All => break,
+                    ImportSymbol::Named(source_name) => {
+                        let lookup = source_name.text().to_string();
+                        match reexport.import.resolved_path.as_deref() {
+                            Ok(path) if seen_paths.insert(path.to_path_buf()) => {
+                                if let Some(module) = db.module_for_path(path) {
+                                    stack.push(SymbolFromModuleInfo::new(db, lookup, module));
+                                }
+                            }
+                            _ => break,
+                        }
+                    }
+                    ImportSymbol::Default => {
+                        if let Ok(path) = reexport.import.resolved_path.as_deref()
+                            && let Some(module) = db.module_for_path(path)
+                        {
+                            stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                        }
+                    }
+                }
+            }
+            None => {
+                for reexport in module.blanket_reexports.iter() {
+                    if let Ok(path) = reexport.import.resolved_path.as_deref()
+                        && seen_paths.insert(path.to_path_buf())
+                        && let Some(module) = db.module_for_path(path)
+                    {
+                        stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
+                    }
+                }
+            }
+        }
+    }
+
+    Vec::new()
+}
+
 // #endregion
 
 // #region QUERY HELPER FUNCTIONS
