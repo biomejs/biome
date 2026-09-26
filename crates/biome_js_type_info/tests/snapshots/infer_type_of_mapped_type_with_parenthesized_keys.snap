@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Copy<T> = { [K in keyof T]: T[K] };
+
+```
+
+## Result
+
+```
+instanceof Local TypeId(4)<Local TypeId(5)>
+```
+
+## Registered types
+
+```
+Module TypeId(0) => K
+
+Module TypeId(1) => instanceof unresolved reference "T" (scope ID: 0)
+
+Module TypeId(2) => instanceof unresolved reference "K" (scope ID: 0)
+
+Module TypeId(3) => IndexedAccessType {
+    object: Resolved(
+        Local TypeId(1),
+    ),
+    index: Resolved(
+        Local TypeId(2),
+    ),
+}
+
+Module TypeId(4) => MappedType {
+    type_parameter: Resolved(
+        Local TypeId(0),
+    ),
+    keys: Keyof(
+        Resolved(
+            Local TypeId(1),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(3),
+    ),
+    readonly_modifier: None,
+    optional_modifier: None,
+}
+
+Module TypeId(5) => T
+```

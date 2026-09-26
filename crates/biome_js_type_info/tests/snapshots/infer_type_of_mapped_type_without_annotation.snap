@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Implicit = { [K in "A"] };
+
+```
+
+## Result
+
+```
+MappedType {
+    type_parameter: Resolved(
+        Local TypeId(0),
+    ),
+    keys: Type(
+        Resolved(
+            Local TypeId(1),
+        ),
+    ),
+    ty: Resolved(
+        unknown,
+    ),
+    readonly_modifier: None,
+    optional_modifier: None,
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => K
+
+Module TypeId(1) => string: A
+```
