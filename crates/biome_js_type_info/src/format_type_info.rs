@@ -750,7 +750,7 @@ impl Format<FormatTypeContext> for TypeImportQualifier {
                 space(),
                 token("from"),
                 space(),
-                self.resolved_path
+                self.specifier.as_ref()
             ]
         )
     }

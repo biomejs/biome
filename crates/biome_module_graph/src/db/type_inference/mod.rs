@@ -239,8 +239,9 @@ fn inference_scc(
     while let Some((source, source_info)) = pending.pop() {
         db.unwind_if_revision_cancelled();
 
-        for resolved_path in source_info.type_inference_dependency_paths() {
-            let Some(path) = resolved_path.as_path() else {
+        for import in source_info.type_inference_dependencies() {
+            let resolved = import.resolve_js(db, source);
+            let Some(path) = resolved.path().as_path() else {
                 continue;
             };
             let Some(target) = db.module_for_path(path) else {

@@ -8,13 +8,12 @@ use biome_js_type_info::interned_types::{
 use biome_languages::JsFileSource;
 use biome_module_graph::{
     BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, LocalTypeInput, ModuleDb,
-    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache, SymbolFromModuleInfo,
-    TypeInferenceMode, infer_binding_type, infer_call_argument_type, infer_export_type,
+    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, SymbolFromModuleInfo, TypeInferenceMode,
+    infer_binding_type, infer_call_argument_type, infer_export_type,
     infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
     infer_local_type, infer_module_types, infer_module_types_bottom_up, normalize_type,
     resolve_js_module_with_inference_mode, type_inference::TypeInferenceClassification,
 };
-use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_service::db::WorkspaceDb;
 use divan::Bencher;
@@ -62,6 +61,11 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
     ),
 ];
 
+/// Creates a database whose resolver reads the files of `fs`.
+fn workspace_db(fs: &MemoryFileSystem) -> WorkspaceDb {
+    WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())))
+}
+
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
     INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
 }
@@ -84,18 +88,15 @@ fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {
-            let path_info_cache = PathInfoCache::default();
+            let db = workspace_db(&fs);
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &path_info_cache,
                 TypeInferenceMode::RawTypesOnly,
             );
 
-            let db = WorkspaceDb::default();
             let module = ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -410,17 +411,15 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
             (fs, modules)
         })
         .bench_local_values(|(fs, modules)| {
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for (name, root, semantic_model) in modules {
                 let path = BiomePath::new(name);
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -451,7 +450,7 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             }
             fs.insert("index.ts".into(), INDEX_TS_BEFORE_EDIT);
 
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for name in index_d_ts_cases().chain(["index.ts"]) {
                 let path = BiomePath::new(name);
@@ -459,12 +458,10 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
                 let semantic_model =
                     Arc::new(semantic_model(&root, SemanticModelOptions::default()));
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -486,17 +483,15 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             let path = BiomePath::new("index.ts");
             let root = get_js_root(&fs, &path);
             let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-            (db, index_module, fs, root, semantic_model)
+            (db, index_module, root, semantic_model)
         })
-        .bench_local_values(|(mut db, index_module, fs, root, semantic_model)| {
+        .bench_local_values(|(mut db, index_module, root, semantic_model)| {
             let path = BiomePath::new("index.ts");
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &PathInfoCache::default(),
                 TypeInferenceMode::RawTypesOnly,
             );
             salsa::Setter::to(
@@ -515,16 +510,14 @@ fn build_source_db(name: &str, content: &str) -> (WorkspaceDb, ModuleInfo) {
     let path = BiomePath::new(name);
     let root = get_js_root(&fs, &path);
     let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+    let db = workspace_db(&fs);
     let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
         root,
         &path,
-        &fs,
-        &ProjectLayout::default(),
         semantic_model,
-        &PathInfoCache::default(),
         TypeInferenceMode::RawTypesOnly,
     );
-    let db = WorkspaceDb::default();
     let module = ModuleInfo::new(
         &db,
         path.as_path().to_path_buf(),
@@ -666,20 +659,17 @@ fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRa
     );
     fs.insert("/src/consumer.ts".into(), CONSUMER_SOURCE);
 
-    let db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
+    let db = workspace_db(&fs);
     let mut consumer = None;
     for name in ["/src/loader.ts", "/src/consumer.ts"] {
         let path = BiomePath::new(name);
         let root = get_js_root(&fs, &path);
         let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
         let (module_info, _, _) = resolve_js_module_with_inference_mode(
+            &db,
             root,
             &path,
-            &fs,
-            &ProjectLayout::default(),
             semantic_model,
-            &path_info_cache,
             TypeInferenceMode::RawTypesOnly,
         );
         let module = ModuleInfo::new(
@@ -757,19 +747,16 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     let path = BiomePath::new(name);
     let root = get_js_root(&fs, &path);
     let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-    let path_info_cache = PathInfoCache::default();
+    let db = workspace_db(&fs);
     let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
         root,
         &path,
-        &fs,
-        &ProjectLayout::default(),
         semantic_model,
-        &path_info_cache,
         TypeInferenceMode::RawTypesOnly,
     );
 
     let kind = ModuleInfoKind::Js(module_info);
-    let db = WorkspaceDb::default();
     let module = ModuleInfo::new(&db, path.as_path().to_path_buf(), kind.clone());
     db.modules
         .pin()

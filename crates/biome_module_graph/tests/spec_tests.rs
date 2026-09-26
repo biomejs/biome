@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use biome_db::ParsedSource;
 use biome_db::testing::{
     Events, assert_function_query_was_not_run, assert_function_query_was_run,
@@ -22,19 +20,19 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::{
     CallArgumentTypeInput, CallExpressionTypeInput, InferredModuleTypes, JsExport, JsOwnExport,
-    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache,
+    ModuleDb, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, NormalizeTypeInput, ResolverDb,
     find_value_member_type, infer_call_argument_type,
     infer_call_expression_type as infer_call_expression_type_query,
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
-use biome_package::{Dependencies, PackageJson};
-use biome_project_layout::ProjectLayout;
+use biome_resolver::{ResolverFsProxy, ResolverPathChange, ResolverPaths, sync_resolver_paths};
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_test_utils::get_added_js_paths;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
 use salsa::plumbing::{AsId, FromId};
+use std::collections::BTreeMap;
 
 #[path = "spec_tests/callback_parameters.test.rs"]
 mod callback_parameters;
@@ -89,16 +87,27 @@ mod snap;
 
 #[salsa::db]
 struct TestModuleDb {
+    fs: MemoryFileSystem,
+    files: BTreeMap<Utf8PathBuf, ParsedSource>,
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
+    resolver_paths: ResolverPaths,
     events: Events,
     storage: Storage<Self>,
 }
 
 impl TestModuleDb {
     fn new() -> Self {
+        Self::with_fs(&MemoryFileSystem::default())
+    }
+
+    /// Creates a database whose resolver reads the files of `fs`.
+    fn with_fs(fs: &MemoryFileSystem) -> Self {
         let events = Events::default();
         let db = Self {
+            fs: MemoryFileSystem::from_files(fs.files.0.clone()),
+            files: BTreeMap::new(),
             modules: BTreeMap::new(),
+            resolver_paths: ResolverPaths::default(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -118,6 +127,14 @@ impl TestModuleDb {
     fn clear_salsa_events(&self) {
         self.take_salsa_events();
     }
+
+    /// Indexes a JSON document, such as a manifest, as a parsed source.
+    fn insert_json_source(&mut self, path: Utf8PathBuf, source: &str) {
+        let parse = parse_json(source, JsonParserOptions::default());
+        let parsed = ParsedSource::new(self, path.clone(), parse.into(), 0, Vec::new());
+        self.files.insert(path.clone(), parsed);
+        sync_resolver_paths(self, [(path, ResolverPathChange::Content.into())]);
+    }
 }
 
 #[salsa::db]
@@ -125,8 +142,19 @@ impl salsa::Database for TestModuleDb {}
 
 #[salsa::db]
 impl biome_db::Db for TestModuleDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
-        None
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+        self.files.get(path).copied()
+    }
+}
+
+#[salsa::db]
+impl ResolverDb for TestModuleDb {
+    fn resolver_fs(&self) -> &dyn ResolverFsProxy {
+        &self.fs
+    }
+
+    fn resolver_paths(&self) -> &ResolverPaths {
+        &self.resolver_paths
     }
 }
 
@@ -712,27 +740,13 @@ fn resolve_js_module_kind_for_test(
     path: &str,
     infer_types: bool,
 ) -> ModuleInfoKind {
-    resolve_js_module_kind_with_layout(fs, &ProjectLayout::default(), path, infer_types)
-}
-
-fn resolve_js_module_kind_with_layout(
-    fs: &MemoryFileSystem,
-    project_layout: &ProjectLayout,
-    path: &str,
-    infer_types: bool,
-) -> ModuleInfoKind {
     let paths = [BiomePath::new(path)];
     let mut added_paths = get_added_js_paths(fs, &paths);
     let (path, root, semantic_model) = added_paths.pop().expect("module must parse");
-    let (module_info, _, _) = resolve_js_module(
-        root,
-        path,
-        fs,
-        project_layout,
-        semantic_model,
-        &PathInfoCache::default(),
-        infer_types,
-    );
+    // The module info doesn't store resolved imports, so any database can
+    // collect it.
+    let db = TestModuleDb::with_fs(fs);
+    let (module_info, _, _) = resolve_js_module(&db, root, path, semantic_model, infer_types);
 
     ModuleInfoKind::Js(module_info)
 }
@@ -742,21 +756,12 @@ fn build_js_test_module_db(
     paths: &[&str],
     infer_types: bool,
 ) -> TestModuleDb {
-    build_js_test_module_db_with_layout(fs, &ProjectLayout::default(), paths, infer_types)
-}
-
-fn build_js_test_module_db_with_layout(
-    fs: &MemoryFileSystem,
-    project_layout: &ProjectLayout,
-    paths: &[&str],
-    infer_types: bool,
-) -> TestModuleDb {
-    let mut db = TestModuleDb::new();
+    let mut db = TestModuleDb::with_fs(fs);
     for path in paths {
         let module_info = ModuleInfo::new(
             &db,
             Utf8PathBuf::from(*path),
-            resolve_js_module_kind_with_layout(fs, project_layout, path, infer_types),
+            resolve_js_module_kind_for_test(fs, path, infer_types),
         );
         db.modules.insert(Utf8PathBuf::from(*path), module_info);
     }

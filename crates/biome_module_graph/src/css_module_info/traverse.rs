@@ -1,7 +1,7 @@
 use crate::db::ModuleDb;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::traverse::{UpwardTraversalAction, UpwardTraversalVisitor};
-use crate::{CssPropertyDefinition, JsImportPath, JsImportPhase, JsModuleInfo};
+use crate::{CssPropertyDefinition, HtmlImport, JsImportPath, JsImportPhase, JsModuleInfo};
 use biome_console::markup;
 use biome_css_semantic::db::{
     css_property_definitions_from_snippet, css_property_definitions_from_source,
@@ -91,10 +91,10 @@ impl UpwardTraversalVisitor for CssClassTraversal<'_> {
         _branch: &Self::Branch,
     ) -> bool {
         let importer_path = importer.path(self.db);
-        let importer = importer.kind(self.db);
-        !matches!(importer, ModuleInfoKind::Css(_))
+        let importer_kind = importer.kind(self.db);
+        !matches!(importer_kind, ModuleInfoKind::Css(_))
             && !self.visited.contains(importer_path)
-            && imports_path(&importer, imported_path)
+            && imports_path(self.db, importer, imported_path)
     }
 
     /// Collects the importer's CSS classes and continues through its importers.
@@ -108,23 +108,32 @@ impl UpwardTraversalVisitor for CssClassTraversal<'_> {
     ) -> Vec<UpwardTraversalAction<Self::Item, Self::Branch>> {
         let db = self.db;
         let importer_path = importer.path(db);
-        let importer = importer.kind(db);
+        let importer_kind = importer.kind(db);
         self.visited.insert(importer_path.to_path_buf());
 
-        let items = match importer {
+        let items = match importer_kind {
             ModuleInfoKind::Js(js_info) => js_info
                 .import_paths
                 .iter()
                 .filter(|import| import.kind.is_static())
-                .filter_map(|import_path| css_class_step(db, import_path.as_path()?))
+                .filter_map(|import_path| {
+                    let resolved = import_path.resolve_js(db, importer);
+                    css_class_step(db, resolved.path().as_path()?)
+                })
                 .collect(),
             ModuleInfoKind::Html(html_info) => {
                 let mut items = html_info
                     .imported_stylesheets
                     .iter()
-                    .chain(html_info.import_paths.iter())
-                    .filter_map(|import_path| css_class_step(db, import_path.as_path()?))
+                    .filter_map(|import_path| {
+                        let resolved = import_path.resolve_css(db, importer);
+                        css_class_step(db, resolved.path().as_path()?)
+                    })
                     .collect::<Vec<_>>();
+                items.extend(html_info.import_paths.iter().filter_map(|import_path| {
+                    let resolved = import_path.resolve_html(db, importer);
+                    css_class_step(db, resolved.path().as_path()?)
+                }));
                 items.push(CssClassStep {
                     css_path: importer_path.to_path_buf(),
                     css_classes: html_info.get_global_styles(),
@@ -248,7 +257,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     fn actions_for_imports(
         &mut self,
         imported_path: &Utf8Path,
-        imports: &[&Utf8Path],
+        imports: &[Utf8PathBuf],
         next_branch: CssPropertyBranch,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
         let definition = imports
@@ -257,7 +266,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
             .find_map(|path| self.last_property_in_module_context_from(path, next_branch.clone()));
         imports
             .iter()
-            .filter(|path| **path == imported_path)
+            .filter(|path| path.as_path() == imported_path)
             .map(|_| self.action(definition.clone(), next_branch.clone()))
             .collect()
     }
@@ -267,8 +276,9 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         &self,
         path: &Utf8Path,
     ) -> Option<CssPropertyDefinition> {
+        let module = self.db.module_for_path(path)?;
         let branch = CssPropertyBranch::new(path.to_path_buf());
-        self.html_property_contexts(path, false)
+        self.html_property_contexts(module, false)
             .into_iter()
             .rev()
             .find_map(|context| match context.kind {
@@ -284,12 +294,19 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
         &self,
         path: &Utf8Path,
     ) -> Option<CssPropertyDefinition> {
-        let info = self.db.js_module_info_for_path(path)?;
+        let module = self.db.module_for_path(path)?;
+        let module_kind = module.kind(self.db);
+        let info = module_kind.as_js_module_info()?;
         let branch = CssPropertyBranch::new(path.to_path_buf());
-        js_import_paths_in_source_order(&info)
+        js_import_paths_in_source_order(info)
             .rev()
-            .filter_map(|import| import.as_path())
-            .find_map(|path| self.last_property_in_module_context_from(path, branch.clone()))
+            .find_map(|import| {
+                let resolved = import.resolve_js(self.db, module);
+                self.last_property_in_module_context_from(
+                    resolved.path().as_path()?,
+                    branch.clone(),
+                )
+            })
     }
 
     /// Returns the last visible definition in a CSS import context.
@@ -332,7 +349,8 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                         return Some(definition);
                     }
                     stack.extend(info.imports.iter().filter_map(|import| {
-                        let path = import.resolved_path.as_path()?;
+                        let resolved = import.resolve_css(self.db, module);
+                        let path = resolved.path().as_path()?;
                         if branch.contains(path) {
                             return None;
                         }
@@ -344,7 +362,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 }
                 ModuleInfoKind::Html(_) => {
                     stack.extend(
-                        self.html_property_contexts(&path, true)
+                        self.html_property_contexts(module, true)
                             .into_iter()
                             .filter_map(|context| match context.kind {
                                 HtmlPropertyContextKind::Definition(definition) => {
@@ -357,7 +375,8 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                 }
                 ModuleInfoKind::Js(info) => {
                     stack.extend(js_import_paths_in_source_order(&info).filter_map(|import| {
-                        let path = import.as_path()?;
+                        let resolved = import.resolve_js(self.db, module);
+                        let path = resolved.path().as_path()?;
                         if branch.contains(path) {
                             return None;
                         }
@@ -375,12 +394,13 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     /// Returns the last definition visible through the stylesheet's imports.
     fn last_property_in_imports(
         &self,
+        module: ModuleInfo,
         info: &crate::CssModuleInfo,
         branch: CssPropertyBranch,
     ) -> Option<CssPropertyDefinition> {
         info.imports.iter().rev().find_map(|import| {
-            let path = import.resolved_path.as_path()?;
-            self.last_property_in_module_context_from(path, branch.clone())
+            let resolved = import.resolve_css(self.db, module);
+            self.last_property_in_module_context_from(resolved.path().as_path()?, branch.clone())
         })
     }
 
@@ -400,21 +420,30 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
 
     fn html_property_contexts(
         &self,
-        path: &Utf8Path,
+        module: ModuleInfo,
         only_global: bool,
     ) -> Vec<HtmlPropertyContext> {
-        let Some(info) = self.db.html_module_info_for_path(path) else {
+        let path = module.path(self.db);
+        let module_kind = module.kind(self.db);
+        let Some(info) = module_kind.as_html_module_info() else {
             return Vec::new();
         };
+        let is_visible = |import: &&HtmlImport| !only_global || import.applicability.is_global();
         let mut contexts = info
             .imported_stylesheets
             .iter()
-            .chain(info.import_paths.iter())
-            .filter(|import| !only_global || import.applicability.is_global())
-            .filter_map(|import| {
+            .filter(is_visible)
+            .map(|import| (import, import.resolve_css(self.db, module)))
+            .chain(
+                info.import_paths
+                    .iter()
+                    .filter(is_visible)
+                    .map(|import| (import, import.resolve_html(self.db, module))),
+            )
+            .filter_map(|(import, resolved)| {
                 Some(HtmlPropertyContext {
                     position: import.range.start(),
-                    kind: HtmlPropertyContextKind::Import(import.as_path()?.to_path_buf()),
+                    kind: HtmlPropertyContextKind::Import(resolved.path().as_path()?.to_path_buf()),
                 })
             })
             .collect::<Vec<_>>();
@@ -463,10 +492,10 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
     fn actions_for_html_imports(
         &mut self,
         imported_path: &Utf8Path,
-        importer_path: &Utf8Path,
+        importer: ModuleInfo,
         next_branch: CssPropertyBranch,
     ) -> Vec<UpwardTraversalAction<CssPropertyDefinition, CssPropertyBranch>> {
-        let contexts = self.html_property_contexts(importer_path, true);
+        let contexts = self.html_property_contexts(importer, true);
         let global_definition = contexts
             .iter()
             .rev()
@@ -517,7 +546,7 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
         branch: &Self::Branch,
     ) -> bool {
         let importer_path = importer.path(self.db);
-        !branch.contains(importer_path) && imports_path(&importer.kind(self.db), imported_path)
+        !branch.contains(importer_path) && imports_path(self.db, importer, imported_path)
     }
 
     /// Resolves the definition visible from each import of `imported_path`.
@@ -534,49 +563,62 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
         let db = self.db;
         let importer_path = importer.path(db);
         let next_branch = branch.with_path(importer_path.to_path_buf());
-        let importer = importer.kind(db);
-        match importer {
+        let importer_kind = importer.kind(db);
+        match importer_kind {
             ModuleInfoKind::Css(info) => info
                 .imports
                 .iter()
-                .filter(|import| import.resolved_path.as_path() == Some(imported_path))
+                .filter(|import| {
+                    import.resolve_css(db, importer).path().as_path() == Some(imported_path)
+                })
                 .map(|_| {
                     let local_definition = self.local_property_definition(importer_path);
-                    let definition = local_definition
-                        .or_else(|| self.last_property_in_imports(&info, next_branch.clone()));
+                    let definition = local_definition.or_else(|| {
+                        self.last_property_in_imports(importer, &info, next_branch.clone())
+                    });
                     self.action(definition, next_branch.clone())
                 })
                 .collect(),
             ModuleInfoKind::Js(info) => {
                 let imports = js_import_paths_in_source_order(&info)
-                    .filter_map(|import| import.as_path())
+                    .filter_map(|import| {
+                        import
+                            .resolve_js(db, importer)
+                            .path()
+                            .as_path()
+                            .map(Utf8Path::to_path_buf)
+                    })
                     .collect::<Vec<_>>();
                 self.actions_for_imports(imported_path, &imports, next_branch)
             }
             ModuleInfoKind::Html(_) => {
-                self.actions_for_html_imports(imported_path, importer_path, next_branch)
+                self.actions_for_html_imports(imported_path, importer, next_branch)
             }
         }
     }
 }
 
 /// Returns whether `module` imports `path` through a supported import.
-fn imports_path(module: &ModuleInfoKind, path: &Utf8Path) -> bool {
-    match module {
+fn imports_path(db: &dyn ModuleDb, module: ModuleInfo, path: &Utf8Path) -> bool {
+    match module.kind(db) {
         ModuleInfoKind::Js(info) => info
             .import_paths
             .iter()
             .filter(|import| import.kind.is_dynamic() || import.phase != JsImportPhase::Type)
-            .any(|import| import.as_path() == Some(path)),
+            .any(|import| import.resolve_js(db, module).path().as_path() == Some(path)),
         ModuleInfoKind::Css(info) => info
             .imports
             .iter()
-            .any(|import| import.resolved_path.as_path() == Some(path)),
-        ModuleInfoKind::Html(info) => info
-            .imported_stylesheets
-            .iter()
-            .chain(info.import_paths.iter())
-            .any(|import| import.as_path() == Some(path)),
+            .any(|import| import.resolve_css(db, module).path().as_path() == Some(path)),
+        ModuleInfoKind::Html(info) => {
+            info.imported_stylesheets
+                .iter()
+                .any(|import| import.resolve_css(db, module).path().as_path() == Some(path))
+                || info
+                    .import_paths
+                    .iter()
+                    .any(|import| import.resolve_html(db, module).path().as_path() == Some(path))
+        }
     }
 }
 

@@ -20,7 +20,12 @@ biome_json_value  = { workspace = true }
 biome_package     = { workspace = true }
 biome_rowan       = { workspace = true }
 camino            = { workspace = true }
+enumflags2        = { workspace = true }
+papaya            = { workspace = true }
 salsa             = { workspace = true }
+
+[dev-dependencies]
+biome_json_parser = { path = "../biome_json_parser" }
 
 [lints]
 workspace = true

@@ -1614,14 +1614,16 @@ mod tests {
     fn create_test_session() -> Arc<Session> {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let fs: Arc<dyn biome_resolver::FsWithResolverProxy> =
+            Arc::new(MemoryFileSystem::default());
         let workspace = Arc::new(WorkspaceServer::new(
-            Arc::new(MemoryFileSystem::default()),
+            fs.clone(),
             watcher_tx,
             service_tx,
             Arc::new(NoopQueryProvider {}),
             None,
         ));
-        let db_state = Arc::new(DbState::lsp());
+        let db_state = Arc::new(DbState::lsp(fs));
 
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));

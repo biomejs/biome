@@ -32,7 +32,8 @@ impl<'a> ModuleGraphSnapshot<'a> {
             let file_name = Utf8PathBuf::from(file_name.as_str());
             write_source_file(&mut content, &file_name, source_code);
 
-            if let Some(data) = self.module_db.module_info_for_path(file_name.as_path()) {
+            if let Some(module) = self.module_db.module_for_path(file_name.as_path()) {
+                let data = module.kind(self.module_db);
                 content.push_str("\n\n## Module Info\n\n");
                 match data {
                     ModuleInfoKind::Js(data) => {
@@ -80,8 +81,11 @@ impl<'a> ModuleGraphSnapshot<'a> {
                         if !side_effect_paths.is_empty() {
                             content.push_str("\nSide-effect imports: [");
                             for (specifier, path) in &side_effect_paths {
-                                let resolved =
-                                    path.as_path().map_or("<unresolved>".to_string(), |p| {
+                                let resolved = path
+                                    .resolve_js(self.module_db, module)
+                                    .path()
+                                    .as_path()
+                                    .map_or("<unresolved>".to_string(), |p| {
                                         p.as_str().replace('\\', "/")
                                     });
                                 content.push_str(&format!("\n  \"{specifier}\" => {resolved},"));
@@ -118,7 +122,22 @@ impl<'a> ModuleGraphSnapshot<'a> {
                     }
                     ModuleInfoKind::Html(html_data) => {
                         content.push_str("```\n");
-                        content.push_str(&html_data.to_string());
+                        let mut formatted = html_data.to_string();
+                        for (specifier, import) in html_data.import_paths.named_iter() {
+                            let Some(resolved) = import
+                                .resolve_html(self.module_db, module)
+                                .path()
+                                .as_path()
+                                .map(|path| path.as_str().replace('\\', "/"))
+                            else {
+                                continue;
+                            };
+                            formatted = formatted.replace(
+                                &format!("{specifier:?} => {},", import.specifier),
+                                &format!("{specifier:?} => {resolved},"),
+                            );
+                        }
+                        content.push_str(&formatted);
                         content.push_str("\n```\n\n");
                     }
                 }

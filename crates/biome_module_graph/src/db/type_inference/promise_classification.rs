@@ -24,7 +24,7 @@ use crate::db::queries::{
 };
 use crate::js_module_info::TsBindingReferenceExt;
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsModuleInfo, JsOwnExport, ModuleDb, ResolvedPath, SymbolFromModuleInfo};
+use crate::{JsExport, JsImport, JsModuleInfo, JsOwnExport, ModuleDb, SymbolFromModuleInfo};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Literal, RawTypeData, RawTypeId, ScopeId, TypeId, TypeMember,
     TypeReference, TypeReferenceQualifier, TypeResolverLevel, TypeofExpression, global_types,
@@ -119,13 +119,8 @@ enum ClassificationTarget {
     Reference(TypeReference),
     /// An entry in the current module's raw local type table.
     Local(TypeId),
-    /// A symbol imported from another resolved module path.
-    Import {
-        /// Path used to locate the imported module in the module graph.
-        resolved_path: ResolvedPath,
-        /// Export selected from the imported module.
-        symbol: ImportSymbol,
-    },
+    /// A symbol imported from another module.
+    Import(JsImport),
     /// An export name owned by the state's current module.
     Export(Text),
 }
@@ -348,10 +343,7 @@ fn classify_expression(
                                 };
                                 break ClassificationState {
                                     module: state.module,
-                                    target: ClassificationTarget::Import {
-                                        resolved_path: import.resolved_path.clone(),
-                                        symbol: import.symbol.clone(),
-                                    },
+                                    target: ClassificationTarget::Import(import.clone()),
                                     mode,
                                     members: members.clone(),
                                     projection: state.projection,
@@ -466,10 +458,10 @@ fn classify_expression(
                 }
                 TypeReference::Import(import) => ClassificationState {
                     module: state.module,
-                    target: ClassificationTarget::Import {
-                        resolved_path: import.resolved_path.clone(),
+                    target: ClassificationTarget::Import(JsImport {
+                        specifier: import.specifier.as_ref().clone(),
                         symbol: import.symbol.clone(),
-                    },
+                    }),
                     mode: state.mode,
                     members: state.members,
                     projection: state.projection,
@@ -1034,17 +1026,15 @@ fn classify_expression(
                     }
                 }
             }
-            ClassificationTarget::Import {
-                resolved_path,
-                symbol,
-            } => {
-                let Some(path) = resolved_path.as_path() else {
+            ClassificationTarget::Import(import) => {
+                let resolved = import.resolve_js(db, state.module);
+                let Some(path) = resolved.path().as_path() else {
                     return DoesNotReturnPromise;
                 };
                 let Some(module) = db.module_for_path(path) else {
                     return DoesNotReturnPromise;
                 };
-                let (name, members, mode) = match symbol {
+                let (name, members, mode) = match import.symbol {
                     ImportSymbol::All => {
                         let Some((name, remaining)) = state.members.split_first() else {
                             return Indeterminate;
@@ -1108,10 +1098,7 @@ fn classify_expression(
                     },
                     JsOwnExport::Namespace(reexport) => ClassificationState {
                         module,
-                        target: ClassificationTarget::Import {
-                            resolved_path: reexport.import.resolved_path.clone(),
-                            symbol: reexport.import.symbol.clone(),
-                        },
+                        target: ClassificationTarget::Import(reexport.import.clone()),
                         mode: state.mode,
                         members: state.members,
                         projection: state.projection,

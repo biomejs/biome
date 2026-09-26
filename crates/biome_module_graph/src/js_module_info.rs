@@ -6,16 +6,15 @@ pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
 mod visitor;
 
-use crate::ImportPathMap;
 use crate::css_module_info::CssClassReference;
+use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
 use biome_js_semantic::JsDeclarationKind;
 use biome_js_syntax::AnyJsImportLike;
 use biome_js_type_info::{
     ImportSymbol, RawTypeData, RawTypeId, TypeId, TypeReference, resolved::InferredLocalTypeId,
 };
-use biome_resolver::{ResolutionKind, ResolvedPath};
+use biome_resolver::ResolvedSpecifier;
 use biome_rowan::{Text, TextRange};
-use camino::Utf8Path;
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeSet;
@@ -51,23 +50,20 @@ impl JsModuleInfo {
         }
     }
 
-    pub(crate) fn type_inference_dependency_paths(&self) -> impl Iterator<Item = &ResolvedPath> {
+    pub(crate) fn type_inference_dependencies(&self) -> impl Iterator<Item = &JsImport> {
         self.static_imports
             .values()
-            .map(|import| &import.resolved_path)
             .chain(
                 self.blanket_reexports
                     .iter()
-                    .map(|reexport| &reexport.import.resolved_path),
+                    .map(|reexport| &reexport.import),
             )
             .chain(self.exports.values().filter_map(|export| match export {
                 JsExport::Reexport(reexport) | JsExport::ReexportType(reexport) => {
-                    Some(&reexport.import.resolved_path)
+                    Some(&reexport.import)
                 }
                 JsExport::Own(JsOwnExport::Namespace(reexport))
-                | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => {
-                    Some(&reexport.import.resolved_path)
-                }
+                | JsExport::OwnType(JsOwnExport::Namespace(reexport)) => Some(&reexport.import),
                 JsExport::Own(_) | JsExport::OwnType(_) => None,
             }))
     }
@@ -101,7 +97,7 @@ impl JsModuleInfo {
     }
 
     /// Returns a serializable representation of this module.
-    pub fn dump(&self) -> SerializedJsModuleInfo {
+    pub fn dump(&self, db: &dyn ModuleDb, module: ModuleInfo) -> SerializedJsModuleInfo {
         SerializedJsModuleInfo {
             static_imports: self
                 .static_imports
@@ -115,10 +111,14 @@ impl JsModuleInfo {
                 .import_paths
                 .named_iter()
                 .filter(|(_, import)| import.kind.is_static())
-                .map(|(specifier, JsImportPath { resolved_path, .. })| {
+                .map(|(specifier, import)| {
                     (
                         specifier.to_string(),
-                        resolved_path.dump().unwrap_or(specifier.to_string()),
+                        import
+                            .resolve_js(db, module)
+                            .path()
+                            .dump()
+                            .unwrap_or_else(|| specifier.to_string()),
                     )
                 })
                 .collect(),
@@ -147,18 +147,6 @@ impl JsModuleInfo {
                 })
                 .collect::<BTreeSet<_>>(),
         }
-    }
-
-    pub fn find_resolved_path_by_symbol(&self, name: &str) -> Option<&Utf8Path> {
-        self.static_imports
-            .get(name)
-            .and_then(|import| import.resolved_path.as_path())
-            .or_else(|| {
-                self.import_paths
-                    .get(name)
-                    .filter(|import| import.kind.is_dynamic())
-                    .and_then(|import| import.resolved_path.as_path())
-            })
     }
 
     pub fn local_type_name(&self, type_id: InferredLocalTypeId) -> Option<Text> {
@@ -210,10 +198,8 @@ pub(crate) fn is_named_type_declaration(declaration_kind: JsDeclarationKind) -> 
 pub struct JsModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
-    /// Maps from the local imported name to a [JsImport] with the absolute path
-    /// it resolves to. The resolved path may be looked up as key in the
-    /// [ModuleDb] map, although it is not required to exist
-    /// (for instance, if the path is outside the project's scope).
+    /// Maps each local imported name to a [JsImport]. Resolve its specifier with
+    /// [JsImport::resolve] using the owning [ModuleInfo].
     ///
     /// Note that re-exports may introduce additional dependencies, because they
     /// import another module and immediately re-export from that module.
@@ -341,19 +327,17 @@ impl JsImportKind {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct JsImportPath {
-    pub resolved_path: ResolvedPath,
+    pub specifier: Text,
     pub phase: JsImportPhase,
     pub kind: JsImportKind,
-    resolution_kind: ResolutionKind,
 }
 
 impl JsImportPath {
-    pub fn as_path(&self) -> Option<&Utf8Path> {
-        self.resolved_path.as_path()
-    }
-
-    pub const fn resolution_kind(&self) -> ResolutionKind {
-        self.resolution_kind
+    /// Resolves this import of the JavaScript or TypeScript `module`.
+    ///
+    /// See [ResolutionMode::JavaScript] for the resolution rules.
+    pub fn resolve_js(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::JavaScript)
     }
 }
 
@@ -418,16 +402,17 @@ pub struct JsImport {
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
 
-    /// Absolute path of the resource being imported, if it can be resolved.
-    ///
-    /// If the import statement referred to a package dependency, the path will
-    /// point towards the resolved entry point of the package.
-    ///
-    /// If `None`, import resolution failed.
-    pub resolved_path: ResolvedPath,
-
     /// The symbol(s) being imported.
     pub symbol: ImportSymbol,
+}
+
+impl JsImport {
+    /// Resolves this import of the JavaScript or TypeScript `module`.
+    ///
+    /// See [ResolutionMode::JavaScript] for the resolution rules.
+    pub fn resolve_js(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::JavaScript)
+    }
 }
 
 /// Information tracked for every "own" export.
@@ -448,9 +433,8 @@ pub enum JsOwnExport {
     /// created here, not forwarded from the target).
     ///
     /// Stores the same [`JsReexport`] information as other reexport kinds so
-    /// that the JSDoc comment on the export statement and the resolved path to
-    /// the target module are both preserved for documentation and type
-    /// inference.
+    /// that the JSDoc comment on the export statement and the target module
+    /// specifier are both preserved for documentation and type inference.
     Namespace(JsReexport),
 }
 
@@ -499,7 +483,7 @@ impl Iterator for ImportPathIterator {
 pub struct SerializedJsModuleInfo {
     /// Map of all static imports found in the module.
     ///
-    /// Maps from the local imported name to the absolute path it resolves to.
+    /// Maps each local imported name to its source module specifier.
     pub static_imports: BTreeMap<String, String>,
 
     /// Map of all the paths from static imports in the module.

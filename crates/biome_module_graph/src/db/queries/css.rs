@@ -29,7 +29,8 @@ pub fn css_classes_for_module(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<CssC
         .iter()
         .filter(|import| import.kind.is_static())
     {
-        if let Some(path) = import_path.as_path()
+        let resolved = import_path.resolve_js(db, module);
+        if let Some(path) = resolved.path().as_path()
             && let Some(target) = db.module_for_path(path)
             && let ModuleInfoKind::Css(css_info) = target.kind(db)
         {
@@ -62,33 +63,33 @@ pub fn transitive_importers_of(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<Utf
             continue;
         }
 
-        for (file_path, module_info) in &modules {
+        for (file_path, _) in &modules {
             if file_path == current.as_path() {
                 continue;
             }
-            let imports_current = match module_info {
-                ModuleInfoKind::Js(js_info) => js_info
-                    .import_paths
-                    .iter()
-                    .any(|p| p.as_path() == Some(current.as_path())),
-                ModuleInfoKind::Css(css_info) => css_info
-                    .imports
-                    .iter()
-                    .any(|p| p.resolved_path.as_path() == Some(current.as_path())),
-                ModuleInfoKind::Html(html_info) => {
-                    html_info
-                        .imported_stylesheets
-                        .iter()
-                        .any(|p| p.as_path() == Some(current.as_path()))
-                        || html_info
-                            .import_paths
-                            .iter()
-                            .any(|p| p.as_path() == Some(current.as_path()))
-                }
+            let Some(owner) = db.module_for_path(file_path) else {
+                continue;
             };
+            let module_info = owner.kind(db);
+            let imports_current =
+                match &module_info {
+                    ModuleInfoKind::Js(js_info) => js_info.import_paths.iter().any(|p| {
+                        p.resolve_js(db, owner).path().as_path() == Some(current.as_path())
+                    }),
+                    ModuleInfoKind::Css(css_info) => css_info.imports.iter().any(|p| {
+                        p.resolve_css(db, owner).path().as_path() == Some(current.as_path())
+                    }),
+                    ModuleInfoKind::Html(html_info) => {
+                        html_info.imported_stylesheets.iter().any(|p| {
+                            p.resolve_css(db, owner).path().as_path() == Some(current.as_path())
+                        }) || html_info.import_paths.iter().any(|p| {
+                            p.resolve_html(db, owner).path().as_path() == Some(current.as_path())
+                        })
+                    }
+                };
 
             if imports_current && !visited.contains(file_path.as_path()) {
-                match module_info {
+                match &module_info {
                     ModuleInfoKind::Js(_) | ModuleInfoKind::Html(_) => {
                         result.push(file_path.to_path_buf());
                     }
@@ -118,19 +119,23 @@ pub fn traverse_import_tree_for_classes(
 ) -> Vec<CssClassStep> {
     let mut results = Vec::new();
 
-    if let Some(js_info) = db.js_module_info_for_path(module.path(db)) {
-        for import_path in js_info
-            .import_paths
-            .iter()
-            .filter(|import| import.kind.is_static())
-        {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
+    if let Some(owner) = db.module_for_path(module.path(db)) {
+        let owner_kind = owner.kind(db);
+        if let Some(js_info) = owner_kind.as_js_module_info() {
+            for import_path in js_info
+                .import_paths
+                .iter()
+                .filter(|import| import.kind.is_static())
             {
-                results.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
+                let resolved = import_path.resolve_js(db, owner);
+                if let Some(path) = resolved.path().as_path()
+                    && let Some(css_info) = db.css_module_info_for_path(path)
+                {
+                    results.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
             }
         }
     }
@@ -155,38 +160,43 @@ pub fn traverse_import_tree_for_html_classes(
     let mut inline_steps = Vec::new();
     let mut linked_steps = Vec::new();
 
-    if let Some(html_info) = db.html_module_info_for_path(module.path(db)) {
-        let all_inline_classes: IndexMap<_, _> = html_info
-            .style_classes
-            .iter()
-            .map(|c| (c.range, c.name.clone()))
-            .collect();
-        if !all_inline_classes.is_empty() {
-            inline_steps.push(CssClassStep {
-                css_path: module.path(db).to_path_buf(),
-                css_classes: all_inline_classes,
-            });
-        }
-
-        for stylesheet_path in &html_info.imported_stylesheets {
-            if let Some(path) = stylesheet_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
+    if let Some(owner) = db.module_for_path(module.path(db)) {
+        let owner_kind = owner.kind(db);
+        if let Some(html_info) = owner_kind.as_html_module_info() {
+            let all_inline_classes: IndexMap<_, _> = html_info
+                .style_classes
+                .iter()
+                .map(|c| (c.range, c.name.clone()))
+                .collect();
+            if !all_inline_classes.is_empty() {
+                inline_steps.push(CssClassStep {
+                    css_path: module.path(db).to_path_buf(),
+                    css_classes: all_inline_classes,
                 });
             }
-        }
 
-        for import_path in html_info.import_paths.iter() {
-            if let Some(path) = import_path.as_path()
-                && let Some(css_info) = db.css_module_info_for_path(path)
-            {
-                linked_steps.push(CssClassStep {
-                    css_path: path.to_path_buf(),
-                    css_classes: css_info.classes.clone(),
-                });
+            for stylesheet_path in &html_info.imported_stylesheets {
+                let resolved = stylesheet_path.resolve_css(db, owner);
+                if let Some(path) = resolved.path().as_path()
+                    && let Some(css_info) = db.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
+            }
+
+            for import_path in html_info.import_paths.iter() {
+                let resolved = import_path.resolve_html(db, owner);
+                if let Some(path) = resolved.path().as_path()
+                    && let Some(css_info) = db.css_module_info_for_path(path)
+                {
+                    linked_steps.push(CssClassStep {
+                        css_path: path.to_path_buf(),
+                        css_classes: css_info.classes.clone(),
+                    });
+                }
             }
         }
     }
@@ -330,7 +340,8 @@ pub fn build_import_tree_for_js(db: &dyn ModuleDb, module: ModuleInfo) -> Option
         .iter()
         .filter(|import| import.kind.is_static())
         .filter_map(|import_path| {
-            let path = import_path.as_path()?;
+            let resolved = import_path.resolve_js(db, module);
+            let path = resolved.path().as_path()?;
             db.css_module_info_for_path(path)?;
             Some(path.to_path_buf())
         })
@@ -352,12 +363,18 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
     let css_imports: Vec<_> = html_info
         .imported_stylesheets
         .iter()
-        .chain(html_info.import_paths.iter())
         .filter_map(|stylesheet_path| {
-            let path = stylesheet_path.as_path()?;
+            let resolved = stylesheet_path.resolve_css(db, module);
+            let path = resolved.path().as_path()?;
             db.css_module_info_for_path(path)?;
             Some(path.to_path_buf())
         })
+        .chain(html_info.import_paths.iter().filter_map(|import_path| {
+            let resolved = import_path.resolve_html(db, module);
+            let path = resolved.path().as_path()?;
+            db.css_module_info_for_path(path)?;
+            Some(path.to_path_buf())
+        }))
         .collect();
 
     let mut root = ImportTreeNode {
@@ -403,7 +420,8 @@ fn is_class_used_in_component_tree<'db>(
                     return true;
                 }
                 for import_path in js_info.import_paths.iter() {
-                    if let Some(path) = import_path.as_path()
+                    let resolved = import_path.resolve_js(db, module);
+                    if let Some(path) = resolved.path().as_path()
                         && let Some(module) = db.module_for_path(path)
                     {
                         queue.push_back(module);
@@ -452,7 +470,8 @@ fn search_css_class_transitive<'db>(
 
         // Follow @import edges
         for import in css_info.imports.iter() {
-            if let Some(imported_path) = import.resolved_path.as_path()
+            let resolved = import.resolve_css(db, current);
+            if let Some(imported_path) = resolved.path().as_path()
                 && let Some(module) = db.module_for_path(imported_path)
             {
                 queue.push_back(module);
@@ -472,32 +491,42 @@ fn build_parent_nodes(
     all_modules.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
     let mut parents = Vec::new();
 
-    for (file_path, module_info) in &all_modules {
+    for (file_path, _) in &all_modules {
         if visited.contains(file_path.as_path()) {
             continue;
         }
+        let Some(owner) = db.module_for_path(file_path) else {
+            continue;
+        };
+        let module_info = owner.kind(db);
 
-        let imports_current = match module_info {
+        let imports_current = match &module_info {
             ModuleInfoKind::Js(js_info) => js_info
                 .import_paths
                 .iter()
-                .any(|p| p.as_path() == Some(current_path)),
-            ModuleInfoKind::Html(html_info) => html_info
-                .imported_stylesheets
-                .iter()
-                .chain(html_info.import_paths.iter())
-                .any(|p| p.as_path() == Some(current_path)),
+                .any(|p| p.resolve_js(db, owner).path().as_path() == Some(current_path)),
+            ModuleInfoKind::Html(html_info) => {
+                html_info
+                    .imported_stylesheets
+                    .iter()
+                    .any(|p| p.resolve_css(db, owner).path().as_path() == Some(current_path))
+                    || html_info
+                        .import_paths
+                        .iter()
+                        .any(|p| p.resolve_html(db, owner).path().as_path() == Some(current_path))
+            }
             ModuleInfoKind::Css(_) => false,
         };
 
         if imports_current {
-            let css_imports: Vec<Utf8PathBuf> = match module_info {
+            let css_imports: Vec<Utf8PathBuf> = match &module_info {
                 ModuleInfoKind::Js(js_info) => js_info
                     .import_paths
                     .iter()
                     .filter(|import| import.kind.is_static())
                     .filter_map(|import_path| {
-                        let path = import_path.as_path()?;
+                        let resolved = import_path.resolve_js(db, owner);
+                        let path = resolved.path().as_path()?;
                         db.css_module_info_for_path(path)?;
                         Some(path.to_path_buf())
                     })
@@ -505,12 +534,18 @@ fn build_parent_nodes(
                 ModuleInfoKind::Html(html_info) => html_info
                     .imported_stylesheets
                     .iter()
-                    .chain(html_info.import_paths.iter())
                     .filter_map(|stylesheet_path| {
-                        let path = stylesheet_path.as_path()?;
+                        let resolved = stylesheet_path.resolve_css(db, owner);
+                        let path = resolved.path().as_path()?;
                         db.css_module_info_for_path(path)?;
                         Some(path.to_path_buf())
                     })
+                    .chain(html_info.import_paths.iter().filter_map(|import_path| {
+                        let resolved = import_path.resolve_html(db, owner);
+                        let path = resolved.path().as_path()?;
+                        db.css_module_info_for_path(path)?;
+                        Some(path.to_path_buf())
+                    }))
                     .collect(),
                 ModuleInfoKind::Css(_) => Vec::new(),
             };

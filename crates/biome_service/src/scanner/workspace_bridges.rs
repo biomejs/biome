@@ -110,6 +110,21 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError>;
+
+    /// Refreshes the path info of `path` and of the known paths inside it,
+    /// after the watcher reported a change.
+    ///
+    /// Returns whether the change affects a manifest. Once the change is
+    /// indexed, the dependencies that became reachable must then be indexed
+    /// using [`WorkspaceScannerBridge::index_new_module_dependencies()`].
+    fn sync_path_info(&self, path: &Utf8Path) -> bool;
+
+    /// Indexes the dependencies that became reachable after a manifest
+    /// changed.
+    fn index_new_module_dependencies(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<Vec<Diagnostic>, WorkspaceError>;
 }
 
 /// Trait used to give access to workspace functionality required by the
@@ -263,14 +278,32 @@ where
         project_key: ProjectKey,
         path: impl Into<BiomePath>,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace
-            .index_file(project_key, path, IndexTrigger::Update)
-            .map(|(_, diagnostics)| {
-                diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>()
-            })
+        let path = path.into();
+        // The file is indexed with the refreshed path info, so its imports resolve
+        // against the current filesystem.
+        let manifest_changed = self.workspace.sync_path_info(&path);
+        let (dependencies, diagnostics) =
+            self.workspace
+                .index_file(project_key, path, IndexTrigger::Update)?;
+        let mut diagnostics = diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect::<Vec<_>>();
+        if !dependencies.is_empty()
+            && let Some(project_path) = self.workspace.get_project_path(project_key)
+        {
+            diagnostics.extend(self.scanner.index_dependencies(
+                self.workspace,
+                project_key,
+                &project_path,
+                dependencies,
+                IndexTrigger::Update,
+            )?);
+        }
+        if manifest_changed {
+            diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
+        Ok(diagnostics)
     }
 
     #[inline]
@@ -279,6 +312,7 @@ where
             return Ok(vec![]); // file events outside our projects can be safely ignored.
         };
 
+        self.workspace.sync_path_info(path);
         self.scanner.index_folder(self.workspace, project_key, path)
     }
 
@@ -292,22 +326,26 @@ where
         self.scanner.remove_watched_folders(callback)
     }
 
-    #[inline]
     fn unload_file(
         &self,
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_file(path, project_key)
+        let mut diagnostics = self.workspace.unload_file(path, project_key)?;
+        if self.workspace.sync_path_info(path) {
+            diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
+        Ok(diagnostics)
     }
 
-    #[inline]
     fn unload_path(
         &self,
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        self.workspace.unload_path(path, project_key)
+        let diagnostics = self.workspace.unload_path(path, project_key)?;
+        self.workspace.sync_path_info(path);
+        Ok(diagnostics)
     }
 
     #[inline]

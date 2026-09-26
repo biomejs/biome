@@ -6,23 +6,21 @@
 //!
 //! Module info is stored as Salsa inputs in a `WorkspaceDb`. Query and
 //! traversal functions in this module accept `&dyn ModuleDb` to look up data.
-pub(crate) mod fs_proxy;
-
 use crate::css_module_info::{CssModuleInfo, CssModuleVisitor, SerializedCssModuleInfo};
-use crate::html_module_info::{HtmlModuleInfo, HtmlModuleVisitor, SerializedHtmlModuleInfo};
-use crate::path_info_cache::PathInfoCache;
+use crate::db::queries::{css_dependencies, html_dependencies, js_dependencies};
+use crate::html_module_info::{
+    HtmlModuleInfo, HtmlModuleVisitor, PreparedHtmlModule, SerializedHtmlModuleInfo,
+    prepare_html_module,
+};
 use crate::{
-    JsModuleInfo, ModuleDiagnostic, SerializedJsModuleInfo, TypeInferenceMode,
+    JsModuleInfo, ModuleDb, ModuleDiagnostic, SerializedJsModuleInfo, TypeInferenceMode,
     js_module_info::JsModuleVisitor,
 };
 use biome_css_syntax::AnyCssRoot;
 use biome_fs::BiomePath;
 use biome_js_syntax::AnyJsRoot;
-use biome_languages::LanguageDb;
-use biome_project_layout::ProjectLayout;
-use biome_resolver::FsWithResolverProxy;
+use biome_resolver::ResolverDb;
 use camino::Utf8PathBuf;
-pub(crate) use fs_proxy::ModuleGraphFsProxy;
 use rustc_hash::FxHashSet;
 use std::ops::Deref;
 
@@ -34,15 +32,14 @@ pub const SUPPORTED_EXTENSIONS: &[&str] = &[
 
 /// Resolves a JS/TS file into its module info.
 ///
-/// Pure computation: takes a parsed AST + filesystem proxy, returns module info.
-/// The caller is responsible for storing the result in the database.
+/// Collects the module info from the AST and resolves its imports through the
+/// database, which records the path info observed by the resolver.
+/// The caller is responsible for storing the module info in the database.
 pub fn resolve_js_module(
+    db: &dyn ResolverDb,
     root: AnyJsRoot,
     path: &BiomePath,
-    fs: &dyn FsWithResolverProxy,
-    project_layout: &ProjectLayout,
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-    path_info_cache: &PathInfoCache,
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
     let inference_mode = if enable_type_inference {
@@ -50,101 +47,51 @@ pub fn resolve_js_module(
     } else {
         TypeInferenceMode::Disabled
     };
-    resolve_js_module_with_inference_mode(
-        root,
-        path,
-        fs,
-        project_layout,
-        semantic_model,
-        path_info_cache,
-        inference_mode,
-    )
+
+    resolve_js_module_with_inference_mode(db, root, path, semantic_model, inference_mode)
 }
 
 pub fn resolve_js_module_with_inference_mode(
+    db: &dyn ResolverDb,
     root: AnyJsRoot,
     path: &BiomePath,
-    fs: &dyn FsWithResolverProxy,
-    project_layout: &ProjectLayout,
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
-    path_info_cache: &PathInfoCache,
     inference_mode: TypeInferenceMode,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
-
-    let directory = path.parent().unwrap_or(path);
-    let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor = JsModuleVisitor::new(
-        root,
-        path.to_path_buf(),
-        directory,
-        &fs_proxy,
-        semantic_model,
-        inference_mode,
-    );
-
+    let visitor = JsModuleVisitor::new(root, path.to_path_buf(), semantic_model, inference_mode);
     let module_info = visitor.collect_info();
-    let mut dependencies = ModuleDependencies::default();
-    for import_path in module_info.all_import_paths() {
-        if let Some(p) = import_path.as_path() {
-            dependencies.insert(p.to_path_buf());
-        }
-    }
+    let dependencies = js_dependencies(db, path, &module_info);
     let diagnostics = module_info.diagnostics().to_vec();
     (module_info, dependencies, diagnostics)
 }
 
 pub fn resolve_css_module(
+    db: &dyn ResolverDb,
     root: AnyCssRoot,
     path: &BiomePath,
-    fs: &dyn FsWithResolverProxy,
-    project_layout: &ProjectLayout,
-    path_info_cache: &PathInfoCache,
 ) -> (CssModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
-    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
-
-    let directory = path.parent().unwrap_or(path);
-    let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor = CssModuleVisitor::new(root, directory, &fs_proxy);
-
-    let module = visitor.visit();
-    let mut dependencies = ModuleDependencies::default();
-    for import in module.0.imports.iter() {
-        if let Some(p) = import.resolved_path.as_path() {
-            dependencies.insert(p.to_path_buf());
-        }
-    }
+    let module = CssModuleVisitor::new(root).visit();
+    let dependencies = css_dependencies(db, path, &module);
     (module, dependencies, Vec::new())
 }
 
 pub fn resolve_html_module(
-    db: &dyn LanguageDb,
+    db: &dyn ModuleDb,
     path: &BiomePath,
-    fs: &dyn FsWithResolverProxy,
-    project_layout: &ProjectLayout,
-    path_info_cache: &PathInfoCache,
 ) -> Option<(HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>)> {
-    path_info_cache.prepopulate_directory_path_info(fs, &[path]);
-
     let parsed_source = db.parsed_source_for_path(path)?;
-    let directory = path.parent().unwrap_or(path);
-    let fs_proxy = ModuleGraphFsProxy::new(fs, path_info_cache, project_layout);
-    let visitor =
-        HtmlModuleVisitor::new(db, parsed_source, path.to_path_buf(), directory, &fs_proxy);
+    let prepared = prepare_html_module(db, parsed_source);
+    Some(resolve_prepared_html_module(db, prepared, path))
+}
 
-    let module = visitor.visit();
-    let mut dependencies = ModuleDependencies::default();
-    for resolved_path in &module.imported_stylesheets {
-        if let Some(p) = resolved_path.as_path() {
-            dependencies.insert(p.to_path_buf());
-        }
-    }
-    for resolved_path in module.import_paths.iter() {
-        if let Some(p) = resolved_path.as_path() {
-            dependencies.insert(p.to_path_buf());
-        }
-    }
-    Some((module, dependencies, Vec::new()))
+pub fn resolve_prepared_html_module(
+    db: &dyn ResolverDb,
+    prepared: PreparedHtmlModule,
+    path: &BiomePath,
+) -> (HtmlModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    let module = HtmlModuleVisitor::new(prepared, path.to_path_buf()).visit();
+    let dependencies = html_dependencies(db, path, &module);
+    (module, dependencies, Vec::new())
 }
 
 // #endregion
@@ -218,15 +165,17 @@ impl From<HtmlModuleInfo> for ModuleInfoKind {
     }
 }
 
-impl ModuleInfoKind {
-    pub fn dump(&self) -> SerializedModuleInfo {
-        match self {
-            Self::Js(module) => SerializedModuleInfo::Js(module.dump()),
-            Self::Css(module) => SerializedModuleInfo::Css(module.dump()),
-            Self::Html(module) => SerializedModuleInfo::Html(module.dump()),
+impl ModuleInfo {
+    pub fn dump(self, db: &dyn ModuleDb) -> SerializedModuleInfo {
+        match self.kind(db) {
+            ModuleInfoKind::Js(module) => SerializedModuleInfo::Js(module.dump(db, self)),
+            ModuleInfoKind::Css(module) => SerializedModuleInfo::Css(module.dump()),
+            ModuleInfoKind::Html(module) => SerializedModuleInfo::Html(module.dump()),
         }
     }
+}
 
+impl ModuleInfoKind {
     pub fn as_js_module_info(&self) -> Option<&JsModuleInfo> {
         match self {
             Self::Js(module) => Some(module),
@@ -250,7 +199,7 @@ impl ModuleInfoKind {
 }
 
 /// Represents all the files that are imported/depended on by a module.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct ModuleDependencies(FxHashSet<Utf8PathBuf>);
 
 impl ModuleDependencies {
@@ -276,6 +225,12 @@ impl Deref for ModuleDependencies {
 impl From<FxHashSet<Utf8PathBuf>> for ModuleDependencies {
     fn from(dependencies: FxHashSet<Utf8PathBuf>) -> Self {
         Self(dependencies)
+    }
+}
+
+impl Extend<Utf8PathBuf> for ModuleDependencies {
+    fn extend<T: IntoIterator<Item = Utf8PathBuf>>(&mut self, iter: T) {
+        self.0.extend(iter);
     }
 }
 

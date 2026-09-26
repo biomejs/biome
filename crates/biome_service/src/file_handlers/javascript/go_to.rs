@@ -216,12 +216,12 @@ fn resolve_import_definition(
     module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_db.module_info_for_path(current_path)?;
-    match module_info {
+    let source_module = module_db.module_for_path(current_path)?;
+    match source_module.kind(module_db) {
         ModuleInfoKind::Js(module_info) => {
             let import_path = module_info.import_paths.get(specifier)?;
-
-            let target_path = import_path.resolved_path.as_path()?;
+            let resolved = import_path.resolve_js(module_db, source_module);
+            let target_path = resolved.path().as_path()?;
 
             // Skip files not in the module graph
             if !module_db.contains(target_path) {
@@ -255,9 +255,9 @@ fn resolve_import_definition(
         }
         ModuleInfoKind::Css(_) => {}
         ModuleInfoKind::Html(module_info) => {
-            let resolved_path = module_info.import_paths.get(specifier)?;
-
-            let target_path = resolved_path.as_path()?;
+            let html_import = module_info.import_paths.get(specifier)?;
+            let resolved = html_import.resolve_html(module_db, source_module);
+            let target_path = resolved.path().as_path()?;
 
             // Skip files not in the module graph
             if !module_db.contains(target_path) {

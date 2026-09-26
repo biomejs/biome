@@ -1,4 +1,6 @@
 use super::*;
+#[cfg(feature = "module_graph")]
+use crate::scanner::WorkspaceWatcherBridge;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
@@ -33,6 +35,678 @@ fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
     true
 }
 
+/// Returns the bridge through which the watcher reports filesystem changes.
+#[cfg(feature = "module_graph")]
+fn watcher(workspace: &LocalWorkspace) -> ScannerWatcherBridge<'_, LocalWorkspace> {
+    ScannerWatcherBridge::new((&workspace.server.scanner, workspace))
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn tsconfig_change_reresolves_existing_importers() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"references":[{"path":"../shared/base.json"}]}"#,
+    );
+    fs.insert(
+        "/shared/base.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["../project/src/first"]}}}"#,
+    );
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from '@dep';",
+    );
+    fs.insert("/project/src/first.ts".into(), b"export const value = 1;");
+    fs.insert("/project/src/second.ts".into(), b"export const value = 2;");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+            content: FileContent::FromClient {
+                content: r#"{"compilerOptions":{"paths":{"@dep":["../project/src/first"]}}}"#
+                    .into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let resolved_import = |db: &WorkspaceDb| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get("@dep")?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/first.ts"))
+    );
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+            content: r#"{"compilerOptions":{"paths":{"@dep":["../project/src/second"]}}}"#.into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/second.ts"))
+    );
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+        })
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/first.ts"))
+    );
+
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["./src/second"]}}}"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new("/project/tsconfig.json"))
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/second.ts"))
+    );
+
+    fs.remove(Utf8Path::new("/project/tsconfig.json"));
+    watcher(&workspace)
+        .unload_file(Utf8Path::new("/project/tsconfig.json"), project_key)
+        .unwrap();
+
+    assert_eq!(resolved_import(&workspace.get_db()), None);
+}
+
+/// Creates an Owned-mode workspace for `project_path` and scans it.
+#[cfg(feature = "module_graph")]
+fn scanned_lsp_workspace(
+    fs: &Arc<MemoryFileSystem>,
+    project_path: &str,
+) -> (LocalWorkspace, ProjectKey) {
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(project_path),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new(project_path)),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    (workspace, project_key)
+}
+
+/// Returns the path `specifier` resolves to when imported by `importer`.
+#[cfg(feature = "module_graph")]
+fn resolved_import(
+    workspace: &LocalWorkspace,
+    importer: &str,
+    specifier: &str,
+) -> Option<Utf8PathBuf> {
+    let db = workspace.get_db();
+    let module = db.module_for_path(Utf8Path::new(importer))?;
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        return None;
+    };
+    info.import_paths
+        .get(specifier)?
+        .resolve_js(&db, module)
+        .path()
+        .as_path()
+        .map(Utf8Path::to_path_buf)
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn only_the_watcher_refreshes_resolver_path_info() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    const INDEX: &str = "/project/src/index.ts";
+    assert_eq!(resolved_import(&workspace, INDEX, "dependency"), None);
+
+    fs.insert(
+        "/project/node_modules/dependency/index.ts".into(),
+        b"export const value = 1;",
+    );
+    // Dependency indexing uses the same trigger as watcher updates, but it
+    // must not refresh the path info the scanner already published.
+    workspace
+        .open_file_internal(
+            OpenFileReason::Index(IndexTrigger::Update),
+            OpenFileParams {
+                project_key,
+                path: BiomePath::new("/project/node_modules/dependency/index.ts"),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(resolved_import(&workspace, INDEX, "dependency"), None);
+
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/index.ts"),
+        )
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/index.ts"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn workspace_manifest_update_refreshes_hoisted_dependencies() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        "/repo/package.json".into(),
+        br#"{"name":"repo","workspaces":["packages/*"]}"#,
+    );
+    fs.insert("/repo/packages/a/package.json".into(), br#"{"name":"a"}"#);
+    fs.insert(
+        "/repo/packages/a/src/index.ts".into(),
+        b"import { value } from 'foo';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/repo");
+    const INDEX: &str = "/repo/packages/a/src/index.ts";
+    assert_eq!(resolved_import(&workspace, INDEX, "foo"), None);
+
+    // `npm install foo -w packages/a` hoists the package to the root and
+    // only produces watcher events for the manifest.
+    fs.insert(
+        "/repo/node_modules/foo/package.json".into(),
+        br#"{"name":"foo"}"#,
+    );
+    fs.insert(
+        "/repo/node_modules/foo/index.ts".into(),
+        b"export const value = 1;",
+    );
+    fs.insert(
+        "/repo/packages/a/package.json".into(),
+        br#"{"name":"a","dependencies":{"foo":"1.0.0"}}"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new("/repo/packages/a/package.json"))
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "foo"),
+        Some(Utf8PathBuf::from("/repo/node_modules/foo/index.ts"))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn imported_json_documents_are_not_resolver_manifests() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert("/project/src/data.json".into(), br#"{"value":1}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        // The bare specifier makes the resolver read the package manifest.
+        b"import data from './data.json'; import 'dependency';",
+    );
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "./data.json"),
+        Some(Utf8PathBuf::from("/project/src/data.json"))
+    );
+    assert!(
+        workspace
+            .db_state
+            .is_resolver_manifest(Utf8Path::new("/project/package.json"))
+    );
+    assert!(
+        !workspace
+            .db_state
+            .is_resolver_manifest(Utf8Path::new("/project/src/data.json"))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn added_dependency_directory_reresolves_existing_importers() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency'; import addon from 'dependency/native.node';",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let resolved_import = |db: &WorkspaceDb, specifier: &str| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get(specifier)?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(resolved_import(&workspace.get_db(), "dependency"), None);
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        None
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/index.ts".into(),
+        b"export const value = 1;",
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/index.ts"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/index.ts"
+        ))
+    );
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        None
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/native.node".into(),
+        b"native",
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/native.node"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/native.node"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn package_types_change_discovers_unrecorded_target() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import type { Value } from 'dependency';",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"types":"a.d.ts"}"#,
+    );
+    fs.insert(
+        "/project/node_modules/dependency/a.d.ts".into(),
+        b"export type Value = string;",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/b.d.ts".into(),
+        b"export type Value = number;",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let resolved_import = |db: &WorkspaceDb| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get("dependency")?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/node_modules/dependency/a.d.ts"))
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"types":"b.d.ts"}"#,
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/package.json"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/node_modules/dependency/b.d.ts"))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new("/project/node_modules/dependency/b.d.ts"))
+            .is_some()
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn shared_manifest_refresh_preserves_project_settings_and_dependency_ownership() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/first/package.json".into(), br#"{"name":"first"}"#);
+    fs.insert("/first/index.ts".into(), b"export const first = 1;");
+    fs.insert("/second/package.json".into(), br#"{"name":"second"}"#);
+    fs.insert(
+        "/second/tsconfig.json".into(),
+        br#"{"references":[{"path":"../shared/base.json"}]}"#,
+    );
+    fs.insert(
+        "/shared/base.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["../second/current"]}}}"#,
+    );
+    fs.insert("/second/current.ts".into(), b"export const value = 1;");
+    fs.insert(
+        "/second/index.ts".into(),
+        b"import { value } from '@dep'; export async function second(): Promise<void> { console.log(value); }",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let first_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/first"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    let second_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/second"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    for (project_key, path, resolution_kind) in [
+        (first_project, "/first", ModuleGraphResolutionKind::Modules),
+        (
+            second_project,
+            "/second",
+            ModuleGraphResolutionKind::ModulesAndTypes,
+        ),
+    ] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(path)),
+                configuration: Configuration::default(),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: resolution_kind,
+            })
+            .unwrap();
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::TypeAware,
+                verbose: false,
+            })
+            .unwrap();
+    }
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key: first_project,
+            path: BiomePath::new("/shared/base.json"),
+            content: FileContent::FromClient {
+                content: r#"{"compilerOptions":{"paths":{"@dep":["../second/current"]}}}"#.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key: second_project,
+            path: BiomePath::new("/second/index.ts"),
+            content: FileContent::FromClient {
+                content: "import { value } from '@dep'; export async function second(): Promise<void> { console.log(value); }".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second_raw_types = |db: &WorkspaceDb| {
+        let module = db
+            .module_for_path(Utf8Path::new("/second/index.ts"))
+            .expect("the second module must be indexed");
+        let ModuleInfoKind::Js(module) = module.kind(db) else {
+            panic!("the second module must be JavaScript");
+        };
+        format!("{:?}", module.raw_types)
+    };
+    let before = second_raw_types(&workspace.get_db());
+    assert!(before.contains("Promise"));
+
+    fs.insert("/second/generated.ts".into(), b"export const value = 2;");
+    workspace
+        .change_file(ChangeFileParams {
+            project_key: first_project,
+            path: BiomePath::new("/shared/base.json"),
+            content: r#"{"compilerOptions":{"paths":{"@dep":["../second/generated"]}}}"#.into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(second_raw_types(&workspace.get_db()), before);
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new("/second/index.ts"))
+        .expect("the second module must be indexed");
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("the second module must be JavaScript");
+    };
+    let resolved_path = info.import_paths.get("@dep").and_then(|import| {
+        import
+            .resolve_js(&db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    });
+    assert_eq!(
+        resolved_path,
+        Some(Utf8PathBuf::from("/second/generated.ts"))
+    );
+    assert!(
+        db.module_for_path(Utf8Path::new("/second/generated.ts"))
+            .is_some()
+    );
+}
+
 #[cfg(feature = "plugins")]
 #[test]
 fn close_project_removes_descendant_plugin_caches() {
@@ -60,7 +734,7 @@ fn close_project_removes_descendant_plugin_caches() {
     assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
 }
 
-fn assert_settings_query_routes(db_state: DbState) {
+fn assert_settings_query_routes(db_state: fn(Arc<dyn FsWithResolverProxy>) -> DbState) {
     const PATH: &str = "/project/file.js";
     const SOURCE: &str = "knownGlobal; const value={foo:\"bar\"};";
 
@@ -75,7 +749,7 @@ fn assert_settings_query_routes(db_state: DbState) {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = db_state;
+    workspace.db_state = db_state(workspace.server.fs.clone());
     let project_key = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -220,8 +894,8 @@ fn assert_settings_query_routes(db_state: DbState) {
 
 #[test]
 fn settings_query_routes_in_shared_and_owned_modes() {
-    assert_settings_query_routes(DbState::default());
-    assert_settings_query_routes(DbState::lsp());
+    assert_settings_query_routes(DbState::new);
+    assert_settings_query_routes(DbState::lsp);
 }
 
 #[test]
@@ -737,7 +1411,7 @@ fn change_file_resumes_module_update_after_cancellation() {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = DbState::lsp();
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -868,7 +1542,7 @@ fn owned_scan_uses_replacement_updates() {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = DbState::lsp();
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -927,7 +1601,7 @@ fn scanner_epoch_queues_setters_without_cancelling_scan() {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = DbState::lsp();
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -1051,7 +1725,7 @@ fn incremental_index_retries_pending_write() {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = DbState::lsp();
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),
@@ -1160,7 +1834,7 @@ fn retrying_workspace_does_not_retry_project_scan() {
         Arc::new(NoopQueryProvider {}),
         None,
     );
-    workspace.db_state = DbState::lsp();
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
     let OpenProjectResult { project_key } = workspace
         .open_project(OpenProjectParams {
             path: BiomePath::new("/project"),

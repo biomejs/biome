@@ -16,6 +16,7 @@ use biome_js_type_info::{
     },
 };
 use biome_rowan::Text;
+use std::sync::Arc;
 
 const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
@@ -134,7 +135,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 {
                     self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
-                        resolved_path: import.resolved_path.clone(),
+                        specifier: Arc::new(import.specifier.clone()),
                         type_only: qualifier.type_only,
                     })
                 } else if resolves_declarations_directly {
@@ -359,7 +360,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         return self.resolve_import_member_with_steps(
                             &TypeImportQualifier {
                                 symbol: import.symbol.clone(),
-                                resolved_path: import.resolved_path.clone(),
+                                specifier: Arc::new(import.specifier.clone()),
                                 type_only: qualifier.type_only,
                             },
                             member,

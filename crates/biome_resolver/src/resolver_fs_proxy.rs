@@ -5,7 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crate::errors::ResolveError;
 
 /// Represents the kind of filesystem entry a path points at.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PathInfo {
     Directory,
     File,

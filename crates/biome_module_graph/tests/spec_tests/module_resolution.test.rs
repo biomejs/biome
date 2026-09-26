@@ -1,19 +1,16 @@
-use biome_deserialize::json::deserialize_from_json_str;
-use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, OsFileSystem};
+use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
 use biome_module_graph::{
     ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsOwnExport, JsReexport, ModuleDb,
-    ResolvedPath, SymbolFromModuleInfo, find_js_exported_symbol,
+    SymbolFromModuleInfo, find_js_exported_symbol,
 };
-use biome_package::{Dependencies, PackageJson};
-use biome_project_layout::ProjectLayout;
 use biome_resolver::ResolveError;
 use biome_rowan::{Text, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 
-use super::support::build_js_db;
+use super::support::{add_json_file, build_js_db};
 use super::*;
 
-fn project() -> (MemoryFileSystem, ProjectLayout) {
+fn project() -> MemoryFileSystem {
     let fs = MemoryFileSystem::default();
     fs.insert(
         "/src/index.ts".into(),
@@ -24,67 +21,65 @@ fn project() -> (MemoryFileSystem, ProjectLayout) {
         "/node_modules/shared/index.d.ts".into(),
         "export function foo(): void;",
     );
-    let layout = ProjectLayout::default();
-    layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("app")
-            .with_dependencies(Dependencies(Box::new([("shared".into(), "1.0.0".into())]))),
+    fs.insert(
+        "/package.json".into(),
+        r#"{"name":"app","dependencies":{"shared":"1.0.0"}}"#,
     );
-    let manifest = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
+    fs.insert(
+        "/node_modules/shared/package.json".into(),
         r#"{"name":"shared","version":"1.0.0","types":"index.d.ts"}"#,
-        Default::default(),
-        "package.json",
-    )
-    .into_deserialized()
-    .unwrap();
-    layout.insert_node_manifest("/node_modules/shared".into(), manifest);
-    (fs, layout)
+    );
+    fs
 }
 
 #[test]
 fn test_resolve_relative_import() {
-    let (fs, layout) = project();
+    let fs = project();
     let db = build_js_db(
         &fs,
-        &layout,
         &[
             BiomePath::new("/src/index.ts"),
             BiomePath::new("/src/bar.ts"),
         ],
         true,
     );
-    let info = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
+    let import = info.static_imports.get("bar").unwrap();
     assert_eq!(
-        info.static_imports.get("bar"),
-        Some(&JsImport {
+        import,
+        &JsImport {
             specifier: "./bar.ts".into(),
-            resolved_path: ResolvedPath::from_path("/src/bar.ts"),
             symbol: "bar".into()
-        })
+        }
+    );
+    assert_eq!(
+        import.resolve_js(&db, module).path().as_path(),
+        Some(Utf8Path::new("/src/bar.ts"))
     );
 }
 
 #[test]
 fn test_resolve_package_import() {
-    let (fs, layout) = project();
+    let fs = project();
     let db = build_js_db(
         &fs,
-        &layout,
         &[
             BiomePath::new("/src/index.ts"),
             BiomePath::new("/src/components/Hello.tsx"),
         ],
         true,
     );
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     assert_eq!(
-        db.js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-            .unwrap()
-            .static_imports
+        info.static_imports
             .get("foo")
             .unwrap()
-            .resolved_path
+            .resolve_js(&db, module)
+            .path()
             .as_path(),
         Some(Utf8Path::new("/node_modules/shared/index.d.ts"))
     );
@@ -101,24 +96,67 @@ fn test_import_through_path_alias() {
         "/src/components/Hello.tsx".into(),
         "export function Hello() {}",
     );
-    let layout = ProjectLayout::default();
-    layout.insert_node_manifest("/".into(), PackageJson::new("app").with_version("1.0.0"));
-    let json = biome_json_parser::parse_json(
-        r#"{"compilerOptions":{"paths":{"@components/*":["./src/components/*"]}}}"#,
-        Default::default(),
+    fs.insert(
+        "/package.json".into(),
+        r#"{"name":"app","version":"1.0.0"}"#,
     );
-    layout.insert_serialized_tsconfig("/".into(), &json.syntax().as_send().unwrap());
-    let db = build_js_db(&fs, &layout, &[BiomePath::new("/src/index.ts")], true);
+    fs.insert(
+        "/tsconfig.json".into(),
+        r#"{"compilerOptions":{"paths":{"@components/*":["./src/components/*"]}}}"#,
+    );
+    let db = build_js_db(&fs, &[BiomePath::new("/src/index.ts")], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     assert_eq!(
-        db.js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-            .unwrap()
-            .static_imports
+        info.static_imports
             .get("Hello")
             .unwrap()
-            .resolved_path
+            .resolve_js(&db, module)
+            .path()
             .as_path(),
         Some(Utf8Path::new("/src/components/Hello.tsx"))
     );
+}
+
+#[test]
+fn test_import_through_path_alias_indexed_after_the_importer() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        "import { Hello } from '@components/Hello';",
+    );
+    fs.insert(
+        "/src/components/Hello.tsx".into(),
+        "export function Hello() {}",
+    );
+    let mut db = build_js_db(&fs, &[BiomePath::new("/src/index.ts")], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let resolve = |db: &biome_service::db::WorkspaceDb| {
+        let kind = module.kind(db);
+        let info = kind.as_js_module_info().unwrap();
+        info.static_imports
+            .get("Hello")
+            .unwrap()
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(resolve(&db), None);
+
+    add_json_file(
+        &mut db,
+        Utf8Path::new("/package.json"),
+        r#"{"name":"app","version":"1.0.0"}"#,
+    );
+    add_json_file(
+        &mut db,
+        Utf8Path::new("/tsconfig.json"),
+        r#"{"compilerOptions":{"paths":{"@components/*":["./src/components/*"]}}}"#,
+    );
+
+    assert_eq!(resolve(&db), Some("/src/components/Hello.tsx".into()));
 }
 
 #[test]
@@ -129,23 +167,10 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
     }
     fixtures.push("crates/biome_module_graph/tests/fixtures");
     let fs = OsFileSystem::new(fixtures.clone());
-    let layout = ProjectLayout::default();
-    for directory in ["frontend", "shared", "frontend/node_modules/shared"] {
-        let root = fixtures.join(directory);
-        let manifest = deserialize_from_json_str::<PackageJson>(
-            &fs.read_file_from_path(&root.join("package.json")).unwrap(),
-            Default::default(),
-            "package.json",
-        )
-        .into_deserialized()
-        .unwrap();
-        layout.insert_node_manifest(root, manifest);
-    }
     let frontend = fixtures.join("frontend/src/index.ts");
     let shared = fixtures.join("shared/dist/index.js");
     let db = build_js_db(
         &fs,
-        &layout,
         &[
             BiomePath::new(fixtures.join("frontend/src/bar.ts")),
             BiomePath::new(frontend.clone()),
@@ -154,12 +179,15 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         ],
         true,
     );
-    let info = db.js_module_info_for_path(&frontend).unwrap();
+    let module = db.module_for_path(&frontend).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     assert_eq!(
         info.static_imports
             .get("sharedFoo")
             .unwrap()
-            .resolved_path
+            .resolve_js(&db, module)
+            .path()
             .as_path(),
         Some(shared.as_path())
     );
@@ -167,7 +195,8 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
         info.static_imports
             .get("bar")
             .unwrap()
-            .resolved_path
+            .resolve_js(&db, module)
+            .path()
             .as_path(),
         Some(fixtures.join("frontend/src/bar.ts").as_path())
     );
@@ -177,21 +206,17 @@ fn test_resolve_package_import_in_monorepo_fixtures() {
 fn test_node_builtin_imports_resolve_to_builtin_error() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), "import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';");
-    let db = build_js_db(
-        &fs,
-        &ProjectLayout::default(),
-        &[BiomePath::new("/src/index.ts")],
-        false,
-    );
-    let info = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
+    let db = build_js_db(&fs, &[BiomePath::new("/src/index.ts")], false);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     for specifier in ["node:fs", "node:path", "node:url"] {
         assert_eq!(
             info.import_paths
                 .get(specifier)
                 .unwrap()
-                .resolved_path
+                .resolve_js(&db, module)
+                .path()
                 .error(),
             Some(&ResolveError::NodeBuiltIn)
         );
@@ -205,21 +230,17 @@ fn test_bun_builtin_imports_resolve_to_builtin_error() {
         "/src/index.ts".into(),
         "import Bun from 'bun'; import { dlopen } from 'bun:ffi'; import { jsc } from 'bun:jsc';",
     );
-    let db = build_js_db(
-        &fs,
-        &ProjectLayout::default(),
-        &[BiomePath::new("/src/index.ts")],
-        false,
-    );
-    let info = db
-        .js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-        .unwrap();
+    let db = build_js_db(&fs, &[BiomePath::new("/src/index.ts")], false);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     for specifier in ["bun", "bun:ffi", "bun:jsc"] {
         assert_eq!(
             info.import_paths
                 .get(specifier)
                 .unwrap()
-                .resolved_path
+                .resolve_js(&db, module)
+                .path()
                 .error(),
             Some(&ResolveError::BunBuiltIn)
         );
@@ -234,30 +255,24 @@ fn test_package_typings_field_resolution() {
         "/node_modules/my-icons/dist/index.d.ts".into(),
         "export declare function Icon(): void;",
     );
-    let layout = ProjectLayout::default();
-    layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("app").with_dependencies(Dependencies(Box::new([(
-            "my-icons".into(),
-            "1.0.0".into(),
-        )]))),
+    fs.insert(
+        "/package.json".into(),
+        r#"{"name":"app","dependencies":{"my-icons":"1.0.0"}}"#,
     );
-    let manifest = biome_deserialize::json::deserialize_from_json_str::<PackageJson>(
+    fs.insert(
+        "/node_modules/my-icons/package.json".into(),
         r#"{"name":"my-icons","version":"1.0.0","typings":"./dist/index.d.ts"}"#,
-        Default::default(),
-        "package.json",
-    )
-    .into_deserialized()
-    .unwrap();
-    layout.insert_node_manifest("/node_modules/my-icons".into(), manifest);
-    let db = build_js_db(&fs, &layout, &[BiomePath::new("/src/index.ts")], false);
+    );
+    let db = build_js_db(&fs, &[BiomePath::new("/src/index.ts")], false);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     assert_eq!(
-        db.js_module_info_for_path(Utf8Path::new("/src/index.ts"))
-            .unwrap()
-            .static_imports
+        info.static_imports
             .get("Icon")
             .unwrap()
-            .resolved_path
+            .resolve_js(&db, module)
+            .path()
             .as_path(),
         Some(Utf8Path::new("/node_modules/my-icons/dist/index.d.ts"))
     );
@@ -269,7 +284,6 @@ fn export_db(source: &str, barrel: &str) -> biome_service::db::WorkspaceDb {
     fs.insert("/src/barrel.ts".into(), barrel);
     build_js_db(
         &fs,
-        &ProjectLayout::default(),
         &[
             BiomePath::new("/src/source.ts"),
             BiomePath::new("/src/barrel.ts"),
@@ -304,16 +318,23 @@ fn test_namespace_reexport_is_own_export() {
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
     let kind = barrel.kind(&db);
     let info = kind.as_js_module_info().unwrap();
+    let namespace = info.exports.get(&Text::new_static("MyNs")).unwrap();
     assert_eq!(
-        info.exports.get(&Text::new_static("MyNs")),
-        Some(&JsExport::Own(JsOwnExport::Namespace(JsReexport {
+        namespace,
+        &JsExport::Own(JsOwnExport::Namespace(JsReexport {
             export_range: Some(TextRange::new(TextSize::from(0), TextSize::from(36))),
             import: JsImport {
                 specifier: "./source.ts".into(),
-                resolved_path: ResolvedPath::from_path("/src/source.ts"),
                 symbol: ImportSymbol::All
             }
-        })))
+        }))
+    );
+    let JsExport::Own(JsOwnExport::Namespace(reexport)) = namespace else {
+        unreachable!();
+    };
+    assert_eq!(
+        reexport.import.resolve_js(&db, barrel).path().as_path(),
+        Some(Utf8Path::new("/src/source.ts"))
     );
 }
 
@@ -345,14 +366,12 @@ fn test_find_symbol_reexported_through_package_self_reference() {
         "/node_modules/next/dist/request.d.ts".into(),
         "export declare class NextRequest {}",
     );
-    let layout = ProjectLayout::default();
-    layout.insert_node_manifest(
-        "/node_modules/next".into(),
-        PackageJson::new("next").with_version("16.0.0"),
+    fs.insert(
+        "/node_modules/next/package.json".into(),
+        r#"{"name":"next","version":"16.0.0"}"#,
     );
     let db = build_js_db(
         &fs,
-        &layout,
         &[
             BiomePath::new("/node_modules/next/server.d.ts"),
             BiomePath::new("/node_modules/next/dist/request.d.ts"),
@@ -374,7 +393,6 @@ fn test_export_equals_namespace_without_type_inference() {
     fs.insert("/node_modules/react/index.d.ts".into(), "declare namespace React { function useState(): void; function useCallback(): void; } export = React;");
     let db = build_js_db(
         &fs,
-        &ProjectLayout::default(),
         &[BiomePath::new("/node_modules/react/index.d.ts")],
         false,
     );

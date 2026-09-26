@@ -1,4 +1,4 @@
-use crate::{JsImportPath, ModuleDb, ModuleGraphGeneration, ModuleInfoKind};
+use crate::{ModuleDb, ModuleGraphGeneration, ModuleInfoKind};
 use biome_fs::is_node_modules_path;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
@@ -58,8 +58,8 @@ pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> J
             return;
         };
 
-        for JsImportPath { resolved_path, .. } in module_info.all_import_paths() {
-            if let Some(target) = resolved_path.as_path()
+        for import in module_info.all_import_paths() {
+            if let Some(target) = import.resolve_js(db, module).path().as_path()
                 && target != path
                 && let Some(&to_id) = id_by_path.get(target)
             {

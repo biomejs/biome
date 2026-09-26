@@ -333,17 +333,6 @@ impl Format<FormatTypeContext> for JsImport {
         )?;
         write!(f, [hard_line_break()])?;
 
-        write!(
-            f,
-            [&format_args![
-                token("Resolved path:"),
-                space(),
-                self.resolved_path
-            ]]
-        )?;
-
-        write!(f, [hard_line_break()])?;
-
         write!(f, [&format_args![&self.symbol]])?;
 
         write!(f, [hard_line_break()])?;
@@ -427,9 +416,9 @@ impl Format<FormatTypeContext> for JsImportPath {
             write!(
                 f,
                 [&format_args![
-                    token("resolved_path:"),
+                    token("specifier:"),
                     space(),
-                    self.resolved_path,
+                    text(&std::format!("{:?}", self.specifier.text()), None),
                     token(","),
                     hard_line_break(),
                     token("phase:"),
@@ -466,10 +455,6 @@ impl Format<FormatTypeContext> for CssImport {
                     space(),
                     text(&std::format!("{:?}", self.specifier.text()), None),
                     token(","),
-                    hard_line_break(),
-                    token("resolved_path:"),
-                    space(),
-                    self.resolved_path,
                 ]]
             )
         });
@@ -727,11 +712,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
             let mut sorted: Vec<_> = self
                 .imported_stylesheets
                 .iter()
-                .map(|p| {
-                    p.as_path().map_or("<unresolved>".to_string(), |p| {
-                        p.as_str().replace('\\', "/")
-                    })
-                })
+                .map(|import| import.specifier.text().to_string())
                 .collect();
             sorted.sort();
             if sorted.is_empty() {
@@ -751,11 +732,11 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
             let mut sorted: Vec<_> = self
                 .import_paths
                 .named_iter()
-                .map(|(specifier, resolved)| {
-                    let resolved_str = resolved.as_path().map_or("<unresolved>".to_string(), |p| {
-                        p.as_str().replace('\\', "/")
-                    });
-                    (specifier.text().to_string(), resolved_str)
+                .map(|(specifier, import)| {
+                    (
+                        specifier.text().to_string(),
+                        import.specifier.text().to_string(),
+                    )
                 })
                 .collect();
             sorted.sort_by(|a, b| a.0.cmp(&b.0));
@@ -764,7 +745,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
             } else {
                 let separator = hard_line_break();
                 let mut joiner = f.join_with(&separator);
-                for (specifier, resolved) in &sorted {
+                for (specifier, raw_specifier) in &sorted {
                     let entry = format_with(|f| {
                         write!(
                             f,
@@ -773,7 +754,7 @@ impl Format<FormatTypeContext> for HtmlModuleInfoInner {
                                 space(),
                                 token("=>"),
                                 space(),
-                                text(resolved, None),
+                                text(raw_specifier, None),
                                 token(","),
                             ]]
                         )

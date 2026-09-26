@@ -11,6 +11,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
+use biome_module_graph::ModuleInfoKind;
 use biome_rowan::BatchMutationExt;
 use biome_rule_options::use_import_extensions::UseImportExtensionsOptions;
 
@@ -158,17 +159,21 @@ impl Rule for UseImportExtensions {
     type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
+        let owner = ctx.module_info_for_path(ctx.file_path())?;
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
+            return None;
+        };
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();
         let import_path = module_info.get_import_path_by_js_node(node)?;
-        let resolved_path = import_path.as_path()?;
+        let resolved = import_path.resolve_js(ctx.db(), owner);
+        let resolved_path = resolved.path().as_path()?;
 
         get_extensionless_import(
             node,
             resolved_path,
-            import_path.resolution_kind(),
+            resolved.kind(),
             ctx,
             force_js_extensions,
         )

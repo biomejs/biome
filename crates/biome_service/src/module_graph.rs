@@ -8,23 +8,14 @@ pub(crate) use biome_module_graph::resolve_html_module;
 pub(crate) use biome_module_graph::resolve_js_module;
 #[cfg(feature = "module_graph")]
 pub(crate) use biome_module_graph::{
-    ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, PathInfoCache,
+    ModuleDb, ModuleDependencies, ModuleInfo, ModuleInfoKind, module_dependencies,
 };
 
 #[cfg(not(feature = "module_graph"))]
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 
 #[cfg(not(feature = "module_graph"))]
 pub(crate) type ModuleDependencies = Vec<Utf8PathBuf>;
-
-#[cfg(not(feature = "module_graph"))]
-#[derive(Default)]
-pub(crate) struct PathInfoCache;
-
-#[cfg(not(feature = "module_graph"))]
-impl PathInfoCache {
-    pub(crate) fn remove(&self, _path: &Utf8Path) {}
-}
 
 #[cfg(not(feature = "module_graph"))]
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
