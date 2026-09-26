@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSetupFunction.vue
+---
+# Input
+```vue
+<script>
+import { computed } from 'vue'
+
+export default {
+  setup() {
+    const state = useState()
+
+    const mutatingMethod = computed(() => state.items.reverse())
+    const assign = computed(() => {
+      state.firstName = 'lorem'
+      return state.firstName
+    })
+    return { mutatingMethod, assign }
+  },
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalidSetupFunction.vue:8:43 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+     6 │     const state = useState()
+     7 │ 
+   > 8 │     const mutatingMethod = computed(() => state.items.reverse())
+       │                                           ^^^^^^^^^^^^^^^^^^^^^
+     9 │     const assign = computed(() => {
+    10 │       state.firstName = 'lorem'
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSetupFunction.vue:10:7 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+     8 │     const mutatingMethod = computed(() => state.items.reverse())
+     9 │     const assign = computed(() => {
+  > 10 │       state.firstName = 'lorem'
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │       return state.firstName
+    12 │     })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

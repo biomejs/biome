@@ -1,0 +1,326 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidScriptSetup.vue
+---
+# Input
+```vue
+<script setup>
+import { computed, reactive } from 'vue'
+
+const state = useState()
+const nested = { inner: {} }
+const list = reactive([])
+function helper() {}
+class Helper {}
+
+const assign = computed(() => {
+  state.firstName = 'lorem'
+  nested.inner.value = 'lorem'
+  return state.firstName + ' ' + state.lastName
+})
+const update = computed(() => {
+  state.count += 2
+  state.count++
+  return state.count
+})
+const mutatingMethod = computed(() => state.items.reverse())
+const directMutatingMethod = computed(() => list.reverse())
+const nestedChain = computed(() => {
+  const pushed = state.outer.items.push('example')
+  return pushed
+})
+const computedMember = computed(() => {
+  state.items[index] = state.other[index]
+  return state.items
+})
+const getterMember = computed({
+  get() {
+    return state.items.reverse()
+  },
+})
+const arrowGetterMember = computed({
+  get: () => state.items.sort(),
+})
+const functionBinding = computed(() => {
+  helper.displayName = 'renamed'
+})
+const classBinding = computed(() => {
+  Helper.displayName = 'renamed'
+})
+const sequence = computed(() => ((state.flag = true), state.flag))
+</script>
+
+```
+
+# Diagnostics
+```
+invalidScriptSetup.vue:11:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    10 │ const assign = computed(() => {
+  > 11 │   state.firstName = 'lorem'
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │   nested.inner.value = 'lorem'
+    13 │   return state.firstName + ' ' + state.lastName
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:12:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    10 │ const assign = computed(() => {
+    11 │   state.firstName = 'lorem'
+  > 12 │   nested.inner.value = 'lorem'
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   return state.firstName + ' ' + state.lastName
+    14 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:16:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    14 │ })
+    15 │ const update = computed(() => {
+  > 16 │   state.count += 2
+       │   ^^^^^^^^^^^^^^^^
+    17 │   state.count++
+    18 │   return state.count
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:17:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    15 │ const update = computed(() => {
+    16 │   state.count += 2
+  > 17 │   state.count++
+       │   ^^^^^^^^^^^^^
+    18 │   return state.count
+    19 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:20:39 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    18 │   return state.count
+    19 │ })
+  > 20 │ const mutatingMethod = computed(() => state.items.reverse())
+       │                                       ^^^^^^^^^^^^^^^^^^^^^
+    21 │ const directMutatingMethod = computed(() => list.reverse())
+    22 │ const nestedChain = computed(() => {
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:21:45 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    19 │ })
+    20 │ const mutatingMethod = computed(() => state.items.reverse())
+  > 21 │ const directMutatingMethod = computed(() => list.reverse())
+       │                                             ^^^^^^^^^^^^^^
+    22 │ const nestedChain = computed(() => {
+    23 │   const pushed = state.outer.items.push('example')
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:23:18 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    21 │ const directMutatingMethod = computed(() => list.reverse())
+    22 │ const nestedChain = computed(() => {
+  > 23 │   const pushed = state.outer.items.push('example')
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │   return pushed
+    25 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:27:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    25 │ })
+    26 │ const computedMember = computed(() => {
+  > 27 │   state.items[index] = state.other[index]
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │   return state.items
+    29 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:32:12 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    30 │ const getterMember = computed({
+    31 │   get() {
+  > 32 │     return state.items.reverse()
+       │            ^^^^^^^^^^^^^^^^^^^^^
+    33 │   },
+    34 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:36:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    34 │ })
+    35 │ const arrowGetterMember = computed({
+  > 36 │   get: () => state.items.sort(),
+       │              ^^^^^^^^^^^^^^^^^^
+    37 │ })
+    38 │ const functionBinding = computed(() => {
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:39:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    37 │ })
+    38 │ const functionBinding = computed(() => {
+  > 39 │   helper.displayName = 'renamed'
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ })
+    41 │ const classBinding = computed(() => {
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:42:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    40 │ })
+    41 │ const classBinding = computed(() => {
+  > 42 │   Helper.displayName = 'renamed'
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ })
+    44 │ const sequence = computed(() => ((state.flag = true), state.flag))
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidScriptSetup.vue:44:35 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    42 │   Helper.displayName = 'renamed'
+    43 │ })
+  > 44 │ const sequence = computed(() => ((state.flag = true), state.flag))
+       │                                   ^^^^^^^^^^^^^^^^^
+    45 │ </script>
+    46 │ 
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

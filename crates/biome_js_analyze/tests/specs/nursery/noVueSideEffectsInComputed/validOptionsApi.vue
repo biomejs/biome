@@ -1,0 +1,54 @@
+/* should not generate diagnostics */
+
+<script>
+export default {
+  computed: {
+    fullName() {
+      return this.firstName + ' ' + this.lastName
+    },
+    copiedBeforeReorder() {
+      return this.items.slice(0).reverse()
+    },
+    spreadBeforeReorder() {
+      return [...this.items].reverse()
+    },
+    localOnly() {
+      const example = this.something * 2
+      return example + 'test'
+    },
+    spreadIntoNewObject() {
+      return { ...this.something, test: 'example' }
+    },
+    mutatingCallOnCopy() {
+      return Object.keys(this.map).sort()
+    },
+    memberNameOnly() {
+      return other[this.key]
+    },
+    callBreaksTheChain() {
+      return this.factory['make']().reverse()
+    },
+    objectAssignIntoNewObject() {
+      return Object.assign({}, this.data, { extra: 'value' })
+    },
+    localCollection() {
+      const categories = {}
+      this.types.forEach((type) => {
+        categories[type.category] = categories[type.category] || []
+        categories[type.category].push(type)
+      })
+      return categories
+    },
+    mutationInNestedFunction() {
+      return {
+        action() {
+          this.something++
+        },
+      }
+    },
+    readInNestedCallback() {
+      return this.types.map((type) => type)
+    },
+  },
+}
+</script>

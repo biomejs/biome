@@ -6816,6 +6816,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueSideEffectsInComputedConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueSideEffectsInComputedOptions" }
+			]
+		},
+		"NoVueSideEffectsInComputedOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7412,6 +7422,13 @@
 					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueSideEffectsInComputed": {
+					"description": "Disallow side effects in computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueSideEffectsInComputedConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11678,6 +11695,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueSideEffectsInComputedOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueSideEffectsInComputedOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

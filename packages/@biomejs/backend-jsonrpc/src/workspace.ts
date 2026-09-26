@@ -2700,6 +2700,11 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 	 */
 	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
 	/**
+	* Disallow side effects in computed properties.
+See https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed 
+	 */
+	noVueSideEffectsInComputed?: NoVueSideEffectsInComputedConfiguration;
+	/**
 	* Disallow custom Vue directives that are not declared.
 See https://biomejs.dev/linter/rules/no-vue-undeclared-directives 
 	 */
@@ -5050,6 +5055,9 @@ export type NoVueImportCompilerMacrosConfiguration =
 export type NoVueRefAsOperandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefAsOperandOptions;
+export type NoVueSideEffectsInComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueSideEffectsInComputedOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -7098,6 +7106,10 @@ export interface RuleWithNoVueRefAsOperandOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRefAsOperandOptions;
 }
+export interface RuleWithNoVueSideEffectsInComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueSideEffectsInComputedOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -8948,6 +8960,7 @@ export type NoUselessTypeConversionOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
+export type NoVueSideEffectsInComputedOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	* Names of directives registered globally with `app.directive(...)`,
@@ -10443,6 +10456,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noXorAsExponentiation"
@@ -10475,8 +10489,8 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLayeredStyles"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
