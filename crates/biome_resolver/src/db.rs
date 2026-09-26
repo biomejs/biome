@@ -49,11 +49,9 @@ pub trait ResolverDb: Db {
 #[salsa::input]
 #[derive(Debug)]
 pub struct ResolverPathData {
-    #[returns(ref)]
     pub path: Utf8PathBuf,
 
     /// The kind of filesystem entry the path points at.
-    #[returns(ref)]
     pub info: Result<PathInfo, ResolveError>,
 
     /// Changes when the content backing this path may have changed.
@@ -61,6 +59,7 @@ pub struct ResolverPathData {
     /// Queries that read content associated with the path, such as a
     /// manifest, read this field so they are invalidated when the content is
     /// replaced outside the parsed source.
+    #[returns(copy)]
     pub revision: u64,
 }
 
@@ -308,7 +307,6 @@ impl ResolverFsProxy for ResolverDbAdapter<'_> {
 pub struct PackageJsonData<'db> {
     #[tracked]
     #[no_eq]
-    #[returns(ref)]
     pub manifest: Option<PackageJson>,
 }
 
@@ -316,7 +314,7 @@ pub struct PackageJsonData<'db> {
 ///
 /// The returned data contains no manifest when the source is not a JSON
 /// document or does not contain a valid package manifest.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn package_json_from_source<'db>(
     db: &'db dyn Db,
     source: ParsedSource,
@@ -330,7 +328,7 @@ pub fn package_json_from_source<'db>(
 /// content is taken into account, even for a manifest that doesn't exist on
 /// disk yet. Otherwise, the manifest is read through
 /// [`ResolverDb::resolver_fs`] if the path is a file.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn package_json_for_path<'db>(
     db: &'db dyn ResolverDb,
     path: ResolverPathData,
@@ -356,13 +354,13 @@ pub fn package_json_for_path<'db>(
 /// The nearest package manifest for a directory.
 #[salsa::tracked]
 pub struct ResolvedPackage<'db> {
-    #[returns(ref)]
     pub path: Utf8PathBuf,
+    #[returns(copy)]
     pub manifest: PackageJsonData<'db>,
 }
 
 /// Finds the nearest package manifest for `directory`.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn package_json_for_directory<'db>(
     db: &'db dyn ResolverDb,
     directory: ResolverPathData,
@@ -384,7 +382,6 @@ pub fn package_json_for_directory<'db>(
 pub struct TsConfigJsonData<'db> {
     #[tracked]
     #[no_eq]
-    #[returns(ref)]
     pub manifest: Option<TsConfigJson>,
 }
 
@@ -392,7 +389,7 @@ pub struct TsConfigJsonData<'db> {
 ///
 /// The returned data contains no configuration when the source is not a JSON
 /// document or does not contain a valid TypeScript configuration.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn tsconfig_json_from_source<'db>(
     db: &'db dyn Db,
     source: ParsedSource,
@@ -406,7 +403,7 @@ pub fn tsconfig_json_from_source<'db>(
 /// The indexed parsed source is used when there is one. Otherwise, the
 /// configuration is read through [`ResolverDb::resolver_fs`] if the path is a
 /// file.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn tsconfig_json_for_path<'db>(
     db: &'db dyn ResolverDb,
     path: ResolverPathData,

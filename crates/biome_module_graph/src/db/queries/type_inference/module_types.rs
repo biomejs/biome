@@ -67,7 +67,7 @@ pub fn infer_module_types<'db>(
                 );
                 whole_module
             });
-            let result = resolve_raw_types(db, module, &js_info, ImportResolution::on_demand());
+            let result = resolve_raw_types(db, module, js_info, ImportResolution::on_demand());
             if let Some(whole_module) = whole_module {
                 whole_module.complete();
             }
@@ -92,7 +92,7 @@ pub(crate) fn infer_module_types_from_tables<'db>(
     Some(resolve_raw_types(
         db,
         module,
-        &js_info,
+        js_info,
         ImportResolution::FromTables { root },
     ))
 }
@@ -129,7 +129,7 @@ impl InferenceModuleSccs {
     }
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn inference_module_sccs(
     db: &dyn ModuleDb,
     generation: ModuleGraphGeneration,
@@ -154,7 +154,7 @@ pub(crate) fn inference_module_sccs(
         let Some(edges) = edges.get_mut(from_id as usize) else {
             return;
         };
-        push_inference_dependency_ids(db, &id_by_module, edges, module, &js_info);
+        push_inference_dependency_ids(db, &id_by_module, edges, module, js_info);
     });
 
     let (component_by_id, component_sizes) = compute_sccs(&edges);
@@ -218,7 +218,7 @@ pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
         .then(|| infer_module_types_from_tables(db, module, module))?
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn prepare_module_types_bottom_up_for_import_depth(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
     let whole_module = start_whole_module_inference_at(
         TypeInferenceWholeModuleReason::ImportDepthLimit,
@@ -266,7 +266,7 @@ fn infer_module_types_bottom_up_impl<'db>(
         let ModuleInfoKind::Js(js_info) = current.kind(db) else {
             continue;
         };
-        push_scheduled_inference_dependencies(db, &visited, &mut stack, current, &js_info);
+        push_scheduled_inference_dependencies(db, &visited, &mut stack, current, js_info);
     }
 
     None

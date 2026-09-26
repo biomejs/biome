@@ -1148,17 +1148,18 @@ mod tests {
 
     #[salsa::interned]
     struct TestSettingsQueryInput {
+        #[returns(copy)]
         project: ProjectInput,
-        #[returns(ref)]
         selection: SettingsQuerySelection,
     }
 
     #[salsa::interned]
     struct TestSettingsCacheInput {
+        #[returns(copy)]
         value: usize,
     }
 
-    #[salsa::tracked(lru = 256)]
+    #[salsa::tracked(returns(copy), lru = 256)]
     fn test_settings_query<'db>(
         db: &'db dyn ProjectDb,
         input: TestSettingsQueryInput<'db>,
@@ -1287,7 +1288,7 @@ mod tests {
         )
     }
 
-    #[salsa::tracked]
+    #[salsa::tracked(returns(copy))]
     fn blocking_document_source_index(db: &dyn Db, file: ParsedSource) -> usize {
         SETTER_READER_STARTED.wait();
 

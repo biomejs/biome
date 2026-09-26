@@ -336,7 +336,11 @@ impl JsImportPath {
     /// Resolves this import of the JavaScript or TypeScript `module`.
     ///
     /// See [ResolutionMode::JavaScript] for the resolution rules.
-    pub fn resolve_js(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+    pub fn resolve_js<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
         resolve_module_import(db, module, &self.specifier, ResolutionMode::JavaScript)
     }
 }
@@ -410,7 +414,11 @@ impl JsImport {
     /// Resolves this import of the JavaScript or TypeScript `module`.
     ///
     /// See [ResolutionMode::JavaScript] for the resolution rules.
-    pub fn resolve_js(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+    pub fn resolve_js<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
         resolve_module_import(db, module, &self.specifier, ResolutionMode::JavaScript)
     }
 }

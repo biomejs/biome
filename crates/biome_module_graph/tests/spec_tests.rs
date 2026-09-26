@@ -461,7 +461,7 @@ fn inferred_function_return_ty_by_name<'db>(
     Some(inferred.resolve_type(db, *return_ty))
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn inferred_expression_count(db: &dyn ModuleDb, module: ModuleInfo) -> usize {
     infer_module_types(db, module).map_or(0, |inferred| inferred.expressions.len())
 }

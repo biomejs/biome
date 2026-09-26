@@ -374,7 +374,7 @@ impl<'db, 'name> CssPropertyTraversal<'db, 'name> {
                     );
                 }
                 ModuleInfoKind::Js(info) => {
-                    stack.extend(js_import_paths_in_source_order(&info).filter_map(|import| {
+                    stack.extend(js_import_paths_in_source_order(info).filter_map(|import| {
                         let resolved = import.resolve_js(self.db, module);
                         let path = resolved.path().as_path()?;
                         if branch.contains(path) {
@@ -574,13 +574,13 @@ impl UpwardTraversalVisitor for CssPropertyTraversal<'_, '_> {
                 .map(|_| {
                     let local_definition = self.local_property_definition(importer_path);
                     let definition = local_definition.or_else(|| {
-                        self.last_property_in_imports(importer, &info, next_branch.clone())
+                        self.last_property_in_imports(importer, info, next_branch.clone())
                     });
                     self.action(definition, next_branch.clone())
                 })
                 .collect(),
             ModuleInfoKind::Js(info) => {
-                let imports = js_import_paths_in_source_order(&info)
+                let imports = js_import_paths_in_source_order(info)
                     .filter_map(|import| {
                         import
                             .resolve_js(db, importer)

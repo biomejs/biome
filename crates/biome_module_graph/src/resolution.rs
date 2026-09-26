@@ -54,9 +54,10 @@ pub enum ResolutionMode {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct ResolutionRequest<'db> {
+    #[returns(copy)]
     pub base_directory: ResolverPathData,
-    #[returns(ref)]
     pub specifier: String,
+    #[returns(copy)]
     pub mode: ResolutionMode,
 }
 
@@ -81,24 +82,24 @@ pub fn resolve_module_request<'db>(
 ///
 /// Every module-graph consumer resolves through this function, so indexing,
 /// lint rules and type inference share the same memoized results.
-pub fn resolve_specifier(
-    db: &dyn ResolverDb,
+pub fn resolve_specifier<'db>(
+    db: &'db dyn ResolverDb,
     base_directory: &Utf8Path,
     specifier: &str,
     mode: ResolutionMode,
-) -> ResolvedSpecifier {
+) -> &'db ResolvedSpecifier {
     let base_directory = db.resolver_paths().get_or_create(db, base_directory);
     let request = ResolutionRequest::new(db, base_directory, specifier.to_string(), mode);
     resolve_module_request(db, request)
 }
 
 /// Resolves `specifier` as imported by `module`.
-pub fn resolve_module_import(
-    db: &dyn ModuleDb,
+pub fn resolve_module_import<'db>(
+    db: &'db dyn ModuleDb,
     module: ModuleInfo,
     specifier: &str,
     mode: ResolutionMode,
-) -> ResolvedSpecifier {
+) -> &'db ResolvedSpecifier {
     let module_path = module.path(db);
     let base_directory = module_path.parent().unwrap_or(module_path);
     resolve_specifier(db, base_directory, specifier, mode)

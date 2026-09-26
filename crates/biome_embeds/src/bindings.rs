@@ -16,24 +16,20 @@ pub struct EmbeddedBinding {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedBindingTokenText {
-    #[returns(ref)]
     path: Utf8PathBuf,
 
-    #[returns(ref)]
     name: TokenText,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedBindingText {
-    #[returns(ref)]
     path: Utf8PathBuf,
 
-    #[returns(ref)]
     name: String,
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn get_binding_by_name<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
@@ -50,7 +46,7 @@ pub fn get_binding_by_name<'db>(
     None
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn get_binding_with_source<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
@@ -66,7 +62,7 @@ pub fn get_binding_with_source<'db>(
     None
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn get_binding_by_token_text<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
@@ -83,7 +79,7 @@ pub fn get_binding_by_token_text<'db>(
     None
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn get_binding_by_text<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingText<'db>,

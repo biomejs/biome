@@ -30,7 +30,7 @@ const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
 ///     map: <T>(value: T) => T;
 /// };
 /// ```
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeSubstitution<'db> {
     /// Type to replace.
     pub generic: TypeData<'db>,

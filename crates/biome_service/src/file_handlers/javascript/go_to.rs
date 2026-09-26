@@ -248,7 +248,9 @@ fn resolve_import_definition(
                     );
                 }
                 JsExportedSymbolLookup::Found(own_export) => match own_export {
-                    JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
+                    JsOwnExport::Binding(range) => {
+                        result.store(BiomePath::new(target_path), *range)
+                    }
                     JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                 },
             }
@@ -278,7 +280,7 @@ fn resolve_import_definition(
                     }
                     JsExportedSymbolLookup::Found(own_export) => match own_export {
                         JsOwnExport::Binding(range) => {
-                            result.store(BiomePath::new(target_path), range)
+                            result.store(BiomePath::new(target_path), *range)
                         }
                         JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                     },

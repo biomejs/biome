@@ -250,11 +250,8 @@ impl ServiceLanguage for GritLanguage {
 
 #[salsa::interned]
 struct GritFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

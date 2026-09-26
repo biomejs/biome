@@ -100,7 +100,6 @@ pub fn resolve_prepared_html_module(
 #[salsa::input]
 #[derive(Debug)]
 pub struct ModuleInfo {
-    #[returns(ref)]
     pub path: Utf8PathBuf,
 
     #[no_eq]

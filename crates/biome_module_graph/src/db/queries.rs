@@ -116,7 +116,7 @@ pub fn find_js_exported_symbol<'db>(
 }
 
 /// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn find_jsdoc_for_exported_symbol<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
@@ -212,7 +212,6 @@ pub struct SymbolFromModuleInfo {
     #[returns(clone)]
     pub(crate) name: String,
 
-    #[returns(ref)]
     pub(crate) module: ModuleInfo,
 }
 

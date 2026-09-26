@@ -32,7 +32,7 @@ const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
 pub(super) const MAX_NAMESPACE_IMPORT_MEMBER_STEPS: usize = 64;
 
 /// Result of searching for the declaration behind a named export.
-#[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, PartialEq, salsa::SalsaValue)]
 pub(crate) enum ExportOriginResult {
     /// The completed search found no declaration.
     ///
@@ -326,7 +326,7 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         return None;
     }
 
-    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::on_demand());
+    let ctx = ResolutionCtx::new(db, module, js_info, super::ImportResolution::on_demand());
     Some(ctx.resolve_export_name_on_demand(module, name))
 }
 
@@ -408,14 +408,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         };
                         self.for_on_demand_import(
                             *module,
-                            &js_info,
+                            js_info,
                             remaining,
                             resolve_declarations_directly,
                         )
                     }
                     import_resolution @ (super::ImportResolution::FromTables { .. }
                     | super::ImportResolution::CycleFallback(_)) => {
-                        ResolutionCtx::new(self.db, *module, &js_info, import_resolution)
+                        ResolutionCtx::new(self.db, *module, js_info, import_resolution)
                     }
                 };
                 ctx.resolve_namespace_import_member_with_steps(
@@ -525,7 +525,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
                 let ctx = self.for_on_demand_import(
                     module,
-                    &js_info,
+                    js_info,
                     remaining,
                     resolve_declarations_directly,
                 );
@@ -643,14 +643,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             JsOwnExport::Binding(range) => inferred_type_from_binding_on_demand(
                 self,
                 *module,
-                &js_info,
+                js_info,
                 *range,
                 resolve_declaration_directly,
             ),
             JsOwnExport::Type(resolved_id) => inferred_type_from_resolved_id_on_demand(
                 self,
                 *module,
-                &js_info,
+                js_info,
                 ResolvedTypeId::Local(*resolved_id),
                 resolve_declaration_directly,
             ),

@@ -1,12 +1,12 @@
 use crate::{ControlFlowModel, control_flow_model};
 use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn control_flow_model_from_source(db: &dyn Db, file: ParsedSource) -> ControlFlowModel {
     control_flow_model(&file.parsed(db).tree())
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn control_flow_model_from_snippet(db: &dyn Db, file: ParsedSnippet) -> ControlFlowModel {
     control_flow_model(&file.parsed(db).tree())
 }

@@ -34,6 +34,7 @@ mod type_inference;
 /// with a new value.
 #[salsa::input(singleton)]
 pub struct ModuleGraphGeneration {
+    #[returns(copy)]
     pub value: u64,
 }
 

@@ -35,7 +35,7 @@ impl JsModuleSccs {
 }
 
 /// Returns the strongly connected components of the JavaScript import graph.
-#[salsa::tracked(no_eq, returns(ref))]
+#[salsa::tracked(no_eq)]
 pub fn js_module_sccs(db: &dyn ModuleDb, generation: ModuleGraphGeneration) -> JsModuleSccs {
     let _ = generation.value(db);
 

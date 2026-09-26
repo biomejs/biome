@@ -185,7 +185,11 @@ impl CssImport {
     /// Resolves this `@import` of the CSS `module`.
     ///
     /// See [ResolutionMode::Css] for the resolution rules.
-    pub fn resolve_css(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+    pub fn resolve_css<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
         resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
     }
 }

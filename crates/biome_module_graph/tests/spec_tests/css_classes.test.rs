@@ -273,7 +273,7 @@ fn css_importers_and_parent_nodes_are_sorted_and_deduplicated() {
     );
 
     let leaf = db.module_for_path(Utf8Path::new("/leaf.js")).unwrap();
-    let tree = build_import_tree_for_js(&db, leaf).unwrap();
+    let tree = build_import_tree_for_js(&db, leaf).as_ref().unwrap();
     assert_eq!(
         tree.parent_components
             .iter()

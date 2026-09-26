@@ -7,14 +7,12 @@ use camino::Utf8PathBuf;
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedVueDirective {
-    #[returns(ref)]
     path: Utf8PathBuf,
-    #[returns(ref)]
     name: String,
 }
 
 /// Resolves a Vue custom directive from workspace-backed embedded data.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn resolve_vue_directive(
     db: &dyn LanguageDb,
     directive: InternedVueDirective<'_>,

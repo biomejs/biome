@@ -373,11 +373,8 @@ impl ServiceLanguage for CssLanguage {
 
 #[salsa::interned]
 struct CssFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -394,11 +391,8 @@ fn resolved_css_format_options<'db>(
 
 #[salsa::interned]
 struct CssAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

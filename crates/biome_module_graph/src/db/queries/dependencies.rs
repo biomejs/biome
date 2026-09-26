@@ -10,9 +10,9 @@ use biome_resolver::ResolverDb;
 use camino::Utf8Path;
 
 /// Returns the resolved dependencies of `module`.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn module_dependencies(db: &dyn ModuleDb, module: ModuleInfo) -> ModuleDependencies {
-    dependencies_of(db, module.path(db), &module.kind(db))
+    dependencies_of(db, module.path(db), module.kind(db))
 }
 
 fn dependencies_of(

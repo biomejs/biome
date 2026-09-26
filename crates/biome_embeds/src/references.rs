@@ -24,13 +24,11 @@ pub struct EmbeddedTypeReference {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedReference {
-    #[returns(ref)]
     path: Utf8PathBuf,
-    #[returns(ref)]
     name: TokenText,
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_value_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
     let parsed_source = db.parsed_source_for_path(reference.path(db));
     parsed_source.is_some_and(|parsed_source| {
@@ -43,7 +41,7 @@ pub fn is_value_reference_used(db: &dyn LanguageDb, reference: InternedReference
     })
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_type_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
     let parsed_source = db.parsed_source_for_path(reference.path(db));
     parsed_source.is_some_and(|parsed_source| {
@@ -56,7 +54,7 @@ pub fn is_type_reference_used(db: &dyn LanguageDb, reference: InternedReference<
     })
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
     let parsed_source = db.parsed_source_for_path(reference.path(db));
     parsed_source.is_some_and(|parsed_source| {
@@ -79,7 +77,7 @@ pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) 
 /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
 ///
 /// See also: https://svelte.dev/docs/svelte/stores
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_svelte_store_reference_used(
     db: &dyn LanguageDb,
     reference: InternedReference<'_>,
@@ -126,7 +124,7 @@ pub(crate) fn svelte_store_reference_name(reference_name: &str) -> Option<&str> 
 /// spelled in camelCase (e.g. `vHighlight`).
 ///
 /// See also: https://vuejs.org/guide/reusability/custom-directives.html
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_vue_directive_reference_used(
     db: &dyn LanguageDb,
     reference: InternedReference<'_>,

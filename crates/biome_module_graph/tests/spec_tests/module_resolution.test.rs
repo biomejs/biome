@@ -305,7 +305,7 @@ fn test_aliased_named_reexport_is_found_by_alias() {
     ));
     assert_eq!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "originalName", barrel)),
-        JsExportedSymbolLookup::Missing
+        &JsExportedSymbolLookup::Missing
     );
 }
 
@@ -347,11 +347,11 @@ fn test_find_symbol_behind_unresolvable_reexport_is_unknown() {
     let barrel = db.module_for_path(Utf8Path::new("/src/barrel.ts")).unwrap();
     assert_eq!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "missing", barrel)),
-        JsExportedSymbolLookup::Unknown
+        &JsExportedSymbolLookup::Unknown
     );
     assert_eq!(
         find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "absent", barrel)),
-        JsExportedSymbolLookup::Missing
+        &JsExportedSymbolLookup::Missing
     );
 }
 

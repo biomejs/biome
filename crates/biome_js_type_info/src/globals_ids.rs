@@ -10,7 +10,7 @@ use crate::{RawTypeId, TypeId};
 const PREDEFINED_TYPE_COUNT: usize = 89;
 
 /// Type ID that is known to index the predefined global resolver.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct GlobalTypeId(TypeId);
 
 impl GlobalTypeId {

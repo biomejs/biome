@@ -512,14 +512,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         };
                         self.for_on_demand_import(
                             module,
-                            &js_info,
+                            js_info,
                             remaining,
                             resolve_declarations_directly,
                         )
                     }
                     import_resolution @ (ImportResolution::FromTables { .. }
                     | ImportResolution::CycleFallback(_)) => {
-                        ResolutionCtx::new(self.db, module, &js_info, import_resolution)
+                        ResolutionCtx::new(self.db, module, js_info, import_resolution)
                     }
                 };
                 return Some(

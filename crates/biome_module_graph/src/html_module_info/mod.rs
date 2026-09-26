@@ -88,7 +88,11 @@ impl HtmlImport {
     ///
     /// Use this for the imports in `imported_stylesheets`. See
     /// [ResolutionMode::Css] for the resolution rules.
-    pub fn resolve_css(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+    pub fn resolve_css<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
         resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
     }
 
@@ -97,7 +101,11 @@ impl HtmlImport {
     ///
     /// Use this for the imports in `import_paths`. See
     /// [ResolutionMode::HtmlScript] for the resolution rules.
-    pub fn resolve_html(&self, db: &dyn ModuleDb, module: ModuleInfo) -> ResolvedSpecifier {
+    pub fn resolve_html<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
         resolve_module_import(db, module, &self.specifier, ResolutionMode::HtmlScript)
     }
 }

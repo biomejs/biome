@@ -252,7 +252,7 @@ fn classify_expression(
                                 let mut ctx = ResolutionCtx::new(
                                     db,
                                     state.module,
-                                    &js_info,
+                                    js_info,
                                     ImportResolution::on_demand(),
                                 );
                                 let Some(awaited) = ctx.resolve_await_expression(*return_ty) else {
@@ -373,7 +373,7 @@ fn classify_expression(
                         let mut ctx = ResolutionCtx::new(
                             db,
                             state.module,
-                            &js_info,
+                            js_info,
                             ImportResolution::on_demand(),
                         );
                         let mut ty = ctx.resolve_qualifier(&qualifier);
@@ -540,7 +540,7 @@ fn classify_expression(
                         };
                         if let Some(projection) = returned_call_projection
                             && let Some(returned_call) =
-                                returned_call_reference(&js_info, return_ty, function.is_async)
+                                returned_call_reference(js_info, return_ty, function.is_async)
                         {
                             ClassificationState {
                                 module: state.module,
@@ -553,7 +553,7 @@ fn classify_expression(
                             let mut ctx = ResolutionCtx::new(
                                 db,
                                 state.module,
-                                &js_info,
+                                js_info,
                                 ImportResolution::on_demand(),
                             );
                             let ty = ctx.resolve(return_ty);
@@ -772,7 +772,7 @@ fn classify_expression(
                             let mut ctx = ResolutionCtx::new(
                                 db,
                                 state.module,
-                                &js_info,
+                                js_info,
                                 ImportResolution::on_demand(),
                             );
                             return match is_array_of_promise_type(
@@ -795,7 +795,7 @@ fn classify_expression(
                             let mut ctx = ResolutionCtx::new(
                                 db,
                                 state.module,
-                                &js_info,
+                                js_info,
                                 ImportResolution::on_demand(),
                             );
                             let ty = ctx.resolve_raw_type_id(type_id);
@@ -961,7 +961,7 @@ fn classify_expression(
                         let mut ctx = ResolutionCtx::new(
                             db,
                             state.module,
-                            &js_info,
+                            js_info,
                             ImportResolution::on_demand(),
                         );
                         let target = ctx.resolve_raw_type_id(type_id);

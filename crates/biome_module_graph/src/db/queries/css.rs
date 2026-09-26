@@ -250,7 +250,7 @@ pub fn css_property_definitions<'db>(
 
 /// Returns `true` if the given CSS `class_name` is referenced in any
 /// JS or HTML file that transitively imports `css_path`.
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn is_class_referenced_by_importers<'db>(
     db: &'db dyn ModuleDb,
     class_name: SymbolFromModuleInfo<'db>,
@@ -395,7 +395,7 @@ pub fn build_import_tree_for_html(db: &dyn ModuleDb, module: ModuleInfo) -> Opti
 // #region QUERY HELPER FUNCTIONS
 
 /// Checks if a class is used in a file or any of its imported components (transitively).
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn is_class_used_in_component_tree<'db>(
     db: &'db dyn ModuleDb,
     module: ModuleInfo,

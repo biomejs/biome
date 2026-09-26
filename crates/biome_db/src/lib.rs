@@ -22,16 +22,14 @@ pub trait Db: salsa::Database {
 #[salsa::input]
 #[derive(Debug)]
 pub struct ParsedSource {
-    #[returns(ref)]
     pub path: Utf8PathBuf,
 
-    #[returns(ref)]
     #[no_eq]
     pub parsed: AnyParse,
 
+    #[returns(copy)]
     pub document_source_index: usize,
 
-    #[returns(ref)]
     pub snippets: Vec<ParsedSnippet>,
 }
 
@@ -77,7 +75,6 @@ impl ParsedSource {
 #[salsa::input]
 #[derive(Debug)]
 pub struct ParsedSnippet {
-    #[returns(ref)]
     #[no_eq]
     pub parsed: AnyParse,
 
@@ -97,6 +94,7 @@ pub struct ParsedSnippet {
     pub content_offset: TextSize,
 
     /// The file source of the document
+    #[returns(copy)]
     pub document_source_index: usize,
 }
 

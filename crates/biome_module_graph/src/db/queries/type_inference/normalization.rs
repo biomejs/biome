@@ -22,7 +22,7 @@ use biome_js_type_info::interned_types::TypeData as InferredTypeData;
 /// A local-handle cycle retains the repeated symbolic handle. A Salsa query
 /// cycle, invalid structural rebuild, or exhausted normalization budget returns
 /// [`InferredTypeData::Unknown`].
-#[salsa::tracked(cycle_result=normalize_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=normalize_type_cycle_result)]
 pub fn normalize_type<'db>(
     db: &'db dyn ModuleDb,
     input: NormalizeTypeInput<'db>,

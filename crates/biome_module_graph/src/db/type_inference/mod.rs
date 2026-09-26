@@ -32,14 +32,14 @@ pub(in crate::db) use promise_classification::{
 pub(in crate::db) use resolver::{ImportResolution, ResolutionCtx, resolve_raw_types};
 
 /// Type information attached to one binding declaration.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::SalsaValue)]
 pub struct BindingTypeData<'db> {
     /// Inferred type of the declared binding.
     pub ty: InferredTypeData<'db>,
 }
 
 /// Resolved type tables produced for one JavaScript or TypeScript module.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, salsa::SalsaValue)]
 pub struct InferredModuleTypes<'db> {
     /// Stable key stored in local type handles owned by this module.
     pub module_key: ModuleKey,
@@ -48,60 +48,15 @@ pub struct InferredModuleTypes<'db> {
     /// Resolved types indexed by [`LocalTypeId`].
     pub types: Box<[InferredTypeData<'db>]>,
     /// Expression types indexed by their source ranges.
+    // SAFETY: `TextRange` is two integers and doesn't implement `SalsaValue`
+    // only because it's defined outside Salsa. The values are Salsa handles,
+    // which use `'db` only as a brand.
+    #[salsa_value(unsafe(prove_safe_to_retain_manually))]
     pub expressions: FxHashMap<TextRange, InferredTypeData<'db>>,
     /// Binding types indexed by declaration ranges.
+    // SAFETY: See `expressions`.
+    #[salsa_value(unsafe(prove_safe_to_retain_manually))]
     pub binding_type_data: FxHashMap<TextRange, BindingTypeData<'db>>,
-}
-
-// SAFETY: None of the fields contains a Rust reference tied to `'db`.
-// `InferredTypeData<'db>` uses the lifetime only to brand Salsa handles, whose
-// `Update` implementations support comparison across revisions; all containers
-// and map keys are owned. Each field is updated exactly once through its own
-// `Update` implementation, and `maybe_update_range_map` either replaces an
-// owned map or delegates updates to the values under an unchanged set of keys.
-unsafe impl salsa::Update for InferredModuleTypes<'_> {
-    unsafe fn maybe_update(old_pointer: *mut Self, new_value: Self) -> bool {
-        let Self {
-            module_key,
-            named_type_ids,
-            types,
-            expressions,
-            binding_type_data,
-        } = new_value;
-        let mut changed = false;
-        changed |=
-            unsafe { salsa::Update::maybe_update(&raw mut (*old_pointer).module_key, module_key) };
-        changed |= unsafe {
-            salsa::Update::maybe_update(&raw mut (*old_pointer).named_type_ids, named_type_ids)
-        };
-        changed |= unsafe { salsa::Update::maybe_update(&raw mut (*old_pointer).types, types) };
-        changed |=
-            unsafe { maybe_update_range_map(&raw mut (*old_pointer).expressions, expressions) };
-        changed |= unsafe {
-            maybe_update_range_map(&raw mut (*old_pointer).binding_type_data, binding_type_data)
-        };
-        changed
-    }
-}
-
-unsafe fn maybe_update_range_map<V: salsa::Update>(
-    old_pointer: *mut FxHashMap<TextRange, V>,
-    new_map: FxHashMap<TextRange, V>,
-) -> bool {
-    let old_map = unsafe { &mut *old_pointer };
-    if old_map.len() != new_map.len() || old_map.keys().any(|key| !new_map.contains_key(key)) {
-        *old_map = new_map;
-        return true;
-    }
-
-    let mut changed = false;
-    for (key, new_value) in new_map {
-        let old_value = old_map
-            .get_mut(&key)
-            .expect("range keys were checked above");
-        changed |= unsafe { V::maybe_update(old_value, new_value) };
-    }
-    changed
 }
 
 impl<'db> InferredModuleTypes<'db> {
@@ -208,11 +163,11 @@ pub(super) fn infer_module_types_cycle_result<'db>(
     }
 
     record_cycle_recovery();
-    let blocked = inference_scc(db, module, &js_info);
+    let blocked = inference_scc(db, module, js_info);
     Some(resolve_raw_types(
         db,
         module,
-        &js_info,
+        js_info,
         ImportResolution::CycleFallback(&blocked),
     ))
 }
@@ -233,7 +188,7 @@ fn inference_scc(
     // reverse graph needed to determine which modules can reach it again.
     let mut reachable = FxHashSet::default();
     let mut reverse = FxHashMap::<ModuleInfo, Vec<ModuleInfo>>::default();
-    let mut pending = vec![(root, root_info.clone())];
+    let mut pending = vec![(root, root_info)];
     reachable.insert(root);
 
     while let Some((source, source_info)) = pending.pop() {
