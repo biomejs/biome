@@ -240,6 +240,107 @@ fn resolved_import(
 
 #[cfg(feature = "module_graph")]
 #[test]
+fn watcher_updates_retry_when_a_write_is_pending() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+    const DEPENDENCY: &str = "/project/node_modules/dependency/index.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    fs.insert(DEPENDENCY.into(), b"export const value = 1;");
+
+    // The retained read keeps the setter pending, so the watcher update must
+    // read the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    let watcher_result = std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let watcher_update =
+            scope.spawn(|| watcher(&workspace).index_file(project_key, BiomePath::new(DEPENDENCY)));
+        std::thread::sleep(Duration::from_millis(50));
+        drop(retained_db);
+
+        update.join().expect("the setter completes");
+        watcher_update.join()
+    });
+
+    assert!(
+        watcher_result
+            .expect("the watcher update must not unwind")
+            .is_ok(),
+        "the watcher update succeeds after the write completes"
+    );
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "dependency"),
+        Some(Utf8PathBuf::from(DEPENDENCY))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn renaming_a_manifest_indexes_newly_reachable_dependencies() {
+    const INDEX: &str = "/project/src/index.ts";
+    const DECLARATION: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"compilerOptions":{"paths":{"dependency":["./stub.d.ts"]}}}"#,
+    );
+    fs.insert(
+        "/project/stub.d.ts".into(),
+        b"export declare const value: number;",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"name":"dependency","types":"index.d.ts"}"#,
+    );
+    fs.insert(DECLARATION.into(), b"export declare const value: string;");
+    fs.insert(INDEX.into(), b"import { value } from 'dependency';");
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from("/project/stub.d.ts"))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new(DECLARATION))
+            .is_none()
+    );
+
+    // The watcher reports the source of a rename, and paths that no longer
+    // exist, through `unload_path`.
+    fs.remove(Utf8Path::new("/project/tsconfig.json"));
+    watcher(&workspace)
+        .unload_path(Utf8Path::new("/project/tsconfig.json"), project_key)
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from(DECLARATION))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new(DECLARATION))
+            .is_some(),
+        "the newly reachable declaration file is indexed"
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
 fn only_the_watcher_refreshes_resolver_path_info() {
     let fs = Arc::new(MemoryFileSystem::default());
     fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);

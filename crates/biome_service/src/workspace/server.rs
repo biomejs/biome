@@ -2279,7 +2279,8 @@ impl WorkspaceServerWithDb<'_> {
     /// Refreshes the resolver path info of `path`, and of the known paths inside
     /// it, after the watcher reported a change.
     ///
-    /// Returns whether the change affects a manifest.
+    /// Returns whether the change affects a manifest: `path` itself, or a
+    /// manifest inside it.
     #[cfg(feature = "module_graph")]
     fn sync_resolver_path_info(&self, path: &Utf8Path) -> bool {
         let mut changes = self.db_state.resolver_changes_within(path);
@@ -2299,8 +2300,13 @@ impl WorkspaceServerWithDb<'_> {
                     .resolver_changes_in_visible_node_modules(package_path),
             );
         }
+        // A removed or created directory may contain manifests, which only
+        // the paths inside it identify.
+        let manifest_changed = changes
+            .iter()
+            .any(|(path, _)| self.is_manifest_for_resolution(&BiomePath::new(path)));
         self.db_state.sync_resolver_paths(changes);
-        self.is_manifest_for_resolution(&BiomePath::new(path))
+        manifest_changed
     }
 
     /// Indexes the dependencies that became resolvable after a manifest
@@ -4561,9 +4567,11 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     }
 
     fn sync_path_info(&self, path: &Utf8Path) -> bool {
+        // The watcher has no cancellation boundary of its own, and a
+        // concurrent client update can cancel the database reads.
         #[cfg(feature = "module_graph")]
         {
-            self.sync_resolver_path_info(path)
+            retry_on_pending_write(|| self.sync_resolver_path_info(path))
         }
         #[cfg(not(feature = "module_graph"))]
         {
@@ -4578,7 +4586,7 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
     ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
         #[cfg(feature = "module_graph")]
         {
-            self.index_new_dependencies(project_key)
+            retry_on_pending_write(|| self.index_new_dependencies(project_key))
         }
         #[cfg(not(feature = "module_graph"))]
         {

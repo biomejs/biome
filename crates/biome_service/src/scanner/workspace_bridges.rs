@@ -114,9 +114,10 @@ pub(crate) trait WorkspaceScannerBridge: Send + Sync + RefUnwindSafe {
     /// Refreshes the path info of `path` and of the known paths inside it,
     /// after the watcher reported a change.
     ///
-    /// Returns whether the change affects a manifest. Once the change is
-    /// indexed, the dependencies that became reachable must then be indexed
-    /// using [`WorkspaceScannerBridge::index_new_module_dependencies()`].
+    /// Returns whether the change affects a manifest: `path` itself, or a
+    /// manifest inside it. Once the change is indexed, the dependencies that
+    /// became reachable must then be indexed using
+    /// [`WorkspaceScannerBridge::index_new_module_dependencies()`].
     fn sync_path_info(&self, path: &Utf8Path) -> bool;
 
     /// Indexes the dependencies that became reachable after a manifest
@@ -306,14 +307,19 @@ where
         Ok(diagnostics)
     }
 
-    #[inline]
     fn index_folder(&self, path: &Utf8Path) -> Result<Vec<Diagnostic>, WorkspaceError> {
         let Some(project_key) = self.find_project_for_path(path) else {
             return Ok(vec![]); // file events outside our projects can be safely ignored.
         };
 
-        self.workspace.sync_path_info(path);
-        self.scanner.index_folder(self.workspace, project_key, path)
+        let manifest_changed = self.workspace.sync_path_info(path);
+        let mut diagnostics = self
+            .scanner
+            .index_folder(self.workspace, project_key, path)?;
+        if manifest_changed {
+            diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
+        Ok(diagnostics)
     }
 
     #[inline]
@@ -343,8 +349,12 @@ where
         path: &Utf8Path,
         project_key: ProjectKey,
     ) -> Result<Vec<Diagnostic>, WorkspaceError> {
-        let diagnostics = self.workspace.unload_path(path, project_key)?;
-        self.workspace.sync_path_info(path);
+        let mut diagnostics = self.workspace.unload_path(path, project_key)?;
+        // Renames and directory removals also unload manifests, which may make
+        // other dependencies reachable.
+        if self.workspace.sync_path_info(path) {
+            diagnostics.extend(self.workspace.index_new_module_dependencies(project_key)?);
+        }
         Ok(diagnostics)
     }
 
