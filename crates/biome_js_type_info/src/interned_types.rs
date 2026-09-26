@@ -36,6 +36,22 @@ pub type ReferenceResolver<'db, 'resolver> =
 const MAX_GENERIC_REPLACEMENT_STEPS: usize = 64;
 const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 
+/// Expands `local` and any supporting-type handle that it resolves to.
+///
+/// Supporting types are ordered so that each only refers to earlier entries,
+/// so repeated expansion terminates.
+#[inline(never)]
+fn expand_global_local_handle<'db>(
+    db: &'db dyn TypeDb,
+    local: crate::GlobalTypeInput,
+) -> TypeData<'db> {
+    let mut ty = local.expand(db);
+    while let TypeData::GlobalLocal(local) = ty {
+        ty = local.expand(db);
+    }
+    ty
+}
+
 pub fn well_known_symbol_name(ty: TypeData) -> Option<Text> {
     let TypeData::GlobalType(id) = ty else {
         return None;
@@ -839,22 +855,24 @@ impl<'db> TypeData<'db> {
     /// definition so that it can find the static `resolve` member. Only that
     /// lookup uses the expanded definition; the canonical handle remains
     /// unchanged elsewhere.
+    #[inline]
     pub fn expand_canonical_global(self, db: &'db dyn TypeDb) -> Self {
-        match self.expand_global_local(db) {
+        match self {
             Self::GlobalType(id) => crate::global_types(db).get(id),
-            ty => ty,
+            Self::GlobalLocal(_) => self.expand_global_local(db).expand_canonical_global(db),
+            _ => self,
         }
     }
 
     /// Replaces a handle to a global's supporting type with its data.
     ///
-    /// Other types are returned unchanged. Supporting types are ordered so that
-    /// each only refers to earlier entries, so repeated expansion terminates.
-    pub fn expand_global_local(mut self, db: &'db dyn TypeDb) -> Self {
-        while let Self::GlobalLocal(local) = self {
-            self = local.expand(db);
+    /// Other types are returned unchanged.
+    #[inline]
+    pub fn expand_global_local(self, db: &'db dyn TypeDb) -> Self {
+        match self {
+            Self::GlobalLocal(local) => expand_global_local_handle(db, local),
+            _ => self,
         }
-        self
     }
 
     /// Resolves a canonical global handle unless doing so would discard an
@@ -877,17 +895,24 @@ impl<'db> TypeData<'db> {
     /// ID. `kind` is represented by an internal global helper whose definition
     /// carries no identity that structural operations preserve, so the helper
     /// expands to the union of string literals that `typeof` can return.
+    #[inline]
     pub fn expand_structural_global(self, db: &'db dyn TypeDb) -> Self {
-        let handle = self.expand_global_local(db);
-        let Self::GlobalType(id) = handle else {
-            return handle;
-        };
+        match self {
+            Self::GlobalType(id) => self.expand_structural_global_handle(db, id),
+            Self::GlobalLocal(_) => self.expand_global_local(db).expand_structural_global(db),
+            _ => self,
+        }
+    }
+
+    /// Expands the canonical global handle `self`, whose ID is `id`, as
+    /// described by [`Self::expand_structural_global`].
+    fn expand_structural_global_handle(self, db: &'db dyn TypeDb, id: GlobalTypeId) -> Self {
         match crate::global_types(db).get(id) {
             Self::Class(_)
             | Self::Interface(_)
             | Self::Module(_)
             | Self::Namespace(_)
-            | Self::Object(_) => handle,
+            | Self::Object(_) => self,
             expanded @ (Self::Unknown
             | Self::Global
             | Self::GlobalType(_)
@@ -1191,7 +1216,7 @@ pub(crate) struct TypeDataSlots<'db> {
 /// replacements extracted from one parent from being validated against another.
 pub(crate) struct TypeDataSlotRebuilder<'db> {
     parent: TypeData<'db>,
-    slot_count: usize,
+    slots: Vec<TypeData<'db>>,
 }
 
 impl<'db> TypeDataSlots<'db> {
@@ -1293,12 +1318,11 @@ impl<'db> TypeDataSlots<'db> {
         self.slots.iter().copied()
     }
 
-    pub(crate) fn into_parts(self) -> (TypeDataSlotRebuilder<'db>, Vec<TypeData<'db>>) {
-        let rebuilder = TypeDataSlotRebuilder {
+    pub(crate) fn into_rebuilder(self) -> TypeDataSlotRebuilder<'db> {
+        TypeDataSlotRebuilder {
             parent: self.parent,
-            slot_count: self.slots.len(),
-        };
-        (rebuilder, self.slots)
+            slots: self.slots,
+        }
     }
 
     /// Pattern bindings precede the parameter type during reconstruction.
@@ -1427,8 +1451,7 @@ impl<'db> TypeDataSlots<'db> {
         db: &'db dyn TypeDb,
         replacements: Vec<TypeData<'db>>,
     ) -> TypeTransformResult<TypeData<'db>> {
-        let (rebuilder, _) = self.into_parts();
-        rebuilder.rebuild(db, replacements)
+        self.into_rebuilder().rebuild(db, replacements)
     }
 }
 
@@ -1443,7 +1466,46 @@ impl<'db> IntoIterator for TypeDataSlots<'db> {
 
 impl<'db> TypeDataSlotRebuilder<'db> {
     pub(crate) fn len(&self) -> usize {
-        self.slot_count
+        self.slots.len()
+    }
+
+    /// Returns the slots extracted from the parent, in rebuild order.
+    pub(crate) fn slots(&self) -> &[TypeData<'db>] {
+        &self.slots
+    }
+
+    /// Rebuilds the parent like [`Self::rebuild`], but returns it unchanged
+    /// when every replacement equals its original slot and rebuilding would
+    /// not normalize it.
+    pub(crate) fn rebuild_if_changed(
+        self,
+        db: &'db dyn TypeDb,
+        replacements: Vec<TypeData<'db>>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        if replacements == self.slots && !self.rebuild_normalizes(db) {
+            return TypeTransformResult::Transformed(self.parent);
+        }
+        self.rebuild(db, replacements)
+    }
+
+    /// Returns whether rebuilding the parent from its own slots can produce a
+    /// different type.
+    ///
+    /// Rebuilding flattens and deduplicates unions and intersections, and
+    /// collapses an instance without type arguments whose target is an
+    /// instance or a union.
+    fn rebuild_normalizes(&self, db: &'db dyn TypeDb) -> bool {
+        match self.parent {
+            TypeData::Union(_) | TypeData::Intersection(_) => true,
+            TypeData::InstanceOf(instance) => {
+                instance.type_parameters(db).is_empty()
+                    && matches!(
+                        instance.ty(db),
+                        TypeData::InstanceOf(_) | TypeData::Union(_)
+                    )
+            }
+            _ => false,
+        }
     }
 
     pub(crate) fn rebuild(
@@ -1451,7 +1513,7 @@ impl<'db> TypeDataSlotRebuilder<'db> {
         db: &'db dyn TypeDb,
         replacements: Vec<TypeData<'db>>,
     ) -> TypeTransformResult<TypeData<'db>> {
-        TypeDataSlotReplacements::new(replacements, self.slot_count)
+        TypeDataSlotReplacements::new(replacements, self.slots.len())
             .and_then(|replacements| replacements.rebuild(db, self.parent))
             .map_or(
                 TypeTransformResult::InvalidRebuild,
