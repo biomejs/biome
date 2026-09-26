@@ -31,7 +31,9 @@ use biome_html_parser::{HtmlParse, HtmlParserOptions};
 use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::TypeData;
-use biome_languages::{DocumentFileSource, JsonFileSource};
+use biome_languages::DocumentFileSource;
+#[cfg(feature = "module_graph")]
+use biome_languages::JsonFileSource;
 #[cfg(feature = "module_graph")]
 use biome_module_graph::ModuleInfoKind;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
@@ -63,7 +65,6 @@ use json_comments::StripComments;
 use similar::{DiffableStr, TextDiff};
 use std::ffi::c_int;
 use std::fmt::Write;
-#[cfg(feature = "module_graph")]
 use std::sync::{Arc, Once};
 
 pub fn scripts_from_json(extension: &str, input_code: &str) -> Option<Vec<String>> {
