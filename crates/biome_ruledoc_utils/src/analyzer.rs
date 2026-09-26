@@ -477,8 +477,10 @@ fn extract_html_embedded_js<'a>(
                     text: &code[range],
                     offset: range.start(),
                     file_source: JsFileSource::ts().with_embedding_kind(JsEmbeddingKind::Astro {
+                        content_offset: 0.into(),
                         frontmatter: true,
                         is_class_attribute: false,
+                        is_class_list_attribute: false,
                     }),
                 });
             }
@@ -592,8 +594,10 @@ fn extract_html_embedded_js<'a>(
 
             let file_source = if host_file_source.is_astro() {
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Astro {
+                    content_offset: 0.into(),
                     frontmatter: false,
                     is_class_attribute,
+                    is_class_list_attribute: false,
                 })
             } else if host_file_source.is_svelte() {
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Svelte {

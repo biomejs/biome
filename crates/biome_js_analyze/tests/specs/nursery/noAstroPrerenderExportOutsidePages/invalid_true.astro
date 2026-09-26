@@ -1,0 +1,35 @@
+---
+// should generate diagnostics
+export const prerender = true;
+export let prerender;
+export var prerender = getValue();
+export const prerender: boolean = value;
+export const other = true, prerender = false;
+export const { prerender } = Astro.props;
+export const { nested: { prerender } } = Astro.props;
+export const [prerender] = values;
+export const [first, { prerender }] = values;
+export const pr\u0065render = true;
+
+const localValue = true;
+export { prerender };
+export { localValue as prerender };
+export { localValue as pr\u0065render };
+export { localValue as "prerender" };
+export { localValue as "pr\u0065render" };
+
+export { prerender } from "./config";
+export { value as prerender } from "./config";
+export { value as pr\u0065render } from "./config";
+export { value as "prerender" } from "./config";
+export { value as "pr\u0065render" } from "./config";
+export * as prerender from "./config";
+export * as pr\u0065render from "./config";
+export * as "prerender" from "./config";
+export * as "pr\u0065render" from "./config";
+
+export {
+    first as prerender,
+    second as "pr\u0065render",
+} from "./config";
+---

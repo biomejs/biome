@@ -110,9 +110,16 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 // Astro directives: class:list={...}, define:vars={...}, etc.
                 if let Some(directive) = AnyAstroDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
+                    && let is_class_list_attribute = directive
+                        .as_astro_class_directive()
+                        .and_then(|directive| directive.value().ok())
+                        .and_then(|value| value.name().ok())
+                        .and_then(|name| name.value_token().ok())
+                        .is_some_and(|name| name.text_trimmed() == "list")
                     && let Some(candidate) = build_attribute_expression_candidate(
                         &initializer,
-                        directive.as_astro_class_directive().is_some(),
+                        is_class_list_attribute,
+                        is_class_list_attribute,
                     )
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -126,7 +133,10 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                         attr.name()
                             .ok()
                             .and_then(|name| name.value_token().ok())
-                            .is_some_and(|token| token.text_trimmed() == "class"),
+                            .is_some_and(|token| {
+                                matches!(token.text_trimmed(), "class" | "className")
+                            }),
+                        false,
                     )
                 {
                     ctx.parse_and_push(&candidate, &doc_file_source, None, &mut nodes);
@@ -383,6 +393,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                             .ok()
                             .and_then(|name| name.value_token().ok())
                             .is_some_and(|token| token.text_trimmed() == "class"),
+                        false,
                     )
                 {
                     ctx.parse_and_push(
@@ -652,7 +663,7 @@ fn build_svelte_directive_candidates(directive: &AnySvelteDirective) -> Vec<Embe
 
     match initializer {
         AnySvelteDirectiveInitializerClause::HtmlAttributeInitializerClause(initializer) => {
-            build_attribute_expression_candidate(&initializer, false)
+            build_attribute_expression_candidate(&initializer, false, false)
                 .into_iter()
                 .collect()
         }
@@ -693,6 +704,7 @@ fn build_text_expression_directive_candidate(
         },
         is_event_handler: false,
         is_class_attribute: false,
+        is_class_list_attribute: false,
     })
 }
 
@@ -704,6 +716,7 @@ fn build_text_expression_directive_candidate(
 fn build_attribute_expression_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_class_attribute: bool,
+    is_class_list_attribute: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let text_expression = value_node.as_html_attribute_single_text_expression()?;
@@ -719,6 +732,7 @@ fn build_attribute_expression_candidate(
         },
         is_event_handler: false,
         is_class_attribute,
+        is_class_list_attribute,
     })
 }
 
@@ -794,6 +808,7 @@ fn build_vue_directive_candidate(
         },
         is_event_handler,
         is_class_attribute,
+        is_class_list_attribute: false,
     })
 }
 
@@ -1110,8 +1125,10 @@ fn parse_matched_embed(
             let is_source_level = match candidate {
                 EmbedCandidate::Frontmatter { .. } => {
                     js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                        content_offset: content.content_offset,
                         frontmatter: true,
                         is_class_attribute: false,
+                        is_class_list_attribute: false,
                     });
                     true
                 }
@@ -1137,8 +1154,10 @@ fn parse_matched_embed(
                 EmbedCandidate::TextExpression { block_kind, .. } => {
                     if ctx.host_file_source.is_astro() {
                         js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                            content_offset: content.content_offset,
                             frontmatter: false,
                             is_class_attribute: false,
+                            is_class_list_attribute: false,
                         });
                     } else if ctx.host_file_source.is_svelte() {
                         let embedding_kind = match block_kind {
@@ -1172,14 +1191,17 @@ fn parse_matched_embed(
                 EmbedCandidate::Directive {
                     is_event_handler,
                     is_class_attribute,
+                    is_class_list_attribute,
                     ..
                 } => {
                     match ctx.host_file_source.variant() {
                         HtmlVariant::Standard(_) => {}
                         HtmlVariant::Astro => {
                             js_source = js_source.with_embedding_kind(JsEmbeddingKind::Astro {
+                                content_offset: content.content_offset,
                                 frontmatter: false,
                                 is_class_attribute: *is_class_attribute,
+                                is_class_list_attribute: *is_class_list_attribute,
                             });
                         }
                         HtmlVariant::Vue => {

@@ -1,0 +1,587 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_true.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+export const prerender = true;
+export let prerender;
+export var prerender = getValue();
+export const prerender: boolean = value;
+export const other = true, prerender = false;
+export const { prerender } = Astro.props;
+export const { nested: { prerender } } = Astro.props;
+export const [prerender] = values;
+export const [first, { prerender }] = values;
+export const pr\u0065render = true;
+
+const localValue = true;
+export { prerender };
+export { localValue as prerender };
+export { localValue as pr\u0065render };
+export { localValue as "prerender" };
+export { localValue as "pr\u0065render" };
+
+export { prerender } from "./config";
+export { value as prerender } from "./config";
+export { value as pr\u0065render } from "./config";
+export { value as "prerender" } from "./config";
+export { value as "pr\u0065render" } from "./config";
+export * as prerender from "./config";
+export * as pr\u0065render from "./config";
+export * as "prerender" from "./config";
+export * as "pr\u0065render" from "./config";
+
+export {
+    first as prerender,
+    second as "pr\u0065render",
+} from "./config";
+---
+
+```
+
+# Diagnostics
+```
+invalid_true.astro:3:14 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    1 │ ---
+    2 │ // should generate diagnostics
+  > 3 │ export const prerender = true;
+      │              ^^^^^^^^^
+    4 │ export let prerender;
+    5 │ export var prerender = getValue();
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:4:12 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    2 │ // should generate diagnostics
+    3 │ export const prerender = true;
+  > 4 │ export let prerender;
+      │            ^^^^^^^^^
+    5 │ export var prerender = getValue();
+    6 │ export const prerender: boolean = value;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:5:12 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    3 │ export const prerender = true;
+    4 │ export let prerender;
+  > 5 │ export var prerender = getValue();
+      │            ^^^^^^^^^
+    6 │ export const prerender: boolean = value;
+    7 │ export const other = true, prerender = false;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:6:14 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    4 │ export let prerender;
+    5 │ export var prerender = getValue();
+  > 6 │ export const prerender: boolean = value;
+      │              ^^^^^^^^^
+    7 │ export const other = true, prerender = false;
+    8 │ export const { prerender } = Astro.props;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:7:28 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    5 │ export var prerender = getValue();
+    6 │ export const prerender: boolean = value;
+  > 7 │ export const other = true, prerender = false;
+      │                            ^^^^^^^^^
+    8 │ export const { prerender } = Astro.props;
+    9 │ export const { nested: { prerender } } = Astro.props;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:8:16 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+     6 │ export const prerender: boolean = value;
+     7 │ export const other = true, prerender = false;
+   > 8 │ export const { prerender } = Astro.props;
+       │                ^^^^^^^^^
+     9 │ export const { nested: { prerender } } = Astro.props;
+    10 │ export const [prerender] = values;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:9:26 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+     7 │ export const other = true, prerender = false;
+     8 │ export const { prerender } = Astro.props;
+   > 9 │ export const { nested: { prerender } } = Astro.props;
+       │                          ^^^^^^^^^
+    10 │ export const [prerender] = values;
+    11 │ export const [first, { prerender }] = values;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:10:15 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+     8 │ export const { prerender } = Astro.props;
+     9 │ export const { nested: { prerender } } = Astro.props;
+  > 10 │ export const [prerender] = values;
+       │               ^^^^^^^^^
+    11 │ export const [first, { prerender }] = values;
+    12 │ export const pr\u0065render = true;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:11:24 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+     9 │ export const { nested: { prerender } } = Astro.props;
+    10 │ export const [prerender] = values;
+  > 11 │ export const [first, { prerender }] = values;
+       │                        ^^^^^^^^^
+    12 │ export const pr\u0065render = true;
+    13 │ 
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:12:14 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    10 │ export const [prerender] = values;
+    11 │ export const [first, { prerender }] = values;
+  > 12 │ export const pr\u0065render = true;
+       │              ^^^^^^^^^^^^^^
+    13 │ 
+    14 │ const localValue = true;
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:15:10 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    14 │ const localValue = true;
+  > 15 │ export { prerender };
+       │          ^^^^^^^^^
+    16 │ export { localValue as prerender };
+    17 │ export { localValue as pr\u0065render };
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:16:24 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    14 │ const localValue = true;
+    15 │ export { prerender };
+  > 16 │ export { localValue as prerender };
+       │                        ^^^^^^^^^
+    17 │ export { localValue as pr\u0065render };
+    18 │ export { localValue as "prerender" };
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:17:24 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    15 │ export { prerender };
+    16 │ export { localValue as prerender };
+  > 17 │ export { localValue as pr\u0065render };
+       │                        ^^^^^^^^^^^^^^
+    18 │ export { localValue as "prerender" };
+    19 │ export { localValue as "pr\u0065render" };
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:18:24 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    16 │ export { localValue as prerender };
+    17 │ export { localValue as pr\u0065render };
+  > 18 │ export { localValue as "prerender" };
+       │                        ^^^^^^^^^^^
+    19 │ export { localValue as "pr\u0065render" };
+    20 │ 
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:19:24 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    17 │ export { localValue as pr\u0065render };
+    18 │ export { localValue as "prerender" };
+  > 19 │ export { localValue as "pr\u0065render" };
+       │                        ^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ export { prerender } from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:21:10 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    19 │ export { localValue as "pr\u0065render" };
+    20 │ 
+  > 21 │ export { prerender } from "./config";
+       │          ^^^^^^^^^
+    22 │ export { value as prerender } from "./config";
+    23 │ export { value as pr\u0065render } from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:22:19 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    21 │ export { prerender } from "./config";
+  > 22 │ export { value as prerender } from "./config";
+       │                   ^^^^^^^^^
+    23 │ export { value as pr\u0065render } from "./config";
+    24 │ export { value as "prerender" } from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:23:19 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    21 │ export { prerender } from "./config";
+    22 │ export { value as prerender } from "./config";
+  > 23 │ export { value as pr\u0065render } from "./config";
+       │                   ^^^^^^^^^^^^^^
+    24 │ export { value as "prerender" } from "./config";
+    25 │ export { value as "pr\u0065render" } from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:24:19 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    22 │ export { value as prerender } from "./config";
+    23 │ export { value as pr\u0065render } from "./config";
+  > 24 │ export { value as "prerender" } from "./config";
+       │                   ^^^^^^^^^^^
+    25 │ export { value as "pr\u0065render" } from "./config";
+    26 │ export * as prerender from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:25:19 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    23 │ export { value as pr\u0065render } from "./config";
+    24 │ export { value as "prerender" } from "./config";
+  > 25 │ export { value as "pr\u0065render" } from "./config";
+       │                   ^^^^^^^^^^^^^^^^
+    26 │ export * as prerender from "./config";
+    27 │ export * as pr\u0065render from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:26:13 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    24 │ export { value as "prerender" } from "./config";
+    25 │ export { value as "pr\u0065render" } from "./config";
+  > 26 │ export * as prerender from "./config";
+       │             ^^^^^^^^^
+    27 │ export * as pr\u0065render from "./config";
+    28 │ export * as "prerender" from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:27:13 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    25 │ export { value as "pr\u0065render" } from "./config";
+    26 │ export * as prerender from "./config";
+  > 27 │ export * as pr\u0065render from "./config";
+       │             ^^^^^^^^^^^^^^
+    28 │ export * as "prerender" from "./config";
+    29 │ export * as "pr\u0065render" from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:28:13 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    26 │ export * as prerender from "./config";
+    27 │ export * as pr\u0065render from "./config";
+  > 28 │ export * as "prerender" from "./config";
+       │             ^^^^^^^^^^^
+    29 │ export * as "pr\u0065render" from "./config";
+    30 │ 
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:29:13 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    27 │ export * as pr\u0065render from "./config";
+    28 │ export * as "prerender" from "./config";
+  > 29 │ export * as "pr\u0065render" from "./config";
+       │             ^^^^^^^^^^^^^^^^
+    30 │ 
+    31 │ export {
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:32:14 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    31 │ export {
+  > 32 │     first as prerender,
+       │              ^^^^^^^^^
+    33 │     second as "pr\u0065render",
+    34 │ } from "./config";
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_true.astro:33:15 lint/nursery/noAstroPrerenderExportOutsidePages ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prerender export has no effect on Astro rendering outside a pages directory.
+  
+    31 │ export {
+    32 │     first as prerender,
+  > 33 │     second as "pr\u0065render",
+       │               ^^^^^^^^^^^^^^^^
+    34 │ } from "./config";
+    35 │ ---
+  
+  i Astro only applies prerender to page routes and endpoints.
+  
+  i Move this export to the relevant route or remove it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
