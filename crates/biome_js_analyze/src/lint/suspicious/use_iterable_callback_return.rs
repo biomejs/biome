@@ -1,27 +1,25 @@
 use crate::ControlFlowGraph;
-use crate::services::control_flow::JsControlFlowGraph;
+use crate::utils::iterable::{ITERABLE_METHOD_INFOS, IterableMethodInfo};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
-use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
-use biome_control_flow::builder::ROOT_BLOCK_ID;
-use biome_control_flow::{ExceptionHandlerKind, InstructionKind};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsFunctionBody, JsArrowFunctionExpression, JsCallArgumentList, JsCallArguments,
-    JsCallExpression, JsFunctionExpression, JsReturnStatement, global_identifier,
+    JsCallExpression, JsFunctionExpression, global_identifier,
 };
-use biome_rowan::{AstNode, AstSeparatedList, NodeOrToken, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions;
-use roaring::RoaringBitmap;
-use rustc_hash::FxHashMap;
-use std::io;
-use std::sync::LazyLock;
 
 declare_lint_rule! {
     /// Enforce consistent return values in iterable callbacks.
     ///
     /// This rule ensures that callbacks passed to certain iterable methods either always return a
     /// value or never return a value, depending on the method's requirements.
+    ///
+    /// This rule relies on static analysis. For a type-aware alternative,
+    /// use [`useTypedIterableCallbackReturn`](https://biomejs.dev/linter/rules/use-typed-iterable-callback-return/).
+    /// That rule allows callbacks that return `void`.
+    /// It also checks the object's type, so a custom method named `every` is not treated as an array method.
     ///
     /// Note that async and generator callbacks are ignored as they always return `Promise` or
     /// `Generator` respectively.
@@ -75,9 +73,6 @@ declare_lint_rule! {
     /// [].map(() => {
     ///     return 1; // Correctly returns a value
     /// });
-    /// ```
-    ///
-    /// ```js
     /// [].forEach(() => void null); // Void return value, which doesn't trigger the rule
     /// ```
     ///
@@ -112,7 +107,7 @@ declare_lint_rule! {
     /// ### `allowImplicit`
     ///
     /// **Since `v2.5.0`**
-    /// 
+    ///
     /// Default: `false`
     ///
     /// When set to `true`, allows callbacks to implicitly return `undefined`
@@ -349,7 +344,7 @@ struct FunctionReturnsInfo {
 /// This function analyzes the control flow graph of a function and collects information about
 /// the return statements. It also counts the number of blocks that do not have any return
 /// statements.
-fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
+fn get_function_returns_info(cfg: &ControlFlowGraph) -> FunctionReturnsInfo {
     let mut function_returns_info = FunctionReturnsInfo {
         has_paths_without_returns: false,
         returns_with_value: Vec::new(),
@@ -377,133 +372,15 @@ fn get_function_returns_info(cfg: &JsControlFlowGraph) -> FunctionReturnsInfo {
         return function_returns_info;
     }
 
-    // stack of blocks to process
-    let mut block_stack = vec![ROOT_BLOCK_ID];
-    let mut visited_blocks = RoaringBitmap::new();
-    visited_blocks.insert(ROOT_BLOCK_ID.index());
-    while let Some(block_id) = block_stack.pop() {
-        let block = cfg.get(block_id);
-        for handler in block.exception_handlers.iter() {
-            if matches!(handler.kind, ExceptionHandlerKind::Catch) {
-                // Avoid cycles and redundant checks.
-                if visited_blocks.insert(handler.target.index()) {
-                    block_stack.push(handler.target);
-                }
-            }
-        }
-        for instruction in block.instructions.iter() {
-            match instruction.kind {
-                InstructionKind::Statement => {}
-                InstructionKind::Jump {
-                    conditional,
-                    block: jump_block_id,
-                    ..
-                } => {
-                    // Avoid cycles and redundant checks.
-                    if visited_blocks.insert(jump_block_id.index()) {
-                        block_stack.push(jump_block_id);
-                    }
-                    if !conditional {
-                        // The next instructions are unreachable.
-                        break;
-                    }
-                }
-                InstructionKind::Return => {
-                    match &instruction.node {
-                        Some(NodeOrToken::Node(node)) => {
-                            if let Some(return_stmt) = JsReturnStatement::cast_ref(node) {
-                                let range = return_stmt
-                                    .return_token()
-                                    .map_or(return_stmt.range(), |token| token.text_range());
-                                if return_stmt.argument().is_none() {
-                                    function_returns_info.returns_without_value.push(range);
-                                } else {
-                                    function_returns_info.returns_with_value.push(range);
-                                }
-                            }
-                            // Ignore execution paths ending with `throw` statements.
-                        }
-                        _ => {
-                            function_returns_info.has_paths_without_returns = true;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-    function_returns_info
-}
-
-/// This struct holds information about iterable methods to be used in the lint rule.
-#[derive(Debug)]
-struct IterableMethodInfo {
-    /// The name of the iterable method (e.g., "map", "filter").
-    method_name: &'static str,
-    /// The name of the global object (e.g., "Array") that contains the method.
-    global_name: Option<&'static str>,
-    /// The position of the callback argument in the method's argument list.
-    callback_argument_position: usize,
-    /// Indicates whether the method requires a return value from the callback.
-    return_value_required: bool,
-}
-
-/// A static map that holds information about iterable methods.
-static ITERABLE_METHOD_INFOS: LazyLock<FxHashMap<&'static str, IterableMethodInfo>> =
-    LazyLock::new(|| {
-        let mut map: FxHashMap<&'static str, IterableMethodInfo> = FxHashMap::default();
-        for method_name in [
-            "every",
-            "filter",
-            "find",
-            "findIndex",
-            "findLast",
-            "findLastIndex",
-            "flatMap",
-            "map",
-            "reduce",
-            "reduceRight",
-            "some",
-            "sort",
-            "toSorted",
-        ] {
-            map.insert(
-                method_name,
-                IterableMethodInfo {
-                    method_name,
-                    global_name: None,
-                    callback_argument_position: 0,
-                    return_value_required: true,
-                },
-            );
-        }
-        map.insert(
-            "forEach",
-            IterableMethodInfo {
-                method_name: "forEach",
-                global_name: None,
-                callback_argument_position: 0,
-                return_value_required: false,
-            },
-        );
-        map.insert(
-            "from",
-            IterableMethodInfo {
-                method_name: "from",
-                global_name: Some("Array"),
-                callback_argument_position: 1,
-                return_value_required: true,
-            },
-        );
-        map
-    });
-
-impl Display for IterableMethodInfo {
-    fn fmt(&self, fmt: &mut Formatter<'_>) -> io::Result<()> {
-        if let Some(global_name) = self.global_name {
-            write!(fmt, "{}.{}() method", global_name, self.method_name)
+    function_returns_info.has_paths_without_returns = cfg.visit_return_paths(|return_stmt| {
+        let range = return_stmt
+            .return_token()
+            .map_or(return_stmt.range(), |token| token.text_range());
+        if return_stmt.argument().is_none() {
+            function_returns_info.returns_without_value.push(range);
         } else {
-            write!(fmt, "{}() iterable method", self.method_name)
+            function_returns_info.returns_with_value.push(range);
         }
-    }
+    });
+    function_returns_info
 }

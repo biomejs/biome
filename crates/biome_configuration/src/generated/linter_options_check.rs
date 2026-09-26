@@ -2492,6 +2492,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useTrimStartEnd",
         TypeId::of::<biome_rule_options::use_trim_start_end::UseTrimStartEndOptions>(),
     ));
+    result.push(("nursery", "useTypedIterableCallbackReturn", TypeId::of::<biome_rule_options::use_typed_iterable_callback_return::UseTypedIterableCallbackReturnOptions>()));
     result.push((
         "nursery",
         "useUnicodeRegex",

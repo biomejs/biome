@@ -227,6 +227,40 @@ impl<'db> InferredType<'db> {
         .unwrap_or(false)
     }
 
+    /// Returns whether every variant is an array, tuple, or built-in Map or Set instance.
+    /// Unresolved variants and exhausted traversal limits return `false`.
+    pub fn is_all_array_map_or_set(self) -> bool {
+        self.try_all_variants_match(|data| match data {
+            TypeData::Tuple(_) => true,
+            TypeData::InstanceOf(instance) => {
+                let target = instance.ty(self.db).expand_canonical_global(self.db);
+                matches!(target, TypeData::Class(class) if class.is_builtin(self.db)
+                    && class.name(self.db).as_ref().is_some_and(|name|
+                        matches!(name.text(), "Array" | "Map" | "Set")))
+            }
+            _ => false,
+        })
+        .unwrap_or(false)
+    }
+
+    /// Returns whether a variant has type `void`. An inconclusive traversal returns `None`.
+    pub fn has_void_variant(self) -> Option<bool> {
+        self.try_any_variant_matches(|data| matches!(data, TypeData::VoidKeyword))
+            .ok()
+    }
+
+    /// Returns whether a variant can produce a value other than `void` or `undefined`.
+    /// `never` does not produce a value. An inconclusive traversal returns `None`.
+    pub fn has_non_void_return_value(self) -> Option<bool> {
+        self.try_any_variant_matches(|data| {
+            !matches!(
+                data,
+                TypeData::VoidKeyword | TypeData::Undefined | TypeData::NeverKeyword
+            )
+        })
+        .ok()
+    }
+
     pub fn is_regexp_literal_without_global_flag(self) -> bool {
         matches!(
         self.data,
@@ -1925,6 +1959,8 @@ mod tests {
         assert_eq!(unknown.has_null_variant(), None);
         assert_eq!(unknown.has_undefined_variant(), None);
         assert_eq!(unknown.is_safe_for_nullish_coalescing(), None);
+        assert_eq!(unknown.has_void_variant(), None);
+        assert_eq!(unknown.has_non_void_return_value(), None);
 
         let null_or_unknown = TypeData::Union(InternedUnion::new(
             &db,
@@ -1934,6 +1970,33 @@ mod tests {
         assert_eq!(union.has_nullish_variant(), Some(true));
         assert_eq!(union.has_undefined_variant(), None);
         assert_eq!(union.is_safe_for_nullish_coalescing(), None);
+    }
+
+    #[test]
+    fn callback_return_values_distinguish_void_undefined_and_never() {
+        let db = TestDb::default();
+        for (data, void, value) in [
+            (TypeData::VoidKeyword, Some(true), Some(false)),
+            (TypeData::Undefined, Some(false), Some(false)),
+            (TypeData::NeverKeyword, Some(false), Some(false)),
+            (TypeData::Number, Some(false), Some(true)),
+            (TypeData::Null, Some(false), Some(true)),
+            (TypeData::AnyKeyword, None, None),
+            (TypeData::UnknownKeyword, None, None),
+        ] {
+            let ty = InferredType::new(&db, data);
+            assert_eq!(ty.has_void_variant(), void);
+            assert_eq!(ty.has_non_void_return_value(), value);
+        }
+        let mixed = InferredType::new(
+            &db,
+            TypeData::Union(InternedUnion::new(
+                &db,
+                vec![TypeData::VoidKeyword, TypeData::Number].into_boxed_slice(),
+            )),
+        );
+        assert_eq!(mixed.has_void_variant(), Some(true));
+        assert_eq!(mixed.has_non_void_return_value(), Some(true));
     }
 
     #[test]
