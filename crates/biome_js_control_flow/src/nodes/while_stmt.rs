@@ -65,9 +65,10 @@ impl NodeVisitor for WhileVisitor {
 
         // Write the continue block
         builder.set_cursor(continue_block);
+        let test = node.test()?;
         builder
-            .append_jump(true, loop_block)
-            .with_node(node.test()?.into_syntax());
+            .append_jump(!super::is_truthy_literal(&test), loop_block)
+            .with_node(test.into_syntax());
 
         builder.append_jump(false, break_block);
 
