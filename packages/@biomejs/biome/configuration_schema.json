@@ -7230,6 +7230,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBigintLiterals": {
+					"description": "Enforce the use of bigint literals over the BigInt() constructor.\nSee https://biomejs.dev/linter/rules/use-bigint-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBigintLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTestIt": {
 					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
 					"anyOf": [
@@ -11497,6 +11504,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBigintLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBigintLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBiomeIgnoreFolderOptions": {
 			"type": "object",
 			"properties": {
@@ -15280,6 +15297,16 @@
 					"$ref": "#/$defs/AvailabilityTarget"
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseBigintLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBigintLiteralsOptions" }
+			]
+		},
+		"UseBigintLiteralsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseBiomeIgnoreFolderConfiguration": {

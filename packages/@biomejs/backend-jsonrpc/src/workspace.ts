@@ -2683,6 +2683,11 @@ See https://biomejs.dev/linter/rules/use-baseline
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
+	* Enforce the use of bigint literals over the BigInt() constructor.
+See https://biomejs.dev/linter/rules/use-bigint-literals 
+	 */
+	useBigintLiterals?: UseBigintLiteralsConfiguration;
+	/**
 	* Enforce consistent use of it or test for test functions.
 See https://biomejs.dev/linter/rules/use-consistent-test-it 
 	 */
@@ -4940,6 +4945,9 @@ export type UseAwaitThenableConfiguration =
 export type UseBaselineConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBaselineOptions;
+export type UseBigintLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBigintLiteralsOptions;
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
@@ -6925,6 +6933,11 @@ export interface RuleWithUseBaselineOptions {
 	level: RulePlainConfiguration;
 	options?: UseBaselineOptions;
 }
+export interface RuleWithUseBigintLiteralsOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBigintLiteralsOptions;
+}
 export interface RuleWithUseConsistentTestItOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8750,6 +8763,7 @@ export interface UseBaselineOptions {
 	 */
 	available?: AvailabilityTarget;
 }
+export type UseBigintLiteralsOptions = {};
 /**
  * Options for the `useConsistentTestIt` rule
  */
@@ -10143,6 +10157,7 @@ export type Category =
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
+	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"

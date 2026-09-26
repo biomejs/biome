@@ -1701,6 +1701,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_baseline::UseBaselineOptions>(),
     ));
     result.push((
+        "nursery",
+        "useBigintLiterals",
+        TypeId::of::<biome_rule_options::use_bigint_literals::UseBigintLiteralsOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useBiomeIgnoreFolder",
         TypeId::of::<biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions>(),

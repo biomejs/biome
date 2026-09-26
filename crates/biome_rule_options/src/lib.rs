@@ -360,6 +360,7 @@ pub mod use_at_index;
 pub mod use_await;
 pub mod use_await_thenable;
 pub mod use_baseline;
+pub mod use_bigint_literals;
 pub mod use_biome_ignore_folder;
 pub mod use_block_statements;
 pub mod use_button_type;

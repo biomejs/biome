@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTokenBoundaries.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+BigInt(1)as bigint;
+BigInt(1)satisfies bigint;
+
+```
+
+# Diagnostics
+```
+invalidTokenBoundaries.ts:2:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ BigInt(1)as bigint;
+      │ ^^^^^^^^^
+    3 │ BigInt(1)satisfies bigint;
+    4 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - BigInt(1)as·bigint;
+      2 │ + 1n·as·bigint;
+    3 3 │   BigInt(1)satisfies bigint;
+    4 4 │   
+  
+
+```
+
+```
+invalidTokenBoundaries.ts:3:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ /* should generate diagnostics */
+    2 │ BigInt(1)as bigint;
+  > 3 │ BigInt(1)satisfies bigint;
+      │ ^^^^^^^^^
+    4 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   BigInt(1)as bigint;
+    3   │ - BigInt(1)satisfies·bigint;
+      3 │ + 1n·satisfies·bigint;
+    4 4 │   
+  
+
+```

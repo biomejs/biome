@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+1n;
+BigInt();
+BigInt(1, 1);
+BigInt(...[1]);
+BigInt(true);
+BigInt(null);
+new BigInt(1);
+Not_BigInt(1);
+BigInt("1.0");
+BigInt("1.1");
+BigInt("1e3");
+BigInt(`1`);
+BigInt("1" + "2");
+BigInt?.(1);
+BigInt(1.1);
+typeof BigInt;
+BigInt(1n);
+BigInt("not-number");
+BigInt("1_2");
+BigInt("1\
+2");
+BigInt("\u{31}");
+BigInt(!1);
+BigInt(~1);
+BigInt("++1");
+BigInt("+ 1");
+BigInt("-0x1");
+BigInt("0x");
+BigInt("0b12");
+BigInt(void 0);
+BigInt(NaN);
+BigInt(Infinity);
+BigInt(-Infinity);
+BigInt(BigInt);
+BigInt(globalThis.x);
+BigInt(x);
+BigInt?.("1");
+BigInt(-"1");
+BigInt(9e999);
+
+function shadowed(BigInt) {
+	BigInt(1);
+}
+
+```

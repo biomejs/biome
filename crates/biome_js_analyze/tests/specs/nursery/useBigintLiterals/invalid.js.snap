@@ -1,0 +1,2120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+BigInt("0");
+BigInt("  0  ");
+BigInt("9007199254740993");
+BigInt("0B11");
+BigInt("0O777");
+BigInt("0XFe");
+BigInt("0x00");
+BigInt("007");
+BigInt("");
+BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+BigInt(0);
+BigInt(0B11_11);
+BigInt(0O777_777);
+BigInt(0XFe_fE);
+BigInt(9007199254740993);
+BigInt(0x20000000000001);
+BigInt(9_007_199_254_740_993);
+BigInt(0x20_00_00_00_00_00_01);
+BigInt(1_000);
+BigInt(1.0);
+BigInt(1e2);
+BigInt(1e21);
+BigInt(/* comment */1);
+BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+BigInt("-1");
+BigInt("+1");
+BigInt(-1);
+BigInt(+1);
+-BigInt(-1);
+-BigInt("-1");
+-BigInt(1);
+-BigInt("1");
+BigInt(" +1 ");
+BigInt(" -1 ");
+-BigInt("+1");
+-BigInt(/* comment */-1);
+-(BigInt(-1));
+2n - BigInt("-1");
+2n -BigInt("-1");
+BigInt(-1).toString();
+functionCall(-BigInt(1));
+functionCall(BigInt(-1));
+obj[BigInt(1)];
+obj[BigInt(-1)];
+BigInt(-1)[key];
+arr[BigInt(0)];
+void BigInt(1);
+typeof BigInt(1);
+BigInt(1) + BigInt(2);
+BigInt(1) ** 2n;
+BigInt(-1) ** 2n;
+condition ? BigInt(1) : BigInt(2);
++BigInt(1);
++BigInt(-1);
++BigInt("1");
+BigInt(+0);
+BigInt(-0);
+BigInt("+0");
+-BigInt("-0");
+1n - (( BigInt("-1") ));
+BigInt(-(+(-10)));
+globalThis.BigInt(1);
+window.BigInt("1");
+(BigInt)(1);
+const a = BigInt(-1);
+const b = [BigInt(-1)];
+const c = { key: BigInt(-1) };
+const d = () => BigInt(-1);
+function f() {
+	return BigInt(-1);
+}
+foo();
+BigInt(-1);
+foo();
+BigInt(-1).toString();
+{
+	BigInt(-1).toString();
+}
+if (foo) BigInt(-1).toString();
+function g() {}
+BigInt(-1).toString();
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+  > 1 │ BigInt("0");
+      │ ^^^^^^^^^^^
+    2 │ BigInt("  0  ");
+    3 │ BigInt("9007199254740993");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+     1    │ - BigInt("0");
+        1 │ + 0n;
+     2  2 │   BigInt("  0  ");
+     3  3 │   BigInt("9007199254740993");
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ BigInt("0");
+  > 2 │ BigInt("  0  ");
+      │ ^^^^^^^^^^^^^^^
+    3 │ BigInt("9007199254740993");
+    4 │ BigInt("0B11");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+     1  1 │   BigInt("0");
+     2    │ - BigInt("··0··");
+        2 │ + 0n;
+     3  3 │   BigInt("9007199254740993");
+     4  4 │   BigInt("0B11");
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    1 │ BigInt("0");
+    2 │ BigInt("  0  ");
+  > 3 │ BigInt("9007199254740993");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ BigInt("0B11");
+    5 │ BigInt("0O777");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 9007199254740993n.
+  
+     1  1 │   BigInt("0");
+     2  2 │   BigInt("  0  ");
+     3    │ - BigInt("9007199254740993");
+        3 │ + 9007199254740993n;
+     4  4 │   BigInt("0B11");
+     5  5 │   BigInt("0O777");
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    2 │ BigInt("  0  ");
+    3 │ BigInt("9007199254740993");
+  > 4 │ BigInt("0B11");
+      │ ^^^^^^^^^^^^^^
+    5 │ BigInt("0O777");
+    6 │ BigInt("0XFe");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0B11n.
+  
+     2  2 │   BigInt("  0  ");
+     3  3 │   BigInt("9007199254740993");
+     4    │ - BigInt("0B11");
+        4 │ + 0B11n;
+     5  5 │   BigInt("0O777");
+     6  6 │   BigInt("0XFe");
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    3 │ BigInt("9007199254740993");
+    4 │ BigInt("0B11");
+  > 5 │ BigInt("0O777");
+      │ ^^^^^^^^^^^^^^^
+    6 │ BigInt("0XFe");
+    7 │ BigInt("0x00");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0O777n.
+  
+     3  3 │   BigInt("9007199254740993");
+     4  4 │   BigInt("0B11");
+     5    │ - BigInt("0O777");
+        5 │ + 0O777n;
+     6  6 │   BigInt("0XFe");
+     7  7 │   BigInt("0x00");
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    4 │ BigInt("0B11");
+    5 │ BigInt("0O777");
+  > 6 │ BigInt("0XFe");
+      │ ^^^^^^^^^^^^^^
+    7 │ BigInt("0x00");
+    8 │ BigInt("007");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0XFen.
+  
+     4  4 │   BigInt("0B11");
+     5  5 │   BigInt("0O777");
+     6    │ - BigInt("0XFe");
+        6 │ + 0XFen;
+     7  7 │   BigInt("0x00");
+     8  8 │   BigInt("007");
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    5 │ BigInt("0O777");
+    6 │ BigInt("0XFe");
+  > 7 │ BigInt("0x00");
+      │ ^^^^^^^^^^^^^^
+    8 │ BigInt("007");
+    9 │ BigInt("");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+     5  5 │   BigInt("0O777");
+     6  6 │   BigInt("0XFe");
+     7    │ - BigInt("0x00");
+        7 │ + 0n;
+     8  8 │   BigInt("007");
+     9  9 │   BigInt("");
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     6 │ BigInt("0XFe");
+     7 │ BigInt("0x00");
+   > 8 │ BigInt("007");
+       │ ^^^^^^^^^^^^^
+     9 │ BigInt("");
+    10 │ BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 7n.
+  
+     6  6 │   BigInt("0XFe");
+     7  7 │   BigInt("0x00");
+     8    │ - BigInt("007");
+        8 │ + 7n;
+     9  9 │   BigInt("");
+    10 10 │   BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     7 │ BigInt("0x00");
+     8 │ BigInt("007");
+   > 9 │ BigInt("");
+       │ ^^^^^^^^^^
+    10 │ BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    11 │ BigInt(0);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+     7  7 │   BigInt("0x00");
+     8  8 │   BigInt("007");
+     9    │ - BigInt("");
+        9 │ + 0n;
+    10 10 │   BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    11 11 │   BigInt(0);
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     8 │ BigInt("007");
+     9 │ BigInt("");
+  > 10 │ BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ BigInt(0);
+    12 │ BigInt(0B11_11);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999n.
+  
+     8  8 │   BigInt("007");
+     9  9 │   BigInt("");
+    10    │ - BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+       10 │ + 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999n;
+    11 11 │   BigInt(0);
+    12 12 │   BigInt(0B11_11);
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+     9 │ BigInt("");
+    10 │ BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+  > 11 │ BigInt(0);
+       │ ^^^^^^^^^
+    12 │ BigInt(0B11_11);
+    13 │ BigInt(0O777_777);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+     9  9 │   BigInt("");
+    10 10 │   BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    11    │ - BigInt(0);
+       11 │ + 0n;
+    12 12 │   BigInt(0B11_11);
+    13 13 │   BigInt(0O777_777);
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    10 │ BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    11 │ BigInt(0);
+  > 12 │ BigInt(0B11_11);
+       │ ^^^^^^^^^^^^^^^
+    13 │ BigInt(0O777_777);
+    14 │ BigInt(0XFe_fE);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0B11_11n.
+  
+    10 10 │   BigInt("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999");
+    11 11 │   BigInt(0);
+    12    │ - BigInt(0B11_11);
+       12 │ + 0B11_11n;
+    13 13 │   BigInt(0O777_777);
+    14 14 │   BigInt(0XFe_fE);
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    11 │ BigInt(0);
+    12 │ BigInt(0B11_11);
+  > 13 │ BigInt(0O777_777);
+       │ ^^^^^^^^^^^^^^^^^
+    14 │ BigInt(0XFe_fE);
+    15 │ BigInt(9007199254740993);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0O777_777n.
+  
+    11 11 │   BigInt(0);
+    12 12 │   BigInt(0B11_11);
+    13    │ - BigInt(0O777_777);
+       13 │ + 0O777_777n;
+    14 14 │   BigInt(0XFe_fE);
+    15 15 │   BigInt(9007199254740993);
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    12 │ BigInt(0B11_11);
+    13 │ BigInt(0O777_777);
+  > 14 │ BigInt(0XFe_fE);
+       │ ^^^^^^^^^^^^^^^
+    15 │ BigInt(9007199254740993);
+    16 │ BigInt(0x20000000000001);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0XFe_fEn.
+  
+    12 12 │   BigInt(0B11_11);
+    13 13 │   BigInt(0O777_777);
+    14    │ - BigInt(0XFe_fE);
+       14 │ + 0XFe_fEn;
+    15 15 │   BigInt(9007199254740993);
+    16 16 │   BigInt(0x20000000000001);
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    13 │ BigInt(0O777_777);
+    14 │ BigInt(0XFe_fE);
+  > 15 │ BigInt(9007199254740993);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ BigInt(0x20000000000001);
+    17 │ BigInt(9_007_199_254_740_993);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    14 │ BigInt(0XFe_fE);
+    15 │ BigInt(9007199254740993);
+  > 16 │ BigInt(0x20000000000001);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ BigInt(9_007_199_254_740_993);
+    18 │ BigInt(0x20_00_00_00_00_00_01);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    15 │ BigInt(9007199254740993);
+    16 │ BigInt(0x20000000000001);
+  > 17 │ BigInt(9_007_199_254_740_993);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ BigInt(0x20_00_00_00_00_00_01);
+    19 │ BigInt(1_000);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    16 │ BigInt(0x20000000000001);
+    17 │ BigInt(9_007_199_254_740_993);
+  > 18 │ BigInt(0x20_00_00_00_00_00_01);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ BigInt(1_000);
+    20 │ BigInt(1.0);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    17 │ BigInt(9_007_199_254_740_993);
+    18 │ BigInt(0x20_00_00_00_00_00_01);
+  > 19 │ BigInt(1_000);
+       │ ^^^^^^^^^^^^^
+    20 │ BigInt(1.0);
+    21 │ BigInt(1e2);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1_000n.
+  
+    17 17 │   BigInt(9_007_199_254_740_993);
+    18 18 │   BigInt(0x20_00_00_00_00_00_01);
+    19    │ - BigInt(1_000);
+       19 │ + 1_000n;
+    20 20 │   BigInt(1.0);
+    21 21 │   BigInt(1e2);
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    18 │ BigInt(0x20_00_00_00_00_00_01);
+    19 │ BigInt(1_000);
+  > 20 │ BigInt(1.0);
+       │ ^^^^^^^^^^^
+    21 │ BigInt(1e2);
+    22 │ BigInt(1e21);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    19 │ BigInt(1_000);
+    20 │ BigInt(1.0);
+  > 21 │ BigInt(1e2);
+       │ ^^^^^^^^^^^
+    22 │ BigInt(1e21);
+    23 │ BigInt(/* comment */1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    20 │ BigInt(1.0);
+    21 │ BigInt(1e2);
+  > 22 │ BigInt(1e21);
+       │ ^^^^^^^^^^^^
+    23 │ BigInt(/* comment */1);
+    24 │ BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    21 │ BigInt(1e2);
+    22 │ BigInt(1e21);
+  > 23 │ BigInt(/* comment */1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    24 │ BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+    25 │ BigInt("-1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    22 │ BigInt(1e21);
+    23 │ BigInt(/* comment */1);
+  > 24 │ BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ BigInt("-1");
+    26 │ BigInt("+1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    23 │ BigInt(/* comment */1);
+    24 │ BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+  > 25 │ BigInt("-1");
+       │ ^^^^^^^^^^^^
+    26 │ BigInt("+1");
+    27 │ BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    23 23 │   BigInt(/* comment */1);
+    24 24 │   BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+    25    │ - BigInt("-1");
+       25 │ + -1n;
+    26 26 │   BigInt("+1");
+    27 27 │   BigInt(-1);
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    24 │ BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+    25 │ BigInt("-1");
+  > 26 │ BigInt("+1");
+       │ ^^^^^^^^^^^^
+    27 │ BigInt(-1);
+    28 │ BigInt(+1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    24 24 │   BigInt(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999);
+    25 25 │   BigInt("-1");
+    26    │ - BigInt("+1");
+       26 │ + 1n;
+    27 27 │   BigInt(-1);
+    28 28 │   BigInt(+1);
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    25 │ BigInt("-1");
+    26 │ BigInt("+1");
+  > 27 │ BigInt(-1);
+       │ ^^^^^^^^^^
+    28 │ BigInt(+1);
+    29 │ -BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    25 25 │   BigInt("-1");
+    26 26 │   BigInt("+1");
+    27    │ - BigInt(-1);
+       27 │ + -1n;
+    28 28 │   BigInt(+1);
+    29 29 │   -BigInt(-1);
+  
+
+```
+
+```
+invalid.js:28:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    26 │ BigInt("+1");
+    27 │ BigInt(-1);
+  > 28 │ BigInt(+1);
+       │ ^^^^^^^^^^
+    29 │ -BigInt(-1);
+    30 │ -BigInt("-1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    26 26 │   BigInt("+1");
+    27 27 │   BigInt(-1);
+    28    │ - BigInt(+1);
+       28 │ + 1n;
+    29 29 │   -BigInt(-1);
+    30 30 │   -BigInt("-1");
+  
+
+```
+
+```
+invalid.js:29:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    27 │ BigInt(-1);
+    28 │ BigInt(+1);
+  > 29 │ -BigInt(-1);
+       │  ^^^^^^^^^^
+    30 │ -BigInt("-1");
+    31 │ -BigInt(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    27 27 │   BigInt(-1);
+    28 28 │   BigInt(+1);
+    29    │ - -BigInt(-1);
+       29 │ + -(-1n);
+    30 30 │   -BigInt("-1");
+    31 31 │   -BigInt(1);
+  
+
+```
+
+```
+invalid.js:30:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    28 │ BigInt(+1);
+    29 │ -BigInt(-1);
+  > 30 │ -BigInt("-1");
+       │  ^^^^^^^^^^^^
+    31 │ -BigInt(1);
+    32 │ -BigInt("1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    28 28 │   BigInt(+1);
+    29 29 │   -BigInt(-1);
+    30    │ - -BigInt("-1");
+       30 │ + -(-1n);
+    31 31 │   -BigInt(1);
+    32 32 │   -BigInt("1");
+  
+
+```
+
+```
+invalid.js:31:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    29 │ -BigInt(-1);
+    30 │ -BigInt("-1");
+  > 31 │ -BigInt(1);
+       │  ^^^^^^^^^
+    32 │ -BigInt("1");
+    33 │ BigInt(" +1 ");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    29 29 │   -BigInt(-1);
+    30 30 │   -BigInt("-1");
+    31    │ - -BigInt(1);
+       31 │ + -1n;
+    32 32 │   -BigInt("1");
+    33 33 │   BigInt(" +1 ");
+  
+
+```
+
+```
+invalid.js:32:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    30 │ -BigInt("-1");
+    31 │ -BigInt(1);
+  > 32 │ -BigInt("1");
+       │  ^^^^^^^^^^^
+    33 │ BigInt(" +1 ");
+    34 │ BigInt(" -1 ");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    30 30 │   -BigInt("-1");
+    31 31 │   -BigInt(1);
+    32    │ - -BigInt("1");
+       32 │ + -1n;
+    33 33 │   BigInt(" +1 ");
+    34 34 │   BigInt(" -1 ");
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    31 │ -BigInt(1);
+    32 │ -BigInt("1");
+  > 33 │ BigInt(" +1 ");
+       │ ^^^^^^^^^^^^^^
+    34 │ BigInt(" -1 ");
+    35 │ -BigInt("+1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    31 31 │   -BigInt(1);
+    32 32 │   -BigInt("1");
+    33    │ - BigInt("·+1·");
+       33 │ + 1n;
+    34 34 │   BigInt(" -1 ");
+    35 35 │   -BigInt("+1");
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    32 │ -BigInt("1");
+    33 │ BigInt(" +1 ");
+  > 34 │ BigInt(" -1 ");
+       │ ^^^^^^^^^^^^^^
+    35 │ -BigInt("+1");
+    36 │ -BigInt(/* comment */-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    32 32 │   -BigInt("1");
+    33 33 │   BigInt(" +1 ");
+    34    │ - BigInt("·-1·");
+       34 │ + -1n;
+    35 35 │   -BigInt("+1");
+    36 36 │   -BigInt(/* comment */-1);
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    33 │ BigInt(" +1 ");
+    34 │ BigInt(" -1 ");
+  > 35 │ -BigInt("+1");
+       │  ^^^^^^^^^^^^
+    36 │ -BigInt(/* comment */-1);
+    37 │ -(BigInt(-1));
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    33 33 │   BigInt(" +1 ");
+    34 34 │   BigInt(" -1 ");
+    35    │ - -BigInt("+1");
+       35 │ + -1n;
+    36 36 │   -BigInt(/* comment */-1);
+    37 37 │   -(BigInt(-1));
+  
+
+```
+
+```
+invalid.js:36:2 lint/nursery/useBigintLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    34 │ BigInt(" -1 ");
+    35 │ -BigInt("+1");
+  > 36 │ -BigInt(/* comment */-1);
+       │  ^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ -(BigInt(-1));
+    38 │ 2n - BigInt("-1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:3 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    35 │ -BigInt("+1");
+    36 │ -BigInt(/* comment */-1);
+  > 37 │ -(BigInt(-1));
+       │   ^^^^^^^^^^
+    38 │ 2n - BigInt("-1");
+    39 │ 2n -BigInt("-1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    35 35 │   -BigInt("+1");
+    36 36 │   -BigInt(/* comment */-1);
+    37    │ - -(BigInt(-1));
+       37 │ + -(-1n);
+    38 38 │   2n - BigInt("-1");
+    39 39 │   2n -BigInt("-1");
+  
+
+```
+
+```
+invalid.js:38:6 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    36 │ -BigInt(/* comment */-1);
+    37 │ -(BigInt(-1));
+  > 38 │ 2n - BigInt("-1");
+       │      ^^^^^^^^^^^^
+    39 │ 2n -BigInt("-1");
+    40 │ BigInt(-1).toString();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    36 36 │   -BigInt(/* comment */-1);
+    37 37 │   -(BigInt(-1));
+    38    │ - 2n·-·BigInt("-1");
+       38 │ + 2n·-·(-1n);
+    39 39 │   2n -BigInt("-1");
+    40 40 │   BigInt(-1).toString();
+  
+
+```
+
+```
+invalid.js:39:5 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    37 │ -(BigInt(-1));
+    38 │ 2n - BigInt("-1");
+  > 39 │ 2n -BigInt("-1");
+       │     ^^^^^^^^^^^^
+    40 │ BigInt(-1).toString();
+    41 │ functionCall(-BigInt(1));
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    37 37 │   -(BigInt(-1));
+    38 38 │   2n - BigInt("-1");
+    39    │ - 2n·-BigInt("-1");
+       39 │ + 2n·-(-1n);
+    40 40 │   BigInt(-1).toString();
+    41 41 │   functionCall(-BigInt(1));
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    38 │ 2n - BigInt("-1");
+    39 │ 2n -BigInt("-1");
+  > 40 │ BigInt(-1).toString();
+       │ ^^^^^^^^^^
+    41 │ functionCall(-BigInt(1));
+    42 │ functionCall(BigInt(-1));
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    38 38 │   2n - BigInt("-1");
+    39 39 │   2n -BigInt("-1");
+    40    │ - BigInt(-1).toString();
+       40 │ + (-1n).toString();
+    41 41 │   functionCall(-BigInt(1));
+    42 42 │   functionCall(BigInt(-1));
+  
+
+```
+
+```
+invalid.js:41:15 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    39 │ 2n -BigInt("-1");
+    40 │ BigInt(-1).toString();
+  > 41 │ functionCall(-BigInt(1));
+       │               ^^^^^^^^^
+    42 │ functionCall(BigInt(-1));
+    43 │ obj[BigInt(1)];
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    39 39 │   2n -BigInt("-1");
+    40 40 │   BigInt(-1).toString();
+    41    │ - functionCall(-BigInt(1));
+       41 │ + functionCall(-1n);
+    42 42 │   functionCall(BigInt(-1));
+    43 43 │   obj[BigInt(1)];
+  
+
+```
+
+```
+invalid.js:42:14 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    40 │ BigInt(-1).toString();
+    41 │ functionCall(-BigInt(1));
+  > 42 │ functionCall(BigInt(-1));
+       │              ^^^^^^^^^^
+    43 │ obj[BigInt(1)];
+    44 │ obj[BigInt(-1)];
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    40 40 │   BigInt(-1).toString();
+    41 41 │   functionCall(-BigInt(1));
+    42    │ - functionCall(BigInt(-1));
+       42 │ + functionCall(-1n);
+    43 43 │   obj[BigInt(1)];
+    44 44 │   obj[BigInt(-1)];
+  
+
+```
+
+```
+invalid.js:43:5 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    41 │ functionCall(-BigInt(1));
+    42 │ functionCall(BigInt(-1));
+  > 43 │ obj[BigInt(1)];
+       │     ^^^^^^^^^
+    44 │ obj[BigInt(-1)];
+    45 │ BigInt(-1)[key];
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    41 41 │   functionCall(-BigInt(1));
+    42 42 │   functionCall(BigInt(-1));
+    43    │ - obj[BigInt(1)];
+       43 │ + obj[1n];
+    44 44 │   obj[BigInt(-1)];
+    45 45 │   BigInt(-1)[key];
+  
+
+```
+
+```
+invalid.js:44:5 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    42 │ functionCall(BigInt(-1));
+    43 │ obj[BigInt(1)];
+  > 44 │ obj[BigInt(-1)];
+       │     ^^^^^^^^^^
+    45 │ BigInt(-1)[key];
+    46 │ arr[BigInt(0)];
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    42 42 │   functionCall(BigInt(-1));
+    43 43 │   obj[BigInt(1)];
+    44    │ - obj[BigInt(-1)];
+       44 │ + obj[-1n];
+    45 45 │   BigInt(-1)[key];
+    46 46 │   arr[BigInt(0)];
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    43 │ obj[BigInt(1)];
+    44 │ obj[BigInt(-1)];
+  > 45 │ BigInt(-1)[key];
+       │ ^^^^^^^^^^
+    46 │ arr[BigInt(0)];
+    47 │ void BigInt(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    43 43 │   obj[BigInt(1)];
+    44 44 │   obj[BigInt(-1)];
+    45    │ - BigInt(-1)[key];
+       45 │ + (-1n)[key];
+    46 46 │   arr[BigInt(0)];
+    47 47 │   void BigInt(1);
+  
+
+```
+
+```
+invalid.js:46:5 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    44 │ obj[BigInt(-1)];
+    45 │ BigInt(-1)[key];
+  > 46 │ arr[BigInt(0)];
+       │     ^^^^^^^^^
+    47 │ void BigInt(1);
+    48 │ typeof BigInt(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+    44 44 │   obj[BigInt(-1)];
+    45 45 │   BigInt(-1)[key];
+    46    │ - arr[BigInt(0)];
+       46 │ + arr[0n];
+    47 47 │   void BigInt(1);
+    48 48 │   typeof BigInt(1);
+  
+
+```
+
+```
+invalid.js:47:6 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    45 │ BigInt(-1)[key];
+    46 │ arr[BigInt(0)];
+  > 47 │ void BigInt(1);
+       │      ^^^^^^^^^
+    48 │ typeof BigInt(1);
+    49 │ BigInt(1) + BigInt(2);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    45 45 │   BigInt(-1)[key];
+    46 46 │   arr[BigInt(0)];
+    47    │ - void·BigInt(1);
+       47 │ + void·1n;
+    48 48 │   typeof BigInt(1);
+    49 49 │   BigInt(1) + BigInt(2);
+  
+
+```
+
+```
+invalid.js:48:8 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    46 │ arr[BigInt(0)];
+    47 │ void BigInt(1);
+  > 48 │ typeof BigInt(1);
+       │        ^^^^^^^^^
+    49 │ BigInt(1) + BigInt(2);
+    50 │ BigInt(1) ** 2n;
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    46 46 │   arr[BigInt(0)];
+    47 47 │   void BigInt(1);
+    48    │ - typeof·BigInt(1);
+       48 │ + typeof·1n;
+    49 49 │   BigInt(1) + BigInt(2);
+    50 50 │   BigInt(1) ** 2n;
+  
+
+```
+
+```
+invalid.js:49:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    47 │ void BigInt(1);
+    48 │ typeof BigInt(1);
+  > 49 │ BigInt(1) + BigInt(2);
+       │ ^^^^^^^^^
+    50 │ BigInt(1) ** 2n;
+    51 │ BigInt(-1) ** 2n;
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    47 47 │   void BigInt(1);
+    48 48 │   typeof BigInt(1);
+    49    │ - BigInt(1)·+·BigInt(2);
+       49 │ + 1n·+·BigInt(2);
+    50 50 │   BigInt(1) ** 2n;
+    51 51 │   BigInt(-1) ** 2n;
+  
+
+```
+
+```
+invalid.js:49:13 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    47 │ void BigInt(1);
+    48 │ typeof BigInt(1);
+  > 49 │ BigInt(1) + BigInt(2);
+       │             ^^^^^^^^^
+    50 │ BigInt(1) ** 2n;
+    51 │ BigInt(-1) ** 2n;
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 2n.
+  
+    47 47 │   void BigInt(1);
+    48 48 │   typeof BigInt(1);
+    49    │ - BigInt(1)·+·BigInt(2);
+       49 │ + BigInt(1)·+·2n;
+    50 50 │   BigInt(1) ** 2n;
+    51 51 │   BigInt(-1) ** 2n;
+  
+
+```
+
+```
+invalid.js:50:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    48 │ typeof BigInt(1);
+    49 │ BigInt(1) + BigInt(2);
+  > 50 │ BigInt(1) ** 2n;
+       │ ^^^^^^^^^
+    51 │ BigInt(-1) ** 2n;
+    52 │ condition ? BigInt(1) : BigInt(2);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    48 48 │   typeof BigInt(1);
+    49 49 │   BigInt(1) + BigInt(2);
+    50    │ - BigInt(1)·**·2n;
+       50 │ + 1n·**·2n;
+    51 51 │   BigInt(-1) ** 2n;
+    52 52 │   condition ? BigInt(1) : BigInt(2);
+  
+
+```
+
+```
+invalid.js:51:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    49 │ BigInt(1) + BigInt(2);
+    50 │ BigInt(1) ** 2n;
+  > 51 │ BigInt(-1) ** 2n;
+       │ ^^^^^^^^^^
+    52 │ condition ? BigInt(1) : BigInt(2);
+    53 │ +BigInt(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    49 49 │   BigInt(1) + BigInt(2);
+    50 50 │   BigInt(1) ** 2n;
+    51    │ - BigInt(-1)·**·2n;
+       51 │ + (-1n)·**·2n;
+    52 52 │   condition ? BigInt(1) : BigInt(2);
+    53 53 │   +BigInt(1);
+  
+
+```
+
+```
+invalid.js:52:13 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    50 │ BigInt(1) ** 2n;
+    51 │ BigInt(-1) ** 2n;
+  > 52 │ condition ? BigInt(1) : BigInt(2);
+       │             ^^^^^^^^^
+    53 │ +BigInt(1);
+    54 │ +BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    50 50 │   BigInt(1) ** 2n;
+    51 51 │   BigInt(-1) ** 2n;
+    52    │ - condition·?·BigInt(1)·:·BigInt(2);
+       52 │ + condition·?·1n·:·BigInt(2);
+    53 53 │   +BigInt(1);
+    54 54 │   +BigInt(-1);
+  
+
+```
+
+```
+invalid.js:52:25 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    50 │ BigInt(1) ** 2n;
+    51 │ BigInt(-1) ** 2n;
+  > 52 │ condition ? BigInt(1) : BigInt(2);
+       │                         ^^^^^^^^^
+    53 │ +BigInt(1);
+    54 │ +BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 2n.
+  
+    50 50 │   BigInt(1) ** 2n;
+    51 51 │   BigInt(-1) ** 2n;
+    52    │ - condition·?·BigInt(1)·:·BigInt(2);
+       52 │ + condition·?·BigInt(1)·:·2n;
+    53 53 │   +BigInt(1);
+    54 54 │   +BigInt(-1);
+  
+
+```
+
+```
+invalid.js:53:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    51 │ BigInt(-1) ** 2n;
+    52 │ condition ? BigInt(1) : BigInt(2);
+  > 53 │ +BigInt(1);
+       │  ^^^^^^^^^
+    54 │ +BigInt(-1);
+    55 │ +BigInt("1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    51 51 │   BigInt(-1) ** 2n;
+    52 52 │   condition ? BigInt(1) : BigInt(2);
+    53    │ - +BigInt(1);
+       53 │ + +1n;
+    54 54 │   +BigInt(-1);
+    55 55 │   +BigInt("1");
+  
+
+```
+
+```
+invalid.js:54:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    52 │ condition ? BigInt(1) : BigInt(2);
+    53 │ +BigInt(1);
+  > 54 │ +BigInt(-1);
+       │  ^^^^^^^^^^
+    55 │ +BigInt("1");
+    56 │ BigInt(+0);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    52 52 │   condition ? BigInt(1) : BigInt(2);
+    53 53 │   +BigInt(1);
+    54    │ - +BigInt(-1);
+       54 │ + +(-1n);
+    55 55 │   +BigInt("1");
+    56 56 │   BigInt(+0);
+  
+
+```
+
+```
+invalid.js:55:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    53 │ +BigInt(1);
+    54 │ +BigInt(-1);
+  > 55 │ +BigInt("1");
+       │  ^^^^^^^^^^^
+    56 │ BigInt(+0);
+    57 │ BigInt(-0);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    53 53 │   +BigInt(1);
+    54 54 │   +BigInt(-1);
+    55    │ - +BigInt("1");
+       55 │ + +1n;
+    56 56 │   BigInt(+0);
+    57 57 │   BigInt(-0);
+  
+
+```
+
+```
+invalid.js:56:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    54 │ +BigInt(-1);
+    55 │ +BigInt("1");
+  > 56 │ BigInt(+0);
+       │ ^^^^^^^^^^
+    57 │ BigInt(-0);
+    58 │ BigInt("+0");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+    54 54 │   +BigInt(-1);
+    55 55 │   +BigInt("1");
+    56    │ - BigInt(+0);
+       56 │ + 0n;
+    57 57 │   BigInt(-0);
+    58 58 │   BigInt("+0");
+  
+
+```
+
+```
+invalid.js:57:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    55 │ +BigInt("1");
+    56 │ BigInt(+0);
+  > 57 │ BigInt(-0);
+       │ ^^^^^^^^^^
+    58 │ BigInt("+0");
+    59 │ -BigInt("-0");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+    55 55 │   +BigInt("1");
+    56 56 │   BigInt(+0);
+    57    │ - BigInt(-0);
+       57 │ + 0n;
+    58 58 │   BigInt("+0");
+    59 59 │   -BigInt("-0");
+  
+
+```
+
+```
+invalid.js:58:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    56 │ BigInt(+0);
+    57 │ BigInt(-0);
+  > 58 │ BigInt("+0");
+       │ ^^^^^^^^^^^^
+    59 │ -BigInt("-0");
+    60 │ 1n - (( BigInt("-1") ));
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+    56 56 │   BigInt(+0);
+    57 57 │   BigInt(-0);
+    58    │ - BigInt("+0");
+       58 │ + 0n;
+    59 59 │   -BigInt("-0");
+    60 60 │   1n - (( BigInt("-1") ));
+  
+
+```
+
+```
+invalid.js:59:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    57 │ BigInt(-0);
+    58 │ BigInt("+0");
+  > 59 │ -BigInt("-0");
+       │  ^^^^^^^^^^^^
+    60 │ 1n - (( BigInt("-1") ));
+    61 │ BigInt(-(+(-10)));
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 0n.
+  
+    57 57 │   BigInt(-0);
+    58 58 │   BigInt("+0");
+    59    │ - -BigInt("-0");
+       59 │ + -0n;
+    60 60 │   1n - (( BigInt("-1") ));
+    61 61 │   BigInt(-(+(-10)));
+  
+
+```
+
+```
+invalid.js:60:9 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    58 │ BigInt("+0");
+    59 │ -BigInt("-0");
+  > 60 │ 1n - (( BigInt("-1") ));
+       │         ^^^^^^^^^^^^
+    61 │ BigInt(-(+(-10)));
+    62 │ globalThis.BigInt(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    58 58 │   BigInt("+0");
+    59 59 │   -BigInt("-0");
+    60    │ - 1n·-·((·BigInt("-1")·));
+       60 │ + 1n·-·((·-1n·));
+    61 61 │   BigInt(-(+(-10)));
+    62 62 │   globalThis.BigInt(1);
+  
+
+```
+
+```
+invalid.js:61:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    59 │ -BigInt("-0");
+    60 │ 1n - (( BigInt("-1") ));
+  > 61 │ BigInt(-(+(-10)));
+       │ ^^^^^^^^^^^^^^^^^
+    62 │ globalThis.BigInt(1);
+    63 │ window.BigInt("1");
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 10n.
+  
+    59 59 │   -BigInt("-0");
+    60 60 │   1n - (( BigInt("-1") ));
+    61    │ - BigInt(-(+(-10)));
+       61 │ + 10n;
+    62 62 │   globalThis.BigInt(1);
+    63 63 │   window.BigInt("1");
+  
+
+```
+
+```
+invalid.js:62:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    60 │ 1n - (( BigInt("-1") ));
+    61 │ BigInt(-(+(-10)));
+  > 62 │ globalThis.BigInt(1);
+       │ ^^^^^^^^^^^^^^^^^^^^
+    63 │ window.BigInt("1");
+    64 │ (BigInt)(1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    60 60 │   1n - (( BigInt("-1") ));
+    61 61 │   BigInt(-(+(-10)));
+    62    │ - globalThis.BigInt(1);
+       62 │ + 1n;
+    63 63 │   window.BigInt("1");
+    64 64 │   (BigInt)(1);
+  
+
+```
+
+```
+invalid.js:63:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    61 │ BigInt(-(+(-10)));
+    62 │ globalThis.BigInt(1);
+  > 63 │ window.BigInt("1");
+       │ ^^^^^^^^^^^^^^^^^^
+    64 │ (BigInt)(1);
+    65 │ const a = BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    61 61 │   BigInt(-(+(-10)));
+    62 62 │   globalThis.BigInt(1);
+    63    │ - window.BigInt("1");
+       63 │ + 1n;
+    64 64 │   (BigInt)(1);
+    65 65 │   const a = BigInt(-1);
+  
+
+```
+
+```
+invalid.js:64:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    62 │ globalThis.BigInt(1);
+    63 │ window.BigInt("1");
+  > 64 │ (BigInt)(1);
+       │ ^^^^^^^^^^^
+    65 │ const a = BigInt(-1);
+    66 │ const b = [BigInt(-1)];
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with 1n.
+  
+    62 62 │   globalThis.BigInt(1);
+    63 63 │   window.BigInt("1");
+    64    │ - (BigInt)(1);
+       64 │ + 1n;
+    65 65 │   const a = BigInt(-1);
+    66 66 │   const b = [BigInt(-1)];
+  
+
+```
+
+```
+invalid.js:65:11 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    63 │ window.BigInt("1");
+    64 │ (BigInt)(1);
+  > 65 │ const a = BigInt(-1);
+       │           ^^^^^^^^^^
+    66 │ const b = [BigInt(-1)];
+    67 │ const c = { key: BigInt(-1) };
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    63 63 │   window.BigInt("1");
+    64 64 │   (BigInt)(1);
+    65    │ - const·a·=·BigInt(-1);
+       65 │ + const·a·=·-1n;
+    66 66 │   const b = [BigInt(-1)];
+    67 67 │   const c = { key: BigInt(-1) };
+  
+
+```
+
+```
+invalid.js:66:12 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    64 │ (BigInt)(1);
+    65 │ const a = BigInt(-1);
+  > 66 │ const b = [BigInt(-1)];
+       │            ^^^^^^^^^^
+    67 │ const c = { key: BigInt(-1) };
+    68 │ const d = () => BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    64 64 │   (BigInt)(1);
+    65 65 │   const a = BigInt(-1);
+    66    │ - const·b·=·[BigInt(-1)];
+       66 │ + const·b·=·[-1n];
+    67 67 │   const c = { key: BigInt(-1) };
+    68 68 │   const d = () => BigInt(-1);
+  
+
+```
+
+```
+invalid.js:67:18 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    65 │ const a = BigInt(-1);
+    66 │ const b = [BigInt(-1)];
+  > 67 │ const c = { key: BigInt(-1) };
+       │                  ^^^^^^^^^^
+    68 │ const d = () => BigInt(-1);
+    69 │ function f() {
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    65 65 │   const a = BigInt(-1);
+    66 66 │   const b = [BigInt(-1)];
+    67    │ - const·c·=·{·key:·BigInt(-1)·};
+       67 │ + const·c·=·{·key:·-1n·};
+    68 68 │   const d = () => BigInt(-1);
+    69 69 │   function f() {
+  
+
+```
+
+```
+invalid.js:68:17 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    66 │ const b = [BigInt(-1)];
+    67 │ const c = { key: BigInt(-1) };
+  > 68 │ const d = () => BigInt(-1);
+       │                 ^^^^^^^^^^
+    69 │ function f() {
+    70 │ 	return BigInt(-1);
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    66 66 │   const b = [BigInt(-1)];
+    67 67 │   const c = { key: BigInt(-1) };
+    68    │ - const·d·=·()·=>·BigInt(-1);
+       68 │ + const·d·=·()·=>·-1n;
+    69 69 │   function f() {
+    70 70 │   	return BigInt(-1);
+  
+
+```
+
+```
+invalid.js:70:9 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    68 │ const d = () => BigInt(-1);
+    69 │ function f() {
+  > 70 │ 	return BigInt(-1);
+       │ 	       ^^^^^^^^^^
+    71 │ }
+    72 │ foo();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    68 68 │   const d = () => BigInt(-1);
+    69 69 │   function f() {
+    70    │ - → return·BigInt(-1);
+       70 │ + → return·-1n;
+    71 71 │   }
+    72 72 │   foo();
+  
+
+```
+
+```
+invalid.js:73:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    71 │ }
+    72 │ foo();
+  > 73 │ BigInt(-1);
+       │ ^^^^^^^^^^
+    74 │ foo();
+    75 │ BigInt(-1).toString();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    71 71 │   }
+    72 72 │   foo();
+    73    │ - BigInt(-1);
+       73 │ + -1n;
+    74 74 │   foo();
+    75 75 │   BigInt(-1).toString();
+  
+
+```
+
+```
+invalid.js:75:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    73 │ BigInt(-1);
+    74 │ foo();
+  > 75 │ BigInt(-1).toString();
+       │ ^^^^^^^^^^
+    76 │ {
+    77 │ 	BigInt(-1).toString();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    73 73 │   BigInt(-1);
+    74 74 │   foo();
+    75    │ - BigInt(-1).toString();
+       75 │ + (-1n).toString();
+    76 76 │   {
+    77 77 │   	BigInt(-1).toString();
+  
+
+```
+
+```
+invalid.js:77:2 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    75 │ BigInt(-1).toString();
+    76 │ {
+  > 77 │ 	BigInt(-1).toString();
+       │ 	^^^^^^^^^^
+    78 │ }
+    79 │ if (foo) BigInt(-1).toString();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    75 75 │   BigInt(-1).toString();
+    76 76 │   {
+    77    │ - → BigInt(-1).toString();
+       77 │ + → (-1n).toString();
+    78 78 │   }
+    79 79 │   if (foo) BigInt(-1).toString();
+  
+
+```
+
+```
+invalid.js:79:10 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    77 │ 	BigInt(-1).toString();
+    78 │ }
+  > 79 │ if (foo) BigInt(-1).toString();
+       │          ^^^^^^^^^^
+    80 │ function g() {}
+    81 │ BigInt(-1).toString();
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    77 77 │   	BigInt(-1).toString();
+    78 78 │   }
+    79    │ - if·(foo)·BigInt(-1).toString();
+       79 │ + if·(foo)·(-1n).toString();
+    80 80 │   function g() {}
+    81 81 │   BigInt(-1).toString();
+  
+
+```
+
+```
+invalid.js:81:1 lint/nursery/useBigintLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This BigInt() call can be replaced with a bigint literal.
+  
+    79 │ if (foo) BigInt(-1).toString();
+    80 │ function g() {}
+  > 81 │ BigInt(-1).toString();
+       │ ^^^^^^^^^^
+    82 │ 
+  
+  i A bigint literal with the n suffix is more concise, and it is evaluated at parse time instead of being converted at runtime.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Replace with -1n.
+  
+    79 79 │   if (foo) BigInt(-1).toString();
+    80 80 │   function g() {}
+    81    │ - BigInt(-1).toString();
+       81 │ + (-1n).toString();
+    82 82 │   
+  
+
+```
