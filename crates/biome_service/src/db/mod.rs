@@ -19,6 +19,12 @@ use biome_module_graph::{
     ModuleInfoKind, TypeDb, module_for_key,
 };
 use biome_parser::AnyParse;
+use biome_resolver::FsWithResolverProxy;
+#[cfg(feature = "module_graph")]
+use biome_resolver::{
+    ResolverDb, ResolverFsProxy, ResolverPathChange, ResolverPathChanges, ResolverPaths,
+    resolver_paths_need_sync, sync_resolver_paths,
+};
 use biome_rowan::SendNode;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
@@ -172,6 +178,14 @@ pub struct WorkspaceDb {
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    /// The path info observed by the resolver.
+    #[cfg(feature = "module_graph")]
+    resolver_paths: ResolverPaths,
+    /// The filesystem used to read the path info of new paths.
+    ///
+    /// Only the resolver reads it, through [ResolverDb::resolver_fs].
+    #[cfg(feature = "module_graph")]
+    resolver_fs: Arc<dyn FsWithResolverProxy>,
     /// It stores the file sources across projects.
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     /// A map of projects loaded in the workspace.
@@ -179,23 +193,6 @@ pub struct WorkspaceDb {
     settings_queries: Arc<SettingsQueryCache>,
     // NOTE: this must stay last as per salsa restrictions.
     storage: Storage<Self>,
-}
-
-impl Default for WorkspaceDb {
-    fn default() -> Self {
-        let db = Self {
-            files: Arc::default(),
-            #[cfg(feature = "module_graph")]
-            modules: Arc::default(),
-            file_sources: Arc::default(),
-            projects: Arc::default(),
-            settings_queries: Arc::default(),
-            storage: Storage::default(),
-        };
-        #[cfg(feature = "module_graph")]
-        ModuleGraphGeneration::new(&db, 0);
-        db
-    }
 }
 
 /// Handles to the collections that a [WorkspaceDb] shares with all its
@@ -215,6 +212,8 @@ pub struct WorkspaceDbData {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    #[cfg(feature = "module_graph")]
+    resolver_paths: ResolverPaths,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
 }
@@ -259,6 +258,84 @@ impl WorkspaceDbData {
         self.modules.pin().insert(path, module);
     }
 
+    /// Returns whether the resolver reads the content of `path`.
+    ///
+    /// This is the case for the manifests the resolver has read, such as
+    /// package manifests and TypeScript configurations, including the
+    /// configurations they reference.
+    #[cfg(feature = "module_graph")]
+    pub fn is_resolver_manifest(&self, path: &Utf8Path) -> bool {
+        self.resolver_paths.is_manifest(path)
+    }
+
+    /// Returns the change to report when the filesystem reports that `path`
+    /// was created or modified.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_for_modified_path(
+        &self,
+        path: &Utf8Path,
+    ) -> ResolverPathChanges {
+        self.resolver_paths.changes_for_modified_path(path)
+    }
+
+    /// Returns the resolver changes to report for the known paths inside the
+    /// `node_modules` directories that `directory` can resolve packages from.
+    ///
+    /// These are the `node_modules` directories of `directory`, of its
+    /// ancestors, and of its descendants.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_in_visible_node_modules(
+        &self,
+        directory: &Utf8Path,
+    ) -> Vec<(Utf8PathBuf, ResolverPathChanges)> {
+        self.resolver_paths
+            .paths_matching(|path| {
+                // The package owning the outermost `node_modules` directory of
+                // the path.
+                path.ancestors()
+                    .filter(|ancestor| ancestor.file_name() == Some("node_modules"))
+                    .last()
+                    .and_then(Utf8Path::parent)
+                    .is_some_and(|package_path| {
+                        directory.starts_with(package_path) || package_path.starts_with(directory)
+                    })
+            })
+            .into_iter()
+            .map(|path| {
+                let changes = self.resolver_paths.changes_for_modified_path(&path);
+                (path, changes)
+            })
+            .collect()
+    }
+
+    /// Returns the resolver change to report when the parsed source of `path`
+    /// is published or removed, if the resolver reads its content.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_source_change(
+        &self,
+        path: &Utf8Path,
+    ) -> Option<(Utf8PathBuf, ResolverPathChanges)> {
+        self.is_resolver_manifest(path)
+            .then(|| (path.to_path_buf(), ResolverPathChange::Content.into()))
+    }
+
+    /// Returns the resolver changes to report for the known paths equal to or
+    /// inside `path`.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_within(
+        &self,
+        path: &Utf8Path,
+    ) -> Vec<(Utf8PathBuf, ResolverPathChanges)> {
+        self.resolver_paths
+            .paths_within(path)
+            .into_iter()
+            .map(|path| {
+                let changes = self.resolver_paths.changes_for_modified_path(&path);
+                (path, changes)
+            })
+            .collect()
+    }
+
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&self, path: &Utf8Path) {
         self.modules.pin().remove(path);
@@ -293,6 +370,36 @@ impl WorkspaceDbData {
 }
 
 impl WorkspaceDb {
+    /// Creates a database whose resolver reads path info from `fs`.
+    pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::with_storage(fs, Storage::default(), Arc::default())
+    }
+
+    fn with_storage(
+        #[cfg_attr(not(feature = "module_graph"), expect(unused_variables))] fs: Arc<
+            dyn FsWithResolverProxy,
+        >,
+        storage: Storage<Self>,
+        settings_queries: Arc<SettingsQueryCache>,
+    ) -> Self {
+        let db = Self {
+            files: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            modules: Arc::default(),
+            #[cfg(feature = "module_graph")]
+            resolver_paths: ResolverPaths::default(),
+            #[cfg(feature = "module_graph")]
+            resolver_fs: fs,
+            file_sources: Arc::default(),
+            projects: Arc::default(),
+            settings_queries,
+            storage,
+        };
+        #[cfg(feature = "module_graph")]
+        ModuleGraphGeneration::new(&db, 0);
+        db
+    }
+
     pub(crate) fn settings_query_db(&self) -> SettingsQueryDb {
         self.settings_queries.database()
     }
@@ -324,6 +431,29 @@ impl WorkspaceDb {
         self.write_module_data(|_| {});
     }
 
+    /// Refreshes the resolver path info of the given paths from the filesystem.
+    ///
+    /// Only paths the resolver has already looked up are refreshed, and only
+    /// the path info that changed is updated.
+    #[cfg(feature = "module_graph")]
+    pub fn sync_resolver_paths(
+        &mut self,
+        changes: impl IntoIterator<Item = (Utf8PathBuf, ResolverPathChanges)>,
+    ) {
+        sync_resolver_paths(self, changes);
+    }
+
+    /// Returns whether [Self::sync_resolver_paths] would update any path info.
+    #[cfg(feature = "module_graph")]
+    pub fn resolver_paths_need_sync(&self, changes: &[(Utf8PathBuf, ResolverPathChanges)]) -> bool {
+        resolver_paths_need_sync(
+            self,
+            changes
+                .iter()
+                .map(|(path, change)| (path.as_path(), *change)),
+        )
+    }
+
     /// Returns handles to the collections that this database shares with all
     /// its clones.
     pub fn data(&self) -> WorkspaceDbData {
@@ -331,6 +461,8 @@ impl WorkspaceDb {
             files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             projects: self.projects.clone(),
         }
@@ -420,7 +552,29 @@ impl WorkspaceDb {
             existing_file.set_snippets(self).to(snippets);
             existing_file
         } else {
-            self.replace_file(path, parsed, document_source_index, snippets)
+            let file = self.replace_file(path, parsed, document_source_index, snippets);
+            // Manifest queries look up the parsed source of a path outside
+            // Salsa. Publishing a new parsed source must invalidate them.
+            #[cfg(feature = "module_graph")]
+            {
+                let change = self.data().resolver_source_change(path);
+                self.sync_resolver_paths(change);
+            }
+            file
+        }
+    }
+
+    /// Removes the parsed source cached for `path`.
+    ///
+    /// Use this from the Owned-mode database inside `OwnedDb::with_setter`,
+    /// because the resolver is notified through Salsa setters.
+    pub fn remove_file(&mut self, path: &Utf8Path) {
+        if self.files.pin().remove(path).is_some() {
+            #[cfg(feature = "module_graph")]
+            {
+                let change = self.data().resolver_source_change(path);
+                self.sync_resolver_paths(change);
+            }
         }
     }
 
@@ -552,6 +706,9 @@ impl WorkspaceDb {
                     }
                 });
             }
+
+            let changes = self.data().resolver_changes_within(path);
+            self.sync_resolver_paths(changes);
         }
     }
 
@@ -764,16 +921,14 @@ pub struct SharedWorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
+    #[cfg(feature = "module_graph")]
+    resolver_paths: ResolverPaths,
+    #[cfg(feature = "module_graph")]
+    resolver_fs: Arc<dyn FsWithResolverProxy>,
     file_sources: Arc<boxcar::Vec<DocumentFileSource>>,
     projects: Arc<HashMap<ProjectKey, ProjectInput>>,
     settings_queries: Arc<SettingsQueryCache>,
     storage: salsa::StorageHandle<WorkspaceDb>,
-}
-
-impl Default for SharedWorkspaceDb {
-    fn default() -> Self {
-        Self::from_workspace_db(WorkspaceDb::default())
-    }
 }
 
 impl SharedWorkspaceDb {
@@ -781,11 +936,21 @@ impl SharedWorkspaceDb {
     ///
     /// The resulting forks share Salsa storage and workspace collections with
     /// `db`, but each fork has fresh Salsa local state.
+    /// Creates handles to a new database whose resolver reads path info from
+    /// `fs`.
+    pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
+        Self::from_workspace_db(WorkspaceDb::new(fs))
+    }
+
     pub(crate) fn from_workspace_db(db: WorkspaceDb) -> Self {
         let WorkspaceDb {
             files,
             #[cfg(feature = "module_graph")]
             modules,
+            #[cfg(feature = "module_graph")]
+            resolver_paths,
+            #[cfg(feature = "module_graph")]
+            resolver_fs,
             file_sources,
             storage,
             projects,
@@ -795,6 +960,10 @@ impl SharedWorkspaceDb {
             files,
             #[cfg(feature = "module_graph")]
             modules,
+            #[cfg(feature = "module_graph")]
+            resolver_paths,
+            #[cfg(feature = "module_graph")]
+            resolver_fs,
             file_sources,
             projects,
             settings_queries,
@@ -807,6 +976,8 @@ impl SharedWorkspaceDb {
             files: self.files.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            resolver_paths: self.resolver_paths.clone(),
             file_sources: self.file_sources.clone(),
             projects: self.projects.clone(),
         }
@@ -818,6 +989,10 @@ impl SharedWorkspaceDb {
             file_sources: self.file_sources.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
+            #[cfg(feature = "module_graph")]
+            resolver_paths: self.resolver_paths.clone(),
+            #[cfg(feature = "module_graph")]
+            resolver_fs: self.resolver_fs.clone(),
             projects: self.projects.clone(),
             settings_queries: self.settings_queries.clone(),
             storage: self.storage.clone().into_storage(),
@@ -837,6 +1012,18 @@ impl biome_db::Db for WorkspaceDb {
     }
 }
 
+#[cfg(feature = "module_graph")]
+#[salsa::db]
+impl ResolverDb for WorkspaceDb {
+    fn resolver_fs(&self) -> &dyn ResolverFsProxy {
+        self.resolver_fs.as_ref()
+    }
+
+    fn resolver_paths(&self) -> &ResolverPaths {
+        &self.resolver_paths
+    }
+}
+
 #[salsa::db]
 impl ProjectDb for WorkspaceDb {
     fn get_project(&self, project_key: &ProjectKey) -> Option<ProjectInput> {
@@ -844,9 +1031,12 @@ impl ProjectDb for WorkspaceDb {
     }
 
     fn find_project_for_path(&self, path: &Utf8Path) -> Option<ProjectKey> {
-        self.projects.pin().iter().find_map(|(key, project_data)| {
-            path.starts_with(project_data.path(self)).then_some(*key)
-        })
+        self.projects
+            .pin()
+            .iter()
+            .filter(|(_, project_data)| path.starts_with(project_data.path(self)))
+            .max_by_key(|(_, project_data)| project_data.path(self).components().count())
+            .map(|(key, _)| *key)
     }
 
     fn for_each_project(&self, f: &mut dyn FnMut(ProjectInput)) {
@@ -935,7 +1125,6 @@ mod tests {
     use biome_db::testing::{Events, function_query_will_execute_count_by_name};
     #[cfg(any(feature = "lang_js", feature = "module_graph"))]
     use biome_fs::BiomePath;
-    #[cfg(feature = "module_graph")]
     use biome_fs::MemoryFileSystem;
     #[cfg(feature = "module_graph")]
     use biome_html_parser::{HtmlParserOptions, parse_html};
@@ -947,11 +1136,9 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
     #[cfg(feature = "module_graph")]
-    use biome_module_graph::{ModuleDb, PathInfoCache, resolve_html_module};
+    use biome_module_graph::{ModuleDb, resolve_html_module};
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
-    #[cfg(feature = "module_graph")]
-    use biome_project_layout::ProjectLayout;
     use salsa::plumbing::{AsId, ZalsaDatabase};
     #[cfg(feature = "lang_js")]
     use std::str::FromStr;
@@ -965,17 +1152,18 @@ mod tests {
 
     #[salsa::interned]
     struct TestSettingsQueryInput {
+        #[returns(copy)]
         project: ProjectInput,
-        #[returns(ref)]
         selection: SettingsQuerySelection,
     }
 
     #[salsa::interned]
     struct TestSettingsCacheInput {
+        #[returns(copy)]
         value: usize,
     }
 
-    #[salsa::tracked(lru = 256)]
+    #[salsa::tracked(returns(copy), lru = 256)]
     fn test_settings_query<'db>(
         db: &'db dyn ProjectDb,
         input: TestSettingsQueryInput<'db>,
@@ -1001,6 +1189,14 @@ mod tests {
         .into()
     }
 
+    fn test_fs() -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(MemoryFileSystem::default())
+    }
+
+    fn test_db() -> WorkspaceDb {
+        WorkspaceDb::new(test_fs())
+    }
+
     fn settings_query_test_db() -> (WorkspaceDb, Events) {
         let events = Events::default();
         let storage = Storage::new(Some(Box::new({
@@ -1011,23 +1207,13 @@ mod tests {
             let events = events.clone();
             move |event| events.0.lock().unwrap().push(event)
         })));
-        let db = WorkspaceDb {
-            files: Arc::default(),
-            #[cfg(feature = "module_graph")]
-            modules: Arc::default(),
-            file_sources: Arc::default(),
-            projects: Arc::default(),
-            settings_queries,
-            storage,
-        };
-        #[cfg(feature = "module_graph")]
-        ModuleGraphGeneration::new(&db, 0);
+        let db = WorkspaceDb::with_storage(test_fs(), storage, settings_queries);
         (db, events)
     }
 
     #[test]
     fn settings_query_cache_rotates_storage_at_capacity() {
-        let db = WorkspaceDb::default();
+        let db = test_db();
         let first = db.settings_query_db();
 
         for value in 0..SETTINGS_QUERY_CACHE_CAPACITY {
@@ -1088,33 +1274,17 @@ mod tests {
                 barrier.wait();
             }
         })));
-        let db = WorkspaceDb {
-            files: Arc::default(),
-            modules: Arc::default(),
-            file_sources: Arc::default(),
-            projects: Arc::default(),
-            settings_queries: Arc::default(),
-            storage,
-        };
-        ModuleGraphGeneration::new(&db, 0);
-        db
+        WorkspaceDb::with_storage(test_fs(), storage, Arc::default())
     }
 
     #[cfg(feature = "module_graph")]
     fn test_module(db: &mut WorkspaceDb, path: &str) -> ModuleInfo {
         let path = BiomePath::new(path);
-        let fs = MemoryFileSystem::default();
         let source_index = db.insert_source(DocumentFileSource::Html(HtmlFileSource::html()));
         let parsed = parse_html("", HtmlParserOptions::default());
         db.replace_file(path.as_path(), parsed.into(), source_index, vec![]);
-        let (module, _, _) = resolve_html_module(
-            db,
-            &path,
-            &fs,
-            &ProjectLayout::default(),
-            &PathInfoCache::default(),
-        )
-        .expect("the parsed HTML source was just inserted");
+        let (module, _, _) =
+            resolve_html_module(db, &path).expect("the parsed HTML source was just inserted");
         ModuleInfo::new(
             db,
             path.as_path().to_path_buf(),
@@ -1122,7 +1292,7 @@ mod tests {
         )
     }
 
-    #[salsa::tracked]
+    #[salsa::tracked(returns(copy))]
     fn blocking_document_source_index(db: &dyn Db, file: ParsedSource) -> usize {
         SETTER_READER_STARTED.wait();
 
@@ -1137,7 +1307,7 @@ mod tests {
 
     #[test]
     fn upsert_file_updates_existing_input() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let path = Utf8Path::new("test.js");
 
         let file = db.upsert_file(path, parse_js("let a = 1;"), 0, vec![]);
@@ -1149,7 +1319,7 @@ mod tests {
 
     #[test]
     fn replace_file_replaces_existing_input() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let path = Utf8Path::new("test.js");
 
         let file = db.replace_file(path, parse_js("let a = 1;"), 0, vec![]);
@@ -1164,7 +1334,7 @@ mod tests {
 
     #[test]
     fn insert_project_keeps_index_and_salsa_in_sync() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let path = Utf8PathBuf::from("project");
 
         let project_key = db.insert_project(path.clone());
@@ -1176,7 +1346,7 @@ mod tests {
 
     #[test]
     fn remove_project_removes_project_from_index() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         let project = assert_single_project_in_sync(&db, project_key);
 
@@ -1663,7 +1833,7 @@ mod tests {
 
     #[test]
     fn settings_context_records_root_and_deepest_nested_selection() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         db.insert_nested_setting_with_mode(
             project_key,
@@ -1721,7 +1891,7 @@ mod tests {
 
     #[test]
     fn inline_settings_do_not_change_tracked_project_selection() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         let project = db.get_project(&project_key).unwrap();
         let settings = project.root_settings(&db);
@@ -1813,7 +1983,7 @@ mod tests {
 
     #[test]
     fn insert_root_settings_keeps_index_and_salsa_in_sync() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         let project = assert_single_project_in_sync(&db, project_key);
         let mut settings = Settings::default();
@@ -1840,7 +2010,7 @@ mod tests {
 
     #[test]
     fn insert_nested_setting_keeps_index_and_salsa_in_sync() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         let project = assert_single_project_in_sync(&db, project_key);
         let nested_path = Utf8PathBuf::from("project/package");
@@ -1868,7 +2038,7 @@ mod tests {
 
     #[test]
     fn replacement_updates_retry_after_project_changes() {
-        let shared = SharedWorkspaceDb::default();
+        let shared = SharedWorkspaceDb::new(test_fs());
         let mut db = shared.fork();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         drop(db);
@@ -1914,7 +2084,7 @@ mod tests {
 
     #[test]
     fn replacement_update_does_not_restore_removed_project() {
-        let shared = SharedWorkspaceDb::default();
+        let shared = SharedWorkspaceDb::new(test_fs());
         let mut db = shared.fork();
         let project_key = db.insert_project(Utf8PathBuf::from("project"));
         drop(db);
@@ -1952,7 +2122,7 @@ mod tests {
 
     #[test]
     fn store_nested_ignore_patterns_keeps_index_and_salsa_in_sync() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let root_path = Utf8PathBuf::from("/project");
         let project_key = db.insert_project(root_path.clone());
         let project = assert_single_project_in_sync(&db, project_key);
@@ -1995,7 +2165,7 @@ mod tests {
 
     #[test]
     fn setter_update_cancels_running_query_without_deadlock() {
-        let mut db = WorkspaceDb::default();
+        let mut db = test_db();
         let path = Utf8PathBuf::from("test.js");
         let file = db.upsert_file(&path, parse_js("let a = 1;"), 0, vec![]);
         let (writer_finished_tx, writer_finished_rx) = mpsc::channel();

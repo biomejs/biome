@@ -154,9 +154,9 @@ impl Rule for NoUndeclaredClasses {
 
             if !found_class && let Some(module) = db.module_for_path(file_path) {
                 let import_tree = if is_html_like {
-                    build_import_tree_for_html(db, module)
+                    build_import_tree_for_html(db, module).clone()
                 } else {
-                    build_import_tree_for_js(db, module)
+                    build_import_tree_for_js(db, module).clone()
                 };
                 signals.push(UndeclaredClass {
                     range: entry.range,
@@ -331,7 +331,7 @@ fn run_without_semantic(
         });
 
         if !found_class && let Some(module) = db.module_for_path(file_path) {
-            let import_tree = build_import_tree_for_html(db, module);
+            let import_tree = build_import_tree_for_html(db, module).clone();
             signals.push(UndeclaredClass {
                 range: entry.range,
                 name: entry.name.clone(),

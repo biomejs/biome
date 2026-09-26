@@ -156,11 +156,8 @@ impl ServiceLanguage for YamlLanguage {
 
 #[salsa::interned]
 struct YamlFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

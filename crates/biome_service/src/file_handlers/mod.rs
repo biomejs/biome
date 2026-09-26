@@ -2328,23 +2328,18 @@ struct AnalyzerVisitorComputedResult {
 
 #[salsa::interned]
 struct AnalyzerInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
 }
 
 #[salsa::interned]
 struct ManifestAnalyzerInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     manifest: ManifestDependencies,
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 fn resolved_analyzer_visitor<'db>(
     db: &'db dyn salsa::Database,
     input: AnalyzerInput<'db>,
@@ -2360,7 +2355,7 @@ pub(crate) fn analyzer_input_count_for_test(db: &WorkspaceDb) -> usize {
         .count()
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 fn resolved_manifest_visitor<'db>(
     db: &'db dyn salsa::Database,
     input: ManifestAnalyzerInput<'db>,

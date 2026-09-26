@@ -1,16 +1,15 @@
 use biome_db::testing::{assert_function_query_was_not_run, assert_function_query_was_run};
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_module_graph::{
-    ModuleDb, ModuleInfo, ModuleInfoKind, PathInfoCache, SymbolFromModuleInfo,
-    build_import_tree_for_js, css_classes_for_module, is_class_referenced_by_importers,
-    resolve_css_module, transitive_importers_of, traverse_import_tree_for_classes,
+    ModuleDb, ModuleInfo, ModuleInfoKind, SymbolFromModuleInfo, build_import_tree_for_js,
+    css_classes_for_module, is_class_referenced_by_importers, resolve_css_module,
+    transitive_importers_of, traverse_import_tree_for_classes,
 };
-use biome_project_layout::ProjectLayout;
 use biome_service::db::WorkspaceDb;
 use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashSet;
 
-use super::support::{add_css_modules, add_js_modules};
+use super::support::{TestFs, add_css_modules, add_js_modules};
 use super::{TestModuleDb, resolve_js_module_kind_for_test};
 
 fn graph(css: &[(&str, &str)], js: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
@@ -18,11 +17,10 @@ fn graph(css: &[(&str, &str)], js: &[(&str, &str)]) -> (MemoryFileSystem, Worksp
     for (path, source) in css.iter().chain(js) {
         fs.insert((*path).into(), *source);
     }
-    let mut db = WorkspaceDb::default();
+    let mut db = WorkspaceDb::new(fs.share());
     add_css_modules(
         &mut db,
         &fs,
-        &ProjectLayout::default(),
         &css.iter()
             .map(|(p, _)| BiomePath::new(*p))
             .collect::<Vec<_>>(),
@@ -30,7 +28,6 @@ fn graph(css: &[(&str, &str)], js: &[(&str, &str)]) -> (MemoryFileSystem, Worksp
     add_js_modules(
         &mut db,
         &fs,
-        &ProjectLayout::default(),
         &js.iter()
             .map(|(p, _)| BiomePath::new(*p))
             .collect::<Vec<_>>(),
@@ -51,13 +48,14 @@ fn test_jsx_imports_css_file() {
             "import \"./styles.css\";\n\nexport function App() {\n    return <div className=\"button header\">Hello</div>;\n}",
         )],
     );
-    let info = db
-        .js_module_info_for_path(Utf8Path::new("/src/App.jsx"))
-        .unwrap();
+    let module = db.module_for_path(Utf8Path::new("/src/App.jsx")).unwrap();
+    let kind = module.kind(&db);
+    let info = kind.as_js_module_info().unwrap();
     assert!(
         info.import_paths
             .iter()
-            .any(|path| path.as_path() == Some(Utf8Path::new("/src/styles.css")))
+            .any(|path| path.resolve_js(&db, module).path().as_path()
+                == Some(Utf8Path::new("/src/styles.css")))
     );
     assert!(["button", "header"].into_iter().all(|name| {
         info.referenced_classes
@@ -275,7 +273,7 @@ fn css_importers_and_parent_nodes_are_sorted_and_deduplicated() {
     );
 
     let leaf = db.module_for_path(Utf8Path::new("/leaf.js")).unwrap();
-    let tree = build_import_tree_for_js(&db, leaf).unwrap();
+    let tree = build_import_tree_for_js(&db, leaf).as_ref().unwrap();
     assert_eq!(
         tree.parent_components
             .iter()
@@ -290,13 +288,7 @@ fn resolve_css_module_kind_for_test(fs: &MemoryFileSystem, path: &str) -> Module
     let (_, root) = biome_test_utils::get_css_added_paths(fs, &paths)
         .pop()
         .unwrap();
-    let (info, _, _) = resolve_css_module(
-        root,
-        &paths[0],
-        fs,
-        &ProjectLayout::default(),
-        &PathInfoCache::default(),
-    );
+    let (info, _, _) = resolve_css_module(&TestModuleDb::with_fs(fs), root, &paths[0]);
     ModuleInfoKind::Css(info)
 }
 
@@ -307,20 +299,14 @@ fn css_classes_query_reuses_unrelated_edits_and_invalidates_dependency_edits() {
     fs.insert("/theme.css".into(), ".theme{}");
     fs.insert("/unrelated.css".into(), ".unrelated{}");
 
-    let mut db = TestModuleDb::new();
+    let mut db = TestModuleDb::with_fs(&fs);
     for path in ["/theme.css", "/unrelated.css"] {
-        let module = ModuleInfo::new(
-            &db,
-            Utf8PathBuf::from(path),
-            resolve_css_module_kind_for_test(&fs, path),
-        );
+        let kind = resolve_css_module_kind_for_test(&fs, path);
+        let module = ModuleInfo::new(&db, Utf8PathBuf::from(path), kind);
         db.modules.insert(Utf8PathBuf::from(path), module);
     }
-    let app = ModuleInfo::new(
-        &db,
-        Utf8PathBuf::from("/app.js"),
-        resolve_js_module_kind_for_test(&fs, "/app.js", false),
-    );
+    let kind = resolve_js_module_kind_for_test(&fs, "/app.js", false);
+    let app = ModuleInfo::new(&db, Utf8PathBuf::from("/app.js"), kind);
     db.modules.insert(Utf8PathBuf::from("/app.js"), app);
 
     assert_eq!(css_classes_for_module(&db, app).len(), 1);

@@ -27,7 +27,7 @@ use biome_js_type_info::{InferredType, interned_types::TypeData as InferredTypeD
 /// conclusive non-matches. Missing expressions, disabled inference, unsupported
 /// or ambiguous type shapes, dependency cycles, and exhausted traversal budgets
 /// are indeterminate.
-#[salsa::tracked(cycle_result=infer_expression_is_promise_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_is_promise_cycle_result)]
 pub fn infer_expression_is_promise<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
@@ -70,7 +70,7 @@ pub fn infer_expression_is_promise<'db>(
 /// const pending: Promise<number>[] = [Promise.resolve(1)];
 /// pending;
 /// ```
-#[salsa::tracked(cycle_result=infer_expression_is_array_of_promises_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_is_array_of_promises_cycle_result)]
 pub fn infer_expression_is_array_of_promises<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
@@ -115,7 +115,7 @@ pub fn infer_expression_is_array_of_promises<'db>(
 /// const callbacks = { callback: async () => {}, other: 0 };
 /// callbacks.callback;
 /// ```
-#[salsa::tracked(cycle_result=infer_expression_function_returns_promise_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_function_returns_promise_cycle_result)]
 pub fn infer_expression_function_returns_promise<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,

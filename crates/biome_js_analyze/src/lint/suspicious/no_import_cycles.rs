@@ -7,7 +7,7 @@ use biome_diagnostics::Severity;
 use biome_fs::is_node_modules_path;
 use biome_js_syntax::AnyJsImportLike;
 use biome_module_graph::{
-    JsImportPath, JsImportPhase, JsModuleInfo, ModuleGraphGeneration, js_module_sccs,
+    JsImportPhase, JsModuleInfo, ModuleGraphGeneration, ModuleInfo, ModuleInfoKind, js_module_sccs,
 };
 use biome_resolver::ResolvedPath;
 use biome_rowan::AstNode;
@@ -168,36 +168,42 @@ impl Rule for NoImportCycles {
     type Options = NoImportCyclesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
+        let db = ctx.db();
+        let owner = ctx.module_info_for_path(ctx.file_path())?;
+        let ModuleInfoKind::Js(module_info) = owner.kind(db) else {
+            return None;
+        };
         let node = ctx.query();
 
-        let JsImportPath {
-            resolved_path,
-            phase,
-            ..
-        } = module_info.get_import_path_by_js_node(node)?;
+        let import_path = module_info.get_import_path_by_js_node(node)?;
 
         let options = ctx.options();
-        if options.ignore_types() && node.is_static_import() && *phase == JsImportPhase::Type {
+        if options.ignore_types()
+            && node.is_static_import()
+            && import_path.phase == JsImportPhase::Type
+        {
             return None;
         }
 
-        let resolved_path_path = resolved_path.as_path()?;
+        let resolved = import_path.resolve_js(db, owner);
+        let resolved_path_path = resolved.path().as_path()?;
 
         // Don't check for cycles through node_modules imports.
         if is_node_modules_path(resolved_path_path) {
             return None;
         }
 
-        let db = ctx.db();
         let sccs = js_module_sccs(db, ModuleGraphGeneration::get(db));
         if !sccs.contains_cycle_between(ctx.file_path(), resolved_path_path) {
             return None;
         }
 
-        let imports = ctx.js_module_info_for_path(resolved_path_path)?;
+        let target_owner = ctx.module_info_for_path(resolved_path_path)?;
+        let ModuleInfoKind::Js(imports) = target_owner.kind(db) else {
+            return None;
+        };
 
-        find_cycle(ctx, resolved_path, imports)
+        find_cycle(ctx, resolved.path(), target_owner, imports.clone())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -252,25 +258,25 @@ impl Rule for NoImportCycles {
 fn find_cycle(
     ctx: &RuleContext<NoImportCycles>,
     start_path: &ResolvedPath,
+    mut owner: ModuleInfo,
     mut module_info: JsModuleInfo,
 ) -> Option<Box<[ResolvedPath]>> {
+    let db = ctx.db();
     let options = ctx.options();
     let mut seen = FxHashSet::default();
-    let mut stack: Vec<(ResolvedPath, JsModuleInfo)> = Vec::new();
+    let mut stack: Vec<(ResolvedPath, ModuleInfo, JsModuleInfo)> = Vec::new();
 
     'outer: loop {
-        for JsImportPath {
-            resolved_path,
-            phase,
-            kind,
-            ..
-        } in module_info.all_import_paths()
-        {
-            if options.ignore_types() && !kind.is_dynamic() && phase == JsImportPhase::Type {
+        for import in module_info.all_import_paths() {
+            if options.ignore_types()
+                && !import.kind.is_dynamic()
+                && import.phase == JsImportPhase::Type
+            {
                 continue;
             }
 
-            let Some(path) = resolved_path.as_path() else {
+            let resolved = import.resolve_js(db, owner);
+            let Some(path) = resolved.path().as_path() else {
                 continue;
             };
 
@@ -279,7 +285,7 @@ fn find_cycle(
                 continue;
             }
 
-            if !seen.insert(resolved_path.clone()) {
+            if !seen.insert(resolved.path().clone()) {
                 continue;
             }
 
@@ -293,23 +299,28 @@ fn find_cycle(
                 // Return all the paths from `start_path` to `resolved_path`:
                 let paths = Some(start_path.clone())
                     .into_iter()
-                    .chain(stack.iter().map(|(path, _)| path.clone()))
-                    .chain(Some(resolved_path.clone()))
+                    .chain(stack.iter().map(|(path, _, _)| path.clone()))
+                    .chain(Some(resolved.path().clone()))
                     .collect::<Vec<_>>()
                     .into_boxed_slice();
 
                 return Some(paths);
             }
 
-            if let Some(next_module_info) = ctx.js_module_info_for_path(path) {
-                stack.push((resolved_path.clone(), module_info));
+            if let Some(next_owner) = ctx.module_info_for_path(path)
+                && let ModuleInfoKind::Js(next_module_info) = next_owner.kind(db)
+            {
+                let next_module_info = next_module_info.clone();
+                stack.push((resolved.path().clone(), owner, module_info));
+                owner = next_owner;
                 module_info = next_module_info;
                 continue 'outer;
             }
         }
 
         match stack.pop() {
-            Some((_previous_path, previous_module_info)) => {
+            Some((_previous_path, previous_owner, previous_module_info)) => {
+                owner = previous_owner;
                 module_info = previous_module_info;
             }
             None => break,

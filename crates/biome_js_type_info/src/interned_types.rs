@@ -51,7 +51,7 @@ pub fn well_known_symbol_type<'db>(member_name: &str) -> Option<TypeData<'db>> {
         .map(TypeData::GlobalType)
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::SalsaValue)]
 pub struct ModuleKey {
     id: salsa::Id,
 }
@@ -66,7 +66,7 @@ impl ModuleKey {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, salsa::SalsaValue)]
 pub struct LocalTypeId {
     index: u32,
 }
@@ -91,7 +91,7 @@ pub trait TypeDb: biome_db::Db {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum TypeData<'db> {
     #[default]
     Unknown,
@@ -1862,7 +1862,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum Literal<'db> {
     BigInt(Text),
     Boolean(BooleanLiteral),
@@ -1873,32 +1873,32 @@ pub enum Literal<'db> {
     Template(Text),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum ReturnType<'db> {
     Type(TypeData<'db>),
     Predicate(PredicateReturnType<'db>),
     Asserts(AssertsReturnType<'db>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct PredicateReturnType<'db> {
     pub parameter_name: Text,
     pub ty: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct AssertsReturnType<'db> {
     pub parameter_name: Text,
     pub ty: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct ConstructorParameter<'db> {
     pub parameter: FunctionParameter<'db>,
     pub accessibility: Option<raw::TypeMemberAccessibility>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum FunctionParameter<'db> {
     Named(NamedFunctionParameter<'db>),
     Pattern(PatternFunctionParameter<'db>),
@@ -1936,7 +1936,7 @@ impl<'db> FunctionParameter<'db> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct NamedFunctionParameter<'db> {
     pub name: Text,
     pub ty: TypeData<'db>,
@@ -1944,7 +1944,7 @@ pub struct NamedFunctionParameter<'db> {
     pub is_rest: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct PatternFunctionParameter<'db> {
     pub bindings: Box<[FunctionParameterBinding<'db>]>,
     pub ty: TypeData<'db>,
@@ -1952,13 +1952,13 @@ pub struct PatternFunctionParameter<'db> {
     pub is_rest: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct FunctionParameterBinding<'db> {
     pub name: Text,
     pub ty: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TupleElementType<'db> {
     pub ty: TypeData<'db>,
     pub name: Option<Text>,
@@ -1966,7 +1966,7 @@ pub struct TupleElementType<'db> {
     pub is_rest: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeMember<'db> {
     pub kind: TypeMemberKind<'db>,
     pub ty: TypeData<'db>,
@@ -1991,7 +1991,7 @@ impl TypeMember<'_> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum TypeMemberKind<'db> {
     CallSignature,
     ComputedValue(TypeData<'db>),
@@ -2166,7 +2166,7 @@ impl<'db> TypeMemberKind<'db> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum TypeofExpression<'db> {
     Addition(TypeofAdditionExpression<'db>),
     Await(TypeofAwaitExpression<'db>),
@@ -2192,29 +2192,29 @@ pub enum TypeofExpression<'db> {
     UnaryMinus(TypeofUnaryMinusExpression<'db>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofAdditionExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofAwaitExpression<'db> {
     pub argument: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofBitwiseNotExpression<'db> {
     pub argument: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofCallExpression<'db> {
     pub callee: TypeData<'db>,
     pub arguments: Box<[CallArgumentType<'db>]>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofCallArgumentExpression<'db> {
     pub callee: TypeData<'db>,
     pub arguments: Box<[CallArgumentType<'db>]>,
@@ -2222,91 +2222,91 @@ pub struct TypeofCallArgumentExpression<'db> {
     pub is_constructor: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofParameterExpression<'db> {
     pub function: TypeData<'db>,
     pub index: u16,
     pub has_initializer: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofConditionalExpression<'db> {
     pub test: TypeData<'db>,
     pub consequent: TypeData<'db>,
     pub alternate: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofDestructureExpression<'db> {
     pub ty: TypeData<'db>,
     pub destructure_field: raw::DestructureField,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofIterableValueOfExpression<'db> {
     pub ty: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofLogicalAndExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofLogicalOrExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofNewExpression<'db> {
     pub callee: TypeData<'db>,
     pub arguments: Box<[CallArgumentType<'db>]>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub enum CallArgumentType<'db> {
     Argument(TypeData<'db>),
     Spread(TypeData<'db>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofComputedMemberExpression<'db> {
     pub object: TypeData<'db>,
     pub member: TypeData<'db>,
     pub is_optional_chain: bool,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofIndexExpression<'db> {
     pub object: TypeData<'db>,
     pub index: usize,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofNullishCoalescingExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofStaticMemberExpression<'db> {
     pub object: TypeData<'db>,
     pub member: Text,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofThisOrSuperExpression<'db> {
     pub parent: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofTypeofExpression<'db> {
     pub argument: TypeData<'db>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct TypeofUnaryMinusExpression<'db> {
     pub argument: TypeData<'db>,
 }
@@ -2314,14 +2314,11 @@ pub struct TypeofUnaryMinusExpression<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedFunction<'db> {
-    #[returns(ref)]
     pub type_parameters: Box<[TypeData<'db>]>,
-    #[returns(ref)]
     pub parameters: Box<[FunctionParameter<'db>]>,
-    #[returns(ref)]
     pub return_type: ReturnType<'db>,
+    #[returns(copy)]
     pub is_async: bool,
-    #[returns(ref)]
     pub name: Option<Text>,
 }
 
@@ -2348,25 +2345,22 @@ impl<'db> InternedFunction<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedClass<'db> {
-    #[returns(ref)]
     pub type_parameters: Box<[TypeData<'db>]>,
+    #[returns(copy)]
     pub extends: Option<TypeData<'db>>,
-    #[returns(ref)]
     pub implements: Box<[TypeData<'db>]>,
-    #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
-    #[returns(ref)]
     pub name: Option<Text>,
+    #[returns(copy)]
     pub is_builtin: bool,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedConstructor<'db> {
-    #[returns(ref)]
     pub type_parameters: Box<[TypeData<'db>]>,
-    #[returns(ref)]
     pub parameters: Box<[ConstructorParameter<'db>]>,
+    #[returns(copy)]
     pub return_type: Option<TypeData<'db>>,
 }
 
@@ -2390,91 +2384,84 @@ impl<'db> InternedConstructor<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedInterface<'db> {
-    #[returns(ref)]
     pub type_parameters: Box<[TypeData<'db>]>,
-    #[returns(ref)]
     pub extends: Box<[TypeData<'db>]>,
-    #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
-    #[returns(ref)]
     pub name: Text,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedObject<'db> {
+    #[returns(copy)]
     pub prototype: Option<TypeData<'db>>,
-    #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
 
     /// Whether the object may carry members beyond those in `members`.
     ///
     /// See [`crate::type_data::Object::has_unknown_members`].
+    #[returns(copy)]
     pub has_unknown_members: bool,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedUnion<'db> {
-    #[returns(ref)]
     pub types: Box<[TypeData<'db>]>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedIntersection<'db> {
-    #[returns(ref)]
     pub types: Box<[TypeData<'db>]>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTuple<'db> {
-    #[returns(ref)]
     pub elements: Box<[TupleElementType<'db>]>,
     /// Whether these elements describe an ordinary mutable array expression.
     /// See [`raw::Tuple::is_inferred_array`] for examples.
+    #[returns(copy)]
     pub is_inferred_array: bool,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedModule<'db> {
-    #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
-    #[returns(ref)]
     pub name: Text,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedNamespace<'db> {
-    #[returns(ref)]
     pub members: Box<[TypeMember<'db>]>,
-    #[returns(ref)]
     pub path: raw::Path,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedLiteral<'db> {
-    #[returns(ref)]
     pub literal: Literal<'db>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTypeInstance<'db> {
+    #[returns(copy)]
     pub ty: TypeData<'db>,
-    #[returns(ref)]
     pub type_parameters: Box<[TypeData<'db>]>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedMergedReference<'db> {
+    #[returns(copy)]
     pub ty: Option<TypeData<'db>>,
+    #[returns(copy)]
     pub value_ty: Option<TypeData<'db>>,
+    #[returns(copy)]
     pub namespace_ty: Option<TypeData<'db>>,
 }
 
@@ -2494,24 +2481,30 @@ impl<'db> InternedMergedReference<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedGenericTypeParameter<'db> {
+    #[returns(copy)]
     pub is_const: bool,
+    #[returns(copy)]
     pub constraint: Option<TypeData<'db>>,
+    #[returns(copy)]
     pub default: Option<TypeData<'db>>,
-    #[returns(ref)]
     pub name: Text,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct LocalTypeHandle<'db> {
+    #[returns(copy)]
     pub module: ModuleKey,
+    #[returns(copy)]
     pub type_id: LocalTypeId,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTypeOperatorType<'db> {
+    #[returns(copy)]
     pub ty: TypeData<'db>,
+    #[returns(copy)]
     pub operator: raw::TypeOperator,
 }
 
@@ -2520,29 +2513,32 @@ pub struct InternedTypeOperatorType<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedIndexedAccessType<'db> {
+    #[returns(copy)]
     pub object: TypeData<'db>,
+    #[returns(copy)]
     pub index: TypeData<'db>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTypeofExpression<'db> {
-    #[returns(ref)]
     pub expression: TypeofExpression<'db>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTypeofType<'db> {
+    #[returns(copy)]
     pub ty: TypeData<'db>,
 }
 
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedTypeofValue<'db> {
+    #[returns(copy)]
     pub ty: TypeData<'db>,
-    #[returns(ref)]
     pub identifier: Text,
+    #[returns(copy)]
     pub scope_id: Option<ScopeId>,
 }
 

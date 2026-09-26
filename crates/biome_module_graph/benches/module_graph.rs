@@ -3,8 +3,8 @@ use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::JsFileSource;
-use biome_module_graph::{PathInfoCache, resolve_js_module};
-use biome_project_layout::ProjectLayout;
+use biome_module_graph::resolve_js_module;
+use biome_service::db::WorkspaceDb;
 use divan::Bencher;
 use std::sync::Arc;
 
@@ -72,16 +72,8 @@ fn bench_index_d_ts(bencher: Bencher, name: &str) {
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {
-            let path_info_cache = PathInfoCache::default();
-            let (module_info, _, _) = resolve_js_module(
-                root,
-                &path,
-                &fs,
-                &ProjectLayout::default(),
-                semantic_model,
-                &path_info_cache,
-                true,
-            );
+            let db = WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())));
+            let (module_info, _, _) = resolve_js_module(&db, root, &path, semantic_model, true);
             divan::black_box(&module_info);
         });
 }

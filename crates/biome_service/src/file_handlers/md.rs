@@ -254,11 +254,8 @@ impl ServiceLanguage for MarkdownLanguage {
 
 #[salsa::interned]
 struct MarkdownFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -275,11 +272,8 @@ fn resolved_markdown_format_options<'db>(
 
 #[salsa::interned]
 struct MarkdownAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

@@ -2,7 +2,7 @@
 ///
 /// This keeps an inconclusive inference result distinct from a conclusive
 /// non-match.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, salsa::SalsaValue)]
 pub enum TypeInferenceClassification {
     /// The available type information proves that the subject matches.
     Match,

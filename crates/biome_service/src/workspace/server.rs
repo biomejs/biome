@@ -22,7 +22,7 @@ use crate::module_graph::resolve_html_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use crate::module_graph::resolve_js_module;
 #[cfg(feature = "module_graph")]
-use crate::module_graph::{ModuleDb, ModuleInfoKind};
+use crate::module_graph::{ModuleDb, ModuleInfoKind, module_dependencies};
 use crate::projects::{GetFileFeaturesParams, ProjectDb, ProjectKey};
 use crate::scanner::{
     IndexRequestKind, IndexTrigger, ScanOptions, Scanner, ScannerWatcherBridge, WatcherInstruction,
@@ -467,8 +467,8 @@ impl LocalWorkspace {
         threads: Option<usize>,
     ) -> Self {
         Self {
+            db_state: DbState::new(fs.clone()),
             server: WorkspaceServer::new(fs, watcher_tx, notification_tx, search_provider, threads),
-            db_state: DbState::default(),
         }
     }
 
@@ -547,7 +547,7 @@ impl WorkspaceServerWithDb<'_> {
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let mut final_diagnostics = vec![];
 
-        if self.is_indexed(path) {
+        if self.should_update_service_data(path) {
             let (dependencies, diagnostics) = self.update_service_data(
                 path,
                 UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, parsed.into()),
@@ -1012,7 +1012,7 @@ impl WorkspaceServerWithDb<'_> {
 
             // `open_file_internal` must update project data for both index
             // requests and client requests for files that are already indexed.
-            reason.is_index() || self.is_indexed(&path)
+            reason.is_index() || self.should_update_service_data(&path)
         };
 
         // Manifest files need to update the module graph.
@@ -1044,6 +1044,18 @@ impl WorkspaceServerWithDb<'_> {
         // If the document was never opened by the scanner, we don't care
         // about updating service data.
         Ok(InternalOpenFileResult::default())
+    }
+
+    /// Returns whether a client update of `path` must update the service data.
+    ///
+    /// This is the case for indexed files, and for the documents the resolver
+    /// reads, such as a TypeScript configuration referenced by an indexed one.
+    fn should_update_service_data(&self, path: &Utf8Path) -> bool {
+        #[cfg(feature = "module_graph")]
+        if self.db_state.is_resolver_manifest(path) {
+            return true;
+        }
+        self.is_indexed(path)
     }
 
     /// Retrieves the parser result for a given file.
@@ -2111,15 +2123,8 @@ impl WorkspaceServerWithDb<'_> {
                     #[cfg(feature = "lang_js")]
                     if let Some(js_root) = root.clone().into_language_root::<AnyJsRoot>(&*db) {
                         let semantic_model = Arc::new(js_semantic_model(&*db, &root).clone());
-                        let (module_info, dependencies, diagnostics) = resolve_js_module(
-                            js_root,
-                            path,
-                            self.fs.as_ref(),
-                            &self.project_layout,
-                            semantic_model,
-                            &self.db_state.path_info_cache,
-                            infer_types,
-                        );
+                        let (module_info, dependencies, diagnostics) =
+                            resolve_js_module(&*db, js_root, path, semantic_model, infer_types);
                         break 'resolve ResolvedModuleGraphUpdate::Upsert {
                             kind: ModuleInfoKind::Js(module_info),
                             dependencies,
@@ -2129,13 +2134,8 @@ impl WorkspaceServerWithDb<'_> {
 
                     #[cfg(feature = "lang_css")]
                     if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(&*db) {
-                        let (module_info, dependencies, diagnostics) = resolve_css_module(
-                            css_root,
-                            path,
-                            self.fs.as_ref(),
-                            &self.project_layout,
-                            &self.db_state.path_info_cache,
-                        );
+                        let (module_info, dependencies, diagnostics) =
+                            resolve_css_module(&*db, css_root, path);
                         break 'resolve ResolvedModuleGraphUpdate::Upsert {
                             kind: ModuleInfoKind::Css(module_info),
                             dependencies,
@@ -2145,14 +2145,9 @@ impl WorkspaceServerWithDb<'_> {
 
                     #[cfg(feature = "lang_html")]
                     if root.clone().into_language_root::<HtmlRoot>(&*db).is_some() {
-                        let (module_info, dependencies, diagnostics) = resolve_html_module(
-                            &*db,
-                            path,
-                            self.fs.as_ref(),
-                            &self.project_layout,
-                            &self.db_state.path_info_cache,
-                        )
-                        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+                        let (module_info, dependencies, diagnostics) =
+                            resolve_html_module(&*db, path)
+                                .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
                         break 'resolve ResolvedModuleGraphUpdate::Upsert {
                             kind: ModuleInfoKind::Html(module_info),
                             dependencies,
@@ -2188,7 +2183,6 @@ impl WorkspaceServerWithDb<'_> {
                 Ok((dependencies, diagnostics))
             }
             ResolvedModuleGraphUpdate::Remove => {
-                self.db_state.path_info_cache.remove(path);
                 self.db_state.remove_module(path);
                 Ok(Default::default())
             }
@@ -2224,6 +2218,28 @@ impl WorkspaceServerWithDb<'_> {
         project_key: ProjectKey,
     ) -> Result<(ModuleDependencies, Vec<Error>), WorkspaceError> {
         let path = BiomePath::from(path);
+        // Index requests don't refresh dependencies: an initial scan indexes
+        // them itself, and watcher updates are refreshed by the watcher
+        // bridge.
+        #[cfg(feature = "module_graph")]
+        let refresh_dependencies = matches!(
+            &update_kind,
+            UpdateKind::AddedOrChanged(OpenFileReason::ClientRequest, _)
+        ) && self.is_manifest_for_resolution(&path);
+        // The resolver prefers the parsed source of a manifest to the
+        // filesystem, so a removed manifest must not outlive its file unless
+        // the client still has it open.
+        #[cfg(feature = "module_graph")]
+        if matches!(&update_kind, UpdateKind::Removed) && self.is_manifest_for_resolution(&path) {
+            let documents = self.documents.pin();
+            let opened_by_client = documents
+                .get(path.as_path())
+                .is_some_and(|document| document.version.is_some());
+            if !opened_by_client {
+                documents.remove(path.as_path());
+                self.db_remove_file(&path);
+            }
+        }
         if path.is_manifest() {
             self.update_project_layout(&path, &update_kind, project_key)?;
         }
@@ -2245,7 +2261,106 @@ impl WorkspaceServerWithDb<'_> {
             settings.module_graph_resolution_kind.is_modules_and_types(),
         )?;
 
+        #[cfg(feature = "module_graph")]
+        if refresh_dependencies {
+            // Diagnostics of dependencies aren't reported to the client.
+            let _diagnostics = self.index_new_dependencies(project_key)?;
+        }
+
         Ok(result)
+    }
+
+    /// Returns whether the content of `path` can affect module resolution.
+    #[cfg(feature = "module_graph")]
+    fn is_manifest_for_resolution(&self, path: &BiomePath) -> bool {
+        path.is_manifest() || self.db_state.is_resolver_manifest(path)
+    }
+
+    /// Refreshes the resolver path info of `path`, and of the known paths inside
+    /// it, after the watcher reported a change.
+    ///
+    /// Returns whether the change affects a manifest: `path` itself, or a
+    /// manifest inside it.
+    #[cfg(feature = "module_graph")]
+    fn sync_resolver_path_info(&self, path: &Utf8Path) -> bool {
+        let mut changes = self.db_state.resolver_changes_within(path);
+        changes.push((
+            path.to_path_buf(),
+            self.db_state.resolver_changes_for_modified_path(path),
+        ));
+        if path.file_name() == Some("package.json")
+            && let Some(package_path) = path.parent()
+        {
+            // Installing dependencies doesn't produce watcher events for
+            // `node_modules`, so the path info of the packages the manifest can
+            // resolve are refreshed when it changes. Package managers may
+            // hoist them to the `node_modules` of an ancestor.
+            changes.extend(
+                self.db_state
+                    .resolver_changes_in_visible_node_modules(package_path),
+            );
+        }
+        // A removed or created directory may contain manifests, which only
+        // the paths inside it identify.
+        let manifest_changed = changes
+            .iter()
+            .any(|(path, _)| self.is_manifest_for_resolution(&BiomePath::new(path)));
+        self.db_state.sync_resolver_paths(changes);
+        manifest_changed
+    }
+
+    /// Indexes the dependencies that became resolvable after a manifest
+    /// changed.
+    ///
+    /// Resolution results are derived from Salsa queries, so only the imports
+    /// affected by the manifest are resolved again. Each new dependency is
+    /// indexed by the project that contains it, or by `project_key` if no
+    /// project contains it.
+    #[cfg(feature = "module_graph")]
+    fn index_new_dependencies(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
+        let dependencies_by_project = {
+            let db = self.get_db();
+            let mut modules = Vec::new();
+            db.for_each_module(&mut |module| modules.push(module));
+            let documents = self.documents.pin();
+            let mut dependencies_by_project =
+                FxHashMap::<ProjectKey, ModuleDependencies>::default();
+            for module in modules {
+                for dependency in module_dependencies(&*db, module).iter() {
+                    // Dependencies that Biome can't read, or that were already
+                    // indexed without becoming modules, can't become modules.
+                    if db.contains(dependency)
+                        || documents.contains_key(dependency.as_path())
+                        || !DocumentFileSource::can_read(dependency)
+                    {
+                        continue;
+                    }
+                    let owner = db.find_project_for_path(dependency).unwrap_or(project_key);
+                    dependencies_by_project
+                        .entry(owner)
+                        .or_default()
+                        .insert(dependency.clone());
+                }
+            }
+            dependencies_by_project
+        };
+
+        let mut diagnostics = Vec::new();
+        for (owner, dependencies) in dependencies_by_project {
+            if let Some(project_path) = self.project_get_path(owner) {
+                diagnostics.extend(self.scanner.index_dependencies(
+                    self,
+                    owner,
+                    &project_path,
+                    dependencies,
+                    IndexTrigger::Update,
+                )?);
+            }
+        }
+        Ok(diagnostics)
     }
 
     // #region DATABASE OPERATIONS
@@ -2269,7 +2384,6 @@ impl WorkspaceServerWithDb<'_> {
 
     /// Purges the path from the database
     fn db_unload_path(&self, path: &Utf8Path) {
-        self.db_state.path_info_cache.remove(path);
         self.db_state.unload_path(path);
     }
 
@@ -3101,7 +3215,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             editor_features,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
-        let is_indexed = self.is_indexed(&path);
+        let is_indexed = self.should_update_service_data(&path);
         let documents = self.documents.pin();
         let (index, existing_version, same_content) = documents
             .get(path.as_path())
@@ -4053,6 +4167,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         self.node_cache.lock().unwrap().remove(path);
         self.db_remove_file(path);
 
+        // Without the client's content, the resolver reads the manifest from
+        // the filesystem again, which may make other dependencies reachable.
+        #[cfg(feature = "module_graph")]
+        if self.db_state.is_resolver_manifest(path) {
+            // Diagnostics of dependencies aren't reported to the client.
+            let _diagnostics = self.index_new_dependencies(params.project_key)?;
+        }
+
         if self.is_indexed(path) {
             // This may look counter-intuitive, but we need to consider that the
             // file may have gone out-of-sync between the client and the
@@ -4174,10 +4296,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let mut data = FxHashMap::default();
         #[cfg(feature = "module_graph")]
         db.for_each_module(&mut |module| {
-            data.insert(
-                module.path(&*db).as_str().to_string(),
-                module.kind(&*db).dump(),
-            );
+            data.insert(module.path(&*db).as_str().to_string(), module.dump(&*db));
         });
         #[cfg(not(feature = "module_graph"))]
         let data = {
@@ -4446,6 +4565,35 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
                     .collect()
             })
     }
+
+    fn sync_path_info(&self, path: &Utf8Path) -> bool {
+        // The watcher has no cancellation boundary of its own, and a
+        // concurrent client update can cancel the database reads.
+        #[cfg(feature = "module_graph")]
+        {
+            retry_on_pending_write(|| self.sync_resolver_path_info(path))
+        }
+        #[cfg(not(feature = "module_graph"))]
+        {
+            let _ = path;
+            false
+        }
+    }
+
+    fn index_new_module_dependencies(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
+        #[cfg(feature = "module_graph")]
+        {
+            retry_on_pending_write(|| self.index_new_dependencies(project_key))
+        }
+        #[cfg(not(feature = "module_graph"))]
+        {
+            let _ = project_key;
+            Ok(Vec::new())
+        }
+    }
 }
 
 impl WorkspaceScannerBridge for LocalWorkspace {
@@ -4528,6 +4676,18 @@ impl WorkspaceScannerBridge for LocalWorkspace {
         project_key: ProjectKey,
     ) -> Result<Vec<biome_diagnostics::serde::Diagnostic>, WorkspaceError> {
         self.as_workspace().unload_path(path, project_key)
+    }
+
+    fn sync_path_info(&self, path: &Utf8Path) -> bool {
+        self.as_workspace().sync_path_info(path)
+    }
+
+    fn index_new_module_dependencies(
+        &self,
+        project_key: ProjectKey,
+    ) -> Result<Vec<SerdeDiagnostic>, WorkspaceError> {
+        self.as_workspace()
+            .index_new_module_dependencies(project_key)
     }
 }
 

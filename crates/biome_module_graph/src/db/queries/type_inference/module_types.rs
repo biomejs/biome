@@ -20,7 +20,7 @@ use crate::type_inference::profiling::{
     start_whole_module_inference, start_whole_module_inference_at,
 };
 use crate::{
-    ModuleDb, ModuleGraphGeneration, ResolvedPath, type_inference::TypeInferenceCodeReference,
+    JsImport, ModuleDb, ModuleGraphGeneration, type_inference::TypeInferenceCodeReference,
 };
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -67,7 +67,7 @@ pub fn infer_module_types<'db>(
                 );
                 whole_module
             });
-            let result = resolve_raw_types(db, module, &js_info, ImportResolution::on_demand());
+            let result = resolve_raw_types(db, module, js_info, ImportResolution::on_demand());
             if let Some(whole_module) = whole_module {
                 whole_module.complete();
             }
@@ -92,7 +92,7 @@ pub(crate) fn infer_module_types_from_tables<'db>(
     Some(resolve_raw_types(
         db,
         module,
-        &js_info,
+        js_info,
         ImportResolution::FromTables { root },
     ))
 }
@@ -129,7 +129,7 @@ impl InferenceModuleSccs {
     }
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn inference_module_sccs(
     db: &dyn ModuleDb,
     generation: ModuleGraphGeneration,
@@ -154,7 +154,7 @@ pub(crate) fn inference_module_sccs(
         let Some(edges) = edges.get_mut(from_id as usize) else {
             return;
         };
-        push_inference_dependency_ids(db, &id_by_module, edges, &js_info);
+        push_inference_dependency_ids(db, &id_by_module, edges, module, js_info);
     });
 
     let (component_by_id, component_sizes) = compute_sccs(&edges);
@@ -218,7 +218,7 @@ pub(crate) fn infer_module_types_bottom_up_for_import_depth<'db>(
         .then(|| infer_module_types_from_tables(db, module, module))?
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn prepare_module_types_bottom_up_for_import_depth(db: &dyn ModuleDb, module: ModuleInfo) -> bool {
     let whole_module = start_whole_module_inference_at(
         TypeInferenceWholeModuleReason::ImportDepthLimit,
@@ -266,7 +266,7 @@ fn infer_module_types_bottom_up_impl<'db>(
         let ModuleInfoKind::Js(js_info) = current.kind(db) else {
             continue;
         };
-        push_scheduled_inference_dependencies(db, &visited, &mut stack, &js_info);
+        push_scheduled_inference_dependencies(db, &visited, &mut stack, current, js_info);
     }
 
     None
@@ -286,9 +286,11 @@ fn push_inference_dependency(
     db: &dyn ModuleDb,
     visited: &FxHashSet<ModuleInfo>,
     stack: &mut Vec<(ModuleInfo, bool)>,
-    resolved_path: &ResolvedPath,
+    owner: ModuleInfo,
+    import: &JsImport,
 ) {
-    if let Some(path) = resolved_path.as_path()
+    let resolved = import.resolve_js(db, owner);
+    if let Some(path) = resolved.path().as_path()
         && let Some(target) = db.module_for_path(path)
         && !visited.contains(&target)
     {
@@ -300,10 +302,11 @@ fn push_scheduled_inference_dependencies(
     db: &dyn ModuleDb,
     visited: &FxHashSet<ModuleInfo>,
     stack: &mut Vec<(ModuleInfo, bool)>,
+    owner: ModuleInfo,
     js_info: &crate::JsModuleInfo,
 ) {
-    for resolved_path in js_info.type_inference_dependency_paths() {
-        push_inference_dependency(db, visited, stack, resolved_path);
+    for import in js_info.type_inference_dependencies() {
+        push_inference_dependency(db, visited, stack, owner, import);
     }
 }
 
@@ -311,10 +314,12 @@ fn push_inference_dependency_ids(
     db: &dyn ModuleDb,
     id_by_module: &FxHashMap<ModuleInfo, u32>,
     edges: &mut Vec<u32>,
+    owner: ModuleInfo,
     js_info: &crate::JsModuleInfo,
 ) {
-    let mut push = |resolved_path: &ResolvedPath| {
-        if let Some(path) = resolved_path.as_path()
+    let mut push = |import: &JsImport| {
+        let resolved = import.resolve_js(db, owner);
+        if let Some(path) = resolved.path().as_path()
             && let Some(module) = db.module_for_path(path)
             && let Some(&id) = id_by_module.get(&module)
         {
@@ -322,8 +327,8 @@ fn push_inference_dependency_ids(
         }
     };
 
-    for resolved_path in js_info.type_inference_dependency_paths() {
-        push(resolved_path);
+    for import in js_info.type_inference_dependencies() {
+        push(import);
     }
 }
 

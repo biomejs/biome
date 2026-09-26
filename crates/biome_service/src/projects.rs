@@ -43,7 +43,6 @@ pub struct ProjectInput {
     project_key: ProjectKey,
 
     /// The root path of the project. This path should be **absolute**.
-    #[returns(ref)]
     pub(crate) path: Utf8PathBuf,
 
     /// The "root" settings of the project.
@@ -55,7 +54,6 @@ pub struct ProjectInput {
 
     /// Optional nested settings, usually populated in monorepo
     /// projects.
-    #[returns(ref)]
     pub(crate) nested_settings: BTreeMap<NestedPath, SettingsIdentity>,
 }
 

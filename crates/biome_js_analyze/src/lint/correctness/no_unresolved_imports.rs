@@ -6,7 +6,7 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_module_graph::{
-    JsExportedSymbolLookup, JsImportPath, ModuleDb, ModuleInfo, SUPPORTED_EXTENSIONS,
+    JsExportedSymbolLookup, ModuleDb, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
     SymbolFromModuleInfo, find_js_exported_symbol,
 };
 use biome_resolver::ResolveError;
@@ -97,21 +97,24 @@ impl Rule for NoUnresolvedImports {
     type Options = NoUnresolvedImportsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(module_info) = ctx.js_module_info_for_path(ctx.file_path()) else {
+        let Some(owner) = ctx.module_info_for_path(ctx.file_path()) else {
+            return Vec::new();
+        };
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(JsImportPath { resolved_path, .. }) = module_info.get_import_path_by_js_node(node)
-        else {
+        let Some(import_path) = module_info.get_import_path_by_js_node(node) else {
             return Vec::new();
         };
+        let resolved = import_path.resolve_js(ctx.db(), owner);
 
         let Some(specifier) = node.inner_string_text() else {
             return Vec::new();
         };
 
-        let resolved_path = match resolved_path.as_deref() {
+        let resolved_path = match resolved.path().as_deref() {
             Ok(resolved_path) => resolved_path,
             Err(resolve_error) => {
                 // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) are valid

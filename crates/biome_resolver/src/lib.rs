@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+mod db;
 mod errors;
 mod resolver_fs_proxy;
 mod runtime_builtins;
@@ -11,6 +12,13 @@ use biome_json_value::{JsonObject, JsonValue};
 use biome_package::{PackageJson, TsConfigJson};
 use camino::{Utf8Path, Utf8PathBuf};
 
+pub use db::{
+    PackageJsonData, ResolvedPackage, ResolverDb, ResolverDbAdapter, ResolverPathChange,
+    ResolverPathChanges, ResolverPathData, ResolverPaths, TsConfigJsonData,
+    package_json_for_directory, package_json_for_path, package_json_from_source,
+    resolver_paths_need_sync, sync_resolver_paths, tsconfig_json_for_path,
+    tsconfig_json_from_source,
+};
 pub use errors::*;
 pub use resolver_fs_proxy::*;
 pub use runtime_builtins::{is_builtin_bun_module, is_builtin_node_module};
@@ -974,6 +982,54 @@ impl Resolution {
     /// Returns the resolved path.
     pub fn into_path(self) -> Utf8PathBuf {
         self.path
+    }
+}
+
+/// The outcome of resolving a module specifier.
+///
+/// [`Self::path`] contains either the resolved path or the resolution error.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ResolvedSpecifier {
+    path: ResolvedPath,
+    kind: ResolutionKind,
+}
+
+impl ResolvedSpecifier {
+    /// Creates a resolution outcome from its path and mechanism.
+    pub fn new(path: ResolvedPath, kind: ResolutionKind) -> Self {
+        Self { path, kind }
+    }
+
+    /// Returns the resolved path or resolution error.
+    pub const fn path(&self) -> &ResolvedPath {
+        &self.path
+    }
+
+    /// Returns the mechanism that produced the resolved path.
+    pub const fn kind(&self) -> ResolutionKind {
+        self.kind
+    }
+}
+
+impl From<Resolution> for ResolvedSpecifier {
+    fn from(resolution: Resolution) -> Self {
+        let kind = resolution.kind();
+        Self::new(resolution.into_path().into(), kind)
+    }
+}
+
+impl From<ResolveError> for ResolvedSpecifier {
+    fn from(error: ResolveError) -> Self {
+        Self::new(error.into(), ResolutionKind::Other)
+    }
+}
+
+impl From<Result<Resolution, ResolveError>> for ResolvedSpecifier {
+    fn from(result: Result<Resolution, ResolveError>) -> Self {
+        match result {
+            Ok(resolution) => resolution.into(),
+            Err(error) => error.into(),
+        }
     }
 }
 

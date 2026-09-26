@@ -9,6 +9,7 @@
 //! whose behavior they implement.
 
 mod css;
+mod dependencies;
 mod js_scc;
 mod type_inference;
 
@@ -18,6 +19,8 @@ use biome_jsdoc_comment::JsdocComment;
 
 pub use crate::db::type_inference::InferredModuleTypes;
 pub use css::*;
+pub use dependencies::module_dependencies;
+pub(crate) use dependencies::{css_dependencies, html_dependencies, js_dependencies};
 pub use js_scc::*;
 pub use type_inference::*;
 
@@ -34,7 +37,8 @@ pub fn find_js_exported_symbol<'db>(
     let mut saw_unresolved_target = false;
 
     while let Some(symbol) = stack.pop() {
-        let ModuleInfoKind::Js(module) = symbol.module(db).kind(db) else {
+        let owning_module = *symbol.module(db);
+        let ModuleInfoKind::Js(module) = owning_module.kind(db) else {
             continue;
         };
         match &module.exports.get(symbol.name(db).as_str()) {
@@ -46,7 +50,12 @@ pub fn find_js_exported_symbol<'db>(
                     ImportSymbol::All => break,
                     ImportSymbol::Named(source_name) => {
                         let lookup = source_name.text().to_string();
-                        match reexport.import.resolved_path.as_deref() {
+                        match reexport
+                            .import
+                            .resolve_js(db, owning_module)
+                            .path()
+                            .as_deref()
+                        {
                             Ok(path) if seen_paths.insert(path.to_path_buf()) => {
                                 if let Some(module) = db.module_for_path(path) {
                                     stack.push(SymbolFromModuleInfo::new(
@@ -64,7 +73,11 @@ pub fn find_js_exported_symbol<'db>(
                         }
                     }
                     ImportSymbol::Default => {
-                        if let Ok(path) = reexport.import.resolved_path.as_deref()
+                        if let Ok(path) = reexport
+                            .import
+                            .resolve_js(db, owning_module)
+                            .path()
+                            .as_deref()
                             && seen_paths.insert(path.to_path_buf())
                             && let Some(module) = db.module_for_path(path)
                         {
@@ -75,7 +88,12 @@ pub fn find_js_exported_symbol<'db>(
             }
             None => {
                 for reexport in module.blanket_reexports.iter() {
-                    match reexport.import.resolved_path.as_deref() {
+                    match reexport
+                        .import
+                        .resolve_js(db, owning_module)
+                        .path()
+                        .as_deref()
+                    {
                         Ok(path) => {
                             if seen_paths.insert(path.to_path_buf())
                                 && let Some(module) = db.module_for_path(path)
@@ -98,7 +116,7 @@ pub fn find_js_exported_symbol<'db>(
 }
 
 /// Finds JSDoc for an exported symbol by `name`, following re-exports through the db.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn find_jsdoc_for_exported_symbol<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
@@ -107,7 +125,8 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
     let mut stack = vec![symbol];
 
     while let Some(symbol) = stack.pop() {
-        let ModuleInfoKind::Js(module) = symbol.module(db).kind(db) else {
+        let owning_module = *symbol.module(db);
+        let ModuleInfoKind::Js(module) = owning_module.kind(db) else {
             continue;
         };
         match &module.exports.get(symbol.name(db).as_str()) {
@@ -128,7 +147,12 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
                     ImportSymbol::All => break,
                     ImportSymbol::Named(source_name) => {
                         let lookup = source_name.text().to_string();
-                        match reexport.import.resolved_path.as_deref() {
+                        match reexport
+                            .import
+                            .resolve_js(db, owning_module)
+                            .path()
+                            .as_deref()
+                        {
                             Ok(path) if seen_paths.insert(path.to_path_buf()) => {
                                 if let Some(module) = db.module_for_path(path) {
                                     stack.push(SymbolFromModuleInfo::new(
@@ -142,7 +166,11 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
                         }
                     }
                     ImportSymbol::Default => {
-                        if let Ok(path) = reexport.import.resolved_path.as_deref()
+                        if let Ok(path) = reexport
+                            .import
+                            .resolve_js(db, owning_module)
+                            .path()
+                            .as_deref()
                             && let Some(module) = db.module_for_path(path)
                         {
                             stack.push(SymbolFromModuleInfo::new(db, symbol.name(db), module));
@@ -152,7 +180,11 @@ pub fn find_jsdoc_for_exported_symbol<'db>(
             }
             None => {
                 for reexport in module.blanket_reexports.iter() {
-                    if let Ok(path) = reexport.import.resolved_path.as_deref()
+                    if let Ok(path) = reexport
+                        .import
+                        .resolve_js(db, owning_module)
+                        .path()
+                        .as_deref()
                         && seen_paths.insert(path.to_path_buf())
                         && let Some(module) = db.module_for_path(path)
                     {
@@ -180,7 +212,6 @@ pub struct SymbolFromModuleInfo {
     #[returns(clone)]
     pub(crate) name: String,
 
-    #[returns(ref)]
     pub(crate) module: ModuleInfo,
 }
 

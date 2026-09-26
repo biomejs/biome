@@ -282,16 +282,18 @@ pub fn global_types(db: &dyn crate::TypeDb) -> GlobalTypes<'_> {
 }
 
 /// A predefined global or a local entry scoped to that global's supporting-type table.
-#[salsa::interned(no_lifetime)]
+#[salsa::interned]
 struct GlobalTypeInput {
+    #[returns(copy)]
     owner: GlobalTypeId,
+    #[returns(copy)]
     local: Option<crate::TypeId>,
 }
 
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn resolve_global_type<'db>(
     db: &'db dyn crate::TypeDb,
-    input: GlobalTypeInput,
+    input: GlobalTypeInput<'db>,
 ) -> InferredTypeData<'db> {
     let owner = input.owner(db);
     let local = input.local(db);

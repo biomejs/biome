@@ -11,7 +11,10 @@ use crate::db::queries::{
     resolved_export_origin,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
-use crate::{JsExport, JsImport, JsOwnExport, ModuleDb, ModuleGraphGeneration, ResolvedPath};
+use crate::{
+    JsExport, JsImport, JsOwnExport, ModuleDb, ModuleGraphGeneration, ResolutionMode,
+    resolve_module_import,
+};
 use biome_js_type_info::{
     GlobalTypeId, ImportSymbol, Path, ResolvedTypeId, TypeImportQualifier, TypeReference,
     TypeResolverLevel,
@@ -29,7 +32,7 @@ const MAX_EXPORT_RESOLUTION_STEPS: usize = 1024;
 pub(super) const MAX_NAMESPACE_IMPORT_MEMBER_STEPS: usize = 64;
 
 /// Result of searching for the declaration behind a named export.
-#[derive(Clone, Debug, Eq, PartialEq, salsa::Update)]
+#[derive(Clone, Debug, Eq, PartialEq, salsa::SalsaValue)]
 pub(crate) enum ExportOriginResult {
     /// The completed search found no declaration.
     ///
@@ -247,10 +250,7 @@ fn collect_namespace_names_in_module(
     }
 
     for reexport in js_info.blanket_reexports.iter().rev() {
-        let Some(path) = reexport.import.resolved_path.as_path() else {
-            return false;
-        };
-        let Some(module) = db.module_for_path(path) else {
+        let Some(module) = module_for_import(db, module, &reexport.import) else {
             return false;
         };
         collection.stack.push((module, false));
@@ -285,9 +285,7 @@ fn find_export_origin_in_module(
             })
         }
         Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-            if let Some(path) = reexport.import.resolved_path.as_path()
-                && let Some(module) = db.module_for_path(path)
-            {
+            if let Some(module) = module_for_import(db, module, &reexport.import) {
                 let name = match &reexport.import.symbol {
                     ImportSymbol::All => name.clone(),
                     ImportSymbol::Default => Text::from("default"),
@@ -300,10 +298,7 @@ fn find_export_origin_in_module(
         None if name.text() == "default" => ExportOriginStep::Continue,
         None => {
             for reexport in js_info.blanket_reexports.iter().rev() {
-                let Some(path) = reexport.import.resolved_path.as_path() else {
-                    continue;
-                };
-                if let Some(module) = db.module_for_path(path) {
+                if let Some(module) = module_for_import(db, module, &reexport.import) {
                     stack.push((module, name.clone()));
                 }
             }
@@ -331,7 +326,7 @@ pub(in crate::db) fn resolve_export_type_on_demand<'db>(
         return None;
     }
 
-    let ctx = ResolutionCtx::new(db, module, &js_info, super::ImportResolution::on_demand());
+    let ctx = ResolutionCtx::new(db, module, js_info, super::ImportResolution::on_demand());
     Some(ctx.resolve_export_name_on_demand(module, name))
 }
 
@@ -340,7 +335,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         qualifier: &TypeImportQualifier,
     ) -> InferredTypeData<'db> {
-        let Some(module) = self.module_for_resolved_path(&qualifier.resolved_path) else {
+        let Some(module) = self.module_for_import_qualifier(qualifier) else {
             return InferredTypeData::Unknown;
         };
 
@@ -360,7 +355,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         remaining_projection_steps: usize,
     ) -> Option<InferredTypeData<'db>> {
         let remaining_projection_steps = remaining_projection_steps.checked_sub(1)?;
-        let module = self.module_for_resolved_path(&qualifier.resolved_path)?;
+        let module = self.module_for_import_qualifier(qualifier)?;
         let export_name = match &qualifier.symbol {
             ImportSymbol::All => {
                 return Some(
@@ -390,10 +385,12 @@ impl<'db> ResolutionCtx<'db, '_> {
                     return None;
                 }
                 Some(
-                    self.module_for_resolved_path(&reexport.import.resolved_path)
-                        .map_or(InferredTypeData::Unknown, |module| {
+                    module_for_import(self.db, *module, &reexport.import).map_or(
+                        InferredTypeData::Unknown,
+                        |module| {
                             self.resolve_import_symbol(module, &ImportSymbol::Named(member.clone()))
-                        }),
+                        },
+                    ),
                 )
             }
             JsOwnExport::Binding(range) => {
@@ -411,14 +408,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         };
                         self.for_on_demand_import(
                             *module,
-                            &js_info,
+                            js_info,
                             remaining,
                             resolve_declarations_directly,
                         )
                     }
                     import_resolution @ (super::ImportResolution::FromTables { .. }
                     | super::ImportResolution::CycleFallback(_)) => {
-                        ResolutionCtx::new(self.db, *module, &js_info, import_resolution)
+                        ResolutionCtx::new(self.db, *module, js_info, import_resolution)
                     }
                 };
                 ctx.resolve_namespace_import_member_with_steps(
@@ -431,8 +428,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn module_for_resolved_path(&self, resolved_path: &ResolvedPath) -> Option<ModuleInfo> {
-        let path = resolved_path.as_path()?;
+    fn module_for_import_qualifier(&self, qualifier: &TypeImportQualifier) -> Option<ModuleInfo> {
+        let resolved = resolve_module_import(
+            self.db,
+            self.module,
+            &qualifier.specifier,
+            ResolutionMode::JavaScript,
+        );
+        let path = resolved.path().as_path()?;
         self.db.module_for_path(path)
     }
 
@@ -522,7 +525,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
                 let ctx = self.for_on_demand_import(
                     module,
-                    &js_info,
+                    js_info,
                     remaining,
                     resolve_declarations_directly,
                 );
@@ -531,14 +534,13 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn resolve_js_import(&self, import: &JsImport) -> InferredTypeData<'db> {
+    fn resolve_js_import(&self, owner: ModuleInfo, import: &JsImport) -> InferredTypeData<'db> {
         let resolution_depth = self.resolution_depth.get();
         if resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {
             return InferredTypeData::Unknown;
         }
         self.resolution_depth.set(resolution_depth + 1);
-        let result = self
-            .module_for_resolved_path(&import.resolved_path)
+        let result = module_for_import(self.db, owner, import)
             .map_or(InferredTypeData::Unknown, |module| {
                 self.resolve_import_symbol(module, &import.symbol)
             });
@@ -641,14 +643,14 @@ impl<'db> ResolutionCtx<'db, '_> {
             JsOwnExport::Binding(range) => inferred_type_from_binding_on_demand(
                 self,
                 *module,
-                &js_info,
+                js_info,
                 *range,
                 resolve_declaration_directly,
             ),
             JsOwnExport::Type(resolved_id) => inferred_type_from_resolved_id_on_demand(
                 self,
                 *module,
-                &js_info,
+                js_info,
                 ResolvedTypeId::Local(*resolved_id),
                 resolve_declaration_directly,
             ),
@@ -659,7 +661,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                             module: *module,
                             name: name.clone(),
                         }),
-                    _ => self.resolve_js_import(&reexport.import),
+                    _ => self.resolve_js_import(*module, &reexport.import),
                 }
             }
         };
@@ -680,7 +682,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         else {
             return InferredTypeData::Unknown;
         };
-        self.resolve_js_import(&reexport.import)
+        self.resolve_js_import(self.module, &reexport.import)
     }
 
     /// Builds a namespace from whole-module tables during cycle fallback.
@@ -778,7 +780,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
 
         for reexport in js_info.blanket_reexports.iter().rev() {
-            let Some(module) = self.module_for_resolved_path(&reexport.import.resolved_path) else {
+            let Some(module) = module_for_import(self.db, module, &reexport.import) else {
                 return false;
             };
             collection.stack.push((module, false));
@@ -878,18 +880,16 @@ impl<'db> ResolutionCtx<'db, '_> {
                         module: module_key,
                         own_export: own_export.clone(),
                     },
-                    ty: self.resolve_own_export_from_tables(inferred_types, own_export),
+                    ty: self.resolve_own_export_from_tables(module, inferred_types, own_export),
                 })
             }
             Some(JsExport::Reexport(reexport) | JsExport::ReexportType(reexport)) => {
-                self.push_reexport_target(reexport.import.clone(), name, stack);
+                self.push_reexport_target(module, reexport.import.clone(), name, stack);
                 ExportResolutionStep::Continue
             }
             None => {
                 for reexport in js_info.blanket_reexports.iter().rev() {
-                    if let Some(module) =
-                        self.module_for_resolved_path(&reexport.import.resolved_path)
-                    {
+                    if let Some(module) = module_for_import(self.db, module, &reexport.import) {
                         stack.push((module, name.to_string()));
                     }
                 }
@@ -900,11 +900,12 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn push_reexport_target(
         &self,
+        owner: ModuleInfo,
         import: JsImport,
         fallback_name: &str,
         stack: &mut Vec<(ModuleInfo, String)>,
     ) {
-        let Some(module) = self.module_for_resolved_path(&import.resolved_path) else {
+        let Some(module) = module_for_import(self.db, owner, &import) else {
             return;
         };
 
@@ -919,6 +920,7 @@ impl<'db> ResolutionCtx<'db, '_> {
 
     fn resolve_own_export_from_tables(
         &self,
+        module: ModuleInfo,
         inferred_types: &InferredModuleTypes<'db>,
         own_export: &JsOwnExport,
     ) -> InferredTypeData<'db> {
@@ -932,9 +934,19 @@ impl<'db> ResolutionCtx<'db, '_> {
                 inferred_types,
                 ResolvedTypeId::Local(*resolved_id),
             ),
-            JsOwnExport::Namespace(reexport) => self.resolve_js_import(&reexport.import),
+            JsOwnExport::Namespace(reexport) => self.resolve_js_import(module, &reexport.import),
         }
     }
+}
+
+fn module_for_import(
+    db: &dyn ModuleDb,
+    owner: ModuleInfo,
+    import: &JsImport,
+) -> Option<ModuleInfo> {
+    let resolved = import.resolve_js(db, owner);
+    let path = resolved.path().as_path()?;
+    db.module_for_path(path)
 }
 
 fn is_namespace_export_collectible(infer_types: bool, export: &JsExport) -> bool {
