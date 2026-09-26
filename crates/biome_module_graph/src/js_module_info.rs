@@ -199,7 +199,7 @@ pub struct JsModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
     /// Maps each local imported name to a [JsImport]. Resolve its specifier with
-    /// [JsImport::resolve] using the owning [ModuleInfo].
+    /// [JsImport::resolve_js] using the owning [ModuleInfo].
     ///
     /// Note that re-exports may introduce additional dependencies, because they
     /// import another module and immediately re-export from that module.
