@@ -1,0 +1,231 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidPredicates.ts
+---
+# Input
+```ts
+// should generate diagnostics
+const values = [1, 2, 3];
+values.some(() => null);
+values.every(() => ({}));
+values.filter((): string | undefined => undefined);
+values.find((): boolean | undefined => undefined);
+values.findIndex((): number | undefined => undefined);
+values.findLast(() => null);
+values.findLastIndex(() => null);
+values["filter"](() => null);
+values.some((() => null));
+function predicate(): number | null { return null; }
+values.filter(predicate);
+
+```
+
+# Diagnostics
+```
+invalidPredicates.ts:3:13 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-nullish value.
+  
+    1 │ // should generate diagnostics
+    2 │ const values = [1, 2, 3];
+  > 3 │ values.some(() => null);
+      │             ^^^^^^^^^^
+    4 │ values.every(() => ({}));
+    5 │ values.filter((): string | undefined => undefined);
+  
+  i Nullish values are always falsy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:4:14 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-truthy value.
+  
+    2 │ const values = [1, 2, 3];
+    3 │ values.some(() => null);
+  > 4 │ values.every(() => ({}));
+      │              ^^^^^^^^^^
+    5 │ values.filter((): string | undefined => undefined);
+    6 │ values.find((): boolean | undefined => undefined);
+  
+  i Objects, functions, and symbols are always truthy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:5:15 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns a nullable string.
+  
+    3 │ values.some(() => null);
+    4 │ values.every(() => ({}));
+  > 5 │ values.filter((): string | undefined => undefined);
+      │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ values.find((): boolean | undefined => undefined);
+    7 │ values.findIndex((): number | undefined => undefined);
+  
+  i This check treats empty strings and nullish values alike.
+  
+  i Check for nullish values and empty strings explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:6:13 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns a nullable boolean.
+  
+    4 │ values.every(() => ({}));
+    5 │ values.filter((): string | undefined => undefined);
+  > 6 │ values.find((): boolean | undefined => undefined);
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ values.findIndex((): number | undefined => undefined);
+    8 │ values.findLast(() => null);
+  
+  i This check treats false and nullish values alike.
+  
+  i Compare with true or provide an explicit default with ?? false.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:7:18 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns a nullable number.
+  
+    5 │ values.filter((): string | undefined => undefined);
+    6 │ values.find((): boolean | undefined => undefined);
+  > 7 │ values.findIndex((): number | undefined => undefined);
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ values.findLast(() => null);
+    9 │ values.findLastIndex(() => null);
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:8:17 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-nullish value.
+  
+     6 │ values.find((): boolean | undefined => undefined);
+     7 │ values.findIndex((): number | undefined => undefined);
+   > 8 │ values.findLast(() => null);
+       │                 ^^^^^^^^^^
+     9 │ values.findLastIndex(() => null);
+    10 │ values["filter"](() => null);
+  
+  i Nullish values are always falsy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:9:22 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-nullish value.
+  
+     7 │ values.findIndex((): number | undefined => undefined);
+     8 │ values.findLast(() => null);
+   > 9 │ values.findLastIndex(() => null);
+       │                      ^^^^^^^^^^
+    10 │ values["filter"](() => null);
+    11 │ values.some((() => null));
+  
+  i Nullish values are always falsy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:10:18 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-nullish value.
+  
+     8 │ values.findLast(() => null);
+     9 │ values.findLastIndex(() => null);
+  > 10 │ values["filter"](() => null);
+       │                  ^^^^^^^^^^
+    11 │ values.some((() => null));
+    12 │ function predicate(): number | null { return null; }
+  
+  i Nullish values are always falsy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:11:14 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns an always-nullish value.
+  
+     9 │ values.findLastIndex(() => null);
+    10 │ values["filter"](() => null);
+  > 11 │ values.some((() => null));
+       │              ^^^^^^^^^^
+    12 │ function predicate(): number | null { return null; }
+    13 │ values.filter(predicate);
+  
+  i Nullish values are always falsy.
+  
+  i Return a boolean that expresses the intended condition.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidPredicates.ts:13:15 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This array predicate returns a nullable number.
+  
+    11 │ values.some((() => null));
+    12 │ function predicate(): number | null { return null; }
+  > 13 │ values.filter(predicate);
+       │               ^^^^^^^^^
+    14 │ 
+  
+  i This check treats zero, NaN, and nullish values alike.
+  
+  i Check for nullish values and falsy numbers explicitly, or use Boolean() to test truthiness.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
