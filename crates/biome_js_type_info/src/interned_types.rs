@@ -41,6 +41,15 @@ const MAX_OBJECT_RELATION_DEPTH: usize = 50;
 /// Supporting types are ordered so that each only refers to earlier entries,
 /// so repeated expansion terminates.
 #[inline(never)]
+/// Returns whether `ty` is [`TypeData::Unknown`] or an instance of it.
+fn is_unknown_operand<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> bool {
+    match ty {
+        TypeData::Unknown => true,
+        TypeData::InstanceOf(instance) => instance.ty(db) == TypeData::Unknown,
+        _ => false,
+    }
+}
+
 fn expand_global_local_handle<'db>(
     db: &'db dyn TypeDb,
     local: crate::GlobalTypeInput<'db>,
@@ -1491,12 +1500,17 @@ impl<'db> TypeDataSlotRebuilder<'db> {
     /// Returns whether rebuilding the parent from its own slots can produce a
     /// different type.
     ///
-    /// Rebuilding flattens and deduplicates unions and intersections, and
+    /// Rebuilding flattens and deduplicates unions and intersections,
     /// collapses an instance without type arguments whose target is an
-    /// instance or a union.
+    /// instance or a union, and collapses an indexed access with an unknown
+    /// operand.
     fn rebuild_normalizes(&self, db: &'db dyn TypeDb) -> bool {
         match self.parent {
             TypeData::Union(_) | TypeData::Intersection(_) => true,
+            TypeData::IndexedAccess(access) => {
+                is_unknown_operand(db, access.object(db))
+                    || is_unknown_operand(db, access.index(db))
+            }
             TypeData::InstanceOf(instance) => {
                 instance.type_parameters(db).is_empty()
                     && matches!(
@@ -1626,11 +1640,17 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeData::TypeOperator(operator) => TypeData::TypeOperator(
                 InternedTypeOperatorType::new(db, self.take_type()?, operator.operator(db)),
             ),
-            TypeData::IndexedAccess(_) => TypeData::IndexedAccess(InternedIndexedAccessType::new(
-                db,
-                self.take_type()?,
-                self.take_type()?,
-            )),
+            TypeData::IndexedAccess(_) => {
+                let object = self.take_type()?;
+                let index = self.take_type()?;
+                // Retaining an unknown operand lets recursive aliases build
+                // Unknown[K][K]... instead of reaching a repeated lookup state.
+                if is_unknown_operand(db, object) || is_unknown_operand(db, index) {
+                    TypeData::Unknown
+                } else {
+                    TypeData::IndexedAccess(InternedIndexedAccessType::new(db, object, index))
+                }
+            }
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
