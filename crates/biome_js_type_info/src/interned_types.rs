@@ -1532,11 +1532,22 @@ impl<'db> TypeDataSlotReplacements<'db> {
             TypeData::TypeOperator(operator) => TypeData::TypeOperator(
                 InternedTypeOperatorType::new(db, self.take_type()?, operator.operator(db)),
             ),
-            TypeData::IndexedAccess(_) => TypeData::IndexedAccess(InternedIndexedAccessType::new(
-                db,
-                self.take_type()?,
-                self.take_type()?,
-            )),
+            TypeData::IndexedAccess(_) => {
+                let object = self.take_type()?;
+                let index = self.take_type()?;
+                // Retaining an unknown operand lets recursive aliases build
+                // Unknown[K][K]... instead of reaching a repeated lookup state.
+                let is_unknown = |ty| match ty {
+                    TypeData::Unknown => true,
+                    TypeData::InstanceOf(instance) => instance.ty(db) == TypeData::Unknown,
+                    _ => false,
+                };
+                if is_unknown(object) || is_unknown(index) {
+                    TypeData::Unknown
+                } else {
+                    TypeData::IndexedAccess(InternedIndexedAccessType::new(db, object, index))
+                }
+            }
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
@@ -3055,13 +3066,10 @@ mod tests {
             raw::TypeOperator::Keyof,
         ));
         let mut transformer = TypeDataTransformer::new(1);
-        let mut substituter = TypeSubstituter::new(
-            &db,
-            TypeSubstitution {
-                generic: TypeData::Number,
-                replacement: TypeData::Boolean,
-            },
-        );
+        let mut substituter = TypeSubstituter::new(&[TypeSubstitution {
+            generic: TypeData::Number,
+            replacement: TypeData::Boolean,
+        }]);
 
         assert_eq!(
             substituter.substitute(&mut transformer, &db, ty),

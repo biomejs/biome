@@ -302,16 +302,22 @@ impl TypeDataTransformer {
     }
 }
 
-pub(crate) struct TypeSubstituter<'db> {
-    substitution: TypeSubstitution<'db>,
-    binder_generic: TypeData<'db>,
+/// Replaces generic references simultaneously without visiting replacements.
+///
+/// A nested declaration masks only its own parameters, leaving other bindings
+/// active in its body. Generic declarations retain their interned identities.
+pub(crate) struct TypeSubstituter<'a, 'db> {
+    substitutions: &'a [TypeSubstitution<'db>],
+    shadowed: Vec<TypeData<'db>>,
+    scopes: Vec<usize>,
 }
 
-impl<'db> TypeSubstituter<'db> {
-    pub(crate) fn new(db: &'db dyn TypeDb, substitution: TypeSubstitution<'db>) -> Self {
+impl<'a, 'db> TypeSubstituter<'a, 'db> {
+    pub(crate) fn new(substitutions: &'a [TypeSubstitution<'db>]) -> Self {
         Self {
-            substitution,
-            binder_generic: substitution.binder_generic(db),
+            substitutions,
+            shadowed: Vec::new(),
+            scopes: Vec::new(),
         }
     }
 
@@ -325,19 +331,33 @@ impl<'db> TypeSubstituter<'db> {
     }
 }
 
-impl<'db> TypeTransform<'db> for TypeSubstituter<'db> {
+impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
-        if ty == self.substitution.generic {
-            TypeTransformAction::Replace(self.substitution.replacement)
-        } else if matches!(ty, TypeData::Generic(_)) || ty.declares_generic(db, self.binder_generic)
-        {
-            TypeTransformAction::Replace(ty)
-        } else {
-            TypeTransformAction::Descend(ty)
+        if let Some(substitution) = self.substitutions.iter().find(|substitution| {
+            substitution.generic == ty && !self.shadowed.contains(&substitution.binder_generic(db))
+        }) {
+            return TypeTransformAction::Replace(substitution.replacement);
         }
+        if matches!(ty, TypeData::Generic(_))
+            || self.substitutions.iter().all(|substitution| {
+                let generic = substitution.binder_generic(db);
+                self.shadowed.contains(&generic) || ty.declares_generic(db, generic)
+            })
+        {
+            return TypeTransformAction::Replace(ty);
+        }
+
+        self.scopes.push(self.shadowed.len());
+        if let Some(parameters) = ty.declared_type_parameters(db) {
+            self.shadowed.extend_from_slice(parameters);
+        }
+        TypeTransformAction::Descend(ty)
     }
 
     fn leave(&mut self, _db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+        if let Some(length) = self.scopes.pop() {
+            self.shadowed.truncate(length);
+        }
         ty
     }
 }
@@ -418,8 +438,29 @@ impl<'db> TypeData<'db> {
         db: &'db dyn TypeDb,
         substitution: TypeSubstitution<'db>,
     ) -> TypeTransformResult<Self> {
-        let mut transformer = TypeDataTransformer::new(MAX_TYPE_SUBSTITUTION_STEPS);
-        TypeSubstituter::new(db, substitution).substitute(&mut transformer, db, self)
+        self.substitute_types(db, std::slice::from_ref(&substitution))
+    }
+
+    /// Replaces generic references simultaneously, without substituting inside
+    /// their replacements. Each generic must have at most one replacement.
+    /// Nested declarations shadow only the bindings for their own parameters.
+    /// An indexed access becomes [`Self::Unknown`] if either operand is that
+    /// type or an instance of it.
+    /// Other indexed accesses and type operators remain unevaluated; callers can
+    /// use [`Self::normalize_nested_types`] after resolving their operands.
+    pub fn substitute_types(
+        self,
+        db: &'db dyn TypeDb,
+        substitutions: &[TypeSubstitution<'db>],
+    ) -> TypeTransformResult<Self> {
+        if substitutions.is_empty() {
+            return TypeTransformResult::Transformed(self);
+        }
+        TypeDataTransformer::new(MAX_TYPE_SUBSTITUTION_STEPS).transform(
+            self,
+            db,
+            &mut TypeSubstituter::new(substitutions),
+        )
     }
 
     /// Replaces references inside a root generic declaration without replacing
@@ -450,7 +491,7 @@ impl<'db> TypeData<'db> {
         let slots = self.type_slots(db);
         let mut replacements = Vec::with_capacity(slots.len());
         let mut transformer = TypeDataTransformer::new(MAX_TYPE_SUBSTITUTION_STEPS);
-        let mut substituter = TypeSubstituter::new(db, substitution);
+        let mut substituter = TypeSubstituter::new(std::slice::from_ref(&substitution));
         for (index, ty) in slots.iter().enumerate() {
             if index < root_type_parameter_count {
                 replacements.push(ty);
@@ -492,7 +533,270 @@ impl<'db> TypeData<'db> {
 
 #[cfg(test)]
 mod tests {
-    use super::TypeTransformResult;
+    use super::*;
+    use crate::interned_types::{
+        InternedFunction, InternedGenericTypeParameter, InternedIndexedAccessType,
+        InternedTypeofType, ReturnType,
+    };
+    use biome_rowan::Text;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    fn generic<'db>(db: &'db TestDb, name: &'static str) -> TypeData<'db> {
+        TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::from(name),
+        ))
+    }
+
+    #[test]
+    fn simultaneous_substitution_does_not_substitute_replacements() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: u,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: t,
+            },
+        ];
+        for (source, expected) in [(t, u), (u, t)] {
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                expected
+            );
+            let reversed = [substitutions[1], substitutions[0]];
+            assert_eq!(source.substitute_types(&db, &reversed).unwrap(), expected);
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_shadowed_bindings() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let reference_t = TypeData::instance_of(&db, t, Box::default());
+        let function = |return_type| {
+            TypeData::Function(InternedFunction::new(
+                &db,
+                vec![t].into_boxed_slice(),
+                Box::default(),
+                ReturnType::Type(return_type),
+                false,
+                None,
+            ))
+        };
+        let source = TypeData::union_from_types(
+            &db,
+            vec![
+                function(TypeData::union_from_types(&db, vec![reference_t, u])),
+                reference_t,
+            ],
+        );
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: TypeData::String,
+            },
+            TypeSubstitution {
+                generic: reference_t,
+                replacement: TypeData::String,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: TypeData::Number,
+            },
+        ];
+        let expected = TypeData::union_from_types(
+            &db,
+            vec![
+                function(TypeData::union_from_types(
+                    &db,
+                    vec![reference_t, TypeData::Number],
+                )),
+                TypeData::String,
+            ],
+        );
+        assert_eq!(
+            source.substitute_types(&db, &substitutions).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_unmatched_generic_identity() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(t),
+            Some(t),
+            Text::from("U"),
+        ));
+        assert_eq!(
+            u.substitute_types(
+                &db,
+                &[TypeSubstitution {
+                    generic: t,
+                    replacement: TypeData::String
+                },]
+            )
+            .unwrap(),
+            u
+        );
+    }
+
+    #[test]
+    fn substitution_leaves_indexed_access_normalization_to_the_caller() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let source =
+            TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, TypeData::Number));
+        let replacement = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitution = TypeSubstitution {
+            generic: t,
+            replacement,
+        };
+        let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(
+            &db,
+            replacement,
+            TypeData::Number,
+        ));
+        assert_eq!(source.substitute_type(&db, substitution).unwrap(), expected);
+        assert_eq!(
+            source.substitute_types(&db, &[substitution]).unwrap(),
+            expected
+        );
+        assert_eq!(
+            expected.normalize_nested_types(&db, |ty| ty).unwrap(),
+            TypeData::String,
+        );
+    }
+
+    #[test]
+    fn substitution_propagates_unknown_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let wrapped_unknown = TypeData::instance_of(&db, TypeData::Unknown, Box::default());
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: array,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: wrapped_unknown,
+            },
+        ];
+        for (object, index) in [
+            (t, TypeData::Unknown),
+            (t, wrapped_unknown),
+            (TypeData::Unknown, TypeData::Number),
+            (wrapped_unknown, TypeData::Number),
+            (t, u),
+            (u, TypeData::Number),
+        ] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn substitution_propagates_unknown_instances_with_type_arguments() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let instance = TypeData::instance_of(&db, t, vec![TypeData::String].into_boxed_slice());
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: TypeData::Unknown,
+        }];
+        for (object, index) in [(instance, TypeData::Number), (array, instance)] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_deferred_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: u,
+        }];
+        for index in [TypeData::Number, generic(&db, "K")] {
+            let source = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, index));
+            let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, u, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                expected,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_respects_the_work_limit() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: TypeData::String,
+        }];
+        let mut source = t;
+        for _ in 1..MAX_TYPE_SUBSTITUTION_STEPS {
+            source = TypeData::TypeofType(InternedTypeofType::new(&db, source));
+        }
+        assert!(
+            source
+                .substitute_types(&db, &substitutions)
+                .is_transformed()
+        );
+        source = TypeData::TypeofType(InternedTypeofType::new(&db, source));
+        assert_eq!(
+            source.substitute_types(&db, &substitutions),
+            TypeTransformResult::LimitExceeded
+        );
+    }
 
     #[test]
     #[should_panic(expected = "type transformation failed: step limit exceeded")]

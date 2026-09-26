@@ -91,10 +91,10 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
         } else {
             ty
         };
+        let ty = apply_substitutions(db, ty, substitutions);
         let Ok(ty) = normalize_structural_type(db, ty, |ty| ty) else {
             return InferredTypeData::Unknown;
         };
-        let ty = apply_substitutions(db, ty, substitutions);
         self.member_type(ty, is_optional)
     }
 }

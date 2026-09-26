@@ -74,7 +74,7 @@ Expression "Symbol" => class "Symbol" {
 Expression "Symbol.iterator" => Symbol.iterator
 
 Binding entry "entry" => [string,
-number] | instanceof BuiltinIteratorReturn
+number] | unknown
 
 Expression "entries" => instanceof MapIterator<[string,
 number]>
@@ -86,21 +86,17 @@ Expression "entries.next" => sync Function "next" {
     ]
     type_args: []
   }
-  returns: instanceof instanceof instanceof IteratorYieldResult<[string,
-  number]> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><[string,
-  number], instanceof BuiltinIteratorReturn><[string,
-  number], instanceof BuiltinIteratorReturn>
+  returns: instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><[string,
+  number], unknown>
 }
 
-Expression "entries.next()" => instanceof instanceof instanceof IteratorYieldResult<[string,
-number]> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><[string,
-number], instanceof BuiltinIteratorReturn><[string,
-number], instanceof BuiltinIteratorReturn>
+Expression "entries.next()" => instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><[string,
+number], unknown>
 
 Expression "entries.next().value" => [string,
-number] | instanceof BuiltinIteratorReturn
+number] | unknown
 
-Binding value "value" => string | instanceof BuiltinIteratorReturn
+Binding value "value" => string | unknown
 
 Expression "values" => instanceof SetIterator<string>
 
@@ -111,12 +107,12 @@ Expression "values.next" => sync Function "next" {
     ]
     type_args: []
   }
-  returns: instanceof instanceof instanceof IteratorYieldResult<string> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn>
+  returns: instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><string, unknown>
 }
 
-Expression "values.next()" => instanceof instanceof instanceof IteratorYieldResult<string> | instanceof IteratorReturnResult<instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn><string, instanceof BuiltinIteratorReturn>
+Expression "values.next()" => instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><string, unknown>
 
-Expression "values.next().value" => string | instanceof BuiltinIteratorReturn
+Expression "values.next().value" => string | unknown
 
 Binding repeated "repeated" => instanceof MapIterator<[string,
 number]>
