@@ -72,6 +72,27 @@ pub const DRIZZLE_TYPEBOX_FILES: &[(&str, &str)] = &[
     ),
 ];
 
+pub const EFFECT_ARKTYPE_FILES: &[(&str, &str)] = &[
+    (
+        "/vendor/effect.d.ts",
+        include_str!("../fixtures/effect_arktype/vendor/effect.d.ts"),
+    ),
+    (
+        "/vendor/arktype.d.ts",
+        include_str!("../fixtures/effect_arktype/vendor/arktype.d.ts"),
+    ),
+    (
+        "/schema.ts",
+        include_str!("../fixtures/effect_arktype/schema.ts"),
+    ),
+    (
+        "/program.ts",
+        include_str!("../fixtures/effect_arktype/program.ts"),
+    ),
+];
+
+pub const EFFECT_ARKTYPE_CASES: &[&str] = &["/schema.ts", "/program.ts"];
+
 pub fn build_db(files: &[(&str, &str)], entry: &str) -> (WorkspaceDb, ModuleInfo) {
     let fs = MemoryFileSystem::default();
     for (path, source) in files {

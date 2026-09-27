@@ -67,6 +67,16 @@ fn bench_drizzle_typebox_cold_module(bencher: Bencher) {
         });
 }
 
+#[divan::bench(args = integration::EFFECT_ARKTYPE_CASES)]
+fn bench_effect_arktype_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::EFFECT_ARKTYPE_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
 #[cfg(target_os = "windows")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
