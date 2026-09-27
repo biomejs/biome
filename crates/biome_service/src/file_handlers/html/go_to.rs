@@ -15,7 +15,7 @@ use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, HtmlRoot};
 #[cfg(feature = "html_embeds")]
 use biome_html_syntax::{HtmlComponentName, HtmlTextExpression};
 #[cfg(feature = "module_graph")]
-use biome_module_graph::ModuleDb;
+use biome_module_graph::{ModuleDb, ModuleInfoKind};
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, TokenAtOffset};
@@ -159,10 +159,13 @@ fn resolve_import_definition(
     module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_db.html_module_info_for_path(current_path)?;
+    let source_module = module_db.module_for_path(current_path)?;
+    let ModuleInfoKind::Html(module_info) = source_module.kind(module_db) else {
+        return None;
+    };
     let html_import = module_info.import_paths.get(source)?;
-
-    let target_path = html_import.as_path()?;
+    let resolved = html_import.resolve_html(module_db, source_module);
+    let target_path = resolved.path().as_path()?;
 
     // Skip files not in the module graph
     if !module_db.contains(target_path) {

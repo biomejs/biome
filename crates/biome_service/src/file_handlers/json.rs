@@ -127,11 +127,8 @@ impl From<JsonAssistConfiguration> for JsonAssistSettings {
 
 #[salsa::interned]
 struct JsonFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -148,11 +145,8 @@ fn resolved_json_format_options<'db>(
 
 #[salsa::interned]
 struct JsonAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

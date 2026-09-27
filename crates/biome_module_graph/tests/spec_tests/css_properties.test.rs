@@ -1,7 +1,6 @@
 use biome_db::Db;
 use biome_fs::BiomePath;
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, css_property_definitions};
-use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use camino::Utf8Path;
 
@@ -210,7 +209,6 @@ fn js_definitions(js: &str, target: &str) -> Vec<String> {
     add_js_modules(
         &mut db,
         &fs,
-        &ProjectLayout::default(),
         &[BiomePath::new(app_path), BiomePath::new("/component.js")],
         false,
     );
