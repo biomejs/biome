@@ -282,15 +282,19 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    content_offset: 0.into(),
                     frontmatter: true,
                     is_class_attribute: false,
+                    is_class_list_attribute: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":true,"isClassAttribute":false}]"#,
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Astro {
+                    content_offset: 0.into(),
                     frontmatter: false,
                     is_class_attribute: true,
+                    is_class_list_attribute: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"astro","frontmatter":false,"isClassAttribute":true}]"#,
             ),

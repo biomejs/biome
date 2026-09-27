@@ -1,0 +1,18 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<div class="used"></div>
+
+<style>
+.used { color: green; }
+.card.active { color: red; }
+.parent .child { color: red; }
+.pseudo:hover { color: red; }
+:global(.global) { color: red; }
+</style>
+
+```

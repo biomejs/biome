@@ -3111,6 +3111,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroExportsFromComponentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroExportsFromComponentsOptions" }
+			]
+		},
+		"NoAstroExportsFromComponentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroPrerenderExportOutsidePagesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroPrerenderExportOutsidePagesOptions" }
+			]
+		},
+		"NoAstroPrerenderExportOutsidePagesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -3118,6 +3138,45 @@
 			]
 		},
 		"NoAstroSetHtmlDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroUnsafeInlineScriptsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnsafeInlineScriptsOptions" }
+			]
+		},
+		"NoAstroUnsafeInlineScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"allowDefineVars": { "type": ["boolean", "null"] },
+				"allowModuleScripts": { "type": ["boolean", "null"] },
+				"allowNonExecutingTypes": {
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"allowNonce": { "type": ["boolean", "null"] }
+			},
+			"additionalProperties": false
+		},
+		"NoAstroUnusedCssSelectorConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnusedCssSelectorOptions" }
+			]
+		},
+		"NoAstroUnusedCssSelectorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoAstroUnusedDefineVarsInStyleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroUnusedDefineVarsInStyleOptions" }
+			]
+		},
+		"NoAstroUnusedDefineVarsInStyleOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6932,10 +6991,47 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"noAstroExportsFromComponents": {
+					"description": "Disallows runtime default exports from Astro component frontmatter.\nSee https://biomejs.dev/linter/rules/no-astro-exports-from-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroExportsFromComponentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroPrerenderExportOutsidePages": {
+					"description": "Reports prerender exports in Astro files outside a pages directory.\nSee https://biomejs.dev/linter/rules/no-astro-prerender-export-outside-pages",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"noAstroSetHtmlDirective": {
 					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAstroSetHtmlDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroUnsafeInlineScripts": {
+					"description": "Disallows inline Astro scripts unless an explicitly allowed safety condition applies.\nSee https://biomejs.dev/linter/rules/no-astro-unsafe-inline-scripts",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnsafeInlineScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroUnusedCssSelector": {
+					"description": "Disallows unused standalone class selectors in local Astro styles.\nSee https://biomejs.dev/linter/rules/no-astro-unused-css-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnusedCssSelectorConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noAstroUnusedDefineVarsInStyle": {
+					"description": "Disallows unused variables passed to an Astro style block with define:vars.\nSee https://biomejs.dev/linter/rules/no-astro-unused-define-vars-in-style",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroUnusedDefineVarsInStyleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7451,10 +7547,31 @@
 						{ "type": "null" }
 					]
 				},
+				"useAstroClassListDirective": {
+					"description": "Promotes Astro's class:list directive for expression-based classes.\nSee https://biomejs.dev/linter/rules/use-astro-class-list-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroClassListDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAstroClientOnlyDirectiveValue": {
 					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useAstroObjectClassList": {
+					"description": "Promotes object entries for conditional classes in Astro's class:list directive.\nSee https://biomejs.dev/linter/rules/use-astro-object-class-list",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroObjectClassListConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useAstroSplitClassList": {
+					"description": "Splits space-separated strings into separate entries in Astro's class:list directive.\nSee https://biomejs.dev/linter/rules/use-astro-split-class-list",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAstroSplitClassListConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -8558,11 +8675,58 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoAstroExportsFromComponentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroExportsFromComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroPrerenderExportOutsidePagesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoAstroPrerenderExportOutsidePagesOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoAstroSetHtmlDirectiveOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAstroSetHtmlDirectiveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroUnsafeInlineScriptsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnsafeInlineScriptsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroUnusedCssSelectorOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnusedCssSelectorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroUnusedDefineVarsInStyleOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroUnusedDefineVarsInStyleOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11853,11 +12017,40 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAstroClassListDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroClassListDirectiveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAstroClientOnlyDirectiveValueOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseAstroClientOnlyDirectiveValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseAstroObjectClassListOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroObjectClassListOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseAstroSplitClassListOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAstroSplitClassListOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15666,6 +15859,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseAstroClassListDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroClassListDirectiveOptions" }
+			]
+		},
+		"UseAstroClassListDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseAstroClientOnlyDirectiveValueConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -15673,6 +15876,26 @@
 			]
 		},
 		"UseAstroClientOnlyDirectiveValueOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseAstroObjectClassListConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroObjectClassListOptions" }
+			]
+		},
+		"UseAstroObjectClassListOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseAstroSplitClassListConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAstroSplitClassListOptions" }
+			]
+		},
+		"UseAstroSplitClassListOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

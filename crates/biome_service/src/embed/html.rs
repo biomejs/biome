@@ -72,6 +72,7 @@ pub(crate) enum EmbedCandidate {
         content: EmbedContent,
         is_event_handler: bool,
         is_class_attribute: bool,
+        is_class_list_attribute: bool,
     },
     Attribute {
         name: TokenText,

@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+const prerender = true;
+export { prerender as mode };
+export { prerender as reexportedMode } from "./config";
+export { "prerender" as stringMode } from "./config";
+export * as namespaceMode from "./config";
+
+export const { prerender: renamed } = Astro.props;
+
+type PrerenderType = boolean;
+type prerender = boolean;
+export type { prerender };
+export { type prerender };
+export { type PrerenderType as prerender };
+export type { prerender } from "./config";
+export { type prerender } from "./config";
+export type * as prerender from "./config";
+export { value as "pr\01erender" } from "./config";
+
+export declare const prerender: boolean;
+export default prerender;
+export * from "./config";
+
+export function prerender() {}
+export class prerender {}
+export enum prerender {}
+export namespace prerender {}
+export import prerender = require("./config");
+---
+
+<script>
+export const prerender = true;
+</script>
+
+```

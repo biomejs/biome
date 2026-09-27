@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"noAstroUnsafeInlineScripts": {
+					"level": "error",
+					"options": {
+						"allowNonExecutingTypes": []
+					}
+				}
+			}
+		}
+	}
+}

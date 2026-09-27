@@ -1,0 +1,426 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+---
+// should generate diagnostics
+const active = true;
+const size = "large";
+---
+<div class:list={active ? "active" : ""}></div>
+<div class:list={active ? "" : "inactive"}></div>
+<div class:list={active ? "active" : "inactive"}></div>
+<div class:list={[size, active ? "selected" : ""]}></div>
+<div class:list={[[active ? "nested" : ""]]}></div>
+<div class:list={[(active ? "wrapped" : "")]}></div>
+<div class:list={(active ? "root" : "")}></div>
+<div class:list={[[(active && size ? "" : "inactive")]]}></div>
+<div class:list={active /* keep */ ? "commented" : ""}></div>
+<div class:list={active ? "__proto__" : ""}></div>
+<div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+<div class:list={active ? 'say "hi"' : ""}></div>
+<div class:list={active ? 'it\'s' : ""}></div>
+<div class:list={active ? 'line\nbreak' : ""}></div>
+<div class:list={active ? 'caf\u00e9' : ""}></div>
+<div class:list={active ? "\\08" : ""}></div>
+
+```
+
+# Diagnostics
+```
+invalid.astro:6:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    4 │ const size = "large";
+    5 │ ---
+  > 6 │ <div class:list={active ? "active" : ""}></div>
+      │                  ^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div class:list={active ? "" : "inactive"}></div>
+    8 │ <div class:list={active ? "active" : "inactive"}></div>
+  
+  i Astro's object form associates the class active directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·"active"·:·""
+  + {"active":·active}
+  
+
+```
+
+```
+invalid.astro:7:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    5 │ ---
+    6 │ <div class:list={active ? "active" : ""}></div>
+  > 7 │ <div class:list={active ? "" : "inactive"}></div>
+      │                  ^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <div class:list={active ? "active" : "inactive"}></div>
+    9 │ <div class:list={[size, active ? "selected" : ""]}></div>
+  
+  i Astro's object form associates the class inactive directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·""·:·"inactive"
+  + {"inactive":·!active}
+  
+
+```
+
+```
+invalid.astro:8:18 lint/nursery/useAstroObjectClassList ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+     6 │ <div class:list={active ? "active" : ""}></div>
+     7 │ <div class:list={active ? "" : "inactive"}></div>
+   > 8 │ <div class:list={active ? "active" : "inactive"}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div class:list={[size, active ? "selected" : ""]}></div>
+    10 │ <div class:list={[[active ? "nested" : ""]]}></div>
+  
+  i Astro's object form associates the class active directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:9:25 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+     7 │ <div class:list={active ? "" : "inactive"}></div>
+     8 │ <div class:list={active ? "active" : "inactive"}></div>
+   > 9 │ <div class:list={[size, active ? "selected" : ""]}></div>
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ <div class:list={[[active ? "nested" : ""]]}></div>
+    11 │ <div class:list={[(active ? "wrapped" : "")]}></div>
+  
+  i Astro's object form associates the class selected directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - [size,·active·?·"selected"·:·""]
+  + [size,·{"selected":·active}]
+  
+
+```
+
+```
+invalid.astro:10:20 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+     8 │ <div class:list={active ? "active" : "inactive"}></div>
+     9 │ <div class:list={[size, active ? "selected" : ""]}></div>
+  > 10 │ <div class:list={[[active ? "nested" : ""]]}></div>
+       │                    ^^^^^^^^^^^^^^^^^^^^^^
+    11 │ <div class:list={[(active ? "wrapped" : "")]}></div>
+    12 │ <div class:list={(active ? "root" : "")}></div>
+  
+  i Astro's object form associates the class nested directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - [[active·?·"nested"·:·""]]
+  + [[{"nested":·active}]]
+  
+
+```
+
+```
+invalid.astro:11:20 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+     9 │ <div class:list={[size, active ? "selected" : ""]}></div>
+    10 │ <div class:list={[[active ? "nested" : ""]]}></div>
+  > 11 │ <div class:list={[(active ? "wrapped" : "")]}></div>
+       │                    ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ <div class:list={(active ? "root" : "")}></div>
+    13 │ <div class:list={[[(active && size ? "" : "inactive")]]}></div>
+  
+  i Astro's object form associates the class wrapped directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - [(active·?·"wrapped"·:·"")]
+  + [({"wrapped":·active})]
+  
+
+```
+
+```
+invalid.astro:12:19 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    10 │ <div class:list={[[active ? "nested" : ""]]}></div>
+    11 │ <div class:list={[(active ? "wrapped" : "")]}></div>
+  > 12 │ <div class:list={(active ? "root" : "")}></div>
+       │                   ^^^^^^^^^^^^^^^^^^^^
+    13 │ <div class:list={[[(active && size ? "" : "inactive")]]}></div>
+    14 │ <div class:list={active /* keep */ ? "commented" : ""}></div>
+  
+  i Astro's object form associates the class root directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - (active·?·"root"·:·"")
+  + ({"root":·active})
+  
+
+```
+
+```
+invalid.astro:13:21 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    11 │ <div class:list={[(active ? "wrapped" : "")]}></div>
+    12 │ <div class:list={(active ? "root" : "")}></div>
+  > 13 │ <div class:list={[[(active && size ? "" : "inactive")]]}></div>
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <div class:list={active /* keep */ ? "commented" : ""}></div>
+    15 │ <div class:list={active ? "__proto__" : ""}></div>
+  
+  i Astro's object form associates the class inactive directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - [[(active·&&·size·?·""·:·"inactive")]]
+  + [[({"inactive":·!(active·&&·size)})]]
+  
+
+```
+
+```
+invalid.astro:14:18 lint/nursery/useAstroObjectClassList ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    12 │ <div class:list={(active ? "root" : "")}></div>
+    13 │ <div class:list={[[(active && size ? "" : "inactive")]]}></div>
+  > 14 │ <div class:list={active /* keep */ ? "commented" : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <div class:list={active ? "__proto__" : ""}></div>
+    16 │ <div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+  
+  i Astro's object form associates the class commented directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:15:18 lint/nursery/useAstroObjectClassList ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    13 │ <div class:list={[[(active && size ? "" : "inactive")]]}></div>
+    14 │ <div class:list={active /* keep */ ? "commented" : ""}></div>
+  > 15 │ <div class:list={active ? "__proto__" : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+    17 │ <div class:list={active ? 'say "hi"' : ""}></div>
+  
+  i Astro's object form associates the class __proto__ directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:16:18 lint/nursery/useAstroObjectClassList ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    14 │ <div class:list={active /* keep */ ? "commented" : ""}></div>
+    15 │ <div class:list={active ? "__proto__" : ""}></div>
+  > 16 │ <div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ <div class:list={active ? 'say "hi"' : ""}></div>
+    18 │ <div class:list={active ? 'it\'s' : ""}></div>
+  
+  i Astro's object form associates the class __proto__ directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:17:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    15 │ <div class:list={active ? "__proto__" : ""}></div>
+    16 │ <div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+  > 17 │ <div class:list={active ? 'say "hi"' : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ <div class:list={active ? 'it\'s' : ""}></div>
+    19 │ <div class:list={active ? 'line\nbreak' : ""}></div>
+  
+  i Astro's object form associates the class say "hi" directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·'say·"hi"'·:·""
+  + {'say·"hi"':·active}
+  
+
+```
+
+```
+invalid.astro:18:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    16 │ <div class:list={active ? "\x5f\x5fproto__" : ""}></div>
+    17 │ <div class:list={active ? 'say "hi"' : ""}></div>
+  > 18 │ <div class:list={active ? 'it\'s' : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^
+    19 │ <div class:list={active ? 'line\nbreak' : ""}></div>
+    20 │ <div class:list={active ? 'caf\u00e9' : ""}></div>
+  
+  i Astro's object form associates the class it's directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·'it\'s'·:·""
+  + {'it\'s':·active}
+  
+
+```
+
+```
+invalid.astro:19:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    17 │ <div class:list={active ? 'say "hi"' : ""}></div>
+    18 │ <div class:list={active ? 'it\'s' : ""}></div>
+  > 19 │ <div class:list={active ? 'line\nbreak' : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <div class:list={active ? 'caf\u00e9' : ""}></div>
+    21 │ <div class:list={active ? "\\08" : ""}></div>
+  
+  i Astro's object form associates the class line
+    break directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·'line\nbreak'·:·""
+  + {'line\nbreak':·active}
+  
+
+```
+
+```
+invalid.astro:20:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    18 │ <div class:list={active ? 'it\'s' : ""}></div>
+    19 │ <div class:list={active ? 'line\nbreak' : ""}></div>
+  > 20 │ <div class:list={active ? 'caf\u00e9' : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <div class:list={active ? "\\08" : ""}></div>
+    22 │ 
+  
+  i Astro's object form associates the class café directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·'caf\u00e9'·:·""
+  + {'caf\u00e9':·active}
+  
+
+```
+
+```
+invalid.astro:21:18 lint/nursery/useAstroObjectClassList  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an object entry instead of a conditional class.
+  
+    19 │ <div class:list={active ? 'line\nbreak' : ""}></div>
+    20 │ <div class:list={active ? 'caf\u00e9' : ""}></div>
+  > 21 │ <div class:list={active ? "\\08" : ""}></div>
+       │                  ^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i Astro's object form associates the class \08 directly with the condition that controls it.
+  
+  i Replace the conditional with an object entry when its branches can be represented without changing the class-list result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object entry for the conditional class.
+  
+  - active·?·"\\08"·:·""
+  + {"\\08":·active}
+  
+
+```

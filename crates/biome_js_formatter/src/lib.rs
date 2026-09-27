@@ -1118,8 +1118,10 @@ console.log(a);
     fn format_astro_template(src: &str) -> String {
         let syntax = JsFileSource::tsx().with_embedding_kind(
             biome_languages::javascript::JsEmbeddingKind::Astro {
+                content_offset: 0.into(),
                 frontmatter: false,
                 is_class_attribute: false,
+                is_class_list_attribute: false,
             },
         );
         let tree = parse(src, syntax, JsParserOptions::default());

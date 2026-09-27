@@ -1,0 +1,140 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<script>alert("inline")</script>
+<script type="module">console.log("module")</script>
+<script nonce={nonce}>console.log("nonce")</script>
+<script define:vars={{ value }}>console.log(value)</script>
+<script type="text/plain">data</script>
+<script type={scriptType}>data</script>
+
+```
+
+# Diagnostics
+```
+invalid.astro:2:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <script>alert("inline")</script>
+      │ ^^^^^^^^
+    3 │ <script type="module">console.log("module")</script>
+    4 │ <script nonce={nonce}>console.log("nonce")</script>
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:3:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script>alert("inline")</script>
+  > 3 │ <script type="module">console.log("module")</script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <script nonce={nonce}>console.log("nonce")</script>
+    5 │ <script define:vars={{ value }}>console.log(value)</script>
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:4:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    2 │ <script>alert("inline")</script>
+    3 │ <script type="module">console.log("module")</script>
+  > 4 │ <script nonce={nonce}>console.log("nonce")</script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <script define:vars={{ value }}>console.log(value)</script>
+    6 │ <script type="text/plain">data</script>
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:5:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    3 │ <script type="module">console.log("module")</script>
+    4 │ <script nonce={nonce}>console.log("nonce")</script>
+  > 5 │ <script define:vars={{ value }}>console.log(value)</script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <script type="text/plain">data</script>
+    7 │ <script type={scriptType}>data</script>
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:6:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    4 │ <script nonce={nonce}>console.log("nonce")</script>
+    5 │ <script define:vars={{ value }}>console.log(value)</script>
+  > 6 │ <script type="text/plain">data</script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <script type={scriptType}>data</script>
+    8 │ 
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:1 lint/nursery/noAstroUnsafeInlineScripts ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid inline scripts without a src attribute.
+  
+    5 │ <script define:vars={{ value }}>console.log(value)</script>
+    6 │ <script type="text/plain">data</script>
+  > 7 │ <script type={scriptType}>data</script>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i An inline script is harder to restrict with a Content Security Policy and cannot be managed as a separate script resource.
+  
+  i Move the script to a separate file and reference it with a src attribute, or configure a narrowly scoped allowance.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

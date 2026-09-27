@@ -1,0 +1,44 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "nursery": {
+        "useAstroObjectClassList": "error",
+        "useAstroSplitClassList": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.astro`
+
+```astro
+---
+const active = true;
+---
+<div class:list={{"selected": active}}></div>
+<div class:list={["card", "active"]}></div>
+<div class:list={{'say "hi"': active}}></div>
+<div class:list={{'it\'s': active}}></div>
+<div class:list={{'line\nbreak': active}}></div>
+<div class:list={{'caf\u00e9': active}}></div>
+<div class:list={[[{"nested": active}]]}></div>
+<div class:list={[({"wrapped": active})]}></div>
+<div class:list={[[({"inactive": !(active && true)})]]}></div>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

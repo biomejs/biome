@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+---
+// should not generate diagnostics
+export const value = 1;
+export * from "./value";
+export default interface Props {}
+export default function helper(): void;
+export type { Props as default };
+export { type Props as default };
+---
+
+<script>
+export default function clientScript() {}
+</script>
+
+```

@@ -59,7 +59,24 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
     ));
+    result.push(("nursery", "noAstroExportsFromComponents", TypeId::of::<biome_rule_options::no_astro_exports_from_components::NoAstroExportsFromComponentsOptions>()));
+    result.push(("nursery", "noAstroPrerenderExportOutsidePages", TypeId::of::<biome_rule_options::no_astro_prerender_export_outside_pages::NoAstroPrerenderExportOutsidePagesOptions>()));
     result.push(("nursery", "noAstroSetHtmlDirective", TypeId::of::<biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions>()));
+    result.push((
+        "nursery",
+        "noAstroUnsafeInlineScripts",
+        TypeId::of::<
+            biome_rule_options::no_astro_unsafe_inline_scripts::NoAstroUnsafeInlineScriptsOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "noAstroUnusedCssSelector",
+        TypeId::of::<
+            biome_rule_options::no_astro_unused_css_selector::NoAstroUnusedCssSelectorOptions,
+        >(),
+    ));
+    result.push(("nursery", "noAstroUnusedDefineVarsInStyle", TypeId::of::<biome_rule_options::no_astro_unused_define_vars_in_style::NoAstroUnusedDefineVarsInStyleOptions>()));
     result.push((
         "suspicious",
         "noAsyncPromiseExecutor",
@@ -1739,7 +1756,21 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useAsConstAssertion",
         TypeId::of::<biome_rule_options::use_as_const_assertion::UseAsConstAssertionOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useAstroClassListDirective",
+        TypeId::of::<
+            biome_rule_options::use_astro_class_list_directive::UseAstroClassListDirectiveOptions,
+        >(),
+    ));
     result.push(("nursery", "useAstroClientOnlyDirectiveValue", TypeId::of::<biome_rule_options::use_astro_client_only_directive_value::UseAstroClientOnlyDirectiveValueOptions>()));
+    result.push(("nursery", "useAstroObjectClassList", TypeId::of::<biome_rule_options::use_astro_object_class_list::UseAstroObjectClassListOptions>()));
+    result.push((
+        "nursery",
+        "useAstroSplitClassList",
+        TypeId::of::<biome_rule_options::use_astro_split_class_list::UseAstroSplitClassListOptions>(
+        ),
+    ));
     result.push((
         "style",
         "useAtIndex",
