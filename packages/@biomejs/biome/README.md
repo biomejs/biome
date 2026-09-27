@@ -150,9 +150,6 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
         <a href="https://lokalise.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/14294501?s=200&v=4" height="100" alt="Lokalise logo"></a>
       </td>
       <td align="center" valign="middle">
-        <a href="https://latitude.so/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/98949449?s=200&v=4" height="100" alt="Latitude logo"></a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://www.cloudflare.com/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/314135?s=200&v=4" height="100" alt="Cloudflare logo"></a>
       </td>
     </tr>
@@ -165,13 +162,7 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://vital.io/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80" alt="Vital logo"></a>
-      </td>
-      <td align="center" valign="middle">
         <a href="https://coderabbit.ai/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80" alt="CodeRabbit logo"></a>
-      </td>
-      <td align="center" valign="middle">
-        <a href="https://forge42.dev/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80" alt="Forge42 logo"></a>
       </td>
       <td align="center" valign="middle">
         <a href="http://rstudio.org/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80" alt="RStudio logo"></a>
@@ -193,6 +184,9 @@ Biome offers [enterprise support](https://biomejs.dev/enterprise), where Core Co
       </td>
       <td align="center" valign="middle">
         <a href="https://kraken.tech/?utm_source=biome&utm_medium=readme" target="_blank"><img src="https://avatars.githubusercontent.com/u/105941848?s=200&v=4" width="80" alt="Kraken Tech logo"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.code4japan.org/en" target="_blank"><img src="https://avatars.githubusercontent.com/u/5137738?s=200&v=4" width="80" alt="Code for Japan logo"></a>
       </td>
     </tr>
   </tbody>
