@@ -28,6 +28,8 @@ pub(crate) fn format(
     let Some(doc) = session.document(&url) else {
         return Ok(None);
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -79,6 +81,11 @@ pub(crate) fn format(
             project_key: doc.project_key,
             path: path.clone(),
         })?;
+    // Another client may have changed the file while we were formatting it;
+    // edits computed from its text would corrupt the buffer of this client.
+    if input != *doc.content {
+        return Err(LspError::ContentModified);
+    }
     if output.is_empty() {
         return Ok(None);
     }
@@ -114,6 +121,8 @@ pub(crate) fn format_range(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -158,17 +167,12 @@ pub(crate) fn format_range(
                 url.as_str()
             )
         })?;
-    let content = session
-        .workspace_for_request()
-        .get_file_content(GetFileContentParams {
-            project_key: doc.project_key,
-            path: path.clone(),
-        })?;
 
+    // The workspace holds this client's text after the sync above.
     let offset = match path.extension() {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        Some("vue") => VueFileHandler::start(&doc.content),
+        Some("astro") => AstroFileHandler::start(&doc.content),
+        Some("svelte") => SvelteFileHandler::start(&doc.content),
         _ => None,
     };
     let format_range = if let Some(offset) = offset {
@@ -192,6 +196,17 @@ pub(crate) fn format_range(
             range: format_range,
             inline_config: session.inline_config(),
         })?;
+
+    let content = session
+        .workspace_for_request()
+        .get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        })?;
+    // See `format` for why the content must still be ours.
+    if content != *doc.content {
+        return Err(LspError::ContentModified);
+    }
 
     let formatted_range = formatted
         .range()
@@ -222,6 +237,8 @@ pub(crate) fn format_on_type(
     let Some(doc) = session.document(&url) else {
         return Err(extension_error(&path).into());
     };
+    let _guard = session.lock_document(path.as_path());
+    session.sync_document_with_workspace(&session.workspace_for_request(), &path, &doc)?;
     if !session
         .workspace_for_request()
         .file_exists(path.clone().into())?
@@ -281,6 +298,10 @@ pub(crate) fn format_on_type(
             project_key: doc.project_key,
             path: path.clone(),
         })?;
+    // See `format` for why the content must still be ours.
+    if content != *doc.content {
+        return Err(LspError::ContentModified);
+    }
 
     let formatted_range = formatted
         .range()

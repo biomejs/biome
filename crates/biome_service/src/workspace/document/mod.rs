@@ -1,6 +1,11 @@
 pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
+use camino::{Utf8Path, Utf8PathBuf};
+use parking_lot::lock_api::ArcReentrantMutexGuard;
+use parking_lot::{RawMutex, RawThreadId, ReentrantMutex};
+use rustc_hash::FxBuildHasher;
+use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
@@ -27,4 +32,37 @@ pub(crate) struct Document {
     /// - `Result`: if the file is read, but the file is too large
     /// - `AnyParse`: the result of the parsed file
     pub(crate) syntax: Option<Result<(), FileTooLarge>>,
+}
+
+/// Guard returned by [`DocumentLocks::lock`]. Must not be held across an
+/// `.await`.
+pub type DocumentLockGuard = ArcReentrantMutexGuard<RawMutex, RawThreadId, ()>;
+
+/// One lock per document path, held by every writer while it stores the
+/// parsed file and the content, which live in separate stores, and by readers
+/// that need both from the same write.
+///
+/// Re-entrant: a request holding it may re-open the file.
+///
+/// Writers from the file system take it too, creating it if missing; skipping
+/// a missing lock would let their parse land after a client's first open.
+/// Entries are never removed.
+#[derive(Default)]
+pub(crate) struct DocumentLocks {
+    locks: papaya::HashMap<Utf8PathBuf, Arc<ReentrantMutex<()>>, FxBuildHasher>,
+}
+
+impl DocumentLocks {
+    /// Locks `path`, creating its lock if needed.
+    pub(crate) fn lock(&self, path: &Utf8Path) -> DocumentLockGuard {
+        let locks = self.locks.pin();
+        let mutex = match locks.get(path) {
+            Some(mutex) => Arc::clone(mutex),
+            None => Arc::clone(
+                locks.get_or_insert_with(path.to_path_buf(), || Arc::new(ReentrantMutex::new(()))),
+            ),
+        };
+        drop(locks);
+        mutex.lock_arc()
+    }
 }

@@ -23,8 +23,9 @@ use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
-    PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
+    DocumentLockGuard, FeaturesBuilder, FileContent, GetFileContentParams, OpenFileParams,
+    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, RetryingWorkspace,
+    SupportsFeatureParams,
 };
 use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
@@ -220,6 +221,21 @@ impl TryFrom<u8> for ConfigurationStatus {
 
 pub(crate) type SessionHandle = Arc<Session>;
 
+/// Why diagnostics are refreshed; decides whether the refresh may write this
+/// client's text over another client's in the workspace.
+#[derive(Clone, Copy)]
+pub(crate) enum DiagnosticsTrigger {
+    /// This client opened, changed or saved the document.
+    ClientChange,
+    /// This client's configuration or workspace folders changed. May write;
+    /// the writes only trigger [`Self::IndexUpdate`], so the chain ends.
+    ConfigurationChange,
+    /// The project index was updated. Never writes, or two clients with
+    /// different texts would re-open an indexed file forever; keeps the
+    /// previous diagnostics if the workspace holds another client's text.
+    IndexUpdate,
+}
+
 /// Holds the set of capabilities supported by the Language Server
 /// instance and whether they are enabled or not
 #[derive(Default)]
@@ -349,7 +365,9 @@ impl Session {
                     ServiceNotification::IndexUpdated => {
                         let session = session.clone();
                         spawn(async move {
-                            session.update_all_diagnostics().await;
+                            session
+                                .update_all_diagnostics(DiagnosticsTrigger::IndexUpdate)
+                                .await;
                         });
                     }
                     ServiceNotification::WatcherStopped => {
@@ -456,6 +474,81 @@ impl Session {
     /// Remove the [`Document`] matching the provided [`Uri`]
     pub(crate) fn remove_document(&self, url: &Uri) -> Option<ProjectKey> {
         self.documents.pin().remove(url).map(|doc| doc.project_key)
+    }
+
+    /// Locks `path` so no writer replaces the document while the caller reads
+    /// it. Request handlers hold it from syncing the document to converting
+    /// the result with `doc.line_index`. Must not be held across an `.await`.
+    pub(crate) fn lock_document(&self, path: &Utf8Path) -> DocumentLockGuard {
+        self.workspace.lock_document(path)
+    }
+
+    /// Makes the shared workspace hold this session's copy of `doc`,
+    /// re-opening the file if another client changed or closed it. Re-opening
+    /// rather than changing it sidesteps the version check of `change_file`:
+    /// versions from different clients can't be compared.
+    ///
+    /// Call before any workspace operation whose result is converted with
+    /// `doc.line_index` or diffed against `doc.content`.
+    pub(crate) fn sync_document_with_workspace(
+        &self,
+        workspace: &impl Workspace,
+        path: &BiomePath,
+        doc: &Document,
+    ) -> Result<(), WorkspaceError> {
+        if self.workspace_holds_document(workspace, path, doc)? {
+            return Ok(());
+        }
+
+        debug!(%path, "document out of sync with the workspace, re-opening it");
+        workspace.open_file(OpenFileParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+            content: FileContent::FromClient {
+                content: doc.content.to_string(),
+                version: doc.version,
+            },
+            document_file_source: Some(doc.file_source),
+            persist_node_cache: true,
+            inline_config: self.inline_config(),
+            editor_features: Some(self.extension_settings.read().editor_features()),
+        })?;
+        Ok(())
+    }
+
+    /// Whether the workspace holds this session's copy of `doc`; `false` if
+    /// another client closed the file.
+    pub(crate) fn workspace_holds_document(
+        &self,
+        workspace: &impl Workspace,
+        path: &BiomePath,
+        doc: &Document,
+    ) -> Result<bool, WorkspaceError> {
+        match workspace.get_file_content(GetFileContentParams {
+            project_key: doc.project_key,
+            path: path.clone(),
+        }) {
+            Ok(content) => Ok(content == *doc.content),
+            Err(WorkspaceError::NotFound(_)) => Ok(false),
+            Err(err) => Err(err),
+        }
+    }
+
+    /// Fails with [`LspError::ContentModified`] when the workspace no longer
+    /// holds this session's copy of `doc`. Call after computing a result and
+    /// before converting it with `doc.line_index`, since another client may
+    /// have changed the file in between.
+    pub(crate) fn ensure_workspace_holds_document(
+        &self,
+        workspace: &impl Workspace,
+        path: &BiomePath,
+        doc: &Document,
+    ) -> Result<(), LspError> {
+        if self.workspace_holds_document(workspace, path, doc)? {
+            Ok(())
+        } else {
+            Err(LspError::ContentModified)
+        }
     }
 
     fn diagnostics_entry(&self, url: Uri, version: i32) -> Arc<DiagnosticsEntry> {
@@ -568,8 +661,13 @@ impl Session {
         let Some(doc) = self.document(&url) else {
             return Ok(());
         };
-        self.update_diagnostics_for_document(url.clone(), doc, None)
-            .await
+        self.update_diagnostics_for_document(
+            url.clone(),
+            doc,
+            None,
+            DiagnosticsTrigger::ClientChange,
+        )
+        .await
     }
 
     async fn update_diagnostics_for_version(
@@ -584,8 +682,13 @@ impl Session {
         if doc.version != version || entry.closed.load(Ordering::Acquire) {
             return Ok(());
         }
-        self.update_diagnostics_for_document(url.clone(), doc, Some(entry))
-            .await
+        self.update_diagnostics_for_document(
+            url.clone(),
+            doc,
+            Some(entry),
+            DiagnosticsTrigger::ClientChange,
+        )
+        .await
     }
 
     /// Computes diagnostics for the file matching the provided url and publishes
@@ -597,6 +700,7 @@ impl Session {
         url: Uri,
         doc: Document,
         entry: Option<&DiagnosticsEntry>,
+        trigger: DiagnosticsTrigger,
     ) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
 
@@ -638,6 +742,24 @@ impl Session {
             return Ok(());
         }
         let diagnostics: Vec<Diagnostic> = {
+            // Keeps the workspace content stable while we pull diagnostics
+            // and convert their ranges for this client.
+            let _guard = self.lock_document(biome_path.as_path());
+            match trigger {
+                DiagnosticsTrigger::ClientChange | DiagnosticsTrigger::ConfigurationChange => {
+                    self.sync_document_with_workspace(&self.workspace(), &biome_path, &doc)?;
+                }
+                DiagnosticsTrigger::IndexUpdate => {
+                    if !self.workspace_holds_document(&self.workspace(), &biome_path, &doc)? {
+                        debug!(
+                            url = url.as_str(),
+                            "workspace holds another client's text, keeping previous diagnostics"
+                        );
+                        return Ok(());
+                    }
+                }
+            }
+
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if configuration_status.is_loaded() {
                 if file_features.supports_lint() {
@@ -670,16 +792,8 @@ impl Session {
                     Some("svelte") => Some(SvelteFileHandler::start),
                     _ => None,
                 };
-                get_start.and_then(|f| {
-                    let content = self
-                        .workspace()
-                        .get_file_content(GetFileContentParams {
-                            project_key: doc.project_key,
-                            path: biome_path.clone(),
-                        })
-                        .ok()?;
-                    f(content.as_str())
-                })
+                // The workspace holds this client's text here, see above.
+                get_start.and_then(|f| f(&doc.content))
             };
 
             result
@@ -730,13 +844,15 @@ impl Session {
     }
 
     /// Updates diagnostics for every [`Document`] in this [`Session`]
-    #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn update_all_diagnostics(&self) {
+    #[tracing::instrument(level = "debug", skip_all)]
+    pub(crate) async fn update_all_diagnostics(&self, trigger: DiagnosticsTrigger) {
         let mut futures: FuturesUnordered<_> = self
             .documents
             .pin()
             .iter()
-            .map(|(url, doc)| self.update_diagnostics_for_document(url.clone(), doc.clone(), None))
+            .map(|(url, doc)| {
+                self.update_diagnostics_for_document(url.clone(), doc.clone(), None, trigger)
+            })
             .collect();
 
         while let Some(result) = futures.next().await {

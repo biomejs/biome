@@ -11,6 +11,22 @@ pub enum LspError {
     WorkspaceError(WorkspaceError),
     Anyhow(anyhow::Error),
     Error(biome_diagnostics::Error),
+    /// The document changed while the request was being computed, so the
+    /// result would refer to positions of a text the client doesn't have.
+    /// Answered with `ContentModified`, which makes the client retry.
+    ContentModified,
+}
+
+impl LspError {
+    /// The JSON-RPC error a request handler answers with when the error
+    /// isn't turned into a message for the user.
+    pub(crate) fn into_jsonrpc_error(self) -> jsonrpc::Error {
+        match self {
+            // Routine traffic, not a failure: the client re-sends the request.
+            Self::ContentModified => jsonrpc::Error::content_modified(),
+            err => into_lsp_error(err),
+        }
+    }
 }
 
 impl From<WorkspaceError> for LspError {
@@ -41,6 +57,9 @@ impl Display for LspError {
                 write!(f, "{err}")
             }
             Self::Error(err) => err.description(f),
+            Self::ContentModified => {
+                f.write_str("the document was modified while the request was being processed")
+            }
         }
     }
 }
@@ -65,11 +84,11 @@ pub(crate) async fn handle_lsp_error<T>(
 
             _ => Err(into_lsp_error(err)),
         },
-        LspError::Anyhow(err) => Err(into_lsp_error(err)),
         LspError::Error(err) => {
             let message = print_diagnostic_to_string(&err);
             client.log_message(MessageType::ERROR, message).await;
             Ok(None)
         }
+        err @ (LspError::Anyhow(_) | LspError::ContentModified) => Err(err.into_jsonrpc_error()),
     }
 }
