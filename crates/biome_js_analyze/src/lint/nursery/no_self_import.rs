@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsImportLike;
-use biome_module_graph::JsImportPath;
+use biome_module_graph::ModuleInfoKind;
 use biome_rowan::AstNode;
 use biome_rule_options::no_self_import::NoSelfImportOptions;
 
@@ -56,12 +56,17 @@ impl Rule for NoSelfImport {
     type Options = NoSelfImportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
+        let owner = ctx.module_info_for_path(ctx.file_path())?;
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
+            return None;
+        };
         let node = ctx.query();
 
-        let JsImportPath { resolved_path, .. } = module_info.get_import_path_by_js_node(node)?;
+        let resolved = module_info
+            .get_import_path_by_js_node(node)?
+            .resolve_js(ctx.db(), owner);
 
-        (resolved_path.as_path()? == ctx.file_path()).then_some(())
+        (resolved.path().as_path()? == ctx.file_path()).then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

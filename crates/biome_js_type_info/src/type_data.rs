@@ -13,8 +13,8 @@ pub mod literal;
 
 use std::fmt::{self, Debug, Formatter, Result as FormatResult};
 use std::str::FromStr;
+use std::sync::Arc;
 
-use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
 use crate::{
@@ -1666,8 +1666,8 @@ pub struct TypeImportQualifier {
     /// The imported symbol.
     pub symbol: ImportSymbol,
 
-    /// Resolved path of the module to import the type from.
-    pub resolved_path: ResolvedPath,
+    /// The module specifier as it appeared in source text.
+    pub specifier: Arc<Text>,
 
     /// If `true`, this qualifier imports the type only.
     pub type_only: bool,

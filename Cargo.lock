@@ -1821,10 +1821,13 @@ dependencies = [
  "biome_db",
  "biome_diagnostics",
  "biome_fs",
+ "biome_json_parser",
  "biome_json_value",
  "biome_package",
  "biome_rowan",
  "camino",
+ "enumflags2",
+ "papaya",
  "salsa",
 ]
 
@@ -2118,6 +2121,7 @@ dependencies = [
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_type_info",
+ "biome_json_parser",
  "biome_languages",
  "biome_module_graph",
  "biome_package",
@@ -5682,9 +5686,9 @@ checksum = "04d056b875a9d2e6cb9a61d127afee9ac5999b9f87bcb32079d1318e505be714"
 
 [[package]]
 name = "salsa"
-version = "0.27.2"
+version = "0.28.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffbaab832e2ea754afda4a738f987dd1e8bd30c9e5d8c981ee6a3934386095e2"
+checksum = "27d2e6e19e39591cd99c01ac4141544b4d012cfd0831348629b8187fa9fe6d34"
 dependencies = [
  "boxcar",
  "crossbeam-queue",
@@ -5708,20 +5712,19 @@ dependencies = [
 
 [[package]]
 name = "salsa-macro-rules"
-version = "0.27.2"
+version = "0.28.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de6872462ac73d39969a836273c24163e6a26a4e08f5114fcd80e25af30ea9c6"
+checksum = "baf90a551c38f25ed8489111d3d5827aa18e1b85963f5e6a298505b1d1e2cb7e"
 
 [[package]]
 name = "salsa-macros"
-version = "0.27.2"
+version = "0.28.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76bc78ffaf65b1a9175818592c5130aa10b1bb245a905722fd4db87cea8a8457"
+checksum = "69dd77f86ec10e72e314f4ddf7c44c8d349e73cdff1aad524ba9668603fb0549"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.106",
- "synstructure 0.13.2",
+ "syn 3.0.5",
 ]
 
 [[package]]

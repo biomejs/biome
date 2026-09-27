@@ -101,11 +101,8 @@ impl From<GraphqlAssistConfiguration> for GraphqlAssistSettings {
 
 #[salsa::interned]
 struct GraphqlFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -122,11 +119,8 @@ fn resolved_graphql_format_options<'db>(
 
 #[salsa::interned]
 struct GraphqlAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 

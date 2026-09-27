@@ -559,7 +559,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         let ImportResolution::OnDemand { remaining } = self.import_resolution else {
             return InferredTypeData::Unknown;
         };
-        let mut ctx = self.for_on_demand_import(module, &js_info, remaining, true);
+        let mut ctx = self.for_on_demand_import(module, js_info, remaining, true);
         match declaration {
             OnDemandDeclaration::Binding { range, .. } => js_info
                 .raw_binding_types

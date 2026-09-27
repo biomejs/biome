@@ -3,14 +3,14 @@ use std::collections::BTreeMap;
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
 use biome_db::{ParsedSnippet, ParsedSource};
-use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
-use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource};
+use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsonFileSource};
 use biome_module_graph::{
-    ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
+    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_parser::AnyParse;
-use biome_project_layout::ProjectLayout;
+use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
 use biome_service::db::WorkspaceDb;
 use biome_service::settings::ModuleGraphResolutionKind;
@@ -18,6 +18,7 @@ use biome_service::test_utils::setup_workspace_and_open_project;
 use biome_service::workspace::UpdateSettingsParams;
 use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
+use std::sync::Arc;
 
 type HtmlTestFile<'a> = (
     &'a str,
@@ -26,50 +27,59 @@ type HtmlTestFile<'a> = (
     Vec<(AnyParse, CssFileSource)>,
 );
 
+/// A filesystem whose files a test database can read.
+pub trait TestFs: FsWithResolverProxy {
+    /// Returns a handle to the same files, for the resolver of a database.
+    fn share(&self) -> Arc<dyn FsWithResolverProxy>;
+}
+
+impl TestFs for MemoryFileSystem {
+    fn share(&self) -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(Self::from_files(self.files.0.clone()))
+    }
+}
+
+impl TestFs for OsFileSystem {
+    fn share(&self) -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(Self {
+            working_directory: self.working_directory.clone(),
+        })
+    }
+}
+
 pub fn add_js_modules(
     db: &mut WorkspaceDb,
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
+    fs: &dyn FsWithResolverProxy,
     paths: &[BiomePath],
     infer_types: bool,
 ) {
-    let path_info_cache = PathInfoCache::default();
     for (path, root, semantic_model) in get_added_js_paths(fs, paths) {
-        let (info, _, _) = resolve_js_module(
-            root,
-            path,
-            fs,
-            layout,
-            semantic_model,
-            &path_info_cache,
-            infer_types,
-        );
+        let (info, _, _) = resolve_js_module(&*db, root, path, semantic_model, infer_types);
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Js(info));
     }
 }
 
-pub fn add_css_modules(
-    db: &mut WorkspaceDb,
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    paths: &[BiomePath],
-) {
-    let path_info_cache = PathInfoCache::default();
+pub fn add_css_modules(db: &mut WorkspaceDb, fs: &dyn FsWithResolverProxy, paths: &[BiomePath]) {
     for (path, root) in get_css_added_paths(fs, paths) {
-        let (info, _, _) = resolve_css_module(root, path, fs, layout, &path_info_cache);
+        let (info, _, _) = resolve_css_module(&*db, root, path);
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Css(info));
     }
 }
 
-pub fn build_js_db(
-    fs: &dyn biome_resolver::FsWithResolverProxy,
-    layout: &ProjectLayout,
-    paths: &[BiomePath],
-    infer_types: bool,
-) -> WorkspaceDb {
-    let mut db = WorkspaceDb::default();
-    add_js_modules(&mut db, fs, layout, paths, infer_types);
+pub fn build_js_db(fs: &impl TestFs, paths: &[BiomePath], infer_types: bool) -> WorkspaceDb {
+    let mut db = WorkspaceDb::new(fs.share());
+    add_js_modules(&mut db, fs, paths, infer_types);
     db
+}
+
+/// Indexes a JSON document, such as a manifest, as a parsed source.
+///
+/// This uses setters, so resolutions already computed from the filesystem are
+/// invalidated, like when the workspace opens a manifest.
+pub fn add_json_file(db: &mut WorkspaceDb, path: &Utf8Path, source: &str) {
+    let parse = biome_json_parser::parse_json(source, Default::default());
+    let source_index = db.insert_source(DocumentFileSource::Json(JsonFileSource::json()));
+    db.upsert_file(path, parse.into(), source_index, Vec::new());
 }
 
 pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
@@ -81,8 +91,8 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
         .iter()
         .map(|(path, _)| BiomePath::new(*path))
         .collect::<Vec<_>>();
-    let mut db = WorkspaceDb::default();
-    add_css_modules(&mut db, &fs, &ProjectLayout::default(), &paths);
+    let mut db = WorkspaceDb::new(fs.share());
+    add_css_modules(&mut db, &fs, &paths);
 
     for (path, source) in files {
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
@@ -112,8 +122,7 @@ pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, C
 }
 
 pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> WorkspaceDb {
-    let mut db = WorkspaceDb::default();
-    let cache = PathInfoCache::default();
+    let mut db = WorkspaceDb::new(fs.share());
     for (path, source, file_source, embedded) in files {
         let path = BiomePath::new(*path);
         let snippets = embedded
@@ -140,8 +149,7 @@ pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> Works
             snippets,
         );
         db.insert_file(path.as_path(), parsed_source);
-        let (info, _, _) =
-            resolve_html_module(&db, &path, fs, &ProjectLayout::default(), &cache).unwrap();
+        let (info, _, _) = resolve_html_module(&db, &path).unwrap();
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db

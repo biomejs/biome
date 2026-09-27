@@ -108,7 +108,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
     }
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn embedded_bindings_from_source(
     db: &dyn LanguageDb,
     file: ParsedSource,
@@ -133,7 +133,7 @@ pub fn embedded_bindings_from_source(
 }
 
 /// Collects custom Vue directive declarations from a host document.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn vue_directive_declarations_from_source(
     db: &dyn LanguageDb,
     file: ParsedSource,
@@ -227,7 +227,7 @@ struct CollectedEmbeddedBindings {
     vue_directive_declarations: VueDirectiveDeclarations,
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
     file: ParsedSource,
@@ -239,7 +239,7 @@ pub fn embedded_references_from_source(
     vec![build_value_references(&builder)]
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn embedded_type_references_from_source(
     db: &dyn LanguageDb,
     file: ParsedSource,
