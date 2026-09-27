@@ -10,8 +10,8 @@ use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
-    html_self_closing_element_has_accessible_name,
+    get_truthy_aria_hidden_attribute, has_non_empty_attribute,
+    html_element_has_truthy_aria_hidden, html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
@@ -21,7 +21,8 @@ declare_lint_rule! {
     ///
     /// Accessible means the content is not hidden using the `aria-hidden` attribute.
     /// Anchor tags should have text content that describes the link destination for screen reader users.
-    /// An `aria-label`, `aria-labelledby`, or `title` attribute alone doesn't satisfy this rule.
+    /// A non-empty `aria-label` attribute also provides an accessible name for the anchor, so it satisfies
+    /// this rule. An `aria-labelledby` or `title` attribute alone doesn't satisfy it.
     ///
     /// :::note
     /// In `.html` files, this rule matches element names case-insensitively (e.g., `<A>`, `<a>`).
@@ -51,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```html,expect_diagnostic
-    /// <a aria-label="Navigate to home"></a>
+    /// <a aria-label=""></a>
     /// ```
     ///
     /// ```html,expect_diagnostic
@@ -64,6 +65,7 @@ declare_lint_rule! {
     /// <a>content</a>
     /// <a><span>content</span></a>
     /// <a><span aria-hidden="true"></span>content</a>
+    /// <a aria-label="Navigate to home"></a>
     /// <a aria-label="Navigate to home">Home</a>
     /// <a title="Home page">Home</a>
     /// ```
@@ -110,6 +112,11 @@ impl Rule for UseAnchorContent {
             return Some(UseAnchorContentState {
                 aria_hidden_attribute: Some(aria_hidden_attr),
             });
+        }
+
+        // A non-empty `aria-label` gives the anchor an accessible name
+        if has_non_empty_attribute(&tag_element, "aria-label") {
+            return None;
         }
 
         // Handle self-closing anchors - they have no content

@@ -9,6 +9,7 @@ use biome_js_syntax::JsxAttributeList;
 use biome_js_syntax::JsxElement;
 use biome_js_syntax::JsxExpressionAttributeValue;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::static_value::StaticValue;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
@@ -19,7 +20,8 @@ declare_lint_rule! {
     ///
     /// Accessible means the content is not hidden using the `aria-hidden` attribute.
     /// Anchor tags should have text content that describes the link destination for screen reader users.
-    /// An `aria-label`, `aria-labelledby`, or `title` attribute alone doesn't satisfy this rule.
+    /// A non-empty `aria-label` attribute also provides an accessible name for the anchor, so it satisfies
+    /// this rule. An `aria-labelledby` or `title` attribute alone doesn't satisfy it.
     ///
     /// ## Examples
     ///
@@ -45,10 +47,18 @@ declare_lint_rule! {
     /// <a><span aria-hidden="true">content</span></a>
     /// ```
     ///
+    /// ```jsx,expect_diagnostic
+    /// <a aria-label=""></a>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```jsx
     /// <a>content</a>
+    /// ```
+    ///
+    /// ```jsx
+    /// <a aria-label="Home" />
     /// ```
     ///
     /// ```jsx
@@ -103,6 +113,10 @@ impl Rule for UseAnchorContent {
         if name.text_trimmed() == "a" {
             if node.has_truthy_attribute("aria-hidden") {
                 return Some(());
+            }
+
+            if has_non_empty_aria_label(node) {
+                return None;
             }
 
             if has_valid_anchor_content(node) {
@@ -171,6 +185,28 @@ impl Rule for UseAnchorContent {
             ));
         }
         None
+    }
+}
+
+/// Returns `true` if the anchor has a non-empty `aria-label` attribute.
+///
+/// A dynamic value (`aria-label={label}`) is assumed to provide an accessible name, while an
+/// empty or whitespace-only literal, a valueless attribute, `null`, and `undefined` don't.
+fn has_non_empty_aria_label(node: &AnyJsxElement) -> bool {
+    let Some(attribute) = node.find_attribute_by_name("aria-label") else {
+        return false;
+    };
+    if attribute.initializer().is_none() {
+        return false;
+    }
+
+    match attribute.as_static_value() {
+        None => true,
+        Some(value) => match value {
+            StaticValue::String(_) => !value.text().trim().is_empty(),
+            StaticValue::EmptyString(_) | StaticValue::Null(_) | StaticValue::Undefined(_) => false,
+            _ => true,
+        },
     }
 }
 

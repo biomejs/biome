@@ -25,6 +25,10 @@ expression: valid.vue
   <a aria-label="Navigate to dashboard">Dashboard</a>
   <a title="Go to settings page">Settings</a>
 
+  <!-- A non-empty aria-label provides an accessible name -->
+  <a aria-label="Navigate to dashboard"></a>
+  <a :aria-label="label" />
+
   <!-- Custom components may render accessible content -->
   <a><Image alt="description" /></a>
   <a><CustomIcon /></a>

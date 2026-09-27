@@ -26,11 +26,9 @@ expression: invalid.vue
   <!-- Hidden input is not accessible -->
   <a><input type="hidden" /></a>
 
-  <!-- Labels alone do not provide anchor content -->
-  <a aria-label="Navigate to dashboard"></a>
+  <!-- `aria-labelledby` and `title` alone do not provide anchor content -->
   <a title="Go to settings page"></a>
   <a aria-labelledby="dashboard-label"></a>
-  <a :aria-label="label" />
   <a :title="label">    </a>
 </template>
 
@@ -254,7 +252,7 @@ invalid.vue:21:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━
   > 21 │   <a><input type="hidden" /></a>
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
-    23 │   <!-- Labels alone do not provide anchor content -->
+    23 │   <!-- `aria-labelledby` and `title` alone do not provide anchor content -->
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -272,11 +270,11 @@ invalid.vue:24:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    23 │   <!-- Labels alone do not provide anchor content -->
-  > 24 │   <a aria-label="Navigate to dashboard"></a>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │   <a title="Go to settings page"></a>
-    26 │   <a aria-labelledby="dashboard-label"></a>
+    23 │   <!-- `aria-labelledby` and `title` alone do not provide anchor content -->
+  > 24 │   <a title="Go to settings page"></a>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │   <a aria-labelledby="dashboard-label"></a>
+    26 │   <a :title="label">    </a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -294,12 +292,12 @@ invalid.vue:25:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    23 │   <!-- Labels alone do not provide anchor content -->
-    24 │   <a aria-label="Navigate to dashboard"></a>
-  > 25 │   <a title="Go to settings page"></a>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │   <a aria-labelledby="dashboard-label"></a>
-    27 │   <a :aria-label="label" />
+    23 │   <!-- `aria-labelledby` and `title` alone do not provide anchor content -->
+    24 │   <a title="Go to settings page"></a>
+  > 25 │   <a aria-labelledby="dashboard-label"></a>
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │   <a :title="label">    </a>
+    27 │ </template>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -317,58 +315,12 @@ invalid.vue:26:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using a elements.
   
-    24 │   <a aria-label="Navigate to dashboard"></a>
-    25 │   <a title="Go to settings page"></a>
-  > 26 │   <a aria-labelledby="dashboard-label"></a>
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │   <a :aria-label="label" />
-    28 │   <a :title="label">    </a>
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.vue:27:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    25 │   <a title="Go to settings page"></a>
-    26 │   <a aria-labelledby="dashboard-label"></a>
-  > 27 │   <a :aria-label="label" />
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │   <a :title="label">    </a>
-    29 │ </template>
-  
-  i All links on a page should have content that is accessible to screen readers.
-  
-  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
-  
-  i Follow these links for more information,
-     WCAG 2.4.4
-     WCAG 4.1.2
-  
-
-```
-
-```
-invalid.vue:28:3 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide screen reader accessible content when using a elements.
-  
-    26 │   <a aria-labelledby="dashboard-label"></a>
-    27 │   <a :aria-label="label" />
-  > 28 │   <a :title="label">    </a>
+    24 │   <a title="Go to settings page"></a>
+    25 │   <a aria-labelledby="dashboard-label"></a>
+  > 26 │   <a :title="label">    </a>
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    29 │ </template>
-    30 │ 
+    27 │ </template>
+    28 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

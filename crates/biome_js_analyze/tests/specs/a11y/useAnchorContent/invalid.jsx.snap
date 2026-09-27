@@ -11,6 +11,10 @@ expression: invalid.jsx
 	<a>   </a>
 	<a>{null}</a>
 	<a>{undefined}</a>
+	<a aria-label="" />
+	<a aria-label="   " />
+	<a aria-label={""} />
+	<a aria-label={null} />
 	<a aria-hidden>content</a>
 	<a><span aria-hidden="true">content</span></a>
 	<a><span aria-hidden={true}>content</span></a>
@@ -102,7 +106,7 @@ invalid.jsx:6:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
   > 6 │ 	<a>{null}</a>
       │ 	^^^^^^^^^^^^^
     7 │ 	<a>{undefined}</a>
-    8 │ 	<a aria-hidden>content</a>
+    8 │ 	<a aria-label="" />
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -124,8 +128,8 @@ invalid.jsx:7:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
     6 │ 	<a>{null}</a>
   > 7 │ 	<a>{undefined}</a>
       │ 	^^^^^^^^^^^^^^^^^^
-    8 │ 	<a aria-hidden>content</a>
-    9 │ 	<a><span aria-hidden="true">content</span></a>
+    8 │ 	<a aria-label="" />
+    9 │ 	<a aria-label="   " />
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -139,16 +143,16 @@ invalid.jsx:7:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:8:2 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
      6 │ 	<a>{null}</a>
      7 │ 	<a>{undefined}</a>
-   > 8 │ 	<a aria-hidden>content</a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 	<a><span aria-hidden="true">content</span></a>
-    10 │ 	<a><span aria-hidden={true}>content</span></a>
+   > 8 │ 	<a aria-label="" />
+       │ 	^^^^^^^^^^^^^^^^^^^
+     9 │ 	<a aria-label="   " />
+    10 │ 	<a aria-label={""} />
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -158,10 +162,6 @@ invalid.jsx:8:2 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━
      WCAG 2.4.4
      WCAG 4.1.2
   
-  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
-  
-    8 │ → <a·aria-hidden>content</a>
-      │      -----------            
 
 ```
 
@@ -171,11 +171,11 @@ invalid.jsx:9:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━�
   × Provide screen reader accessible content when using `a` elements.
   
      7 │ 	<a>{undefined}</a>
-     8 │ 	<a aria-hidden>content</a>
-   > 9 │ 	<a><span aria-hidden="true">content</span></a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 	<a><span aria-hidden={true}>content</span></a>
-    11 │ 	<a><span aria-hidden={"true"}>content</span></a>
+     8 │ 	<a aria-label="" />
+   > 9 │ 	<a aria-label="   " />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	<a aria-label={""} />
+    11 │ 	<a aria-label={null} />
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -193,12 +193,12 @@ invalid.jsx:10:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
-     8 │ 	<a aria-hidden>content</a>
-     9 │ 	<a><span aria-hidden="true">content</span></a>
-  > 10 │ 	<a><span aria-hidden={true}>content</span></a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ 	<a><span aria-hidden={"true"}>content</span></a>
-    12 │ 	<a><span aria-hidden={`true`}>content</span></a>
+     8 │ 	<a aria-label="" />
+     9 │ 	<a aria-label="   " />
+  > 10 │ 	<a aria-label={""} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	<a aria-label={null} />
+    12 │ 	<a aria-hidden>content</a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -216,12 +216,12 @@ invalid.jsx:11:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
-     9 │ 	<a><span aria-hidden="true">content</span></a>
-    10 │ 	<a><span aria-hidden={true}>content</span></a>
-  > 11 │ 	<a><span aria-hidden={"true"}>content</span></a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ 	<a><span aria-hidden={`true`}>content</span></a>
-    13 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
+     9 │ 	<a aria-label="   " />
+    10 │ 	<a aria-label={""} />
+  > 11 │ 	<a aria-label={null} />
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	<a aria-hidden>content</a>
+    13 │ 	<a><span aria-hidden="true">content</span></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -235,16 +235,16 @@ invalid.jsx:11:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:12:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:2 lint/a11y/useAnchorContent  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
-    10 │ 	<a><span aria-hidden={true}>content</span></a>
-    11 │ 	<a><span aria-hidden={"true"}>content</span></a>
-  > 12 │ 	<a><span aria-hidden={`true`}>content</span></a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
-    14 │ 	<my-button render={<a />} />
+    10 │ 	<a aria-label={""} />
+    11 │ 	<a aria-label={null} />
+  > 12 │ 	<a aria-hidden>content</a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	<a><span aria-hidden="true">content</span></a>
+    14 │ 	<a><span aria-hidden={true}>content</span></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -254,6 +254,10 @@ invalid.jsx:12:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
      WCAG 2.4.4
      WCAG 4.1.2
   
+  i Unsafe fix: Remove the aria-hidden attribute to allow the anchor element and its content visible to assistive technologies.
+  
+    12 │ → <a·aria-hidden>content</a>
+       │      -----------            
 
 ```
 
@@ -262,12 +266,12 @@ invalid.jsx:13:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
-    11 │ 	<a><span aria-hidden={"true"}>content</span></a>
-    12 │ 	<a><span aria-hidden={`true`}>content</span></a>
-  > 13 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ 	<my-button render={<a />} />
-    15 │ </>
+    11 │ 	<a aria-label={null} />
+    12 │ 	<a aria-hidden>content</a>
+  > 13 │ 	<a><span aria-hidden="true">content</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	<a><span aria-hidden={true}>content</span></a>
+    15 │ 	<a><span aria-hidden={"true"}>content</span></a>
   
   i All links on a page should have content that is accessible to screen readers.
   
@@ -281,16 +285,108 @@ invalid.jsx:13:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:14:21 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide screen reader accessible content when using `a` elements.
   
-    12 │ 	<a><span aria-hidden={`true`}>content</span></a>
-    13 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
-  > 14 │ 	<my-button render={<a />} />
+    12 │ 	<a aria-hidden>content</a>
+    13 │ 	<a><span aria-hidden="true">content</span></a>
+  > 14 │ 	<a><span aria-hidden={true}>content</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	<a><span aria-hidden={"true"}>content</span></a>
+    16 │ 	<a><span aria-hidden={`true`}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.jsx:15:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+    13 │ 	<a><span aria-hidden="true">content</span></a>
+    14 │ 	<a><span aria-hidden={true}>content</span></a>
+  > 15 │ 	<a><span aria-hidden={"true"}>content</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	<a><span aria-hidden={`true`}>content</span></a>
+    17 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.jsx:16:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+    14 │ 	<a><span aria-hidden={true}>content</span></a>
+    15 │ 	<a><span aria-hidden={"true"}>content</span></a>
+  > 16 │ 	<a><span aria-hidden={`true`}>content</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
+    18 │ 	<my-button render={<a />} />
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.jsx:17:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+    15 │ 	<a><span aria-hidden={"true"}>content</span></a>
+    16 │ 	<a><span aria-hidden={`true`}>content</span></a>
+  > 17 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	<my-button render={<a />} />
+    19 │ </>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.jsx:18:21 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+    16 │ 	<a><span aria-hidden={`true`}>content</span></a>
+    17 │ 	<a><span aria-hidden={`${true}`}>content</span></a>
+  > 18 │ 	<my-button render={<a />} />
        │ 	                   ^^^^^
-    15 │ </>
-    16 │ 
+    19 │ </>
+    20 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

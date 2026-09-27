@@ -1,4 +1,4 @@
-<!-- should generate diagnostics -->
+<!-- should not generate diagnostics: the non-empty `aria-label` provides an accessible name -->
 <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
     <svg aria-hidden="true">
         <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />

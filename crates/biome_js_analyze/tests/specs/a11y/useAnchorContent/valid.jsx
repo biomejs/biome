@@ -1,6 +1,10 @@
 /* should not generate diagnostics */
 <>
     <a>content</a>
+    <a aria-label="Home" />
+    <a aria-label="Home"></a>
+    <a aria-label="Home"><span aria-hidden="true">Home</span></a>
+    <a aria-label={label} />
     <a><TextWrapper /></a>
 		<a><TextWrapper aria-hidden /></a>
 		<a><TextWrapper aria-hidden={true} /></a>
