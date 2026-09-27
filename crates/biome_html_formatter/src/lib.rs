@@ -9,7 +9,7 @@ use biome_formatter::comments::Comments;
 use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
-use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
+use biome_formatter::{FormatLanguage, FormatResult, Formatted, VecBuffer, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
 use biome_rowan::{AstNode, SyntaxToken, TextRange};
 use comments::HtmlCommentStyle;
@@ -35,17 +35,43 @@ mod vue;
 
 /// Formats a HTML file based on its features.
 ///
+/// `embedded_node_ranges` contains the content ranges of the embedded snippets
+/// whose formatting is delegated to the formatter of their language. The nodes
+/// holding these snippets are emitted as embedded tags, which the caller fills
+/// with [Formatted::format_embedded]. With no ranges, embedded content is
+/// printed as it's written.
+///
 /// It returns a [Formatted] result, which the user can use to override a file.
 pub fn format_node(
     options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
-    delegate_fmt_embedded_nodes: bool,
+    embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
+    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
     biome_formatter::format_node(
         root,
-        HtmlFormatLanguage::new(options),
+        HtmlFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
         delegate_fmt_embedded_nodes,
     )
+}
+
+/// The code of a node that is formatted by the formatter of another language.
+///
+/// It's printed as `content`, the node's own formatting, unless the caller of
+/// [format_node] replaces it with [Formatted::format_embedded].
+pub(crate) struct FormatEmbedded {
+    range: TextRange,
+    content: Interned,
+}
+
+impl Format<HtmlFormatContext> for FormatEmbedded {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        f.write_elements([
+            FormatElement::Tag(StartEmbedded(self.range)),
+            FormatElement::Interned(self.content.clone()),
+            FormatElement::Tag(EndEmbedded),
+        ])
+    }
 }
 
 /// Used to get an object that knows how to format this object.
@@ -147,11 +173,20 @@ where
 #[derive(Debug, Clone)]
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl HtmlFormatLanguage {
     pub fn new(options: HtmlFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            embedded_node_ranges: Vec::new(),
+        }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
     }
 }
 
@@ -173,7 +208,7 @@ impl FormatLanguage for HtmlFormatLanguage {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
         let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
         if delegate_fmt_embedded_nodes {
-            context.with_fmt_embedded_nodes()
+            context.with_embedded_node_ranges(self.embedded_node_ranges)
         } else {
             context
         }
@@ -226,28 +261,33 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        if let Some(range) = self.embedded_node_range(node, f) {
-            // Tokens that belong to embedded nodes are formatted later on,
-            // so we track them, even though they aren't formatted now during this pass.
-            let state = f.state_mut();
-            for token in node.syntax().tokens() {
-                state.track_token(&token);
-            }
-
-            f.write_elements(vec![
-                FormatElement::Tag(StartEmbedded(range)),
-                FormatElement::Tag(EndEmbedded),
-            ])?;
+        let range = node.range();
+        if f.context().is_embedded_node_range(range) {
+            let mut buffer = VecBuffer::new(f.state_mut());
+            write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
+            let embedded = FormatEmbedded {
+                range,
+                content: Interned::new(buffer.into_vec()),
+            };
+            self.wrap_embed(node, &embedded, f)
         } else {
-            self.fmt_fields(node, f)?;
+            self.fmt_fields(node, f)
         }
-        Ok(())
     }
 
-    /// Whether this node contains content that needs to be formatted by an external formatter.
-    /// If so, the function must return the range of the nodes that will be formatted in the second phase.
-    fn embedded_node_range(&self, _node: &N, _f: &mut HtmlFormatter) -> Option<TextRange> {
-        None
+    /// Writes `embedded`, a piece of code written in another language, such as
+    /// the JavaScript inside `{ }` or inside a `<script>` tag.
+    ///
+    /// By default, the code stays on the same line as the surrounding markup, like
+    /// `<p>{name}</p>`. Override this method when the code must start on its own
+    /// line, like the content of a `<script>` tag.
+    fn wrap_embed(
+        &self,
+        _node: &N,
+        embedded: &FormatEmbedded,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        embedded.fmt(f)
     }
 
     /// Formats the node's fields.

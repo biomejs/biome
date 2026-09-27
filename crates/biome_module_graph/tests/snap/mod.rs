@@ -156,7 +156,7 @@ pub fn write_source_file(content: &mut String, file_name: &Utf8PathBuf, source_c
             let formatted = biome_html_formatter::format_node(
                 HtmlFormatOptions::default(),
                 tree.tree().syntax(),
-                false,
+                Vec::new(),
             )
             .unwrap()
             .print()
