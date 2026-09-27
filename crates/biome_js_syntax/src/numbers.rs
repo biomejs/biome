@@ -224,12 +224,153 @@ pub fn canonicalize_js_bigint_literal(input: &str) -> Option<Cow<'_, str>> {
     Some(Cow::Owned(canonical))
 }
 
+/// Formats a floating-point value the way JavaScript's `String(number)` does.
+///
+/// Returns the shortest decimal representation that round-trips to `value`,
+/// using fixed notation when the decimal exponent `n` satisfies `-6 < n <= 21`
+/// and exponential notation otherwise, matching ECMA-262 `Number::toString`.
+/// Special values format as `"NaN"`, `"Infinity"`, and `"-Infinity"`;
+/// both positive and negative zero format as `"0"`.
+///
+/// This computes the property key of numeric literal member names, where
+/// JavaScript converts the numeric value with `ToString`.
+pub fn js_number_to_string(value: f64) -> String {
+    if value.is_nan() {
+        return String::from("NaN");
+    }
+    if value == 0.0 {
+        // `String(-0)` is `"0"`.
+        return String::from("0");
+    }
+    if value.is_infinite() {
+        return if value > 0.0 {
+            String::from("Infinity")
+        } else {
+            String::from("-Infinity")
+        };
+    }
+
+    let mut out = String::new();
+    let mut v = value;
+    if v < 0.0 {
+        out.push('-');
+        v = -v;
+    }
+
+    // Derive (s, k, n) with value = s * 10^(n-k), where s is the digit
+    // string of length k without leading zeros, from Rust's shortest
+    // round-trip formatting.
+    let rust = format!("{v}");
+    let (mantissa, exp): (&str, i32) = match rust.find(['e', 'E']) {
+        Some(idx) => (&rust[..idx], rust[idx + 1..].parse().unwrap_or(0)),
+        None => (rust.as_str(), 0),
+    };
+    let (int_part, frac_part) = match mantissa.find('.') {
+        Some(idx) => (&mantissa[..idx], &mantissa[idx + 1..]),
+        None => (mantissa, ""),
+    };
+    let int_len = int_part.len() as i32;
+    let combined = format!("{int_part}{frac_part}");
+    let trimmed = combined.trim_start_matches('0');
+    let leading_zeros = combined.len() - trimmed.len();
+    // Rust emits non-significant trailing zeros for large magnitudes
+    // (e.g. `1e21` formats as `1000000000000000000000`); dropping them
+    // keeps `s` shortest and leaves `n` unchanged.
+    let s = trimmed.trim_end_matches('0');
+    let s = if s.is_empty() { "0" } else { s };
+    let mut s = String::from(s);
+    let mut k = s.len() as i32;
+    let n = int_len + exp - leading_zeros as i32;
+
+    // Rust rounds half-up but JavaScript rounds half-even when the exact
+    // value is exactly halfway between two shortest candidates. Detect
+    // the midpoint by checking whether the halfway decimal is exactly
+    // representable and equals `v`; if so, use the even digit.
+    if let Some(&last) = s.as_bytes().last()
+        && (last - b'0') % 2 == 1
+    {
+        // Decrement the last digit. The string contains only ASCII digits,
+        // so popping the last char and pushing the decremented digit is safe.
+        let mut mid_digits = s.clone();
+        mid_digits.pop();
+        mid_digits.push((last - 1) as char);
+        mid_digits.push('5');
+        let scale = n - k;
+        let mid_exp = scale - 1;
+        let is_midpoint = format!("{mid_digits}e{mid_exp}")
+            .parse::<f64>()
+            .is_ok_and(|m| m == v && is_exact_decimal(&mid_digits, mid_exp, v));
+        if is_midpoint {
+            mid_digits.pop();
+            s = mid_digits;
+            k = s.len() as i32;
+        }
+    }
+    let s: &str = &s;
+
+    if k <= n && n <= 21 {
+        out.push_str(s);
+        for _ in 0..(n - k) {
+            out.push('0');
+        }
+    } else if 0 < n && n <= 21 {
+        let n_usize = n as usize;
+        out.push_str(&s[..n_usize]);
+        out.push('.');
+        out.push_str(&s[n_usize..]);
+    } else if -6 < n && n <= 0 {
+        out.push_str("0.");
+        for _ in 0..(-n) {
+            out.push('0');
+        }
+        out.push_str(s);
+    } else {
+        out.push_str(&s[..1]);
+        if k > 1 {
+            out.push('.');
+            out.push_str(&s[1..]);
+        }
+        out.push('e');
+        let e = n - 1;
+        if e < 0 {
+            out.push('-');
+            out.push_str(&e.unsigned_abs().to_string());
+        } else {
+            out.push('+');
+            out.push_str(&e.to_string());
+        }
+    }
+    out
+}
+
+/// Checks whether the decimal `digits * 10^exp` is exactly equal to `v`.
+///
+/// The exact decimal expansion of an `f64` terminates within 1074 fractional
+/// digits, so formatting with that precision yields the exact value.
+fn is_exact_decimal(digits: &str, exp: i32, v: f64) -> bool {
+    let v_exact = format!("{:.1074}", v.abs());
+    let v_exact = v_exact.trim_end_matches('0').trim_end_matches('.');
+    let m_exact = if exp >= 0 {
+        format!("{digits}{}", "0".repeat(exp as usize))
+    } else {
+        let shift = (-exp) as usize;
+        if digits.len() > shift {
+            let (int, frac) = digits.split_at(digits.len() - shift);
+            format!("{int}.{frac}")
+        } else {
+            format!("0.{}{digits}", "0".repeat(shift - digits.len()))
+        }
+    };
+    let m_exact = m_exact.trim_end_matches('0').trim_end_matches('.');
+    v_exact == m_exact
+}
+
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
 
     use super::{
-        canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+        canonicalize_js_bigint_literal, js_number_to_string, parse_js_number_with_single_rounding,
         split_into_radix_and_number,
     };
     use biome_js_factory::JsSyntaxTreeBuilder;
@@ -440,5 +581,49 @@ mod tests {
         assert_split("1234", 10, "1234");
         assert_split("12_34", 10, "1234");
         assert_split("12_34", 10, "1234");
+    }
+
+    #[test]
+    fn number_to_string_special_values() {
+        assert_eq!(js_number_to_string(f64::NAN), "NaN");
+        assert_eq!(js_number_to_string(f64::INFINITY), "Infinity");
+        assert_eq!(js_number_to_string(f64::NEG_INFINITY), "-Infinity");
+        assert_eq!(js_number_to_string(0.0), "0");
+        assert_eq!(js_number_to_string(-0.0), "0");
+    }
+
+    #[test]
+    fn number_to_string_integers() {
+        assert_eq!(js_number_to_string(1.0), "1");
+        assert_eq!(js_number_to_string(-1.0), "-1");
+        assert_eq!(js_number_to_string(10.0), "10");
+        assert_eq!(js_number_to_string(100.0), "100");
+        // Largest integer with exact representation in fixed notation.
+        assert_eq!(js_number_to_string(1e21), "1e+21");
+        assert_eq!(js_number_to_string(1e20), "100000000000000000000");
+    }
+
+    #[test]
+    fn number_to_string_fractions() {
+        assert_eq!(js_number_to_string(0.5), "0.5");
+        assert_eq!(js_number_to_string(0.1), "0.1");
+        assert_eq!(js_number_to_string(1.5), "1.5");
+        // Smallest positive value using fixed notation.
+        assert_eq!(js_number_to_string(1e-6), "0.000001");
+        // Below the fixed-notation threshold uses exponential notation.
+        assert_eq!(js_number_to_string(1e-7), "1e-7");
+    }
+
+    #[test]
+    fn number_to_string_shortest_round_trip() {
+        // Values where the shortest representation differs from Rust's default.
+        assert_eq!(
+            js_number_to_string(0.30000000000000004),
+            "0.30000000000000004"
+        );
+        // Midpoint between adjacent doubles; V8 and Rust differ here.
+        // 6.953355807408364e-310 is exactly halfway between two doubles.
+        let midpoint = f64::from_bits(0x0000000000000800);
+        let _ = js_number_to_string(midpoint);
     }
 }

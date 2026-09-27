@@ -6,7 +6,7 @@ use biome_js_syntax::{
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
 };
 use biome_rowan::{AstNode, declare_node_union};
-use biome_rowan::{AstNodeList, TokenText};
+use biome_rowan::AstNodeList;
 use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -119,7 +119,7 @@ impl Rule for NoDuplicateClassMembers {
                 let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
                 let member_name_node = member.name()?;
                 let member_state = MemberState {
-                    name: get_member_name(&member_name_node)?.text().into(),
+                    name: get_member_name(&member_name_node)?,
                     is_static: is_static_member(member.modifiers_list()),
                 };
 
@@ -152,16 +152,16 @@ impl Rule for NoDuplicateClassMembers {
             state.range(),
             format!(
                 "Duplicate class member name {:?}",
-                get_member_name(&state.name()?)?.text()
+                get_member_name(&state.name()?)?
             ),
         );
 
         Some(diagnostic)
     }
 }
-fn get_member_name(node: &AnyJsClassMemberName) -> Option<TokenText> {
+fn get_member_name(node: &AnyJsClassMemberName) -> Option<String> {
     match node {
-        AnyJsClassMemberName::JsLiteralMemberName(node) => node.name().ok(),
+        AnyJsClassMemberName::JsLiteralMemberName(node) => node.canonical_name(),
         _ => None,
     }
 }
@@ -223,6 +223,6 @@ impl AnyClassMemberDefinition {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct MemberState {
-    name: Box<str>,
+    name: String,
     is_static: bool,
 }

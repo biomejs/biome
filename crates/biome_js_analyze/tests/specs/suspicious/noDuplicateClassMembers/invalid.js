@@ -16,3 +16,10 @@ class A { get foo() {} get foo() {} }
 class A { foo() {} "foo"() {} }
 
 // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
+
+// Equivalent numeric member names
+class A { 0x1() {} 1() {} }
+class A { 1.0() {} 1() {} }
+class A { '1'() {} 1() {} }
+class A { 1; 1; }
+class A { 10() {} 1e1() {} }

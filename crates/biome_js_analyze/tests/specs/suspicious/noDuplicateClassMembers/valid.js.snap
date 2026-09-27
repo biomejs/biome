@@ -37,7 +37,6 @@ class A { '#foo'; #foo; }
 
 // Currently, biome doesn't handles these computed and numerical property cases.
 // This is because these cases needed runtime evaluation.
-class A { 10() {} 1e1() {} }
 class A { ['foo']() {} ['foo']() {} }
 class A { static ['foo']() {} static foo() {} }
 class A { set 'foo'(value) {} set ['foo'](val) {} }

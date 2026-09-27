@@ -4,36 +4,6 @@ expression: valid.jsonc
 ---
 # Input
 ```cjs
-({ 0x1: 1, 1: 2 });
-```
-
-# Input
-```cjs
-({ 012: 1, 10: 2 });
-```
-
-# Input
-```cjs
-({ 0b1: 1, 1: 2 });
-```
-
-# Input
-```cjs
-({ 0o1: 1, 1: 2 });
-```
-
-# Input
-```cjs
-({ 1n: 1, 1: 2 });
-```
-
-# Input
-```cjs
-({ 1_0: 1, 10: 2 });
-```
-
-# Input
-```cjs
 ({ a: 1, b: 1 });
 ```
 

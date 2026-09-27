@@ -23,6 +23,13 @@ class A { foo() {} "foo"() {} }
 
 // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
 
+// Equivalent numeric member names
+class A { 0x1() {} 1() {} }
+class A { 1.0() {} 1() {} }
+class A { '1'() {} 1() {} }
+class A { 1; 1; }
+class A { 10() {} 1e1() {} }
+
 ```
 
 # Diagnostics
@@ -289,6 +296,79 @@ invalid.js:16:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━�
        │                    ^^^^^^^^^^
     17 │ 
     18 │ // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
+  
+
+```
+
+```
+invalid.js:21:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "1"
+  
+    20 │ // Equivalent numeric member names
+  > 21 │ class A { 0x1() {} 1() {} }
+       │                    ^^^^^^
+    22 │ class A { 1.0() {} 1() {} }
+    23 │ class A { '1'() {} 1() {} }
+  
+
+```
+
+```
+invalid.js:22:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "1"
+  
+    20 │ // Equivalent numeric member names
+    21 │ class A { 0x1() {} 1() {} }
+  > 22 │ class A { 1.0() {} 1() {} }
+       │                    ^^^^^^
+    23 │ class A { '1'() {} 1() {} }
+    24 │ class A { 1; 1; }
+  
+
+```
+
+```
+invalid.js:23:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "1"
+  
+    21 │ class A { 0x1() {} 1() {} }
+    22 │ class A { 1.0() {} 1() {} }
+  > 23 │ class A { '1'() {} 1() {} }
+       │                    ^^^^^^
+    24 │ class A { 1; 1; }
+    25 │ class A { 10() {} 1e1() {} }
+  
+
+```
+
+```
+invalid.js:24:14 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "1"
+  
+    22 │ class A { 1.0() {} 1() {} }
+    23 │ class A { '1'() {} 1() {} }
+  > 24 │ class A { 1; 1; }
+       │              ^^
+    25 │ class A { 10() {} 1e1() {} }
+    26 │ 
+  
+
+```
+
+```
+invalid.js:25:19 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "10"
+  
+    23 │ class A { '1'() {} 1() {} }
+    24 │ class A { 1; 1; }
+  > 25 │ class A { 10() {} 1e1() {} }
+       │                   ^^^^^^^^
+    26 │ 
   
 
 ```

@@ -1,5 +1,8 @@
 //! Extensions for things which are not easily generated in ast expr nodes
-use crate::numbers::parse_js_number;
+use crate::numbers::{
+    canonicalize_js_bigint_literal, js_number_to_string, parse_js_number,
+    parse_js_number_with_single_rounding,
+};
 use crate::static_value::StaticValue;
 use crate::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
@@ -169,6 +172,44 @@ impl JsLiteralMemberName {
     /// ```
     pub fn name(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.value()?))
+    }
+
+    /// Returns the canonical property key for duplicate detection.
+    ///
+    /// Numeric literals are formatted with JavaScript `ToString` and bigint
+    /// literals use their decimal digits without the `n` suffix, so `0x1`,
+    /// `1.0`, `1`, `"1"`, and `1n` all yield `"1"`. String literals and
+    /// identifiers yield the same text as [`JsLiteralMemberName::name`].
+    pub fn canonical_name(&self) -> Option<String> {
+        let token = self.value().ok()?;
+        canonical_token_text(&token)
+    }
+}
+
+/// Returns the canonical property key for a member name token.
+///
+/// Numeric literals are formatted with JavaScript `ToString`
+/// ([`js_number_to_string`]) and bigint literals use their decimal digits
+/// without the `n` suffix, matching how the engine converts property keys.
+/// Returns `None` if a numeric or bigint literal cannot be parsed; other
+/// tokens yield the same text as [`inner_string_text`].
+fn canonical_token_text(token: &JsSyntaxToken) -> Option<String> {
+    let text = token.text_trimmed();
+    match token.kind() {
+        JsSyntaxKind::JS_NUMBER_LITERAL => {
+            let value = parse_js_number_with_single_rounding(text)?;
+            Some(js_number_to_string(value))
+        }
+        JsSyntaxKind::JS_BIGINT_LITERAL => {
+            let canonical = canonicalize_js_bigint_literal(text)?;
+            Some(
+                canonical
+                    .strip_suffix('n')
+                    .unwrap_or(&canonical)
+                    .to_string(),
+            )
+        }
+        _ => Some(inner_string_text(token).text().to_string()),
     }
 }
 
@@ -1837,6 +1878,36 @@ impl AnyJsObjectMember {
         };
         name.ok()?.name()
     }
+
+    /// Returns the canonical member name for duplicate detection.
+    ///
+    /// This is like [`AnyJsObjectMember::name`], but numeric and bigint
+    /// literal names are normalized to their JavaScript property key, so
+    /// `0x1`, `1.0`, `1`, and `1n` are all recognized as `"1"`.
+    pub fn canonical_name(&self) -> Option<String> {
+        let name = match self {
+            Self::JsGetterObjectMember(member) => member.name(),
+            Self::JsMethodObjectMember(member) => member.name(),
+            Self::JsPropertyObjectMember(member) => member.name(),
+            Self::JsSetterObjectMember(member) => member.name(),
+            Self::JsShorthandPropertyObjectMember(member) => {
+                return Some(
+                    member
+                        .name()
+                        .ok()?
+                        .value_token()
+                        .ok()?
+                        .token_text_trimmed()
+                        .text()
+                        .to_string(),
+                );
+            }
+            Self::JsBogusMember(_) | Self::JsSpread(_) | Self::JsMetavariable(_) => {
+                return None;
+            }
+        };
+        name.ok()?.canonical_name()
+    }
 }
 
 impl AnyJsObjectMemberName {
@@ -1888,6 +1959,34 @@ impl AnyJsObjectMemberName {
             Self::JsMetavariable(_) => return None,
         };
         Some(inner_string_text(&token))
+    }
+
+    /// Returns the canonical property key for duplicate detection.
+    ///
+    /// This is like [`AnyJsObjectMemberName::name`], but numeric and bigint
+    /// literal names are normalized to their JavaScript property key, so
+    /// `0x1`, `1.0`, `1`, and `1n` are all recognized as `"1"`.
+    pub fn canonical_name(&self) -> Option<String> {
+        let token = match self {
+            Self::JsComputedMemberName(expr) => {
+                let expr = expr.expression().ok()?;
+                match expr.omit_parentheses() {
+                    AnyJsExpression::AnyJsLiteralExpression(expr) => expr.value_token().ok()?,
+                    AnyJsExpression::JsTemplateExpression(expr) => {
+                        if !expr.is_constant() {
+                            return None;
+                        }
+                        let chunk = expr.elements().first()?;
+                        let chunk = chunk.as_js_template_chunk_element()?;
+                        chunk.template_chunk_token().ok()?
+                    }
+                    _ => return None,
+                }
+            }
+            Self::JsLiteralMemberName(expr) => expr.value().ok()?,
+            Self::JsMetavariable(_) => return None,
+        };
+        canonical_token_text(&token)
     }
 }
 
