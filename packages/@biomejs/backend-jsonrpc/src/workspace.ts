@@ -11326,7 +11326,7 @@ specifier itself.
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Maps each local imported name to its source module specifier. 
 	 */
 	staticImports: Record<string, string>;
 }
@@ -11338,7 +11338,7 @@ export interface SerializedCssModuleInfo {
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Contains the import specifiers as they appeared in source text. 
 	 */
 	imports: string[];
 }

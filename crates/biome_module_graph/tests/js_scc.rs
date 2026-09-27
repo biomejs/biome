@@ -1,27 +1,25 @@
 use biome_fs::{BiomePath, MemoryFileSystem};
 use biome_module_graph::{
-    ModuleDb, ModuleGraphGeneration, ModuleInfoKind, PathInfoCache, js_module_sccs,
-    resolve_js_module,
+    ModuleDb, ModuleGraphGeneration, ModuleInfoKind, js_module_sccs, resolve_js_module,
 };
-use biome_project_layout::ProjectLayout;
 use biome_service::db::WorkspaceDb;
 use biome_test_utils::get_added_js_paths;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
+use std::sync::Arc;
 
-fn resolve_module(fs: &MemoryFileSystem, path: &str) -> ModuleInfoKind {
+fn update_module(db: &mut WorkspaceDb, fs: &MemoryFileSystem, path: &str) {
     let paths = [BiomePath::new(path)];
     let mut added_paths = get_added_js_paths(fs, &paths);
     let (path, root, semantic_model) = added_paths.pop().expect("module must parse");
-    let (module_info, _, _) = resolve_js_module(
-        root,
-        path,
-        fs,
-        &ProjectLayout::default(),
-        semantic_model,
-        &PathInfoCache::default(),
-        false,
+    let (module_info, _, _) = resolve_js_module(&*db, root, path, semantic_model, false);
+    db.update_or_insert_module(
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
     );
-    ModuleInfoKind::Js(module_info)
+}
+
+fn workspace_db(fs: &MemoryFileSystem) -> WorkspaceDb {
+    WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())))
 }
 
 fn module_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
@@ -30,9 +28,9 @@ fn module_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
         fs.insert(path.into(), source);
     }
 
-    let mut db = WorkspaceDb::default();
+    let mut db = workspace_db(&fs);
     for &(path, _) in files {
-        db.update_or_insert_module(Utf8PathBuf::from(path), resolve_module(&fs, path));
+        update_module(&mut db, &fs, path);
     }
     (fs, db)
 }
@@ -79,10 +77,7 @@ fn scc_query_recomputes_after_module_graph_changes() {
 
     let generation = db.module_graph_generation();
     fs.insert("/src/b.js".into(), "import './a.js';");
-    db.update_or_insert_module(
-        Utf8PathBuf::from("/src/b.js"),
-        resolve_module(&fs, "/src/b.js"),
-    );
+    update_module(&mut db, &fs, "/src/b.js");
 
     assert_eq!(db.module_graph_generation(), generation);
     assert!(
@@ -97,10 +92,10 @@ fn scc_query_recomputes_after_modules_are_added_and_removed() {
     fs.insert("/src/a.js".into(), "import './b.js';");
     fs.insert("/src/b.js".into(), "import './a.js';");
 
-    let mut db = WorkspaceDb::default();
+    let mut db = workspace_db(&fs);
     let a_path = Utf8Path::new("/src/a.js");
     let b_path = Utf8Path::new("/src/b.js");
-    db.update_or_insert_module(a_path.to_path_buf(), resolve_module(&fs, "/src/a.js"));
+    update_module(&mut db, &fs, "/src/a.js");
 
     assert!(
         !js_module_sccs(&db, ModuleGraphGeneration::get(&db))
@@ -108,7 +103,7 @@ fn scc_query_recomputes_after_modules_are_added_and_removed() {
     );
 
     let generation = db.module_graph_generation();
-    db.update_or_insert_module(b_path.to_path_buf(), resolve_module(&fs, "/src/b.js"));
+    update_module(&mut db, &fs, "/src/b.js");
 
     assert_eq!(db.module_graph_generation(), generation.wrapping_add(1));
     assert!(

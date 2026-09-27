@@ -12,7 +12,7 @@ mod html_module_info;
 mod import_path_map;
 pub mod js_module_info;
 mod module_graph;
-mod path_info_cache;
+mod resolution;
 mod traverse;
 pub mod type_inference;
 
@@ -20,7 +20,7 @@ pub use biome_js_type_info::{
     ImportSymbol,
     resolved::{InferredLocalTypeId, InferredModuleKey},
 };
-pub use biome_resolver::ResolvedPath;
+pub use biome_resolver::{PathInfo, ResolveError, ResolvedPath};
 pub use css_module_info::{
     CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssPropertyDefinition,
     CssTraversalStep, ImportTreeDisplay, ImportTreeNode,
@@ -36,13 +36,15 @@ pub use db::queries::{
     infer_expression_function_returns_promise, infer_expression_is_array_of_promises,
     infer_expression_is_promise, infer_expression_type, infer_local_type, infer_module_types,
     infer_module_types_bottom_up, is_array_of_promise_type, is_class_referenced_by_importers,
-    is_promise_type, js_module_sccs, normalize_type, resolve_callable_type,
+    is_promise_type, js_module_sccs, module_dependencies, normalize_type, resolve_callable_type,
     transitive_importers_of, traverse_import_tree_for_classes,
     traverse_import_tree_for_html_classes,
 };
-pub use db::{ModuleDb, ModuleGraphGeneration, TypeDb, module_for_key};
+pub use db::{ModuleDb, ModuleGraphGeneration, ResolverDb, TypeDb, module_for_key};
 pub use diagnostics::ModuleDiagnostic;
-pub use html_module_info::{HtmlImport, HtmlModuleInfo, SerializedHtmlModuleInfo};
+pub use html_module_info::{
+    HtmlImport, HtmlModuleInfo, PreparedHtmlModule, SerializedHtmlModuleInfo, prepare_html_module,
+};
 pub use import_path_map::{ImportPathMap, ImportPathMapIterator};
 pub use js_module_info::{
     JsExport, JsExportedSymbolLookup, JsImport, JsImportKind, JsImportPath, JsImportPhase,
@@ -52,6 +54,9 @@ pub use js_module_info::{
 pub use module_graph::{
     ModuleDependencies, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS, SerializedModuleInfo,
     resolve_css_module, resolve_html_module, resolve_js_module,
-    resolve_js_module_with_inference_mode,
+    resolve_js_module_with_inference_mode, resolve_prepared_html_module,
 };
-pub use path_info_cache::PathInfoCache;
+pub use resolution::{
+    ResolutionMode, ResolutionRequest, resolve_module_import, resolve_module_request,
+    resolve_specifier,
+};

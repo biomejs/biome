@@ -172,7 +172,6 @@ use super::{
 };
 use crate::WorkspaceError;
 use crate::embed::EmbedContent;
-use crate::module_graph::PathInfoCache;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
@@ -180,6 +179,9 @@ use crate::settings::Settings;
 use biome_db::{ParsedSnippet, ParsedSource};
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
+use biome_resolver::FsWithResolverProxy;
+#[cfg(feature = "module_graph")]
+use biome_resolver::ResolverPathChanges;
 use camino::{Utf8Path, Utf8PathBuf};
 use parking_lot::{Mutex, MutexGuard};
 use std::cell::Cell;
@@ -197,11 +199,17 @@ use tracing::error;
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
-    pub(crate) path_info_cache: Arc<PathInfoCache>,
     /// Records module-map changes made by a scanner epoch's shared view.
     #[cfg(feature = "module_graph")]
     scanner_module_graph_dirty: Option<Arc<AtomicBool>>,
+    /// Records the resolver path info a scanner epoch's shared view must refresh.
+    #[cfg(feature = "module_graph")]
+    scanner_resolver_changes: Option<ResolverChanges>,
 }
+
+/// Resolver changes accumulated while Salsa setters can't run.
+#[cfg(feature = "module_graph")]
+type ResolverChanges = Arc<Mutex<Vec<(Utf8PathBuf, ResolverPathChanges)>>>;
 
 enum DbStorage {
     Shared(SharedWorkspaceDb),
@@ -213,8 +221,10 @@ enum DbStorage {
 /// For owned storage, the epoch holds the setter gate and supplies a shared
 /// replacement-update view over the same Salsa storage and workspace
 /// collections. This keeps individual scanner updates from announcing pending
-/// Salsa writes. Dropping the epoch discards the view before publishing one
-/// module graph invalidation and releasing the setter gate.
+/// Salsa writes. Queries that run during the epoch may observe outdated
+/// resolver path info or module associations. Dropping the epoch discards the view
+/// before publishing the accumulated resolver changes and one module graph
+/// invalidation, then releases the setter gate.
 /// Shared storage needs no setter gate and reuses its existing update mode.
 pub(crate) struct ScannerDbEpoch<'a> {
     // Struct fields drop in declaration order. The shared view must be gone
@@ -239,6 +249,8 @@ enum ScannerDbEpochFinalizer<'a> {
         setter_guard: MutexGuard<'a, ()>,
         #[cfg(feature = "module_graph")]
         module_graph_dirty: Arc<AtomicBool>,
+        #[cfg(feature = "module_graph")]
+        resolver_changes: ResolverChanges,
     },
 }
 
@@ -252,10 +264,21 @@ impl Drop for ScannerDbEpochFinalizer<'_> {
                 setter_guard,
                 #[cfg(feature = "module_graph")]
                 module_graph_dirty,
+                #[cfg(feature = "module_graph")]
+                resolver_changes,
             } => {
                 #[cfg(feature = "module_graph")]
-                if module_graph_dirty.load(Ordering::Acquire) {
-                    owner.with_setter_gate_held(setter_guard, WorkspaceDb::invalidate_module_graph);
+                {
+                    let resolver_changes = std::mem::take(&mut *resolver_changes.lock());
+                    let module_graph_dirty = module_graph_dirty.load(Ordering::Acquire);
+                    if module_graph_dirty || !resolver_changes.is_empty() {
+                        owner.with_setter_gate_held(setter_guard, |db| {
+                            db.sync_resolver_paths(resolver_changes);
+                            if module_graph_dirty {
+                                db.invalidate_module_graph();
+                            }
+                        });
+                    }
                 }
 
                 #[cfg(not(feature = "module_graph"))]
@@ -442,24 +465,31 @@ impl OwnedDb {
     }
 }
 
-impl Default for DbState {
-    fn default() -> Self {
+impl DbState {
+    /// Creates a Shared-mode database state, used by short-lived operations
+    /// such as the CLI.
+    ///
+    /// The resolver reads path info from `fs`.
+    pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
-            storage: DbStorage::Shared(SharedWorkspaceDb::default()),
-            path_info_cache: Arc::default(),
+            storage: DbStorage::Shared(SharedWorkspaceDb::new(fs)),
             #[cfg(feature = "module_graph")]
             scanner_module_graph_dirty: None,
+            #[cfg(feature = "module_graph")]
+            scanner_resolver_changes: None,
         }
     }
-}
 
-impl DbState {
-    pub fn lsp() -> Self {
+    /// Creates an Owned-mode database state, used by the long-lived LSP.
+    ///
+    /// The resolver reads path info from `fs`.
+    pub fn lsp(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
-            storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::default())),
-            path_info_cache: Arc::default(),
+            storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::new(fs))),
             #[cfg(feature = "module_graph")]
             scanner_module_graph_dirty: None,
+            #[cfg(feature = "module_graph")]
+            scanner_resolver_changes: None,
         }
     }
 
@@ -472,14 +502,17 @@ impl DbState {
     pub(crate) fn scanner_epoch(&self) -> ScannerDbEpoch<'_> {
         #[cfg(feature = "module_graph")]
         let module_graph_dirty = Arc::new(AtomicBool::new(false));
+        #[cfg(feature = "module_graph")]
+        let resolver_changes = ResolverChanges::default();
 
         match &self.storage {
             DbStorage::Shared(shared_db) => ScannerDbEpoch {
                 view: Self {
                     storage: DbStorage::Shared(shared_db.clone()),
-                    path_info_cache: self.path_info_cache.clone(),
                     #[cfg(feature = "module_graph")]
                     scanner_module_graph_dirty: None,
+                    #[cfg(feature = "module_graph")]
+                    scanner_resolver_changes: None,
                 },
                 _finalizer: ScannerDbEpochFinalizer::Shared,
             },
@@ -493,9 +526,10 @@ impl DbState {
                 ScannerDbEpoch {
                     view: Self {
                         storage: DbStorage::Shared(shared_db),
-                        path_info_cache: self.path_info_cache.clone(),
                         #[cfg(feature = "module_graph")]
                         scanner_module_graph_dirty: Some(module_graph_dirty.clone()),
+                        #[cfg(feature = "module_graph")]
+                        scanner_resolver_changes: Some(resolver_changes.clone()),
                     },
                     _finalizer: ScannerDbEpochFinalizer::Owned {
                         #[cfg(feature = "module_graph")]
@@ -503,6 +537,8 @@ impl DbState {
                         setter_guard,
                         #[cfg(feature = "module_graph")]
                         module_graph_dirty,
+                        #[cfg(feature = "module_graph")]
+                        resolver_changes,
                     },
                 }
             }
@@ -630,13 +666,17 @@ impl DbState {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
                 let parsed_snippets = create_parsed_snippets(&db, snippets);
-                db.update_or_insert_file(
+                let file = db.update_or_insert_file(
                     path,
                     parsed,
                     language_index,
                     parsed_snippets,
                     ParsedSourceUpdateMode::Replace,
-                )
+                );
+                // The replacement publishes a new parsed source for `path`.
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(shared_db.data().resolver_source_change(path));
+                file
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 let parsed_snippets = create_parsed_snippets(db, snippets);
@@ -654,9 +694,13 @@ impl DbState {
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
-                shared_db.fork().data().unload_path(path);
+                let data = shared_db.data();
+                data.unload_path(path);
                 #[cfg(feature = "module_graph")]
-                self.mark_module_graph_dirty();
+                {
+                    self.mark_module_graph_dirty();
+                    self.record_resolver_changes(data.resolver_changes_within(path));
+                }
             }
             DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
         }
@@ -664,13 +708,89 @@ impl DbState {
 
     /// Removes the cached parsed source for `path`.
     ///
-    /// This is an untracked removal: the `files` map is not read by any
-    /// Salsa-tracked query, so no generation signal needs to be bumped. See
-    /// the "Remove" section of the module documentation above.
+    /// Only the resolver reads the `files` map from Salsa-tracked queries, and
+    /// only for the content of manifests. Removing any other parsed source is
+    /// an untracked removal. See the "Remove" section of the module
+    /// documentation above.
     pub(crate) fn remove_file(&self, path: &Utf8Path) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.data().remove_file(path),
+            DbStorage::Shared(shared_db) => {
+                let data = shared_db.data();
+                data.remove_file(path);
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(data.resolver_source_change(path));
+            }
+            #[cfg(feature = "module_graph")]
+            DbStorage::Owned(db) if db.data.is_resolver_manifest(path) => {
+                db.with_setter(|db| db.remove_file(path));
+            }
             DbStorage::Owned(db) => db.data.remove_file(path),
+        }
+    }
+
+    /// Refreshes the resolver path info of the given paths from the filesystem.
+    ///
+    /// Call this when the filesystem reports a change, for example from the
+    /// watcher. Owned storage applies the changes immediately, and skips the
+    /// write when the path info is already up to date. A scanner epoch applies
+    /// them when it ends. Shared storage outside an epoch never refreshes
+    /// path info, because it doesn't observe filesystem changes.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn sync_resolver_paths(&self, changes: Vec<(Utf8PathBuf, ResolverPathChanges)>) {
+        match &self.storage {
+            DbStorage::Shared(_) => self.record_resolver_changes(changes),
+            DbStorage::Owned(db) => {
+                let needs_sync = db.fork().resolver_paths_need_sync(&changes);
+                if needs_sync {
+                    db.with_setter(|db| db.sync_resolver_paths(changes));
+                }
+            }
+        }
+    }
+
+    /// Returns the resolver changes to report for the known paths equal to or
+    /// inside `path`.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_within(
+        &self,
+        path: &Utf8Path,
+    ) -> Vec<(Utf8PathBuf, ResolverPathChanges)> {
+        self.data().resolver_changes_within(path)
+    }
+
+    /// Returns the change to report when the filesystem reports that `path`
+    /// was created or modified.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_for_modified_path(
+        &self,
+        path: &Utf8Path,
+    ) -> ResolverPathChanges {
+        self.data().resolver_changes_for_modified_path(path)
+    }
+
+    /// Returns the resolver changes to report for the known paths inside the
+    /// `node_modules` directories that `directory` can resolve packages from.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn resolver_changes_in_visible_node_modules(
+        &self,
+        directory: &Utf8Path,
+    ) -> Vec<(Utf8PathBuf, ResolverPathChanges)> {
+        self.data()
+            .resolver_changes_in_visible_node_modules(directory)
+    }
+
+    /// Returns whether the resolver reads the content of `path`.
+    #[cfg(feature = "module_graph")]
+    pub(crate) fn is_resolver_manifest(&self, path: &Utf8Path) -> bool {
+        self.data().is_resolver_manifest(path)
+    }
+
+    /// Returns handles to the collections shared by every database fork.
+    #[cfg(feature = "module_graph")]
+    fn data(&self) -> WorkspaceDbData {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => shared_db.data(),
+            DbStorage::Owned(db) => db.data.clone(),
         }
     }
 
@@ -708,6 +828,21 @@ impl DbState {
     fn mark_module_graph_dirty(&self) {
         if let Some(dirty) = &self.scanner_module_graph_dirty {
             dirty.store(true, Ordering::Release);
+        }
+    }
+
+    /// Records resolver changes made through a replacement update.
+    ///
+    /// A scanner epoch applies them when it ends. Outside an epoch, Shared
+    /// storage discards them: it can't run Salsa setters, and the operations
+    /// using it don't observe filesystem changes.
+    #[cfg(feature = "module_graph")]
+    fn record_resolver_changes(
+        &self,
+        changes: impl IntoIterator<Item = (Utf8PathBuf, ResolverPathChanges)>,
+    ) {
+        if let Some(pending) = &self.scanner_resolver_changes {
+            pending.lock().extend(changes);
         }
     }
 
@@ -754,6 +889,7 @@ fn create_parsed_snippets(
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use crate::projects::ProjectDb;
     use biome_configuration::vcs::VcsClientKind;
     use biome_js_parser::{JsParserOptions, parse};
@@ -766,6 +902,10 @@ mod tests {
     use std::time::Duration;
 
     static_assertions::assert_not_impl_any!(DbReadGuard: Send);
+
+    fn test_fs() -> Arc<dyn FsWithResolverProxy> {
+        Arc::new(biome_fs::MemoryFileSystem::default())
+    }
 
     fn parse_js(source: &str) -> AnyParse {
         parse(
@@ -801,7 +941,7 @@ mod tests {
     /// is a regression test for exactly that deadlock.
     #[test]
     fn owned_storage_shared_data_does_not_wait_for_pending_setters() {
-        let state = Arc::new(DbState::lsp());
+        let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
@@ -850,7 +990,7 @@ mod tests {
     /// would wait on each other forever.
     #[test]
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
-        let state = Arc::new(DbState::lsp());
+        let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
 
@@ -883,7 +1023,7 @@ mod tests {
     /// contribute to `pending_setters`.
     #[test]
     fn owned_storage_queues_only_one_pending_setter() {
-        let state = Arc::new(DbState::lsp());
+        let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
 
@@ -937,7 +1077,7 @@ mod tests {
     #[cfg(feature = "module_graph")]
     #[test]
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
-        let state = Arc::new(DbState::lsp());
+        let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
 
@@ -960,7 +1100,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "db setter invoked while this thread holds a db clone")]
     fn owned_storage_setter_panics_when_this_thread_holds_read_guard() {
-        let state = DbState::lsp();
+        let state = DbState::lsp(test_fs());
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
@@ -969,7 +1109,7 @@ mod tests {
 
     #[test]
     fn replacement_update_does_not_cancel_concurrent_reads() {
-        let state = DbState::default();
+        let state = DbState::new(test_fs());
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
@@ -981,7 +1121,7 @@ mod tests {
 
     #[test]
     fn shared_storage_project_lifecycle_replaces_inputs_without_waiting_for_reads() {
-        let state = Arc::new(DbState::default());
+        let state = Arc::new(DbState::new(test_fs()));
         let path = Utf8PathBuf::from("project");
         let project_key = state.insert_project(path.clone());
         let retained_db = state.fork();
@@ -1027,7 +1167,7 @@ mod tests {
 
     #[test]
     fn owned_storage_project_lifecycle_preserves_input_identity() {
-        let state = DbState::lsp();
+        let state = DbState::lsp(test_fs());
         let path = Utf8PathBuf::from("project");
         let project_key = state.insert_project(path.clone());
         let project = {
@@ -1067,7 +1207,7 @@ mod tests {
 
     #[test]
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
-        let state = Arc::new(DbState::lsp());
+        let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
         state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
 
@@ -1095,5 +1235,160 @@ mod tests {
             "setter should complete after the other thread drops its read guard"
         );
         setter.join().unwrap();
+    }
+
+    #[cfg(feature = "module_graph")]
+    mod resolver {
+        use super::*;
+        use biome_fs::MemoryFileSystem;
+        use biome_resolver::{
+            PathInfo, ResolveError, ResolverDb, ResolverPathChange, ResolverPathData,
+        };
+
+        const MANIFEST: &str = "/project/package.json";
+        const SOURCE: &str = "/project/index.js";
+
+        fn resolver_fs(fs: &MemoryFileSystem) -> Arc<dyn FsWithResolverProxy> {
+            Arc::new(MemoryFileSystem::from_files(fs.files.0.clone()))
+        }
+
+        fn parse_json(source: &str) -> AnyParse {
+            biome_json_parser::parse_json(source, Default::default()).into()
+        }
+
+        /// Looks up the resolver path info of `path`, like a resolver query does.
+        fn lookup(state: &DbState, path: &str) -> ResolverPathData {
+            let db = state.fork();
+            db.resolver_paths().get_or_create(&*db, Utf8Path::new(path))
+        }
+
+        /// Reads `path` as a package manifest, like a resolver query does.
+        fn read_manifest(state: &DbState, path: &str) -> ResolverPathData {
+            let data = lookup(state, path);
+            let db = state.fork();
+            let _ = biome_resolver::package_json_for_path(&*db, data);
+            data
+        }
+
+        fn revision(state: &DbState, data: ResolverPathData) -> u64 {
+            data.revision(&*state.fork())
+        }
+
+        fn info(state: &DbState, data: ResolverPathData) -> Result<PathInfo, ResolveError> {
+            data.info(&*state.fork()).clone()
+        }
+
+        #[test]
+        fn owned_updates_notify_the_resolver_only_for_new_manifest_sources() {
+            let fs = MemoryFileSystem::default();
+            let state = DbState::lsp(resolver_fs(&fs));
+            let manifest = read_manifest(&state, MANIFEST);
+            let source = lookup(&state, SOURCE);
+            let setters = state.setter_gate_attempts();
+
+            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js(""), 0, vec![]);
+            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js("a"), 0, vec![]);
+            assert_eq!(
+                revision(&state, source),
+                0,
+                "sources aren't read by the resolver"
+            );
+
+            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+            assert_eq!(revision(&state, manifest), 1);
+            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("[]"), 0, vec![]);
+            assert_eq!(
+                revision(&state, manifest),
+                1,
+                "content changes of an indexed manifest are tracked by its parsed source"
+            );
+
+            assert_eq!(
+                state.setter_gate_attempts() - setters,
+                4,
+                "each update is a single write"
+            );
+        }
+
+        #[test]
+        fn owned_sync_skips_the_write_when_path_info_is_current() {
+            let fs = MemoryFileSystem::default();
+            fs.insert(SOURCE.into(), "");
+            let state = DbState::lsp(resolver_fs(&fs));
+            let source = lookup(&state, SOURCE);
+            let setters = state.setter_gate_attempts();
+
+            state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
+            assert_eq!(state.setter_gate_attempts(), setters);
+
+            fs.remove(Utf8Path::new(SOURCE));
+            state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
+            assert_eq!(state.setter_gate_attempts(), setters + 1);
+            assert_eq!(info(&state, source), Err(ResolveError::NotFound));
+        }
+
+        #[test]
+        fn owned_unload_marks_known_paths_as_missing() {
+            let fs = MemoryFileSystem::default();
+            fs.insert(SOURCE.into(), "");
+            let state = DbState::lsp(resolver_fs(&fs));
+            let directory = lookup(&state, "/project");
+            let source = lookup(&state, SOURCE);
+
+            fs.remove(Utf8Path::new(SOURCE));
+            state.unload_path(Utf8Path::new("/project"));
+
+            assert_eq!(info(&state, source), Err(ResolveError::NotFound));
+            assert_eq!(
+                lookup(&state, SOURCE),
+                source,
+                "unloading keeps the input, so dependent queries observe the change"
+            );
+            assert_eq!(info(&state, directory), Err(ResolveError::NotFound));
+        }
+
+        #[test]
+        fn scanner_epoch_applies_resolver_changes_when_it_ends() {
+            let fs = MemoryFileSystem::default();
+            let state = DbState::lsp(resolver_fs(&fs));
+            let manifest = read_manifest(&state, MANIFEST);
+            let source = lookup(&state, SOURCE);
+
+            {
+                let epoch = state.scanner_epoch();
+                epoch.view().update_parsed_file(
+                    Utf8Path::new(MANIFEST),
+                    parse_json("{}"),
+                    0,
+                    vec![],
+                );
+                fs.insert(SOURCE.into(), "");
+                epoch
+                    .view()
+                    .sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
+
+                let db = epoch.view().fork();
+                assert_eq!(manifest.revision(&*db), 0);
+                assert_eq!(source.info(&*db), &Err(ResolveError::NotFound));
+            }
+
+            assert_eq!(revision(&state, manifest), 1);
+            assert_eq!(info(&state, source), Ok(PathInfo::File));
+        }
+
+        #[test]
+        fn shared_mode_never_refreshes_resolver_path_info() {
+            let fs = MemoryFileSystem::default();
+            let state = DbState::new(resolver_fs(&fs));
+            let manifest = read_manifest(&state, MANIFEST);
+            let source = lookup(&state, SOURCE);
+
+            fs.insert(SOURCE.into(), "");
+            state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
+            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+
+            assert_eq!(info(&state, source), Err(ResolveError::NotFound));
+            assert_eq!(revision(&state, manifest), 0);
+        }
     }
 }

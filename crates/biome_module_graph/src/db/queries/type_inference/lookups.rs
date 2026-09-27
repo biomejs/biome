@@ -34,7 +34,7 @@ use biome_js_type_info::{InferredType, TypeId, interned_types::TypeData as Infer
 /// const promise = Promise.resolve(1);
 /// promise;
 /// ```
-#[salsa::tracked(cycle_result=infer_expression_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_type_cycle_result)]
 pub fn infer_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
@@ -54,7 +54,7 @@ pub fn infer_expression_type<'db>(
             }
 
             let reference = js_info.raw_expressions.get(&expression)?.clone();
-            let mut ctx = ResolutionCtx::new(db, module, &js_info, ImportResolution::on_demand());
+            let mut ctx = ResolutionCtx::new(db, module, js_info, ImportResolution::on_demand());
             Some(ctx.resolve(&reference))
         },
     )
@@ -71,7 +71,7 @@ pub fn infer_expression_type<'db>(
 /// ```ts
 /// const value = 1;
 /// ```
-#[salsa::tracked(cycle_result=infer_binding_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_binding_type_cycle_result)]
 pub fn infer_binding_type<'db>(
     db: &'db dyn ModuleDb,
     input: BindingTypeInput<'db>,
@@ -99,7 +99,7 @@ pub fn infer_binding_type<'db>(
 ///     field: string;
 /// }
 /// ```
-#[salsa::tracked(cycle_result=infer_local_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_local_type_cycle_result)]
 pub fn infer_local_type<'db>(
     db: &'db dyn ModuleDb,
     input: LocalTypeInput<'db>,
@@ -113,7 +113,7 @@ pub fn infer_local_type<'db>(
     )
 }
 
-#[salsa::tracked(cycle_result=infer_binding_type_with_import_budget_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_binding_type_with_import_budget_cycle_result)]
 pub(crate) fn infer_binding_type_with_import_budget<'db>(
     db: &'db dyn ModuleDb,
     input: BindingTypeWithImportBudgetInput<'db>,
@@ -123,7 +123,7 @@ pub(crate) fn infer_binding_type_with_import_budget<'db>(
     infer_binding_type_impl(db, lookup, ImportResolution::OnDemand { remaining })
 }
 
-#[salsa::tracked(cycle_result=infer_local_type_with_import_budget_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_local_type_with_import_budget_cycle_result)]
 pub(crate) fn infer_local_type_with_import_budget<'db>(
     db: &'db dyn ModuleDb,
     input: LocalTypeWithImportBudgetInput<'db>,
@@ -148,7 +148,7 @@ fn infer_binding_type_impl<'db>(
     }
 
     let reference = js_info.raw_binding_types.get(&range)?.clone();
-    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
     let ty = ctx.resolve(&reference);
     // Build a declaration graph only when the selected lookup crosses an
     // import cycle. Local and acyclic lookups stay on the ordinary tracked
@@ -175,7 +175,7 @@ fn infer_local_type_impl<'db>(
     }
 
     let type_id = TypeId::new(type_id.index());
-    let mut ctx = ResolutionCtx::new(db, module, &js_info, import_resolution);
+    let mut ctx = ResolutionCtx::new(db, module, js_info, import_resolution);
     let ty = ctx.resolve_raw_type_id(type_id);
     // The initial pass preserves the cheaper lookup path. A cycle activates a
     // root retry that can distinguish an import cycle from a dependency cycle.

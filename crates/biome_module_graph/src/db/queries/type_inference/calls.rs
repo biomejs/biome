@@ -39,7 +39,7 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 /// declare function parse(value: string): number;
 /// const result = parse("1");
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallExpressionTypeInput<'db>,
@@ -73,7 +73,7 @@ pub fn infer_call_expression_type<'db>(
 /// declare function consume(value: string, callback: () => void): void;
 /// consume("value", async () => {});
 /// ```
-#[salsa::tracked(cycle_result=infer_argument_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_call_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,
@@ -105,7 +105,7 @@ pub fn infer_call_argument_type<'db>(
 /// }
 /// new Job(async () => {});
 /// ```
-#[salsa::tracked(cycle_result=infer_argument_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_constructor_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,

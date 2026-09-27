@@ -78,21 +78,14 @@ fn test_infer_module_types_resolves_react_export_equals_namespace() {
         "#,
     );
 
-    let project_layout = ProjectLayout::default();
-    project_layout.insert_node_manifest(
-        "/".into(),
-        PackageJson::new("frontend")
-            .with_version("0.0.0")
-            .with_dependencies(Dependencies(Box::new([("react".into(), "19.0.0".into())]))),
+    fs.insert(
+        "/package.json".into(),
+        r#"{"name":"frontend","version":"0.0.0","dependencies":{"react":"19.0.0"}}"#,
     );
+    fs.insert("/tsconfig.json".into(), "{}");
 
-    let tsconfig_json = parse_json(r#"{}"#, JsonParserOptions::default());
-    project_layout
-        .insert_serialized_tsconfig("/".into(), &tsconfig_json.syntax().as_send().unwrap());
-
-    let db = build_js_test_module_db_with_layout(
+    let db = build_js_test_module_db(
         &fs,
-        &project_layout,
         &["/node_modules/@types/react/index.d.ts", "/src/index.ts"],
         true,
     );

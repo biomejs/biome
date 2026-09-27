@@ -23,7 +23,7 @@ use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource};
 use biome_module_graph::{
-    ModuleInfoKind, PathInfoCache, resolve_css_module, resolve_html_module, resolve_js_module,
+    ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
 };
 use biome_parser::AnyParse;
 use biome_project_layout::ProjectLayout;
@@ -41,10 +41,13 @@ use std::sync::Arc;
 /// for multiple code blocks.
 pub struct AnalyzerServicesBuilder {
     module_db: WorkspaceDb,
-    file_system: MemoryFileSystem,
-    path_info_cache: PathInfoCache,
     project_layout: Arc<ProjectLayout>,
     enable_type_inference: bool,
+}
+
+/// Creates a module database whose resolver reads the files of `fs`.
+fn module_db_for(fs: &MemoryFileSystem) -> WorkspaceDb {
+    WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())))
 }
 
 impl AnalyzerServicesBuilder {
@@ -61,11 +64,8 @@ impl AnalyzerServicesBuilder {
         enable_type_inference: bool,
     ) -> Self {
         if files.is_empty() {
-            let db = WorkspaceDb::default();
             return Self {
-                module_db: db,
-                file_system: MemoryFileSystem::default(),
-                path_info_cache: PathInfoCache::default(),
+                module_db: module_db_for(&MemoryFileSystem::default()),
                 project_layout: Default::default(),
                 enable_type_inference,
             };
@@ -73,7 +73,6 @@ impl AnalyzerServicesBuilder {
 
         let fs = MemoryFileSystem::default();
         let layout = ProjectLayout::default();
-        let path_info_cache = PathInfoCache::default();
 
         let mut js_paths = Vec::new();
         let mut css_paths = Vec::new();
@@ -120,19 +119,12 @@ impl AnalyzerServicesBuilder {
             fs.insert(path_buf, src);
         }
 
-        let mut db = WorkspaceDb::default();
+        let mut db = module_db_for(&fs);
 
         let js_added_paths = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_added_paths {
-            let (module_info, _, _) = resolve_js_module(
-                root,
-                path,
-                &fs,
-                &layout,
-                semantic_model,
-                &path_info_cache,
-                enable_type_inference,
-            );
+            let (module_info, _, _) =
+                resolve_js_module(&db, root, path, semantic_model, enable_type_inference);
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -143,8 +135,7 @@ impl AnalyzerServicesBuilder {
 
         let css_added_paths = get_css_added_paths(&fs, &css_paths);
         for (path, root) in css_added_paths {
-            let (module_info, _, _) =
-                resolve_css_module(root, path, &fs, &layout, &path_info_cache);
+            let (module_info, _, _) = resolve_css_module(&db, root, path);
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -164,7 +155,7 @@ impl AnalyzerServicesBuilder {
                 vec![],
             );
             db.insert_file(path.as_path(), parsed_source);
-            let resolved = resolve_html_module(&db, path, &fs, &layout, &path_info_cache);
+            let resolved = resolve_html_module(&db, path);
             debug_assert!(resolved.is_some());
             let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
             let md = biome_module_graph::ModuleInfo::new(
@@ -177,8 +168,6 @@ impl AnalyzerServicesBuilder {
 
         Self {
             module_db: db,
-            file_system: fs,
-            path_info_cache,
             project_layout: Arc::new(layout),
             enable_type_inference,
         }
@@ -215,12 +204,10 @@ impl AnalyzerServicesBuilder {
         let semantic_model =
             Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
         let (module_info, _, _) = resolve_js_module(
+            &self.module_db,
             root,
             &BiomePath::new(&path),
-            &self.file_system,
-            &self.project_layout,
             semantic_model.clone(),
-            &self.path_info_cache,
             self.enable_type_inference,
         );
         self.module_db
@@ -253,13 +240,7 @@ impl AnalyzerServicesBuilder {
         );
         self.module_db.insert_file(&path, parsed_source);
 
-        let resolved = resolve_html_module(
-            &self.module_db,
-            &BiomePath::new(&path),
-            &self.file_system,
-            &self.project_layout,
-            &self.path_info_cache,
-        );
+        let resolved = resolve_html_module(&self.module_db, &BiomePath::new(&path));
         debug_assert!(resolved.is_some());
         let (module_info, _, _) = resolved.expect("the parsed HTML source was just inserted");
         self.module_db

@@ -551,11 +551,8 @@ impl ServiceLanguage for HtmlLanguage {
 
 #[salsa::interned]
 struct HtmlFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -572,11 +569,8 @@ fn resolved_html_format_options<'db>(
 
 #[salsa::interned]
 struct HtmlAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
