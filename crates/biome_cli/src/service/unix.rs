@@ -22,10 +22,6 @@ use tokio::{
 use tracing::{Instrument, debug, info, warn};
 
 /// Returns the directory containing the daemon sockets
-///
-/// Only the current user can access this directory, so other users can't
-/// reach the sockets inside it regardless of the permissions of the sockets
-/// themselves.
 fn get_socket_dir() -> Utf8PathBuf {
     biome_fs::ensure_cache_dir().join("biome-daemon")
 }
@@ -53,17 +49,14 @@ fn create_socket_dir(path: &Utf8Path) -> io::Result<()> {
     verify_socket_dir(path)
 }
 
-/// Ensures that `path` is a directory that only the current user can access
-///
-/// When the directory is in a shared location, such as the temporary
-/// directory, another user could create it first to intercept connections.
+/// Ensures that `path` is a directory that only the current user can access.
 fn verify_socket_dir(path: &Utf8Path) -> io::Result<()> {
     let metadata = fs::symlink_metadata(path)?;
     if !metadata.is_dir() || metadata.uid() != current_uid() || metadata.mode() & 0o077 != 0 {
         return Err(io::Error::new(
             ErrorKind::PermissionDenied,
             format!(
-                "the socket directory {path} must be a directory owned by the current user and inaccessible to other users"
+                "The socket directory {path} must be a directory owned by the current user and inaccessible to other users."
             ),
         ));
     }
