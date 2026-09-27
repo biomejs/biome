@@ -45,4 +45,9 @@ mfrac {
 	z-index: 1;
 }
 
+::VIEW-TRANSITION-OLD(page),
+::View-Transition-Group(page) {
+	z-index: 1;
+}
+
 ```

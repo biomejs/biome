@@ -38,3 +38,8 @@ mfrac {
 ::view-transition-group(*) {
 	z-index: 1;
 }
+
+::VIEW-TRANSITION-OLD(page),
+::View-Transition-Group(page) {
+	z-index: 1;
+}

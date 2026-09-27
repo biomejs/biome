@@ -29,7 +29,12 @@ fn is_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool
         .and_then(CssPseudoElementFunctionSelector::cast)
         .and_then(|func| func.name().ok())
         .and_then(|name| name.value_token().ok())
-        .is_some_and(|token| VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&token.text_trimmed()))
+        .is_some_and(|token| {
+            let name = token.text_trimmed();
+            VIEW_TRANSITION_PSEUDO_ELEMENTS
+                .iter()
+                .any(|pseudo_element| pseudo_element.eq_ignore_ascii_case(name))
+        })
 }
 
 declare_lint_rule! {
