@@ -1,13 +1,16 @@
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::{
-    JsDoWhileStatement, JsFinallyClause, JsForInStatement, JsForOfStatement, JsForStatement,
-    JsFunctionBody, JsReturnStatement, JsStatementList, JsSwitchStatement, JsWhileStatement,
+    AnyTsType, JsDoWhileStatement, JsFinallyClause, JsForInStatement, JsForOfStatement,
+    JsForStatement, JsFunctionBody, JsReturnStatement, JsStatementList, JsSwitchStatement,
+    JsWhileStatement,
 };
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_useless_return::NoUselessReturnOptions;
 
 use crate::JsRuleAction;
+use crate::lint::correctness::no_void_type_return::AnyJsFunctionMethodWithReturnType;
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
 declare_lint_rule! {
@@ -68,6 +71,19 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// In TypeScript, a trailing `return;` is kept when `tsc` needs it: either the
+    /// enclosing function declares a return type other than `void`, `undefined` and
+    /// `any`, or another `return` statement of the same function returns a value.
+    ///
+    /// ```ts
+    /// function foo(flag: boolean) {
+    ///     if (flag) {
+    ///         return 1;
+    ///     }
+    ///     return;
+    /// }
+    /// ```
+    ///
     pub NoUselessReturn {
         version: "2.3.15",
         name: "noUselessReturn",
@@ -101,6 +117,15 @@ impl Rule for NoUselessReturn {
         // Bail if the control flow root is a module/script (top-level return)
         if biome_js_syntax::JsModule::can_cast(function_root.kind())
             || biome_js_syntax::JsScript::can_cast(function_root.kind())
+        {
+            return None;
+        }
+
+        // In TypeScript, the type checker can require the trailing `return`:
+        // removing it would make the file fail to compile.
+        // See https://github.com/biomejs/biome/issues/11903
+        if ctx.source_type::<JsFileSource>().is_typescript()
+            && is_required_by_type_checker(&function_root)
         {
             return None;
         }
@@ -228,4 +253,54 @@ fn is_tail_position(
 
         current = parent;
     }
+}
+
+/// Check whether the TypeScript type checker requires the given trailing `return;`.
+///
+/// Removing such a statement makes the compiler report an error when:
+/// - the enclosing function declares a return type other than `void`, `undefined`
+///   or `any` (TS2355, TS2366, or TS7030 when `noImplicitReturns` is enabled); or
+/// - the function has no declared return type, but one of its `return` statements
+///   returns a value, so its return type is inferred as non-`void` and the
+///   fallthrough created by the removal is reported by `noImplicitReturns` (TS7030).
+fn is_required_by_type_checker(
+    function_root: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>,
+) -> bool {
+    let return_type = AnyJsFunctionMethodWithReturnType::cast_ref(function_root)
+        .and_then(|function| function.return_type());
+
+    match return_type {
+        // A declared return type other than `void`, `undefined` and `any` cannot be
+        // satisfied by an implicit fallthrough.
+        Some(return_type) => !matches!(
+            return_type
+                .as_any_ts_type()
+                .cloned()
+                .map(AnyTsType::omit_parentheses),
+            Some(
+                AnyTsType::TsVoidType(_) | AnyTsType::TsUndefinedType(_) | AnyTsType::TsAnyType(_)
+            )
+        ),
+        // Without a declaration, the return type is inferred from the return statements.
+        None => returns_value(function_root),
+    }
+}
+
+/// Check whether the given function contains a `return` statement that returns a value.
+///
+/// Returns of nested functions are ignored, because they do not contribute to the
+/// return type of `function_root`.
+fn returns_value(function_root: &biome_rowan::SyntaxNode<biome_js_syntax::JsLanguage>) -> bool {
+    function_root
+        .descendants()
+        .filter_map(JsReturnStatement::cast)
+        .any(|ret| {
+            ret.argument().is_some()
+                && ret
+                    .syntax()
+                    .ancestors()
+                    .skip(1)
+                    .find_map(AnyJsControlFlowRoot::cast)
+                    .is_some_and(|root| root.syntax() == function_root)
+        })
 }
