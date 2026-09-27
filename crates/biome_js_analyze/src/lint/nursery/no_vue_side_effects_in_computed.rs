@@ -138,7 +138,7 @@ declare_lint_rule! {
         version: "next",
         name: "noVueSideEffectsInComputed",
         language: "js",
-        recommended: false,
+        recommended: true,
         severity: Severity::Error,
         domains: &[RuleDomain::Vue],
         sources: &[RuleSource::EslintVueJs("no-side-effects-in-computed-properties").same()],
@@ -464,7 +464,8 @@ fn find_mutation(node: &JsSyntaxNode) -> Option<TextRange> {
                 let call = JsCallExpression::cast(parent)?;
                 let member_name = static_member_name(last_member.as_ref()?)?;
                 return MUTATING_ARRAY_METHODS
-                    .contains(&member_name.text_trimmed())
+                    .binary_search(&member_name.text_trimmed())
+                    .is_ok()
                     .then(|| call.range());
             }
             JsSyntaxKind::JS_CALL_ARGUMENT_LIST => {
@@ -639,6 +640,7 @@ fn outermost_parenthesized(node: JsSyntaxNode) -> JsSyntaxNode {
 }
 
 /// The `Array.prototype` methods that reorder or resize the array in place.
+/// Sorted for binary search.
 const MUTATING_ARRAY_METHODS: &[&str] = &[
     "copyWithin",
     "fill",
@@ -650,3 +652,16 @@ const MUTATING_ARRAY_METHODS: &[&str] = &[
     "splice",
     "unshift",
 ];
+
+#[cfg(test)]
+mod tests {
+    use super::MUTATING_ARRAY_METHODS;
+
+    #[test]
+    fn mutating_array_methods_should_be_sorted() {
+        assert!(
+            MUTATING_ARRAY_METHODS.is_sorted(),
+            "MUTATING_ARRAY_METHODS should be sorted for binary search."
+        );
+    }
+}
