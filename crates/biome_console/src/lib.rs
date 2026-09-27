@@ -161,6 +161,23 @@ impl Default for EnvConsole {
     }
 }
 
+/// Writes to the console, treating a closed pipe as end of output.
+///
+/// A reader that goes away is an ordinary way to say "that is enough": `biome
+/// check | head`, quitting a pager early, or a terminal that closed while
+/// Biome was still printing. Rust ignores `SIGPIPE`, so this surfaces as an
+/// [io::ErrorKind::BrokenPipe] error instead of terminating the process, and
+/// panicking on it would turn a normal end of output into a crash report.
+///
+/// Any other error is still a bug and keeps panicking as before.
+fn ignore_broken_pipe(result: io::Result<()>) {
+    match result {
+        Ok(()) => {}
+        Err(error) if error.kind() == io::ErrorKind::BrokenPipe => {}
+        Err(error) => panic!("failed to write to the console: {error}"),
+    }
+}
+
 impl Console for EnvConsole {
     fn println(&mut self, level: LogLevel, args: Markup) {
         let mut out = match level {
@@ -168,11 +185,9 @@ impl Console for EnvConsole {
             LogLevel::Log => self.out.lock(),
         };
 
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
+        ignore_broken_pipe(fmt::Formatter::new(&mut Termcolor(&mut out)).write_markup(args));
 
-        writeln!(out).unwrap();
+        ignore_broken_pipe(writeln!(out));
     }
 
     fn print(&mut self, level: LogLevel, args: Markup) {
@@ -181,11 +196,9 @@ impl Console for EnvConsole {
             LogLevel::Log => self.out.lock(),
         };
 
-        fmt::Formatter::new(&mut Termcolor(&mut out))
-            .write_markup(args)
-            .unwrap();
+        ignore_broken_pipe(fmt::Formatter::new(&mut Termcolor(&mut out)).write_markup(args));
 
-        write!(out, "").unwrap();
+        ignore_broken_pipe(write!(out, ""));
     }
 
     fn print_raw(&mut self, level: LogLevel, content: &str) {
@@ -194,7 +207,7 @@ impl Console for EnvConsole {
             LogLevel::Log => self.out.lock(),
         };
 
-        out.write_all(content.as_bytes()).unwrap();
+        ignore_broken_pipe(out.write_all(content.as_bytes()));
     }
 
     fn read(&mut self) -> Option<String> {
@@ -319,5 +332,28 @@ impl Console for FileBufferConsole {
 
     fn clear(&mut self) {
         self.out.clear();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ignore_broken_pipe;
+    use std::io;
+
+    #[test]
+    fn broken_pipe_is_treated_as_end_of_output() {
+        ignore_broken_pipe(Err(io::Error::new(
+            io::ErrorKind::BrokenPipe,
+            "Broken pipe",
+        )));
+    }
+
+    #[test]
+    #[should_panic(expected = "failed to write to the console")]
+    fn other_write_errors_still_panic() {
+        ignore_broken_pipe(Err(io::Error::new(
+            io::ErrorKind::PermissionDenied,
+            "permission denied",
+        )));
     }
 }

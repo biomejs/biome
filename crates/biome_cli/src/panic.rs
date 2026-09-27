@@ -12,10 +12,15 @@ pub fn setup_panic_handler() {
 }
 
 fn panic_handler(info: &PanicHookInfo) {
+    use std::io::Write as _;
+
     let error = write_error(info).expect("To write into buffer");
 
-    // Write the panic to stderr
-    eprintln!("{error}");
+    // Write the panic to stderr. This deliberately avoids `eprintln!`, which
+    // panics when the write fails: if stderr is a closed pipe, that second
+    // panic happens inside the panic handler, and Rust aborts the process.
+    // The report the user was meant to see is then replaced by a core dump.
+    let _ = writeln!(std::io::stderr(), "{error}");
 
     // Write the panic to the log file, this is done last since the `tracing`
     // infrastructure could panic a second time and abort the process, so we
