@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidSetupBindingWrites.vue
+---
+# Input
+```vue
+<script setup>
+import { computed } from 'vue'
+
+let counter = 0
+let flag = false
+
+const assigned = computed(() => {
+  counter = 1
+  return counter
+})
+const updated = computed(() => {
+  counter++
+  return counter
+})
+const toggled = computed(() => {
+  flag = !flag
+  return flag
+})
+const local = computed(() => {
+  // Declared in the getter, so this write is the getter's own.
+  let own = 0
+  own++
+  return own
+})
+</script>
+
+```
+
+# Diagnostics
+```
+invalidSetupBindingWrites.vue:8:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+     7 │ const assigned = computed(() => {
+   > 8 │   counter = 1
+       │   ^^^^^^^^^^^
+     9 │   return counter
+    10 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSetupBindingWrites.vue:12:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    10 │ })
+    11 │ const updated = computed(() => {
+  > 12 │   counter++
+       │   ^^^^^^^^^
+    13 │   return counter
+    14 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidSetupBindingWrites.vue:16:3 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside a computed getter.
+  
+    14 │ })
+    15 │ const toggled = computed(() => {
+  > 16 │   flag = !flag
+       │   ^^^^^^^^^^^^
+    17 │   return flag
+    18 │ })
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

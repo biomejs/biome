@@ -5,8 +5,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsObjectMember, JsCallExpression, JsComputedMemberAssignment,
-    JsComputedMemberExpression, JsIdentifierExpression, JsName, JsReferenceIdentifier,
+    AnyJsExpression, AnyJsIdentifierReference, AnyJsObjectMember, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierExpression, JsName,
     JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
     JsThisExpression, JsUnaryExpression, JsUnaryOperator,
 };
@@ -32,7 +32,9 @@ declare_lint_rule! {
     /// mutation is an assignment, an update (`++`, `--`), a `delete`, a call to one
     /// of the array methods that reorder or resize in place (`push`, `pop`,
     /// `shift`, `unshift`, `reverse`, `splice`, `sort`, `copyWithin`, `fill`), or an
-    /// `Object.assign()` that writes into the tracked object.
+    /// `Object.assign()` that writes into the tracked object. A `computed()` getter
+    /// that writes to a setup binding directly — `count++` rather than
+    /// `state.count++` — is reported too.
     ///
     /// Values created inside the getter are not tracked, so building up a local
     /// array or object and returning it is allowed.
@@ -182,6 +184,7 @@ impl Rule for NoVueSideEffectsInComputed {
             collect_this_mutations(
                 &getter,
                 declaration.declaration_name().as_ref(),
+                model,
                 &mut side_effects,
             );
         }
@@ -328,6 +331,7 @@ fn getter_of_object_member(
 fn collect_this_mutations(
     getter: &JsSyntaxNode,
     property_name: Option<&TokenText>,
+    model: &SemanticModel,
     side_effects: &mut Vec<SideEffect>,
 ) {
     for this_expression in getter.descendants().filter_map(JsThisExpression::cast) {
@@ -336,7 +340,7 @@ fn collect_this_mutations(
         }
         // `this.$set(...)` is the Vue 2 spelling of a reactive write.
         if let Some(range) = find_mutation(this_expression.syntax())
-            .or_else(|| find_reactivity_helper_call(this_expression.syntax(), "$set"))
+            .or_else(|| find_this_set_call(this_expression.syntax()))
         {
             side_effects.push(SideEffect {
                 range,
@@ -345,21 +349,12 @@ fn collect_this_mutations(
         }
     }
 
-    // `Vue.set(this, 'foo', value)` writes through the global instead.
-    for reference in getter.descendants().filter_map(JsReferenceIdentifier::cast) {
-        if !runs_directly_in(reference.syntax(), getter) {
+    // `Vue.set(target, 'foo', value)` writes through Vue itself instead.
+    for call in getter.descendants().filter_map(JsCallExpression::cast) {
+        if !runs_directly_in(call.syntax(), getter) {
             continue;
         }
-        let is_vue_global = reference
-            .value_token()
-            .is_ok_and(|name| name.text_trimmed() == "Vue");
-        if !is_vue_global {
-            continue;
-        }
-        let Some(expression) = reference.parent::<JsIdentifierExpression>() else {
-            continue;
-        };
-        if let Some(range) = find_reactivity_helper_call(expression.syntax(), "set") {
+        if let Some(range) = find_vue_set_call(&call, model) {
             side_effects.push(SideEffect {
                 range,
                 property_name: property_name.cloned(),
@@ -391,7 +386,7 @@ fn collect_setup_mutations(
     };
     let getter_range = getter.text_trimmed_range();
 
-    for reference in getter.descendants().filter_map(JsReferenceIdentifier::cast) {
+    for reference in getter.descendants().filter_map(AnyJsIdentifierReference::cast) {
         if !runs_directly_in(reference.syntax(), getter) {
             continue;
         }
@@ -407,10 +402,18 @@ fn collect_setup_mutations(
         {
             continue;
         }
-        let Some(expression) = reference.parent::<JsIdentifierExpression>() else {
-            continue;
+        let range = match reference {
+            // The binding itself is written to: `count = 1`, `count++`.
+            AnyJsIdentifierReference::JsIdentifierAssignment(assignment) => {
+                Some(write_range(assignment.syntax()))
+            }
+            // Otherwise the write, if any, is further up the member chain.
+            AnyJsIdentifierReference::JsReferenceIdentifier(reference) => reference
+                .parent::<JsIdentifierExpression>()
+                .and_then(|expression| find_mutation(expression.syntax())),
+            AnyJsIdentifierReference::JsxReferenceIdentifier(_) => None,
         };
-        if let Some(range) = find_mutation(expression.syntax()) {
+        if let Some(range) = range {
             side_effects.push(SideEffect {
                 range,
                 property_name: None,
@@ -474,9 +477,11 @@ fn find_mutation(node: &JsSyntaxNode) -> Option<TextRange> {
     }
 }
 
-/// Returns the range of the write a member assignment belongs to.
-fn write_range(member_assignment: &JsSyntaxNode) -> TextRange {
-    member_assignment
+/// Returns the range of the write an assignment target belongs to: the whole
+/// assignment or update expression, or the target itself when it is neither (a
+/// destructuring pattern, or a `for ... of` binding).
+fn write_range(assignment: &JsSyntaxNode) -> TextRange {
+    assignment
         .parent()
         .filter(|parent| {
             matches!(
@@ -487,24 +492,40 @@ fn write_range(member_assignment: &JsSyntaxNode) -> TextRange {
             )
         })
         .map_or_else(
-            || member_assignment.text_trimmed_range(),
+            || assignment.text_trimmed_range(),
             |parent| parent.text_trimmed_range(),
         )
 }
 
-/// Matches `this.$set(...)` and `Vue.set(...)`, and returns the range of the
-/// helper's name.
-fn find_reactivity_helper_call(node: &JsSyntaxNode, helper_name: &str) -> Option<TextRange> {
-    let member = outermost_parenthesized(node.clone()).parent()?;
+/// Matches `this.$set(...)`, the Vue 2 instance helper for a reactive write, and
+/// returns the range of its name.
+fn find_this_set_call(this_expression: &JsSyntaxNode) -> Option<TextRange> {
+    let member = outermost_parenthesized(this_expression.clone()).parent()?;
     if member.kind() != JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION {
         return None;
     }
     let name = static_member_name(&member)?;
-    if name.text_trimmed() != helper_name {
+    if name.text_trimmed() != "$set" {
         return None;
     }
     let call = outermost_parenthesized(member).parent()?;
     (call.kind() == JsSyntaxKind::JS_CALL_EXPRESSION).then(|| name.text_trimmed_range())
+}
+
+/// Matches Vue 2's `set()` helper — `Vue.set(...)` on the global, or the named
+/// export — and returns the range of the name that identifies it.
+///
+/// The receiver is resolved through the semantic model, so a local object that
+/// happens to own a `set` method is not mistaken for Vue.
+fn find_vue_set_call(call: &JsCallExpression, model: &SemanticModel) -> Option<TextRange> {
+    let callee = call.callee().ok()?.inner_expression()?;
+    if !is_vue_api_reference(&callee, model, "set") {
+        return None;
+    }
+    Some(match static_member_name(callee.syntax()) {
+        Some(name) => name.text_trimmed_range(),
+        None => callee.range(),
+    })
 }
 
 /// Returns true when the innermost function around `node` is `function_node`.
