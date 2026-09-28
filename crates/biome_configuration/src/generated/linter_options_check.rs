@@ -806,6 +806,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noMisplacedAssertion",
         TypeId::of::<biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions>(),
     ));
+    result.push(("nursery", "noMisplacedListElements", TypeId::of::<biome_rule_options::no_misplaced_list_elements::NoMisplacedListElementsOptions>()));
     result.push(("suspicious", "noMisrefactoredShorthandAssign", TypeId::of::<biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions>()));
     result.push((
         "correctness",
@@ -2156,11 +2157,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "useLayeredStyles",
         TypeId::of::<biome_rule_options::use_layered_styles::UseLayeredStylesOptions>(),
-    ));
-    result.push((
-        "nursery",
-        "useLiContainer",
-        TypeId::of::<biome_rule_options::use_li_container::UseLiContainerOptions>(),
     ));
     result.push((
         "style",

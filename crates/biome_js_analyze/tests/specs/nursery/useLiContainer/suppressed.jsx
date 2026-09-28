@@ -1,5 +1,0 @@
-/* should not generate diagnostics */
-<div>
-    {/* biome-ignore lint/nursery/useLiContainer: The container is replaced before rendering. */}
-    <li>Item</li>
-</div>;

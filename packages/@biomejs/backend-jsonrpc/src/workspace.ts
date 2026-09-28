@@ -2485,6 +2485,11 @@ See https://biomejs.dev/linter/rules/no-misleading-return-type
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
+	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+See https://biomejs.dev/linter/rules/no-misplaced-list-elements 
+	 */
+	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -2832,11 +2837,6 @@ See https://biomejs.dev/linter/rules/use-includes
 See https://biomejs.dev/linter/rules/use-layered-styles 
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
-	/**
-	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
-See https://biomejs.dev/linter/rules/use-li-container 
-	 */
-	useLiContainer?: UseLiContainerConfiguration;
 	/**
 	* Enforce logical properties over physical properties.
 See https://biomejs.dev/linter/rules/use-logical-properties 
@@ -4941,6 +4941,9 @@ export type NoMeaninglessVoidOperatorConfiguration =
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
+export type NoMisplacedListElementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisplacedListElementsOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -5145,9 +5148,6 @@ export type UseIncludesConfiguration =
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
-export type UseLiContainerConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseLiContainerOptions;
 export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLogicalPropertiesOptions;
@@ -6948,6 +6948,10 @@ export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
 }
+export interface RuleWithNoMisplacedListElementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisplacedListElementsOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7240,10 +7244,6 @@ export interface RuleWithUseIncludesOptions {
 export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
-}
-export interface RuleWithUseLiContainerOptions {
-	level: RulePlainConfiguration;
-	options?: UseLiContainerOptions;
 }
 export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
@@ -8898,6 +8898,7 @@ export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
+export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
@@ -9132,7 +9133,6 @@ export interface UseLayeredStylesOptions {
 	 */
 	requireImportLayers?: boolean;
 }
-export type UseLiContainerOptions = {};
 export interface UseLogicalPropertiesOptions {
 	/**
 	 * The text direction used to map physical inline properties. Defaults to `"ltr"`.
@@ -10449,6 +10449,7 @@ export type Category =
 	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
@@ -10529,7 +10530,6 @@ export type Category =
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
-	| "lint/nursery/useLiContainer"
 	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"

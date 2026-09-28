@@ -28,7 +28,7 @@ use std::{fs::read_to_string, slice};
 
 // Spec cases are discovered from the filesystem during macro expansion.
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,mjs,jsx,tsx,ts,json,jsonc,svelte,vue,html,astro}", crate::run_test, "module"}
-tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue,astro}", crate::run_suppression_test, "module"}
 tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte,vue}", crate::run_multi_rule_test, "module"}
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
@@ -406,7 +406,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
-    if matches!(input_file.extension(), Some("vue" | "svelte")) {
+    if matches!(input_file.extension(), Some("vue" | "svelte" | "astro")) {
         let input_code = read_to_string(input_file)
             .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
         let (group, rule) = parse_test_path(input_file);
