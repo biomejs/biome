@@ -2928,6 +2928,11 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	* Require unambiguous boolean expressions in conditions.
+See https://biomejs.dev/linter/rules/use-strict-boolean-expressions 
+	 */
+	useStrictBooleanExpressions?: UseStrictBooleanExpressionsConfiguration;
+	/**
 	* Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
@@ -5192,6 +5197,9 @@ export type UseScopedStylesConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseStrictBooleanExpressionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseStrictBooleanExpressionsOptions;
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
@@ -7310,6 +7318,10 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseStrictBooleanExpressionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseStrictBooleanExpressionsOptions;
+}
 export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -9190,6 +9202,7 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
@@ -10526,6 +10539,7 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"

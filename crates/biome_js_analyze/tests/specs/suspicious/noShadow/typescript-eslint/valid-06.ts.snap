@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-07.ts
+expression: valid-06.ts
 ---
 # Input
 ```ts
