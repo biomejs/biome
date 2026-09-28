@@ -306,13 +306,41 @@ impl TypeDataTransformer {
     }
 }
 
-/// Replaces generic references simultaneously without visiting replacements.
+/// Replaces generic references using several substitutions at once.
 ///
-/// A nested declaration masks only its own parameters, leaving other bindings
-/// active in its body. Generic declarations retain their interned identities.
+/// Replacements are inserted as they are and never visited again, so the
+/// substitutions `T -> U` and `U -> T` swap the two parameters.
+///
+/// A nested declaration masks only the substitutions for the parameters it
+/// declares. The other substitutions still apply inside it. For example,
+/// substituting `T` with `string` and `U` with `number` preserves the `T`
+/// declared by `map`, but replaces the `U` inside it:
+///
+/// ```ts
+/// type Container<T, U> = {
+///     value: T;
+///     map: <T>(value: T) => [T, U];
+/// };
+///
+/// type Substituted = {
+///     value: string;
+///     map: <T>(value: T) => [T, number];
+/// };
+/// ```
+///
+/// A generic parameter without a substitution is kept as it is, including its
+/// constraint and default. Rewriting either would intern a different parameter
+/// that no longer matches the existing references to it.
 pub(crate) struct TypeSubstituter<'a, 'db> {
+    /// Substitutions to apply, with at most one replacement per generic.
     substitutions: &'a [TypeSubstitution<'db>],
+    /// Type parameters declared by the declarations that enclose the type
+    /// being visited. A substitution doesn't apply while its generic is in
+    /// this list.
     shadowed: Vec<TypeData<'db>>,
+    /// Length of `shadowed` when each type being visited was entered. Leaving
+    /// a type truncates `shadowed` back to that length, which drops the
+    /// parameters the type declared.
     scopes: Vec<usize>,
 }
 
