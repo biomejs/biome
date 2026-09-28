@@ -1,7 +1,0 @@
-@keyframes fade {
-  from {
-    @include fade-start;
-    @if $bounce { transform: scale(1.1); }
-    opacity: 0 !important;
-  }
-}
