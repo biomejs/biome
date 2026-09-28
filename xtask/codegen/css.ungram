@@ -1010,9 +1010,13 @@ CssCounterStyleAtRuleDeclarator =
 	'counter-style'
 	name: CssCustomIdentifier
 
+// @property --accent {}
+//           ^^^^^^^^
+// @property --#{$name} {}
+//           ^^^^^^^^^^
 CssPropertyAtRuleDeclarator =
 	'property'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 
 CssFontFaceAtRuleDeclarator =
 	'font-face'
