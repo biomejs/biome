@@ -439,10 +439,10 @@ pub fn css_container_at_rule_declarator(
 pub struct CssContainerAtRuleDeclaratorBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    name: Option<CssCustomIdentifier>,
+    name: Option<AnyCssContainerName>,
 }
 impl CssContainerAtRuleDeclaratorBuilder {
-    pub fn with_name(mut self, name: CssCustomIdentifier) -> Self {
+    pub fn with_name(mut self, name: AnyCssContainerName) -> Self {
         self.name = Some(name);
         self
     }
@@ -3311,6 +3311,14 @@ pub fn scss_binary_expression(
             Some(SyntaxElement::Token(operator_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
+    ))
+}
+pub fn scss_container_interpolated_query(
+    query: ScssInterpolation,
+) -> ScssContainerInterpolatedQuery {
+    ScssContainerInterpolatedQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_CONTAINER_INTERPOLATED_QUERY,
+        [Some(SyntaxElement::Node(query.into_syntax()))],
     ))
 }
 pub fn scss_content_at_rule(content_token: SyntaxToken) -> ScssContentAtRuleBuilder {

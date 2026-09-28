@@ -979,8 +979,16 @@ CssMediaAtRuleDeclarator =
 
 CssContainerAtRuleDeclarator =
 	'container'
-	name: CssCustomIdentifier?
+	name: AnyCssContainerName?
 	query: AnyCssContainerQuery
+
+// @container sidebar (width <= 500px) {  }
+//            ^^^^^^^
+// @container #{$name} (width <= 500px) {  }
+//            ^^^^^^^^
+AnyCssContainerName =
+	CssCustomIdentifier
+	| ScssInterpolatedIdentifier
 
 CssSupportsAtRuleDeclarator =
 	'supports'
@@ -1206,7 +1214,13 @@ AnyCssContainerQueryInParens =
 	| CssContainerSizeFeatureInParens
 	| CssContainerScrollStateQueryInParens
 	| CssContainerStyleQueryInParens
+	| ScssContainerInterpolatedQuery
 	| AnyCssValue // general-enclosed
+
+// @container #{$query} {  }
+//            ^^^^^^^^^
+ScssContainerInterpolatedQuery =
+	query: ScssInterpolation
 
 // ( <container-query> )
 // @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }

@@ -13,6 +13,7 @@ pub(crate) mod composes_import_source;
 pub(crate) mod compound_selector;
 pub(crate) mod conditional_block;
 pub(crate) mod container_and_combinable_query;
+pub(crate) mod container_name;
 pub(crate) mod container_or_combinable_query;
 pub(crate) mod container_query;
 pub(crate) mod container_query_in_parens;
