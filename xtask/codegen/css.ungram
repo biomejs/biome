@@ -2677,8 +2677,13 @@ CssAttrFunction =
 //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
 
+// attr(data-test)
+//      ^^^^^^^^^
+// attr(#{$name})
+//      ^^^^^^^^
 AnyCssAttrName =
 	CssIdentifier
+	| ScssInterpolatedIdentifier
 	| CssBogusAttrName
 
 // Literal value that can be used as a type in the attr() function.

@@ -14166,6 +14166,7 @@ impl AnyCssAtRuleDeclarator {
 pub enum AnyCssAttrName {
     CssBogusAttrName(CssBogusAttrName),
     CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
 }
 impl AnyCssAttrName {
     pub fn as_css_bogus_attr_name(&self) -> Option<&CssBogusAttrName> {
@@ -14177,6 +14178,12 @@ impl AnyCssAttrName {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -35868,17 +35875,29 @@ impl From<CssIdentifier> for AnyCssAttrName {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssAttrName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl AstNode for AnyCssAttrName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusAttrName::KIND_SET.union(CssIdentifier::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusAttrName::KIND_SET
+        .union(CssIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_ATTR_NAME => Self::CssBogusAttrName(CssBogusAttrName { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -35887,12 +35906,14 @@ impl AstNode for AnyCssAttrName {
         match self {
             Self::CssBogusAttrName(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusAttrName(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -35901,6 +35922,7 @@ impl std::fmt::Debug for AnyCssAttrName {
         match self {
             Self::CssBogusAttrName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -35909,6 +35931,7 @@ impl From<AnyCssAttrName> for SyntaxNode {
         match n {
             AnyCssAttrName::CssBogusAttrName(it) => it.into_syntax(),
             AnyCssAttrName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssAttrName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
 }
