@@ -472,11 +472,13 @@ fn is_at_any_media_in_parens(p: &mut CssParser) -> bool {
 #[inline]
 pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_interpolated_media_in_parens(p) {
-        if CssSyntaxFeatures::Scss.is_supported(p) {
-            return parse_scss_interpolated_media_in_parens(p);
-        }
-
-        return parse_media_feature_in_parens(p);
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_media_in_parens,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated media conditions", marker.range(p))
+            },
+        );
     }
 
     if !is_at_any_media_in_parens(p) {
@@ -499,20 +501,6 @@ pub(crate) fn parse_any_media_in_parens(p: &mut CssParser) -> ParsedSyntax {
     p.expect(T![')']);
 
     Present(m.complete(p, kind))
-}
-
-#[inline]
-fn parse_media_feature_in_parens(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_any_media_in_parens(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump(T!['(']);
-    recover_media_feature_in_parens_body(p);
-    p.expect(T![')']);
-
-    Present(m.complete(p, CSS_MEDIA_FEATURE_IN_PARENS))
 }
 
 #[inline]

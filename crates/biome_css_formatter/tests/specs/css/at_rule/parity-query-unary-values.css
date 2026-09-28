@@ -1,0 +1,6 @@
+@media(min-width:16px),(min-width:-16px),(min-width:+16px){.lengths{display:block}}
+@media(aspect-ratio:16 /9){.ratio{display:block}}
+@media(-16px<width<=+800px),(width>=400px),(800px>width){.ranges{display:block}}
+@media(min-width:calc(800px - 16px)){.calculation{display:block}}
+@container(min-width: -16px){.container{display:block}}
+.after{color:blue}
