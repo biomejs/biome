@@ -107,12 +107,3 @@ jobs:
             gh pr edit "$PR_URL" --title "chore: update e18e module replacements data to $E18E_VERSION"
           fi
           echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
-
-      - name: Auto merge
-        if: ${{ steps.create-pull-request.outputs.pr_url != '' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge "${{ steps.create-pull-request.outputs.pr_url }}" \
-            --squash \
-            --delete-branch
