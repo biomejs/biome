@@ -35,8 +35,8 @@ use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, Toke
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
-    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
-    GLOBAL_UNDEFINED_ID,
+    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_KEYWORD_ID,
+    GLOBAL_STRING_KEYWORD_ID, GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
@@ -814,7 +814,7 @@ impl TypeData {
                 }
                 Err(_) => Self::unknown(),
             },
-            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
+            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_KEYWORD_ID),
             AnyTsType::TsObjectType(ty) => {
                 let mut has_unknown_members = false;
                 let members = ty
@@ -842,7 +842,7 @@ impl TypeData {
                 Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => Self::unknown(),
             },
-            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
+            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_KEYWORD_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
                 Self::Literal(Box::new(Literal::Template(ty.to_string().into())))

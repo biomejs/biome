@@ -11,6 +11,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail};
+use biome_string_case::StrLikeExtension;
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
@@ -741,8 +742,11 @@ mod tests {
 
         for needle in [
             "//! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.",
-            "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
-            "pub(crate) fn set_generated_global_type_data(",
+            "pub(crate) mod ids {",
+            "pub(crate) const GENERATED_GLOBAL_NAMES: &[&str] =",
+            "pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
+            "pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
+            "pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData;",
             "pub(crate) fn generated_local_types(",
         ] {
             assert!(
@@ -995,21 +999,32 @@ mod tests {
         let generated = fs::read_to_string(&output_path)
             .with_context(|| format!("failed to read {}", output_path.display()))?;
 
-        assert!(generated.contains("crate::globals::ERROR_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::SYMBOL_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(
-            generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
-        );
-        assert!(generated.contains("crate::globals::DATE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::MATH_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("builder.set_type_data("));
+        let builders = generated
+            .split_once("pub(crate) static GENERATED_GLOBAL_BUILDERS")
+            .and_then(|(_, rest)| rest.split_once("];"))
+            .map(|(table, _)| table)
+            .context("generated module should contain the builder table")?;
+        for name in [
+            "ERROR",
+            "ERROR_CONSTRUCT",
+            "ERROR_CALL",
+            "SYMBOL",
+            "SYMBOL_DISPOSE",
+            "SYMBOL_ASYNC_DISPOSE",
+            "DISPOSABLE",
+            "DISPOSABLE_DISPOSE",
+            "ASYNC_DISPOSABLE",
+            "ASYNC_DISPOSABLE_ASYNC_DISPOSE",
+            "DATE",
+            "MATH",
+        ] {
+            assert!(generated.contains(&format!("const {name}_ID_GLOBAL_TYPE_ID: GlobalTypeId")));
+            let builder = format!("global_{},", name.to_ascii_lowercase_cow());
+            assert!(
+                builders.lines().any(|line| line.trim() == builder),
+                "builder table should contain `{builder}`"
+            );
+        }
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
         assert!(generated.contains("crate::TypeData::Function("));
@@ -1144,7 +1159,7 @@ mod tests {
         assert_eq!(name.kind(), &LoweredMemberKind::Named { optional: false });
         assert_eq!(
             name.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
 
         let message = class
@@ -1156,7 +1171,7 @@ mod tests {
         );
         assert_eq!(
             message.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
         let stack = class
             .member("stack")
@@ -1164,7 +1179,7 @@ mod tests {
         assert_eq!(stack.kind(), &LoweredMemberKind::Named { optional: true });
         assert_eq!(
             stack.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
         let prototype = class
             .member("prototype")
@@ -1197,7 +1212,7 @@ mod tests {
             .expect("Error constructor helper should be lowered");
         assert_eq!(
             constructor.id_constant(),
-            "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"
+            "ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID"
         );
 
         let call = lowered
@@ -1308,7 +1323,7 @@ mod tests {
         assert_eq!(dispose.kind(), &LoweredMemberKind::NamedStatic);
         assert_eq!(
             dispose.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_DISPOSE_ID")
+            &LoweredTypeReference::Global("GLOBAL_SYMBOL_DISPOSE_ID".into())
         );
         let async_dispose = symbol_class
             .member("asyncDispose")
@@ -1316,7 +1331,7 @@ mod tests {
         assert_eq!(async_dispose.kind(), &LoweredMemberKind::NamedStatic);
         assert_eq!(
             async_dispose.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID")
+            &LoweredTypeReference::Global("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID".into())
         );
 
         let dispose_helper = lowered
@@ -1351,11 +1366,12 @@ mod tests {
             .global("WeakMap")
             .expect("WeakMap should be lowered");
         assert_eq!(weak_map.id_constant(), "WEAK_MAP_ID_GLOBAL_TYPE_ID");
-        let LoweredTypeData::Class(weak_map_class) = weak_map.data() else {
-            bail!("WeakMap should lower to class data");
+        // Without `declare var WeakMap`, the declaration only names a type.
+        let LoweredTypeData::Interface(weak_map_interface) = weak_map.data() else {
+            bail!("WeakMap should lower to interface data");
         };
-        assert_eq!(weak_map_class.name(), "WeakMap");
-        assert!(weak_map_class.members().is_empty());
+        assert_eq!(weak_map_interface.name(), "WeakMap");
+        assert!(weak_map_interface.members().is_empty());
 
         Ok(())
     }
@@ -1366,12 +1382,12 @@ mod tests {
 
         let date = lowered.global("Date").expect("Date should be lowered");
         assert_eq!(date.id_constant(), "DATE_ID_GLOBAL_TYPE_ID");
-        let LoweredTypeData::Class(date_class) = date.data() else {
-            bail!("Date should lower to class data");
+        let LoweredTypeData::Interface(date_interface) = date.data() else {
+            bail!("Date should lower to interface data");
         };
-        assert_eq!(date_class.name(), "Date");
-        assert!(date_class.type_parameters().is_empty());
-        assert!(!date_class.members().is_empty());
+        assert_eq!(date_interface.name(), "Date");
+        assert!(date_interface.type_parameters().is_empty());
+        assert_eq!(date_interface.members().len(), 2);
 
         Ok(())
     }
@@ -1379,29 +1395,29 @@ mod tests {
     #[test]
     fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
-        let LoweredTypeData::Class(class) = lowered.global("Date").unwrap().data() else {
-            bail!("expected class");
+        let LoweredTypeData::Interface(interface) = lowered.global("Date").unwrap().data() else {
+            bail!("expected interface");
         };
         assert_eq!(
-            class.member("value").unwrap().type_reference(),
-            &class.type_parameters()[0]
+            interface.member("value").unwrap().type_reference(),
+            &interface.type_parameters()[0]
         );
         Ok(())
     }
 
     #[test]
-    fn lowerer_rejects_inconsistent_weak_map_type_parameter_count() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts"),
-            "inconsistent type parameter count across merged class WeakMap declarations",
-        )
+    fn lowerer_reports_inconsistent_weak_map_type_parameter_count() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts")?;
+        assert!(lowered.gaps().iter().any(|gap| gap.owner == "WeakMap"
+            && gap.detail == "merged declarations have different type parameter counts"));
+        Ok(())
     }
 
     #[test]
     fn lowerer_rejects_missing_symbol_member() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-missing-async-dispose.d.ts"),
-            "SymbolConstructor is missing asyncDispose",
+            "AsyncDisposable requires Symbol.asyncDispose to be declared as a unique symbol",
         )
     }
 
@@ -1409,7 +1425,7 @@ mod tests {
     fn lowerer_rejects_non_unique_symbol_member() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-wrong-type.d.ts"),
-            "SymbolConstructor.dispose must be unique symbol",
+            "Disposable requires Symbol.dispose to be declared as a unique symbol",
         )
     }
 
@@ -1417,7 +1433,7 @@ mod tests {
     fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
-            "SymbolConstructor is missing dispose",
+            "Disposable requires Symbol.dispose to be declared as a unique symbol",
         )
     }
 

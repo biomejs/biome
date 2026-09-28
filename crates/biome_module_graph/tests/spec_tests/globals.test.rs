@@ -841,3 +841,29 @@ fn generated_global_functions_infer_declared_signatures_and_returns() {
         &fs,
     );
 }
+
+#[test]
+fn declared_lib_types_resolve_by_name() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const keyTypes: WeakKeyTypes;
+        export const keyTypesObject = keyTypes.object;
+        declare const property: PropertyKey;
+        export const propertyKey = property;
+        declare const list: ReadonlyArray<string>;
+        export const joined = list.join(",");
+        declare const arrayLike: ArrayLike<number>;
+        export const arrayLikeLength = arrayLike.length;
+        declare const options: Intl.DateTimeFormatOptions;
+        export const timeZone = options.timeZone;
+        export const serialized = JSON.stringify({});
+        export const pi = Math.PI;
+        export const hasKey = Reflect.has({}, "key");
+        export const rangeError = new RangeError("out of range").message;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot("declared_lib_types_resolve_by_name", &db, &fs);
+}

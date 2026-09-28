@@ -72,7 +72,7 @@ Expression "Symbol" => class "Symbol" {
 
 Expression "Symbol.iterator" => Symbol.iterator
 
-Binding asyncIterator "asyncIterator" => symbol
+Binding asyncIterator "asyncIterator" => Symbol.asyncIterator
 
 Expression "Symbol" => class "Symbol" {
   extends: none
@@ -80,7 +80,7 @@ Expression "Symbol" => class "Symbol" {
   type_args: []
 }
 
-Expression "Symbol.asyncIterator" => symbol
+Expression "Symbol.asyncIterator" => Symbol.asyncIterator
 
 Binding tag "tag" => Symbol.toStringTag
 

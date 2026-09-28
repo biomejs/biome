@@ -229,7 +229,7 @@ fn assert_promise_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     };
     if constructor_member.kind() != &LoweredMemberKind::Constructor
         || constructor_member.type_reference()
-            != &LoweredTypeReference::Predefined("GLOBAL_PROMISE_CONSTRUCTOR_ID")
+            != &LoweredTypeReference::Predefined("GLOBAL_PROMISE_CONSTRUCT_ID")
     {
         bail!("generated Promise constructor member has unexpected shape");
     }
@@ -237,7 +237,7 @@ fn assert_promise_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     let constructor = generated_function(
         lowered,
         "Promise.constructor",
-        "PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+        "PROMISE_CONSTRUCT_ID_GLOBAL_TYPE_ID",
     )?;
     if constructor.is_async()
         || !constructor.type_parameters().is_empty()
@@ -330,9 +330,11 @@ fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
         .members()
         .iter()
         .filter(|member| {
-            !matches!(
+            matches!(
                 member.kind(),
-                LoweredMemberKind::NamedStatic | LoweredMemberKind::ComputedStatic { .. }
+                LoweredMemberKind::Named { .. }
+                    | LoweredMemberKind::ComputedValue { .. }
+                    | LoweredMemberKind::IndexSignature { .. }
             )
         })
         .count();
@@ -345,7 +347,7 @@ fn assert_array_shape(lowered: &LoweredGlobalTypes) -> Result<()> {
     assert_array_member(class, "filter", "GLOBAL_ARRAY_FILTER_ID")?;
     assert_array_member(class, "forEach", "GLOBAL_ARRAY_FOREACH_ID")?;
     assert_array_member(class, "map", "GLOBAL_ARRAY_MAP_ID")?;
-    assert_array_member(class, "length", "GLOBAL_NUMBER_ID")?;
+    assert_array_member(class, "length", "GLOBAL_NUMBER_KEYWORD_ID")?;
 
     assert_array_method(
         lowered,
@@ -471,7 +473,7 @@ fn assert_symbol_member(class: &LoweredClass, name: &str, type_id: &'static str)
     if member.kind() != &LoweredMemberKind::NamedStatic {
         bail!("generated Symbol.{name} has unexpected kind");
     }
-    if member.type_reference() != &LoweredTypeReference::Predefined(type_id) {
+    if member.type_reference() != &LoweredTypeReference::Global(type_id.into()) {
         bail!("generated Symbol.{name} has unexpected type");
     }
     Ok(())
@@ -509,9 +511,9 @@ fn generated_constructor(lowered: &LoweredGlobalTypes) -> Result<&LoweredConstru
     let Some(constructor) = lowered.global("Error.constructor") else {
         bail!("generated globals are missing the Error constructor helper");
     };
-    if constructor.id_constant() != "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID" {
+    if constructor.id_constant() != "ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID" {
         bail!(
-            "generated Error constructor targets {}, expected ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID",
+            "generated Error constructor targets {}, expected ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID",
             constructor.id_constant()
         );
     }
@@ -653,7 +655,7 @@ fn assert_error_named_string_member(
             member.name()
         );
     }
-    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
+    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID") {
         bail!(
             "generated Error member {} has unexpected type",
             member.name()
@@ -671,7 +673,7 @@ fn assert_error_stack_member(lowered: &LoweredGlobalTypes) -> Result<()> {
     if member.kind() != &(LoweredMemberKind::Named { optional: true }) {
         bail!("generated Error member stack has unexpected kind");
     }
-    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
+    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID") {
         bail!("generated Error member stack has unexpected type");
     }
     Ok(())
@@ -701,7 +703,7 @@ fn assert_error_constructor_member(lowered: &LoweredGlobalTypes) -> Result<()> {
     if member.kind() != &LoweredMemberKind::Constructor {
         bail!("generated Error constructor member has unexpected kind");
     }
-    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_ERROR_CONSTRUCTOR_ID") {
+    if member.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_ERROR_CONSTRUCT_ID") {
         bail!("generated Error constructor member has unexpected type");
     }
     Ok(())
@@ -769,7 +771,7 @@ fn assert_single_optional_message_parameter(
     if name.text() != "message" {
         bail!("{owner} has unexpected parameter name {}", name.text());
     }
-    if parameter.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_ID") {
+    if parameter.type_reference() != &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID") {
         bail!("{owner} message parameter has unexpected type");
     }
     if !parameter.is_optional() {
