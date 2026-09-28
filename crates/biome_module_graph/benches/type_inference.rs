@@ -653,7 +653,7 @@ fn overload_binding_range_by_name(
                 .is_ok_and(|token| token.text_trimmed() == name)
         })
         .find_map(|binding| {
-            let range = binding.syntax().text_trimmed_range();
+            let range = binding.range();
             let ty = inferred
                 .binding_type_data
                 .get(&range)

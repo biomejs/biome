@@ -440,7 +440,7 @@ fn inferred_binding_ty_by_name<'db>(
 
     inferred
         .binding_type_data
-        .get(&binding.syntax().text_trimmed_range())
+        .get(&binding.range())
         .map(|data| data.ty)
 }
 
@@ -558,7 +558,7 @@ fn inferred_overload_ty_by_name<'db>(
         .filter_map(|binding| {
             inferred
                 .binding_type_data
-                .get(&binding.syntax().text_trimmed_range())
+                .get(&binding.range())
                 .map(|data| inferred.resolve_type(db, data.ty))
         })
         .find(|ty| {

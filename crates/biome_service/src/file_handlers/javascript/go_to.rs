@@ -59,7 +59,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                 return Some(result);
             }
             return Some(DefinitionReference::Local {
-                range: binding.syntax().text_trimmed_range(),
+                range: binding.range(),
             });
         }
 
