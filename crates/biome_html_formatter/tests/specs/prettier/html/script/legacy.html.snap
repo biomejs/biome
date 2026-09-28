@@ -22,39 +22,24 @@ alert(2)
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,11 +1,11 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,13 +1,11 @@
  <script>
-   <!--
--  alert(1);
-+alert(1)
-   -->
+   
+-  
+ <!--
+ alert(1)
+ -->
  </script>
  
  <script>
-   <!--
--  alert(2);
-+alert(2)
-   //-->
- </script>
-```
+-  
+   
+ <!--
+ alert(2)
 
-# Output
-
-```html
-<script>
-  <!--
-alert(1)
-  -->
-</script>
-
-<script>
-  <!--
-alert(2)
-  //-->
-</script>
 ```

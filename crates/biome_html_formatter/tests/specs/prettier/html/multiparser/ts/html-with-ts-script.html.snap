@@ -30,55 +30,26 @@ info: html/multiparser/ts/html-with-ts-script.html
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -2,11 +2,17 @@
- <html lang="en">
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -3,7 +3,6 @@
    <head>
      <script lang="ts">
--      type X = { [K in keyof Y]: Partial<K> };
-+      type X = { [
-+        K in keyof Y
-+    ]: Partial < K >  } ;
-+
-+      class   Foo< T >{
-+
-+        constructor ( private foo: keyof Apple ){
+       
+-      
+     type X = { [
+         K in keyof Y
+     ]: Partial < K >  } ;
+@@ -15,7 +14,6 @@
  
--      class Foo<T> {
--        constructor(private foo: keyof Apple) {}
--      }
-+
-+        }
-+    }
+         }
+     }
+-    
+     
      </script>
    </head>
-   <body></body>
-```
 
-# Output
-
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <script lang="ts">
-      type X = { [
-        K in keyof Y
-    ]: Partial < K >  } ;
-
-      class   Foo< T >{
-
-        constructor ( private foo: keyof Apple ){
-
-
-        }
-    }
-    </script>
-  </head>
-  <body></body>
-</html>
 ```

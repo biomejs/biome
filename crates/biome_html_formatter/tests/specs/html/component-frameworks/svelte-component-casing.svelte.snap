@@ -35,7 +35,7 @@ import Select from "./Select.svelte";
 
 <Button label="test button" />
 <TextInput placeholder="enter text" />
-<Select options={['a', 'b']} />
+<Select options={["a", "b"]} />
 <Ul
 	><li>a</li>
 	<li>b</li></Ul
