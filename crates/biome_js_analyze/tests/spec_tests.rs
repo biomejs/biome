@@ -405,6 +405,21 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+
+    if matches!(input_file.extension(), Some("vue" | "svelte")) {
+        let input_code = read_to_string(input_file)
+            .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
+        let (group, rule) = parse_test_path(input_file);
+        let snapshot = analyze_with_workspace(input_file, input_code, group, rule);
+        insta::with_settings!({
+            prepend_module_to_snapshot => false,
+            snapshot_path => input_file.parent().unwrap(),
+        }, {
+            insta::assert_snapshot!(file_name, snapshot, file_name);
+        });
+        return;
+    }
+
     let source_type = match input_file.extension() {
         Some("js" | "mjs" | "jsx") => JsFileSource::jsx(),
         Some("cjs") => JsFileSource::js_script(),

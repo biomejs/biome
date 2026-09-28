@@ -77,6 +77,7 @@ impl VueFileHandler {
                     language,
                     variant,
                     setup,
+                    ..
                 } = parse_lang_and_setup_from_script_opening_tag(
                     captures.name("opening")?.as_str(),
                 );

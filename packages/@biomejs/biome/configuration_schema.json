@@ -5737,6 +5737,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteExportLetConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteExportLetOptions" }
+			]
+		},
+		"NoSvelteExportLetOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteLegacyConstConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7279,6 +7289,13 @@
 					"description": "Disallow the use of Svelte's {@html} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteAtHtmlTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteExportLet": {
+					"description": "Disallow declaring Svelte component props with export let.\nSee https://biomejs.dev/linter/rules/no-svelte-export-let",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteExportLetConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10813,6 +10830,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteAtHtmlTagsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteExportLetOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteExportLetOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
