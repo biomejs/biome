@@ -261,18 +261,19 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
-        let range = node.range();
-        if f.context().is_embedded_node_range(range) {
-            let mut buffer = VecBuffer::new(f.state_mut());
-            write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
-            let embedded = FormatEmbedded {
-                range,
-                content: Interned::new(buffer.into_vec()),
-            };
-            self.wrap_embed(node, &embedded, f)
-        } else {
-            self.fmt_fields(node, f)
+        if f.context().should_delegate_fmt_embedded_nodes() {
+            let range = node.range();
+            if f.context().is_embedded_node_range(range) {
+                let mut buffer = VecBuffer::new(f.state_mut());
+                write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
+                let embedded = FormatEmbedded {
+                    range,
+                    content: Interned::new(buffer.into_vec()),
+                };
+                return self.wrap_embed(node, &embedded, f);
+            }
         }
+        self.fmt_fields(node, f)
     }
 
     /// Writes `embedded`, a piece of code written in another language, such as
