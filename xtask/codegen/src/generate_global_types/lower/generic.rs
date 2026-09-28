@@ -1064,6 +1064,14 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
                 return Ok(parameter);
             }
             if name.text() == "intrinsic" {
+                // TypeScript resolves this alias to `undefined` under
+                // `strictBuiltinIteratorReturn`, which `strict` enables, and to
+                // `any` otherwise.
+                if self.slot.namespace().is_empty()
+                    && self.slot.declared_name().text() == "BuiltinIteratorReturn"
+                {
+                    return Ok(LoweredTypeReference::Predefined("GLOBAL_UNDEFINED_ID"));
+                }
                 return Ok(self.unknown("intrinsic type"));
             }
         }
