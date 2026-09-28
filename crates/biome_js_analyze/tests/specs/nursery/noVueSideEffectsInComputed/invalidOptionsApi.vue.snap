@@ -41,6 +41,9 @@ export default {
     computedMethodName() {
       return this.items['reverse']()
     },
+    assignOntoComponent() {
+      return Object.assign(this, { flag: true })
+    },
   },
 }
 </script>
@@ -247,7 +250,28 @@ invalidOptionsApi.vue:36:14 lint/nursery/noVueSideEffectsInComputed ━━━━
   > 36 │       return this.items['reverse']()
        │              ^^^^^^^^^^^^^^^^^^^^^^^
     37 │     },
-    38 │   },
+    38 │     assignOntoComponent() {
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApi.vue:39:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside the assignOntoComponent computed property.
+  
+    37 │     },
+    38 │     assignOntoComponent() {
+  > 39 │       return Object.assign(this, { flag: true })
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │     },
+    41 │   },
   
   i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
   

@@ -37,6 +37,10 @@ export default {
     objectAssignIntoNewObject() {
       return Object.assign({}, this.data, { extra: 'value' })
     },
+    componentAsArgument() {
+      // Reading the component is not writing to it.
+      return Object.keys(this)
+    },
     mutatorWithoutCall() {
       // Reading the method does not run it.
       return this.items.sort

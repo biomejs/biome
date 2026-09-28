@@ -35,6 +35,9 @@ export default {
     computedMethodName() {
       return this.items['reverse']()
     },
+    assignOntoComponent() {
+      return Object.assign(this, { flag: true })
+    },
   },
 }
 </script>

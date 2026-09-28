@@ -372,17 +372,21 @@ fn collect_this_mutations(
         if !runs_directly_in(this_expression.syntax(), getter) {
             continue;
         }
-        // The walk starts at the member rather than at `this`, because a call on
-        // the component itself is one of its own methods: `this.sort()` is not an
-        // array mutation, only `this.items.sort()` is. The source rule draws the
-        // line in the same place.
-        let Some(member) = this_expression.syntax().parent() else {
+        let Some(parent) = this_expression.syntax().parent() else {
             continue;
         };
-        let range = match AnyJsAssignment::cast_ref(&member) {
-            Some(assignment) => Some(write_range(&assignment)),
-            None => AnyJsMemberExpression::cast_ref(&member)
-                .and_then(|member| find_mutation(&member.into(), model)),
+        let range = if let Some(assignment) = AnyJsAssignment::cast_ref(&parent) {
+            // `this.count = 1`, `this.count++`.
+            Some(write_range(&assignment))
+        } else if let Some(member) = AnyJsMemberExpression::cast_ref(&parent) {
+            // The walk starts at the member rather than at `this`, because a call
+            // on the component itself is one of its own methods: `this.sort()` is
+            // not an array mutation, only `this.items.sort()` is. The source rule
+            // draws the line in the same place.
+            find_mutation(&member.into(), model)
+        } else {
+            // The component can also be written into whole: `Object.assign(this, ...)`.
+            find_mutation(&this_expression.clone().into(), model)
         };
         if let Some(range) = range {
             side_effects.push(SideEffect {
