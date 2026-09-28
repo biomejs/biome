@@ -5,8 +5,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyTsType, AnyTsVariableAnnotation, JsInitializerClause,
-    JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T, global_identifier,
+    AnyJsCallArgument, AnyJsExpression, AnyTsType, AnyTsVariableAnnotation, JsCallArguments,
+    JsInitializerClause, JsNewOrCallExpression, JsSyntaxKind, JsVariableDeclarator, T,
+    global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_array_literals::UseArrayLiteralsOptions;
@@ -18,6 +19,9 @@ declare_lint_rule! {
     ///
     /// Use of the Array constructor to construct a new array is generally discouraged in favor of array literal notation because of the single-argument pitfall and because the Array global may be redefined.
     /// The exception is when the Array constructor intentionally creates sparse arrays of a specified size by giving the constructor a single numeric argument.
+    ///
+    /// When the arguments include a spread, such as `Array(...args)`, the call is reported but not fixed unless at least two other arguments are given:
+    /// the spread may leave a single numeric argument, and the array literal would not preserve that behavior.
     ///
     /// ## Examples
     ///
@@ -131,6 +135,12 @@ impl Rule for UseArrayLiterals {
         {
             // Ignore useless expression statements.
             // This avoids issues with missing semicolons.
+            return None;
+        }
+        if node
+            .arguments()
+            .is_some_and(|arguments| spread_may_leave_one_argument(&arguments))
+        {
             return None;
         }
         let mut mutation = ctx.root().begin();
@@ -258,6 +268,21 @@ impl Rule for UseArrayLiterals {
             mutation,
         ))
     }
+}
+
+/// Whether a spread among `arguments` may leave the call with a single argument,
+/// which preallocates an array when it is a number, unlike an array literal.
+fn spread_may_leave_one_argument(arguments: &JsCallArguments) -> bool {
+    let mut has_spread = false;
+    let mut others = 0;
+    for argument in arguments.args().iter().flatten() {
+        if matches!(argument, AnyJsCallArgument::JsSpread(_)) {
+            has_spread = true;
+        } else {
+            others += 1;
+        }
+    }
+    has_spread && others < 2
 }
 
 /// If the node's parent is a [JsVariableDeclarator] with no type annotation, return it, otherwise [None]

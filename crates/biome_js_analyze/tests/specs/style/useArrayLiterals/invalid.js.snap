@@ -18,6 +18,14 @@ var xs = new Array(0, 1, 2);
 
 var xs = new Array(...args);
 
+// A spread can leave a single numeric argument, so these are not fixed
+var xs = Array(x, ...args);
+
+var xs = new Array(...a, ...b);
+
+// At least two arguments remain whatever the spread holds
+var xs = Array(x, y, ...args);
+
 var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
 
 var xs = (Array)(
@@ -87,7 +95,7 @@ invalid.js:3:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:5:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:10 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -99,15 +107,6 @@ invalid.js:5:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
     7 │ var xs = new Array;
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
-  
-  i Safe fix: Use an array literal.
-  
-     3  3 │   var xs = Array(0, 1, 2);
-     4  4 │   
-     5    │ - var·xs·=·Array(...args);
-        5 │ + var·xs·=·[...args];
-     6  6 │   
-     7  7 │   var xs = new Array;
   
 
 ```
@@ -191,7 +190,7 @@ invalid.js:11:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:13:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:10 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
@@ -200,147 +199,127 @@ invalid.js:13:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
   > 13 │ var xs = new Array(...args);
        │          ^^^^^^^^^^^^^^^^^^
     14 │ 
-    15 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
+    15 │ // A spread can leave a single numeric argument, so these are not fixed
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+
+```
+
+```
+invalid.js:16:10 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    15 │ // A spread can leave a single numeric argument, so these are not fixed
+  > 16 │ var xs = Array(x, ...args);
+       │          ^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ var xs = new Array(...a, ...b);
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+
+```
+
+```
+invalid.js:18:10 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    16 │ var xs = Array(x, ...args);
+    17 │ 
+  > 18 │ var xs = new Array(...a, ...b);
+       │          ^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ // At least two arguments remain whatever the spread holds
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+
+```
+
+```
+invalid.js:21:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    20 │ // At least two arguments remain whatever the spread holds
+  > 21 │ var xs = Array(x, y, ...args);
+       │          ^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
   i Safe fix: Use an array literal.
   
-    11 11 │   var xs = new Array(0, 1, 2);
-    12 12 │   
-    13    │ - var·xs·=·new·Array(...args);
-       13 │ + var·xs·=·[...args];
-    14 14 │   
-    15 15 │   var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
+    19 19 │   
+    20 20 │   // At least two arguments remain whatever the spread holds
+    21    │ - var·xs·=·Array(x,·y,·...args);
+       21 │ + var·xs·=·[x,·y,·...args];
+    22 22 │   
+    23 23 │   var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
   
 
 ```
 
 ```
-invalid.js:15:17 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:17 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
-    13 │ var xs = new Array(...args);
-    14 │ 
-  > 15 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
+    21 │ var xs = Array(x, y, ...args);
+    22 │ 
+  > 23 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ var xs = (Array)(
+    24 │ 
+    25 │ var xs = (Array)(
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
   i Safe fix: Use an array literal.
   
-    13 13 │   var xs = new Array(...args);
-    14 14 │   
-    15    │ - var·xs·=·/**A*/·new·/**B*/·Array·/**C*/·(·/**D*/·0·/**E*/,·/**F*/·1·/**G*/)·/**H*/;
-       15 │ + var·xs·=·/**A*/·[·/**D*/·0·/**E*/,·/**F*/·1·/**G*/]·/**H*/;
-    16 16 │   
-    17 17 │   var xs = (Array)(
+    21 21 │   var xs = Array(x, y, ...args);
+    22 22 │   
+    23    │ - var·xs·=·/**A*/·new·/**B*/·Array·/**C*/·(·/**D*/·0·/**E*/,·/**F*/·1·/**G*/)·/**H*/;
+       23 │ + var·xs·=·/**A*/·[·/**D*/·0·/**E*/,·/**F*/·1·/**G*/]·/**H*/;
+    24 24 │   
+    25 25 │   var xs = (Array)(
   
 
 ```
 
 ```
-invalid.js:17:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Use an array literal instead of the Array constructor.
   
-    15 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
-    16 │ 
-  > 17 │ var xs = (Array)(
+    23 │ var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
+    24 │ 
+  > 25 │ var xs = (Array)(
        │          ^^^^^^^^
-  > 18 │     /* foo */ a,
-  > 19 │     b = c() // bar
-  > 20 │ );
+  > 26 │     /* foo */ a,
+  > 27 │     b = c() // bar
+  > 28 │ );
        │ ^
-    21 │ 
-    22 │ var xs = Array?.();
-  
-  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
-  
-  i Safe fix: Use an array literal.
-  
-    15 15 │   var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
-    16 16 │   
-    17    │ - var·xs·=·(Array)(
-       17 │ + var·xs·=·[
-    18 18 │       /* foo */ a,
-    19 19 │       b = c() // bar
-    20    │ - );
-       20 │ + ];
-    21 21 │   
-    22 22 │   var xs = Array?.();
-  
-
-```
-
-```
-invalid.js:22:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use an array literal instead of the Array constructor.
-  
-    20 │ );
-    21 │ 
-  > 22 │ var xs = Array?.();
-       │          ^^^^^^^^^
-    23 │ 
-    24 │ // ASI
-  
-  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
-  
-  i Safe fix: Use an array literal.
-  
-    20 20 │   );
-    21 21 │   
-    22    │ - var·xs·=·Array?.();
-       22 │ + var·xs·=·[];
-    23 23 │   
-    24 24 │   // ASI
-  
-
-```
-
-```
-invalid.js:26:1 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use an array literal instead of the Array constructor.
-  
-    24 │ // ASI
-    25 │ foo
-  > 26 │ new Array
-       │ ^^^^^^^^^
-    27 │ 
-    28 │ var xs = globalThis.Array();
-  
-  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
-  
-
-```
-
-```
-invalid.js:28:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Use an array literal instead of the Array constructor.
-  
-    26 │ new Array
-    27 │ 
-  > 28 │ var xs = globalThis.Array();
-       │          ^^^^^^^^^^^^^^^^^^
     29 │ 
-    30 │ var xs = window.Array();
+    30 │ var xs = Array?.();
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
   i Safe fix: Use an array literal.
   
-    26 26 │   new Array
-    27 27 │   
-    28    │ - var·xs·=·globalThis.Array();
-       28 │ + var·xs·=·[];
+    23 23 │   var xs = /**A*/ new /**B*/ Array /**C*/ ( /**D*/ 0 /**E*/, /**F*/ 1 /**G*/) /**H*/;
+    24 24 │   
+    25    │ - var·xs·=·(Array)(
+       25 │ + var·xs·=·[
+    26 26 │       /* foo */ a,
+    27 27 │       b = c() // bar
+    28    │ - );
+       28 │ + ];
     29 29 │   
-    30 30 │   var xs = window.Array();
+    30 30 │   var xs = Array?.();
   
 
 ```
@@ -350,21 +329,90 @@ invalid.js:30:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━�
 
   i Use an array literal instead of the Array constructor.
   
-    28 │ var xs = globalThis.Array();
+    28 │ );
     29 │ 
-  > 30 │ var xs = window.Array();
-       │          ^^^^^^^^^^^^^^
+  > 30 │ var xs = Array?.();
+       │          ^^^^^^^^^
     31 │ 
+    32 │ // ASI
   
   i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
   
   i Safe fix: Use an array literal.
   
-    28 28 │   var xs = globalThis.Array();
+    28 28 │   );
     29 29 │   
-    30    │ - var·xs·=·window.Array();
+    30    │ - var·xs·=·Array?.();
        30 │ + var·xs·=·[];
     31 31 │   
+    32 32 │   // ASI
+  
+
+```
+
+```
+invalid.js:34:1 lint/style/useArrayLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    32 │ // ASI
+    33 │ foo
+  > 34 │ new Array
+       │ ^^^^^^^^^
+    35 │ 
+    36 │ var xs = globalThis.Array();
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+
+```
+
+```
+invalid.js:36:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    34 │ new Array
+    35 │ 
+  > 36 │ var xs = globalThis.Array();
+       │          ^^^^^^^^^^^^^^^^^^
+    37 │ 
+    38 │ var xs = window.Array();
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+    34 34 │   new Array
+    35 35 │   
+    36    │ - var·xs·=·globalThis.Array();
+       36 │ + var·xs·=·[];
+    37 37 │   
+    38 38 │   var xs = window.Array();
+  
+
+```
+
+```
+invalid.js:38:10 lint/style/useArrayLiterals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use an array literal instead of the Array constructor.
+  
+    36 │ var xs = globalThis.Array();
+    37 │ 
+  > 38 │ var xs = window.Array();
+       │          ^^^^^^^^^^^^^^
+    39 │ 
+  
+  i The Array constructor is misleading because it can be used to preallocate an array of a given length or to create an array with a given list of elements.
+  
+  i Safe fix: Use an array literal.
+  
+    36 36 │   var xs = globalThis.Array();
+    37 37 │   
+    38    │ - var·xs·=·window.Array();
+       38 │ + var·xs·=·[];
+    39 39 │   
   
 
 ```
