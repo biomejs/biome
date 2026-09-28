@@ -37,6 +37,15 @@ export default {
     objectAssignIntoNewObject() {
       return Object.assign({}, this.data, { extra: 'value' })
     },
+    mutatorWithoutCall() {
+      // Reading the method does not run it.
+      return this.items.sort
+    },
+    shadowedObjectAssign() {
+      // Not the global `Object`, so this says nothing about `this.data`.
+      const Object = { assign: (target) => target }
+      return Object.assign(this.data, { extra: 'value' })
+    },
     localCollection() {
       const categories = {}
       this.types.forEach((type) => {

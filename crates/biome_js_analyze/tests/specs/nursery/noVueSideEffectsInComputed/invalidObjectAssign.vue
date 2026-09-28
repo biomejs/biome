@@ -7,4 +7,7 @@ const inline = computed(() => Object.assign(state.data, { extra: 'value' }))
 const returned = computed(() => {
   return Object.assign(state.user, state.updates)
 })
+const throughGlobalThis = computed(() =>
+  globalThis.Object.assign(state.settings, { theme: 'dark' }),
+)
 </script>

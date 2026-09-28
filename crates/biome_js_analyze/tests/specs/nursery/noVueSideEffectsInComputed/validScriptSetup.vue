@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { helpers } from './helpers'
 
 const state = useState()
+let moduleCounter = 0
 
 const fullName = computed(() => state.firstName + ' ' + state.lastName)
 const copiedBeforeReorder = computed(() => state.items.slice(0).reverse())
@@ -32,6 +33,18 @@ const objectAssignIntoNewObject = computed(() =>
 )
 const argumentOnly = computed(() => helpers.reorder(state.items))
 const byReference = computed(getFullName)
+// Only the getter is checked; a computed property with a setter writes state on purpose.
+const withSetter = computed({
+  get: () => state.fullName,
+  set: (next) => {
+    state.fullName = next
+    state.history.push(next)
+  },
+})
+// A nested function runs when it is called, which may be never.
+const writeInNestedFunction = computed(() => () => {
+  moduleCounter++
+})
 
 // A call hands the value on, so what comes back is no longer tracked state.
 const callBreaksTheChain = computed(() => state.get().items.reverse())
