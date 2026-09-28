@@ -161,7 +161,7 @@ serde                        = { version = "1.0.229", features = ["derive"] }
 serde_json                   = "1.0.151"
 similar                      = "2.7.0"
 similar-asserts              = "1.7.0"
-smallvec                     = { version = "1.15.2", features = ["const_new", "serde", "union"] }
+smallvec                     = { version = "1.16.2", features = ["const_new", "serde", "union"] }
 static_assertions            = "1.1"
 syn                          = "1.0.109"
 termcolor                    = "1.4.1"
