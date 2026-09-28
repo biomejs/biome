@@ -36,6 +36,7 @@ pub(crate) mod declaration_or_at_rule;
 pub(crate) mod declaration_or_at_rule_block;
 pub(crate) mod declaration_or_rule;
 pub(crate) mod declaration_or_rule_block;
+pub(crate) mod declaration_or_statement_block;
 pub(crate) mod dimension;
 pub(crate) mod document_matcher;
 pub(crate) mod expression;

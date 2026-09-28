@@ -704,6 +704,15 @@ AnyCssDeclarationBlock =
 	CssDeclarationBlock
 	| CssBogusBlock
 
+// Declaration-only CSS bodies that SCSS extends with statements.
+// CSS files produce `CssDeclarationBlock`, SCSS files `CssDeclarationOrAtRuleBlock`.
+// @font-face { @include font-options; font-family: Example; }
+//            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssDeclarationOrStatementBlock =
+	CssDeclarationBlock
+	| CssDeclarationOrAtRuleBlock
+	| CssBogusBlock
+
 CssDeclarationBlock =
 	'{'
 	declarations: CssDeclarationList
@@ -1068,7 +1077,7 @@ CssPropertyAtRule =
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	declarator: CssFontFaceAtRuleDeclarator
-	block: AnyCssDeclarationBlock
+	block: AnyCssDeclarationOrStatementBlock
 
 
 // https://drafts.csswg.org/css-fonts/#font-feature-values
@@ -1448,7 +1457,7 @@ ScssKeyframesVariableDeclaration =
 //                          ^^^^^^^^^^^
 CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	block: AnyCssDeclarationBlock
+	block: AnyCssDeclarationOrStatementBlock
 
 CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 

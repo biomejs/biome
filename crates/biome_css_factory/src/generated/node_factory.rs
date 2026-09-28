@@ -970,7 +970,7 @@ pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaratio
 }
 pub fn css_font_face_at_rule(
     declarator: CssFontFaceAtRuleDeclarator,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrStatementBlock,
 ) -> CssFontFaceAtRule {
     CssFontFaceAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
@@ -1500,7 +1500,7 @@ pub fn css_keyframes_ident_selector(selector_token: SyntaxToken) -> CssKeyframes
 }
 pub fn css_keyframes_item(
     selectors: CssKeyframesSelectorList,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrStatementBlock,
 ) -> CssKeyframesItem {
     CssKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_ITEM,

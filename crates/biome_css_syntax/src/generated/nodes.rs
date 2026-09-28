@@ -2720,7 +2720,7 @@ impl CssFontFaceAtRule {
     pub fn declarator(&self) -> SyntaxResult<CssFontFaceAtRuleDeclarator> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrStatementBlock> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -2735,7 +2735,7 @@ impl Serialize for CssFontFaceAtRule {
 #[derive(Serialize)]
 pub struct CssFontFaceAtRuleFields {
     pub declarator: SyntaxResult<CssFontFaceAtRuleDeclarator>,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrStatementBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFontFaceAtRuleDeclarator {
@@ -4270,7 +4270,7 @@ impl CssKeyframesItem {
     pub fn selectors(&self) -> CssKeyframesSelectorList {
         support::list(&self.syntax, 0usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrStatementBlock> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -4285,7 +4285,7 @@ impl Serialize for CssKeyframesItem {
 #[derive(Serialize)]
 pub struct CssKeyframesItemFields {
     pub selectors: CssKeyframesSelectorList,
-    pub block: SyntaxResult<AnyCssDeclarationBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrStatementBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssKeyframesPercentageSelector {
@@ -15114,6 +15114,32 @@ impl AnyCssDeclarationOrRuleBlock {
     pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
         match &self {
             Self::CssDeclarationOrRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssDeclarationOrStatementBlock {
+    CssBogusBlock(CssBogusBlock),
+    CssDeclarationBlock(CssDeclarationBlock),
+    CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock),
+}
+impl AnyCssDeclarationOrStatementBlock {
+    pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
+        match &self {
+            Self::CssBogusBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_block(&self) -> Option<&CssDeclarationBlock> {
+        match &self {
+            Self::CssDeclarationBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_or_at_rule_block(&self) -> Option<&CssDeclarationOrAtRuleBlock> {
+        match &self {
+            Self::CssDeclarationOrAtRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -38551,6 +38577,82 @@ impl From<AnyCssDeclarationOrRuleBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusBlock> for AnyCssDeclarationOrStatementBlock {
+    fn from(node: CssBogusBlock) -> Self {
+        Self::CssBogusBlock(node)
+    }
+}
+impl From<CssDeclarationBlock> for AnyCssDeclarationOrStatementBlock {
+    fn from(node: CssDeclarationBlock) -> Self {
+        Self::CssDeclarationBlock(node)
+    }
+}
+impl From<CssDeclarationOrAtRuleBlock> for AnyCssDeclarationOrStatementBlock {
+    fn from(node: CssDeclarationOrAtRuleBlock) -> Self {
+        Self::CssDeclarationOrAtRuleBlock(node)
+    }
+}
+impl AstNode for AnyCssDeclarationOrStatementBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationBlock::KIND_SET)
+        .union(CssDeclarationOrAtRuleBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK | CSS_DECLARATION_OR_AT_RULE_BLOCK
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
+            CSS_DECLARATION_BLOCK => Self::CssDeclarationBlock(CssDeclarationBlock { syntax }),
+            CSS_DECLARATION_OR_AT_RULE_BLOCK => {
+                Self::CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusBlock(it) => it.syntax(),
+            Self::CssDeclarationBlock(it) => it.syntax(),
+            Self::CssDeclarationOrAtRuleBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusBlock(it) => it.into_syntax(),
+            Self::CssDeclarationBlock(it) => it.into_syntax(),
+            Self::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssDeclarationOrStatementBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssDeclarationOrStatementBlock> for SyntaxNode {
+    fn from(n: AnyCssDeclarationOrStatementBlock) -> Self {
+        match n {
+            AnyCssDeclarationOrStatementBlock::CssBogusBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrStatementBlock::CssDeclarationBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrStatementBlock::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssDeclarationOrStatementBlock> for SyntaxElement {
+    fn from(n: AnyCssDeclarationOrStatementBlock) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssPercentage> for AnyCssDimension {
     fn from(node: CssPercentage) -> Self {
         Self::CssPercentage(node)
@@ -47737,6 +47839,11 @@ impl std::fmt::Display for AnyCssDeclarationOrRule {
     }
 }
 impl std::fmt::Display for AnyCssDeclarationOrRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssDeclarationOrStatementBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
