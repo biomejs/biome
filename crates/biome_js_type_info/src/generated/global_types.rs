@@ -8803,7 +8803,7 @@ fn global_iterator_object() -> crate::TypeData {
     }))
 }
 fn global_builtin_iterator_return() -> crate::TypeData {
-    crate::TypeData::Reference(crate::globals::GLOBAL_UNKNOWN_ID.into())
+    crate::TypeData::Reference(crate::globals::GLOBAL_UNDEFINED_ID.into())
 }
 fn global_array_iterator() -> crate::TypeData {
     crate::TypeData::Interface(Box::new(crate::Interface {
