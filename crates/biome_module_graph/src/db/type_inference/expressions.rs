@@ -2,8 +2,8 @@ use super::{
     collected_type_result,
     lookup::{
         MemberLookupKey, MemberLookupMode, MemberLookupResolver, apply_substitutions,
-        find_member_key_type_with_resolver, find_member_type_with_resolver,
-        substitutions_for_instance,
+        evaluate_mapped_type_with_resolver, find_member_key_type_with_resolver,
+        find_member_type_with_resolver, substitutions_for_instance,
     },
     normalize_structural_type,
     resolver::ResolutionCtx,
@@ -24,8 +24,9 @@ use biome_js_type_info::{
         InternedClass as InferredClass, InternedConstructor as InferredConstructor,
         InternedFunction as InferredFunction,
         InternedGenericTypeParameter as InferredGenericTypeParameter,
-        InternedLiteral as InferredInternedLiteral, InternedTuple as InferredTuple,
-        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
+        InternedLiteral as InferredInternedLiteral, InternedMappedType as InferredMappedType,
+        InternedTuple as InferredTuple, Literal as InferredLiteral,
+        LocalTypeHandle as InferredLocalTypeHandle,
         NamedFunctionParameter as InferredNamedFunctionParameter, ReturnType as InferredReturnType,
         TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
         TypeMember as InferredTypeMember, TypeofExpression as InferredTypeofExpression,
@@ -96,6 +97,24 @@ impl<'db> MemberLookupResolver<'db> for ResolutionCtx<'db, '_> {
             return InferredTypeData::Unknown;
         };
         self.member_type(ty, is_optional)
+    }
+
+    fn evaluate_mapped_type(
+        &mut self,
+        db: &'db dyn crate::ModuleDb,
+        mapped: InferredMappedType<'db>,
+        substitutions: &[biome_js_type_info::interned_types::TypeSubstitution<'db>],
+    ) -> Option<InferredTypeData<'db>> {
+        let key = (mapped, substitutions.to_vec());
+        if let Some(evaluated) = self.mapped_types.get(&key) {
+            return *evaluated;
+        }
+        let in_progress_reads = self.in_progress_reads.get();
+        let evaluated = evaluate_mapped_type_with_resolver(db, self, mapped, substitutions);
+        if self.in_progress_reads.get() == in_progress_reads {
+            self.mapped_types.insert(key, evaluated);
+        }
+        evaluated
     }
 }
 

@@ -27,9 +27,10 @@ use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
-        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
-        InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+        InternedMappedType as InferredMappedType, InternedModule as InferredModule,
+        InternedNamespace as InferredNamespace, InternedTypeofValue, LocalTypeHandle, LocalTypeId,
+        ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::{Text, TextRange};
@@ -216,6 +217,17 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
     encountered_inference_cycle: Cell<bool>,
     on_demand_declarations: Option<SharedOnDemandDeclarationEvaluator<'db>>,
+    /// Mapped types evaluated during member lookup, keyed by the mapped type
+    /// and the substitutions applied to it. Repeated member reads on the same
+    /// instance reuse the evaluated object.
+    pub(in crate::db::type_inference) mapped_types: FxHashMap<
+        (InferredMappedType<'db>, Vec<InferredTypeSubstitution<'db>>),
+        Option<InferredTypeData<'db>>,
+    >,
+    /// Counts reads of types whose resolution is still in progress. A result
+    /// computed while this count grows may be less precise than a later one,
+    /// so it is not cached.
+    pub(in crate::db::type_inference) in_progress_reads: Cell<usize>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -286,6 +298,8 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             resolution_depth: Cell::new(0),
             encountered_inference_cycle: Cell::new(false),
             on_demand_declarations,
+            mapped_types: FxHashMap::default(),
+            in_progress_reads: Cell::new(0),
         }
     }
 
@@ -736,6 +750,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             // A resolution cycle keeps the reference symbolic: lookups that
             // are aware of in-progress types can still read the raw
             // declaration behind the handle, which `Unknown` would rule out.
+            self.in_progress_reads.set(self.in_progress_reads.get() + 1);
             return self.local_type(type_id);
         }
 

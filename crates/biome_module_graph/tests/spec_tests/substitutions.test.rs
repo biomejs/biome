@@ -573,6 +573,45 @@ fn test_member_lookup_rebinds_same_named_inherited_parameters() {
 }
 
 #[test]
+fn test_infer_module_types_reads_members_of_distinct_mapped_type_instances() {
+    // Module inference reuses mapped types evaluated during member lookup.
+    // Reads on instances with different type arguments must not share results.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Mapped<T> = { [K in keyof T]: T[K] };
+            declare function make<T>(value: T): Mapped<T>;
+            const first = make({ A: 1, B: "b" });
+            const second = make({ A: true });
+            export const firstA = first.A;
+            export const firstB = first.B;
+            export const firstAAgain = first.A;
+            export const secondA = second.A;
+            export const secondB = second.B;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for (name, expected) in [
+        ("firstA", "number: 1"),
+        ("firstB", "string: b"),
+        ("firstAAgain", "number: 1"),
+        ("secondA", "bool: true"),
+        ("secondB", "unknown"),
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
+            .expect("binding type must be inferred");
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+}
+
+#[test]
 fn test_infer_module_types_substitutes_mapped_type_alias_arguments() {
     let fs = MemoryFileSystem::default();
     fs.insert(

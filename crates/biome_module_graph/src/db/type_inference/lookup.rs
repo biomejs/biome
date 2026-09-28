@@ -4,10 +4,10 @@ use crate::db::queries::{
 };
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
-    Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
-    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
-    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
-    TypeTransformResult,
+    InternedMappedType as InferredMappedType, Literal as InferredLiteral, LocalTypeHandle,
+    ReturnType as InferredReturnType, TypeData as InferredTypeData,
+    TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+    TypeSubstitution as InferredTypeSubstitution, TypeTransformResult,
 };
 use rustc_hash::{FxHashSet, FxHasher};
 use std::hash::{Hash, Hasher};
@@ -205,6 +205,57 @@ pub(in crate::db::type_inference) trait MemberLookupResolver<'db> {
         substitutions: &[InferredTypeSubstitution<'db>],
         crossed_instance: bool,
     ) -> InferredTypeData<'db>;
+
+    /// Evaluates a mapped type reached during member lookup into an object.
+    ///
+    /// Resolvers that serve many lookups may cache the result. See
+    /// [`evaluate_mapped_type_with_resolver`].
+    fn evaluate_mapped_type(
+        &mut self,
+        db: &'db dyn ModuleDb,
+        mapped: InferredMappedType<'db>,
+        substitutions: &[InferredTypeSubstitution<'db>],
+    ) -> Option<InferredTypeData<'db>>
+    where
+        Self: Sized,
+    {
+        evaluate_mapped_type_with_resolver(db, self, mapped, substitutions)
+    }
+}
+
+/// Evaluates `mapped` after applying `substitutions` collected from enclosing
+/// instances, and returns the result when it is an object.
+///
+/// The keys are evaluated on their own first. Substituting and normalizing
+/// the property type can cost far more than the keys, and that work is wasted
+/// when the keys cannot be enumerated.
+pub(in crate::db::type_inference) fn evaluate_mapped_type_with_resolver<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    mapped: InferredMappedType<'db>,
+    substitutions: &[InferredTypeSubstitution<'db>],
+) -> Option<InferredTypeData<'db>> {
+    let keys_only = InferredTypeData::MappedType(InferredMappedType::new(
+        db,
+        *mapped.type_parameter(db),
+        mapped.keys(db),
+        InferredTypeData::Unknown,
+        None,
+        None,
+    ));
+    let keys_only = apply_substitutions(db, keys_only, substitutions);
+    if !matches!(
+        normalize_structural_type(db, keys_only, |ty| resolver.resolve_type(db, ty)),
+        Ok(InferredTypeData::Object(_))
+    ) {
+        return None;
+    }
+
+    let mapped = apply_substitutions(db, InferredTypeData::MappedType(mapped), substitutions);
+    match normalize_structural_type(db, mapped, |ty| resolver.resolve_type(db, ty)) {
+        Ok(evaluated @ InferredTypeData::Object(_)) => Some(evaluated),
+        _ => None,
+    }
 }
 
 impl<'db> MemberLookupResolver<'db> for &InferredModuleTypes<'db> {
@@ -420,16 +471,10 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
             continue;
         }
 
-        if let InferredTypeData::MappedType(_) = ty {
-            // The members of a mapped type depend on the type arguments
-            // collected from enclosing instances, so they are substituted
-            // before the mapped type is evaluated. A mapped type that cannot
-            // be evaluated has no members to search.
-            let mapped = apply_substitutions(db, ty, &state.substitutions);
-            let evaluated =
-                normalize_structural_type(db, mapped, |ty| resolver.resolve_type(db, ty))
-                    .unwrap_or(InferredTypeData::Unknown);
-            if matches!(evaluated, InferredTypeData::Object(_)) {
+        if let InferredTypeData::MappedType(mapped) = ty {
+            // A mapped type that cannot be evaluated has no members to search.
+            if let Some(evaluated) = resolver.evaluate_mapped_type(db, mapped, &state.substitutions)
+            {
                 state.ty = evaluated;
                 pending.push(state);
             }
