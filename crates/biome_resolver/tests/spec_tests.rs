@@ -644,6 +644,14 @@ fn test_resolve_type_definitions() {
             "{base_dir}/node_modules/@types/react/index.d.ts"
         )))
     );
+
+    // A deprecated `@types` stub without declarations doesn't shadow the package's own types.
+    assert_eq!(
+        resolve("legacy-pkg", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/legacy-pkg/typings/legacy-pkg.d.ts"
+        )))
+    );
 }
 
 #[test]

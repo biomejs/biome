@@ -740,7 +740,12 @@ fn resolve_dependency(
 
             match resolve_package_path(&package_path, subpath, fs, options) {
                 Ok(path) => return Ok(path),
-                Err(ResolveError::NotFound) => { /* continue */ }
+                // A types package without an entry point, such as a deprecated
+                // stub for a package that ships its own types, doesn't shadow
+                // the package, like in TypeScript.
+                Err(ResolveError::NotFound | ResolveError::DirectoryWithoutDefault) => {
+                    /* continue */
+                }
                 Err(error) => return Err(error),
             }
         }
