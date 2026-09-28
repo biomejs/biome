@@ -5324,7 +5324,7 @@ where
 }
 pub fn css_layer_name_list<I, S>(items: I, separators: S) -> CssLayerNameList
 where
-    I: IntoIterator<Item = CssIdentifier>,
+    I: IntoIterator<Item = AnyCssLayerName>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

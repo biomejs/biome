@@ -9736,7 +9736,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             CSS_LAYER_NAME_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                CssIdentifier::can_cast,
+                AnyCssLayerName::can_cast,
                 T ! [.],
                 false,
             ),
