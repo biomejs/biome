@@ -182,7 +182,7 @@ impl EnvConsole {
         match func(&mut stream.lock()) {
             Ok(()) => {}
             Err(error) if error.kind() == io::ErrorKind::BrokenPipe => *closed = true,
-            Err(error) => panic!("failed to write to the console: {error}"),
+            Err(error) => panic!("Failed to write to the console: {error}"),
         }
     }
 }
