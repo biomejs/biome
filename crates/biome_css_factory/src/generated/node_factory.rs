@@ -2031,7 +2031,7 @@ pub fn css_property_at_rule(
 }
 pub fn css_property_at_rule_declarator(
     property_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
 ) -> CssPropertyAtRuleDeclarator {
     CssPropertyAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PROPERTY_AT_RULE_DECLARATOR,
