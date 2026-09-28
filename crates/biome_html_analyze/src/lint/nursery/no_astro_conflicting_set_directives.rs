@@ -135,7 +135,11 @@ impl Rule for NoAstroConflictingSetDirectives {
     }
 
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
-        Some(ctx.query().range())
+        ctx.query()
+            .syntax()
+            .ancestors()
+            .find_map(AnyHtmlTagElement::cast)
+            .map(|element| element.range())
     }
 
     fn suppressed_nodes(

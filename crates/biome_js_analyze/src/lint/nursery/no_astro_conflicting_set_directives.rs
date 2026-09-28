@@ -131,9 +131,9 @@ impl Rule for NoAstroConflictingSetDirectives {
     fn text_range(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<TextRange> {
         ctx.query()
             .syntax()
-            .parent()
-            .and_then(JsxAttribute::cast)
-            .map(|attribute| attribute.range())
+            .ancestors()
+            .find_map(AnyJsxElement::cast)
+            .map(|element| element.range())
     }
 
     fn suppressed_nodes(
