@@ -1827,7 +1827,15 @@ CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
 
 // @layer framework, bar.baz;
 //                   ^^^^^^^
-CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
+CssLayerNameList = (AnyCssLayerName ('.' AnyCssLayerName)*)
+
+// @layer framework, bar.baz;
+//                   ^^^
+// @layer #{$layers};
+//        ^^^^^^^^^
+AnyCssLayerName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
 
 // https://drafts.csswg.org/css-conditional-3/#at-supports
 // https://drafts.csswg.org/css-conditional-4/#at-supports-ext

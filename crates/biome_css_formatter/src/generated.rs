@@ -14838,6 +14838,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssLayer {
         FormatOwnedWithRule::new(self, crate::css::any::layer::FormatAnyCssLayer::default())
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssLayerName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssLayerName,
+        crate::css::any::layer_name::FormatAnyCssLayerName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::layer_name::FormatAnyCssLayerName::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssLayerName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssLayerName,
+        crate::css::any::layer_name::FormatAnyCssLayerName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::layer_name::FormatAnyCssLayerName::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssMediaAndCombinableCondition {
     type Format<'a> = FormatRefWithRule<
         'a,

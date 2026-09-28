@@ -15872,6 +15872,25 @@ impl AnyCssLayer {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssLayerName {
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssLayerName {
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssMediaAndCombinableCondition {
     AnyCssMediaConditionOperand(AnyCssMediaConditionOperand),
     CssMediaAndCondition(CssMediaAndCondition),
@@ -40784,6 +40803,68 @@ impl From<AnyCssLayer> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssIdentifier> for AnyCssLayerName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssLayerName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssLayerName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssLayerName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssLayerName> for SyntaxNode {
+    fn from(n: AnyCssLayerName) -> Self {
+        match n {
+            AnyCssLayerName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssLayerName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssLayerName> for SyntaxElement {
+    fn from(n: AnyCssLayerName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssMediaAndCondition> for AnyCssMediaAndCombinableCondition {
     fn from(node: CssMediaAndCondition) -> Self {
         Self::CssMediaAndCondition(node)
@@ -47810,6 +47891,11 @@ impl std::fmt::Display for AnyCssLayer {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssLayerName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssMediaAndCombinableCondition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -53421,7 +53507,7 @@ impl Serialize for CssLayerNameList {
 }
 impl AstSeparatedList for CssLayerNameList {
     type Language = Language;
-    type Node = CssIdentifier;
+    type Node = AnyCssLayerName;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -53436,15 +53522,15 @@ impl Debug for CssLayerNameList {
     }
 }
 impl IntoIterator for CssLayerNameList {
-    type Item = SyntaxResult<CssIdentifier>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    type Item = SyntaxResult<AnyCssLayerName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssLayerName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for &CssLayerNameList {
-    type Item = SyntaxResult<CssIdentifier>;
-    type IntoIter = AstSeparatedListNodesIterator<Language, CssIdentifier>;
+    type Item = SyntaxResult<AnyCssLayerName>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssLayerName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
