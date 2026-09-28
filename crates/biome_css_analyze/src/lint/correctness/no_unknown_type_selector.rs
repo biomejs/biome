@@ -9,7 +9,8 @@ use biome_rule_options::no_unknown_type_selector::NoUnknownTypeSelectorOptions;
 
 use crate::utils::is_known_type_selector;
 
-const VIEW_TRANSITION_PSEUDO_ELEMENTS: [&str; 4] = [
+const VIEW_TRANSITION_PSEUDO_ELEMENTS: [&str; 5] = [
+    "view-transition",
     "view-transition-group",
     "view-transition-image-pair",
     "view-transition-old",
