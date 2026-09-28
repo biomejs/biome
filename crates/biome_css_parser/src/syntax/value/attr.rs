@@ -5,16 +5,18 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, prelude::ParsedSyntax, token_set};
+use biome_parser::{Parser, SyntaxFeature, prelude::ParsedSyntax, token_set};
 
 use crate::parser::CssParser;
-use crate::syntax::is_at_identifier;
-use crate::syntax::parse_error::{expected_component_value, expected_identifier};
-use crate::syntax::parse_regular_identifier;
+use crate::syntax::parse_error::{
+    expected_component_value, expected_identifier, scss_only_syntax_error,
+};
 use crate::syntax::property::parse_generic_component_value;
+use crate::syntax::scss::parse_scss_interpolated_attribute_name;
 use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
+use crate::syntax::{CssSyntaxFeatures, is_at_identifier};
 
 #[inline]
 pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
@@ -210,7 +212,7 @@ impl ParseSeparatedList for AttrNameList {
     const LIST_KIND: Self::Kind = CSS_ATTR_NAME_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_regular_identifier(p)
+        parse_attr_name(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -232,4 +234,29 @@ impl ParseSeparatedList for AttrNameList {
     fn allow_empty(&self) -> bool {
         false
     }
+}
+
+/// Parses a plain or SCSS-interpolated attribute name.
+///
+/// ```scss
+/// .a::after {
+///   content: attr(#{$name});
+///   content: attr(data-#{$name});
+/// }
+/// ```
+#[inline]
+fn parse_attr_name(p: &mut CssParser) -> ParsedSyntax {
+    let Present(name) = parse_scss_interpolated_attribute_name(p) else {
+        return Absent;
+    };
+
+    if name.kind(p) != SCSS_INTERPOLATED_IDENTIFIER {
+        return Present(name);
+    }
+
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+        p,
+        |_| Present(name),
+        |p, marker| scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p)),
+    )
 }

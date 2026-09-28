@@ -10,6 +10,7 @@ impl FormatRule<AnyCssAttrName> for FormatAnyCssAttrName {
         match node {
             AnyCssAttrName::CssBogusAttrName(node) => node.format().fmt(f),
             AnyCssAttrName::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssAttrName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
         }
     }
 }
