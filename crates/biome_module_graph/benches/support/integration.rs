@@ -93,6 +93,101 @@ pub const EFFECT_ARKTYPE_FILES: &[(&str, &str)] = &[
 
 pub const EFFECT_ARKTYPE_CASES: &[&str] = &["/schema.ts", "/program.ts"];
 
+pub const KYSELY_TS_PATTERN_FILES: &[(&str, &str)] = &[
+    (
+        "/vendor/kysely.d.ts",
+        include_str!("../fixtures/kysely_ts_pattern/vendor/kysely.d.ts"),
+    ),
+    (
+        "/vendor/ts-pattern.d.ts",
+        include_str!("../fixtures/kysely_ts_pattern/vendor/ts-pattern.d.ts"),
+    ),
+    (
+        "/schema.ts",
+        include_str!("../fixtures/kysely_ts_pattern/schema.ts"),
+    ),
+    (
+        "/queries.ts",
+        include_str!("../fixtures/kysely_ts_pattern/queries.ts"),
+    ),
+    (
+        "/reports.ts",
+        include_str!("../fixtures/kysely_ts_pattern/reports.ts"),
+    ),
+];
+
+pub const KYSELY_TS_PATTERN_CASES: &[&str] = &["/queries.ts", "/reports.ts"];
+
+pub const HONO_VALIBOT_FILES: &[(&str, &str)] = &[
+    (
+        "/vendor/valibot.d.ts",
+        include_str!("../fixtures/hono_valibot/vendor/valibot.d.ts"),
+    ),
+    (
+        "/vendor/hono.d.ts",
+        include_str!("../fixtures/hono_valibot/vendor/hono.d.ts"),
+    ),
+    (
+        "/schema.ts",
+        include_str!("../fixtures/hono_valibot/schema.ts"),
+    ),
+    (
+        "/context.ts",
+        include_str!("../fixtures/hono_valibot/context.ts"),
+    ),
+    (
+        "/server.ts",
+        include_str!("../fixtures/hono_valibot/server.ts"),
+    ),
+    (
+        "/client.ts",
+        include_str!("../fixtures/hono_valibot/client.ts"),
+    ),
+];
+
+pub const HONO_VALIBOT_CASES: &[&str] = &["/server.ts", "/client.ts"];
+
+pub const TRPC_ZOD_QUERY_FILES: &[(&str, &str)] = &[
+    (
+        "/vendor/zod.d.ts",
+        include_str!("../fixtures/trpc_zod_query/vendor/zod.d.ts"),
+    ),
+    (
+        "/vendor/tanstack-query.d.ts",
+        include_str!("../fixtures/trpc_zod_query/vendor/tanstack-query.d.ts"),
+    ),
+    (
+        "/vendor/trpc-server.d.ts",
+        include_str!("../fixtures/trpc_zod_query/vendor/trpc-server.d.ts"),
+    ),
+    (
+        "/vendor/trpc-client.d.ts",
+        include_str!("../fixtures/trpc_zod_query/vendor/trpc-client.d.ts"),
+    ),
+    (
+        "/vendor/trpc-tanstack-react-query.d.ts",
+        include_str!("../fixtures/trpc_zod_query/vendor/trpc-tanstack-react-query.d.ts"),
+    ),
+    (
+        "/schema.ts",
+        include_str!("../fixtures/trpc_zod_query/schema.ts"),
+    ),
+    (
+        "/trpc.ts",
+        include_str!("../fixtures/trpc_zod_query/trpc.ts"),
+    ),
+    (
+        "/router.ts",
+        include_str!("../fixtures/trpc_zod_query/router.ts"),
+    ),
+    (
+        "/client.ts",
+        include_str!("../fixtures/trpc_zod_query/client.ts"),
+    ),
+];
+
+pub const TRPC_ZOD_QUERY_CASES: &[&str] = &["/router.ts", "/client.ts"];
+
 pub fn build_db(files: &[(&str, &str)], entry: &str) -> (WorkspaceDb, ModuleInfo) {
     let fs = MemoryFileSystem::default();
     for (path, source) in files {

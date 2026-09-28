@@ -77,6 +77,36 @@ fn bench_effect_arktype_cold_module(bencher: Bencher, case: &str) {
         });
 }
 
+#[divan::bench(args = integration::KYSELY_TS_PATTERN_CASES)]
+fn bench_kysely_ts_pattern_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::KYSELY_TS_PATTERN_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::HONO_VALIBOT_CASES)]
+fn bench_hono_valibot_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::HONO_VALIBOT_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::TRPC_ZOD_QUERY_CASES)]
+fn bench_trpc_zod_query_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::TRPC_ZOD_QUERY_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
 #[cfg(target_os = "windows")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
