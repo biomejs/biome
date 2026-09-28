@@ -39,12 +39,31 @@ pub struct TypeSubstitution<'db> {
 }
 
 impl<'db> TypeSubstitution<'db> {
-    /// Returns the generic whose declarations shadow this substitution.
+    /// Returns the generic whose redeclaration shadows this substitution.
     ///
-    /// An empty generic instantiation is reduced to its generic. An indexed
-    /// access such as `T[K]` is shadowed by declarations of its index `K`, so
-    /// a mapped type replacing `T[K]` does not reach into a nested mapped type
-    /// that declares its own `K`.
+    /// A substitution replaces references to a pattern, such as `T` or
+    /// `T[K]`. Inside a nested declaration that declares the same generic
+    /// again, the references belong to the nested generic, so the substitution
+    /// must not apply there. The returned generic is the one to look for in
+    /// those declarations:
+    ///
+    /// - For `T`, or an instance of `T` without type arguments, it is `T`.
+    /// - For an indexed access `T[K]`, it is the index `K`.
+    ///
+    /// In this example, evaluating `Outer` replaces `Source[K]` with the type
+    /// of each property of `Source`. The nested mapped type declares its own
+    /// `K`, so its `Source[K]` refers to the inner `K`. That access is left
+    /// for the nested mapped type to evaluate:
+    ///
+    /// ```ts
+    /// type Source = { a: number; b: string };
+    /// type Outer = {
+    ///     [K in keyof Source]: {
+    ///         value: Source[K];
+    ///         nested: { [K in keyof Source]: Source[K] };
+    ///     };
+    /// };
+    /// ```
     fn binder_generic(self, db: &'db dyn TypeDb) -> TypeData<'db> {
         let generic = match self.generic {
             TypeData::IndexedAccess(access) => access.index(db),
@@ -419,6 +438,12 @@ where
             && value.ty(db) == TypeData::Unknown
         {
             TypeTransformAction::Replace(ty)
+        } else if let TypeData::IndexedAccess(access) = ty
+            && access.index(db).is_never_supported_index()
+        {
+            // The access normalizes to unknown in `leave` whatever its object
+            // is, so the object, which can be large, is not normalized.
+            TypeTransformAction::Replace(TypeData::Unknown)
         } else {
             TypeTransformAction::Descend(ty)
         }

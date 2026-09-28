@@ -612,6 +612,36 @@ fn test_infer_module_types_reads_members_of_distinct_mapped_type_instances() {
 }
 
 #[test]
+fn test_infer_module_types_skips_mapped_types_with_literal_indexed_keys() {
+    // Indexing with a literal is not evaluated, so these mapped types have no
+    // members to find, whatever their type arguments are.
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type ByElement<T> = { [K in T[0]]: number };
+            type ByColumns<T> = { [K in keyof T["columns"]]: number };
+            declare function byElement<T>(value: T): ByElement<T>;
+            declare function byColumns<T>(value: T): ByColumns<T>;
+            export const element = byElement(["A"] as const).A;
+            export const column = byColumns({ columns: { A: 1 } }).A;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    for name in ["element", "column"] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, name)
+            .expect("binding type must be inferred");
+        assert_eq!(format_inferred_type(&db, ty), "unknown", "{name}");
+    }
+}
+
+#[test]
 fn test_infer_module_types_substitutes_mapped_type_alias_arguments() {
     let fs = MemoryFileSystem::default();
     fs.insert(

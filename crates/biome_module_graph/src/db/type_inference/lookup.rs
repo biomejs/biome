@@ -228,13 +228,18 @@ pub(in crate::db::type_inference) trait MemberLookupResolver<'db> {
 ///
 /// The keys are evaluated on their own first. Substituting and normalizing
 /// the property type can cost far more than the keys, and that work is wasted
-/// when the keys cannot be enumerated.
+/// when the keys cannot be enumerated. Keys that can never be enumerated are
+/// rejected before any substitution, because substituting large type
+/// arguments is itself costly.
 pub(in crate::db::type_inference) fn evaluate_mapped_type_with_resolver<'db>(
     db: &'db dyn ModuleDb,
     resolver: &mut impl MemberLookupResolver<'db>,
     mapped: InferredMappedType<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> Option<InferredTypeData<'db>> {
+    if mapped.keys(db).are_never_enumerable(db) {
+        return None;
+    }
     let keys_only = InferredTypeData::MappedType(InferredMappedType::new(
         db,
         *mapped.type_parameter(db),

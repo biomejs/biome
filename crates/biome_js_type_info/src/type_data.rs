@@ -1593,19 +1593,35 @@ pub struct MappedType {
 
 /// The keys iterated by a [`MappedType`].
 ///
-/// The operand of `keyof` is stored instead of the operator so evaluation can
-/// read the property modifiers of the iterated type.
+/// For `{ [K in keyof T]: ... }`, [`Self::Keyof`] stores `T`, not the keys of
+/// `T`. Evaluation computes the keys from the members of `T` and also needs
+/// those members for two other reasons:
+///
+/// - `T[K]` evaluates to the type of the member named by each key.
+/// - A property is optional when the member of `T` is optional.
+///
+/// In this example, `Copy` evaluates to `{ a: number; b?: string | undefined }`.
+/// The keys `"a" | "b"` alone wouldn't tell evaluation that `b` is optional or
+/// what type `Source[K]` has for each key:
+///
+/// ```ts
+/// type Source = { a: number; b?: string };
+/// type Copy = { [K in keyof Source]: Source[K] };
+/// ```
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum MappedTypeKeys {
-    /// The keys of another type: `{ [K in keyof T]: ... }`.
+    /// The keys of `T` in `{ [K in keyof T]: ... }`. Stores `T`.
     Keyof(TypeReference),
 
-    /// Any other type: `{ [K in "a" | "b"]: ... }`.
+    /// Any other key type, as in `{ [K in "a" | "b"]: ... }`. Stores the key
+    /// type itself.
     Type(TypeReference),
 }
 
 impl MappedTypeKeys {
-    pub fn ty(&self) -> &TypeReference {
+    /// Returns the stored type: the operand `T` for `keyof T`, or the key type
+    /// itself otherwise.
+    pub fn operand(&self) -> &TypeReference {
         match self {
             Self::Keyof(ty) | Self::Type(ty) => ty,
         }

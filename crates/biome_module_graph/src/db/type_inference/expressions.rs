@@ -1908,13 +1908,30 @@ impl<'db> ResolutionCtx<'db, '_> {
         Some(self.member_type(ty, member.is_optional()))
     }
 
+    /// Looks up a member, reusing the result of an identical earlier lookup.
+    ///
+    /// A result is cached only when computing it read no type whose resolution
+    /// was still in progress and encountered no inference cycle, since either
+    /// can make it less precise than the same lookup performed later.
     fn find_member_type_on_resolved_type(
         &mut self,
         ty: InferredTypeData<'db>,
         member_name: &str,
         mode: MemberLookupMode,
     ) -> Option<InferredTypeData<'db>> {
-        find_member_type_with_resolver(self.db, self, ty, member_name, mode)
+        let key = (ty, Text::from(member_name.to_owned()), mode);
+        if let Some(member_ty) = self.member_lookups.get(&key) {
+            return *member_ty;
+        }
+        let in_progress_reads = self.in_progress_reads.get();
+        let encountered_inference_cycle = self.encountered_inference_cycle();
+        let member_ty = find_member_type_with_resolver(self.db, self, ty, member_name, mode);
+        if self.in_progress_reads.get() == in_progress_reads
+            && self.encountered_inference_cycle() == encountered_inference_cycle
+        {
+            self.member_lookups.insert(key, member_ty);
+        }
+        member_ty
     }
 
     /// Builds the simplified `Promise` method type used by call inference.
