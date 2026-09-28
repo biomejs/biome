@@ -32,6 +32,9 @@ export default {
     deepMutatingMethod() {
       return this.items.keys.sort()
     },
+    computedMethodName() {
+      return this.items['reverse']()
+    },
   },
 }
 </script>
