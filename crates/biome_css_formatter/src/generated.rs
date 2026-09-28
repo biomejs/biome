@@ -14149,6 +14149,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationOrRuleB
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationOrStatementBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssDeclarationOrStatementBlock,
+        crate::css::any::declaration_or_statement_block::FormatAnyCssDeclarationOrStatementBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: any :: declaration_or_statement_block :: FormatAnyCssDeclarationOrStatementBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssDeclarationOrStatementBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssDeclarationOrStatementBlock,
+        crate::css::any::declaration_or_statement_block::FormatAnyCssDeclarationOrStatementBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: any :: declaration_or_statement_block :: FormatAnyCssDeclarationOrStatementBlock :: default ())
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssDimension {
     type Format<'a> = FormatRefWithRule<
         'a,

@@ -4,7 +4,7 @@ use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
     expected_percentage_after_timeline_range_name,
 };
-use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
+use crate::syntax::block::{ParseBlockBody, parse_declaration_or_statement_block};
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
@@ -294,7 +294,7 @@ fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
         p.error(expected_keyframes_item_selector(p, p.cur_range()))
     }
 
-    parse_declaration_block(p);
+    parse_declaration_or_statement_block(p);
 
     Present(m.complete(p, CSS_KEYFRAMES_ITEM))
 }

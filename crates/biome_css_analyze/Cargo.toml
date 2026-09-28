@@ -47,6 +47,7 @@ serde                    = { workspace = true, features = ["derive"] }
 biome_css_parser    = { path = "../biome_css_parser" }
 biome_css_syntax    = { path = "../biome_css_syntax", features = ["scss"] }
 biome_fs            = { path = "../biome_fs" }
+biome_languages     = { path = "../biome_languages", features = ["scss"] }
 biome_plugin_loader = { path = "../biome_plugin_loader" }
 
 # Keep this entry in its own Tombi formatting group because CodSpeed requires single-line dependencies.
