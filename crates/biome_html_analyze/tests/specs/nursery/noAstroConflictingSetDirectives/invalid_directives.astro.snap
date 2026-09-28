@@ -40,6 +40,8 @@ invalid_directives.astro:3:6 lint/nursery/noAstroConflictingSetDirectives ━━
     4 │ <div set:text={text} set:html={html}></div>
     5 │ 
   
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -65,6 +67,8 @@ invalid_directives.astro:4:6 lint/nursery/noAstroConflictingSetDirectives ━━
       │                      ^^^^^^^^^^^^^^^
     5 │ 
     6 │ <div set:html={first} set:html={second}></div>
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
   
   i Choose only one content source for this element.
   
@@ -94,6 +98,8 @@ invalid_directives.astro:6:6 lint/nursery/noAstroConflictingSetDirectives ━━
     7 │ <div set:text={first} set:text={second}></div>
     8 │ 
   
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -119,6 +125,8 @@ invalid_directives.astro:7:6 lint/nursery/noAstroConflictingSetDirectives ━━
       │                       ^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ <Component set:html="html" set:text="text" />
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
   
   i Choose only one content source for this element.
   
@@ -148,6 +156,8 @@ invalid_directives.astro:9:12 lint/nursery/noAstroConflictingSetDirectives ━�
     10 │ 
     11 │ <div set:html={a} set:text={b} set:html={c}></div>
   
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -174,6 +184,8 @@ invalid_directives.astro:11:6 lint/nursery/noAstroConflictingSetDirectives ━�
        │                                ^^^^^^^^^^^^
     12 │ 
   
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
   i Choose only one content source for this element.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -199,6 +211,8 @@ invalid_directives.astro:11:6 lint/nursery/noAstroConflictingSetDirectives ━�
   > 11 │ <div set:html={a} set:text={b} set:html={c}></div>
        │                   ^^^^^^^^^^^^
     12 │ 
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
   
   i Choose only one content source for this element.
   

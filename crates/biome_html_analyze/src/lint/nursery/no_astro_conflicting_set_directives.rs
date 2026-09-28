@@ -177,9 +177,15 @@ impl Rule for NoAstroConflictingSetDirectives {
             ),
         };
 
-        Some(diagnostic.note(markup! {
-            "Choose only one content source for this element."
-        }))
+        Some(
+            diagnostic
+                .note(markup! {
+                    "The "<Emphasis>"set:html"</Emphasis>" and "<Emphasis>"set:text"</Emphasis>" directives replace child content, so conflicting content sources may be ignored."
+                })
+                .note(markup! {
+                    "Choose only one content source for this element."
+                }),
+        )
     }
 }
 
