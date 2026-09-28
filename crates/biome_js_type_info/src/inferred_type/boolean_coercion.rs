@@ -223,6 +223,10 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
                 context.push(crate::global_types(self.db).get(id));
                 0
             }
+            TypeData::GlobalLocal(local) => {
+                context.push(local.expand(self.db));
+                0
+            }
             TypeData::TypeofType(ty) => {
                 context.push(ty.ty(self.db));
                 0
