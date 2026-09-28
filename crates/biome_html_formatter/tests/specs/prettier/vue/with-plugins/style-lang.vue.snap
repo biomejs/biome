@@ -15,30 +15,17 @@ world!
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -1,5 +1,6 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,6 +1,5 @@
  <style lang="uppercase-rocks">
--/* SHOULD BE UPPERCASED */
--HELLO,
--WORLD!
-+/* Should be uppercased */
-+hello,
-+world 
-+!
- </style>
-```
+ 
+-
+ /* Should be uppercased */
+ hello,
+ world!
 
-# Output
-
-```vue
-<style lang="uppercase-rocks">
-/* Should be uppercased */
-hello,
-world 
-!
-</style>
 ```
