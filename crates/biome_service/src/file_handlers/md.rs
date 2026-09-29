@@ -11,6 +11,8 @@ use super::{
 };
 #[cfg(not(feature = "md_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
+#[cfg(feature = "md_embeds")]
+use super::{ParsedOrigin, ParsedSnippetOrigin};
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
@@ -35,6 +37,8 @@ use biome_markdown_analyze::analyze;
 use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
+#[cfg(feature = "md_embeds")]
+use biome_markdown_syntax::MdFencedCodeBlock;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
 use biome_rowan::{AstNode, NodeCache};
@@ -402,6 +406,26 @@ impl ExtensionHandler for MarkdownFileHandler {
 #[cfg(not(feature = "md_embeds"))]
 fn parse_embedded_nodes(_params: ParseEmbeddedParams) -> ParseEmbedResult {
     ParseEmbedResult::default()
+}
+
+/// Identifies snippets extracted from fenced code blocks. Code blocks are
+/// usually examples or partial code, so they're formatted but not analyzed.
+#[cfg(feature = "md_embeds")]
+pub(crate) fn is_fenced_code_block(
+    host: &ParsedOrigin,
+    source: DocumentFileSource,
+    snippet: &ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    if source.to_markdown_file_source().is_none() {
+        return false;
+    }
+    let element_range = snippet.element_range(db);
+    host.syntax::<MarkdownLanguage>(db)
+        .covering_element(element_range)
+        .ancestors()
+        .filter_map(MdFencedCodeBlock::cast)
+        .any(|code_block| code_block.range() == element_range)
 }
 
 fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {

@@ -375,8 +375,9 @@ pub(crate) enum SnippetsIterator<'a> {
 }
 
 impl<'a> SnippetsIterator<'a> {
-    /// Excludes host-owned template comments from guest analysis. The unfiltered
-    /// iterator remains available for formatting and host suppression extraction.
+    /// Excludes host-owned template comments and Markdown fenced code blocks from
+    /// guest analysis. The unfiltered iterator remains available for formatting
+    /// and host suppression extraction.
     pub(crate) fn for_analysis(
         self,
         host: &'a ParsedOrigin,
@@ -384,15 +385,16 @@ impl<'a> SnippetsIterator<'a> {
         db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
         self.filter(move |snippet| {
+            let _ = (host, source, snippet, db);
             #[cfg(feature = "html_embeds")]
-            {
-                !html::is_astro_template_comment(host, source, snippet, db)
+            if html::is_astro_template_comment(host, source, snippet, db) {
+                return false;
             }
-            #[cfg(not(feature = "html_embeds"))]
-            {
-                let _ = (host, source, snippet, db);
-                true
+            #[cfg(feature = "md_embeds")]
+            if md::is_fenced_code_block(host, source, snippet, db) {
+                return false;
             }
+            true
         })
     }
 }

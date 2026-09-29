@@ -382,7 +382,7 @@ function () {}
 }
 
 #[test]
-fn lint_markdown_embedded_code_blocks() {
+fn lint_markdown_skips_embedded_code_blocks() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
@@ -401,6 +401,12 @@ a {
   color: blue;
 }
 ```
+
+```html
+<img src="code-block.png">
+```
+
+<img src="html-block.png">
 "#
         .as_bytes(),
     );
@@ -415,7 +421,7 @@ a {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "lint_markdown_embedded_code_blocks",
+        "lint_markdown_skips_embedded_code_blocks",
         fs,
         console,
         result,
