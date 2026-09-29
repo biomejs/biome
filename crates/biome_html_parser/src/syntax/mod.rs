@@ -135,6 +135,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     ElementList {
         vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
         in_math: false,
+        at_root: true,
     }
     .parse_list(p);
 
@@ -480,6 +481,7 @@ fn parse_element_allowing_sfc_blocks(
                 ElementList {
                     vue_sfc_top_level: false,
                     in_math: in_math || is_astro_math,
+                    at_root: false,
                 }
                 .parse_list(p);
                 let Some(ClosingTag {
@@ -529,6 +531,7 @@ fn parse_astro_fragment(
     ElementList {
         vue_sfc_top_level: false,
         in_math,
+        at_root: false,
     }
     .parse_list(p);
 
@@ -577,6 +580,25 @@ fn parse_closing_tag(p: &mut HtmlParser) -> Option<ClosingTag> {
         marker: closing,
         name,
     })
+}
+
+/// Parses a closing tag at the top level of the document, where there is no
+/// element for it to close, as a bogus element.
+fn parse_stray_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
+    let Some(ClosingTag {
+        marker: mut closing,
+        ..
+    }) = parse_closing_tag(p)
+    else {
+        return Absent;
+    };
+
+    // `parse_closing_tag` already reports void closing tags such as `</br>`.
+    if !is_void_closing_tag(p, &closing) {
+        p.error(unexpected_closing_tag(p, closing.range(p)));
+    }
+    closing.change_to_bogus(p);
+    Present(closing)
 }
 
 fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
@@ -672,6 +694,11 @@ struct ElementList {
     vue_sfc_top_level: bool,
     /// Whether this list sits inside an Astro `<math>`, where a `{` is text.
     in_math: bool,
+    /// Whether this is the list of the document root. It has no parent to be
+    /// closed, so it runs to the end of the file, and whatever it can't parse
+    /// becomes bogus. Otherwise the tree sink would put the rest of the source
+    /// into the EOF token, which the formatter drops.
+    at_root: bool,
 }
 
 impl ParseNodeList for ElementList {
@@ -680,11 +707,14 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if self.at_root && p.at(T![<]) && p.nth_at(1, T![/]) {
+            return parse_stray_closing_tag(p);
+        }
         parse_html_element(p, self.vue_sfc_top_level, self.in_math)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(EOF) || p.at(T![<]) && p.nth_at(1, T![/])
+        p.at(EOF) || !self.at_root && p.at(T![<]) && p.nth_at(1, T![/])
     }
 
     fn recover(
@@ -692,11 +722,20 @@ impl ParseNodeList for ElementList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
+        let recovered = parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(HTML_BOGUS_ELEMENT, token_set![T![<], T![>]]),
             expected_child,
-        )
+        );
+        if recovered.is_err() && self.at_root && !p.at(EOF) {
+            // Recovery stops at a token it can't skip, which would end the
+            // list. The root must reach the end of the file, so take the token
+            // as bogus and keep going. The diagnostic has already been added.
+            let m = p.start();
+            p.bump_any();
+            return Ok(m.complete(p, HTML_BOGUS_ELEMENT));
+        }
+        recovered
     }
 }
 
