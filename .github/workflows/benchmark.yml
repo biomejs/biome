@@ -50,6 +50,7 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 2
 
       - name: Detect benchmark changes
@@ -255,7 +256,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.js == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench JS / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -268,6 +269,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install toolchain
@@ -299,13 +301,14 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.service == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Service
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install toolchain
@@ -337,13 +340,14 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.plugins == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Plugins
     runs-on: depot-ubuntu-24.04-arm-16
     steps:
       - name: Checkout PR Branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install toolchain
@@ -375,7 +379,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.console == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Console
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -389,7 +393,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.json == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench JSON / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -405,7 +409,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.yaml == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench YAML
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -420,7 +424,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.css == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench CSS / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -436,7 +440,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.html == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench HTML / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -452,7 +456,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.graphql == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench GraphQL / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -467,7 +471,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.markdown == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Markdown / ${{ matrix.package }}
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -480,6 +484,7 @@ jobs:
       - name: Checkout PR Branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install toolchain
@@ -511,7 +516,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.grit == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench GritQL
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -525,7 +530,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.tailwind == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Tailwind
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -539,7 +544,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.configuration == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Configuration
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -553,7 +558,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.manifests == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Manifests
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
@@ -567,7 +572,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'merge_group' || needs.changes.outputs.module_graph == 'true'
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     name: Bench Module Graph
     runs-on: depot-ubuntu-24.04-arm-16
     strategy:
