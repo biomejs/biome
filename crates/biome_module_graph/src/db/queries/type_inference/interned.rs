@@ -7,7 +7,7 @@
 use crate::ModuleInfo;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
-    TypeData as InferredTypeData,
+    TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
 };
 use biome_rowan::TextRange;
 
@@ -84,6 +84,15 @@ pub struct CallExpressionTypeInput<'db> {
 pub(crate) struct CallableFunctionInput<'db> {
     #[returns(copy)]
     pub ty: InferredTypeData<'db>,
+}
+
+/// Interned input for [`super::substitute_types`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct TypeSubstitutionInput<'db> {
+    #[returns(copy)]
+    pub ty: InferredTypeData<'db>,
+    pub substitutions: Box<[InferredTypeSubstitution<'db>]>,
 }
 
 /// Interned input for call and constructor argument-type inference.
