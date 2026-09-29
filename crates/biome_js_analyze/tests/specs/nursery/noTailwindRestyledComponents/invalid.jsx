@@ -13,3 +13,4 @@
 <Button className="[font-size:14px] hover:[border-radius:0]" />;
 <Button className="[&>span]:bg-[url('a:b')]" />;
 <Button className="café rounded-none" />;
+<Card title={<Badge className="rounded-none" />} />;

@@ -19,6 +19,7 @@ expression: invalid.jsx
 <Button className="[font-size:14px] hover:[border-radius:0]" />;
 <Button className="[&>span]:bg-[url('a:b')]" />;
 <Button className="café rounded-none" />;
+<Card title={<Badge className="rounded-none" />} />;
 
 ```
 
@@ -446,7 +447,7 @@ invalid.jsx:14:20 lint/nursery/noTailwindRestyledComponents ━━━━━━�
   > 14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
        │                    ^^^^^^^^^^^^^^^^^^^^^^^^
     15 │ <Button className="café rounded-none" />;
-    16 │ 
+    16 │ <Card title={<Badge className="rounded-none" />} />;
   
   i The design system should manage the component's appearance.
   
@@ -468,7 +469,30 @@ invalid.jsx:15:25 lint/nursery/noTailwindRestyledComponents ━━━━━━�
     14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
   > 15 │ <Button className="café rounded-none" />;
        │                         ^^^^^^^^^^^^
-    16 │ 
+    16 │ <Card title={<Badge className="rounded-none" />} />;
+    17 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:32 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    14 │ <Button className="[&>span]:bg-[url('a:b')]" />;
+    15 │ <Button className="café rounded-none" />;
+  > 16 │ <Card title={<Badge className="rounded-none" />} />;
+       │                                ^^^^^^^^^^^^
+    17 │ 
   
   i The design system should manage the component's appearance.
   

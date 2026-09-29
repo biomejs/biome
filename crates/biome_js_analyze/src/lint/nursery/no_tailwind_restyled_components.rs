@@ -9,23 +9,30 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
 use biome_tailwind_logic::no_tailwind_restyled_components::restyled_component_ranges;
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use smallvec::SmallVec;
 
 declare_lint_rule! {
-    /// Disallow Tailwind utilities that restyle components at their call sites.
+    /// Disallow Tailwind utilities that override the appearance of components.
     ///
     /// A design system should own its components' appearance. Use component props
     /// for supported visual variants instead of overriding them with utility classes.
     ///
-    /// This rule reports color, typography, spacing, shape, effects, and motion
-    /// utilities on components. Variants,
-    /// important modifiers, and arbitrary values in these families are also checked.
-    /// Explicit arbitrary CSS properties for these styles are checked as well.
-    /// No categories are allowed by default. Layout utilities without a category,
-    /// such as sizing, positioning, and margins, are ignored. Native elements are not checked.
+    /// The rule reports utilities in these categories:
     ///
-    /// Components include capitalized names, member names such as `UI.Button`, and
-    /// custom elements with hyphenated names. The rule checks `class` and `className`,
+    /// - `color`, such as `bg-red-500` and `text-white`
+    /// - `typography`, such as `text-sm` and `font-bold`
+    /// - `spacing`, such as `p-4` and `gap-2`
+    /// - `shape`, such as `rounded-none` and `border-2`
+    /// - `effects`, such as `shadow` and `opacity-50`
+    /// - `motion`, such as `transition` and `animate-spin`
+    ///
+    /// Variants, important modifiers, and arbitrary values don't change the category, so
+    /// `hover:bg-red-500`, `rounded-none!`, and `p-[3px]` are reported too. Arbitrary
+    /// properties that set these styles, such as `[font-size:14px]`, are also reported.
+    /// Other utilities, such as sizing, positioning, and margins, are ignored.
+    ///
+    /// Components are elements with capitalized names such as `Button`, member names
+    /// such as `UI.Button`, and custom elements with hyphenated names such as `my-button`.
+    /// Native elements are not checked. The rule checks `class` and `className`,
     /// including literal branches of conditionals and common class helper calls.
     ///
     /// ## Examples
@@ -87,11 +94,15 @@ impl Rule for NoTailwindRestyledComponents {
     type Options = NoTailwindRestyledComponentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if ctx.query().tailwind_has_errors() {
+            return vec![];
+        }
         let attribute = ctx
             .query()
             .node()
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(JsxAttribute::cast);
         let element = attribute.and_then(|attribute| {
             if !matches!(
@@ -112,10 +123,7 @@ impl Rule for NoTailwindRestyledComponents {
         if !element.is_custom_component() && !element.is_custom_element() {
             return vec![];
         }
-        if ctx.query().tailwind_has_errors() {
-            return vec![];
-        }
-        let allowances: SmallVec<[_; 2]> = ctx
+        let allowances: Vec<_> = ctx
             .options()
             .allow()
             .iter()
