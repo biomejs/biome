@@ -10,3 +10,32 @@ Literal: something <!-- commenmt -->
 PI: <?xml version="1.0"?> here.
 
 CDATA: <![CDATA[text]]> here.
+
+> before <!--
+> hidden
+> --> after
+
+> > before <!--
+> > hidden
+> > --> after
+
+before <!--
+> hidden
+> --> after
+
+> before <!--
+> # heading
+> -->
+
+> before <!--
+>
+> --> after
+
+> before <!--  
+> # heading
+> -->
+
+- item
+  - before <!--
+    # heading
+    -->

@@ -2155,10 +2155,10 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         }
         TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
         p.re_lex(JsReLexContext::BinaryOperator);
-        p.expect(T![>]);
+        let closed = p.expect(T![>]);
         let arguments = m.complete(p, TS_TYPE_ARGUMENTS);
 
-        if p.last() == Some(T![>]) && can_follow_type_arguments_in_expr(p, context) {
+        if closed && can_follow_type_arguments_in_expr(p, context) {
             Ok(Present(arguments))
         } else {
             Err(())

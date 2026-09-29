@@ -1,0 +1,31 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: parse_errors.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div class="hover:"></div>
+
+```
+
+# Diagnostics
+```
+parse_errors.html:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a candidate but instead found 'hover:'.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="hover:"></div>
+      │             ^^^^^^
+    3 │ 
+  
+  i Expected a candidate here.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="hover:"></div>
+      │             ^^^^^^
+    3 │ 
+  
+
+```

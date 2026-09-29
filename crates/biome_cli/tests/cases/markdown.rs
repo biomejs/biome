@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = "#   Heading\n\n\n##   Section";
@@ -417,7 +417,7 @@ a {
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

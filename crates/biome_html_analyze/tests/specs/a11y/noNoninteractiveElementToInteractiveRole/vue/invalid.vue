@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <h1 role="checkbox"></h1>
 <h1 role="radio"></h1>
 <h1 role="button"></h1>
@@ -81,3 +82,4 @@
 <h1 :role="'button'"></h1>
 <main v-bind:role="'button'" />
 <ol :role="'menuitem'" />
+</template>

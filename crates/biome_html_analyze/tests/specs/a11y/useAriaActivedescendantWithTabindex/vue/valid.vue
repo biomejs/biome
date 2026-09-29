@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div aria-activedescendant="some-id" tabindex="0"></div>
 <div aria-activedescendant="some-id" tabindex="-1"></div>
 <div aria-activedescendant="some-id" v-bind:tabindex="tabindexValue"></div>
@@ -10,3 +11,4 @@
 <a href="#" aria-activedescendant="some-id"></a>
 <div></div>
 <div tabindex="0"></div>
+</template>

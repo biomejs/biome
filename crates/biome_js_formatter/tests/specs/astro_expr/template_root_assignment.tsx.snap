@@ -1,0 +1,18 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro_expr/template_root_assignment.tsx
+---
+
+# Input
+
+```tsx
+result=(value=1)+2
+
+```
+
+
+# Formatted
+
+```tsx
+result = (value = 1) + 2
+```

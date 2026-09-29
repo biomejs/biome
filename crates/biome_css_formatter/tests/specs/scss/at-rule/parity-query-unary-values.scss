@@ -1,0 +1,24 @@
+@use 'tokens';@use 'sass:math';$gap :16px;
+@function half($v){@return math.div($v,2)}
+@media(min-width:-$gap+ 800px){.negative{display:block}}
+@media( min-width : +$gap + 800px ){.positive{display : block}}
+@media(min-width:(-$gap+ 800px)),(min-width:(+$gap+ 800px)){.grouped{display:block}}
+@media (min-width:-$gap *2+ 800px){.precedence{display:block}}
+@media(min-width:-($gap + 4px)*2+ 800px){.unary-group{display:block}}
+@media(min-width:((-($gap + 4px)*2)+ 800px)){.nested{display:block}}
+@media(min-width:$gap),(min-width:(tokens.$tablet)),(min-width:tokens.$tablet + 1em){.variables{display:block}}
+@media(min-width:+tokens.$gap + 800px),(min-width:-(tokens.$gap)+ 800px){.module-unary{display:block}}
+@media(min-width:- tokens.$gap + 800px){.module-space{display:block}}
+@media(min-width:- tokens.$gap#{""}){.interpolated-module-space{display:block}}
+@media(min-width:-
+tokens.$gap+ 800px){.module-newline{display:block}}
+@media(min-width:-
+math.div(16px,2)+ 800px){.module-function-newline{display:block}}
+@media(min-width:-
+half(16px)+ 800px){.function-newline{display:block}}
+@media(min-width:-/*call*/math.div(16px,2)+ 800px){.module-function-comment{display:block}}
+@media (width>=-$gap + 800px)and (width<=+$gap + 800px){.ranges{display:block}}
+@container (min-width: +#{$gap}){.container-positive{display:block}}
+@container (max-width: -#{1}px){.container-negative{display:block}}
+.shared-query-tests{color:if(media(width >= +#{$gap}):red;else:blue);background:if(media((width >= -#{1}px)):red;else:blue)}
+.after{color:blue}

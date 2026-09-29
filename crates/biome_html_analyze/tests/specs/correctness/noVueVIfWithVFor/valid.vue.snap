@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 
 <ul v-if="complete">
   <TodoItem
@@ -17,5 +18,6 @@ expression: valid.vue
   v-for="todo in shownTodos"
   :todo="todo"
 />
+</template>
 
 ```

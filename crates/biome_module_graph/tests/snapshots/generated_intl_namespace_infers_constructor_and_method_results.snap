@@ -1,0 +1,426 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const compared = new Intl.Collator("en").compare("a", "b");
+export const calledCompare = Intl.Collator().compare("a", "b");
+export const numeric = Intl.Collator().resolvedOptions().numeric;
+export const numberText = new Intl.NumberFormat("en").format(42);
+export const calledNumberText = Intl.NumberFormat().format(42);
+export const dateText = new Intl.DateTimeFormat("en").format(0);
+export const calledDateText = Intl.DateTimeFormat().format(new Date());
+export const calendar = Intl.DateTimeFormat().resolvedOptions().calendar;
+export const locales = Intl.NumberFormat.supportedLocalesOf(["en"]);
+export const prototypeText = Intl.NumberFormat.prototype.format(42);
+const Format = Intl.NumberFormat;
+export const aliasedText = new Format().format(42);
+export const localeMethod = new Date().toLocaleString;
+```
+
+## Inferred types
+
+```
+Binding compared "compared" => number
+
+Expression "new Intl.Collator(\"en\")" => instanceof Intl.Collator
+
+Expression "new Intl.Collator(\"en\").compare" => sync Function "compare" {
+  accepts: {
+    params: [
+      required x: string
+      required y: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "new Intl.Collator(\"en\").compare(\"a\", \"b\")" => number
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.Collator" => Intl.Collator
+
+Expression "\"en\"" => string: en
+
+Expression "\"a\"" => string: a
+
+Expression "\"b\"" => string: b
+
+Binding calledCompare "calledCompare" => number
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.Collator" => Intl.Collator
+
+Expression "Intl.Collator()" => instanceof Intl.Collator
+
+Expression "Intl.Collator().compare" => sync Function "compare" {
+  accepts: {
+    params: [
+      required x: string
+      required y: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Intl.Collator().compare(\"a\", \"b\")" => number
+
+Expression "\"a\"" => string: a
+
+Expression "\"b\"" => string: b
+
+Binding numeric "numeric" => boolean
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.Collator" => Intl.Collator
+
+Expression "Intl.Collator()" => instanceof Intl.Collator
+
+Expression "Intl.Collator().resolvedOptions" => sync Function "resolvedOptions" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Intl.ResolvedCollatorOptions
+}
+
+Expression "Intl.Collator().resolvedOptions()" => instanceof Intl.ResolvedCollatorOptions
+
+Expression "Intl.Collator().resolvedOptions().numeric" => boolean
+
+Binding numberText "numberText" => string
+
+Expression "new Intl.NumberFormat(\"en\")" => instanceof Intl.NumberFormat
+
+Expression "new Intl.NumberFormat(\"en\").format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Intl.NumberFormat(\"en\").format(42)" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.NumberFormat" => Intl.NumberFormat
+
+Expression "\"en\"" => string: en
+
+Expression "42" => number: 42
+
+Binding calledNumberText "calledNumberText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.NumberFormat" => Intl.NumberFormat
+
+Expression "Intl.NumberFormat()" => instanceof Intl.NumberFormat
+
+Expression "Intl.NumberFormat().format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.NumberFormat().format(42)" => string
+
+Expression "42" => number: 42
+
+Binding dateText "dateText" => string
+
+Expression "new Intl.DateTimeFormat(\"en\")" => instanceof Intl.DateTimeFormat
+
+Expression "new Intl.DateTimeFormat(\"en\").format" => sync Function "format" {
+  accepts: {
+    params: [
+      optional date: instanceof Date | number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Intl.DateTimeFormat(\"en\").format(0)" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => Intl.DateTimeFormat
+
+Expression "\"en\"" => string: en
+
+Expression "0" => number: 0
+
+Binding calledDateText "calledDateText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => Intl.DateTimeFormat
+
+Expression "Intl.DateTimeFormat()" => instanceof Intl.DateTimeFormat
+
+Expression "Intl.DateTimeFormat().format" => sync Function "format" {
+  accepts: {
+    params: [
+      optional date: instanceof Date | number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.DateTimeFormat().format(new Date())" => string
+
+Expression "new Date()" => instanceof Date
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding calendar "calendar" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.DateTimeFormat" => Intl.DateTimeFormat
+
+Expression "Intl.DateTimeFormat()" => instanceof Intl.DateTimeFormat
+
+Expression "Intl.DateTimeFormat().resolvedOptions" => sync Function "resolvedOptions" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Intl.ResolvedDateTimeFormatOptions
+}
+
+Expression "Intl.DateTimeFormat().resolvedOptions()" => instanceof Intl.ResolvedDateTimeFormatOptions
+
+Expression "Intl.DateTimeFormat().resolvedOptions().calendar" => string
+
+Binding locales "locales" => instanceof Array<string>
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.NumberFormat" => Intl.NumberFormat
+
+Expression "Intl.NumberFormat.supportedLocalesOf" => sync Function "supportedLocalesOf" {
+  accepts: {
+    params: [
+      required locales: string | instanceof Array<string>
+      optional options: instanceof Intl.NumberFormatOptions
+    ]
+    type_args: []
+  }
+  returns: instanceof Array<string>
+}
+
+Expression "Intl.NumberFormat.supportedLocalesOf([\"en\"])" => instanceof Array<string>
+
+Expression "[\"en\"]" => [string: en]
+
+Expression "\"en\"" => string: en
+
+Binding prototypeText "prototypeText" => string
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.NumberFormat" => Intl.NumberFormat
+
+Expression "Intl.NumberFormat.prototype" => instanceof Intl.NumberFormat
+
+Expression "Intl.NumberFormat.prototype.format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "Intl.NumberFormat.prototype.format(42)" => string
+
+Expression "42" => number: 42
+
+Binding Format "Format" => Intl.NumberFormat
+
+Expression "Intl" => Object {
+  prototype: No prototype
+  members: [
+    "Collator": Intl.Collator,
+    "NumberFormat": Intl.NumberFormat,
+    "DateTimeFormat": Intl.DateTimeFormat
+  ]
+}
+
+Expression "Intl.NumberFormat" => Intl.NumberFormat
+
+Binding aliasedText "aliasedText" => string
+
+Expression "new Format()" => instanceof Intl.NumberFormat
+
+Expression "new Format().format" => sync Function "format" {
+  accepts: {
+    params: [
+      required value: number
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Expression "new Format().format(42)" => string
+
+Expression "Format" => Intl.NumberFormat
+
+Expression "42" => number: 42
+
+Binding localeMethod "localeMethod" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: [
+            optional locales: string | instanceof Array<string>
+            optional options: instanceof Intl.DateTimeFormatOptions
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "new Date()" => instanceof Date
+
+Expression "new Date().toLocaleString" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "toLocaleString" {
+        accepts: {
+          params: [
+            optional locales: string | instanceof Array<string>
+            optional options: instanceof Intl.DateTimeFormatOptions
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+```

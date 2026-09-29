@@ -1254,6 +1254,7 @@ pub const KNOWN_PROPERTIES: &[&str] = &[
     "footnote-display",
     "footnote-policy",
     "forced-color-adjust",
+    "frame-sizing",
     "gap",
     "glyph-orientation-vertical",
     "grid",

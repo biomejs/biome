@@ -167,7 +167,7 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                         };
                         declarations.insert(
                             name.token_text_trimmed(),
-                            (id_binding.syntax().text_trimmed_range(), decl),
+                            (binding.range(), decl),
                         );
                     }
                 }
@@ -204,11 +204,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
                     redeclarations.push(Redeclaration {
                         name,
                         declaration: *first_text_range,
-                        redeclaration: id_binding.syntax().text_trimmed_range(),
+                        redeclaration: binding.range(),
                     })
                 }
             } else {
-                declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                declarations.insert(name, (binding.range(), decl));
             }
         }
     }

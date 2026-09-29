@@ -1,0 +1,120 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRecursiveArrowFunctions.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+export function f() {
+    let h = () => h();
+    const recursive = () => recursive();
+    const parenthesized = () => (parenthesized());
+    const asynchronous = async () => await asynchronous();
+}
+
+```
+
+# Diagnostics
+```
+invalidRecursiveArrowFunctions.js:4:9 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This variable h is unused.
+  
+    3 │ export function f() {
+  > 4 │     let h = () => h();
+      │         ^
+    5 │     const recursive = () => recursive();
+    6 │     const parenthesized = () => (parenthesized());
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend h with an underscore.
+  
+    2 2 │   
+    3 3 │   export function f() {
+    4   │ - ····let·h·=·()·=>·h();
+      4 │ + ····let·_h·=·()·=>·_h();
+    5 5 │       const recursive = () => recursive();
+    6 6 │       const parenthesized = () => (parenthesized());
+  
+
+```
+
+```
+invalidRecursiveArrowFunctions.js:5:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This variable recursive is unused.
+  
+    3 │ export function f() {
+    4 │     let h = () => h();
+  > 5 │     const recursive = () => recursive();
+      │           ^^^^^^^^^
+    6 │     const parenthesized = () => (parenthesized());
+    7 │     const asynchronous = async () => await asynchronous();
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend recursive with an underscore.
+  
+    3 3 │   export function f() {
+    4 4 │       let h = () => h();
+    5   │ - ····const·recursive·=·()·=>·recursive();
+      5 │ + ····const·_recursive·=·()·=>·_recursive();
+    6 6 │       const parenthesized = () => (parenthesized());
+    7 7 │       const asynchronous = async () => await asynchronous();
+  
+
+```
+
+```
+invalidRecursiveArrowFunctions.js:6:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This variable parenthesized is unused.
+  
+    4 │     let h = () => h();
+    5 │     const recursive = () => recursive();
+  > 6 │     const parenthesized = () => (parenthesized());
+      │           ^^^^^^^^^^^^^
+    7 │     const asynchronous = async () => await asynchronous();
+    8 │ }
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend parenthesized with an underscore.
+  
+    4 4 │       let h = () => h();
+    5 5 │       const recursive = () => recursive();
+    6   │ - ····const·parenthesized·=·()·=>·(parenthesized());
+      6 │ + ····const·_parenthesized·=·()·=>·(_parenthesized());
+    7 7 │       const asynchronous = async () => await asynchronous();
+    8 8 │   }
+  
+
+```
+
+```
+invalidRecursiveArrowFunctions.js:7:11 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This variable asynchronous is unused.
+  
+    5 │     const recursive = () => recursive();
+    6 │     const parenthesized = () => (parenthesized());
+  > 7 │     const asynchronous = async () => await asynchronous();
+      │           ^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend asynchronous with an underscore.
+  
+    5 5 │       const recursive = () => recursive();
+    6 6 │       const parenthesized = () => (parenthesized());
+    7   │ - ····const·asynchronous·=·async·()·=>·await·asynchronous();
+      7 │ + ····const·_asynchronous·=·async·()·=>·await·_asynchronous();
+    8 8 │   }
+    9 9 │   
+  
+
+```

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --reporter=json-pretty 'src\app\main.ts'
+```
+
 ## `src\app\main.ts`
 
 ```ts

@@ -239,7 +239,8 @@ impl ParseNodeList for PageAtRuleItemList {
                 }
 
                 parse_declaration_with_semicolon(p)
-            } else if let Present(declaration) = parse_exclusive_scss_nested_property_declaration(p)
+            } else if let Present(declaration) =
+                parse_exclusive_scss_nested_property_declaration(p, CSS_BOGUS)
             {
                 Present(declaration)
             } else {

@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div role="checkbox"></div>
 <div role="radio"></div>
 <div role="heading"></div>
@@ -47,3 +48,4 @@
 <div :role="'button'"></div>
 <div v-bind:role="'checkbox'"></div>
 <div :role="'heading'"></div>
+</template>

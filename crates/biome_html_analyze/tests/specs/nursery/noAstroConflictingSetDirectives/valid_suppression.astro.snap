@@ -1,0 +1,43 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid_suppression.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div
+    set:html={html}
+    set:text={text}
+></div>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<Component
+    set:html={html}
+    set:text={text}
+/>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div
+    set:html={html}
+>child content</div>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div
+    set:text={text}
+><span>child content</span></div>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div set:html={html} set:text={text}></div>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<Component set:html={html} set:text={text} />
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div set:html={html}>child content</div>
+
+<!-- biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content -->
+<div set:text={text}><span>child content</span></div>
+
+```

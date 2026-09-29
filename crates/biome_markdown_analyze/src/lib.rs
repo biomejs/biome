@@ -73,7 +73,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        Box::new(MarkdownSuppression),
+        Box::new(MarkdownSuppression::new(root)),
         Box::new(MarkdownSuppressionAction),
         &mut emit_signal,
     );

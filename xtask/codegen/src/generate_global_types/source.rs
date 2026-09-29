@@ -69,6 +69,7 @@ const REFERENCE_NO_DEFAULT_LIB_ATTRIBUTE: &str = "no-default-lib";
 /// tests can pass scenario-specific lists.
 pub const PROFILE_ROOTS: &[&str] = &[
     "lib.es5.d.ts",
+    "lib.es2015.core.d.ts",
     "lib.es2015.collection.d.ts",
     "lib.es2015.iterable.d.ts",
     "lib.es2015.promise.d.ts",

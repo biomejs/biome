@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: unresolvedValid.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+import { missing } from "./missing";
+if (missing) {}
+if (notDeclared) {}
+function unresolved(value: MissingType | undefined) {
+    if (value) {}
+}
+
+```

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_plugin_loader"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Functionality for loading plugins and caching them in memory"
@@ -10,6 +10,11 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 publish              = true
+
+[[bench]]
+harness           = false
+name              = "plugins"
+required-features = ["js_plugin"]
 
 [dependencies]
 biome_analyze            = { workspace = true }
@@ -37,6 +42,7 @@ camino                   = { workspace = true }
 grit-pattern-matcher     = { workspace = true }
 grit-util                = { workspace = true }
 papaya                   = { workspace = true }
+parking_lot              = { workspace = true, optional = true }
 rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true }
@@ -47,8 +53,15 @@ biome_js_formatter = { path = "../biome_js_formatter" }
 biome_js_parser    = { path = "../biome_js_parser" }
 biome_js_semantic  = { path = "../biome_js_semantic" }
 biome_languages    = { path = "../biome_languages", features = ["lang_js"] }
+divan              = { package = "codspeed-divan-compat", version = "=5.0.1" }
 insta              = { workspace = true }
 serde_json         = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [target."cfg(unix)".dependencies]
 libc = { workspace = true, optional = true }
@@ -58,7 +71,7 @@ windows = { workspace = true, features = ["Win32_System_Threading"], optional = 
 
 [features]
 default   = []
-js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:windows"]
+js_plugin = ["dep:biome_js_runtime", "dep:boa_engine", "dep:libc", "dep:parking_lot", "dep:windows"]
 schema    = ["biome_glob/schema", "biome_manifest/schema", "dep:schemars"]
 
 [lints]

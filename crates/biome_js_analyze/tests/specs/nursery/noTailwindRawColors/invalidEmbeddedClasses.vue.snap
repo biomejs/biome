@@ -1,0 +1,487 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidEmbeddedClasses.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+  <div v-bind:class="{ 'border-slate-950': active }" />
+  <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+  <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+  <div :class="{ ['border-slate-950']: active }" />
+  <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+  <div :class="classes || 'bg-pink-500'" />
+  <div :class="classes ?? 'hover:text-red-500/80'" />
+  <div :class="(ignored, 'bg-pink-500')" />
+  <div :class="'bg-pink-500 ' + extra" />
+  <div :class="[...['bg-pink-500']]" />
+  <div :class="{...{'hover:text-red-500/80': active}}" />
+  <div :class="cached = 'bg-pink-500'" />
+  <div :class="cached += ' bg-pink-500'" />
+  <div :class="cached ??= 'bg-pink-500'" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalidEmbeddedClasses.vue:3:18 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+      │                  ^^^^^^^^^^^
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:3:51 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+      │                                                   ^^^^^^^^^^^^^^^
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:4:25 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    2 │ <template>
+    3 │   <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+  > 4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+      │                         ^^^^^^^^^^^^^^^^
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+    6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:5:26 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │   <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+  > 5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+      │                          ^^^^^^^^^^^
+    6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+    7 │   <div :class="{ ['border-slate-950']: active }" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:5:48 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    3 │   <div :class="['bg-pink-500', selected && 'hover:text-red-500/80']" />
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+  > 5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+      │                                                ^^^^^^^^^^^^^^^
+    6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+    7 │   <div :class="{ ['border-slate-950']: active }" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:6:18 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+  > 6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+      │                  ^^^^^^^^^^^
+    7 │   <div :class="{ ['border-slate-950']: active }" />
+    8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:6:50 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    4 │   <div v-bind:class="{ 'border-slate-950': active }" />
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+  > 6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+      │                                                  ^^^^^^^^^^^^^^^
+    7 │   <div :class="{ ['border-slate-950']: active }" />
+    8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:7:20 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    5 │   <div :class="active ? `bg-pink-500` : 'hover:text-red-500/80'" />
+    6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+  > 7 │   <div :class="{ ['border-slate-950']: active }" />
+      │                    ^^^^^^^^^^^^^^^^
+    8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+    9 │   <div :class="classes || 'bg-pink-500'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:8:17 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+     7 │   <div :class="{ ['border-slate-950']: active }" />
+   > 8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+       │                 ^^^^^^^^^^^
+     9 │   <div :class="classes || 'bg-pink-500'" />
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:8:47 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+     7 │   <div :class="{ ['border-slate-950']: active }" />
+   > 8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+       │                                               ^^^^^^^^^^^^^^^
+     9 │   <div :class="classes || 'bg-pink-500'" />
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:8:67 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │   <div :class="['bg-pink-500', [active && 'hover:text-red-500/80']]" />
+     7 │   <div :class="{ ['border-slate-950']: active }" />
+   > 8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+       │                                                                   ^^^^^^^^^^^^^^^^
+     9 │   <div :class="classes || 'bg-pink-500'" />
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:9:28 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     7 │   <div :class="{ ['border-slate-950']: active }" />
+     8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+   > 9 │   <div :class="classes || 'bg-pink-500'" />
+       │                            ^^^^^^^^^^^
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+    11 │   <div :class="(ignored, 'bg-pink-500')" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:10:34 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     8 │   <div :class="`bg-pink-500 ${active ? 'hover:text-red-500/80' : 'border-slate-950'}`" />
+     9 │   <div :class="classes || 'bg-pink-500'" />
+  > 10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+       │                                  ^^^^^^^^^^^^^^^
+    11 │   <div :class="(ignored, 'bg-pink-500')" />
+    12 │   <div :class="'bg-pink-500 ' + extra" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:11:27 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     9 │   <div :class="classes || 'bg-pink-500'" />
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+  > 11 │   <div :class="(ignored, 'bg-pink-500')" />
+       │                           ^^^^^^^^^^^
+    12 │   <div :class="'bg-pink-500 ' + extra" />
+    13 │   <div :class="[...['bg-pink-500']]" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:12:17 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    10 │   <div :class="classes ?? 'hover:text-red-500/80'" />
+    11 │   <div :class="(ignored, 'bg-pink-500')" />
+  > 12 │   <div :class="'bg-pink-500 ' + extra" />
+       │                 ^^^^^^^^^^^
+    13 │   <div :class="[...['bg-pink-500']]" />
+    14 │   <div :class="{...{'hover:text-red-500/80': active}}" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:13:22 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    11 │   <div :class="(ignored, 'bg-pink-500')" />
+    12 │   <div :class="'bg-pink-500 ' + extra" />
+  > 13 │   <div :class="[...['bg-pink-500']]" />
+       │                      ^^^^^^^^^^^
+    14 │   <div :class="{...{'hover:text-red-500/80': active}}" />
+    15 │   <div :class="cached = 'bg-pink-500'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:14:28 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    12 │   <div :class="'bg-pink-500 ' + extra" />
+    13 │   <div :class="[...['bg-pink-500']]" />
+  > 14 │   <div :class="{...{'hover:text-red-500/80': active}}" />
+       │                            ^^^^^^^^^^^^^^^
+    15 │   <div :class="cached = 'bg-pink-500'" />
+    16 │   <div :class="cached += ' bg-pink-500'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:15:26 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    13 │   <div :class="[...['bg-pink-500']]" />
+    14 │   <div :class="{...{'hover:text-red-500/80': active}}" />
+  > 15 │   <div :class="cached = 'bg-pink-500'" />
+       │                          ^^^^^^^^^^^
+    16 │   <div :class="cached += ' bg-pink-500'" />
+    17 │   <div :class="cached ??= 'bg-pink-500'" />
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:16:28 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    14 │   <div :class="{...{'hover:text-red-500/80': active}}" />
+    15 │   <div :class="cached = 'bg-pink-500'" />
+  > 16 │   <div :class="cached += ' bg-pink-500'" />
+       │                            ^^^^^^^^^^^
+    17 │   <div :class="cached ??= 'bg-pink-500'" />
+    18 │ </template>
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidEmbeddedClasses.vue:17:28 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    15 │   <div :class="cached = 'bg-pink-500'" />
+    16 │   <div :class="cached += ' bg-pink-500'" />
+  > 17 │   <div :class="cached ??= 'bg-pink-500'" />
+       │                            ^^^^^^^^^^^
+    18 │ </template>
+    19 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

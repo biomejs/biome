@@ -13,7 +13,7 @@ fn assert_format(options: HtmlFormatOptions, source: &str, expected: &str) {
     let parse = parse_html(source, options.file_source().into());
     assert!(!parse.has_errors(), "source failed to parse: {source:?}");
 
-    let formatted = format_node(options, &parse.syntax(), false).unwrap();
+    let formatted = format_node(options, &parse.syntax(), Vec::new()).unwrap();
     let output = formatted.print().unwrap().as_code().to_string();
 
     assert_eq!(output, expected, "for source {source:?}");

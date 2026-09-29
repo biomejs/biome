@@ -1,0 +1,5 @@
+@container sidebar-#{$name} {}
+
+@container #{$name} (width > 400px) and {}
+
+@container #{$name} (width > 400px) {}

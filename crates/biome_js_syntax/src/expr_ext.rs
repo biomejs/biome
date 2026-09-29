@@ -1160,9 +1160,17 @@ impl AnyJsExpression {
         let second = members.next();
 
         // Jasmine / Angular focused test patterns (f prepended)
+        let is_direct_call = self
+            .clone()
+            .omit_parentheses()
+            .as_js_identifier_expression()
+            .is_some();
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite") && second.is_none() {
+            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite")
+                && second.is_none()
+                && is_direct_call
+            {
                 return Ok(true);
             }
         }
@@ -2721,6 +2729,8 @@ mod test {
             "describe('name', () => {});",
             "it('name', () => {});",
             "foo.fit()",
+            "builder.image('url').fit('max');",
+            "builder.image('url').auto('format').quality(90).fit('max');",
         ];
         for valid_case in VALID {
             let call_expression = extract_call_expression(valid_case);

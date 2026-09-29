@@ -36,7 +36,9 @@ use biome_formatter::{
 };
 use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::{JsonAnalyzeServices, analyze};
+use biome_json_analyze::{
+    JsonAnalyzeServices, analyze, analyze_snippet,
+};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
@@ -127,11 +129,8 @@ impl From<JsonAssistConfiguration> for JsonAssistSettings {
 
 #[salsa::interned]
 struct JsonFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -148,11 +147,8 @@ fn resolved_json_format_options<'db>(
 
 #[salsa::interned]
 struct JsonAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -627,6 +623,13 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<biome_analyze::EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ = debug_span!("Linting JSON file", path =? params.path, language =? params.language)
         .entered();
     let Some(file_source) = params
@@ -667,20 +670,31 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
     let services = JsonAnalyzeServices {
         file_source,
         configuration_provider: params.settings.configuration_provider(),
         project_layout: Some(params.project_layout.clone()),
     };
-    let (_, analyze_diagnostics) = analyze(
-        &root,
-        filter,
-        &analyzer_options,
-        services,
-        &params.plugins,
-        |signal| process_lint.process_signal(signal),
-    );
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(
+            &root,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            inspector,
+            |signal| process_lint.process_signal(signal),
+        ),
+        None => analyze(
+            &root,
+            filter,
+            &analyzer_options,
+            services,
+            &params.plugins,
+            |signal| process_lint.process_signal(signal),
+        ),
+    };
 
     let mut diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for

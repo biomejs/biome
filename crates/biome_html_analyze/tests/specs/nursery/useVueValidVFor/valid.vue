@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div v-for="item in items"></div>
 
 <div v-for="({ id }, index) in items" :key="id"></div>
@@ -25,4 +26,5 @@
 
 <template v-for="item in items">
   <div></div>
+</template>
 </template>

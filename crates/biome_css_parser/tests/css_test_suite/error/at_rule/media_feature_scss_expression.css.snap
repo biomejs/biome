@@ -23,36 +23,46 @@ CssRoot {
                 declarator: CssMediaAtRuleDeclarator {
                     media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
                     queries: CssMediaQueryList [
-                        CssMediaAndTypeQuery {
-                            left: CssMediaTypeQuery {
-                                modifier: missing (optional),
-                                ty: CssMediaType {
-                                    value: CssIdentifier {
-                                        value_token: IDENT@7..14 "screen" [] [Whitespace(" ")],
-                                    },
-                                },
-                            },
-                            and_token: AND_KW@14..18 "and" [] [Whitespace(" ")],
-                            right: CssMediaFeatureInParens {
-                                l_paren_token: L_PAREN@18..19 "(" [] [],
-                                feature: CssQueryFeaturePlain {
-                                    name: CssIdentifier {
-                                        value_token: IDENT@19..28 "max-width" [] [],
-                                    },
-                                    colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
-                                    value: CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")],
-                                    },
-                                },
-                                r_paren_token: missing (required),
-                            },
-                        },
-                        missing separator,
                         CssBogusMediaQuery {
                             items: [
-                                PLUS@32..34 "+" [] [Whitespace(" ")],
-                                CSS_NUMBER_LITERAL@34..35 "2" [] [],
-                                R_PAREN@35..37 ")" [] [Whitespace(" ")],
+                                CssMediaTypeQuery {
+                                    modifier: missing (optional),
+                                    ty: CssMediaType {
+                                        value: CssIdentifier {
+                                            value_token: IDENT@7..14 "screen" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                },
+                                AND_KW@14..18 "and" [] [Whitespace(" ")],
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@18..19 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@19..28 "max-width" [] [],
+                                                },
+                                                COLON@28..30 ":" [] [Whitespace(" ")],
+                                                CssBogus {
+                                                    items: [
+                                                        ScssExpressionItemList [
+                                                            ScssBinaryExpression {
+                                                                left: CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")],
+                                                                },
+                                                                operator: PLUS@32..34 "+" [] [Whitespace(" ")],
+                                                                right: CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@34..35 "2" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@35..37 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
                             ],
                         },
                     ],
@@ -81,27 +91,28 @@ CssRoot {
         0: CSS_MEDIA_AT_RULE_DECLARATOR@1..37
           0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
           1: CSS_MEDIA_QUERY_LIST@7..37
-            0: CSS_MEDIA_AND_TYPE_QUERY@7..32
+            0: CSS_BOGUS_MEDIA_QUERY@7..37
               0: CSS_MEDIA_TYPE_QUERY@7..14
                 0: (empty)
                 1: CSS_MEDIA_TYPE@7..14
                   0: CSS_IDENTIFIER@7..14
                     0: IDENT@7..14 "screen" [] [Whitespace(" ")]
               1: AND_KW@14..18 "and" [] [Whitespace(" ")]
-              2: CSS_MEDIA_FEATURE_IN_PARENS@18..32
+              2: CSS_BOGUS@18..37
                 0: L_PAREN@18..19 "(" [] []
-                1: CSS_QUERY_FEATURE_PLAIN@19..32
+                1: CSS_BOGUS@19..35
                   0: CSS_IDENTIFIER@19..28
                     0: IDENT@19..28 "max-width" [] []
                   1: COLON@28..30 ":" [] [Whitespace(" ")]
-                  2: CSS_NUMBER@30..32
-                    0: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")]
-                2: (empty)
-            1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@32..37
-              0: PLUS@32..34 "+" [] [Whitespace(" ")]
-              1: CSS_NUMBER_LITERAL@34..35 "2" [] []
-              2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@30..35
+                    0: SCSS_EXPRESSION_ITEM_LIST@30..35
+                      0: SCSS_BINARY_EXPRESSION@30..35
+                        0: CSS_NUMBER@30..32
+                          0: CSS_NUMBER_LITERAL@30..32 "1" [] [Whitespace(" ")]
+                        1: PLUS@32..34 "+" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@34..35
+                          0: CSS_NUMBER_LITERAL@34..35 "2" [] []
+                2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@37..39
           0: L_CURLY@37..38 "{" [] []
           1: CSS_RULE_LIST@38..38
@@ -113,14 +124,12 @@ CssRoot {
 ## Diagnostics
 
 ```
-media_feature_scss_expression.css:1:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+media_feature_scss_expression.css:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `+`
+  × SCSS query expressions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
   > 1 │ @media screen and (max-width: 1 + 2) {}
-      │                                 ^
+      │                               ^^^^^
     2 │ 
-  
-  i Remove +
   
 ```

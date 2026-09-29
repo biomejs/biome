@@ -31,7 +31,7 @@ use biome_rowan::Text;
 /// // facade.ts
 /// export { value as result } from "./source";
 /// ```
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn resolved_export_origin<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
@@ -54,7 +54,7 @@ pub(crate) fn resolved_export_origin<'db>(
 /// ```ts
 /// export const value = 1;
 /// ```
-#[salsa::tracked(cycle_result=infer_export_type_cycle_result)]
+#[salsa::tracked(returns(copy), cycle_result=infer_export_type_cycle_result)]
 pub fn infer_export_type<'db>(
     db: &'db dyn ModuleDb,
     symbol: SymbolFromModuleInfo<'db>,
@@ -86,7 +86,7 @@ pub fn infer_export_type<'db>(
 /// export const local = 3;
 /// export * from "./source";
 /// ```
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn namespace_export_names(db: &dyn ModuleDb, module: ModuleInfo) -> Option<Box<[Text]>> {
     execute_query(
         TypeInferenceQueryKind::Exports,

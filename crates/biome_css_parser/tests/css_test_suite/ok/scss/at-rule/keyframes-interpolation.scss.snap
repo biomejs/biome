@@ -53,9 +53,9 @@ CssRoot {
                                     selector: FROM_KW@19..27 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@27..28 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -107,9 +107,9 @@ CssRoot {
                                     percent_token: missing (optional),
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@83..84 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -154,9 +154,9 @@ CssRoot {
                                     percent_token: PERCENT@113..115 "%" [] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@115..116 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -219,9 +219,9 @@ CssRoot {
                                     selector: TO_KW@180..183 "to" [] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@183..184 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -255,9 +255,9 @@ CssRoot {
                                     },
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@221..222 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -310,9 +310,9 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@19..27
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@19..27
                   0: FROM_KW@19..27 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@27..48
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@27..48
                 0: L_CURLY@27..28 "{" [] []
-                1: CSS_DECLARATION_LIST@28..44
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@28..44
                   0: CSS_DECLARATION_WITH_SEMICOLON@28..44
                     0: CSS_DECLARATION@28..43
                       0: CSS_GENERIC_PROPERTY@28..43
@@ -345,9 +345,9 @@ CssRoot {
                               0: IDENT@61..81 "loader-icon-duration" [] []
                     3: R_CURLY@81..83 "}" [] [Whitespace(" ")]
                   1: (empty)
-              1: CSS_DECLARATION_BLOCK@83..104
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@83..104
                 0: L_CURLY@83..84 "{" [] []
-                1: CSS_DECLARATION_LIST@84..100
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@84..100
                   0: CSS_DECLARATION_WITH_SEMICOLON@84..100
                     0: CSS_DECLARATION@84..99
                       0: CSS_GENERIC_PROPERTY@84..99
@@ -375,9 +375,9 @@ CssRoot {
                             0: IDENT@111..112 "i" [] []
                     3: R_CURLY@112..113 "}" [] []
                   1: PERCENT@113..115 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@115..139
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@115..139
                 0: L_CURLY@115..116 "{" [] []
-                1: CSS_DECLARATION_LIST@116..135
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@116..135
                   0: CSS_DECLARATION_WITH_SEMICOLON@116..135
                     0: CSS_DECLARATION@116..134
                       0: CSS_GENERIC_PROPERTY@116..134
@@ -418,9 +418,9 @@ CssRoot {
                 3: COMMA@178..180 "," [] [Whitespace(" ")]
                 4: CSS_KEYFRAMES_IDENT_SELECTOR@180..183
                   0: TO_KW@180..183 "to" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@183..206
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@183..206
                 0: L_CURLY@183..184 "{" [] []
-                1: CSS_DECLARATION_LIST@184..202
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@184..202
                   0: CSS_DECLARATION_WITH_SEMICOLON@184..202
                     0: CSS_DECLARATION@184..201
                       0: CSS_GENERIC_PROPERTY@184..201
@@ -441,9 +441,9 @@ CssRoot {
                   1: CSS_PERCENTAGE@216..221
                     0: CSS_NUMBER_LITERAL@216..219 "100" [] []
                     1: PERCENT@219..221 "%" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@221..242
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@221..242
                 0: L_CURLY@221..222 "{" [] []
-                1: CSS_DECLARATION_LIST@222..238
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@222..238
                   0: CSS_DECLARATION_WITH_SEMICOLON@222..238
                     0: CSS_DECLARATION@222..237
                       0: CSS_GENERIC_PROPERTY@222..237

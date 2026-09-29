@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div role="range"></div>
 <div role="datepicker"></div>
 <div role=""></div>
@@ -10,3 +11,4 @@
 <div :role="'range'" />
 <div v-bind:role="'datepicker'" />
 <div :role="'unknown-invalid-role'" />
+</template>

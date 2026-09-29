@@ -1,9 +1,9 @@
+use crate::TestArgs as Args;
 use crate::run_cli_with_dyn_fs;
 use crate::run_cli_with_server_workspace;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
-use bpaf::Args;
 #[cfg(unix)]
 use std::os::unix::fs::symlink;
 

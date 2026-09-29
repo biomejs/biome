@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: infiniteLoops.js
+---
+# Input
+```js
+// should generate diagnostics
+export function whileTrue() { while (true) {} return 1; }
+export function doWhileTrue() { do {} while (true); return 1; }
+export function whileTruthy() { while (1) {} return 1; }
+export function doWhileTruthy() { do {} while ("yes"); return 1; }
+export function parenthesized() { while ((true)) {} return 1; }
+export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+export function continued() { do { continue; } while (true); return 1; }
+
+```
+
+# Diagnostics
+```
+infiniteLoops.js:2:47 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    1 │ // should generate diagnostics
+  > 2 │ export function whileTrue() { while (true) {} return 1; }
+      │                                               ^^^^^^^^^
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    1 │ // should generate diagnostics
+  > 2 │ export function whileTrue() { while (true) {} return 1; }
+      │                                      ^^^^
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:3:53 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    1 │ // should generate diagnostics
+    2 │ export function whileTrue() { while (true) {} return 1; }
+  > 3 │ export function doWhileTrue() { do {} while (true); return 1; }
+      │                                                     ^^^^^^^^^
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    1 │ // should generate diagnostics
+    2 │ export function whileTrue() { while (true) {} return 1; }
+  > 3 │ export function doWhileTrue() { do {} while (true); return 1; }
+      │                                              ^^^^
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:4:46 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    2 │ export function whileTrue() { while (true) {} return 1; }
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+  > 4 │ export function whileTruthy() { while (1) {} return 1; }
+      │                                              ^^^^^^^^^
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    2 │ export function whileTrue() { while (true) {} return 1; }
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+  > 4 │ export function whileTruthy() { while (1) {} return 1; }
+      │                                        ^
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:5:56 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+  > 5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+      │                                                        ^^^^^^^^^
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    3 │ export function doWhileTrue() { do {} while (true); return 1; }
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+  > 5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+      │                                                ^^^^^
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:6:53 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+  > 6 │ export function parenthesized() { while ((true)) {} return 1; }
+      │                                                     ^^^^^^^^^
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+    8 │ export function continued() { do { continue; } while (true); return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    4 │ export function whileTruthy() { while (1) {} return 1; }
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+  > 6 │ export function parenthesized() { while ((true)) {} return 1; }
+      │                                          ^^^^^^
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+    8 │ export function continued() { do { continue; } while (true); return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:7:73 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+  > 7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+      │                                                                         ^^^^^^^^^
+    8 │ export function continued() { do { continue; } while (true); return 1; }
+    9 │ 
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+    5 │ export function doWhileTruthy() { do {} while ("yes"); return 1; }
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+  > 7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+      │                                       ^^^^
+    8 │ export function continued() { do { continue; } while (true); return 1; }
+    9 │ 
+  
+
+```
+
+```
+infiniteLoops.js:8:62 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+  > 8 │ export function continued() { do { continue; } while (true); return 1; }
+      │                                                              ^^^^^^^^^
+    9 │ 
+  
+  i ... because either this statement will continue the loop ...
+  
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+  > 8 │ export function continued() { do { continue; } while (true); return 1; }
+      │                                    ^^^^^^^^^
+    9 │ 
+  
+  i ... or this statement will stop the flow of the code beforehand
+  
+    6 │ export function parenthesized() { while ((true)) {} return 1; }
+    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+  > 8 │ export function continued() { do { continue; } while (true); return 1; }
+      │                                                       ^^^^
+    9 │ 
+  
+
+```

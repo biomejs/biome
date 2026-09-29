@@ -1434,8 +1434,57 @@ pub(super) fn parse_parameters_list(
     parse_parameter: impl Fn(&mut JsParser, ExpressionContext) -> ParsedSyntax,
     list_kind: JsSyntaxKind,
 ) {
-    let mut first = true;
     let has_l_paren = p.expect(T!['(']);
+    let parameters_list = parse_parameters_list_items(p, flags, parse_parameter, has_l_paren);
+    parameters_list.complete(p, list_kind);
+    p.expect(T![')']);
+}
+
+/// Parses the parameters of a Vue slot directive, e.g. `v-slot="{ item }: Props"`.
+///
+/// Vue compiles the directive value as the parameters of an arrow function,
+/// `(value) => {}`, so the list is parsed without the surrounding parentheses.
+/// Any trailing code is wrapped in a bogus parameter.
+pub(crate) fn parse_vue_slot_parameters_list(p: &mut JsParser) {
+    let parameters_list = parse_parameters_list_items(
+        p,
+        SignatureFlags::empty(),
+        |p, expression_context| {
+            parse_any_parameter(
+                p,
+                Absent,
+                ParameterContext::Arrow,
+                expression_context,
+                TypeContext::default(),
+            )
+        },
+        true,
+    );
+
+    if !p.at(EOF) {
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        let bogus = p.start();
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        bogus.complete(p, JS_BOGUS_PARAMETER);
+    }
+
+    parameters_list.complete(p, JS_PARAMETER_LIST);
+}
+
+/// Parses the `param, param` items of a parameter list, stopping at `)` or at the end of the file.
+/// Returns the marker of the list, which the caller must complete.
+fn parse_parameters_list_items(
+    p: &mut JsParser,
+    flags: SignatureFlags,
+    parse_parameter: impl Fn(&mut JsParser, ExpressionContext) -> ParsedSyntax,
+    has_l_paren: bool,
+) -> Marker {
+    let mut first = true;
 
     p.with_state(EnterParameters(flags), |p| {
         let parameters_list = p.start();
@@ -1500,8 +1549,6 @@ pub(super) fn parse_parameters_list(
             }
         }
 
-        parameters_list.complete(p, list_kind);
-    });
-
-    p.expect(T![')']);
+        parameters_list
+    })
 }

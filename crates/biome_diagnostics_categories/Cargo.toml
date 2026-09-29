@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_diagnostics_categories"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Diagnostic categories for biome_diagnostics"

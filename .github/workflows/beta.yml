@@ -70,7 +70,7 @@ jobs:
           sudo apt-get install -y musl-tools
 
       - name: Install cargo-deny
-        uses: taiki-e/install-action@fa23953489c080190314742a9b907f8e97c6767c # v2.87.10
+        uses: taiki-e/install-action@9983c65e42da123ff25d1f78505eb6de315aa172 # v2.87.20
         if: matrix.code-target == 'linux-x64-musl'
         with:
           tool: cargo-deny

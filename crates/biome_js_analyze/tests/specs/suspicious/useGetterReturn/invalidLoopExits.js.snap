@@ -1,0 +1,124 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidLoopExits.js
+---
+# Input
+```js
+// should generate diagnostics
+export const getters = {
+    get whileBreak() { while (true) { break; } },
+    get doWhileBreak() { do { break; } while (true); },
+    get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+    get dynamic() { while (condition) {} },
+    get falsy() { do {} while (false); },
+    get zero() { while (0.0) {} },
+    get empty() { do {} while (""); },
+};
+
+```
+
+# Diagnostics
+```
+invalidLoopExits.js:3:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+    1 │ // should generate diagnostics
+    2 │ export const getters = {
+  > 3 │     get whileBreak() { while (true) { break; } },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │     get doWhileBreak() { do { break; } while (true); },
+    5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+  
+
+```
+
+```
+invalidLoopExits.js:4:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+    2 │ export const getters = {
+    3 │     get whileBreak() { while (true) { break; } },
+  > 4 │     get doWhileBreak() { do { break; } while (true); },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+    6 │     get dynamic() { while (condition) {} },
+  
+
+```
+
+```
+invalidLoopExits.js:5:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+    3 │     get whileBreak() { while (true) { break; } },
+    4 │     get doWhileBreak() { do { break; } while (true); },
+  > 5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │     get dynamic() { while (condition) {} },
+    7 │     get falsy() { do {} while (false); },
+  
+
+```
+
+```
+invalidLoopExits.js:6:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+    4 │     get doWhileBreak() { do { break; } while (true); },
+    5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+  > 6 │     get dynamic() { while (condition) {} },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │     get falsy() { do {} while (false); },
+    8 │     get zero() { while (0.0) {} },
+  
+
+```
+
+```
+invalidLoopExits.js:7:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+    5 │     get labeledBreak() { outer: while (true) { while (true) { break outer; } } },
+    6 │     get dynamic() { while (condition) {} },
+  > 7 │     get falsy() { do {} while (false); },
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │     get zero() { while (0.0) {} },
+    9 │     get empty() { do {} while (""); },
+  
+
+```
+
+```
+invalidLoopExits.js:8:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+     6 │     get dynamic() { while (condition) {} },
+     7 │     get falsy() { do {} while (false); },
+   > 8 │     get zero() { while (0.0) {} },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │     get empty() { do {} while (""); },
+    10 │ };
+  
+
+```
+
+```
+invalidLoopExits.js:9:5 lint/suspicious/useGetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This getter should return a value.
+  
+     7 │     get falsy() { do {} while (false); },
+     8 │     get zero() { while (0.0) {} },
+   > 9 │     get empty() { do {} while (""); },
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ };
+    11 │ 
+  
+
+```

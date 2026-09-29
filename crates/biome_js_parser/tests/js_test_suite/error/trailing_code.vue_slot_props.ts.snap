@@ -1,0 +1,103 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+{ item }: Props) => item
+
+```
+
+
+## AST
+
+```
+JsVueSlotPropsRoot {
+    parameters: JsParameterList [
+        JsFormalParameter {
+            decorators: JsDecoratorList [],
+            binding: JsObjectBindingPattern {
+                l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                properties: JsObjectBindingPatternPropertyList [
+                    JsObjectBindingPatternShorthandProperty {
+                        identifier: JsIdentifierBinding {
+                            name_token: IDENT@2..7 "item" [] [Whitespace(" ")],
+                        },
+                        init: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@7..8 "}" [] [],
+            },
+            question_mark_token: missing (optional),
+            type_annotation: TsTypeAnnotation {
+                colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+                ty: TsReferenceType {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@10..15 "Props" [] [],
+                    },
+                    type_arguments: missing (optional),
+                },
+            },
+            initializer: missing (optional),
+        },
+        missing separator,
+        JsBogusParameter {
+            items: [
+                R_PAREN@15..17 ")" [] [Whitespace(" ")],
+                FAT_ARROW@17..20 "=>" [] [Whitespace(" ")],
+                IDENT@20..24 "item" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_SLOT_PROPS_ROOT@0..25
+  0: JS_PARAMETER_LIST@0..24
+    0: JS_FORMAL_PARAMETER@0..15
+      0: JS_DECORATOR_LIST@0..0
+      1: JS_OBJECT_BINDING_PATTERN@0..8
+        0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+        1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..7
+          0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@2..7
+            0: JS_IDENTIFIER_BINDING@2..7
+              0: IDENT@2..7 "item" [] [Whitespace(" ")]
+            1: (empty)
+        2: R_CURLY@7..8 "}" [] []
+      2: (empty)
+      3: TS_TYPE_ANNOTATION@8..15
+        0: COLON@8..10 ":" [] [Whitespace(" ")]
+        1: TS_REFERENCE_TYPE@10..15
+          0: JS_REFERENCE_IDENTIFIER@10..15
+            0: IDENT@10..15 "Props" [] []
+          1: (empty)
+      4: (empty)
+    1: (empty)
+    2: JS_BOGUS_PARAMETER@15..24
+      0: R_PAREN@15..17 ")" [] [Whitespace(" ")]
+      1: FAT_ARROW@17..20 "=>" [] [Whitespace(" ")]
+      2: IDENT@20..24 "item" [] []
+  1: EOF@24..25 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing_code.vue_slot_props.ts:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Template expressions can only contain a single expression
+
+  > 1 │ { item }: Props) => item
+      │                ^
+    2 │
+
+  i Remove the extra code or split into multiple template expressions.
+
+```

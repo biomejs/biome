@@ -16,6 +16,7 @@ use biome_js_type_info::{
     },
 };
 use biome_rowan::Text;
+use std::sync::Arc;
 
 const MAX_SCOPE_RESOLUTION_STEPS: usize = 1024;
 const MAX_LOCAL_TYPE_RESOLUTION_STEPS: usize = 1024;
@@ -50,10 +51,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
                 .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
             if let Some(binding) = binding {
-                let TypeReference::Resolved(resolved_id) = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?
+                let TypeReference::Resolved(resolved_id) =
+                    self.js_info.raw_binding_types.get(&binding.range())?
                 else {
                     return None;
                 };
@@ -134,15 +133,15 @@ impl<'db> ResolutionCtx<'db, '_> {
                 {
                     self.resolve_import(&TypeImportQualifier {
                         symbol: import.symbol.clone(),
-                        resolved_path: import.resolved_path.clone(),
+                        specifier: Arc::new(import.specifier.clone()),
                         type_only: qualifier.type_only,
                     })
                 } else if resolves_declarations_directly {
-                    self.resolve_local_binding(binding.syntax().text_trimmed_range())
+                    self.resolve_local_binding(binding.range())
                 } else {
                     self.js_info
                         .raw_binding_types
-                        .get(&binding.syntax().text_trimmed_range())
+                        .get(&binding.range())
                         .cloned()
                         .map_or(InferredTypeData::Unknown, |reference| {
                             self.resolve(&reference)
@@ -359,7 +358,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         return self.resolve_import_member_with_steps(
                             &TypeImportQualifier {
                                 symbol: import.symbol.clone(),
-                                resolved_path: import.resolved_path.clone(),
+                                specifier: Arc::new(import.specifier.clone()),
                                 type_only: qualifier.type_only,
                             },
                             member,
@@ -369,7 +368,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     next = self
                         .js_info
                         .raw_binding_types
-                        .get(&binding.syntax().text_trimmed_range())
+                        .get(&binding.range())
                         .cloned();
                     break;
                 }
@@ -511,14 +510,14 @@ impl<'db> ResolutionCtx<'db, '_> {
                         };
                         self.for_on_demand_import(
                             module,
-                            &js_info,
+                            js_info,
                             remaining,
                             resolve_declarations_directly,
                         )
                     }
                     import_resolution @ (ImportResolution::FromTables { .. }
                     | ImportResolution::CycleFallback(_)) => {
-                        ResolutionCtx::new(self.db, module, &js_info, import_resolution)
+                        ResolutionCtx::new(self.db, module, js_info, import_resolution)
                     }
                 };
                 return Some(
@@ -544,6 +543,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -710,6 +710,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -761,6 +762,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null
@@ -810,6 +812,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
+            | InferredTypeData::GlobalLocal(_)
             | InferredTypeData::BigInt
             | InferredTypeData::Boolean
             | InferredTypeData::Null

@@ -19,6 +19,11 @@ impl Default for FormatMdParagraph {
     }
 }
 impl FormatNodeRule<MdParagraph> for FormatMdParagraph {
+    fn is_suppressed(&self, node: &MdParagraph, f: &MarkdownFormatter) -> bool {
+        f.context().comments().is_suppressed(node.syntax())
+            || node.syntax().has_comments_descendants()
+    }
+
     fn fmt_fields(&self, node: &MdParagraph, f: &mut MarkdownFormatter) -> FormatResult<()> {
         let MdParagraphFields { list } = node.as_fields();
         write!(

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validClassExpressions.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+const value = <div className={[
+    'bg-pink-500' === state ? 'bg-primary' : 'text-white',
+    'bg-pink-500' && 'bg-primary',
+    { 'bg-primary': 'bg-pink-500' },
+    lookup['bg-pink-500'],
+    lookup(`bg-pink-500`),
+    (() => 'bg-pink-500')(),
+]} />;
+clsx({ 'bg-primary': 'bg-pink-500' });
+cva('', {
+    variants: { size: { 'bg-pink-500': 'bg-primary', small: { 'text-white': 'bg-pink-500' } } },
+    defaultVariants: { size: 'bg-pink-500' },
+    compoundVariants: [{ size: 'bg-pink-500', class: 'bg-primary' }],
+});
+tv({
+    slots: { 'bg-pink-500': 'bg-primary' },
+    variants: { size: { 'bg-pink-500': { 'hover:text-red-500/80': 'bg-primary' } } },
+    defaultVariants: { size: 'bg-pink-500' },
+    compoundVariants: [{ size: 'bg-pink-500', class: 'bg-primary' }],
+    compoundSlots: [{ slots: ['bg-pink-500'], class: 'bg-primary' }],
+});
+tv({ base: 'bg-pink-500' } ? {} : {});
+tv({ ...({ base: 'bg-pink-500' } && {}) });
+tv(({ base: 'bg-pink-500' }, {}));
+
+```

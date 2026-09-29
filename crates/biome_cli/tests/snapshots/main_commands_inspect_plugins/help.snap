@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome inspect plugins --help
+```
+
 # Emitted Messages
 
 ```block

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_aria_metadata"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Metadata about ARIA properties and ARIA roles"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-include              = ["build.rs", "src/lib.rs"]
+include              = ["aria-data/*.json", "build.rs", "src/lib.rs"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

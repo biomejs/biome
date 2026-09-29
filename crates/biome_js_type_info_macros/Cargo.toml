@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_type_info_macros"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Macros to help implement type resolution"

@@ -439,10 +439,10 @@ pub fn css_container_at_rule_declarator(
 pub struct CssContainerAtRuleDeclaratorBuilder {
     container_token: SyntaxToken,
     query: AnyCssContainerQuery,
-    name: Option<CssCustomIdentifier>,
+    name: Option<AnyCssContainerName>,
 }
 impl CssContainerAtRuleDeclaratorBuilder {
-    pub fn with_name(mut self, name: CssCustomIdentifier) -> Self {
+    pub fn with_name(mut self, name: AnyCssContainerName) -> Self {
         self.name = Some(name);
         self
     }
@@ -970,7 +970,7 @@ pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaratio
 }
 pub fn css_font_face_at_rule(
     declarator: CssFontFaceAtRuleDeclarator,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrStatementBlock,
 ) -> CssFontFaceAtRule {
     CssFontFaceAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FONT_FACE_AT_RULE,
@@ -1500,7 +1500,7 @@ pub fn css_keyframes_ident_selector(selector_token: SyntaxToken) -> CssKeyframes
 }
 pub fn css_keyframes_item(
     selectors: CssKeyframesSelectorList,
-    block: AnyCssDeclarationBlock,
+    block: AnyCssDeclarationOrStatementBlock,
 ) -> CssKeyframesItem {
     CssKeyframesItem::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_KEYFRAMES_ITEM,
@@ -2031,7 +2031,7 @@ pub fn css_property_at_rule(
 }
 pub fn css_property_at_rule_declarator(
     property_token: SyntaxToken,
-    name: CssDashedIdentifier,
+    name: AnyCssDashedIdentifier,
 ) -> CssPropertyAtRuleDeclarator {
     CssPropertyAtRuleDeclarator::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_PROPERTY_AT_RULE_DECLARATOR,
@@ -3311,6 +3311,14 @@ pub fn scss_binary_expression(
             Some(SyntaxElement::Token(operator_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
+    ))
+}
+pub fn scss_container_interpolated_query(
+    query: ScssInterpolation,
+) -> ScssContainerInterpolatedQuery {
+    ScssContainerInterpolatedQuery::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_CONTAINER_INTERPOLATED_QUERY,
+        [Some(SyntaxElement::Node(query.into_syntax()))],
     ))
 }
 pub fn scss_content_at_rule(content_token: SyntaxToken) -> ScssContentAtRuleBuilder {
@@ -5316,7 +5324,7 @@ where
 }
 pub fn css_layer_name_list<I, S>(items: I, separators: S) -> CssLayerNameList
 where
-    I: IntoIterator<Item = CssIdentifier>,
+    I: IntoIterator<Item = AnyCssLayerName>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = CssSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

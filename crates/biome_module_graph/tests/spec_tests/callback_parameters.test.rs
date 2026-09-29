@@ -510,3 +510,77 @@ fn test_non_generic_method_signatures_share_return_types() {
 
     assert_eq!(return_type("first"), return_type("second"));
 }
+
+#[test]
+fn test_callback_parameters_share_callable_signature() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/handler.ts".into(),
+        "export interface Handler<T> { (value: T): void; }",
+    );
+    fs.insert("/src/unrelated.ts".into(), "export const unused = 1;");
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Handler } from "./handler.ts";
+            declare function on(handler: Handler<number>): void;
+            on((first) => {});
+            on((second) => {});
+        "#,
+    );
+    let mut db = build_js_test_module_db(
+        &fs,
+        &["/src/index.ts", "/src/handler.ts", "/src/unrelated.ts"],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+
+    db.clear_salsa_events();
+    assert_eq!(
+        normalized_binding_ty(&db, module, "first"),
+        InferredTypeData::Number
+    );
+    assert_eq!(
+        normalized_binding_ty(&db, module, "second"),
+        InferredTypeData::Number
+    );
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "resolve_callable_function", &events),
+        1,
+        "both callbacks must share the signature of `Handler<number>`"
+    );
+
+    for (path, source, expected, executions) in [
+        (
+            "/src/unrelated.ts",
+            "export const unused = 2;",
+            InferredTypeData::Number,
+            0,
+        ),
+        (
+            "/src/handler.ts",
+            "export interface Handler<T> { (value: string): void; }",
+            InferredTypeData::String,
+            1,
+        ),
+    ] {
+        fs.insert(path.into(), source);
+        let changed = db
+            .module_for_path(Utf8Path::new(path))
+            .expect("module must exist");
+        let kind = resolve_js_module_kind_for_test(&fs, path, true);
+        salsa::Setter::to(changed.set_kind(&mut db), kind);
+
+        db.clear_salsa_events();
+        assert_eq!(normalized_binding_ty(&db, module, "first"), expected);
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "resolve_callable_function", &events),
+            executions,
+            "edit to {path}"
+        );
+    }
+}

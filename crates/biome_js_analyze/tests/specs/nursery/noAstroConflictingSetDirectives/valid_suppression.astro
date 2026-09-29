@@ -1,0 +1,51 @@
+<!-- should not generate diagnostics -->
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div
+        set:html={html}
+        set:text={text}
+    ></div>
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <Component
+        set:html={html}
+        set:text={text}
+    />
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div
+        set:html={html}
+    >child content</div>
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div
+        set:text={text}
+    ><span>child content</span></div>
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div set:html={html} set:text={text}></div>
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <Component set:html={html} set:text={text} />
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div set:html={html}>child content</div>
+)}</div>
+
+<div>{(
+    // biome-ignore lint/nursery/noAstroConflictingSetDirectives: intentional conflicting content
+    <div set:text={text}><span>child content</span></div>
+)}</div>

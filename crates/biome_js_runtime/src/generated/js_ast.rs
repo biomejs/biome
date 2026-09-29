@@ -354,6 +354,7 @@ impl JsAstNode {
             "JS_VARIABLE_DECLARATION_CLAUSE" => JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE,
             "JS_VARIABLE_DECLARATOR" => JsSyntaxKind::JS_VARIABLE_DECLARATOR,
             "JS_VARIABLE_STATEMENT" => JsSyntaxKind::JS_VARIABLE_STATEMENT,
+            "JS_VUE_SLOT_PROPS_ROOT" => JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
             "JS_WHILE_STATEMENT" => JsSyntaxKind::JS_WHILE_STATEMENT,
             "JS_WITH_STATEMENT" => JsSyntaxKind::JS_WITH_STATEMENT,
             "JS_YIELD_ARGUMENT" => JsSyntaxKind::JS_YIELD_ARGUMENT,
@@ -771,6 +772,7 @@ impl JsAstNode {
             JsSyntaxKind::JS_VARIABLE_DECLARATION_CLAUSE => &JS_VARIABLE_DECLARATION_CLAUSE_FIELDS,
             JsSyntaxKind::JS_VARIABLE_DECLARATOR => &JS_VARIABLE_DECLARATOR_FIELDS,
             JsSyntaxKind::JS_VARIABLE_STATEMENT => &JS_VARIABLE_STATEMENT_FIELDS,
+            JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => &JS_VUE_SLOT_PROPS_ROOT_FIELDS,
             JsSyntaxKind::JS_WHILE_STATEMENT => &JS_WHILE_STATEMENT_FIELDS,
             JsSyntaxKind::JS_WITH_STATEMENT => &JS_WITH_STATEMENT_FIELDS,
             JsSyntaxKind::JS_YIELD_ARGUMENT => &JS_YIELD_ARGUMENT_FIELDS,
@@ -6502,6 +6504,30 @@ static JS_VARIABLE_STATEMENT_FIELDS: JsAstNodeFields = JsAstNodeFields {
             value: JsAstFieldValue::Token {
                 kinds: &[T![;]],
                 expected: "\";\"",
+            },
+        },
+    ],
+};
+static JS_VUE_SLOT_PROPS_ROOT_FIELDS: JsAstNodeFields = JsAstNodeFields {
+    kind: JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
+    name: "JsVueSlotPropsRoot",
+    fields: &[
+        JsAstField {
+            property: "parameters",
+            updater: "withParameters",
+            optional: false,
+            value: JsAstFieldValue::List {
+                ty: "JsParameterList",
+                can_cast: JsParameterList::can_cast,
+            },
+        },
+        JsAstField {
+            property: "eofToken",
+            updater: "withEofToken",
+            optional: false,
+            value: JsAstFieldValue::Token {
+                kinds: &[T![EOF]],
+                expected: "\"EOF\"",
             },
         },
     ],

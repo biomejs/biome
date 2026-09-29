@@ -1,0 +1,152 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+  <dIV>a</div>
+  <sPan>b</span>
+  <foreignObject></foreignobject>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..3 "<" [Whitespace("  ")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@3..6 "dIV" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@6..7 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@7..8 "a" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@8..9 "<" [] [],
+                slash_token: SLASH@9..10 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@10..13 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@13..14 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@14..18 "<" [Newline("\n"), Whitespace("  ")] [],
+                name: HtmlTagName {
+                    value_token: SPAN_KW@18..22 "sPan" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@22..23 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@23..24 "b" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@24..25 "<" [] [],
+                slash_token: SLASH@25..26 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SPAN_KW@26..30 "span" [] [],
+                },
+                r_angle_token: R_ANGLE@30..31 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@31..35 "<" [Newline("\n"), Whitespace("  ")] [],
+                name: HtmlTagName {
+                    value_token: FOREIGN_OBJECT_KW@35..48 "foreignObject" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@48..49 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@49..50 "<" [] [],
+                slash_token: SLASH@50..51 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@51..64 "foreignobject" [] [],
+                },
+                r_angle_token: R_ANGLE@64..65 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..66
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..65
+    0: HTML_ELEMENT@0..14
+      0: HTML_OPENING_ELEMENT@0..7
+        0: L_ANGLE@0..3 "<" [Whitespace("  ")] []
+        1: HTML_TAG_NAME@3..6
+          0: DIV_KW@3..6 "dIV" [] []
+        2: HTML_ATTRIBUTE_LIST@6..6
+        3: R_ANGLE@6..7 ">" [] []
+      1: HTML_ELEMENT_LIST@7..8
+        0: HTML_CONTENT@7..8
+          0: HTML_LITERAL@7..8 "a" [] []
+      2: HTML_CLOSING_ELEMENT@8..14
+        0: L_ANGLE@8..9 "<" [] []
+        1: SLASH@9..10 "/" [] []
+        2: HTML_TAG_NAME@10..13
+          0: DIV_KW@10..13 "div" [] []
+        3: R_ANGLE@13..14 ">" [] []
+    1: HTML_ELEMENT@14..31
+      0: HTML_OPENING_ELEMENT@14..23
+        0: L_ANGLE@14..18 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_TAG_NAME@18..22
+          0: SPAN_KW@18..22 "sPan" [] []
+        2: HTML_ATTRIBUTE_LIST@22..22
+        3: R_ANGLE@22..23 ">" [] []
+      1: HTML_ELEMENT_LIST@23..24
+        0: HTML_CONTENT@23..24
+          0: HTML_LITERAL@23..24 "b" [] []
+      2: HTML_CLOSING_ELEMENT@24..31
+        0: L_ANGLE@24..25 "<" [] []
+        1: SLASH@25..26 "/" [] []
+        2: HTML_TAG_NAME@26..30
+          0: SPAN_KW@26..30 "span" [] []
+        3: R_ANGLE@30..31 ">" [] []
+    2: HTML_ELEMENT@31..65
+      0: HTML_OPENING_ELEMENT@31..49
+        0: L_ANGLE@31..35 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_TAG_NAME@35..48
+          0: FOREIGN_OBJECT_KW@35..48 "foreignObject" [] []
+        2: HTML_ATTRIBUTE_LIST@48..48
+        3: R_ANGLE@48..49 ">" [] []
+      1: HTML_ELEMENT_LIST@49..49
+      2: HTML_CLOSING_ELEMENT@49..65
+        0: L_ANGLE@49..50 "<" [] []
+        1: SLASH@50..51 "/" [] []
+        2: HTML_TAG_NAME@51..64
+          0: HTML_UNKNOWN_TAG@51..64 "foreignobject" [] []
+        3: R_ANGLE@64..65 ">" [] []
+  5: EOF@65..66 "" [Newline("\n")] []
+
+```

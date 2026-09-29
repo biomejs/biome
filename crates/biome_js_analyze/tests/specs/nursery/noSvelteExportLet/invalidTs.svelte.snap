@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTs.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	export let name: string;
+	export let count: number = 0;
+</script>
+
+<p>{name} {count}</p>
+
+```
+
+# Diagnostics
+```
+invalidTs.svelte:3:2 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declaring component props with export let is legacy Svelte syntax.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script lang="ts">
+  > 3 │ 	export let name: string;
+      │ 	^^^^^^^^^^
+    4 │ 	export let count: number = 0;
+    5 │ </script>
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTs.svelte:4:2 lint/nursery/noSvelteExportLet ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Declaring component props with export let is legacy Svelte syntax.
+  
+    2 │ <script lang="ts">
+    3 │ 	export let name: string;
+  > 4 │ 	export let count: number = 0;
+      │ 	^^^^^^^^^^
+    5 │ </script>
+    6 │ 
+  
+  i Svelte 5 declares props with the $props() rune. Declaring props with export makes the component run in legacy mode, and is a compile error in runes mode.
+  
+  i Destructure the props from $props() instead, for example: let { name } = $props();. See the Svelte 5 migration guide.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

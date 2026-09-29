@@ -1,16 +1,20 @@
-//! Predefined global type IDs derived from one ordered manifest, [`PREDEFINED_ID_ROWS`].
-//! Row position is the `TypeId` value, so the manifest is append-only: reordering
-//! or removing rows shifts every consumer's `*_ID` constant.
+//! Global IDs consist of a fixed manifest followed by generated declarations.
+//!
+//! The manifest holds intrinsics that no TypeScript declaration file defines, such
+//! as primitive keywords and `typeof` results. Row position in
+//! [`PREDEFINED_ID_ROWS`] is the fixed `TypeId` value. Every global declared by the
+//! TypeScript standard library follows the manifest, in the order chosen by
+//! `just gen-global-types`.
 
 use std::cmp::Ordering;
 
 use crate::{RawTypeId, TypeId};
 
 /// Compile-time guard for manifest length; ordering is checked by `manifest_names_match_id_name_constants`.
-const PREDEFINED_TYPE_COUNT: usize = 69;
+const PREDEFINED_TYPE_COUNT: usize = 40;
 
 /// Type ID that is known to index the predefined global resolver.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::Update)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
 pub struct GlobalTypeId(TypeId);
 
 impl GlobalTypeId {
@@ -72,7 +76,7 @@ macro_rules! predefined_globals {
     ($(($id:ident, $id_name:ident, $global_type_id:ident, $resolved_id:tt, $name:literal, $role:ident $(,)?)),+ $(,)?) => {
         predefined_global_ids!(0usize; $(($id, $id_name, $global_type_id, $resolved_id, $name, $role)),+);
 
-        /// Single ordered manifest of every predefined global type ID.
+        /// Ordered manifest of fixed predefined global type IDs.
         pub(crate) const PREDEFINED_ID_ROWS: &[&str] = &[
             $(
                 $id_name,
@@ -81,12 +85,16 @@ macro_rules! predefined_globals {
 
         const _: () = assert!(PREDEFINED_ID_ROWS.len() == PREDEFINED_TYPE_COUNT);
 
-        /// Number of predefined global type IDs derived from the manifest.
-        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len();
+        /// Number of fixed and generated global type IDs.
+        pub const NUM_PREDEFINED_TYPES: usize = PREDEFINED_ID_ROWS.len()
+            + crate::generated::global_types::GENERATED_GLOBAL_NAMES.len();
 
         /// Returns a string for formatting global IDs in test snapshots.
         pub(crate) fn global_type_name(id: TypeId) -> Option<&'static str> {
-            PREDEFINED_ID_ROWS.get(id.index()).copied()
+            PREDEFINED_ID_ROWS.get(id.index()).copied().or_else(|| {
+                let index = id.index().checked_sub(PREDEFINED_ID_ROWS.len())?;
+                crate::generated::global_types::GENERATED_GLOBAL_NAMES.get(index).copied()
+            })
         }
     };
 }
@@ -116,28 +124,20 @@ predefined_globals! {
     (UNDEFINED_ID, UNDEFINED_ID_NAME, UNDEFINED_ID_GLOBAL_TYPE_ID, GLOBAL_UNDEFINED_ID, "undefined", Sentinel),
     (VOID_ID, VOID_ID_NAME, VOID_ID_GLOBAL_TYPE_ID, GLOBAL_VOID_ID, "void", Sentinel),
     (CONDITIONAL_ID, CONDITIONAL_ID_NAME, CONDITIONAL_ID_GLOBAL_TYPE_ID, GLOBAL_CONDITIONAL_ID, "conditional", Sentinel),
-    (NUMBER_ID, NUMBER_ID_NAME, NUMBER_ID_GLOBAL_TYPE_ID, GLOBAL_NUMBER_ID, "number", Primitive),
-    (STRING_ID, STRING_ID_NAME, STRING_ID_GLOBAL_TYPE_ID, GLOBAL_STRING_ID, "string", Primitive),
+    (NUMBER_KEYWORD_ID, NUMBER_KEYWORD_ID_NAME, NUMBER_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_NUMBER_KEYWORD_ID, "number", Primitive),
+    (STRING_KEYWORD_ID, STRING_KEYWORD_ID_NAME, STRING_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_STRING_KEYWORD_ID, "string", Primitive),
+    (BOOLEAN_KEYWORD_ID, BOOLEAN_KEYWORD_ID_NAME, BOOLEAN_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_BOOLEAN_KEYWORD_ID, "boolean", Primitive),
+    (BIGINT_KEYWORD_ID, BIGINT_KEYWORD_ID_NAME, BIGINT_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_BIGINT_KEYWORD_ID, "bigint", Primitive),
+    (SYMBOL_KEYWORD_ID, SYMBOL_KEYWORD_ID_NAME, SYMBOL_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_KEYWORD_ID, "symbol", Primitive),
+    (NULL_KEYWORD_ID, NULL_KEYWORD_ID_NAME, NULL_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_NULL_KEYWORD_ID, "null", Primitive),
+    (ANY_KEYWORD_ID, ANY_KEYWORD_ID_NAME, ANY_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_ANY_KEYWORD_ID, "any", Primitive),
+    (NEVER_KEYWORD_ID, NEVER_KEYWORD_ID_NAME, NEVER_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_NEVER_KEYWORD_ID, "never", Primitive),
+    (OBJECT_KEYWORD_ID, OBJECT_KEYWORD_ID_NAME, OBJECT_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_OBJECT_KEYWORD_ID, "object", Primitive),
+    (UNKNOWN_KEYWORD_ID, UNKNOWN_KEYWORD_ID_NAME, UNKNOWN_KEYWORD_ID_GLOBAL_TYPE_ID, GLOBAL_UNKNOWN_KEYWORD_ID, "unknown", Primitive),
     (INSTANCEOF_ARRAY_T_ID, INSTANCEOF_ARRAY_T_ID_NAME, INSTANCEOF_ARRAY_T_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_ARRAY_T_ID, "instanceof Array<T>", Helper),
     (INSTANCEOF_ARRAY_U_ID, INSTANCEOF_ARRAY_U_ID_NAME, INSTANCEOF_ARRAY_U_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_ARRAY_U_ID, "instanceof Array<U>", Helper),
-    (ARRAY_ID, ARRAY_ID_NAME, ARRAY_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_ID, "Array", ManualGlobal),
-    (ARRAY_FILTER_ID, ARRAY_FILTER_ID_NAME, ARRAY_FILTER_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_FILTER_ID, "Array.prototype.filter", ManualSynthetic),
-    (ARRAY_FOREACH_ID, ARRAY_FOREACH_ID_NAME, ARRAY_FOREACH_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_FOREACH_ID, "Array.prototype.forEach", ManualSynthetic),
-    (ARRAY_MAP_ID, ARRAY_MAP_ID_NAME, ARRAY_MAP_ID_GLOBAL_TYPE_ID, GLOBAL_ARRAY_MAP_ID, "Array.prototype.map", ManualSynthetic),
     (GLOBAL_ID, GLOBAL_ID_NAME, GLOBAL_ID_GLOBAL_TYPE_ID, GLOBAL_GLOBAL_ID, "globalThis", Helper),
     (INSTANCEOF_PROMISE_ID, INSTANCEOF_PROMISE_ID_NAME, INSTANCEOF_PROMISE_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_PROMISE_ID, "instanceof Promise", Helper),
-    (PROMISE_ID, PROMISE_ID_NAME, PROMISE_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_ID, "Promise", ManualGlobal),
-    (PROMISE_CONSTRUCTOR_ID, PROMISE_CONSTRUCTOR_ID_NAME, PROMISE_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_CONSTRUCTOR_ID, "Promise.constructor", ManualSynthetic),
-    (PROMISE_CATCH_ID, PROMISE_CATCH_ID_NAME, PROMISE_CATCH_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_CATCH_ID, "Promise.prototype.catch", ManualSynthetic),
-    (PROMISE_FINALLY_ID, PROMISE_FINALLY_ID_NAME, PROMISE_FINALLY_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_FINALLY_ID, "Promise.prototype.finally", ManualSynthetic),
-    (PROMISE_THEN_ID, PROMISE_THEN_ID_NAME, PROMISE_THEN_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_THEN_ID, "Promise.prototype.then", ManualSynthetic),
-    (PROMISE_ALL_ID, PROMISE_ALL_ID_NAME, PROMISE_ALL_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_ALL_ID, "Promise.all", ManualSynthetic),
-    (PROMISE_ALL_SETTLED_ID, PROMISE_ALL_SETTLED_ID_NAME, PROMISE_ALL_SETTLED_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_ALL_SETTLED_ID, "Promise.allSettled", ManualSynthetic),
-    (PROMISE_ANY_ID, PROMISE_ANY_ID_NAME, PROMISE_ANY_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_ANY_ID, "Promise.any", ManualSynthetic),
-    (PROMISE_RACE_ID, PROMISE_RACE_ID_NAME, PROMISE_RACE_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_RACE_ID, "Promise.race", ManualSynthetic),
-    (PROMISE_REJECT_ID, PROMISE_REJECT_ID_NAME, PROMISE_REJECT_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_REJECT_ID, "Promise.reject", ManualSynthetic),
-    (PROMISE_RESOLVE_ID, PROMISE_RESOLVE_ID_NAME, PROMISE_RESOLVE_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_RESOLVE_ID, "Promise.resolve", ManualSynthetic),
-    (PROMISE_TRY_ID, PROMISE_TRY_ID_NAME, PROMISE_TRY_ID_GLOBAL_TYPE_ID, GLOBAL_PROMISE_TRY_ID, "Promise.try", ManualSynthetic),
     (BIGINT_STRING_LITERAL_ID, BIGINT_STRING_LITERAL_ID_NAME, BIGINT_STRING_LITERAL_ID_GLOBAL_TYPE_ID, GLOBAL_BIGINT_STRING_LITERAL_ID, "\"bigint\"", Helper),
     (BOOLEAN_STRING_LITERAL_ID, BOOLEAN_STRING_LITERAL_ID_NAME, BOOLEAN_STRING_LITERAL_ID_GLOBAL_TYPE_ID, GLOBAL_BOOLEAN_STRING_LITERAL_ID, "\"boolean\"", Helper),
     (FUNCTION_STRING_LITERAL_ID, FUNCTION_STRING_LITERAL_ID_NAME, FUNCTION_STRING_LITERAL_ID_GLOBAL_TYPE_ID, GLOBAL_FUNCTION_STRING_LITERAL_ID, "\"function\"", Helper),
@@ -156,35 +156,11 @@ predefined_globals! {
     (MAP_CALLBACK_ID, MAP_CALLBACK_ID_NAME, MAP_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_MAP_CALLBACK_ID, "<U>(item: T) => U", Helper),
     (VOID_CALLBACK_ID, VOID_CALLBACK_ID_NAME, VOID_CALLBACK_ID_GLOBAL_TYPE_ID, GLOBAL_VOID_CALLBACK_ID, "() => void", Helper),
     (FETCH_ID, FETCH_ID_NAME, FETCH_ID_GLOBAL_TYPE_ID, _, "fetch", HostManual),
-    (INSTANCEOF_REGEXP_ID, INSTANCEOF_REGEXP_ID_NAME, INSTANCEOF_REGEXP_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_REGEXP_ID, "instanceof RegExp", Helper),
-    (REGEXP_ID, REGEXP_ID_NAME, REGEXP_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_ID, "RegExp", ManualGlobal),
-    (REGEXP_EXEC_ID, REGEXP_EXEC_ID_NAME, REGEXP_EXEC_ID_GLOBAL_TYPE_ID, GLOBAL_REGEXP_EXEC_ID, "RegExp.exec", ManualSynthetic),
+    (INSTANCEOF_REG_EXP_ID, INSTANCEOF_REG_EXP_ID_NAME, INSTANCEOF_REG_EXP_ID_GLOBAL_TYPE_ID, _, "instanceof RegExp", Helper),
     (INSTANCEOF_SYMBOL_ID, INSTANCEOF_SYMBOL_ID_NAME, INSTANCEOF_SYMBOL_ID_GLOBAL_TYPE_ID, _, "instanceof Symbol", Helper),
-    (SYMBOL_ID, SYMBOL_ID_NAME, SYMBOL_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ID, "Symbol", ManualGlobal),
-    (SYMBOL_DISPOSE_ID, SYMBOL_DISPOSE_ID_NAME, SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_DISPOSE_ID, "Symbol.dispose", ManualSynthetic),
-    (SYMBOL_ASYNC_DISPOSE_ID, SYMBOL_ASYNC_DISPOSE_ID_NAME, SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_SYMBOL_ASYNC_DISPOSE_ID, "Symbol.asyncDispose", ManualSynthetic),
-    (DISPOSABLE_ID, DISPOSABLE_ID_NAME, DISPOSABLE_ID_GLOBAL_TYPE_ID, _, "Disposable", ManualGlobal),
-    (DISPOSABLE_DISPOSE_ID, DISPOSABLE_DISPOSE_ID_NAME, DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_DISPOSABLE_DISPOSE_ID, "Disposable[Symbol.dispose]", ManualSynthetic),
-    (ASYNC_DISPOSABLE_ID, ASYNC_DISPOSABLE_ID_NAME, ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID, _, "AsyncDisposable", ManualGlobal),
-    (ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID, ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_NAME, ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID, GLOBAL_ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID,
-        "AsyncDisposable[Symbol.asyncDispose]",
-        ManualSynthetic,
-    ),
     (INSTANCEOF_DATE_ID, INSTANCEOF_DATE_ID_NAME, INSTANCEOF_DATE_ID_GLOBAL_TYPE_ID, _, "instanceof Date", Helper),
-    (DATE_ID, DATE_ID_NAME, DATE_ID_GLOBAL_TYPE_ID, GLOBAL_DATE_ID, "Date", ManualGlobal),
     (INSTANCEOF_MAP_ID, INSTANCEOF_MAP_ID_NAME, INSTANCEOF_MAP_ID_GLOBAL_TYPE_ID, _, "instanceof Map", Helper),
-    (MAP_ID, MAP_ID_NAME, MAP_ID_GLOBAL_TYPE_ID, GLOBAL_MAP_ID, "Map", ManualGlobal),
     (INSTANCEOF_SET_ID, INSTANCEOF_SET_ID_NAME, INSTANCEOF_SET_ID_GLOBAL_TYPE_ID, _, "instanceof Set", Helper),
-    (SET_ID, SET_ID_NAME, SET_ID_GLOBAL_TYPE_ID, GLOBAL_SET_ID, "Set", ManualGlobal),
     (INSTANCEOF_WEAK_MAP_ID, INSTANCEOF_WEAK_MAP_ID_NAME, INSTANCEOF_WEAK_MAP_ID_GLOBAL_TYPE_ID, _, "instanceof WeakMap", Helper),
-    (WEAK_MAP_ID, WEAK_MAP_ID_NAME, WEAK_MAP_ID_GLOBAL_TYPE_ID, GLOBAL_WEAK_MAP_ID, "WeakMap", ManualGlobal),
     (INSTANCEOF_ERROR_ID, INSTANCEOF_ERROR_ID_NAME, INSTANCEOF_ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_INSTANCEOF_ERROR_ID, "instanceof Error", Helper),
-    (ERROR_ID, ERROR_ID_NAME, ERROR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_ID, "Error", ManualGlobal),
-    (BOOLEAN_ID, BOOLEAN_ID_NAME, BOOLEAN_ID_GLOBAL_TYPE_ID, _, "boolean", Primitive),
-    (ERROR_CONSTRUCTOR_ID, ERROR_CONSTRUCTOR_ID_NAME, ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CONSTRUCTOR_ID, "Error.constructor", ManualSynthetic),
-    (ERROR_CALL_ID, ERROR_CALL_ID_NAME, ERROR_CALL_ID_GLOBAL_TYPE_ID, GLOBAL_ERROR_CALL_ID, "Error.call", ManualSynthetic),
-    (ITERATOR_YIELD_RESULT_ID, ITERATOR_YIELD_RESULT_ID_NAME, ITERATOR_YIELD_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_YIELD_RESULT_ID, "IteratorYieldResult", Helper),
-    (ITERATOR_RETURN_RESULT_ID, ITERATOR_RETURN_RESULT_ID_NAME, ITERATOR_RETURN_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RETURN_RESULT_ID, "IteratorReturnResult", Helper),
-    (ITERATOR_RESULT_ID, ITERATOR_RESULT_ID_NAME, ITERATOR_RESULT_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_RESULT_ID, "IteratorResult", Helper),
-    (ITERATOR_ID, ITERATOR_ID_NAME, ITERATOR_ID_GLOBAL_TYPE_ID, GLOBAL_ITERATOR_ID, "Iterator", Helper),
 }
