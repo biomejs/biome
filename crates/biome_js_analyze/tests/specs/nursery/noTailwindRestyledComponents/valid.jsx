@@ -16,3 +16,6 @@ const classes = cn("rounded-none");
 const label = "rounded-none";
 <Button title={cn("rounded-none")} />;
 <Button className={tone === "rounded-none" ? "mt-2" : "mt-4"} />;
+<Button className="mt-4">{"rounded-none"}</Button>;
+<Button className="mt-4">{cn("rounded-none")}</Button>;
+<Card title={<span className="rounded-none" />} />;

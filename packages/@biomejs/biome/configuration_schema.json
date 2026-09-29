@@ -7362,7 +7362,7 @@
 					]
 				},
 				"noTailwindRestyledComponents": {
-					"description": "Disallow Tailwind utilities that restyle components at their call sites.\nSee https://biomejs.dev/linter/rules/no-tailwind-restyled-components",
+					"description": "Disallow Tailwind utilities that override the appearance of components.\nSee https://biomejs.dev/linter/rules/no-tailwind-restyled-components",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindRestyledComponentsConfiguration" },
 						{ "type": "null" }

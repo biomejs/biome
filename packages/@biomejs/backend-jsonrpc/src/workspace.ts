@@ -2635,7 +2635,7 @@ See https://biomejs.dev/linter/rules/no-tailwind-raw-colors
 	 */
 	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
-	* Disallow Tailwind utilities that restyle components at their call sites.
+	* Disallow Tailwind utilities that override the appearance of components.
 See https://biomejs.dev/linter/rules/no-tailwind-restyled-components 
 	 */
 	noTailwindRestyledComponents?: NoTailwindRestyledComponentsConfiguration;
