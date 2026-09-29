@@ -250,6 +250,13 @@ pub struct JsModuleInfoInner {
     /// Sorted local IDs for declarations that retain their symbolic identity.
     pub(crate) named_type_ids: Box<[InferredLocalTypeId]>,
 
+    /// Bindings declared inside each `namespace` or `module` declaration,
+    /// keyed by the raw type ID of that declaration.
+    ///
+    /// Merged declarations of the same namespace contribute their members in
+    /// source order. Namespace types without members have no entry.
+    pub(crate) namespace_members: FxHashMap<TypeId, Box<[NamespaceMember]>>,
+
     /// Diagnostics emitted during the resolution of the module
     pub(crate) diagnostics: Vec<ModuleDiagnostic>,
 
@@ -262,6 +269,14 @@ pub struct JsModuleInfoInner {
     /// which may contain multiple space-separated class names.
     /// Only static string literals are collected; dynamic values are excluded.
     pub referenced_classes: Vec<CssClassReference>,
+}
+
+/// A binding declared directly inside a `namespace` or `module` declaration.
+#[derive(Debug)]
+pub(crate) struct NamespaceMember {
+    pub(crate) name: Text,
+    /// Declaration range, which keys [`JsModuleInfoInner::raw_binding_types`].
+    pub(crate) range: TextRange,
 }
 
 #[derive(Debug, Default)]

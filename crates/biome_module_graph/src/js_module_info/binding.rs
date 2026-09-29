@@ -80,7 +80,7 @@ impl JsBinding {
     /// a default unknown type when no augmentation data exists.
     pub fn ty(&self) -> TypeReference {
         // Look up type augmentation data by binding range
-        let binding_range = self.semantic_binding.syntax().text_trimmed_range();
+        let binding_range = self.semantic_binding.range();
         self.data
             .raw_binding_types
             .get(&binding_range)

@@ -51,10 +51,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 .and_then(|reference| reference.get_binding_id_for_qualifier(qualifier))
                 .and_then(|id| self.js_info.semantic_model.binding_by_id(id));
             if let Some(binding) = binding {
-                let TypeReference::Resolved(resolved_id) = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?
+                let TypeReference::Resolved(resolved_id) =
+                    self.js_info.raw_binding_types.get(&binding.range())?
                 else {
                     return None;
                 };
@@ -139,11 +137,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                         type_only: qualifier.type_only,
                     })
                 } else if resolves_declarations_directly {
-                    self.resolve_local_binding(binding.syntax().text_trimmed_range())
+                    self.resolve_local_binding(binding.range())
                 } else {
                     self.js_info
                         .raw_binding_types
-                        .get(&binding.syntax().text_trimmed_range())
+                        .get(&binding.range())
                         .cloned()
                         .map_or(InferredTypeData::Unknown, |reference| {
                             self.resolve(&reference)
@@ -370,7 +368,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     next = self
                         .js_info
                         .raw_binding_types
-                        .get(&binding.syntax().text_trimmed_range())
+                        .get(&binding.range())
                         .cloned();
                     break;
                 }
