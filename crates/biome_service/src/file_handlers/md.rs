@@ -3,8 +3,6 @@ mod parse_embedded_nodes;
 
 #[cfg(feature = "md_embeds")]
 use self::parse_embedded_nodes::parse_embedded_nodes;
-#[cfg(feature = "md_embeds")]
-use biome_markdown_syntax::MdFencedCodeBlock;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
@@ -39,6 +37,8 @@ use biome_markdown_analyze::analyze;
 use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
+#[cfg(feature = "md_embeds")]
+use biome_markdown_syntax::MdFencedCodeBlock;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
 use biome_rowan::{AstNode, NodeCache};
