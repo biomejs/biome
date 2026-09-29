@@ -18,12 +18,8 @@ use biome_js_syntax::{
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
 pub use closure::*;
-use rust_lapper::{Interval, Lapper};
 use rustc_hash::{FxHashMap, FxHashSet};
-use std::{
-    collections::{BTreeSet, VecDeque},
-    iter::FusedIterator,
-};
+use std::{collections::VecDeque, iter::FusedIterator};
 
 pub use binding::*;
 pub use builder::*;
