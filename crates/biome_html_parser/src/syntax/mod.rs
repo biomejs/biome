@@ -387,7 +387,7 @@ fn parse_element_allowing_sfc_blocks(
         && name_kind != HTML_COMPONENT_LITERAL
         && opening_tag_name.eq_ignore_ascii_case("math");
 
-    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+    let opening_name = parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
     match html_framework(p) {
         HtmlFramework::Svelte => {
@@ -466,14 +466,15 @@ fn parse_element_allowing_sfc_blocks(
             }
             list.complete(p, HTML_ELEMENT_LIST);
 
-            let closing_tag = parse_closing_tag(p);
-            if is_raw_text_block && closing_tag.is_absent() {
-                // The lexer read to the end of the file looking for the closing
-                // tag, so the block is unclosed. Give up and let the caller
-                // parse the element as ordinary markup.
-                return Absent;
+            if parse_closing_tag(p).is_none() {
+                if is_raw_text_block {
+                    // The lexer read to the end of the file looking for the
+                    // closing tag, so the block is unclosed. Give up and let
+                    // the caller parse the element as ordinary markup.
+                    return Absent;
+                }
+                p.error(expected_closing_tag(p, p.cur_range()));
             }
-            closing_tag.or_add_diagnostic(p, expected_closing_tag);
         } else {
             loop {
                 ElementList {
@@ -481,21 +482,27 @@ fn parse_element_allowing_sfc_blocks(
                     in_math: in_math || is_astro_math,
                 }
                 .parse_list(p);
-                if let Some(mut closing) =
-                    parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
-                {
-                    if is_void_closing_tag(p, &closing) {
-                        closing.change_to_bogus(p);
-                        continue;
-                    }
+                let Some(ClosingTag {
+                    marker: mut closing,
+                    name: closing_name,
+                }) = parse_closing_tag(p)
+                else {
+                    p.error(expected_closing_tag(p, p.cur_range()));
+                    break;
+                };
 
-                    if !closing.text(p).contains(opening_tag_name.as_str()) {
-                        p.error(
-                            expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
-                        );
-                        closing.change_to_bogus(p);
-                        continue;
-                    }
+                if is_void_closing_tag(p, &closing) {
+                    closing.change_to_bogus(p);
+                    continue;
+                }
+
+                // Compare the whole names, so that `</span>` doesn't close a `<p>`.
+                if opening_name.as_ref().map(|name| name.text(p))
+                    != closing_name.map(|name| name.text(p))
+                {
+                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                    closing.change_to_bogus(p);
+                    continue;
                 }
                 break;
             }
@@ -534,9 +541,16 @@ fn parse_astro_fragment(
     Present(m.complete(p, ASTRO_FRAGMENT))
 }
 
-fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
+/// A parsed closing tag, e.g. `</div>`.
+struct ClosingTag {
+    marker: CompletedMarker,
+    /// The tag name, which is missing in `</>`.
+    name: Option<CompletedMarker>,
+}
+
+fn parse_closing_tag(p: &mut HtmlParser) -> Option<ClosingTag> {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
-        return Absent;
+        return None;
     }
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
@@ -545,7 +559,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     // The closing tag name has been classified by the lexer; component closings
     // (`HTML_COMPONENT_LITERAL`) are never void, so this is `O(1)` and correct.
     let is_void_element = VOID_ELEMENTS.contains(p.cur());
-    let _name = parse_any_tag_name(p);
+    let name = parse_any_tag_name(p).ok();
 
     // There shouldn't be any attributes in a closing tag.
     while p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"]) {
@@ -559,7 +573,10 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(void_element_should_not_have_closing_tag(p, closing.range(p)).into_diagnostic(p));
     }
 
-    Present(closing)
+    Some(ClosingTag {
+        marker: closing,
+        name,
+    })
 }
 
 fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
