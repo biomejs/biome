@@ -1473,18 +1473,57 @@ pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
 
 /// Iterator that returns the callee names in "top down order".
 ///
+/// The callee must be a chain of names rooted in an identifier. Otherwise, the
+/// iterator yields nothing, so a callee like `/re/.test` isn't mistaken for `test`.
+///
 /// # Examples
 ///
 /// ```javascript
 /// it.only() -> [`only`, `it`]
+/// /re/.test() -> []
 /// ```
 struct CalleeNamesIterator {
-    next: Option<AnyJsExpression>,
+    names: smallvec::IntoIter<[TokenText; 5]>,
 }
 
 impl CalleeNamesIterator {
     fn new(callee: AnyJsExpression) -> Self {
-        Self { next: Some(callee) }
+        let names = Self::collect_names(callee).unwrap_or_default();
+        Self {
+            names: names.into_iter(),
+        }
+    }
+
+    /// Returns `None` if the chain doesn't end at an identifier.
+    fn collect_names(mut current: AnyJsExpression) -> Option<SmallVec<[TokenText; 5]>> {
+        use AnyJsExpression::*;
+
+        let mut names = SmallVec::new();
+        loop {
+            match current {
+                JsIdentifierExpression(identifier) => {
+                    let name = identifier.name().ok()?.value_token().ok()?;
+                    names.push(name.token_text_trimmed());
+                    return Some(names);
+                }
+                JsStaticMemberExpression(member_expression) => {
+                    let AnyJsName::JsName(name) = member_expression.member().ok()? else {
+                        return None;
+                    };
+                    names.push(name.value_token().ok()?.token_text_trimmed());
+                    current = member_expression.object().ok()?;
+                }
+                JsComputedMemberExpression(member_expression) => {
+                    let member = member_expression.member().ok()?;
+                    let string_lit = member
+                        .as_any_js_literal_expression()?
+                        .as_js_string_literal_expression()?;
+                    names.push(string_lit.inner_string_text().ok()?);
+                    current = member_expression.object().ok()?;
+                }
+                _ => return None,
+            }
+        }
     }
 }
 
@@ -1492,37 +1531,7 @@ impl Iterator for CalleeNamesIterator {
     type Item = TokenText;
 
     fn next(&mut self) -> Option<Self::Item> {
-        use AnyJsExpression::*;
-
-        let current = self.next.take()?;
-
-        match current {
-            JsIdentifierExpression(identifier) => identifier
-                .name()
-                .and_then(|reference| reference.value_token())
-                .ok()
-                .map(|value| value.token_text_trimmed()),
-            JsStaticMemberExpression(member_expression) => match member_expression.member() {
-                Ok(AnyJsName::JsName(name)) => {
-                    self.next = member_expression.object().ok();
-                    name.value_token()
-                        .ok()
-                        .map(|name| name.token_text_trimmed())
-                }
-                _ => None,
-            },
-            JsComputedMemberExpression(member_expression) => {
-                let member = member_expression.member().ok()?;
-                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
-                    && let Some(string_lit) = lit.as_js_string_literal_expression()
-                {
-                    self.next = member_expression.object().ok();
-                    return string_lit.inner_string_text().ok();
-                }
-                None
-            }
-            _ => None,
-        }
+        self.names.next()
     }
 }
 

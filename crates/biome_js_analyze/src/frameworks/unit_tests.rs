@@ -413,6 +413,37 @@ mod tests {
     }
 
     #[test]
+    fn member_call_on_non_identifier_is_not_unit_test() {
+        assert!(!is_unit_test(&first_call("/a/.test(x)")));
+        assert!(!is_unit_test(&first_call("new RegExp(s).test(x)")));
+        assert!(!is_unit_test(&first_call("this.it('test', () => {})")));
+        assert!(!is_unit_test(&first_call(
+            "foo().test.only('test', () => {})"
+        )));
+    }
+
+    #[test]
+    fn member_call_on_non_identifier_is_not_test_block() {
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call("foo().describe('suite', () => {})")),
+            None
+        );
+        assert_eq!(
+            TestBlockKind::from_call_expression(&first_call(
+                "foo().test.each([1, 2])('test', () => {})"
+            )),
+            None
+        );
+    }
+
+    #[test]
+    fn computed_string_member_is_unit_test() {
+        assert!(is_unit_test(&first_call(
+            r#"test["only"]('test', () => {})"#
+        )));
+    }
+
+    #[test]
     fn before_each_bare() {
         assert_eq!(
             LifecycleHook::from_call_expression(&first_call("beforeEach(() => {})")),
