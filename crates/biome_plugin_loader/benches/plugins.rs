@@ -139,12 +139,6 @@ const SPARSE: Fixture = Fixture {
     source: sparse_source,
 };
 
-impl fmt::Display for Fixture {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(self.name)
-    }
-}
-
 const FIXTURES: &[&Fixture] = &[&DENSE, &SPARSE];
 
 const BLOCKS: usize = 200;
@@ -345,15 +339,6 @@ fn main() {
 #[divan::bench(args = load_cases())]
 fn load(bencher: Bencher, case: &LoadCase) {
     bencher.bench_local(|| black_box(case.1.load(case.0)));
-}
-
-/// Analysis without plugins. Subtract it from the other groups to isolate the
-/// cost of the plugins from parsing-independent analyzer overhead.
-#[divan::bench(args = FIXTURES)]
-fn baseline(bencher: Bencher, fixture: &Fixture) {
-    let root = parse_fixture(fixture);
-    let plugins = Plugins::new();
-    bencher.bench_local(|| black_box(analyze(&root, &plugins)));
 }
 
 /// First analysis with a freshly loaded plugin. JS plugins create their
