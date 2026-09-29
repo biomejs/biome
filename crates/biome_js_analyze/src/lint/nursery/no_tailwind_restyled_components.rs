@@ -39,6 +39,8 @@ declare_lint_rule! {
     /// such as `UI.Button`, and custom elements with hyphenated names such as `my-button`.
     /// Native elements are not checked. The rule checks `class` and `className`,
     /// including literal branches of conditionals and common class helper calls.
+    /// In Astro, Svelte, and Vue files, it also checks class expressions such as
+    /// `class={...}`, Astro's `class:list={...}`, and Vue's `:class="..."`.
     ///
     /// ## Examples
     ///
