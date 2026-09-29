@@ -110,8 +110,8 @@ impl<'src> YamlLexer<'src> {
     /// ```
     fn consume_tokens(&mut self) {
         let Some(current) = self.current_byte() else {
-            let tokens = self.close_all_scopes();
-            self.tokens.extend(tokens);
+            let mut tokens = self.close_all_scopes();
+            append_tokens(&mut self.tokens, &mut tokens);
             self.tokens
                 .push_back(LexToken::pseudo(EOF, self.current_coordinate));
             return;
@@ -155,7 +155,7 @@ impl<'src> YamlLexer<'src> {
             return;
         }
 
-        let tokens = match current {
+        let mut tokens = match current {
             c if is_break(c) => self.evaluate_block_scope(),
             c if is_space(c) => self.consume_whitespace_token().into(),
             b'#' if self.is_at_comment() => self.consume_comment().into(),
@@ -176,7 +176,7 @@ impl<'src> YamlLexer<'src> {
             b'|' | b'>' => self.consume_block_scalar(current),
             _ => self.consume_unexpected_token().into(),
         };
-        self.tokens.extend(tokens);
+        append_tokens(&mut self.tokens, &mut tokens);
 
         debug_assert!(self.text_position() > start, "Lexer did not advance");
     }
@@ -249,12 +249,12 @@ impl<'src> YamlLexer<'src> {
         let properties_end = tokens.len();
         let mut potential_mapping_keys = self.consume_potential_mapping_key(current);
         let key_end = self.current_coordinate;
-        tokens.append(&mut potential_mapping_keys);
+        append_tokens(&mut tokens, &mut potential_mapping_keys);
 
         // Consume any trailing trivia remaining before closing the mapping/flow, as we must not
         // have trailing trivia followed MAPPING_END/FLOW_END token
         let mut trivia = self.consume_trivia(true);
-        tokens.append(&mut trivia);
+        append_tokens(&mut tokens, &mut trivia);
 
         let mapping_start_coordinate = tokens
             .get(key_properties_start)
@@ -344,7 +344,7 @@ impl<'src> YamlLexer<'src> {
         tokens.push_back(style_token);
 
         let (mut headers, explicit_indent) = self.consume_block_header_tokens();
-        tokens.append(&mut headers);
+        append_tokens(&mut tokens, &mut headers);
 
         let required_indent = explicit_indent.map(|indent| {
             self.scopes
@@ -382,7 +382,7 @@ impl<'src> YamlLexer<'src> {
         }
 
         let mut trivia = self.consume_trailing_trivia();
-        tokens.append(&mut trivia);
+        append_tokens(&mut tokens, &mut trivia);
 
         (tokens, explicit_indent)
     }
@@ -451,7 +451,7 @@ impl<'src> YamlLexer<'src> {
         let start = self.current_coordinate;
         let mut trivia = self.consume_trivia(false);
         let mut scope_end_tokens = self.close_breached_scopes(start);
-        scope_end_tokens.append(&mut trivia);
+        append_tokens(&mut scope_end_tokens, &mut trivia);
         scope_end_tokens
     }
 
@@ -557,7 +557,7 @@ impl<'src> YamlLexer<'src> {
                     }
                 }
 
-                collection_tokens.append(&mut trivia);
+                append_tokens(&mut collection_tokens, &mut trivia);
                 continue;
             }
             let token = match (current, self.peek_byte()) {
@@ -633,6 +633,20 @@ impl<'src> YamlLexer<'src> {
             }
             if !self.current_char_is_yaml_printable() {
                 self.consume_invalid_character();
+                continue;
+            }
+
+            // A run of plain-safe ASCII graphic characters needs no UTF-8 decoding or lookaround.
+            if is_plain_ascii_char(c, in_flow_collection) {
+                let bytes = self.source.as_bytes();
+                let mut offset = self.current_coordinate.offset + 1;
+                while bytes
+                    .get(offset)
+                    .is_some_and(|&c| is_plain_ascii_char(c, in_flow_collection))
+                {
+                    offset += 1;
+                }
+                self.advance(offset - self.current_coordinate.offset);
                 continue;
             }
 
@@ -847,7 +861,7 @@ impl<'src> YamlLexer<'src> {
         self.advance(3);
         tokens.push_back(LexToken::new(DOC_END, start, self.current_coordinate));
         let mut trivia = self.consume_trailing_trivia();
-        tokens.append(&mut trivia);
+        append_tokens(&mut tokens, &mut trivia);
         self.bom_allowed = true;
 
         tokens
@@ -884,13 +898,13 @@ impl<'src> YamlLexer<'src> {
         debug_assert!(self.current_byte().is_some_and(is_break));
         let start = self.current_coordinate;
         let diagnostics_len = self.diagnostics.len();
-        let mut trivia = VecDeque::new();
+        let mut last_trivia = None;
         while let Some(current) = self.current_byte() {
             if is_space(current) {
-                trivia
-                    .push_back(self.consume_scalar_continuation_whitespace_token(required_indent));
+                last_trivia =
+                    Some(self.consume_scalar_continuation_whitespace_token(required_indent));
             } else if is_break(current) {
-                trivia.push_back(self.consume_newline_token());
+                last_trivia = Some(self.consume_newline_token());
             } else {
                 break;
             }
@@ -914,8 +928,8 @@ impl<'src> YamlLexer<'src> {
                     .is_some_and(|byte| !is_break(byte) && byte != b'#')
                 && self.current_coordinate.column < required_indent
             {
-                let range = trivia
-                    .back()
+                let range = last_trivia
+                    .as_ref()
                     .filter(|token| token.kind == WHITESPACE)
                     .map_or_else(
                         || {
@@ -1058,7 +1072,7 @@ impl<'src> YamlLexer<'src> {
                         self.current_coordinate = start;
                         break;
                     } else {
-                        properties.append(&mut trivia);
+                        append_tokens(&mut properties, &mut trivia);
                         current_line_start = properties.len();
                         anchor_before_line = seen_anchor;
                         tag_before_line = seen_tag;
@@ -1132,8 +1146,8 @@ impl<'src> YamlLexer<'src> {
             }
             let mut tokens = properties;
             tokens.push_front(LexToken::pseudo(FLOW_START, start_coordinate));
-            tokens.append(&mut value_tokens);
-            tokens.append(&mut trivia);
+            append_tokens(&mut tokens, &mut value_tokens);
+            append_tokens(&mut tokens, &mut trivia);
             tokens.push_back(LexToken::pseudo(FLOW_END, self.current_coordinate));
             return tokens;
         }
@@ -1675,28 +1689,34 @@ impl<'src> Lexer<'src> for YamlLexer<'src> {
     fn consume_whitespaces(&mut self) {
         self.assert_current_char_boundary();
 
-        while let Some(c) = self.current_byte() {
+        loop {
+            let bytes = self.source.as_bytes();
+            let start_offset = self.current_coordinate.offset;
+            let mut offset = start_offset;
+            while bytes.get(offset).copied().is_some_and(is_space) {
+                offset += 1;
+            }
+            if offset > start_offset {
+                self.advance(offset - start_offset);
+            }
+
+            let Some(c) = self.current_byte() else {
+                break;
+            };
             let dispatch = lookup_byte(c);
-            if !matches!(dispatch, WHS) {
+            if !matches!(dispatch, WHS) || is_break(c) {
                 break;
             }
 
-            if is_space(c) {
-                self.advance(1);
-            } else if is_break(c) {
-                break;
-            } else {
-                let start = self.text_position();
-                self.advance(1);
-
-                self.push_diagnostic(
-                    ParseDiagnostic::new(
-                        "The YAML standard allows only two types of whitespace characters: tabs and spaces",
-                        start..self.text_position(),
-                    )
-                        .with_hint("Use a regular whitespace character instead. For more detail, please check https://yaml.org/spec/1.2.2/#55-white-space-characters"),
+            let start = self.text_position();
+            self.advance(1);
+            self.push_diagnostic(
+                ParseDiagnostic::new(
+                    "The YAML standard allows only two types of whitespace characters: tabs and spaces",
+                    start..self.text_position(),
                 )
-            }
+                    .with_hint("Use a regular whitespace character instead. For more detail, please check https://yaml.org/spec/1.2.2/#55-white-space-characters"),
+            )
         }
     }
 
@@ -1798,6 +1818,19 @@ impl From<LexToken> for VecDeque<LexToken> {
         let mut s = Self::new();
         s.push_back(value);
         s
+    }
+}
+
+/// Moves every token of `src` to the back of `dst`, leaving `src` empty.
+///
+/// Taking the source buffer when the destination is empty avoids allocating and
+/// copying the tokens produced by the lexer.
+#[inline]
+fn append_tokens(dst: &mut VecDeque<LexToken>, src: &mut VecDeque<LexToken>) {
+    if dst.is_empty() {
+        std::mem::swap(dst, src);
+    } else {
+        dst.append(src);
     }
 }
 
@@ -1925,6 +1958,15 @@ fn is_start_of_plain(current: u8, peek: Option<u8>, in_flow_collection: bool) ->
     (is_non_blank_char(current) && !is_indicator(current))
         || ((current == b'?' || current == b':' || current == b'-')
             && peek.is_some_and(|c| is_plain_safe(c, in_flow_collection)))
+}
+
+/// Returns whether an ASCII byte can be consumed without checking its context.
+#[inline]
+fn is_plain_ascii_char(c: u8, in_flow_collection: bool) -> bool {
+    c.is_ascii_graphic()
+        && c != b':'
+        && c != b'#'
+        && !(in_flow_collection && is_flow_collection_indicator(c))
 }
 
 // https://yaml.org/spec/1.2.2/#rule-ns-plain-safe
