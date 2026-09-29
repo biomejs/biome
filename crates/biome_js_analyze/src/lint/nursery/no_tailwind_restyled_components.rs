@@ -1,3 +1,4 @@
+use crate::services::embedded::EmbeddedService;
 use crate::tailwind::{AnyTailwindClassString, host_range};
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
@@ -5,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{AnyJsxElementName, AnyJsxObjectName, JsxAttribute};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
 use biome_tailwind_logic::no_tailwind_restyled_components::{
@@ -103,45 +105,56 @@ impl Rule for NoTailwindRestyledComponents {
         if ctx.query().tailwind_has_errors() {
             return vec![];
         }
-        let attribute = ctx
-            .query()
-            .node()
+        let node = ctx.query().node();
+        let attribute = node
             .syntax()
             .ancestors()
             .skip(1)
             .find_map(JsxAttribute::cast);
-        let element = attribute.and_then(|attribute| {
-            if !matches!(
-                attribute.name_value_token().ok()?.text_trimmed(),
-                "class" | "className"
-            ) {
-                return None;
+        let allowances: Vec<_> = if let Some(attribute) = attribute {
+            let Some(element) = class_attribute_element(&attribute) else {
+                return vec![];
+            };
+            if !element.is_custom_component() && !element.is_custom_element() {
+                return vec![];
             }
-            attribute
-                .syntax()
-                .parent()?
-                .parent()
-                .and_then(AnyJsxElement::cast)
-        });
-        let Some(element) = element else {
+            let segments = element.name().ok().and_then(|name| name_segments(&name));
+            ctx.options()
+                .allow()
+                .iter()
+                .filter(|allow| {
+                    allow.components.matches(|name| match &segments {
+                        Some(segments) => matches_component_name(segments, name),
+                        // Namespaced names such as `svg:rect` are not split into segments.
+                        None => element.matches_name(name).unwrap_or(false),
+                    })
+                })
+                .collect()
+        } else if ctx
+            .source_type::<JsFileSource>()
+            .as_embedding_kind()
+            .is_class_attribute()
+        {
+            // The class attributes of Astro, Svelte, and Vue elements are separate snippets,
+            // so the element is looked up in the host document.
+            let Some(segments) = ctx
+                .get_service::<EmbeddedService>()
+                .and_then(|embedded| embedded.component_at(node.range()))
+            else {
+                return vec![];
+            };
+            ctx.options()
+                .allow()
+                .iter()
+                .filter(|allow| {
+                    allow
+                        .components
+                        .matches(|name| matches_component_name(&segments, name))
+                })
+                .collect()
+        } else {
             return vec![];
         };
-        if !element.is_custom_component() && !element.is_custom_element() {
-            return vec![];
-        }
-        let segments = element.name().ok().and_then(|name| name_segments(&name));
-        let allowances: Vec<_> = ctx
-            .options()
-            .allow()
-            .iter()
-            .filter(|allow| {
-                allow.components.matches(|name| match &segments {
-                    Some(segments) => matches_component_name(segments, name),
-                    // Namespaced names such as `svg:rect` are not split into segments.
-                    None => element.matches_name(name).unwrap_or(false),
-                })
-            })
-            .collect();
         restyled_component_ranges(&ctx.query().tailwind_root().candidates(), &allowances)
     }
 
@@ -156,6 +169,21 @@ impl Rule for NoTailwindRestyledComponents {
             .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
         )
     }
+}
+
+/// Returns the element of `attribute` if it's a `class` or `className` attribute.
+fn class_attribute_element(attribute: &JsxAttribute) -> Option<AnyJsxElement> {
+    if !matches!(
+        attribute.name_value_token().ok()?.text_trimmed(),
+        "class" | "className"
+    ) {
+        return None;
+    }
+    attribute
+        .syntax()
+        .parent()?
+        .parent()
+        .and_then(AnyJsxElement::cast)
 }
 
 /// Returns the segments of `name`, such as `UI` and `Button` for `UI.Button`.

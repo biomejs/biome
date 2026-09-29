@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	let active = true;
+</script>
+
+<div class={active ? "rounded-none" : "bg-red-500"}></div>
+<Button class={"mt-4 w-full"} />
+<Button title={"rounded-none"} />
+
+```

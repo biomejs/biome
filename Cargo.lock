@@ -594,6 +594,7 @@ dependencies = [
  "camino",
  "papaya",
  "salsa",
+ "smallvec",
 ]
 
 [[package]]
