@@ -22,7 +22,7 @@ It describes various parts of how the project is managed as well as accepted pra
 * [Code review](#code-review)
 * [Financial Contributions](#financial-contributions)
   + [Sponsorship](#sponsorship)
-  + [Community-Funded Bounties](#community-funded-bounties)
+  + [Community-Funded Bounties](#community-funded-bounties-currently-halted)
   + [Project-Funded Bounties](#project-funded-bounties)
   + [Paid Contracting](#paid-contracting)
   + [Fund Allocation](#fund-allocation)
@@ -54,7 +54,7 @@ These assets and responsibilities are but are not limited to:
 Also:
 - Ability to vote for new leads.
 - Onboard new [core contributors](#core-contributor) and new leads.
-- Takes part in [project decisions](#project-direction-and-planning).
+- Takes part in [project decisions](#project-direction).
 - Access to the Discord `Lead` category and channels that belong to this category.
 - Propose changes to the governance document via PR.
 
@@ -80,10 +80,10 @@ Core Contributors are outstanding [maintainers](#maintainer), are ambassadors of
 
 - Push access to the [Biome GitHub org][gh-org], this includes all repositories
 - `Core contributor` status on the [Biome Discord server][discord]
-- Takes part in [project decisions](#project-direction-and-planning)
+- Takes part in [project decisions](#project-direction)
 - Ability to [vote](#maintainer-nomination) on new maintainers and [vote](#core-contributor-nomination) on new core contributors
 - Onboard new [maintainers](#maintainer)
-- Assign [pledges to issues](#bounties).
+- Assign [pledges to issues](#community-funded-bounties-currently-halted).
 - Access to the Discord `Core contributors` category and channels that belong to this category.
 - Propose changes to the governance document via PR.
 
@@ -119,7 +119,7 @@ Maintainers are those with a history of consistent contributions, including but 
 
 - Push access to some of the repositories of the [Biome GitHub org][gh-org]
 - `Maintainer` status on the [Biome Discord server][discord]
-- Ability to [vote](#voting) on project decisions
+- Ability to [vote](#voting-rules) on project decisions
 - Ability to [vote](#maintainer-nomination) on new maintainers
 - Access to the Discord `Maintainers` category and channels that belong to this category.
 #### Maintainer nomination
@@ -264,7 +264,7 @@ Bounties are the second approach towards funding Biome development. Unlike spons
 
 ### Project-Funded Bounties
 
-In some cases, Biome funds bounties on its own issues in order to further the project goals as laid out in its [roadmap](#roadmap). Because Biome is the one funding these issues, it also means **100% of the pledged amount will go to the contributor completing the task**. Project-Funded Bounties have the same conditions applied to them as [Community-Funded Bounties](#community-funded-bounties). But given that these issues are funded using money that ultimately comes from our sponsors, we have additional restrictions in place:
+In some cases, Biome funds bounties on its own issues in order to further the project goals as laid out in its [roadmap](#roadmap). Because Biome is the one funding these issues, it also means **100% of the pledged amount will go to the contributor completing the task**. Project-Funded Bounties have the same conditions applied to them as [Community-Funded Bounties](#community-funded-bounties-currently-halted). But given that these issues are funded using money that ultimately comes from our sponsors, we have additional restrictions in place:
 
 - Implementation of the task funded by Biome must advance our [roadmap](#roadmap) or help with essential infrastructure.
   - The task description must include a clear rationale for why this task is eligible for funding.
