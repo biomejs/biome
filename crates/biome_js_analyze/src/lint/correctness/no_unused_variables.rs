@@ -475,7 +475,7 @@ fn is_implemented_overload_type_parameter(
         signatures.iter().any(|id| {
             model
                 .binding_by_id(*id)
-                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
+                .is_some_and(|binding| binding.range() == signature_range)
         })
     })
 }

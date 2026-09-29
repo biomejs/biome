@@ -105,7 +105,7 @@ impl Rule for NoUnmodifiedLoopCondition {
         let mut modified_bindings = FxHashMap::default();
 
         for reference in &mut references {
-            let binding_range = reference.binding.syntax().text_trimmed_range();
+            let binding_range = reference.binding.range();
             reference.modified = *modified_bindings.entry(binding_range).or_insert_with(|| {
                 has_initialized_var_in_loop(loop_statement, &reference.binding)
                     || reference
