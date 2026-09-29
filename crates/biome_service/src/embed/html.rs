@@ -71,6 +71,7 @@ pub(crate) enum EmbedCandidate {
     Directive {
         content: EmbedContent,
         is_event_handler: bool,
+        slot_scope: bool,
         is_class_attribute: bool,
     },
     Attribute {

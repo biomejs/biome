@@ -28,3 +28,4 @@ pub(crate) mod template_chunk_element;
 pub(crate) mod template_element;
 pub(crate) mod variable_declaration_clause;
 pub(crate) mod variable_declarator;
+pub(crate) mod vue_slot_scope_root;

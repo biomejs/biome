@@ -546,6 +546,7 @@ fn extract_html_embedded_js<'a>(
                         setup: element.find_attribute_by_name("setup").is_some(),
                         is_source: true,
                         event_handler: false,
+                        slot_scope: false,
                         allow_statements: true,
                         is_class_attribute: false,
                     })
@@ -602,6 +603,7 @@ fn extract_html_embedded_js<'a>(
                     setup: false,
                     is_source: false,
                     event_handler: false,
+                    slot_scope: false,
                     allow_statements: false,
                     is_class_attribute,
                 })

@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-v-slot.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <RouterView v-slot="{ Component }">
+    <component :is="Component" :missing="missing" />
+  </RouterView>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-v-slot.vue:4:42 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The missing variable is undeclared.
+  
+    2 │ <template>
+    3 │   <RouterView v-slot="{ Component }">
+  > 4 │     <component :is="Component" :missing="missing" />
+      │                                          ^^^^^^^
+    5 │   </RouterView>
+    6 │ </template>
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

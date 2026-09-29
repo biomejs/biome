@@ -98,6 +98,7 @@ fn vue_template_expressions_get_instance_properties() {
         setup: false,
         is_source: false,
         event_handler: false,
+        slot_scope: false,
         allow_statements: false,
     });
     let options =
@@ -119,6 +120,7 @@ fn vue_event_handlers_get_dollar_event() {
             setup: false,
             is_source: false,
             event_handler: true,
+            slot_scope: false,
             allow_statements: false,
         });
     let options = settings

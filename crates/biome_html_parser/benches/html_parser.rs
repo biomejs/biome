@@ -62,6 +62,9 @@ fn load_fixtures() -> Vec<(String, String, String)> {
     }
 
     visit(&fixtures_root, &fixtures_root, &mut cases);
+    cases.sort_by(|(group_a, name_a, _), (group_b, name_b, _)| {
+        (group_a, name_a).cmp(&(group_b, name_b))
+    });
     cases
 }
 
@@ -134,7 +137,6 @@ fn bench_parser(criterion: &mut Criterion) {
     // Benchmark local fixtures (recursively discovered), including their group names
     for (group_name, name, content) in fixtures {
         let code = content.as_str();
-        let mut diagnostics = vec![];
         group.throughput(Throughput::Bytes(code.len() as u64));
         let ext = name
             .rsplit('.')
@@ -144,17 +146,19 @@ fn bench_parser(criterion: &mut Criterion) {
         let file_source = HtmlFileSource::try_from_extension(&ext).unwrap_or_default();
 
         let id = format!("{}/{}", group_name, name);
-        group.bench_with_input(BenchmarkId::new(&id, "uncached"), &code, |b, _| {
-            b.iter(|| {
-                let result = black_box(parse_html(code, HtmlParserOptions::from(&file_source)));
-                diagnostics.extend(result.into_diagnostics());
-            })
-        });
 
+        // Check diagnostics once, outside the measured loop: accumulating them
+        // inside `b.iter` would grow per-iteration work with the iteration count.
+        let diagnostics =
+            parse_html(code, HtmlParserOptions::from(&file_source)).into_diagnostics();
         for diagnostic in diagnostics {
             let diagnostic = diagnostic.with_file_source_code(code).with_file_path(&id);
             println!("{}", print_diagnostic_to_string(&diagnostic));
         }
+
+        group.bench_with_input(BenchmarkId::new(&id, "uncached"), &code, |b, _| {
+            b.iter(|| black_box(parse_html(code, HtmlParserOptions::from(&file_source))))
+        });
 
         group.bench_with_input(BenchmarkId::new(&id, "cached"), &code, |b, _| {
             b.iter_batched(
