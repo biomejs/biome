@@ -1,0 +1,152 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface CallableBase {
+	(): void;
+}
+
+// A base can still contribute a call signature, so the interface's own tag
+// is unknown and it survives a guard for any tag.
+interface DerivedFromCallable extends CallableBase {
+	tag: string;
+}
+
+export function interfaceWithBases(a: DerivedFromCallable | number) {
+	if (typeof a === "object") {
+		a;
+	}
+}
+
+export function tupleValue(b: [string, number] | number) {
+	if (typeof b === "object") {
+		b;
+	}
+}
+
+export function regexpLiteral(c: number) {
+	const value = c > 0 ? /re/ : c;
+	if (typeof value === "object") {
+		value;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding CallableBase "CallableBase" => interface "CallableBase" {
+  extends: []
+  type_args: []
+  members: [
+    ():
+      sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: void
+      }
+  ]
+}
+
+Binding DerivedFromCallable "DerivedFromCallable" => interface "DerivedFromCallable" {
+  extends: [instanceof CallableBase]
+  type_args: []
+  members: ["tag": string]
+}
+
+Binding interfaceWithBases "interfaceWithBases" => sync Function "interfaceWithBases" {
+  accepts: {
+    params: [
+      required a: instanceof DerivedFromCallable | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding a "a" => instanceof DerivedFromCallable | number
+
+Expression "typeof a" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof a === \"object\"" => boolean
+
+Expression "a" => instanceof DerivedFromCallable | number
+
+Expression "\"object\"" => string: object
+
+Expression "a" => interface "DerivedFromCallable" {
+  extends: [instanceof CallableBase]
+  type_args: []
+  members: ["tag": string]
+}
+
+Binding tupleValue "tupleValue" => sync Function "tupleValue" {
+  accepts: {
+    params: [
+      required b: [string,
+      number] | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding b "b" => [string,
+number] | number
+
+Expression "typeof b" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof b === \"object\"" => boolean
+
+Expression "b" => [string,
+number] | number
+
+Expression "\"object\"" => string: object
+
+Expression "b" => [string,
+number]
+
+Binding regexpLiteral "regexpLiteral" => sync Function "regexpLiteral" {
+  accepts: {
+    params: [
+      required c: number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding c "c" => number
+
+Binding value "value" => regex: /re/ | number
+
+Expression "c" => number
+
+Expression "c > 0" => boolean
+
+Expression "c > 0 ? /re/ : c" => regex: /re/ | number
+
+Expression "0" => number: 0
+
+Expression "/re/" => regex: /re/
+
+Expression "c" => number
+
+Expression "typeof value" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof value === \"object\"" => boolean
+
+Expression "value" => regex: /re/ | number
+
+Expression "\"object\"" => string: object
+
+Expression "value" => regex: /re/
+```

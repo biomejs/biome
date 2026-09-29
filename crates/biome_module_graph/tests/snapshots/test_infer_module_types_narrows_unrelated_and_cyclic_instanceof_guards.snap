@@ -1,0 +1,156 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Left {
+	left(): void {}
+}
+class Right {
+	right(): void {}
+}
+
+// Both chains reach their root without meeting the other, so the guard
+// leaves nothing of the other variant.
+export function unrelatedClasses(v: Left | Right) {
+	if (v instanceof Right) {
+		v;
+	}
+}
+
+class SelfExtending extends SelfExtending {}
+
+// Walking the chain must terminate rather than follow the loop forever.
+export function cyclicChain(w: SelfExtending | number) {
+	if (w instanceof SelfExtending) {
+		w;
+	}
+}
+
+interface NotAClass {
+	tag: string;
+}
+declare const notAClass: NotAClass;
+
+// The right-hand side never resolves to a class, so nothing is narrowed.
+export function nonClassGuard(y: Left | number) {
+	if (y instanceof (notAClass as unknown as typeof Left)) {
+		y;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Left "Left" => class "Left" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Right "Right" => class "Right" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding unrelatedClasses "unrelatedClasses" => sync Function "unrelatedClasses" {
+  accepts: {
+    params: [
+      required v: instanceof Left | instanceof Right
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => instanceof Left | instanceof Right
+
+Expression "v" => instanceof Left | instanceof Right
+
+Expression "v instanceof Right" => boolean
+
+Expression "Right" => class "Right" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "v" => instanceof Right
+
+Binding SelfExtending "SelfExtending" => class "SelfExtending" {
+  extends: SelfExtending
+  implements: []
+  type_args: []
+}
+
+Expression "SelfExtending" => class "SelfExtending" {
+  extends: SelfExtending
+  implements: []
+  type_args: []
+}
+
+Binding cyclicChain "cyclicChain" => sync Function "cyclicChain" {
+  accepts: {
+    params: [
+      required w: instanceof SelfExtending | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding w "w" => instanceof SelfExtending | number
+
+Expression "w" => instanceof SelfExtending | number
+
+Expression "w instanceof SelfExtending" => boolean
+
+Expression "SelfExtending" => class "SelfExtending" {
+  extends: SelfExtending
+  implements: []
+  type_args: []
+}
+
+Expression "w" => instanceof SelfExtending
+
+Binding NotAClass "NotAClass" => interface "NotAClass" {
+  extends: []
+  type_args: []
+  members: ["tag": string]
+}
+
+Binding notAClass "notAClass" => instanceof NotAClass
+
+Binding nonClassGuard "nonClassGuard" => sync Function "nonClassGuard" {
+  accepts: {
+    params: [
+      required y: instanceof Left | number
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => instanceof Left | number
+
+Expression "y" => instanceof Left | number
+
+Expression "y instanceof (notAClass as unknown as typeof Left)" => boolean
+
+Expression "(notAClass as unknown as typeof Left)" => typeof Left
+
+Expression "notAClass" => instanceof NotAClass
+
+Expression "notAClass as unknown" => unknown
+
+Expression "notAClass as unknown as typeof Left" => typeof Left
+
+Expression "y" => instanceof Left | number
+```

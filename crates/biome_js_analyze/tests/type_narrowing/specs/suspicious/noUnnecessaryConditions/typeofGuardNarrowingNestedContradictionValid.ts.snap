@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: typeofGuardNarrowingNestedContradictionValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+// Nothing is both a string and a function, so `x` is `never` here and the
+// condition is not provably truthy.
+function nestedContradictoryGuards(x: string | (() => void)) {
+	if (typeof x === "string") {
+		if (typeof x === "function") {
+			if (x) {
+				x();
+			}
+		}
+	}
+}
+
+// A negated `typeof` is not a guard Biome reads, so only the outer one
+// applies and `x` is `string`, which can still be `""`.
+function nestedNegatedContradiction(x: string | (() => void)) {
+	if (typeof x === "string") {
+		if (typeof x !== "string") {
+			if (x) {
+				x();
+			}
+		}
+	}
+}
+
+```
