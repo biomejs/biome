@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <div v-for="item in items"></div>
 
 <div v-for="({ id }, index) in items" :key="id"></div>
@@ -31,6 +32,7 @@ expression: valid.vue
 
 <template v-for="item in items">
   <div></div>
+</template>
 </template>
 
 ```

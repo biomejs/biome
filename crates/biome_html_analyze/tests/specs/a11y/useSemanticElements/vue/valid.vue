@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div></div>
 <header>header</header>
 <img alt="" src="image.jpg" />
@@ -44,3 +45,4 @@
 <input :role="'checkbox'" type="checkbox" />
 <input v-bind:role="'radio'" type="radio" />
 <th :role="'columnheader'" scope="col"></th>
+</template>

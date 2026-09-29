@@ -1,5 +1,7 @@
 <!-- should generate diagnostics -->
+<template>
 <iframe sandbox="allow-scripts allow-same-origin"></iframe>
 <iframe sandbox="allow-downloads allow-scripts allow-forms allow-same-origin"></iframe>
 <iframe :sandbox="'allow-scripts allow-same-origin'"></iframe>
 <iframe v-bind:sandbox="'allow-downloads allow-scripts allow-forms allow-same-origin'"></iframe>
+</template>

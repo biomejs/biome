@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 
 <!-- Basic long-form and shorthand bindings with a simple argument -->
 <div v-bind:foo="bar"></div>
@@ -47,3 +48,4 @@
 
 <!-- Edge-case: argument with hyphen / kebab-case -->
 <div v-bind:data-value="payload"></div>
+</template>

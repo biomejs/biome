@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 
 <!--
 	For this rule, we treat v-binds as if they fully satisfy all conditions of the rule when the value
@@ -13,3 +14,4 @@
 
 <!-- We also should not flag components, only HTML elements -->
 <Button>submit</Button>
+</template>

@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <th scope="col"></th>
 <th scope="row"></th>
 <th v-bind:scope="scopeValue"></th>
@@ -10,3 +11,4 @@
 <!-- static Vue bindings on <th> are valid -->
 <th :scope="'col'"></th>
 <th v-bind:scope="'row'"></th>
+</template>

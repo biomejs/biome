@@ -5,6 +5,8 @@ expression: allowInvalidRoles.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <div role="datepicker"></div>
+</template>
 
 ```

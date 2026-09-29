@@ -5,6 +5,7 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <img alt="Photo of friend." />
 <img alt="Picture of friend." />
 <img alt="Image of friend." />
@@ -12,37 +13,22 @@ expression: invalid.vue
 <img alt="piCTUre of friend." />
 <img alt="imAGE of friend." />
 <img alt="image of cool person" aria-hidden="false" />
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the words "image", "picture", or "photo" in img element alt text.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <img alt="Photo of friend." />
-      │          ^^^^^^^^^^^^^^^^^^
-    3 │ <img alt="Picture of friend." />
-    4 │ <img alt="Image of friend." />
-  
-  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
-  
-
-```
-
 ```
 invalid.vue:3:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <img alt="Photo of friend." />
-  > 3 │ <img alt="Picture of friend." />
-      │          ^^^^^^^^^^^^^^^^^^^^
-    4 │ <img alt="Image of friend." />
-    5 │ <img alt="PhOtO of friend." />
+    2 │ <template>
+  > 3 │ <img alt="Photo of friend." />
+      │          ^^^^^^^^^^^^^^^^^^
+    4 │ <img alt="Picture of friend." />
+    5 │ <img alt="Image of friend." />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
@@ -54,12 +40,12 @@ invalid.vue:4:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
-    2 │ <img alt="Photo of friend." />
-    3 │ <img alt="Picture of friend." />
-  > 4 │ <img alt="Image of friend." />
-      │          ^^^^^^^^^^^^^^^^^^
-    5 │ <img alt="PhOtO of friend." />
-    6 │ <img alt="piCTUre of friend." />
+    2 │ <template>
+    3 │ <img alt="Photo of friend." />
+  > 4 │ <img alt="Picture of friend." />
+      │          ^^^^^^^^^^^^^^^^^^^^
+    5 │ <img alt="Image of friend." />
+    6 │ <img alt="PhOtO of friend." />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
@@ -71,12 +57,12 @@ invalid.vue:5:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
-    3 │ <img alt="Picture of friend." />
-    4 │ <img alt="Image of friend." />
-  > 5 │ <img alt="PhOtO of friend." />
+    3 │ <img alt="Photo of friend." />
+    4 │ <img alt="Picture of friend." />
+  > 5 │ <img alt="Image of friend." />
       │          ^^^^^^^^^^^^^^^^^^
-    6 │ <img alt="piCTUre of friend." />
-    7 │ <img alt="imAGE of friend." />
+    6 │ <img alt="PhOtO of friend." />
+    7 │ <img alt="piCTUre of friend." />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
@@ -88,12 +74,12 @@ invalid.vue:6:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
-    4 │ <img alt="Image of friend." />
-    5 │ <img alt="PhOtO of friend." />
-  > 6 │ <img alt="piCTUre of friend." />
-      │          ^^^^^^^^^^^^^^^^^^^^
-    7 │ <img alt="imAGE of friend." />
-    8 │ <img alt="image of cool person" aria-hidden="false" />
+    4 │ <img alt="Picture of friend." />
+    5 │ <img alt="Image of friend." />
+  > 6 │ <img alt="PhOtO of friend." />
+      │          ^^^^^^^^^^^^^^^^^^
+    7 │ <img alt="piCTUre of friend." />
+    8 │ <img alt="imAGE of friend." />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
@@ -105,12 +91,12 @@ invalid.vue:7:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
-    5 │ <img alt="PhOtO of friend." />
-    6 │ <img alt="piCTUre of friend." />
-  > 7 │ <img alt="imAGE of friend." />
-      │          ^^^^^^^^^^^^^^^^^^
-    8 │ <img alt="image of cool person" aria-hidden="false" />
-    9 │ 
+    5 │ <img alt="Image of friend." />
+    6 │ <img alt="PhOtO of friend." />
+  > 7 │ <img alt="piCTUre of friend." />
+      │          ^^^^^^^^^^^^^^^^^^^^
+    8 │ <img alt="imAGE of friend." />
+    9 │ <img alt="image of cool person" aria-hidden="false" />
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   
@@ -122,11 +108,29 @@ invalid.vue:8:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━�
 
   × Avoid the words "image", "picture", or "photo" in img element alt text.
   
-    6 │ <img alt="piCTUre of friend." />
-    7 │ <img alt="imAGE of friend." />
-  > 8 │ <img alt="image of cool person" aria-hidden="false" />
-      │          ^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     6 │ <img alt="PhOtO of friend." />
+     7 │ <img alt="piCTUre of friend." />
+   > 8 │ <img alt="imAGE of friend." />
+       │          ^^^^^^^^^^^^^^^^^^
+     9 │ <img alt="image of cool person" aria-hidden="false" />
+    10 │ </template>
+  
+  i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
+  
+
+```
+
+```
+invalid.vue:9:10 lint/a11y/noRedundantAlt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the words "image", "picture", or "photo" in img element alt text.
+  
+     7 │ <img alt="piCTUre of friend." />
+     8 │ <img alt="imAGE of friend." />
+   > 9 │ <img alt="image of cool person" aria-hidden="false" />
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </template>
+    11 │ 
   
   i Screen readers announce img elements as "images", so it is not necessary to redeclare this in alternative text.
   

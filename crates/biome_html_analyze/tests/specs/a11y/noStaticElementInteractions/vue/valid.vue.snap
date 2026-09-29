@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <TestComponent @click="myFunction()" />
 <Button @click="myFunction()" />
 <div></div>
@@ -181,5 +182,6 @@ expression: valid.vue
 <div role="separator" @click="() => {}"></div>
 <div role="scrollbar" @click="() => {}"></div>
 <td @click="() => {}"></td>
+</template>
 
 ```

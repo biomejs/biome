@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 
 <!-- argument not allowed -->
 <div v-pre:arg></div>
@@ -8,3 +9,4 @@
 
 <!-- value not allowed -->
 <div v-pre="value"></div>
+</template>

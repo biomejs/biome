@@ -5,41 +5,27 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <html />
 <html></html>
 <html lang></html>
 <html lang=""></html>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a lang attribute when using the html element.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <html />
-      │ ^^^^^^^^
-    3 │ <html></html>
-    4 │ <html lang></html>
-  
-  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
-  
-
-```
-
 ```
 invalid.vue:3:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <html />
-  > 3 │ <html></html>
-      │ ^^^^^^
-    4 │ <html lang></html>
-    5 │ <html lang=""></html>
+    2 │ <template>
+  > 3 │ <html />
+      │ ^^^^^^^^
+    4 │ <html></html>
+    5 │ <html lang></html>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -51,12 +37,12 @@ invalid.vue:4:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    2 │ <html />
-    3 │ <html></html>
-  > 4 │ <html lang></html>
-      │ ^^^^^^^^^^^
-    5 │ <html lang=""></html>
-    6 │ 
+    2 │ <template>
+    3 │ <html />
+  > 4 │ <html></html>
+      │ ^^^^^^
+    5 │ <html lang></html>
+    6 │ <html lang=""></html>
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
@@ -68,11 +54,29 @@ invalid.vue:5:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━
 
   × Provide a lang attribute when using the html element.
   
-    3 │ <html></html>
-    4 │ <html lang></html>
-  > 5 │ <html lang=""></html>
+    3 │ <html />
+    4 │ <html></html>
+  > 5 │ <html lang></html>
+      │ ^^^^^^^^^^^
+    6 │ <html lang=""></html>
+    7 │ </template>
+  
+  i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
+  
+
+```
+
+```
+invalid.vue:6:1 lint/a11y/useHtmlLang ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a lang attribute when using the html element.
+  
+    4 │ <html></html>
+    5 │ <html lang></html>
+  > 6 │ <html lang=""></html>
       │ ^^^^^^^^^^^^^^
-    6 │ 
+    7 │ </template>
+    8 │ 
   
   i Setting a lang attribute on HTML document elements configures the language used by screen readers when no user default is specified.
   
