@@ -1,0 +1,3 @@
+`undefined` as $reference where {
+    register_diagnostic(span = $reference, message = "Unexpected undefined")
+}
