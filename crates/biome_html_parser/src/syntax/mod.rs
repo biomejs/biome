@@ -498,10 +498,7 @@ fn parse_element_allowing_sfc_blocks(
                     continue;
                 }
 
-                // Compare the whole names, so that `</span>` doesn't close a `<p>`.
-                if opening_name.as_ref().map(|name| name.text(p))
-                    != closing_name.map(|name| name.text(p))
-                {
+                if !tag_names_match(p, opening_name.as_ref(), closing_name.as_ref()) {
                     p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
                     closing.change_to_bogus(p);
                     continue;
@@ -582,23 +579,27 @@ fn parse_closing_tag(p: &mut HtmlParser) -> Option<ClosingTag> {
     })
 }
 
-/// Parses a closing tag at the top level of the document, where there is no
-/// element for it to close, as a bogus element.
-fn parse_stray_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
-    let Some(ClosingTag {
-        marker: mut closing,
-        ..
-    }) = parse_closing_tag(p)
-    else {
-        return Absent;
-    };
-
-    // `parse_closing_tag` already reports void closing tags such as `</br>`.
-    if !is_void_closing_tag(p, &closing) {
-        p.error(unexpected_closing_tag(p, closing.range(p)));
+/// Returns whether a closing tag name closes the element with the given opening
+/// tag name. The whole names are compared, so `</span>` doesn't close a `<p>`.
+///
+/// HTML tag names match regardless of case, as in `<DIV></div>`. Component
+/// names, such as `<Foo>` in a Vue file, must match exactly. A missing name
+/// only matches another missing name.
+fn tag_names_match(
+    p: &HtmlParser,
+    opening: Option<&CompletedMarker>,
+    closing: Option<&CompletedMarker>,
+) -> bool {
+    match (opening, closing) {
+        (Some(opening), Some(closing)) => {
+            if opening.kind(p) == HTML_TAG_NAME && closing.kind(p) == HTML_TAG_NAME {
+                opening.text(p).eq_ignore_ascii_case(closing.text(p))
+            } else {
+                opening.text(p) == closing.text(p)
+            }
+        }
+        (opening, closing) => opening.is_none() && closing.is_none(),
     }
-    closing.change_to_bogus(p);
-    Present(closing)
 }
 
 fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
@@ -701,14 +702,44 @@ struct ElementList {
     at_root: bool,
 }
 
+impl ElementList {
+    /// Parses a closing tag in the document root as a bogus element, reporting
+    /// that it has no opening tag. Void closing tags such as `</br>` get the
+    /// diagnostic from [parse_closing_tag] instead.
+    ///
+    /// Only the root list can hold a stray closing tag. Every other list ends
+    /// at a closing tag, which the enclosing element then matches against its
+    /// own opening tag. Returns `Absent` when this list isn't the root or the
+    /// parser isn't at `</`.
+    #[cold]
+    fn parse_stray_closing_tag(&self, p: &mut HtmlParser) -> ParsedSyntax {
+        if !self.at_root {
+            return Absent;
+        }
+        let Some(ClosingTag {
+            marker: mut closing,
+            ..
+        }) = parse_closing_tag(p)
+        else {
+            return Absent;
+        };
+
+        if !is_void_closing_tag(p, &closing) {
+            p.error(unexpected_closing_tag(p, closing.range(p)));
+        }
+        closing.change_to_bogus(p);
+        Present(closing)
+    }
+}
+
 impl ParseNodeList for ElementList {
     type Kind = HtmlSyntaxKind;
     type Parser<'source> = HtmlParser<'source>;
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if self.at_root && p.at(T![<]) && p.nth_at(1, T![/]) {
-            return parse_stray_closing_tag(p);
+        if p.at(T![<]) && p.nth_at(1, T![/]) {
+            return self.parse_stray_closing_tag(p);
         }
         parse_html_element(p, self.vue_sfc_top_level, self.in_math)
     }
