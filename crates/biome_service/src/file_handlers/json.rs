@@ -36,9 +36,7 @@ use biome_formatter::{
 };
 use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};
-use biome_json_analyze::{
-    JsonAnalyzeServices, analyze, analyze_snippet,
-};
+use biome_json_analyze::{JsonAnalyzeServices, analyze, analyze_snippet};
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
 use biome_json_parser::JsonParserOptions;
