@@ -371,6 +371,18 @@ static GROUP_CATEGORY: phf::Map<&'static str, TailwindAppearanceCategory> = phf:
     "stroke" => TailwindAppearanceCategory::Color,
 };
 
+/// Returns whether the allowance component `name` matches a component whose name is made of
+/// `segments`, such as `Card` and `Root` for `Card.Root`.
+///
+/// `name` matches if it equals any segment, so both `Card` and `Root` match `Card.Root`.
+/// A dotted `name` matches if its segments appear consecutively, so `Card.Root` matches
+/// `UI.Card.Root` but not `Card.Header.Root`.
+pub fn matches_component_name<S: AsRef<str>>(segments: &[S], name: &str) -> bool {
+    segments
+        .windows(name.split('.').count())
+        .any(|window| window.iter().map(AsRef::as_ref).eq(name.split('.')))
+}
+
 /// Returns ranges of appearance utilities not covered by the supplied allowances.
 /// Utilities without a mapped category are ignored.
 pub fn restyled_component_ranges(
@@ -681,6 +693,26 @@ fn is_restyling_property(property: &str, values: &CssGenericComponentValueList) 
 mod tests {
     use super::*;
     use biome_tailwind_parser::parse_tailwind;
+
+    #[test]
+    fn component_name_matches_any_segment() {
+        let segments = ["UI", "Card", "Root"];
+        for name in ["UI", "Card", "Root", "UI.Card", "Card.Root", "UI.Card.Root"] {
+            assert!(matches_component_name(&segments, name), "{name}");
+        }
+        for name in [
+            "",
+            "Car",
+            "UI.Root",
+            "Root.Card",
+            "UI.Card.Root.Item",
+            "Card.Root.",
+        ] {
+            assert!(!matches_component_name(&segments, name), "{name}");
+        }
+        assert!(matches_component_name(&["my-button"], "my-button"));
+        assert!(!matches_component_name(&["my-button"], "my"));
+    }
 
     #[test]
     fn lists_are_sorted() {

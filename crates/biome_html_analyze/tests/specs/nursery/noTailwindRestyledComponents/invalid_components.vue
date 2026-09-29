@@ -4,5 +4,5 @@
 <Other class="rounded-none" />
 <Button class="p-4" />
 <Panel.Other class="p-4" />
-<Card.Root class="rounded-none" />
+<Root.Panel class="p-4" />
 </template>

@@ -10,7 +10,7 @@ expression: invalid_components.vue
 <Other class="rounded-none" />
 <Button class="p-4" />
 <Panel.Other class="p-4" />
-<Card.Root class="rounded-none" />
+<Root.Panel class="p-4" />
 </template>
 
 ```
@@ -95,7 +95,7 @@ invalid_components.vue:5:16 lint/nursery/noTailwindRestyledComponents ━━━�
   > 5 │ <Button class="p-4" />
       │                ^^^
     6 │ <Panel.Other class="p-4" />
-    7 │ <Card.Root class="rounded-none" />
+    7 │ <Root.Panel class="p-4" />
   
   i The design system should manage the component's appearance.
   
@@ -117,7 +117,7 @@ invalid_components.vue:6:21 lint/nursery/noTailwindRestyledComponents ━━━�
     5 │ <Button class="p-4" />
   > 6 │ <Panel.Other class="p-4" />
       │                     ^^^
-    7 │ <Card.Root class="rounded-none" />
+    7 │ <Root.Panel class="p-4" />
     8 │ </template>
   
   i The design system should manage the component's appearance.
@@ -132,14 +132,14 @@ invalid_components.vue:6:21 lint/nursery/noTailwindRestyledComponents ━━━�
 ```
 
 ```
-invalid_components.vue:7:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_components.vue:7:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This Tailwind utility restyles a component.
   
     5 │ <Button class="p-4" />
     6 │ <Panel.Other class="p-4" />
-  > 7 │ <Card.Root class="rounded-none" />
-      │                   ^^^^^^^^^^^^
+  > 7 │ <Root.Panel class="p-4" />
+      │                    ^^^
     8 │ </template>
     9 │ 
   

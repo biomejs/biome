@@ -14,3 +14,7 @@
 <Color className="[color:red]" />;
 <Color className="stroke-none" />;
 <Button className="stroke-2" />;
+<Card.Root className="shadow-lg" />;
+<Dialog.Card className="shadow-lg" />;
+<UI.Button.Icon className="shadow-lg" />;
+<Dialog.UI.Button className="shadow-lg" />;

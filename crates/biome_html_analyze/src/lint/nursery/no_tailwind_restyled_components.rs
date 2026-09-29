@@ -3,12 +3,16 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlTagName, HtmlAttribute, element_ext::AnyHtmlTagElement};
-use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, TextRange};
+use biome_html_syntax::{
+    AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlAttribute, element_ext::AnyHtmlTagElement,
+};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
-use biome_tailwind_logic::no_tailwind_restyled_components::restyled_component_ranges;
+use biome_tailwind_logic::no_tailwind_restyled_components::{
+    matches_component_name, restyled_component_ranges,
+};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
+use smallvec::SmallVec;
 
 declare_lint_rule! {
     /// Disallow Tailwind utilities that override the appearance of components.
@@ -61,7 +65,8 @@ declare_lint_rule! {
     /// - `categories`: any of `color`, `typography`, `spacing`, `shape`, `effects`, or `motion`. Default: `[]`.
     /// - `classes`: exact classes, including variants and modifiers. Default: `[]`.
     ///
-    /// In Svelte, `Card` also matches members such as `Card.Root`.
+    /// A name matches any segment of a member name, so both `Card` and `Root` match
+    /// `Card.Root`. Dotted names such as `Card.Root` match consecutive segments.
     ///
     /// ```json,options
     /// {
@@ -115,28 +120,17 @@ impl Rule for NoTailwindRestyledComponents {
         {
             return vec![];
         }
-        let Ok(tag_name) = element.name() else {
+        let Some(segments) = element.name().ok().and_then(|name| name_segments(&name)) else {
             return vec![];
         };
-        let is_svelte = ctx.source_type::<HtmlFileSource>().is_svelte();
         let allowances: Vec<_> = ctx
             .options()
             .allow()
             .iter()
             .filter(|allow| {
-                allow.components.matches(|name| match &tag_name {
-                    AnyHtmlTagName::HtmlMemberName(member) => {
-                        member.syntax().text_trimmed() == name
-                            || is_svelte
-                                && member
-                                    .syntax()
-                                    .first_token()
-                                    .is_some_and(|token| token.text_trimmed() == name)
-                    }
-                    _ => tag_name
-                        .token_text_trimmed()
-                        .is_some_and(|tag| tag.text() == name),
-                })
+                allow
+                    .components
+                    .matches(|name| matches_component_name(&segments, name))
             })
             .collect();
         restyled_component_ranges(&ctx.query().tailwind_root().candidates(), &allowances)
@@ -152,5 +146,33 @@ impl Rule for NoTailwindRestyledComponents {
             .note(markup! { "The design system should manage the component's appearance." })
             .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
         )
+    }
+}
+
+/// Returns the segments of `name`, such as `Card` and `Root` for `Card.Root`.
+fn name_segments(name: &AnyHtmlTagName) -> Option<SmallVec<[TokenText; 2]>> {
+    let mut object = match name {
+        AnyHtmlTagName::HtmlTagName(name) => AnyHtmlComponentObjectName::HtmlTagName(name.clone()),
+        AnyHtmlTagName::HtmlComponentName(name) => {
+            AnyHtmlComponentObjectName::HtmlComponentName(name.clone())
+        }
+        AnyHtmlTagName::HtmlMemberName(name) => {
+            AnyHtmlComponentObjectName::HtmlMemberName(name.clone())
+        }
+    };
+    let mut segments = SmallVec::new();
+    loop {
+        let token = match object {
+            AnyHtmlComponentObjectName::HtmlMemberName(member) => {
+                segments.push(member.member().ok()?.value_token().ok()?.token_text_trimmed());
+                object = member.object().ok()?;
+                continue;
+            }
+            AnyHtmlComponentObjectName::HtmlComponentName(name) => name.value_token().ok()?,
+            AnyHtmlComponentObjectName::HtmlTagName(name) => name.value_token().ok()?,
+        };
+        segments.push(token.token_text_trimmed());
+        segments.reverse();
+        return Some(segments);
     }
 }

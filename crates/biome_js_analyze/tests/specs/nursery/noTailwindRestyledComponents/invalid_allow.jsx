@@ -9,3 +9,5 @@
 <Color className="p-4" />;
 <Color className="stroke-2" />;
 <Button className="stroke-none" />;
+<UI className="shadow-lg" />;
+<Button.UI className="shadow-lg" />;
