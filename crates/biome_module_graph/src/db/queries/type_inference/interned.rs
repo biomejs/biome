@@ -78,6 +78,14 @@ pub struct CallExpressionTypeInput<'db> {
     pub args: Box<[InferredTypeData<'db>]>,
 }
 
+/// Interned input for [`super::resolve_callable_function`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct CallableFunctionInput<'db> {
+    #[returns(copy)]
+    pub ty: InferredTypeData<'db>,
+}
+
 /// Interned input for call and constructor argument-type inference.
 #[salsa::interned]
 #[derive(Debug)]
