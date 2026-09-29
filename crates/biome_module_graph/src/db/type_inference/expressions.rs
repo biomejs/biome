@@ -9,7 +9,7 @@ use super::{
     resolver::ResolutionCtx,
 };
 use crate::db::queries::{
-    CallArgumentTypeInput, ResolvedCallArgument, infer_call_argument_type,
+    CallArgumentTypeInput, CallableFunctionInput, ResolvedCallArgument, infer_call_argument_type,
     infer_call_expression_return_type_from_args, infer_constructor_argument_type,
     resolve_callable_function,
 };
@@ -886,7 +886,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         has_initializer: bool,
     ) -> Option<InferredTypeData<'db>> {
         let function = self.resolve_inferred_type(function);
-        let function = resolve_callable_function(self.db, function)?;
+        let function =
+            resolve_callable_function(self.db, CallableFunctionInput::new(self.db, function))?;
         let parameter = function
             .parameters(self.db)
             .iter()
@@ -1245,7 +1246,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
 
-            let Some(parameter_function) = resolve_callable_function(self.db, parameter_ty) else {
+            let Some(parameter_function) = resolve_callable_function(
+                self.db,
+                CallableFunctionInput::new(self.db, parameter_ty),
+            ) else {
                 continue;
             };
             let InferredReturnType::Type(parameter_return_ty) =
@@ -1253,7 +1257,9 @@ impl<'db> ResolutionCtx<'db, '_> {
             else {
                 continue;
             };
-            let Some(argument_function) = resolve_callable_function(self.db, arg) else {
+            let Some(argument_function) =
+                resolve_callable_function(self.db, CallableFunctionInput::new(self.db, arg))
+            else {
                 continue;
             };
             let InferredReturnType::Type(argument_return_ty) =
