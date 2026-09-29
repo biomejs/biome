@@ -3,12 +3,13 @@ use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
+use biome_embeds::components::{ComponentNameSegments, component_at};
 use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
 use biome_languages::LanguageDb;
-use biome_rowan::TokenText;
+use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -16,6 +17,8 @@ use std::sync::Arc;
 #[derive(Clone)]
 pub struct EmbeddedService {
     source: EmbeddedSource,
+    /// The offset of the analyzed snippet in its host document.
+    snippet_offset: TextSize,
 }
 
 #[derive(Clone)]
@@ -28,15 +31,17 @@ enum EmbeddedSource {
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
+    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf, snippet_offset: TextSize) -> Self {
         Self {
             source: EmbeddedSource::Workspace { db, path },
+            snippet_offset,
         }
     }
 
-    pub(crate) fn from_data(data: Arc<EmbeddedData>) -> Self {
+    pub(crate) fn from_data(data: Arc<EmbeddedData>, snippet_offset: TextSize) -> Self {
         Self {
             source: EmbeddedSource::Interned(data),
+            snippet_offset,
         }
     }
 
@@ -117,6 +122,20 @@ impl EmbeddedService {
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_vue_directive_used(identifier.text()),
+        }
+    }
+
+    /// Returns the name segments of the component whose tag in the host
+    /// document contains `range`, such as `Card` and `Root` for `<Card.Root>`.
+    /// `range` is relative to the analyzed snippet.
+    ///
+    /// Returns `None` if the tag is a native element, or if no tag contains
+    /// `range`.
+    pub(crate) fn component_at(&self, range: TextRange) -> Option<ComponentNameSegments> {
+        let range = range + self.snippet_offset;
+        match &self.source {
+            EmbeddedSource::Workspace { db, path } => component_at(db.as_ref(), path, range),
+            EmbeddedSource::Interned(data) => data.component_at(range).cloned(),
         }
     }
 }

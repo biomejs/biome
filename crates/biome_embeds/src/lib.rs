@@ -1,4 +1,5 @@
 pub mod bindings;
+pub mod components;
 mod data;
 pub mod references;
 #[cfg(test)]

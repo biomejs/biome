@@ -3,16 +3,14 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{
-    AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlAttribute, element_ext::AnyHtmlTagElement,
-};
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_embeds::components::component_name_segments;
+use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
 use biome_tailwind_logic::no_tailwind_restyled_components::{
     matches_component_name, restyled_component_ranges,
 };
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
-use smallvec::SmallVec;
 
 declare_lint_rule! {
     /// Disallow Tailwind utilities that override the appearance of components.
@@ -113,14 +111,7 @@ impl Rule for NoTailwindRestyledComponents {
         else {
             return vec![];
         };
-        if !element.is_custom_component()
-            && !element
-                .tag_name()
-                .is_some_and(|name| name.text().contains('-'))
-        {
-            return vec![];
-        }
-        let Some(segments) = element.name().ok().and_then(|name| name_segments(&name)) else {
+        let Some(segments) = component_name_segments(&element) else {
             return vec![];
         };
         let allowances: Vec<_> = ctx
@@ -146,33 +137,5 @@ impl Rule for NoTailwindRestyledComponents {
             .note(markup! { "The design system should manage the component's appearance." })
             .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
         )
-    }
-}
-
-/// Returns the segments of `name`, such as `Card` and `Root` for `Card.Root`.
-fn name_segments(name: &AnyHtmlTagName) -> Option<SmallVec<[TokenText; 2]>> {
-    let mut object = match name {
-        AnyHtmlTagName::HtmlTagName(name) => AnyHtmlComponentObjectName::HtmlTagName(name.clone()),
-        AnyHtmlTagName::HtmlComponentName(name) => {
-            AnyHtmlComponentObjectName::HtmlComponentName(name.clone())
-        }
-        AnyHtmlTagName::HtmlMemberName(name) => {
-            AnyHtmlComponentObjectName::HtmlMemberName(name.clone())
-        }
-    };
-    let mut segments = SmallVec::new();
-    loop {
-        let token = match object {
-            AnyHtmlComponentObjectName::HtmlMemberName(member) => {
-                segments.push(member.member().ok()?.value_token().ok()?.token_text_trimmed());
-                object = member.object().ok()?;
-                continue;
-            }
-            AnyHtmlComponentObjectName::HtmlComponentName(name) => name.value_token().ok()?,
-            AnyHtmlComponentObjectName::HtmlTagName(name) => name.value_token().ok()?,
-        };
-        segments.push(token.token_text_trimmed());
-        segments.reverse();
-        return Some(segments);
     }
 }
