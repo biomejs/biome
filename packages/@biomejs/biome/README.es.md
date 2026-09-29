@@ -128,11 +128,11 @@ Biome ofrece [soporte empresarial](https://biomejs.dev/enterprise), donde colabo
   <tbody>
     <tr>
       <td align="center" valign="middle">
-        <a href="https://codspeed.io/?utm_source=biome&utm_medium=readme" target="_blank">
+        <a href="https://codspeed.io/?utm_source=oss-sponsorship&utm_medium=biome" target="_blank">
           <picture>
-            <source media="(prefers-color-scheme: light)" srcset="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" />
-            <source media="(prefers-color-scheme: dark)" srcset="https://biomejs.dev/_astro/codspeed-logo-dark.DqfyMRf2.svg" />
-            <img src="https://biomejs.dev/_astro/codspeed-logo-light.NPF02X9E.svg" width="300" alt="CodSpeed logo" />
+            <source media="(prefers-color-scheme: dark)" srcset="https://codspeed.io/codspeed-logo-dark.svg">
+            <source media="(prefers-color-scheme: light)" srcset="https://codspeed.io/codspeed-logo-light.svg">
+            <img alt="CodSpeed logo" src="https://codspeed.io/codspeed-logo-light.svg" width="300">
           </picture>
         </a>
       </td>
