@@ -69,7 +69,10 @@ pub(crate) fn parse_any_function_with_context(
 }
 
 #[inline]
-fn is_at_css_if_function_in_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
+pub(crate) fn is_at_css_if_function_in_context(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> bool {
     if !is_at_if_function(p) {
         return false;
     }
