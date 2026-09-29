@@ -1,11 +1,15 @@
-//! Normalization of types returned by inference queries.
+//! Normalization and generic substitution of types returned by inference
+//! queries.
 //!
 //! Inferred types may contain local handles and structural global references.
 //! Normalization resolves those references throughout wrappers such as unions,
 //! intersections, tuples, instances, merged references, and `typeof` types.
 //! Types that cannot contain these references are returned unchanged.
+//!
+//! Substitution rewrites a type without resolving any references, so it reads
+//! no module inputs and cannot join an inference cycle.
 
-use super::NormalizeTypeInput;
+use super::{NormalizeTypeInput, TypeSubstitutionInput};
 use crate::ModuleDb;
 use crate::db::type_inference::{
     normalize_structural_type, normalize_type_cycle_result, resolve_local_type_on_demand,
@@ -38,6 +42,34 @@ pub fn normalize_type<'db>(
             }
             normalize_structural_type(db, ty, |ty| resolve_local_type_on_demand(db, ty))
                 .unwrap_or(InferredTypeData::Unknown)
+        },
+    )
+}
+
+/// Replaces generic references in `input.ty` with `input.substitutions`.
+///
+/// Substitutions apply simultaneously and are not applied again inside their
+/// replacements. A nested declaration that redeclares a generic keeps its own
+/// references, as described on [`InferredTypeData::substitute_types`]. An
+/// exhausted substitution budget or an invalid structural rebuild returns
+/// [`InferredTypeData::Unknown`].
+///
+/// Member lookup applies the same instance substitutions whenever it reaches
+/// the same member, so this query shares one result across those lookups.
+#[salsa::tracked(returns(copy))]
+pub(crate) fn substitute_types<'db>(
+    db: &'db dyn ModuleDb,
+    input: TypeSubstitutionInput<'db>,
+) -> InferredTypeData<'db> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "substitute_types",
+        || {
+            input
+                .ty(db)
+                .substitute_types(db, input.substitutions(db))
+                .map_or(InferredTypeData::Unknown, |ty| ty)
         },
     )
 }

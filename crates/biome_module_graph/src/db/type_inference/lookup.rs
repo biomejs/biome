@@ -1,5 +1,7 @@
 use super::{InferredModuleTypes, collected_type_result};
-use crate::db::queries::{LocalTypeInput, infer_local_type, infer_module_types};
+use crate::db::queries::{
+    LocalTypeInput, TypeSubstitutionInput, infer_local_type, infer_module_types, substitute_types,
+};
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
     Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
@@ -631,8 +633,10 @@ pub(in crate::db::type_inference) fn apply_substitutions<'db>(
     ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
-    ty.substitute_types(db, substitutions)
-        .map_or(InferredTypeData::Unknown, |ty| ty)
+    if substitutions.is_empty() {
+        return ty;
+    }
+    substitute_types(db, TypeSubstitutionInput::new(db, ty, substitutions))
 }
 
 pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
