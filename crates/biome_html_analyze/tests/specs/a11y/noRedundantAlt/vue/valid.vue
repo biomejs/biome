@@ -1,5 +1,6 @@
 <script setup>
 </script><!-- should not generate diagnostics -->
+<template>
 <img alt="foo" />
 <img v-bind:alt="altValue" />
 <img :alt="altValue" />
@@ -15,3 +16,4 @@
 <img alt />
 <Img alt="image of cool person" aria-hidden="false" />
 
+</template>

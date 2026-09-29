@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <input type="text" />
 <input type="text" autocomplete="name" />
 <input type="text" autocomplete="" />
@@ -22,5 +23,6 @@ expression: valid.vue
 <!-- Static Vue bindings with valid autocomplete values are valid -->
 <input type="text" :autocomplete="'name'" />
 <input type="text" v-bind:autocomplete="'email'" />
+</template>
 
 ```

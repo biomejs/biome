@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <html lang="lorem"></html>
 <html lang="en-babab"></html>
 <html lang="en-GB-something"></html>
@@ -8,3 +9,4 @@
 <!-- static Vue bindings with invalid language codes should also be flagged -->
 <html :lang="'lorem'"></html>
 <html v-bind:lang="'en-babab'"></html>
+</template>

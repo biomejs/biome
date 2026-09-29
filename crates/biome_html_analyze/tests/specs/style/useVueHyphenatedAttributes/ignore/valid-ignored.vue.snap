@@ -5,8 +5,10 @@ expression: valid-ignored.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 
 <IgnoredComponent fooBar="foo" />
 <Foo ignoredAttribute="foo" />
+</template>
 
 ```

@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <input autofocus />
 <input v-bind:autofocus="autofocusValue" />
 <input :autofocus="autofocusValue" />
@@ -11,3 +12,4 @@
 <!-- autofocus on dialog/popover container itself is invalid -->
 <dialog autofocus>content</dialog>
 <div popover autofocus>content</div>
+</template>
