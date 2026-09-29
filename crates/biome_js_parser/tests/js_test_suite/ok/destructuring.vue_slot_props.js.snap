@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+{ item, index = 0, ...rest }
+
+```
+
+
+## AST
+
+```
+JsVueSlotPropsRoot {
+    parameters: JsParameterList [
+        JsFormalParameter {
+            decorators: JsDecoratorList [],
+            binding: JsObjectBindingPattern {
+                l_curly_token: L_CURLY@0..2 "{" [] [Whitespace(" ")],
+                properties: JsObjectBindingPatternPropertyList [
+                    JsObjectBindingPatternShorthandProperty {
+                        identifier: JsIdentifierBinding {
+                            name_token: IDENT@2..6 "item" [] [],
+                        },
+                        init: missing (optional),
+                    },
+                    COMMA@6..8 "," [] [Whitespace(" ")],
+                    JsObjectBindingPatternShorthandProperty {
+                        identifier: JsIdentifierBinding {
+                            name_token: IDENT@8..14 "index" [] [Whitespace(" ")],
+                        },
+                        init: JsInitializerClause {
+                            eq_token: EQ@14..16 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@16..17 "0" [] [],
+                            },
+                        },
+                    },
+                    COMMA@17..19 "," [] [Whitespace(" ")],
+                    JsObjectBindingPatternRest {
+                        dotdotdot_token: DOT3@19..22 "..." [] [],
+                        binding: JsIdentifierBinding {
+                            name_token: IDENT@22..27 "rest" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@27..28 "}" [] [],
+            },
+            question_mark_token: missing (optional),
+            type_annotation: missing (optional),
+            initializer: missing (optional),
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_SLOT_PROPS_ROOT@0..29
+  0: JS_PARAMETER_LIST@0..28
+    0: JS_FORMAL_PARAMETER@0..28
+      0: JS_DECORATOR_LIST@0..0
+      1: JS_OBJECT_BINDING_PATTERN@0..28
+        0: L_CURLY@0..2 "{" [] [Whitespace(" ")]
+        1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@2..27
+          0: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@2..6
+            0: JS_IDENTIFIER_BINDING@2..6
+              0: IDENT@2..6 "item" [] []
+            1: (empty)
+          1: COMMA@6..8 "," [] [Whitespace(" ")]
+          2: JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY@8..17
+            0: JS_IDENTIFIER_BINDING@8..14
+              0: IDENT@8..14 "index" [] [Whitespace(" ")]
+            1: JS_INITIALIZER_CLAUSE@14..17
+              0: EQ@14..16 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@16..17
+                0: JS_NUMBER_LITERAL@16..17 "0" [] []
+          3: COMMA@17..19 "," [] [Whitespace(" ")]
+          4: JS_OBJECT_BINDING_PATTERN_REST@19..27
+            0: DOT3@19..22 "..." [] []
+            1: JS_IDENTIFIER_BINDING@22..27
+              0: IDENT@22..27 "rest" [] [Whitespace(" ")]
+        2: R_CURLY@27..28 "}" [] []
+      2: (empty)
+      3: (empty)
+      4: (empty)
+  1: EOF@28..29 "" [Newline("\n")] []
+
+```

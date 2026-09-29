@@ -1228,3 +1228,50 @@ import { mdiSquareOutline } from "@mdi/js";
         result,
     ));
 }
+
+#[test]
+fn typed_slot_props_are_parsed_and_formatted() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<template>
+	<Component v-slot="{value}:{value:ValueType}">{{ value.innerValue }}</Component>
+	<Component #item="{ item=fallback }:{ item?: ItemType }">{{ item }}</Component>
+</template>
+<script lang="ts" setup>
+import Component from "./Component.vue";
+
+interface ValueType {
+	innerValue: string;
+}
+type ItemType = string;
+const fallback: ItemType = "fallback";
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "typed_slot_props_are_parsed_and_formatted",
+        fs,
+        console,
+        result,
+    ));
+}

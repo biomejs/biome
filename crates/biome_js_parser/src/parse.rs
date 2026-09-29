@@ -543,6 +543,7 @@ mod tests {
             is_source: false,
             event_handler: false,
             allow_statements: false,
+            slot_props: false,
         });
         let parse = parse("/* only a comment */", vue, JsParserOptions::default());
 

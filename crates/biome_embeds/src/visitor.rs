@@ -14,10 +14,10 @@ use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression,
-    JsCallExpression, JsExport, JsIdentifierAssignment, JsImport, JsModuleItemList,
-    JsReferenceIdentifier, JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot,
-    JsVariableStatement, JsxReferenceIdentifier,
+    AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType,
+    JsAssignmentExpression, JsCallExpression, JsExport, JsIdentifierAssignment, JsImport,
+    JsModuleItemList, JsParameterList, JsReferenceIdentifier, JsStaticMemberExpression,
+    JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -488,10 +488,9 @@ impl EmbeddedBindingsBuilder {
                 && let Some(root) = snippet
                     .parse
                     .tree::<AnyJsRoot>()
-                    .as_js_expression_template_root()
-                && let Some(expression) = root.expression()
+                    .as_js_vue_slot_props_root()
             {
-                self.visit_expression_bindings(&expression);
+                self.visit_parameter_list_bindings(&root.parameters());
             }
         }
     }
@@ -785,6 +784,21 @@ impl EmbeddedBindingsBuilder {
         }
 
         None
+    }
+
+    fn visit_parameter_list_bindings(&mut self, parameters: &JsParameterList) {
+        for parameter in parameters.iter().flatten() {
+            let binding = match parameter {
+                AnyJsParameter::AnyJsFormalParameter(parameter) => parameter
+                    .as_js_formal_parameter()
+                    .and_then(|parameter| parameter.binding().ok()),
+                AnyJsParameter::JsRestParameter(parameter) => parameter.binding().ok(),
+                AnyJsParameter::TsThisParameter(_) => None,
+            };
+            if let Some(binding) = binding {
+                self.visit_any_js_binding_pattern(&binding);
+            }
+        }
     }
 
     fn visit_svelte_declaration(
