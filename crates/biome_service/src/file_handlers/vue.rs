@@ -90,6 +90,7 @@ impl VueFileHandler {
                             is_source: true,
                             event_handler: false,
                             allow_statements: true,
+                            slot_props: false,
                         }),
                 )
             })

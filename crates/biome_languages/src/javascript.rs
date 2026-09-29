@@ -186,6 +186,9 @@ pub enum JsEmbeddingKind {
         /// When `false`, the content is parsed as an expression via `parse_template_expression`.
         /// Source-level embeds (`<script>`) use `true`; directives and text expressions use `false`.
         allow_statements: bool,
+        /// Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
+        /// which is parsed as the parameters of an arrow function.
+        slot_props: bool,
         /// Whether this snippet is from a class-related attribute
         /// (e.g. :class="...")
         is_class_attribute: bool,
@@ -244,6 +247,15 @@ impl JsEmbeddingKind {
             self,
             Self::Vue {
                 event_handler: true,
+                ..
+            }
+        )
+    }
+    pub const fn is_vue_slot_props(&self) -> bool {
+        matches!(
+            self,
+            Self::Vue {
+                slot_props: true,
                 ..
             }
         )
@@ -403,6 +415,7 @@ impl JsFileSource {
             is_source: true,
             event_handler: false,
             allow_statements: true,
+            slot_props: false,
         })
     }
 
@@ -414,6 +427,7 @@ impl JsFileSource {
             is_source: true,
             event_handler: false,
             allow_statements: true,
+            slot_props: false,
         })
     }
 
@@ -538,6 +552,11 @@ impl JsFileSource {
     /// Returns true if this is a Vue event handler (v-on directive)
     pub const fn is_vue_event_handler(&self) -> bool {
         self.embedding_kind.is_vue_event_handler()
+    }
+
+    /// Returns true if this is the value of a Vue slot directive (`v-slot` or `#name`)
+    pub const fn is_vue_slot_props(&self) -> bool {
+        self.embedding_kind.is_vue_slot_props()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
@@ -776,6 +795,7 @@ mod tests {
                 is_source: false,
                 event_handler: false,
                 allow_statements: false,
+                slot_props: false,
                 is_class_attribute: true,
             },
             JsEmbeddingKind::Svelte {

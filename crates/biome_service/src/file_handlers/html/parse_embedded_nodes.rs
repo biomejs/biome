@@ -235,7 +235,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 if let Some(directive) = VueVOnShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) =
-                        build_vue_directive_candidate(&initializer, true, false)
+                        build_vue_directive_candidate(&initializer, true, false, false)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -258,6 +258,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|arg| arg.name_token().ok())
                             .is_some_and(|name| name.text_trimmed() == "class"),
+                        false,
                     )
                 {
                     ctx.parse_and_push(
@@ -272,7 +273,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                 if let Some(directive) = VueVSlotShorthandDirective::cast_ref(&element)
                     && let Some(initializer) = directive.initializer()
                     && let Some(candidate) =
-                        build_vue_directive_candidate(&initializer, false, false)
+                        build_vue_directive_candidate(&initializer, false, false, true)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -298,9 +299,15 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|arg| arg.name_token().ok())
                             .is_some_and(|name| name.text_trimmed() == "class");
-                    if let Some(candidate) =
-                        build_vue_directive_candidate(&initializer, is_v_on, is_class_attribute)
-                    {
+                    let is_v_slot = directive
+                        .name_token()
+                        .is_ok_and(|name| name.text_trimmed() == "v-slot");
+                    if let Some(candidate) = build_vue_directive_candidate(
+                        &initializer,
+                        is_v_on,
+                        is_class_attribute,
+                        is_v_slot,
+                    ) {
                         ctx.parse_and_push(
                             &candidate,
                             &doc_file_source,
@@ -693,6 +700,7 @@ fn build_text_expression_directive_candidate(
         },
         is_event_handler: false,
         is_class_attribute: false,
+        is_slot_props: false,
     })
 }
 
@@ -719,6 +727,7 @@ fn build_attribute_expression_candidate(
         },
         is_event_handler: false,
         is_class_attribute,
+        is_slot_props: false,
     })
 }
 
@@ -777,6 +786,7 @@ fn build_vue_directive_candidate(
     initializer: &HtmlAttributeInitializerClause,
     is_event_handler: bool,
     is_class_attribute: bool,
+    is_slot_props: bool,
 ) -> Option<EmbedCandidate> {
     let value_node = initializer.value().ok()?;
     let html_string = value_node.as_html_string()?;
@@ -793,6 +803,7 @@ fn build_vue_directive_candidate(
         },
         is_event_handler,
         is_class_attribute,
+        is_slot_props,
     })
 }
 
@@ -1130,6 +1141,7 @@ fn parse_matched_embed(
                             is_source: true,
                             event_handler: false,
                             allow_statements: true,
+                            slot_props: false,
                         });
                     }
                     // Astro <script> tags and plain HTML: no EmbeddingKind
@@ -1167,6 +1179,7 @@ fn parse_matched_embed(
                             is_source: false,
                             event_handler: false,
                             allow_statements: false,
+                            slot_props: false,
                         });
                     }
                     false
@@ -1174,6 +1187,7 @@ fn parse_matched_embed(
                 EmbedCandidate::Directive {
                     is_event_handler,
                     is_class_attribute,
+                    is_slot_props,
                     ..
                 } => {
                     match ctx.host_file_source.variant() {
@@ -1191,6 +1205,7 @@ fn parse_matched_embed(
                                 is_source: false,
                                 event_handler: *is_event_handler,
                                 allow_statements: false,
+                                slot_props: *is_slot_props,
                             });
                         }
                         HtmlVariant::Svelte => {

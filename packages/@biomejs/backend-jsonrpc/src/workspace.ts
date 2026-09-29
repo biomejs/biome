@@ -11148,6 +11148,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+				/**
+	* Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
+which is parsed as the parameters of an arrow function. 
+	 */
+				slot_props: boolean;
 			};
 	  }
 	| {

@@ -277,6 +277,7 @@ mod tests {
                         is_source: false,
                         event_handler: false,
                         allow_statements: false,
+                        slot_props: false,
                     },
                 )),
             })
@@ -299,6 +300,7 @@ mod tests {
                 is_source: false,
                 event_handler: false,
                 allow_statements: false,
+                slot_props: false,
             }),
             JsParserOptions::default(),
         )
@@ -331,6 +333,7 @@ mod tests {
                 is_source: false,
                 event_handler: false,
                 allow_statements: false,
+                slot_props: false,
             }),
             JsParserOptions::default(),
         )

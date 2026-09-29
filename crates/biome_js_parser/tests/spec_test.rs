@@ -99,6 +99,16 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             file_kind: SvelteFileKind::Component,
             embedding_kind: SvelteEmbeddingKind::Declaration,
         });
+    } else if file_name.contains(".vue_slot_props.") {
+        // Fixture text is the value of a Vue `v-slot` directive.
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+            slot_props: true,
+        });
     } else if file_name.contains(".astro_expr.") {
         // Fixture text is the brace-less body of an Astro `{...}` expression.
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Astro {
