@@ -1,0 +1,121 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare function pick(): string | number;
+
+export let top: string | undefined;
+top = "on";
+top;
+
+export function widens(y: string | number | undefined) {
+	y = 1;
+	y;
+}
+
+export function keepsLiteral(z: "a" | "b" | undefined) {
+	z = "a";
+	z;
+}
+
+export function guardedAfterAssignment(v: string | number | undefined) {
+	v = pick();
+	if (typeof v === "string") v;
+}
+```
+
+## Inferred types
+
+```
+Binding pick "pick" => sync Function "pick" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string | number
+}
+
+Binding top "top" => string | undefined
+
+Expression "top = \"on\"" => unknown
+
+Expression "\"on\"" => string: on
+
+Expression "top" => string
+
+Binding widens "widens" => sync Function "widens" {
+  accepts: {
+    params: [
+      required y: string | number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => string | number | undefined
+
+Expression "y = 1" => unknown
+
+Expression "1" => number: 1
+
+Expression "y" => number
+
+Binding keepsLiteral "keepsLiteral" => sync Function "keepsLiteral" {
+  accepts: {
+    params: [
+      required z: string: a | string: b | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding z "z" => string: a | string: b | undefined
+
+Expression "z = \"a\"" => unknown
+
+Expression "\"a\"" => string: a
+
+Expression "z" => string: a
+
+Binding guardedAfterAssignment "guardedAfterAssignment" => sync Function "guardedAfterAssignment" {
+  accepts: {
+    params: [
+      required v: string | number | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding v "v" => string | number | undefined
+
+Expression "v = pick()" => unknown
+
+Expression "pick" => sync Function "pick" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: string | number
+}
+
+Expression "pick()" => string | number
+
+Expression "typeof v" => string: bigint | string: boolean | string: function | string: number | string: object | string: string | string: symbol | string: undefined
+
+Expression "typeof v === \"string\"" => boolean
+
+Expression "v" => string | number
+
+Expression "\"string\"" => string: string
+
+Expression "v" => string
+```

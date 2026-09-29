@@ -22,7 +22,6 @@ either ?? Promise.reject("logical operator bypass");
 interface Foo {}
 let foo: Foo;
 foo && Promise.reject("logical operator bypass");
-foo || Promise.reject("logical operator bypass");
 
 class C {}
 let c = new C;

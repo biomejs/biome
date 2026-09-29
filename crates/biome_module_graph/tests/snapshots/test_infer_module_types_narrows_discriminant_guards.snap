@@ -1,0 +1,135 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+type Choice = { kind: "left"; left: string } | { kind: "right"; right: number };
+
+export function discriminants(c: Choice) {
+	if (c.kind === "left") {
+		c;
+	}
+}
+
+type Esc = { kind: "o\x6e"; escaped: string } | { kind: "off"; plain: number };
+
+export function escapes(e: Esc) {
+	if (e.kind === "on") {
+		e;
+	}
+}
+
+export function mutated(m: Choice) {
+	if (m.kind === "left") {
+		m.kind = "right";
+		m;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Choice "Choice" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: left, "left": string]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: right, "right": number]
+  }
+
+Binding discriminants "discriminants" => sync Function "discriminants" {
+  accepts: {
+    params: [
+      required c: instanceof Choice
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding c "c" => instanceof Choice
+
+Expression "c" => instanceof Choice
+
+Expression "c.kind" => string: left | string: right
+
+Expression "c.kind === \"left\"" => boolean
+
+Expression "\"left\"" => string: left
+
+Expression "c" => Object {
+  prototype: No prototype
+  members: ["kind": string: left, "left": string]
+}
+
+Binding Esc "Esc" =>
+  Object {
+    prototype: No prototype
+    members: ["kind": string: o\x6e, "escaped": string]
+  }
+  | Object {
+    prototype: No prototype
+    members: ["kind": string: off, "plain": number]
+  }
+
+Binding escapes "escapes" => sync Function "escapes" {
+  accepts: {
+    params: [
+      required e: instanceof Esc
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding e "e" => instanceof Esc
+
+Expression "e" => instanceof Esc
+
+Expression "e.kind" => string: o\x6e | string: off
+
+Expression "e.kind === \"on\"" => boolean
+
+Expression "\"on\"" => string: on
+
+Expression "e" => Object {
+  prototype: No prototype
+  members: ["kind": string: o\x6e, "escaped": string]
+}
+
+Binding mutated "mutated" => sync Function "mutated" {
+  accepts: {
+    params: [
+      required m: instanceof Choice
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding m "m" => instanceof Choice
+
+Expression "m" => instanceof Choice
+
+Expression "m.kind" => string: left | string: right
+
+Expression "m.kind === \"left\"" => boolean
+
+Expression "\"left\"" => string: left
+
+Expression "m" => instanceof Choice
+
+Expression "m.kind = \"right\"" => unknown
+
+Expression "\"right\"" => string: right
+
+Expression "m" => instanceof Choice
+```

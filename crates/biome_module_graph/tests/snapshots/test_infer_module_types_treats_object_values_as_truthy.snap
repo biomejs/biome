@@ -1,0 +1,139 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+class Service {
+	run(): void {}
+}
+
+interface Task {
+	id: string;
+}
+
+export function promiseInstance(x: Promise<void> | undefined) {
+	if (!x) {
+		x;
+	}
+	if (x) {
+		x;
+	}
+}
+
+export function classInstance(y: Service | null) {
+	if (!y) {
+		y;
+	}
+}
+
+export function interfaceValue(z: Task | undefined) {
+	if (!z) {
+		z;
+	}
+}
+
+export function genericValue<T>(k: T | undefined) {
+	if (!k) {
+		k;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding Service "Service" => class "Service" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding Task "Task" => interface "Task" {
+  extends: []
+  type_args: []
+  members: ["id": string]
+}
+
+Binding promiseInstance "promiseInstance" => sync Function "promiseInstance" {
+  accepts: {
+    params: [
+      required x: instanceof Promise<void> | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding x "x" => instanceof Promise<void> | undefined
+
+Expression "!x" => boolean
+
+Expression "x" => instanceof Promise<void> | undefined
+
+Expression "x" => undefined
+
+Expression "x" => instanceof Promise<void> | undefined
+
+Expression "x" => instanceof Promise<void>
+
+Binding classInstance "classInstance" => sync Function "classInstance" {
+  accepts: {
+    params: [
+      required y: instanceof Service | null
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding y "y" => instanceof Service | null
+
+Expression "!y" => boolean
+
+Expression "y" => instanceof Service | null
+
+Expression "y" => null
+
+Binding interfaceValue "interfaceValue" => sync Function "interfaceValue" {
+  accepts: {
+    params: [
+      required z: instanceof Task | undefined
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding z "z" => instanceof Task | undefined
+
+Expression "!z" => boolean
+
+Expression "z" => instanceof Task | undefined
+
+Expression "z" => undefined
+
+Binding genericValue "genericValue" => sync Function "genericValue" {
+  accepts: {
+    params: [
+      required k: instanceof T | undefined
+    ]
+    type_args: [T]
+  }
+  returns: void
+}
+
+Binding T "T" => T
+
+Binding k "k" => instanceof T | undefined
+
+Expression "!k" => boolean
+
+Expression "k" => instanceof T | undefined
+
+Expression "k" => instanceof T | undefined
+```

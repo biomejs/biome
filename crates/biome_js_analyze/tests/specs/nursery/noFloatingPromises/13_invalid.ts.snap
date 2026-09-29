@@ -28,7 +28,6 @@ either ?? Promise.reject("logical operator bypass");
 interface Foo {}
 let foo: Foo;
 foo && Promise.reject("logical operator bypass");
-foo || Promise.reject("logical operator bypass");
 
 class C {}
 let c = new C;
@@ -281,8 +280,8 @@ function functionWithParams({ option }: Params) {
     23 │ let foo: Foo;
   > 24 │ foo && Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ foo || Promise.reject("logical operator bypass");
-    26 │ 
+    25 │ 
+    26 │ class C {}
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -292,35 +291,16 @@ function functionWithParams({ option }: Params) {
 ```
 
 ```
-13_invalid.ts:25:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13_invalid.ts:28:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    23 │ let foo: Foo;
-    24 │ foo && Promise.reject("logical operator bypass");
-  > 25 │ foo || Promise.reject("logical operator bypass");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 
-    27 │ class C {}
-  
-  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-13_invalid.ts:29:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
-  
-    27 │ class C {}
-    28 │ let c = new C;
-  > 29 │ c && Promise.reject("logical operator bypass");
+    26 │ class C {}
+    27 │ let c = new C;
+  > 28 │ c && Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ 
-    31 │ let o: object;
+    29 │ 
+    30 │ let o: object;
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -330,15 +310,15 @@ function functionWithParams({ option }: Params) {
 ```
 
 ```
-13_invalid.ts:32:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13_invalid.ts:31:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    31 │ let o: object;
-  > 32 │ o && Promise.reject("logical operator bypass");
+    30 │ let o: object;
+  > 31 │ o && Promise.reject("logical operator bypass");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    33 │ 
-    34 │ type Params = {
+    32 │ 
+    33 │ type Params = {
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
@@ -348,15 +328,15 @@ function functionWithParams({ option }: Params) {
 ```
 
 ```
-13_invalid.ts:39:5 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13_invalid.ts:38:5 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
   
-    38 │ function functionWithParams({ option }: Params) {
-  > 39 │     option ?? Promise.reject("logical operator bypass");
+    37 │ function functionWithParams({ option }: Params) {
+  > 38 │     option ?? Promise.reject("logical operator bypass");
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    40 │ }
-    41 │ 
+    39 │ }
+    40 │ 
   
   i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
   
