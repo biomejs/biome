@@ -34,7 +34,9 @@ declare_lint_rule! {
     ///
     /// Components are elements with capitalized names such as `MyButton` and custom
     /// elements with hyphenated names such as `my-button`. Native elements are not
-    /// checked. The rule checks static `class` attributes.
+    /// checked. The rule checks static `class` attributes. In Astro, Svelte, and Vue
+    /// files, it also checks class expressions such as `class={...}`, Astro's
+    /// `class:list={...}`, and Vue's `:class="..."`.
     ///
     /// ## Examples
     ///
