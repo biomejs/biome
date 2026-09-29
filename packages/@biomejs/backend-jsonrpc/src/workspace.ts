@@ -2485,6 +2485,11 @@ See https://biomejs.dev/linter/rules/no-misleading-return-type
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
+	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+See https://biomejs.dev/linter/rules/no-misplaced-list-elements 
+	 */
+	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -4936,6 +4941,9 @@ export type NoMeaninglessVoidOperatorConfiguration =
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
+export type NoMisplacedListElementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisplacedListElementsOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -6940,6 +6948,10 @@ export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
 }
+export interface RuleWithNoMisplacedListElementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisplacedListElementsOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8886,6 +8898,7 @@ export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
+export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
@@ -10436,6 +10449,7 @@ export type Category =
 	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"

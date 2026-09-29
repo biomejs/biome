@@ -228,6 +228,7 @@ define_categories! {
     "lint/nursery/noLoopFunc": "https://biomejs.dev/linter/rules/no-loop-func",
     "lint/nursery/noMeaninglessVoidOperator": "https://biomejs.dev/linter/rules/no-meaningless-void-operator",
     "lint/nursery/noMisleadingReturnType": "https://biomejs.dev/linter/rules/no-misleading-return-type",
+    "lint/nursery/noMisplacedListElements": "https://biomejs.dev/linter/rules/no-misplaced-list-elements",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMisusedPromises": "https://biomejs.dev/linter/rules/no-misused-promises",
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
