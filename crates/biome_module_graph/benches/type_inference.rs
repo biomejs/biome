@@ -8,17 +8,104 @@ use biome_js_type_info::interned_types::{
 use biome_languages::JsFileSource;
 use biome_module_graph::{
     BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, LocalTypeInput, ModuleDb,
-    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, PathInfoCache, SymbolFromModuleInfo,
-    TypeInferenceMode, infer_binding_type, infer_call_argument_type, infer_export_type,
+    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, SymbolFromModuleInfo, TypeInferenceMode,
+    infer_binding_type, infer_call_argument_type, infer_export_type,
     infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
     infer_local_type, infer_module_types, infer_module_types_bottom_up, normalize_type,
     resolve_js_module_with_inference_mode, type_inference::TypeInferenceClassification,
 };
-use biome_project_layout::ProjectLayout;
 use biome_rowan::TextRange;
 use biome_service::db::WorkspaceDb;
 use divan::Bencher;
 use std::sync::Arc;
+
+#[path = "support/integration.rs"]
+mod integration;
+
+#[divan::bench(args = integration::ZOD_TANSTACK_FORM_CASES)]
+fn bench_zod_tanstack_form_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::ZOD_TANSTACK_FORM_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_svelte_valibot_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::SVELTE_VALIBOT_FILES, "/stores.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_type_challenges_query_string_parser_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            integration::build_db(
+                integration::TYPE_CHALLENGES_FILES,
+                "/query_string_parser.ts",
+            )
+        })
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_drizzle_typebox_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::DRIZZLE_TYPEBOX_FILES, "/queries.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::EFFECT_ARKTYPE_CASES)]
+fn bench_effect_arktype_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::EFFECT_ARKTYPE_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::KYSELY_TS_PATTERN_CASES)]
+fn bench_kysely_ts_pattern_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::KYSELY_TS_PATTERN_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::HONO_VALIBOT_CASES)]
+fn bench_hono_valibot_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::HONO_VALIBOT_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::TRPC_ZOD_QUERY_CASES)]
+fn bench_trpc_zod_query_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::TRPC_ZOD_QUERY_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -62,6 +149,11 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
     ),
 ];
 
+/// Creates a database whose resolver reads the files of `fs`.
+fn workspace_db(fs: &MemoryFileSystem) -> WorkspaceDb {
+    WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())))
+}
+
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
     INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
 }
@@ -84,18 +176,15 @@ fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {
-            let path_info_cache = PathInfoCache::default();
+            let db = workspace_db(&fs);
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &path_info_cache,
                 TypeInferenceMode::RawTypesOnly,
             );
 
-            let db = WorkspaceDb::default();
             let module = ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -234,6 +323,62 @@ fn bench_cyclic_declaration_promise_lookup(bencher: Bencher) {
         });
 }
 
+const RECURSIVE_ALIAS_CASES: &[(&str, &str, &str)] = &[
+    // A recursive alias whose branches collapse to a self-instantiation with
+    // `infer` parameters, as in react-hook-form's `FieldPathValue`.
+    // See https://github.com/biomejs/biome/issues/11810.
+    (
+        "path_value",
+        r#"
+        type PathValue<T, P extends string> = P extends `${infer K}.${infer R}`
+            ? K extends keyof T
+                ? PathValue<T[K], R>
+                : T extends ReadonlyArray<infer V>
+                    ? PathValue<V, R>
+                    : never
+            : P extends keyof T
+                ? T[P]
+                : never;
+        declare function useController<T, N extends string>(props: {
+            name: N;
+        }): { field: { value: PathValue<T, N> } };
+        const { field } = useController<{ items: string[] }, "items">({ name: "items" });
+        field.value.length;
+        "#,
+        "field.value.length",
+    ),
+    // A recursive alias that re-instantiates itself with its own arguments,
+    // as in zustand's `Mutate<StoreApi<T>, []>`.
+    // See https://github.com/biomejs/biome/issues/11813.
+    (
+        "self_instantiation",
+        r#"
+        interface Api { get(): number }
+        type Rec<T, L> = L extends [] ? T : Rec<T, []>;
+        declare const api: Rec<Api, []>;
+        api.get();
+        "#,
+        "api.get()",
+    ),
+];
+
+fn recursive_alias_cases() -> impl Iterator<Item = &'static str> {
+    RECURSIVE_ALIAS_CASES.iter().map(|(name, _, _)| *name)
+}
+
+#[divan::bench(name = "bench_recursive_alias_member_lookup", args = recursive_alias_cases())]
+fn bench_recursive_alias_member_lookup(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| recursive_alias_member_lookup_input(name))
+        .bench_local_values(|(db, module, range)| {
+            let input = ExpressionTypeInput::new(&db, module, range);
+            let ty = infer_expression_type(&db, input).expect("member access must have a type");
+            let input = NormalizeTypeInput::new(&db, module, ty);
+            divan::black_box(normalize_type(&db, input));
+            db
+        });
+}
+
 #[divan::bench(name = "bench_distinct_local_type_lookup_queries")]
 fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
     bencher
@@ -354,17 +499,15 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
             (fs, modules)
         })
         .bench_local_values(|(fs, modules)| {
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for (name, root, semantic_model) in modules {
                 let path = BiomePath::new(name);
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -395,7 +538,7 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             }
             fs.insert("index.ts".into(), INDEX_TS_BEFORE_EDIT);
 
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for name in index_d_ts_cases().chain(["index.ts"]) {
                 let path = BiomePath::new(name);
@@ -403,12 +546,10 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
                 let semantic_model =
                     Arc::new(semantic_model(&root, SemanticModelOptions::default()));
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -430,17 +571,15 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             let path = BiomePath::new("index.ts");
             let root = get_js_root(&fs, &path);
             let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-            (db, index_module, fs, root, semantic_model)
+            (db, index_module, root, semantic_model)
         })
-        .bench_local_values(|(mut db, index_module, fs, root, semantic_model)| {
+        .bench_local_values(|(mut db, index_module, root, semantic_model)| {
             let path = BiomePath::new("index.ts");
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &PathInfoCache::default(),
                 TypeInferenceMode::RawTypesOnly,
             );
             salsa::Setter::to(
@@ -459,16 +598,14 @@ fn build_source_db(name: &str, content: &str) -> (WorkspaceDb, ModuleInfo) {
     let path = BiomePath::new(name);
     let root = get_js_root(&fs, &path);
     let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+    let db = workspace_db(&fs);
     let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
         root,
         &path,
-        &fs,
-        &ProjectLayout::default(),
         semantic_model,
-        &PathInfoCache::default(),
         TypeInferenceMode::RawTypesOnly,
     );
-    let db = WorkspaceDb::default();
     let module = ModuleInfo::new(
         &db,
         path.as_path().to_path_buf(),
@@ -516,7 +653,7 @@ fn overload_binding_range_by_name(
                 .is_ok_and(|token| token.text_trimmed() == name)
         })
         .find_map(|binding| {
-            let range = binding.syntax().text_trimmed_range();
+            let range = binding.range();
             let ty = inferred
                 .binding_type_data
                 .get(&range)
@@ -610,20 +747,17 @@ fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRa
     );
     fs.insert("/src/consumer.ts".into(), CONSUMER_SOURCE);
 
-    let db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
+    let db = workspace_db(&fs);
     let mut consumer = None;
     for name in ["/src/loader.ts", "/src/consumer.ts"] {
         let path = BiomePath::new(name);
         let root = get_js_root(&fs, &path);
         let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
         let (module_info, _, _) = resolve_js_module_with_inference_mode(
+            &db,
             root,
             &path,
-            &fs,
-            &ProjectLayout::default(),
             semantic_model,
-            &path_info_cache,
             TypeInferenceMode::RawTypesOnly,
         );
         let module = ModuleInfo::new(
@@ -655,6 +789,27 @@ fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRa
     (db, consumer, range)
 }
 
+fn recursive_alias_member_lookup_input(name: &str) -> (WorkspaceDb, ModuleInfo, TextRange) {
+    let (_, source, expression) = RECURSIVE_ALIAS_CASES
+        .iter()
+        .find(|(case_name, _, _)| *case_name == name)
+        .expect("cannot find test case");
+
+    let (db, module) = build_source_db("recursive_alias.ts", source);
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let range = info
+        .raw_expressions
+        .keys()
+        .copied()
+        .find(|range| {
+            source.get(usize::from(range.start())..usize::from(range.end())) == Some(*expression)
+        })
+        .expect("member access must be collected");
+    (db, module, range)
+}
+
 fn expression_query_inputs(count: usize) -> (WorkspaceDb, ModuleInfo, Vec<TextRange>) {
     let mut source = String::new();
     for index in 0..count {
@@ -680,19 +835,16 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     let path = BiomePath::new(name);
     let root = get_js_root(&fs, &path);
     let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-    let path_info_cache = PathInfoCache::default();
+    let db = workspace_db(&fs);
     let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
         root,
         &path,
-        &fs,
-        &ProjectLayout::default(),
         semantic_model,
-        &path_info_cache,
         TypeInferenceMode::RawTypesOnly,
     );
 
     let kind = ModuleInfoKind::Js(module_info);
-    let db = WorkspaceDb::default();
     let module = ModuleInfo::new(&db, path.as_path().to_path_buf(), kind.clone());
     db.modules
         .pin()

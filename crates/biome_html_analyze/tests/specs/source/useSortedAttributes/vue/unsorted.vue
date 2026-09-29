@@ -1,3 +1,4 @@
+<template>
 <p v-text="msg" v-show="ok" dir="auto" v-foo:bar.baz id="hello" class="flex"></p>
 
 <div 
@@ -64,3 +65,4 @@
 
 <!-- argument-less v-bind shorthand sorts like v-bind (VueOtherAttribute), not like a custom directive -->
 <div v-mycustomdirective v-if="awesome" :="props" ref="my-ref"></div>
+</template>

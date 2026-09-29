@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_runtime"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "ECMAScript runtime for JS plugins"

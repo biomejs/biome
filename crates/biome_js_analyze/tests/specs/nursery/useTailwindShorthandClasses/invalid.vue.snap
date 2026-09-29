@@ -168,3 +168,117 @@ invalid.vue:9:43 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━
   
 
 ```
+
+```
+invalid.vue:10:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ <template>
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+  > 10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+       │                  ^^^^^^^^^^^^^^^
+    11 │   <div :class="{ 'mr-3 ml-3': active }" />
+    12 │ </template>
+  
+  i Compressible utility used here.
+  
+     8 │ <template>
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+  > 10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+       │                                  ^^^^^^^^^^^^^
+    11 │   <div :class="{ 'mr-3 ml-3': active }" />
+    12 │ </template>
+  
+  i Compressible utility used here.
+  
+     8 │ <template>
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+  > 10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+       │                                                ^^^^^^^^^^^^^^^^^
+    11 │   <div :class="{ 'mr-3 ml-3': active }" />
+    12 │ </template>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['overflow-hidden·text-ellipsis·whitespace-nowrap',·selected·&&·'hover:w-6·hover:h-6']
+  + ['truncate',·selected·&&·'hover:w-6·hover:h-6']
+  
+
+```
+
+```
+invalid.vue:10:81 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ <template>
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+  > 10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+       │                                                                                 ^^^^^^^^^
+    11 │   <div :class="{ 'mr-3 ml-3': active }" />
+    12 │ </template>
+  
+  i Compressible utility used here.
+  
+     8 │ <template>
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+  > 10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+       │                                                                                           ^^^^^^^^^
+    11 │   <div :class="{ 'mr-3 ml-3': active }" />
+    12 │ </template>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ['overflow-hidden·text-ellipsis·whitespace-nowrap',·selected·&&·'hover:w-6·hover:h-6']
+  + ['overflow-hidden·text-ellipsis·whitespace-nowrap',·selected·&&·'hover:size-6']
+  
+
+```
+
+```
+invalid.vue:11:24 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+    10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+  > 11 │   <div :class="{ 'mr-3 ml-3': active }" />
+       │                        ^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Compressible utility used here.
+  
+     9 │   <div :class="clsx('w-4 h-4', active && 'px-2 py-2')" />
+    10 │   <div :class="['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']" />
+  > 11 │   <div :class="{ 'mr-3 ml-3': active }" />
+       │                   ^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - {·'mr-3·ml-3':·active·}
+  + {·'mx-3':·active·}
+  
+
+```

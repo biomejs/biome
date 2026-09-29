@@ -113,6 +113,10 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                     )
                 }
             }
+            Self::GlobalLocal(local) => {
+                let data = local.expand(db);
+                write!(f, [&data])
+            }
             Self::GlobalType(id) => {
                 if let Some(name) = crate::globals_ids::global_type_name(id.as_type_id()) {
                     write!(f, [text(name, None)])
@@ -412,8 +416,24 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
                 write!(f, [token("["), ty, token("]")])
             }
+            Self::ComputedStatic(ty) | Self::ConstAssertedComputedStatic(ty) => {
+                write!(
+                    f,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        ty,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]"), None)])
             }
             Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
                 write!(f, [text(&std::format!("computed [{name}]"), None)])
@@ -588,6 +608,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedTypeInstance<'db> {
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for InternedGenericTypeParameter<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        if self.is_const(f.context().db()) {
+            write!(f, [token("const"), space()])?;
+        }
         let db = f.context().db();
         let constraint = format_with(|f| {
             if let Some(constraint) = self.constraint(db) {
@@ -819,6 +842,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     ]]
                 ),
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => write!(
                 f,
                 [&format_args![

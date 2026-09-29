@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 
 <TodoItem
   v-if="complete"
@@ -11,3 +12,4 @@
   v-if="todo.shown"
   :todo="todo"
 />
+</template>

@@ -240,11 +240,8 @@ impl ServiceLanguage for YamlLanguage {
 
 #[salsa::interned]
 struct YamlFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -455,7 +452,7 @@ pub(crate) fn format(
     }
 }
 
-fn lint(params: LintParams) -> LintResults {
+pub(super) fn lint(params: LintParams) -> LintResults {
     let _ = debug_span!("Linting YAML file", path =? params.path, language =? params.language)
         .entered();
     let root: YamlRoot = params.parsed_source.tree(&params.workspace_db);

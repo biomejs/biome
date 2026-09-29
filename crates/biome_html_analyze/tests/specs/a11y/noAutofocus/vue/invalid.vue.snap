@@ -5,6 +5,7 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <input autofocus />
 <input v-bind:autofocus="autofocusValue" />
 <input :autofocus="autofocusValue" />
@@ -17,48 +18,29 @@ expression: invalid.vue
 <!-- autofocus on dialog/popover container itself is invalid -->
 <dialog autofocus>content</dialog>
 <div popover autofocus>content</div>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This element uses the autofocus attribute outside an allowed modal context.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <input autofocus />
-      │        ^^^^^^^^^
-    3 │ <input v-bind:autofocus="autofocusValue" />
-    4 │ <input :autofocus="autofocusValue" />
-  
-  i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
-  
-  i Unsafe fix: Remove the autofocus attribute.
-  
-    2 │ <input·autofocus·/>
-      │        ----------  
-
-```
-
 ```
 invalid.vue:3:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <input autofocus />
-  > 3 │ <input v-bind:autofocus="autofocusValue" />
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <input :autofocus="autofocusValue" />
-    5 │ <input autofocus />
+    2 │ <template>
+  > 3 │ <input autofocus />
+      │        ^^^^^^^^^
+    4 │ <input v-bind:autofocus="autofocusValue" />
+    5 │ <input :autofocus="autofocusValue" />
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    3 │ <input·v-bind:autofocus="autofocusValue"·/>
-      │        ----------------------------------  
+    3 │ <input·autofocus·/>
+      │        ----------  
 
 ```
 
@@ -67,19 +49,19 @@ invalid.vue:4:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    2 │ <input autofocus />
-    3 │ <input v-bind:autofocus="autofocusValue" />
-  > 4 │ <input :autofocus="autofocusValue" />
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <input autofocus />
-    6 │ <input autofocus="true" />
+    2 │ <template>
+    3 │ <input autofocus />
+  > 4 │ <input v-bind:autofocus="autofocusValue" />
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <input :autofocus="autofocusValue" />
+    6 │ <input autofocus />
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    4 │ <input·:autofocus="autofocusValue"·/>
-      │        ----------------------------  
+    4 │ <input·v-bind:autofocus="autofocusValue"·/>
+      │        ----------------------------------  
 
 ```
 
@@ -88,19 +70,19 @@ invalid.vue:5:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    3 │ <input v-bind:autofocus="autofocusValue" />
-    4 │ <input :autofocus="autofocusValue" />
-  > 5 │ <input autofocus />
-      │        ^^^^^^^^^
-    6 │ <input autofocus="true" />
-    7 │ <textarea autofocus>content</textarea>
+    3 │ <input autofocus />
+    4 │ <input v-bind:autofocus="autofocusValue" />
+  > 5 │ <input :autofocus="autofocusValue" />
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <input autofocus />
+    7 │ <input autofocus="true" />
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    5 │ <input·autofocus·/>
-      │        ----------  
+    5 │ <input·:autofocus="autofocusValue"·/>
+      │        ----------------------------  
 
 ```
 
@@ -109,61 +91,61 @@ invalid.vue:6:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    4 │ <input :autofocus="autofocusValue" />
-    5 │ <input autofocus />
-  > 6 │ <input autofocus="true" />
-      │        ^^^^^^^^^^^^^^^^
-    7 │ <textarea autofocus>content</textarea>
-    8 │ <button autofocus>Submit</button>
+    4 │ <input v-bind:autofocus="autofocusValue" />
+    5 │ <input :autofocus="autofocusValue" />
+  > 6 │ <input autofocus />
+      │        ^^^^^^^^^
+    7 │ <input autofocus="true" />
+    8 │ <textarea autofocus>content</textarea>
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    6 │ <input·autofocus="true"·/>
+    6 │ <input·autofocus·/>
+      │        ----------  
+
+```
+
+```
+invalid.vue:7:8 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This element uses the autofocus attribute outside an allowed modal context.
+  
+    5 │ <input :autofocus="autofocusValue" />
+    6 │ <input autofocus />
+  > 7 │ <input autofocus="true" />
+      │        ^^^^^^^^^^^^^^^^
+    8 │ <textarea autofocus>content</textarea>
+    9 │ <button autofocus>Submit</button>
+  
+  i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    7 │ <input·autofocus="true"·/>
       │        -----------------  
 
 ```
 
 ```
-invalid.vue:7:11 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:8:11 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    5 │ <input autofocus />
-    6 │ <input autofocus="true" />
-  > 7 │ <textarea autofocus>content</textarea>
-      │           ^^^^^^^^^
-    8 │ <button autofocus>Submit</button>
-    9 │ <select autofocus><option>a</option></select>
+     6 │ <input autofocus />
+     7 │ <input autofocus="true" />
+   > 8 │ <textarea autofocus>content</textarea>
+       │           ^^^^^^^^^
+     9 │ <button autofocus>Submit</button>
+    10 │ <select autofocus><option>a</option></select>
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    7 │ <textarea·autofocus>content</textarea>
+    8 │ <textarea·autofocus>content</textarea>
       │           ---------                   
-
-```
-
-```
-invalid.vue:8:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This element uses the autofocus attribute outside an allowed modal context.
-  
-     6 │ <input autofocus="true" />
-     7 │ <textarea autofocus>content</textarea>
-   > 8 │ <button autofocus>Submit</button>
-       │         ^^^^^^^^^
-     9 │ <select autofocus><option>a</option></select>
-    10 │ 
-  
-  i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
-  
-  i Unsafe fix: Remove the autofocus attribute.
-  
-    8 │ <button·autofocus>Submit</button>
-      │         ---------                
 
 ```
 
@@ -172,58 +154,80 @@ invalid.vue:9:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━�
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-     7 │ <textarea autofocus>content</textarea>
-     8 │ <button autofocus>Submit</button>
-   > 9 │ <select autofocus><option>a</option></select>
+     7 │ <input autofocus="true" />
+     8 │ <textarea autofocus>content</textarea>
+   > 9 │ <button autofocus>Submit</button>
        │         ^^^^^^^^^
-    10 │ 
-    11 │ <!-- autofocus on dialog/popover container itself is invalid -->
+    10 │ <select autofocus><option>a</option></select>
+    11 │ 
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    9 │ <select·autofocus><option>a</option></select>
-      │         ---------                            
+    9 │ <button·autofocus>Submit</button>
+      │         ---------                
 
 ```
 
 ```
-invalid.vue:12:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:10:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    11 │ <!-- autofocus on dialog/popover container itself is invalid -->
-  > 12 │ <dialog autofocus>content</dialog>
+     8 │ <textarea autofocus>content</textarea>
+     9 │ <button autofocus>Submit</button>
+  > 10 │ <select autofocus><option>a</option></select>
        │         ^^^^^^^^^
-    13 │ <div popover autofocus>content</div>
-    14 │ 
+    11 │ 
+    12 │ <!-- autofocus on dialog/popover container itself is invalid -->
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    12 │ <dialog·autofocus>content</dialog>
+    10 │ <select·autofocus><option>a</option></select>
+       │         ---------                            
+
+```
+
+```
+invalid.vue:13:9 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This element uses the autofocus attribute outside an allowed modal context.
+  
+    12 │ <!-- autofocus on dialog/popover container itself is invalid -->
+  > 13 │ <dialog autofocus>content</dialog>
+       │         ^^^^^^^^^
+    14 │ <div popover autofocus>content</div>
+    15 │ </template>
+  
+  i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
+  
+  i Unsafe fix: Remove the autofocus attribute.
+  
+    13 │ <dialog·autofocus>content</dialog>
        │         ---------                 
 
 ```
 
 ```
-invalid.vue:13:14 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:14:14 lint/a11y/noAutofocus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This element uses the autofocus attribute outside an allowed modal context.
   
-    11 │ <!-- autofocus on dialog/popover container itself is invalid -->
-    12 │ <dialog autofocus>content</dialog>
-  > 13 │ <div popover autofocus>content</div>
+    12 │ <!-- autofocus on dialog/popover container itself is invalid -->
+    13 │ <dialog autofocus>content</dialog>
+  > 14 │ <div popover autofocus>content</div>
        │              ^^^^^^^^^
-    14 │ 
+    15 │ </template>
+    16 │ 
   
   i Autofocusing elements can disrupt navigation and confuse screen reader and keyboard users.
   
   i Unsafe fix: Remove the autofocus attribute.
   
-    13 │ <div·popover·autofocus>content</div>
+    14 │ <div·popover·autofocus>content</div>
        │              ---------              
 
 ```

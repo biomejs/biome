@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+publish              = false
 
 [dependencies]
 biome_control_flow = { workspace = true }

@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 692
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome inspect config plugins --path=file.test.js
+```
+
 ## `biome.json`
 
 ```json

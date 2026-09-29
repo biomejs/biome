@@ -148,5 +148,11 @@
 	"new RegExp('[[A&&&]]', 'v')",
 
 	// https://github.com/biomejs/biome/issues/1704
-	"new RegExp('://[^:/]*')"
+	"new RegExp('://[^:/]*')",
+
+	// https://github.com/biomejs/biome/issues/11939
+	"new RegExp('\\\\/')",
+	"new RegExp('\\\\\\\\/')",
+	"new RegExp('\\\\\\/')",
+	"new RegExp(String.raw`\\/`)"
 ]

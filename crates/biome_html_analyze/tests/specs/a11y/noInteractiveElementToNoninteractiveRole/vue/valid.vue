@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <TestComponent onClick="doFoo" />
 <Button onClick="doFoo" />
 
@@ -277,3 +278,4 @@
     alt='An ASCII-style headshot'
   />
 </picture>
+</template>

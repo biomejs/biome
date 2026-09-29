@@ -1,0 +1,75 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/container-interpolation.scss
+---
+
+# Input
+
+```scss
+@container   #{$name}   (min-width:400px) {
+  .a { display: block; }
+}
+
+@container #{$query}{
+  .a { display: block; }
+}
+
+@CONTAINER sidebar-#{$name}   (min-width: 400px) {}
+
+@container #{$name}-sidebar (width>400px)   and   (height > 200px) {}
+
+@container #{$name} not   (width > 400px) {}
+
+@container #{$name} style(--responsive:true) {}
+
+@container #{ $query }   and (min-width: 400px) {}
+
+@container (min-width: 400px) or   #{$query} {}
+
+@container not    #{$query} {}
+
+@container #{$a} #{$b} {}
+
+```
+
+
+# Formatted
+
+```scss
+@container #{$name} (min-width: 400px) {
+	.a {
+		display: block;
+	}
+}
+
+@container #{$query} {
+	.a {
+		display: block;
+	}
+}
+
+@container sidebar-#{$name} (min-width: 400px) {
+}
+
+@container #{$name}-sidebar (width > 400px) and (height > 200px) {
+}
+
+@container #{$name} not (width > 400px) {
+}
+
+@container #{$name} style(--responsive: true) {
+}
+
+@container #{$query} and (min-width: 400px) {
+}
+
+@container (min-width: 400px) or #{$query} {
+}
+
+@container not #{$query} {
+}
+
+@container #{$a} #{$b} {
+}
+
+```

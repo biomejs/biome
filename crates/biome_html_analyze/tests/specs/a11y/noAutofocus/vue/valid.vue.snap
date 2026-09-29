@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <input />
 <textarea>content</textarea>
 <button>Submit</button>
@@ -32,5 +33,6 @@ expression: valid.vue
         <input autofocus />
     </div>
 </div>
+</template>
 
 ```

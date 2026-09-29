@@ -1,0 +1,16 @@
+`await $value` as $await where {
+    $await <: within or {
+        JsForStatement(),
+        JsForInStatement(),
+        JsForOfStatement(),
+        JsWhileStatement(),
+        JsDoWhileStatement(),
+    } until or {
+        JsFunctionDeclaration(),
+        JsFunctionExpression(),
+        JsArrowFunctionExpression(),
+        JsMethodClassMember(),
+        JsMethodObjectMember(),
+    },
+    register_diagnostic(span = $await, message = "Unexpected await inside a loop")
+}

@@ -7,7 +7,7 @@ expression: invalid_functions.jsx
 /* should generate diagnostics */
 clsx("w-[400px]");
 cn("text-[#555]");
-classnames("w-[400px]", "text-red-500");
+twMerge("w-[400px]", "text-red-500");
 clsx(["w-[400px]"]);
 cn({ "w-[400px]": isActive });
 tw`w-[400px]`;
@@ -25,7 +25,7 @@ invalid_functions.jsx:2:9 lint/nursery/noTailwindArbitraryValue ━━━━━�
   > 2 │ clsx("w-[400px]");
       │         ^^^^^^^
     3 │ cn("text-[#555]");
-    4 │ classnames("w-[400px]", "text-red-500");
+    4 │ twMerge("w-[400px]", "text-red-500");
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
@@ -45,7 +45,7 @@ invalid_functions.jsx:3:10 lint/nursery/noTailwindArbitraryValue ━━━━━
     2 │ clsx("w-[400px]");
   > 3 │ cn("text-[#555]");
       │          ^^^^^^
-    4 │ classnames("w-[400px]", "text-red-500");
+    4 │ twMerge("w-[400px]", "text-red-500");
     5 │ clsx(["w-[400px]"]);
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
@@ -58,14 +58,14 @@ invalid_functions.jsx:3:10 lint/nursery/noTailwindArbitraryValue ━━━━━
 ```
 
 ```
-invalid_functions.jsx:4:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_functions.jsx:4:12 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found an arbitrary value in a Tailwind CSS class.
   
     2 │ clsx("w-[400px]");
     3 │ cn("text-[#555]");
-  > 4 │ classnames("w-[400px]", "text-red-500");
-      │               ^^^^^^^
+  > 4 │ twMerge("w-[400px]", "text-red-500");
+      │            ^^^^^^^
     5 │ clsx(["w-[400px]"]);
     6 │ cn({ "w-[400px]": isActive });
   
@@ -84,7 +84,7 @@ invalid_functions.jsx:5:10 lint/nursery/noTailwindArbitraryValue ━━━━━
   i Found an arbitrary value in a Tailwind CSS class.
   
     3 │ cn("text-[#555]");
-    4 │ classnames("w-[400px]", "text-red-500");
+    4 │ twMerge("w-[400px]", "text-red-500");
   > 5 │ clsx(["w-[400px]"]);
       │          ^^^^^^^
     6 │ cn({ "w-[400px]": isActive });
@@ -104,7 +104,7 @@ invalid_functions.jsx:6:9 lint/nursery/noTailwindArbitraryValue ━━━━━�
 
   i Found an arbitrary value in a Tailwind CSS class.
   
-    4 │ classnames("w-[400px]", "text-red-500");
+    4 │ twMerge("w-[400px]", "text-red-500");
     5 │ clsx(["w-[400px]"]);
   > 6 │ cn({ "w-[400px]": isActive });
       │         ^^^^^^^

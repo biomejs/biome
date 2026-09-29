@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const VUE_IMPLICIT_JS_FILE_UNFORMATTED: &str = r#"<script>
@@ -1086,6 +1086,49 @@ import { computed } from "vue";
 }
 
 #[test]
+fn html_comment_suppresses_vue_expression_rule() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUndeclaredVariables": "error" }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+    let file = Utf8Path::new("file.vue");
+    fs.insert(
+        file.into(),
+        r#"<template>
+  <!-- biome-ignore lint/correctness/noUndeclaredVariables: intentionally external -->
+  <div :title="missingValue" />
+</template>"#
+            .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", "--error-on-warnings", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "html_comment_suppresses_vue_expression_rule",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn unused_suppression_has_correct_span_in_vue_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -1180,6 +1223,53 @@ import { mdiSquareOutline } from "@mdi/js";
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "suppress_does_not_add_comments_for_imports_used_in_templates",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn typed_slot_props_are_parsed_and_formatted() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "formatter": {"enabled": true}, "linter": {"enabled": true}, "experimentalFullSupportEnabled": true } }"#.as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<template>
+	<Component v-slot="{value}:{value:ValueType}">{{ value.innerValue }}</Component>
+	<Component #item="{ item=fallback }:{ item?: ItemType }">{{ item }}</Component>
+</template>
+<script lang="ts" setup>
+import Component from "./Component.vue";
+
+interface ValueType {
+	innerValue: string;
+}
+type ItemType = string;
+const fallback: ItemType = "fallback";
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "typed_slot_props_are_parsed_and_formatted",
         fs,
         console,
         result,

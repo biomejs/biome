@@ -22,21 +22,22 @@ CssRoot {
             rule: CssContainerAtRule {
                 declarator: CssContainerAtRuleDeclarator {
                     container_token: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")],
-                    name: CssCustomIdentifier {
-                        value_token: IDENT@11..15 "not" [] [Whitespace(" ")],
-                    },
-                    query: CssContainerSizeFeatureInParens {
-                        l_paren_token: L_PAREN@15..16 "(" [] [],
-                        feature: CssQueryFeatureRange {
-                            left: CssIdentifier {
-                                value_token: IDENT@16..22 "width" [] [Whitespace(" ")],
+                    name: missing (optional),
+                    query: CssContainerNotQuery {
+                        not_token: NOT_KW@11..15 "not" [] [Whitespace(" ")],
+                        query: CssContainerSizeFeatureInParens {
+                            l_paren_token: L_PAREN@15..16 "(" [] [],
+                            feature: CssQueryFeatureRange {
+                                left: CssIdentifier {
+                                    value_token: IDENT@16..22 "width" [] [Whitespace(" ")],
+                                },
+                                comparison: CssQueryFeatureRangeComparison {
+                                    operator: LTEQ@22..24 "<=" [] [],
+                                },
+                                right: missing (required),
                             },
-                            comparison: CssQueryFeatureRangeComparison {
-                                operator: LTEQ@22..24 "<=" [] [],
-                            },
-                            right: missing (required),
+                            r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
                         },
-                        r_paren_token: R_PAREN@24..26 ")" [] [Whitespace(" ")],
                     },
                 },
                 block: CssRuleBlock {
@@ -62,17 +63,18 @@ CssRoot {
       1: CSS_CONTAINER_AT_RULE@1..29
         0: CSS_CONTAINER_AT_RULE_DECLARATOR@1..26
           0: CONTAINER_KW@1..11 "container" [] [Whitespace(" ")]
-          1: CSS_CUSTOM_IDENTIFIER@11..15
-            0: IDENT@11..15 "not" [] [Whitespace(" ")]
-          2: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@15..26
-            0: L_PAREN@15..16 "(" [] []
-            1: CSS_QUERY_FEATURE_RANGE@16..24
-              0: CSS_IDENTIFIER@16..22
-                0: IDENT@16..22 "width" [] [Whitespace(" ")]
-              1: CSS_QUERY_FEATURE_RANGE_COMPARISON@22..24
-                0: LTEQ@22..24 "<=" [] []
-              2: (empty)
-            2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
+          1: (empty)
+          2: CSS_CONTAINER_NOT_QUERY@11..26
+            0: NOT_KW@11..15 "not" [] [Whitespace(" ")]
+            1: CSS_CONTAINER_SIZE_FEATURE_IN_PARENS@15..26
+              0: L_PAREN@15..16 "(" [] []
+              1: CSS_QUERY_FEATURE_RANGE@16..24
+                0: CSS_IDENTIFIER@16..22
+                  0: IDENT@16..22 "width" [] [Whitespace(" ")]
+                1: CSS_QUERY_FEATURE_RANGE_COMPARISON@22..24
+                  0: LTEQ@22..24 "<=" [] []
+                2: (empty)
+              2: R_PAREN@24..26 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@26..29
           0: L_CURLY@26..28 "{" [] [Whitespace(" ")]
           1: CSS_RULE_LIST@28..28

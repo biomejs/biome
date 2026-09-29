@@ -2,11 +2,8 @@ use crate::services::react_compiler::ReactCompilerServices;
 use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_syntax::TextRange;
-use biome_package::PackageJson;
 use biome_react_compiler::{CompilerErrorDetailInfo, ReactCompilerError};
 use biome_rule_options::use_react_compiler::UseReactCompilerOptions;
-use camino::Utf8PathBuf;
-use std::sync::Arc;
 
 declare_lint_rule! {
     /// Validate files with React Compiler.
@@ -15,21 +12,9 @@ declare_lint_rule! {
     /// diagnostics it emits. React Compiler validates whether components and
     /// hooks can be safely compiled.
     ///
-    /// This rule only runs when the nearest `package.json` declares React 19 or
-    /// newer. Projects using React 18 or earlier, or projects without a React
-    /// dependency in `package.json`, are skipped.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
-    ///
-    /// ```json,file=package.json
-    /// {
-    ///     "dependencies": {
-    ///         "react": "^19.0.0"
-    ///     }
-    /// }
-    /// ```
     ///
     /// ```jsx,expect_diagnostic,file=Component.jsx
     /// import { useState } from "react";
@@ -78,14 +63,6 @@ declare_lint_rule! {
     /// With `"compilationMode": "all"`, violations are reported even in
     /// functions that don't follow React naming conventions:
     ///
-    /// ```json,file=package.json
-    /// {
-    ///     "dependencies": {
-    ///         "react": "^19.0.0"
-    ///     }
-    /// }
-    /// ```
-    ///
     /// ```js,use_options,expect_diagnostic,file=counter.js
     /// let counter = 0;
     ///
@@ -116,10 +93,6 @@ impl Rule for UseReactCompiler {
     type Options = UseReactCompilerOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !is_react_19_or_higher(ctx).unwrap_or_default() {
-            return Vec::new();
-        }
-
         let query = ctx.query();
         let root_range = query.range;
 
@@ -493,13 +466,6 @@ impl Rule for UseReactCompiler {
             }
         }
     }
-}
-
-fn is_react_19_or_higher(ctx: &RuleContext<UseReactCompiler>) -> Option<bool> {
-    let (_, package_json) = ctx
-        .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()?
-        .as_ref()?;
-    Some(package_json.matches_dependency("react", ">=19.0.0"))
 }
 
 fn same_diagnostic(left: &ReactCompilerDiagnostic, right: &ReactCompilerDiagnostic) -> bool {

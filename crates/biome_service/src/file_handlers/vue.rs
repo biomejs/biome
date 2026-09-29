@@ -77,6 +77,7 @@ impl VueFileHandler {
                     language,
                     variant,
                     setup,
+                    ..
                 } = parse_lang_and_setup_from_script_opening_tag(
                     captures.name("opening")?.as_str(),
                 );
@@ -84,10 +85,12 @@ impl VueFileHandler {
                     JsFileSource::from(language)
                         .with_variant(variant)
                         .with_embedding_kind(JsEmbeddingKind::Vue {
+                            is_class_attribute: false,
                             setup,
                             is_source: true,
                             event_handler: false,
                             allow_statements: true,
+                            slot_props: false,
                         }),
                 )
             })

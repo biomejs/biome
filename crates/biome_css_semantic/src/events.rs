@@ -233,7 +233,13 @@ impl SemanticEventExtractor {
     /// @property --my-other-property {}
     /// ```
     fn process_at_property(&mut self, node: CssPropertyAtRule) {
-        let Ok(property_name) = node.declarator().and_then(|d| d.name()) else {
+        // SCSS-interpolated names like `--#{$name}` can't be resolved statically.
+        let Some(property_name) = node
+            .declarator()
+            .and_then(|d| d.name())
+            .ok()
+            .and_then(|name| name.as_css_dashed_identifier().cloned())
+        else {
             return;
         };
         let Some(decls) = node

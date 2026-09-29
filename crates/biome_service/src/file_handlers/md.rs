@@ -12,7 +12,7 @@ use super::{
 #[cfg(not(feature = "md_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
 #[cfg(feature = "md_embeds")]
-use super::{ParsedOrigin, ParsedSnippetOrigin};
+use super::{ParsedOrigin, ParsedSnippetOrigin, html, yaml};
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
@@ -266,11 +266,8 @@ impl ServiceLanguage for MarkdownLanguage {
 
 #[salsa::interned]
 struct MarkdownFormatOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -287,11 +284,8 @@ fn resolved_markdown_format_options<'db>(
 
 #[salsa::interned]
 struct MarkdownAnalyzerOptionsInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     file_source: DocumentFileSource,
 }
 
@@ -566,7 +560,29 @@ fn lint(params: LintParams) -> LintResults {
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
-    process_lint.into_result(diagnostics, analyze_diagnostics)
+    let results = process_lint.into_result(diagnostics, analyze_diagnostics);
+    #[cfg(feature = "md_embeds")]
+    let mut results = results;
+    // Fenced code blocks are excluded by `for_analysis`, which leaves the
+    // frontmatter and HTML blocks.
+    #[cfg(feature = "md_embeds")]
+    for snippet in params
+        .parsed_source
+        .snippets(&params.workspace_db)
+        .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+    {
+        let Some(language) = snippet.file_source(&params.workspace_db) else {
+            continue;
+        };
+        let snippet_params = params.for_snippet(&snippet, language);
+        let snippet_results = match language {
+            DocumentFileSource::Html(_) => html::lint(snippet_params),
+            DocumentFileSource::Yaml(_) => yaml::lint(snippet_params),
+            _ => continue,
+        };
+        results.extend(snippet_results);
+    }
+    results
 }
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {

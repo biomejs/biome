@@ -1,4 +1,183 @@
 use super::*;
+use biome_module_graph::{ResolutionMode, ResolutionRequest, resolve_module_request};
+use biome_resolver::ResolveError;
+
+fn request<'db>(
+    db: &'db TestModuleDb,
+    base_directory: &str,
+    specifier: &str,
+    mode: ResolutionMode,
+) -> ResolutionRequest<'db> {
+    let base_directory = db
+        .resolver_paths
+        .get_or_create(db, Utf8Path::new(base_directory));
+    ResolutionRequest::new(db, base_directory, specifier.to_string(), mode)
+}
+
+#[test]
+fn resolver_path_info_is_scoped_to_its_database() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/dependency.css".into(), "");
+    let first = TestModuleDb::with_fs(&fs);
+    let second = TestModuleDb::with_fs(&fs);
+
+    let resolve = |db: &TestModuleDb| {
+        resolve_module_request(db, request(db, "/src", "./dependency", ResolutionMode::Css))
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(resolve(&first), Some("/src/dependency.css".into()));
+
+    fs.remove(Utf8Path::new("/src/dependency.css"));
+    assert_eq!(
+        resolve(&first),
+        Some("/src/dependency.css".into()),
+        "path info is only refreshed when the owner of the database reports a change"
+    );
+    assert_eq!(resolve(&second), None);
+}
+
+#[test]
+fn resolution_requests_intern_equal_queries() {
+    let db = TestModuleDb::new();
+    let javascript = request(&db, "/src", "./dependency", ResolutionMode::JavaScript);
+    let same_javascript = request(&db, "/src", "./dependency", ResolutionMode::JavaScript);
+    let css = request(&db, "/src", "./dependency", ResolutionMode::Css);
+
+    assert_eq!(javascript.as_id(), same_javascript.as_id());
+    assert_ne!(javascript.as_id(), css.as_id());
+}
+
+#[test]
+fn resolution_query_is_memoized_and_tracks_consumed_paths() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/dependency.css".into(), "");
+    let mut db = TestModuleDb::with_fs(&fs);
+
+    {
+        let request = request(&db, "/src", "./dependency", ResolutionMode::Css);
+        assert_eq!(
+            resolve_module_request(&db, request).path().as_path(),
+            Some(Utf8Path::new("/src/dependency.css"))
+        );
+        db.clear_salsa_events();
+
+        let _ = resolve_module_request(&db, request);
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, resolve_module_request, request, &events);
+    }
+
+    // An unrelated path doesn't invalidate the resolution.
+    fs.insert("/other/file.css".into(), "");
+    let _ = db
+        .resolver_paths
+        .get_or_create(&db, Utf8Path::new("/other/file.css"));
+    sync_resolver_paths(
+        &mut db,
+        [("/other/file.css".into(), ResolverPathChange::Kind.into())],
+    );
+    db.clear_salsa_events();
+    {
+        let request = request(&db, "/src", "./dependency", ResolutionMode::Css);
+        let _ = resolve_module_request(&db, request);
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, resolve_module_request, request, &events);
+    }
+
+    fs.remove(Utf8Path::new("/src/dependency.css"));
+    sync_resolver_paths(
+        &mut db,
+        [(
+            "/src/dependency.css".into(),
+            ResolverPathChange::Kind.into(),
+        )],
+    );
+    db.clear_salsa_events();
+
+    let request = request(&db, "/src", "./dependency", ResolutionMode::Css);
+    assert_eq!(
+        resolve_module_request(&db, request).path().error(),
+        Some(&ResolveError::NotFound)
+    );
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, resolve_module_request, request, &events);
+}
+
+#[test]
+fn resolution_query_tracks_tsconfig_source_changes() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/project/src/first.ts".into(), "");
+    fs.insert("/project/src/second.ts".into(), "");
+    let mut db = TestModuleDb::with_fs(&fs);
+    db.insert_json_source(
+        Utf8PathBuf::from("/project/package.json"),
+        r#"{"name":"project"}"#,
+    );
+    db.insert_json_source(
+        Utf8PathBuf::from("/project/tsconfig.json"),
+        r#"{"compilerOptions":{"paths":{"@dep":["./src/first.ts"]}}}"#,
+    );
+
+    {
+        let request = request(&db, "/project/src", "@dep", ResolutionMode::JavaScript);
+        assert_eq!(
+            resolve_module_request(&db, request).path().as_path(),
+            Some(Utf8Path::new("/project/src/first.ts"))
+        );
+    }
+
+    let source = db.files[Utf8Path::new("/project/tsconfig.json")];
+    salsa::Setter::to(
+        source.set_parsed(&mut db),
+        parse_json(
+            r#"{"compilerOptions":{"paths":{"@dep":["./src/second.ts"]}}}"#,
+            JsonParserOptions::default(),
+        )
+        .into(),
+    );
+    db.clear_salsa_events();
+
+    let request = request(&db, "/project/src", "@dep", ResolutionMode::JavaScript);
+    assert_eq!(
+        resolve_module_request(&db, request).path().as_path(),
+        Some(Utf8Path::new("/project/src/second.ts"))
+    );
+    let events = db.take_salsa_events();
+    assert_function_query_was_run(&db, resolve_module_request, request, &events);
+}
+
+#[test]
+fn resolution_query_observes_a_manifest_indexed_later() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/project/src/first.ts".into(), "");
+    let mut db = TestModuleDb::with_fs(&fs);
+
+    {
+        let request = request(&db, "/project/src", "@dep", ResolutionMode::JavaScript);
+        assert!(
+            resolve_module_request(&db, request)
+                .path()
+                .as_path()
+                .is_none()
+        );
+    }
+
+    db.insert_json_source(
+        Utf8PathBuf::from("/project/package.json"),
+        r#"{"name":"project"}"#,
+    );
+    db.insert_json_source(
+        Utf8PathBuf::from("/project/tsconfig.json"),
+        r#"{"compilerOptions":{"paths":{"@dep":["./src/first.ts"]}}}"#,
+    );
+
+    let request = request(&db, "/project/src", "@dep", ResolutionMode::JavaScript);
+    assert_eq!(
+        resolve_module_request(&db, request).path().as_path(),
+        Some(Utf8Path::new("/project/src/first.ts"))
+    );
+}
 
 #[test]
 fn test_module_keys_reject_stale_handles() {

@@ -841,7 +841,7 @@ fn at_setext_underline_after_indent(p: &mut MarkdownParser, mut n: usize) -> Opt
 ///
 /// Walks tokens via lookahead. At each NEWLINE, delegates to
 /// [`at_setext_underline_after_newline`] — the same detection used by
-/// `has_matching_code_span_closer` and `parse_inline_item_list`.
+/// `matching_code_span_closer` and `parse_inline_item_list`.
 pub(crate) fn inline_span_crosses_setext(p: &mut MarkdownParser, byte_len: usize) -> bool {
     p.lookahead(|p| {
         let mut remaining = byte_len;
@@ -869,6 +869,30 @@ pub(crate) fn inline_span_crosses_setext(p: &mut MarkdownParser, byte_len: usize
             remaining -= tok_len;
             p.bump_any();
         }
+    })
+}
+
+/// Returns whether a span reaches a paragraph boundary, including container prefixes.
+pub(crate) fn inline_span_crosses_block_boundary(p: &mut MarkdownParser, byte_len: usize) -> bool {
+    let end = p.cur_range().start() + TextSize::from(byte_len as u32);
+    p.lookahead(|p| {
+        while !p.at(T![EOF]) && p.cur_range().start() < end {
+            if p.at(NEWLINE) || p.at(MD_HARD_LINE_LITERAL) {
+                p.bump_any();
+                if at_blank_line_start(p)
+                    || is_quote_blank_line_from_current(p, p.state().block_quote_depth)
+                    || matches!(
+                        handle_line_continuation(p, true, false),
+                        InlineNewlineAction::Break
+                    )
+                {
+                    return true;
+                }
+            } else {
+                p.bump_any();
+            }
+        }
+        false
     })
 }
 

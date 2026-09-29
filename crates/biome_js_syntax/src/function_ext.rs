@@ -1,7 +1,7 @@
 use crate::{
     AnyJsCallArgument, AnyJsFunction, AnyJsFunctionBody, JsCallArguments, JsCallExpression,
-    JsConstructorClassMember, JsMethodClassMember, JsMethodObjectMember, JsParenthesizedExpression,
-    JsStatementList, JsSyntaxToken,
+    JsConstructorClassMember, JsMethodClassMember, JsMethodObjectMember, JsParameters,
+    JsParenthesizedExpression, JsStatementList, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 
@@ -10,6 +10,11 @@ declare_node_union! {
 }
 
 impl AnyJsFunction {
+    /// Returns the function's parameters when they are parenthesized.
+    pub fn parenthesized_parameters(&self) -> Option<JsParameters> {
+        self.parameters().ok()?.as_js_parameters().cloned()
+    }
+
     /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
     ///
     /// # Examples

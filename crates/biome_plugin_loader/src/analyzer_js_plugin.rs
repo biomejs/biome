@@ -296,24 +296,30 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    is_class_attribute: false,
                     setup: true,
                     is_source: true,
                     event_handler: false,
                     allow_statements: true,
+                    slot_props: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":true,"isSource":true,"eventHandler":false}]"#,
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+                    is_class_attribute: false,
                     setup: false,
                     is_source: false,
                     event_handler: true,
                     allow_statements: false,
+                    slot_props: false,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"vue","setup":false,"isSource":false,"eventHandler":true}]"#,
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::SourceModule,
                     embedding_kind: SvelteEmbeddingKind::Source,
                 }),
@@ -321,6 +327,8 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Expression,
                 }),
@@ -328,6 +336,8 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::SnippetSignature,
                 }),
@@ -335,6 +345,8 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::LegacyConst,
                 }),
@@ -342,6 +354,8 @@ mod tests {
             ),
             (
                 JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Declaration,
                 }),

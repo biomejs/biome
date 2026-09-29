@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --vcs-enabled=true --vcs-client-kind=git --vcs-use-ignore-file=true --vcs-root=. --write --unsafe '<TEMP_DIR>/ignores_file_inside_directory'
+```
+
 ## `.gitignore`
 
 ```gitignore

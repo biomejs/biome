@@ -22,13 +22,16 @@ info: vue/vue/filter.vue
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,9 @@
+@@ -1,7 +1,12 @@
  <!-- vue filters are only allowed in v-bind and interpolation -->
  <template>
    <div class="allowed">
 -    {{value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird}}
 +    {{
-+      value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
++      value |
++        thisIsARealSuperLongFilterPipe("arg1", arg2) |
++        anotherPipeLongJustForFun |
++        pipeTheThird
 +    }}
    </div>
    <div
@@ -42,7 +45,10 @@ info: vue/vue/filter.vue
 <template>
   <div class="allowed">
     {{
-      value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
+      value |
+        thisIsARealSuperLongFilterPipe("arg1", arg2) |
+        anotherPipeLongJustForFun |
+        pipeTheThird
     }}
   </div>
   <div
@@ -62,8 +68,7 @@ info: vue/vue/filter.vue
 
 # Lines exceeding max width of 80 characters
 ```
-    5:       value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird
-   10:     v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
-   14:     :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
-   18:     v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
+   13:     v-bind:something='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   17:     :class='value | thisIsARealSuperLongFilterPipe("arg1", arg2) | anotherPipeLongJustForFun | pipeTheThird'
+   21:     v-if='value | thisIsARealSuperLongBitwiseOr("arg1", arg2) | anotherBitwiseOrLongJustForFun | bitwiseOrTheThird'
 ```

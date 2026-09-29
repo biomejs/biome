@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <a href="#" aria-checked="true" />
 <a href="#" aria-checked />
 <area href="#" aria-checked="true" />
@@ -22,3 +23,4 @@
 <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
 <a :href="'#'" aria-checked="true" />
 <a v-bind:href="'http://x.y.z'" aria-checked="true" />
+</template>

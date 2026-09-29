@@ -10,6 +10,16 @@ expression: invalid.astro
 <aside set:html=`<p>content</p>`></aside>
 <article set:html></article>
 
+{show && <span set:html={content} />}
+
+{
+    show && (
+        <div>
+            <span set:html={content} />
+        </div>
+    )
+}
+
 ```
 
 # Diagnostics
@@ -85,6 +95,49 @@ invalid.astro:5:10 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━
   > 5 │ <article set:html></article>
       │          ^^^^^^^^
     6 │ 
+    7 │ {show && <span set:html={content} />}
+  
+  i Using set:html can introduce cross-site scripting vulnerabilities.
+  
+  i Use a regular Astro expression to render text, or suppress this diagnostic with an explanation if raw HTML is required.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:7:16 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive inserts unescaped HTML.
+  
+    5 │ <article set:html></article>
+    6 │ 
+  > 7 │ {show && <span set:html={content} />}
+      │                ^^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ {
+  
+  i Using set:html can introduce cross-site scripting vulnerabilities.
+  
+  i Use a regular Astro expression to render text, or suppress this diagnostic with an explanation if raw HTML is required.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.astro:12:19 lint/nursery/noAstroSetHtmlDirective ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive inserts unescaped HTML.
+  
+    10 │     show && (
+    11 │         <div>
+  > 12 │             <span set:html={content} />
+       │                   ^^^^^^^^^^^^^^^^^^
+    13 │         </div>
+    14 │     )
   
   i Using set:html can introduce cross-site scripting vulnerabilities.
   

@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::SnapshotPayload;
 use crate::{FORMATTED, assert_cli_snapshot, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
@@ -496,8 +496,8 @@ function sommething(chalk: ChalkInstance) {
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
 
-    if let Result::Err(e) = &result {
-        println!("{e:#?}");
+    if result.is_err() {
+        println!("{result:#?}");
     }
 
     assert!(result.is_ok(), "run_cli returned {result:#?}");

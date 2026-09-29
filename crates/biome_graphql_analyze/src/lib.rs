@@ -10,8 +10,8 @@ pub use crate::registry::visit_registry;
 pub use crate::suppression::GraphqlSuppression;
 use crate::suppression_action::GraphqlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
 use biome_graphql_syntax::GraphqlLanguage;
@@ -42,6 +42,28 @@ where
     analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
 }
 
+/// Analyzes GraphQL embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<GraphqlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        root,
+        filter,
+        |_| {},
+        options,
+        Some(inspector),
+        emit_signal,
+    )
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -53,6 +75,29 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<GraphqlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        root,
+        filter,
+        inspect_matcher,
+        options,
+        None,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
+    root: &LanguageRoot<GraphqlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -82,15 +127,18 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match inspector {
+        Some(inspector) => analyzer.run_snippet(ctx, inspector),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

@@ -217,9 +217,9 @@ CssRoot {
                 declarator: CssFontFaceAtRuleDeclarator {
                     font_face_token: FONT_FACE_KW@211..221 "font-face" [] [Whitespace(" ")],
                 },
-                block: CssDeclarationBlock {
+                block: CssDeclarationOrAtRuleBlock {
                     l_curly_token: L_CURLY@221..223 "{" [] [Whitespace(" ")],
-                    declarations: CssDeclarationList [
+                    items: CssDeclarationOrAtRuleList [
                         CssDeclarationWithSemicolon {
                             declaration: CssDeclaration {
                                 property: CssGenericProperty {
@@ -1490,9 +1490,9 @@ CssRoot {
       1: CSS_FONT_FACE_AT_RULE@211..313
         0: CSS_FONT_FACE_AT_RULE_DECLARATOR@211..221
           0: FONT_FACE_KW@211..221 "font-face" [] [Whitespace(" ")]
-        1: CSS_DECLARATION_BLOCK@221..313
+        1: CSS_DECLARATION_OR_AT_RULE_BLOCK@221..313
           0: L_CURLY@221..223 "{" [] [Whitespace(" ")]
-          1: CSS_DECLARATION_LIST@223..312
+          1: CSS_DECLARATION_OR_AT_RULE_LIST@223..312
             0: CSS_DECLARATION_WITH_SEMICOLON@223..249
               0: CSS_DECLARATION@223..247
                 0: CSS_GENERIC_PROPERTY@223..247

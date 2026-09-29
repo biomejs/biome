@@ -667,6 +667,29 @@ pub trait SyntaxFeature: Sized {
         P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
         E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
     {
+        self.parse_exclusive_syntax_with_kind(p, parse, error_builder, None)
+    }
+
+    /// Parses syntax with an optional recovery kind for unsupported features.
+    ///
+    /// When unsupported, replaces diagnostics from the parse attempt with one
+    /// feature diagnostic and changes the node to `bogus_kind`, or to
+    /// [`SyntaxKind::to_bogus`] when `None`. The supplied kind should be an error
+    /// node accepted by the enclosing grammar.
+    ///
+    /// Supported syntax and its diagnostics are unchanged. An absent result
+    /// stays absent and does not invoke `error_builder`.
+    fn parse_exclusive_syntax_with_kind<'source, P, E>(
+        &self,
+        p: &mut Self::Parser<'source>,
+        parse: P,
+        error_builder: E,
+        bogus_kind: Option<<Self::Parser<'source> as Parser>::Kind>,
+    ) -> ParsedSyntax
+    where
+        P: FnOnce(&mut Self::Parser<'source>) -> ParsedSyntax,
+        E: FnOnce(&Self::Parser<'source>, &CompletedMarker) -> ParseDiagnostic,
+    {
         if self.is_supported(p) {
             parse(p)
         } else {
@@ -678,7 +701,8 @@ pub trait SyntaxFeature: Sized {
                 Present(mut syntax) => {
                     let diagnostic = error_builder(p, &syntax);
                     p.error(diagnostic);
-                    syntax.change_to_bogus(p);
+                    let kind = bogus_kind.unwrap_or_else(|| syntax.kind(p).to_bogus());
+                    syntax.change_kind(p, kind);
                     Present(syntax)
                 }
                 _ => Absent,

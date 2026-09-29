@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
+assertion_line: 415
 expression: content
 ---
+## Command
+
+```shell
+biome rage
+```
+
 ## `biome.json`
 
 ```json

@@ -1068,13 +1068,99 @@ mod tests {
     use crate::{CssParserOptions, parser::CssParser};
     use biome_css_syntax::{CssSyntaxKind, T};
     use biome_languages::CssFileSource;
-    use biome_parser::Parser;
     use biome_parser::prelude::ParsedSyntax::{Absent, Present};
+    use biome_parser::{Parser, SyntaxFeature};
+    use biome_rowan::{SyntaxKind, TextRange};
 
     use super::{
-        ScssCapability, ValueParsingContext, ValueParsingMode, parse_regular_identifier,
-        parse_regular_number, try_parse,
+        CssSyntaxFeatures, ScssCapability, ValueParsingContext, ValueParsingMode,
+        parse_regular_identifier, parse_regular_number, try_parse,
     };
+
+    #[test]
+    fn exclusive_syntax_kind_applies_only_when_unsupported() {
+        for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+            for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER)] {
+                let mut p = CssParser::new("; value", source_type, CssParserOptions::default());
+                p.bump(T![;]);
+                p.error(p.err_builder("before", TextRange::empty(0.into())));
+
+                let parsed = CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+                    &mut p,
+                    |p| {
+                        let parsed = parse_regular_identifier(p);
+                        p.error(p.err_builder("during", p.cur_range()));
+                        parsed
+                    },
+                    |p, marker| {
+                        assert!(!source_type.is_scss());
+                        assert_eq!(marker.kind(p), CssSyntaxKind::CSS_IDENTIFIER);
+                        p.err_builder("unsupported", marker.range(p))
+                    },
+                    kind,
+                );
+
+                let (expected_kind, expected_diagnostics) = if source_type.is_scss() {
+                    (CssSyntaxKind::CSS_IDENTIFIER, ["before", "during"])
+                } else {
+                    (
+                        kind.unwrap_or_else(|| CssSyntaxKind::CSS_IDENTIFIER.to_bogus()),
+                        ["before", "unsupported"],
+                    )
+                };
+                assert_eq!(parsed.kind(&p), Some(expected_kind));
+                assert!(p.at(CssSyntaxKind::EOF));
+                assert_eq!(
+                    p.context()
+                        .diagnostics()
+                        .iter()
+                        .map(|diagnostic| diagnostic.message.to_string())
+                        .collect::<Vec<_>>(),
+                    expected_diagnostics
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn exclusive_syntax_kind_preserves_absent_results() {
+        for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+            for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_DECLARATION)] {
+                let mut p = CssParser::new("; }", source_type, CssParserOptions::default());
+                p.bump(T![;]);
+                p.error(p.err_builder("before", TextRange::empty(0.into())));
+                let position = p.cur_range();
+                let event_count = p.context().events().len();
+
+                let parsed = CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+                    &mut p,
+                    |p| {
+                        p.error(p.err_builder("during", p.cur_range()));
+                        parse_regular_identifier(p)
+                    },
+                    |_, _| panic!("Absent syntax must not produce a feature diagnostic"),
+                    kind,
+                );
+
+                assert!(parsed.is_absent());
+                assert_eq!(p.cur_range(), position);
+                assert_eq!(p.context().events().len(), event_count);
+                let expected_diagnostics = if source_type.is_scss() {
+                    vec!["before", "during"]
+                } else {
+                    vec!["before"]
+                };
+                assert_eq!(
+                    p.context()
+                        .diagnostics()
+                        .iter()
+                        .map(|diagnostic| diagnostic.message.to_string())
+                        .collect::<Vec<_>>(),
+                    expected_diagnostics
+                );
+            }
+        }
+    }
 
     #[test]
     fn css_parser_context_allows_scss_exclusive_value_recovery() {

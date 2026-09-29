@@ -123,6 +123,13 @@ impl Rule for UseForOf {
             _ => None,
         }?;
 
+        if binding
+            .all_writes(model)
+            .any(|reference| body_range.contains(reference.range_start()))
+        {
+            return None;
+        }
+
         let references = list_initializer_references(model, binding, &body_range);
         let array_right = test.as_js_binary_expression()?.right().ok()?;
         let array_used_in_for = array_right

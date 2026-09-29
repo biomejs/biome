@@ -1,0 +1,417 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalidRtl.css
+---
+# Input
+```css
+/* should generate diagnostics with rtl replacements */
+.position {
+	right: 1rem;
+	left: 3rem;
+}
+
+.margin {
+	margin-right: 2rem;
+	margin-left: 4rem;
+}
+
+.padding {
+	padding-right: 10px;
+	padding-left: 20px;
+}
+
+.border {
+	border-left: 5px dotted green;
+	border-left-color: green;
+	border-left-style: dotted;
+	border-left-width: 6px;
+	border-right: 7px double yellow;
+	border-right-color: yellow;
+	border-right-style: double;
+	border-right-width: 8px;
+}
+
+.border-radius {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 8px;
+	border-bottom-left-radius: 12px;
+	border-bottom-right-radius: 16px;
+}
+
+```
+
+# Diagnostics
+```
+invalidRtl.css:3:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    1 │ /* should generate diagnostics with rtl replacements */
+    2 │ .position {
+  > 3 │ 	right: 1rem;
+      │ 	^^^^^
+    4 │ 	left: 3rem;
+    5 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace right with inset-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:4:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    2 │ .position {
+    3 │ 	right: 1rem;
+  > 4 │ 	left: 3rem;
+      │ 	^^^^
+    5 │ }
+    6 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace left with inset-inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:8:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+     7 │ .margin {
+   > 8 │ 	margin-right: 2rem;
+       │ 	^^^^^^^^^^^^
+     9 │ 	margin-left: 4rem;
+    10 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-right with margin-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:9:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+     7 │ .margin {
+     8 │ 	margin-right: 2rem;
+   > 9 │ 	margin-left: 4rem;
+       │ 	^^^^^^^^^^^
+    10 │ }
+    11 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-left with margin-inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:13:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    12 │ .padding {
+  > 13 │ 	padding-right: 10px;
+       │ 	^^^^^^^^^^^^^
+    14 │ 	padding-left: 20px;
+    15 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace padding-right with padding-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:14:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    12 │ .padding {
+    13 │ 	padding-right: 10px;
+  > 14 │ 	padding-left: 20px;
+       │ 	^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace padding-left with padding-inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:18:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    17 │ .border {
+  > 18 │ 	border-left: 5px dotted green;
+       │ 	^^^^^^^^^^^
+    19 │ 	border-left-color: green;
+    20 │ 	border-left-style: dotted;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left with border-inline-end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:19:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    17 │ .border {
+    18 │ 	border-left: 5px dotted green;
+  > 19 │ 	border-left-color: green;
+       │ 	^^^^^^^^^^^^^^^^^
+    20 │ 	border-left-style: dotted;
+    21 │ 	border-left-width: 6px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-color with border-inline-end-color.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:20:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    18 │ 	border-left: 5px dotted green;
+    19 │ 	border-left-color: green;
+  > 20 │ 	border-left-style: dotted;
+       │ 	^^^^^^^^^^^^^^^^^
+    21 │ 	border-left-width: 6px;
+    22 │ 	border-right: 7px double yellow;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-style with border-inline-end-style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:21:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    19 │ 	border-left-color: green;
+    20 │ 	border-left-style: dotted;
+  > 21 │ 	border-left-width: 6px;
+       │ 	^^^^^^^^^^^^^^^^^
+    22 │ 	border-right: 7px double yellow;
+    23 │ 	border-right-color: yellow;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-left-width with border-inline-end-width.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:22:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    20 │ 	border-left-style: dotted;
+    21 │ 	border-left-width: 6px;
+  > 22 │ 	border-right: 7px double yellow;
+       │ 	^^^^^^^^^^^^
+    23 │ 	border-right-color: yellow;
+    24 │ 	border-right-style: double;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right with border-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:23:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    21 │ 	border-left-width: 6px;
+    22 │ 	border-right: 7px double yellow;
+  > 23 │ 	border-right-color: yellow;
+       │ 	^^^^^^^^^^^^^^^^^^
+    24 │ 	border-right-style: double;
+    25 │ 	border-right-width: 8px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-color with border-inline-start-color.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:24:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    22 │ 	border-right: 7px double yellow;
+    23 │ 	border-right-color: yellow;
+  > 24 │ 	border-right-style: double;
+       │ 	^^^^^^^^^^^^^^^^^^
+    25 │ 	border-right-width: 8px;
+    26 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-style with border-inline-start-style.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:25:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    23 │ 	border-right-color: yellow;
+    24 │ 	border-right-style: double;
+  > 25 │ 	border-right-width: 8px;
+       │ 	^^^^^^^^^^^^^^^^^^
+    26 │ }
+    27 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-right-width with border-inline-start-width.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:29:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    28 │ .border-radius {
+  > 29 │ 	border-top-left-radius: 4px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 	border-top-right-radius: 8px;
+    31 │ 	border-bottom-left-radius: 12px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-top-left-radius with border-start-end-radius.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:30:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    28 │ .border-radius {
+    29 │ 	border-top-left-radius: 4px;
+  > 30 │ 	border-top-right-radius: 8px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	border-bottom-left-radius: 12px;
+    32 │ 	border-bottom-right-radius: 16px;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-top-right-radius with border-start-start-radius.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:31:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    29 │ 	border-top-left-radius: 4px;
+    30 │ 	border-top-right-radius: 8px;
+  > 31 │ 	border-bottom-left-radius: 12px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 	border-bottom-right-radius: 16px;
+    33 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-bottom-left-radius with border-end-end-radius.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:32:2 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    30 │ 	border-top-right-radius: 8px;
+    31 │ 	border-bottom-left-radius: 12px;
+  > 32 │ 	border-bottom-right-radius: 16px;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace border-bottom-right-radius with border-end-start-radius.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

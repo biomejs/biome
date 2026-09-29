@@ -5288,6 +5288,44 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVariableStatement {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsVueSlotPropsRoot>
+    for crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::JsVueSlotPropsRoot,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsVueSlotPropsRoot>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsVueSlotPropsRoot {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsVueSlotPropsRoot,
+        crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsVueSlotPropsRoot {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsVueSlotPropsRoot,
+        crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::vue_slot_props_root::FormatJsVueSlotPropsRoot::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsWhileStatement>
     for crate::js::statements::while_statement::FormatJsWhileStatement
 {

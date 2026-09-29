@@ -1,0 +1,64 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.size {
+	inline-size: 100%;
+	min-inline-size: 20rem;
+	max-inline-size: 80rem;
+	block-size: 40vh;
+	min-block-size: 12rem;
+	max-block-size: 90vh;
+	color: red;
+}
+
+.position {
+	inset-block-start: 0;
+	inset-inline-end: 1rem;
+	inset-block-end: 2rem;
+	inset-inline-start: 3rem;
+}
+
+.margin {
+	margin-block-start: 1rem;
+	margin-inline-end: 2rem;
+	margin-block-end: 3rem;
+	margin-inline-start: 4rem;
+}
+
+.padding {
+	padding-block-start: 5px;
+	padding-inline-end: 10px;
+	padding-block-end: 15px;
+	padding-inline-start: 20px;
+}
+
+.border {
+	border-block-start: 1px solid red;
+	border-block-start-color: red;
+	border-block-start-style: solid;
+	border-block-start-width: 2px;
+	border-block-end: 3px dashed blue;
+	border-block-end-color: blue;
+	border-block-end-style: dashed;
+	border-block-end-width: 4px;
+	border-inline-start: 5px dotted green;
+	border-inline-start-color: green;
+	border-inline-start-style: dotted;
+	border-inline-start-width: 6px;
+	border-inline-end: 7px double yellow;
+	border-inline-end-color: yellow;
+	border-inline-end-style: double;
+	border-inline-end-width: 8px;
+}
+
+.border-radius {
+	border-start-start-radius: 4px;
+	border-start-end-radius: 8px;
+	border-end-start-radius: 12px;
+	border-end-end-radius: 16px;
+}
+```

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format '<TEMP_DIR>/when_running_from_a_subdirectory_should_extend_from_the_root_config/packages/lib'
+```
+
 ## `biome.json`
 
 ```json

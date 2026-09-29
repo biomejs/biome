@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot, assert_file_contents};
 use crate::{run_cli, run_cli_with_dyn_fs};
 use biome_console::BufferConsole;
 use biome_fs::{MemoryFileSystem, TemporaryFs};
-use bpaf::Args;
 use camino::Utf8Path;
 
 const UNFORMATTED: &str = "  statement(  )  ";

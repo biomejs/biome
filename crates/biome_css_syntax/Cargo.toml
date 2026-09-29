@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_css_syntax"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "SyntaxKind and common rowan definitions for biome_css_parser"

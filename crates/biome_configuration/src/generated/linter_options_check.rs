@@ -786,6 +786,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_magic_numbers::NoMagicNumbersOptions>(),
     ));
     result.push((
+        "nursery",
+        "noMeaninglessVoidOperator",
+        TypeId::of::<
+            biome_rule_options::no_meaningless_void_operator::NoMeaninglessVoidOperatorOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "noMisleadingCharacterClass",
         TypeId::of::<
@@ -804,6 +811,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noMisplacedAssertion",
         TypeId::of::<biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions>(),
     ));
+    result.push(("nursery", "noMisplacedListElements", TypeId::of::<biome_rule_options::no_misplaced_list_elements::NoMisplacedListElementsOptions>()));
     result.push(("suspicious", "noMisrefactoredShorthandAssign", TypeId::of::<biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions>()));
     result.push((
         "correctness",
@@ -1033,6 +1041,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noReactNativeRawText",
         TypeId::of::<biome_rule_options::no_react_native_raw_text::NoReactNativeRawTextOptions>(),
     ));
+    result.push(("nursery", "noReactObjectTypeAsDefaultProp", TypeId::of::<biome_rule_options::no_react_object_type_as_default_prop::NoReactObjectTypeAsDefaultPropOptions>()));
     result.push((
         "correctness",
         "noReactPropAssignments",
@@ -1138,6 +1147,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_self_compare::NoSelfCompareOptions>(),
     ));
     result.push((
+        "nursery",
+        "noSelfImport",
+        TypeId::of::<biome_rule_options::no_self_import::NoSelfImportOptions>(),
+    ));
+    result.push((
         "correctness",
         "noSetterReturn",
         TypeId::of::<biome_rule_options::no_setter_return::NoSetterReturnOptions>(),
@@ -1212,6 +1226,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noSvelteExportLet",
+        TypeId::of::<biome_rule_options::no_svelte_export_let::NoSvelteExportLetOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noSvelteLegacyConst",
         TypeId::of::<biome_rule_options::no_svelte_legacy_const::NoSvelteLegacyConstOptions>(),
     ));
@@ -1237,6 +1256,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<
             biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions,
         >(),
+    ));
+    result.push((
+        "nursery",
+        "noTailwindRawColors",
+        TypeId::of::<biome_rule_options::no_tailwind_raw_colors::NoTailwindRawColorsOptions>(),
     ));
     result.push(("suspicious", "noTemplateCurlyInString", TypeId::of::<biome_rule_options::no_template_curly_in_string::NoTemplateCurlyInStringOptions>()));
     result.push((
@@ -2150,6 +2174,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_literal_keys::UseLiteralKeysOptions>(),
     ));
     result.push((
+        "nursery",
+        "useLogicalProperties",
+        TypeId::of::<biome_rule_options::use_logical_properties::UseLogicalPropertiesOptions>(),
+    ));
+    result.push((
         "correctness",
         "useLoneAnonymousOperation",
         TypeId::of::<
@@ -2246,6 +2275,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions>(),
     ));
     result.push(("nursery", "usePlaywrightValidDescribeCallback", TypeId::of::<biome_rule_options::use_playwright_valid_describe_callback::UsePlaywrightValidDescribeCallbackOptions>()));
+    result.push((
+        "nursery",
+        "usePromiseRejectErrors",
+        TypeId::of::<biome_rule_options::use_promise_reject_errors::UsePromiseRejectErrorsOptions>(
+        ),
+    ));
     result.push((
         "correctness",
         "useQwikClasslist",
@@ -2405,11 +2440,19 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useStrictBooleanExpressions",
+        TypeId::of::<
+            biome_rule_options::use_strict_boolean_expressions::UseStrictBooleanExpressionsOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "useStrictMode",
         TypeId::of::<biome_rule_options::use_strict_mode::UseStrictModeOptions>(),
     ));
     result.push(("nursery", "useStringStartsEndsWith", TypeId::of::<biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions>()));
+    result.push(("nursery", "useSvelteKitRuneImports", TypeId::of::<biome_rule_options::use_svelte_kit_rune_imports::UseSvelteKitRuneImportsOptions>()));
     result.push(("nursery", "useSvelteRequireEachKey", TypeId::of::<biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions>()));
     result.push((
         "style",

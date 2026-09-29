@@ -36,15 +36,21 @@ info: svelte/adjacent_expressions.svelte
 
 ```svelte
 <span>
-	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(
+		Math.abs(head.median - base.median),
+	)}
 </span>
 
 <span
-	>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}</span
+	>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(
+		Math.abs(head.median - base.median),
+	)}</span
 >
 
 <div>
-	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
+	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(
+		Math.abs(head.median - base.median),
+	)}
 </div>
 
 <span>{first}{second}{third}</span>
@@ -61,11 +67,4 @@ info: svelte/adjacent_expressions.svelte
 
 <span><!-- before -->{first}<!-- between -->{second}<!-- after --></span>
 
-```
-
-# Lines exceeding max width of 80 characters
-```
-    2: 	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
-    6: 	>{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}</span
-   10: 	{head.median - base.median >= 0 ? "+" : "−"}{formatMs(Math.abs(head.median - base.median))}
 ```

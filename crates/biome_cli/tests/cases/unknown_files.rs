@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use crate::{UNFORMATTED, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 #[test]

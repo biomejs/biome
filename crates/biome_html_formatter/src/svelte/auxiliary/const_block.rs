@@ -32,4 +32,13 @@ impl FormatNodeRule<SvelteConstBlock> for FormatSvelteConstBlock {
         // handled by element list formatter
         Ok(())
     }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &SvelteConstBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

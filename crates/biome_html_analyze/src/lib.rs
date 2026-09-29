@@ -18,7 +18,7 @@ pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, Suppression,
+    MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer, Suppression,
 };
 use biome_aria::AriaRoles;
 use biome_diagnostics::Error;
@@ -99,8 +99,62 @@ where
     F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    analyze_with_optional_snippets::<F, B, ()>(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        emit_signal,
+    )
+}
+
+/// Analyzes HTML and embedded snippets together. Ignore comments in HTML can
+/// also apply to findings in the snippets.
+pub fn analyze_with_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: &mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>],
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets(
+        root,
+        filter,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        Some(snippets),
+        emit_signal,
+    )
+}
+
+fn analyze_with_optional_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
     let module_db = html_services.module_db.clone();
-    analyze_with_inspect_matcher(
+    analyze_with_inspect_matcher_and_snippets(
         root,
         filter,
         move |_| {
@@ -112,6 +166,7 @@ where
         source_type,
         html_services,
         suppression,
+        snippets,
         emit_signal,
     )
 }
@@ -130,6 +185,35 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     source_type: HtmlFileSource,
     html_services: HtmlAnalyzerServices,
     suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<HtmlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<HtmlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_snippets::<V, F, B, ()>(
+        root,
+        filter,
+        inspect_matcher,
+        options,
+        source_type,
+        html_services,
+        suppression,
+        None,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_snippets<'a, V, F, B, Output>(
+    root: &LanguageRoot<HtmlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    source_type: HtmlFileSource,
+    html_services: HtmlAnalyzerServices,
+    suppression: Option<Box<dyn Suppression<Diagnostic = SuppressionDiagnostic> + 'a>>,
+    snippets: Option<&mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>]>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -174,15 +258,18 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippets {
+        Some(snippets) => analyzer.run_with_snippets(ctx, snippets),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

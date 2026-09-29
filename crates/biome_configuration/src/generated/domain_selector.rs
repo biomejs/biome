@@ -53,6 +53,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "noUnresolvedImports"),
         RuleFilter::Rule("correctness", "useImportExtensions"),
         RuleFilter::Rule("correctness", "useJsonImportAttributes"),
+        RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
@@ -84,6 +85,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noComponentHookFactories"),
         RuleFilter::Rule("nursery", "noJsxLeakedDollar"),
         RuleFilter::Rule("nursery", "noJsxNamespace"),
+        RuleFilter::Rule("nursery", "noReactObjectTypeAsDefaultProp"),
         RuleFilter::Rule("nursery", "noReactStringRefs"),
         RuleFilter::Rule("nursery", "useReactAsyncServerFunction"),
         RuleFilter::Rule("nursery", "useReactCompiler"),
@@ -122,14 +124,17 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noSvelteAtDebugTags"),
         RuleFilter::Rule("nursery", "noSvelteAtHtmlTags"),
+        RuleFilter::Rule("nursery", "noSvelteExportLet"),
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
+        RuleFilter::Rule("nursery", "useSvelteKitRuneImports"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
     ]
 });
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
     ]
 });
@@ -156,6 +161,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("complexity", "useArrayFind"),
         RuleFilter::Rule("nursery", "noBaseToString"),
         RuleFilter::Rule("nursery", "noFloatingPromises"),
+        RuleFilter::Rule("nursery", "noMeaninglessVoidOperator"),
         RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
@@ -166,6 +172,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useIncludes"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
+        RuleFilter::Rule("nursery", "useStrictBooleanExpressions"),
         RuleFilter::Rule("nursery", "useStringStartsEndsWith"),
         RuleFilter::Rule("style", "useConsistentEnumValueType"),
         RuleFilter::Rule("suspicious", "noUnnecessaryConditions"),

@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{markup_to_string, message_to_string};
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 
 const CONFIG: &str = r#"{
     "html": {

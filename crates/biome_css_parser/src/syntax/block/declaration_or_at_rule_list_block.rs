@@ -78,7 +78,7 @@ impl ParseNodeList for DeclarationOrAtRuleList {
             if CssSyntaxFeatures::Scss.is_supported(p) {
                 parse_scss_interpolated_property_declaration(p)
             } else if let ParsedSyntax::Present(declaration) =
-                parse_exclusive_scss_nested_property_declaration(p)
+                parse_exclusive_scss_nested_property_declaration(p, CSS_BOGUS)
             {
                 ParsedSyntax::Present(declaration)
             } else if is_at_scss_interpolated_property_name(p) {

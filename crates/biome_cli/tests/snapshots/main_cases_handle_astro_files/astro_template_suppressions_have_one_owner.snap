@@ -2,6 +2,14 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --error-on-warnings file.astro
+biome check --write --error-on-warnings --html-formatter-enabled=true file.astro
+biome lint --error-on-warnings file.astro
+```
+
 ## `biome.json`
 
 ```json

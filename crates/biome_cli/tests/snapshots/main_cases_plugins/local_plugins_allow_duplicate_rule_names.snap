@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 692
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/local_plugins_allow_duplicate_rule_names/test.js'
+```
+
 ## `biome.json`
 
 ```json

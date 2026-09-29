@@ -755,9 +755,15 @@ impl Diagnostic for PluginErrors {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!("Error(s) during loading of plugins:\n"))?;
+        fmt.write_markup(markup!("Error(s) during loading of plugins:"))?;
 
         for diagnostic in &self.diagnostics {
+            fmt.write_str("\n")?;
+
+            if let Some(biome_diagnostics::Resource::File(path)) = diagnostic.location().resource {
+                fmt.write_markup(markup!(<Emphasis>{path}</Emphasis>": "))?;
+            }
+
             diagnostic.message(fmt)?;
         }
 

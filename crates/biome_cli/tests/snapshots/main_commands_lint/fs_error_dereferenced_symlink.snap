@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/lint_rome_test_broken_symlink'
+```
+
 # Termination Message
 
 ```block

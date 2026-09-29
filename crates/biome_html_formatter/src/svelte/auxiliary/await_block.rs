@@ -29,4 +29,13 @@ impl FormatNodeRule<SvelteAwaitBlock> for FormatSvelteAwaitBlock {
         // handled by element list formatter
         Ok(())
     }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &SvelteAwaitBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

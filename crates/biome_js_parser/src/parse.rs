@@ -538,10 +538,12 @@ mod tests {
     #[test]
     fn comment_only_template_expression_is_an_error_outside_astro() {
         let vue = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
             setup: false,
             is_source: false,
             event_handler: false,
             allow_statements: false,
+            slot_props: false,
         });
         let parse = parse("/* only a comment */", vue, JsParserOptions::default());
 

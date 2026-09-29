@@ -1,0 +1,240 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const text = Date();
+export const now = Date.now();
+export const parsed = Date.parse("2026-01-01");
+export const utc = Date.UTC(2026, 0);
+export const utcFull = Date.UTC(2026, 0, 1, 12, 30, 45, 500);
+export const prototype = Date.prototype;
+export const prototypeTime = Date.prototype.getTime();
+const create = Date;
+export const aliasedText = create();
+const parse = Date.parse;
+export const aliasedTimestamp = parse("2026-01-01");
+```
+
+## Inferred types
+
+```
+Binding text "text" => string
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date()" => string
+
+Binding now "now" => number
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.now" => sync Function "now" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date.now()" => number
+
+Binding parsed "parsed" => number
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.parse" => sync Function "parse" {
+  accepts: {
+    params: [
+      required s: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date.parse(\"2026-01-01\")" => number
+
+Expression "\"2026-01-01\"" => string: 2026-01-01
+
+Binding utc "utc" => number
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.UTC" => sync Function "UTC" {
+  accepts: {
+    params: [
+      required year: number
+      required monthIndex: number
+      optional date: number
+      optional hours: number
+      optional minutes: number
+      optional seconds: number
+      optional ms: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date.UTC(2026, 0)" => number
+
+Expression "2026" => number: 2026
+
+Expression "0" => number: 0
+
+Binding utcFull "utcFull" => number
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.UTC" => sync Function "UTC" {
+  accepts: {
+    params: [
+      required year: number
+      required monthIndex: number
+      optional date: number
+      optional hours: number
+      optional minutes: number
+      optional seconds: number
+      optional ms: number
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date.UTC(2026, 0, 1, 12, 30, 45, 500)" => number
+
+Expression "2026" => number: 2026
+
+Expression "0" => number: 0
+
+Expression "1" => number: 1
+
+Expression "12" => number: 12
+
+Expression "30" => number: 30
+
+Expression "45" => number: 45
+
+Expression "500" => number: 500
+
+Binding prototype "prototype" => instanceof Date
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.prototype" => instanceof Date
+
+Binding prototypeTime "prototypeTime" => number
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.prototype" => instanceof Date
+
+Expression "Date.prototype.getTime" => sync Function "getTime" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date.prototype.getTime()" => number
+
+Binding create "create" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding aliasedText "aliasedText" => string
+
+Expression "create" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "create()" => string
+
+Binding parse "parse" => sync Function "parse" {
+  accepts: {
+    params: [
+      required s: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "Date" => class "Date" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "Date.parse" => sync Function "parse" {
+  accepts: {
+    params: [
+      required s: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding aliasedTimestamp "aliasedTimestamp" => number
+
+Expression "parse" => sync Function "parse" {
+  accepts: {
+    params: [
+      required s: string
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "parse(\"2026-01-01\")" => number
+
+Expression "\"2026-01-01\"" => string: 2026-01-01
+```

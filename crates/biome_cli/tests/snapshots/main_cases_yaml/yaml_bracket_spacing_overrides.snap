@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 692
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write file.yaml special/file.yml special/compact.yml
+```
+
 ## `biome.json`
 
 ```json

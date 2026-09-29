@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 692
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format format.unknown format.js
+```
+
 ## `biome.json`
 
 ```json

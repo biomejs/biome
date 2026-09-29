@@ -7,96 +7,153 @@ importers:
     configDependencies: {}
     packageManagerDependencies:
       pnpm:
-        specifier: 12.3.4
-        version: 12.3.4
+        specifier: 12.6.0
+        version: 12.6.0
 
 packages:
 
-  '@pnpm/exe.darwin-arm64@12.3.4':
-    resolution: {integrity: sha512-PAyUol8T1+/+ViOiXAt51ECA+QnfXCqz6foL4bW+LsoX0NcVd5XVEM2mRQu+LV4oc7uRz9zf9U0P+XFfuQeDAw==}
+  '@pnpm/exe.android-arm64@12.6.0':
+    resolution: {integrity: sha512-kviIHft9h02q+7N2In7tSL9T/HRUSGwYmU74YPtsWU5ee7vgqPyC0JT6RRX6miW+NxX1CvHgQxg69qq1qTLJYQ==}
+    cpu: [arm64]
+    os: [android]
+
+  '@pnpm/exe.android-x64@12.6.0':
+    resolution: {integrity: sha512-CT8aJKLq2mtZFE71pr4E5Z2xHL8uGnRGr+NclDqsXlVF4SVcQ2QAs14mWi0C8gjT4hbmi+Q0lJRRIkMAWfjjng==}
+    cpu: [x64]
+    os: [android]
+
+  '@pnpm/exe.darwin-arm64@12.6.0':
+    resolution: {integrity: sha512-rafpVkjzugKBMxSvGQd5wK1x5eOTkD/+lcJIFHeQhvd+BJ8kDisOOvwhQDrpGd4vd2Fx+hhW0P2Ptt638OlhFg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@pnpm/exe.darwin-x64@12.3.4':
-    resolution: {integrity: sha512-fxP9JCk0Cdye+ePuj+GJJLMUMTqHGWRdb1dtv4How876uQ2ehxvenpgiYAir/ceO9PsYUZkFTtyZdx+rRu5QOA==}
+  '@pnpm/exe.darwin-x64@12.6.0':
+    resolution: {integrity: sha512-72Jpuv1m24gI8zUNcaylYpBWEhBzz1VPhnDIU2GYM2eRP+KsOqVLwV78i+JrihI39zY2NNXmaN4eAKX1inpaDQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@pnpm/exe.linux-arm64-musl@12.3.4':
-    resolution: {integrity: sha512-FBOt0/7ye6O6q4AllVV5QMviB6qE6fqkeczV/+MDWQsmo+QJrlfsh6X7CpH/tClVpBZEyIbjpUoT8bNhCYBxEg==}
+  '@pnpm/exe.freebsd-x64@12.6.0':
+    resolution: {integrity: sha512-LON4QgNy1w/XF4uySZIyC/5hEB0oGdelXsY9tSKqstER+2j2X2oHz67skD11RRd/HWFRtMr64shQZ4I9ZoZ0zg==}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@pnpm/exe.linux-arm64-musl@12.6.0':
+    resolution: {integrity: sha512-BdDpX+DeaMUc5x6WNcE6FkmFy36NwrBbBvwsZU737Zt3u1fTY+iKFPchjEQNCM4rT6q6xvF2oN3ZwExGsJCkxQ==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-arm64@12.3.4':
-    resolution: {integrity: sha512-t71AVA7LRqiKTyZ5xMYaZc2n5DfdpMbfokZuiIOXHBOM03ECnF0t4iYwaBDqJgVjlKYUOwaF/bRQajGNA4cJ4w==}
+  '@pnpm/exe.linux-arm64@12.6.0':
+    resolution: {integrity: sha512-8h2sNoIhHDpHDYqZZCh9PXr6krqW10btb0GHVGuw710muDHlFAHMtUG2ogmaHge6zJG1xgY4Y7mwX5g/LWvrYg==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.linux-x64-musl@12.3.4':
-    resolution: {integrity: sha512-RPmk7Jb/aYaFvL2iyDN/AtMY+hUEsue732WmXpcuQ9tBpMnGyA5py7Z3+e+qmQaJ0zY/4ni9jJiyPBQHujmv6w==}
+  '@pnpm/exe.linux-ppc64@12.6.0':
+    resolution: {integrity: sha512-ld6xgcEhFCFrsVsJhbmdmR714PnsEspO/Ij8w0/D7OSiz2hYGu3fZd5tKRxOI5m6H6Gl0/RRFAPncTHbsgXVjQ==}
+    cpu: [ppc64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-riscv64@12.6.0':
+    resolution: {integrity: sha512-HIbImydoC3J8NFt+8MXfhTCf5rO6NjCMyinSAHac0VmV8uCHw+kbQkyAzxV84rzz9ZOzmBOnj0b1N461UIYGsw==}
+    cpu: [riscv64]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-s390x@12.6.0':
+    resolution: {integrity: sha512-DjSqT7+BZ/lWcDHwNMuzsRVfyxUimh+D54Xw4tSWbdVVQhtWtNMUyI93LVnwCmsoEpar2gC3SFeAgywx37svKQ==}
+    cpu: [s390x]
+    os: [linux]
+    libc: [glibc]
+
+  '@pnpm/exe.linux-x64-musl@12.6.0':
+    resolution: {integrity: sha512-31lKeGPmRE6xfV6I3VjaEGVFRei14pl/zgoFDK4w+UkbJqOuNl2Ht3O1GuqNIg3Gl14qTEb4kZRAYFHXifDx9A==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@pnpm/exe.linux-x64@12.3.4':
-    resolution: {integrity: sha512-2ZqOlSPkfwX1h5cR+FPiWf8+F+2hZT/3TvhUK5sigHqwaQCIiq8R7CGxhndKs63JtcLi2a1Qpo+wX/EoyfjyJQ==}
+  '@pnpm/exe.linux-x64@12.6.0':
+    resolution: {integrity: sha512-qFWBneHJAJ73W4whtbaFOL1M/7DBC6ILHXuxc7ZPtEhfPuT1zeZiGrmKHoMAfJA+mcm6xhOFljqVTUS+00Jabw==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@pnpm/exe.win32-arm64@12.3.4':
-    resolution: {integrity: sha512-ANyrHqyqco6SXBysUTRF74itDyyraea7IbFsKFdNXTjcFnfycTDx37EwuhdpPYFNSIh2JhUG4fByclsRfiHX7w==}
+  '@pnpm/exe.win32-arm64@12.6.0':
+    resolution: {integrity: sha512-OhfefXEEykZlslSUhR8PPRe6MVPV3Oink/dVfIecE5velpc7j80cZYsHlaDrtRDcm3TPwQHkaRW1SJ1efX9oFg==}
     cpu: [arm64]
     os: [win32]
 
-  '@pnpm/exe.win32-x64@12.3.4':
-    resolution: {integrity: sha512-WH/KqBPY/hq2Tb7SgQltEZytimcjgKRaCRL/aM9CI0c67iKc5TVmHUhIiL3Ux9FB4bWn36i6XewUcScQI+zG8w==}
+  '@pnpm/exe.win32-x64@12.6.0':
+    resolution: {integrity: sha512-L2tuyrD2+Imgxs3VK/ST/2L3xD6vDP0ktJQxM0TaGw7TbAQEMq+RMc8iK6Ew7Id579uzjJe8jSfJID2ZGsOHCA==}
     cpu: [x64]
     os: [win32]
 
-  pnpm@12.3.4:
-    resolution: {integrity: sha512-lhqkH7B32joEpEHZ+OFevAyW2o73ELLrZ7+e58sGEOq9SPH9hfUc/+c4RnhfoPh8VqOocqHYk/hEZ0G1zORUVw==}
+  pnpm@12.6.0:
+    resolution: {integrity: sha512-PvaPlRyxEawgS0paFvCy3fDaVqluBBPoHYVdnwtV75JnFHCQKOHNAMQFwsX7e56OxNxGd3yAXQNzwvL/AP0g7A==}
     engines: {node: '>=18.*'}
     hasBin: true
 
 snapshots:
 
-  '@pnpm/exe.darwin-arm64@12.3.4':
+  '@pnpm/exe.android-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.darwin-x64@12.3.4':
+  '@pnpm/exe.android-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64-musl@12.3.4':
+  '@pnpm/exe.darwin-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-arm64@12.3.4':
+  '@pnpm/exe.darwin-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-x64-musl@12.3.4':
+  '@pnpm/exe.freebsd-x64@12.6.0':
     optional: true
 
-  '@pnpm/exe.linux-x64@12.3.4':
+  '@pnpm/exe.linux-arm64-musl@12.6.0':
     optional: true
 
-  '@pnpm/exe.win32-arm64@12.3.4':
+  '@pnpm/exe.linux-arm64@12.6.0':
     optional: true
 
-  '@pnpm/exe.win32-x64@12.3.4':
+  '@pnpm/exe.linux-ppc64@12.6.0':
     optional: true
 
-  pnpm@12.3.4:
+  '@pnpm/exe.linux-riscv64@12.6.0':
+    optional: true
+
+  '@pnpm/exe.linux-s390x@12.6.0':
+    optional: true
+
+  '@pnpm/exe.linux-x64-musl@12.6.0':
+    optional: true
+
+  '@pnpm/exe.linux-x64@12.6.0':
+    optional: true
+
+  '@pnpm/exe.win32-arm64@12.6.0':
+    optional: true
+
+  '@pnpm/exe.win32-x64@12.6.0':
+    optional: true
+
+  pnpm@12.6.0:
     optionalDependencies:
-      '@pnpm/exe.darwin-arm64': 12.3.4
-      '@pnpm/exe.darwin-x64': 12.3.4
-      '@pnpm/exe.linux-arm64': 12.3.4
-      '@pnpm/exe.linux-arm64-musl': 12.3.4
-      '@pnpm/exe.linux-x64': 12.3.4
-      '@pnpm/exe.linux-x64-musl': 12.3.4
-      '@pnpm/exe.win32-arm64': 12.3.4
-      '@pnpm/exe.win32-x64': 12.3.4
+      '@pnpm/exe.android-arm64': 12.6.0
+      '@pnpm/exe.android-x64': 12.6.0
+      '@pnpm/exe.darwin-arm64': 12.6.0
+      '@pnpm/exe.darwin-x64': 12.6.0
+      '@pnpm/exe.freebsd-x64': 12.6.0
+      '@pnpm/exe.linux-arm64': 12.6.0
+      '@pnpm/exe.linux-arm64-musl': 12.6.0
+      '@pnpm/exe.linux-ppc64': 12.6.0
+      '@pnpm/exe.linux-riscv64': 12.6.0
+      '@pnpm/exe.linux-s390x': 12.6.0
+      '@pnpm/exe.linux-x64': 12.6.0
+      '@pnpm/exe.linux-x64-musl': 12.6.0
+      '@pnpm/exe.win32-arm64': 12.6.0
+      '@pnpm/exe.win32-x64': 12.6.0
 
 ---
 lockfileVersion: '9.0'
@@ -116,17 +173,17 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@changesets/cli':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.3
+        version: 3.0.3
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.6
+        version: 24.13.6
       commonmark:
         specifier: 0.31.2
         version: 0.31.2
       tombi:
-        specifier: 1.5.4
-        version: 1.5.4
+        specifier: 1.5.5
+        version: 1.5.5
 
   crates/biome_formatter_test/src/prettier:
     dependencies:
@@ -137,17 +194,17 @@ importers:
   packages/@biomejs/backend-jsonrpc:
     devDependencies:
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.6
+        version: 24.13.6
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       vite:
         specifier: 7.3.6
-        version: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.4)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
     optionalDependencies:
       '@biomejs/cli-darwin-arm64':
         specifier: 2.5.14
@@ -233,10 +290,10 @@ importers:
         version: 5.9.3
       vite:
         specifier: 7.3.6
-        version: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.4)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
 
   packages/@biomejs/runtime:
     dependencies:
@@ -257,8 +314,8 @@ importers:
   packages/aria-data:
     dependencies:
       happy-dom:
-        specifier: ^20.14.3
-        version: 20.14.3
+        specifier: ^20.14.5
+        version: 20.14.5
 
   packages/prettier-compare:
     dependencies:
@@ -269,27 +326,27 @@ importers:
         specifier: workspace:*
         version: link:../@biomejs/wasm-nodejs
       '@opentui/core':
-        specifier: ^0.5.11
-        version: 0.5.11(typescript@5.9.3)(web-tree-sitter@0.25.10)
+        specifier: ^0.5.12
+        version: 0.5.12(typescript@5.9.3)(web-tree-sitter@0.25.10)
       '@opentui/react':
-        specifier: ^0.5.11
-        version: 0.5.11(react-devtools-core@7.0.1)(react@19.3.0)(typescript@5.9.3)(web-tree-sitter@0.25.10)(ws@8.21.3)
+        specifier: ^0.5.12
+        version: 0.5.12(react-devtools-core@7.0.1)(react@19.3.0)(typescript@5.9.3)(web-tree-sitter@0.25.10)(ws@8.21.3)
       prettier:
-        specifier: ^3.9.6
-        version: 3.9.6
+        specifier: ^3.9.9
+        version: 3.9.9
       prettier-plugin-astro:
         specifier: ^0.14.1
         version: 0.14.1
       prettier-plugin-svelte:
         specifier: ^4.1.1
-        version: 4.1.1(prettier@3.9.6)(svelte@5.46.4)
+        version: 4.1.1(prettier@3.9.9)(svelte@5.46.4)
       react:
         specifier: ^19.3.0
         version: 19.3.0
     devDependencies:
       '@types/node':
-        specifier: 22.20.2
-        version: 22.20.2
+        specifier: 22.20.4
+        version: 22.20.4
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
@@ -300,18 +357,18 @@ importers:
   packages/tailwindcss-config-analyzer:
     dependencies:
       tailwindcss:
-        specifier: ^4.3.3
+        specifier: 4.3.3
         version: 4.3.3
     devDependencies:
       '@types/node':
-        specifier: 24.13.4
-        version: 24.13.4
+        specifier: 24.13.6
+        version: 24.13.6
       read-package-up:
         specifier: 12.0.0
         version: 12.0.0
       tsx:
-        specifier: 4.23.13
-        version: 4.23.13
+        specifier: 4.23.15
+        version: 4.23.15
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -329,8 +386,8 @@ packages:
     resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
     engines: {node: '>=6.9.0'}
 
-  '@changesets/apply-release-plan@8.1.0':
-    resolution: {integrity: sha512-M93HOGyX3ssg6He3b5NotaHtQVu6uajHS6UIQ28xKt2RzskCy73ayX4I914qBKjTJmrE4YFlELQjfcqxbmGLJw==}
+  '@changesets/apply-release-plan@8.1.1':
+    resolution: {integrity: sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q==}
     engines: {node: ^22.11 || ^24 || >=26}
 
   '@changesets/assemble-release-plan@7.0.0':
@@ -345,13 +402,13 @@ packages:
     resolution: {integrity: sha512-QUcrV7878yHlWPXXPA6gqSxNKwtVHCd1K22L7ZAoJw2yGy8K4QvjwOStD75+1Q9KD9ZSUgGS94HuYdd7HOVtpA==}
     engines: {node: ^22.11 || ^24 || >=26}
 
-  '@changesets/cli@3.0.2':
-    resolution: {integrity: sha512-t/omGJj/I+Jv0kmJAkj5cstYEdUQiJnpip2F+2m3F4lQ3kAZ3o8Exep4/Fm1qq4rvw6ovlhJvZNrKdwLJ4lkuQ==}
+  '@changesets/cli@3.0.3':
+    resolution: {integrity: sha512-L1i67bMfkK6iC/kDejuNO4pFgTRcWIObsD6Qof2woP1I4M8tj17DGlcpRaTzTv1DYSP5EMwWdEtR8X0Pj5Jg3Q==}
     engines: {node: ^22.11 || ^24 || >=26, npm: '>=10.9.0', pnpm: '>=10.0.0', yarn: '>=4.5.2'}
     hasBin: true
 
-  '@changesets/config@4.0.0':
-    resolution: {integrity: sha512-mw95/YrkOuhZZxfnVAA4bSXOFUi+KlhzOBTM8C4x777NhUU6HWIl9Z+K+nME+E4PVsv5NQVQwTfiHihAS1A/ow==}
+  '@changesets/config@4.0.1':
+    resolution: {integrity: sha512-PxpxSQLQSLDjceAgRq+4FWlU+HflDIw03mmPVipxoQx9xrXFUjmqTy3SE+n/2t+DqPdpPiLWVr5NRiLZvjyLwg==}
     engines: {node: ^22.11 || ^24 || >=26}
 
   '@changesets/errors@1.0.0':
@@ -746,56 +803,56 @@ packages:
     resolution: {integrity: sha512-6QEf6yqFbETdwGITKq57aYoPfX/3K8XFNwsAlx0C1M7o8cb79sv1M3w+tWuWvIcSbNqrLF7OD7YpZMVVz335hQ==}
     engines: {node: '>=20.0.0'}
 
-  '@opentui/core-darwin-arm64@0.5.11':
-    resolution: {integrity: sha512-DRXY5ioq+n1ZNAMAcaFaBunr0cmi2gqucjbTW7lgFp8t9uN3fNZnLTDOqkCTQtT2XhrU4GXqySaPSQ4qFG/EAQ==}
+  '@opentui/core-darwin-arm64@0.5.12':
+    resolution: {integrity: sha512-YdVnP0tAyerBNl0mIcmQEOotPeZzW1VnSXKBl5cyZ5e6nDd2Y+ui/8eRPpn1oqcamf1NCnzS4ohMgejOvna8Zg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@opentui/core-darwin-x64@0.5.11':
-    resolution: {integrity: sha512-yP/8GliJDiJNm8YYJKvgWuy6xyCEd8d4GwBVOIzCFOI7ZIbGP8GOTvmwIjRW4Paw20pTttWMWyRoQiCvOXvH2g==}
+  '@opentui/core-darwin-x64@0.5.12':
+    resolution: {integrity: sha512-uRrQJdHmLUSj3PV23QPi3WSimYTTxcXnVouxF6U4xMXlOv4N3SxnHfVwMRQkPqbGOfvVWHeLE6FdK4C+ubU0sQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@opentui/core-linux-arm64-musl@0.5.11':
-    resolution: {integrity: sha512-x+xeR2LYibvIi/qQetRjJR008sFRve60QuDcO8ItxUwzFeKTDzl5CEiZpBXfm5I4FhRNuyuj0TSPIFadMvrjFQ==}
+  '@opentui/core-linux-arm64-musl@0.5.12':
+    resolution: {integrity: sha512-VZ2sNMw1d/r1SLPjUbOP9LKscKz1CQjID8adTL6gG8Lrrq+mYcIUxutyB+P/eG0J/7oRZLPR6OMt7dUOap6RTg==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@opentui/core-linux-arm64@0.5.11':
-    resolution: {integrity: sha512-zBIsRFHlLUYFNhapRSNt9dz4mC8gZ4Wxcfy3A+2AwqsgCipcr2FkIuAXYqN08q+IvqFX7DfqgIFGWDNedHTPUg==}
+  '@opentui/core-linux-arm64@0.5.12':
+    resolution: {integrity: sha512-XeKhuIaEtgipvuPHbl4qPOBj+Ut+2zObmsxMVM1jDcjz/FatG9PGeGQPx1G1SnvH2AgpT4K+eCu7DUF0+yIqoQ==}
     cpu: [arm64]
     os: [linux]
 
-  '@opentui/core-linux-x64-musl@0.5.11':
-    resolution: {integrity: sha512-MyqOnSs8pTYG2xmFr1xt6xZIuHu2Xu4pkle9my9JdE+WClmusHf0YN9Eas6jQLAq5XUi34r22wMeK0juk93zyw==}
+  '@opentui/core-linux-x64-musl@0.5.12':
+    resolution: {integrity: sha512-WWW0hVBoSYZ3D6AgZ4u2Y5/u/IyIq2pDb+4yI3WgJ70Wyt6ofHy+6kRGRgbXFn1p+rPInAHjCXD2v6C7iEKSrA==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@opentui/core-linux-x64@0.5.11':
-    resolution: {integrity: sha512-pSOXqOADrv+zINOgR3FDFA9zVRaim3zl8/yhtO+X9rEJ6f34z3gDund0Gf88hNJSMpZK5xWtipEVm28RY5VF8w==}
+  '@opentui/core-linux-x64@0.5.12':
+    resolution: {integrity: sha512-eZiCjEzwbb6qClPPfk32Nha9xmr9obt69Xj0+9SKsXxWLBKkjQEGOMRoh/R9ObaQF4aq8If1xV3VEY0sD9W9vg==}
     cpu: [x64]
     os: [linux]
 
-  '@opentui/core-win32-arm64@0.5.11':
-    resolution: {integrity: sha512-MGGRXIDJ//HyaqC5ndSr7/CUl+ICdYEAMcjbA00UWsthh4ZO/rYhPkyqOaTn5ck6+G4ca3/+M76J+jImMYTjNg==}
+  '@opentui/core-win32-arm64@0.5.12':
+    resolution: {integrity: sha512-aLbm6870Ybls6CYL4zMOCImTBPLZHZMUXJFGqMI44lIWxitkAtT6zg5lYA4oRqFRzzryDclxr29+hDgT3p3Blw==}
     cpu: [arm64]
     os: [win32]
 
-  '@opentui/core-win32-x64@0.5.11':
-    resolution: {integrity: sha512-sMEGX9rhiPd1gBa190jzj5uIdzKCMImxHmr22hJLxIRWqejxWvqGnRBkW68wT8NfMViDiMtZWavgWL7GgmYCAQ==}
+  '@opentui/core-win32-x64@0.5.12':
+    resolution: {integrity: sha512-KTwtwpfd2zF9opVh3SyRJYDd1o3Xv4XL8OZb8Zi+CqWUel6Y2IDCiVivCv8fGJt3J7wOIXXtuZI9ZUkLyKJCiQ==}
     cpu: [x64]
     os: [win32]
 
-  '@opentui/core@0.5.11':
-    resolution: {integrity: sha512-pImMfjCNx7JUp9Df1LRZBDLisWqgzOLXZKXO+hh3jA9ujBFPQnZOqbG+/N5uVAAX8IZGaqhYSQRwSZIFBmcfbQ==}
+  '@opentui/core@0.5.12':
+    resolution: {integrity: sha512-ZXBE5gmvdovmV8zJQrOQf6E44v1tJRDEgrM2MYhEglzgXZ+smIUp95O8zeRYGsuIzQIiMPMgQqKtTJuzvAb7BQ==}
     engines: {bun: '>=1.3.0', node: '>=26.4.0'}
     peerDependencies:
       web-tree-sitter: 0.25.10
 
-  '@opentui/react@0.5.11':
-    resolution: {integrity: sha512-ACH6Kpl3/O1zdNL0sZtzrnxfw0+auJu4eefIbPTAPuNEessyuhd2xvV4agrdWRJCeogywS7er5k7uS/8YRWnZg==}
+  '@opentui/react@0.5.12':
+    resolution: {integrity: sha512-cHzTW0Pyr2kl/sMX7nviP2TM0kLwE8x1Dny5KweqCj0PFBAQsISboTxq0jjjeVAUEYWY89xfDzz+rGpwBzWbRg==}
     peerDependencies:
       react: '>=19.2.0'
       react-devtools-core: ^7.0.1
@@ -924,60 +981,60 @@ packages:
     peerDependencies:
       acorn: ^8.9.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.4':
-    resolution: {integrity: sha512-J8ppYaHt83UEM8qOQLcVkvHPFN+BKuDrPpfaX1dRd3+Ir56+BB9E2HTUQxxb4UCk0rskQo96ONNGrEWN4IFNqA==}
+  '@tombi-toml/cli-darwin-arm64@1.5.5':
+    resolution: {integrity: sha512-pIlEbOYN3RPF5usGwMisDJbEln+etzbTTc5BRZfbCgOU1ZA2Zn3ZY88cGwHXayc8be3USdlEu24l45af5XO9+A==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@tombi-toml/cli-darwin-x64@1.5.4':
-    resolution: {integrity: sha512-nZDd/jFGaQMTRhLymE3/Ptu1jaBFFjvxv/opB26Zl2XaJv8ndQBhCiFq1EBoQt8I8gTEttR7DXD8vwf/1sm3/w==}
+  '@tombi-toml/cli-darwin-x64@1.5.5':
+    resolution: {integrity: sha512-bDMZrYAltRtn1V1cNxgFIUdp9MX+Z+9zhRFsDrKFQQoflhPEr3Bqbru52LHdFhTCb2zCvf8ir1VnHnu2gE8BrA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.4':
-    resolution: {integrity: sha512-03g9GT+tOF8rsMG1gcDeyqRGVFh5gNDqUizxWT6/uHn7UlB/mp9yMGEwzn2xAPOo5HHguDK7Jk/GhPeIyPADAA==}
+  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
+    resolution: {integrity: sha512-Y8WPHVFHv6Zf9DisrP+bQUH+Vzs6UgxJxAYDG8zCTtpnxJFqVmHgrRPebv+X/TkCJYgznDxU41Q0cMNJ68jRnw==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-arm64@1.5.4':
-    resolution: {integrity: sha512-4eVM+U6DDSWsFmJFxITmTcR6NWsu92o2TDBVD+fe1yVwYdEn9C7ryvWG/NSZHYT4VRZ9hqhc5MbSWN0g4isIEA==}
+  '@tombi-toml/cli-linux-arm64@1.5.5':
+    resolution: {integrity: sha512-yixZSwfMIizfOfljU+HO4G1Jt+prHz1Rud3UbOEnw1hF2rAej/CfPIZN2xoT62MFvj9F5RlHOHMjXBdZRx4cGQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.4':
-    resolution: {integrity: sha512-tAjufBrG05GWSfwautBCX2B5FJcwb3XuCGKi17yek7TxokuysIvV7gqryzPPGvPjXQfbCfQwX+O/b/OOsCGgXg==}
+  '@tombi-toml/cli-linux-x64-musl@1.5.5':
+    resolution: {integrity: sha512-c9sGm5LZWxVT2IQUjwRI5Ql8d5pE6ahtwA+6brmVikXvWsfu7SsmnhxrN0VtHZf50/bHirXyuArIxCc3L6Wy9w==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@tombi-toml/cli-linux-x64@1.5.4':
-    resolution: {integrity: sha512-YR0mt+aw78HSpBAtzcIL5kbsEb4BqEGxlPmAueMZkNYHRuuhDzdnlvwPhuC6KbGbbpLq2mSvISIqU5ySzvtSNg==}
+  '@tombi-toml/cli-linux-x64@1.5.5':
+    resolution: {integrity: sha512-3AWdWuGQ+Y6vJyCrEaKS8BOOtJW7ZX5aiv8JKJocB/+YZ/oMAi9PBPnJA9VXiuRyX3z8pAN7q5Rf0KytcuISBA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@tombi-toml/cli-sunos-x64@1.5.4':
-    resolution: {integrity: sha512-tlsUBOXVbxHLr3BhxcxbkyJ9DQlVMqnbGLJdThKlTOcU0o1OehIzYjm5g0i+bhxaclQBWKHiTOjjcWLonHXQ1Q==}
+  '@tombi-toml/cli-sunos-x64@1.5.5':
+    resolution: {integrity: sha512-SKKzvklVj9749rXih7GLyT5Qrz7OGN60/6Jf44DnlE9M45pEeA8y2YXy86OdQ84yaioyFTYNigbjdZrAYSC2RA==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [sunos]
 
-  '@tombi-toml/cli-win32-arm64@1.5.4':
-    resolution: {integrity: sha512-IJ54EmHeizMuIEEPviGsksZj7jsTk4vnB9/KGNebAmj8/NP5DlvJ1P03uZgwPSVB3u6TWmqDczhQzanrjuNnnQ==}
+  '@tombi-toml/cli-win32-arm64@1.5.5':
+    resolution: {integrity: sha512-LZKN5jtJrzpx7Ad3Nw26vn3dsv2RjwKxDzhdFmu2UODeBpTb2vkqUqPeuJQ0BHeqJ4Ou1Iy6N2iT7F2/SwnJbQ==}
     engines: {node: '>=14.0.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@tombi-toml/cli-win32-x64@1.5.4':
-    resolution: {integrity: sha512-KRkU+SatHT2rjT/qnoKtrZg2VlyNHLboV5SM+/G64cc5gFieroiITy5Hy8MhUqIsvDKLOrPX9/ZNI4v71Deacg==}
+  '@tombi-toml/cli-win32-x64@1.5.5':
+    resolution: {integrity: sha512-CbWaV2yZhtxr+IWnA8CWdQKuegwRRnohSTUv8kPiJFPMppA7fxzXUpgEnqO/nYohQGlqSz5L0xXsi/6asib1cw==}
     engines: {node: '>=14.0.0'}
     cpu: [x64]
     os: [win32]
@@ -991,11 +1048,11 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@types/node@22.20.2':
-    resolution: {integrity: sha512-xlvWf4Vs9n1PEVYwP1n4vvG07M6y8WgvJ2t0vbrWTmijsIHp1cS+uJ2kMIRdY3nHZK0nCYKrPeD171+SzF4/zw==}
+  '@types/node@22.20.4':
+    resolution: {integrity: sha512-zJRE40jpHtKqE/C4fgHrAKQLJuSpzEnP9ff9Y7YtoR3Wd2pwqzlekDeEuUQXjRd+QCYnVnNwuJYmhdk9XV8gvA==}
 
-  '@types/node@24.13.4':
-    resolution: {integrity: sha512-YJ7EqCstVTzIr0fMr7qul/977en+pQHrfmuKIo6Zr9i75Be21dr3MovcfvGtyvi2HAUrRerWps5sMO9I7WaxDw==}
+  '@types/node@24.13.6':
+    resolution: {integrity: sha512-SGrw/h3KPFshy3OE6ZL53LMBG5vGQQ8/gIpiqz/kRZhPJ7HgwCEs8LBuNtWLa8dvGZVpSF7+Bf+c11HUrCb/yg==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -1291,8 +1348,8 @@ packages:
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
 
-  happy-dom@20.14.3:
-    resolution: {integrity: sha512-0KMb/Eh8rsd+aMNkOk5h8LkAjo9Na1aksnEGmsuZf+GXl6UkAdIi0VbUHU7d59lXhNmawODgwwuCMiZpCxwwCw==}
+  happy-dom@20.14.5:
+    resolution: {integrity: sha512-x/RzkpWO40bTjIoT30iQtt64FLLmH/iRcUCN2X//bLx7H3ifkdfPXyqsro/OYtqzIAhiLMMA7mmiOR9C3NOKjQ==}
     engines: {node: '>=20.0.0'}
 
   happy-dom@20.9.0:
@@ -1379,6 +1436,10 @@ packages:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
+  picomatch@4.0.7:
+    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
+    engines: {node: '>=12'}
+
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
@@ -1399,8 +1460,8 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  prettier@3.9.6:
-    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+  prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -1513,6 +1574,10 @@ packages:
     resolution: {integrity: sha512-QKAl9m8gWWGHV8jZcPeym6j+XULi6tOf1mT83WYJ4Lk2ytW/uwAWkrP0uFsdoYMdueVJ0qs26wZ+23xeB4ibNQ==}
     engines: {node: '>=18'}
 
+  tinyexec@1.3.1:
+    resolution: {integrity: sha512-GCvB3aoys96IuDFBMcTB46JOR6mdMtAToqwiW8JlWhsoh1mhHi/xn9ss/Dg7N555GiJyEt2qzoG/NHCwM6h1EA==}
+    engines: {node: '>=18'}
+
   tinyglobby@0.2.15:
     resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
     engines: {node: '>=12.0.0'}
@@ -1521,8 +1586,8 @@ packages:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
-  tombi@1.5.4:
-    resolution: {integrity: sha512-l6h2dpKEjf3C35NHZD9RuIB3iibyWSQDKarFO+2DnnFOr5KbTvGbH0LHVwGvQ0XAe0UVDBV5QoRqKkgvVdR9wA==}
+  tombi@1.5.5:
+    resolution: {integrity: sha512-tY+XwsZmMCj4BHbX1iot1H5djjvAmANKf8bIJJWPvDvc+JIwE8/7Od3ryIfnqGzZepLk249O2GOyeaTSO+8F+w==}
     engines: {node: '>=14.0.0'}
     hasBin: true
 
@@ -1531,8 +1596,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  tsx@4.23.13:
-    resolution: {integrity: sha512-BL5MGkRln6aDYhb0xbQlEAGw743BaZYWdbWtdJOBriYJboKgUUYCadFp2/FpBBZquBC/ezNBn7wMMPx7FDZUDw==}
+  tsx@4.23.15:
+    resolution: {integrity: sha512-Yiex1Ovn8z2xPpOWckIiysV1SSyRMY9BkLF++q0yKiDxCqRhosKfMg3janKkiLBwZ5c/YryloKwGZcrEmtwxKw==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -1712,9 +1777,9 @@ snapshots:
 
   '@babel/helper-validator-identifier@7.28.5': {}
 
-  '@changesets/apply-release-plan@8.1.0':
+  '@changesets/apply-release-plan@8.1.1':
     dependencies:
-      '@changesets/config': 4.0.0
+      '@changesets/config': 4.0.1
       '@changesets/format': 0.1.2
       '@changesets/git': 4.0.1
       '@changesets/should-skip-package': 1.0.0
@@ -1740,12 +1805,12 @@ snapshots:
       '@changesets/get-github-info': 1.0.1
       '@changesets/types': 7.0.0
 
-  '@changesets/cli@3.0.2':
+  '@changesets/cli@3.0.3':
     dependencies:
-      '@changesets/apply-release-plan': 8.1.0
+      '@changesets/apply-release-plan': 8.1.1
       '@changesets/assemble-release-plan': 7.0.0
       '@changesets/changelog-git': 1.0.0
-      '@changesets/config': 4.0.0
+      '@changesets/config': 4.0.1
       '@changesets/errors': 1.0.0
       '@changesets/get-dependents-graph': 3.0.0
       '@changesets/git': 4.0.1
@@ -1762,15 +1827,15 @@ snapshots:
       launch-editor: 2.14.1
       package-manager-detector: 1.8.0
       semver: 7.8.5
-      tinyexec: 1.3.0
+      tinyexec: 1.3.1
 
-  '@changesets/config@4.0.0':
+  '@changesets/config@4.0.1':
     dependencies:
       '@changesets/get-dependents-graph': 3.0.0
       '@changesets/should-skip-package': 1.0.0
       '@changesets/types': 7.0.0
       '@manypkg/get-packages': 3.1.0
-      picomatch: 4.0.4
+      picomatch: 4.0.7
 
   '@changesets/errors@1.0.0': {}
 
@@ -2027,31 +2092,31 @@ snapshots:
       tinyglobby: 0.2.15
       yaml: 2.9.0
 
-  '@opentui/core-darwin-arm64@0.5.11':
+  '@opentui/core-darwin-arm64@0.5.12':
     optional: true
 
-  '@opentui/core-darwin-x64@0.5.11':
+  '@opentui/core-darwin-x64@0.5.12':
     optional: true
 
-  '@opentui/core-linux-arm64-musl@0.5.11':
+  '@opentui/core-linux-arm64-musl@0.5.12':
     optional: true
 
-  '@opentui/core-linux-arm64@0.5.11':
+  '@opentui/core-linux-arm64@0.5.12':
     optional: true
 
-  '@opentui/core-linux-x64-musl@0.5.11':
+  '@opentui/core-linux-x64-musl@0.5.12':
     optional: true
 
-  '@opentui/core-linux-x64@0.5.11':
+  '@opentui/core-linux-x64@0.5.12':
     optional: true
 
-  '@opentui/core-win32-arm64@0.5.11':
+  '@opentui/core-win32-arm64@0.5.12':
     optional: true
 
-  '@opentui/core-win32-x64@0.5.11':
+  '@opentui/core-win32-x64@0.5.12':
     optional: true
 
-  '@opentui/core@0.5.11(typescript@5.9.3)(web-tree-sitter@0.25.10)':
+  '@opentui/core@0.5.12(typescript@5.9.3)(web-tree-sitter@0.25.10)':
     dependencies:
       bun-ffi-structs: 0.3.1(typescript@5.9.3)
       diff: 9.0.0
@@ -2060,20 +2125,20 @@ snapshots:
       strip-ansi: 7.1.2
       web-tree-sitter: 0.25.10
     optionalDependencies:
-      '@opentui/core-darwin-arm64': 0.5.11
-      '@opentui/core-darwin-x64': 0.5.11
-      '@opentui/core-linux-arm64': 0.5.11
-      '@opentui/core-linux-arm64-musl': 0.5.11
-      '@opentui/core-linux-x64': 0.5.11
-      '@opentui/core-linux-x64-musl': 0.5.11
-      '@opentui/core-win32-arm64': 0.5.11
-      '@opentui/core-win32-x64': 0.5.11
+      '@opentui/core-darwin-arm64': 0.5.12
+      '@opentui/core-darwin-x64': 0.5.12
+      '@opentui/core-linux-arm64': 0.5.12
+      '@opentui/core-linux-arm64-musl': 0.5.12
+      '@opentui/core-linux-x64': 0.5.12
+      '@opentui/core-linux-x64-musl': 0.5.12
+      '@opentui/core-win32-arm64': 0.5.12
+      '@opentui/core-win32-x64': 0.5.12
     transitivePeerDependencies:
       - typescript
 
-  '@opentui/react@0.5.11(react-devtools-core@7.0.1)(react@19.3.0)(typescript@5.9.3)(web-tree-sitter@0.25.10)(ws@8.21.3)':
+  '@opentui/react@0.5.12(react-devtools-core@7.0.1)(react@19.3.0)(typescript@5.9.3)(web-tree-sitter@0.25.10)(ws@8.21.3)':
     dependencies:
-      '@opentui/core': 0.5.11(typescript@5.9.3)(web-tree-sitter@0.25.10)
+      '@opentui/core': 0.5.12(typescript@5.9.3)(web-tree-sitter@0.25.10)
       react: 19.3.0
       react-devtools-core: 7.0.1
       react-reconciler: 0.33.0(react@19.3.0)
@@ -2150,31 +2215,31 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@tombi-toml/cli-darwin-arm64@1.5.4':
+  '@tombi-toml/cli-darwin-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-darwin-x64@1.5.4':
+  '@tombi-toml/cli-darwin-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64-musl@1.5.4':
+  '@tombi-toml/cli-linux-arm64-musl@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-arm64@1.5.4':
+  '@tombi-toml/cli-linux-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-x64-musl@1.5.4':
+  '@tombi-toml/cli-linux-x64-musl@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-linux-x64@1.5.4':
+  '@tombi-toml/cli-linux-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-sunos-x64@1.5.4':
+  '@tombi-toml/cli-sunos-x64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-win32-arm64@1.5.4':
+  '@tombi-toml/cli-win32-arm64@1.5.5':
     optional: true
 
-  '@tombi-toml/cli-win32-x64@1.5.4':
+  '@tombi-toml/cli-win32-x64@1.5.5':
     optional: true
 
   '@types/chai@5.2.2':
@@ -2185,11 +2250,11 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@types/node@22.20.2':
+  '@types/node@22.20.4':
     dependencies:
       undici-types: 6.21.0
 
-  '@types/node@24.13.4':
+  '@types/node@24.13.6':
     dependencies:
       undici-types: 7.18.2
 
@@ -2203,7 +2268,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
 
   '@typescript-eslint/types@8.57.2': {}
 
@@ -2276,13 +2341,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.11(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.11(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.11
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.11':
     dependencies:
@@ -2318,7 +2383,7 @@ snapshots:
 
   buffer-image-size@0.6.4:
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
 
   bun-ffi-structs@0.3.1(typescript@5.9.3):
     dependencies:
@@ -2451,9 +2516,9 @@ snapshots:
       resolve-pkg-maps: 1.0.0
     optional: true
 
-  happy-dom@20.14.3:
+  happy-dom@20.14.5:
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       buffer-image-size: 0.6.4
@@ -2466,7 +2531,7 @@ snapshots:
 
   happy-dom@20.9.0:
     dependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
       '@types/whatwg-mimetype': 3.0.2
       '@types/ws': 8.18.1
       entities: 7.0.1
@@ -2540,6 +2605,8 @@ snapshots:
 
   picomatch@4.0.4: {}
 
+  picomatch@4.0.7: {}
+
   postcss@8.5.6:
     dependencies:
       nanoid: 3.3.11
@@ -2549,17 +2616,17 @@ snapshots:
   prettier-plugin-astro@0.14.1:
     dependencies:
       '@astrojs/compiler': 2.13.1
-      prettier: 3.9.6
+      prettier: 3.9.9
       sass-formatter: 0.7.9
 
-  prettier-plugin-svelte@4.1.1(prettier@3.9.6)(svelte@5.46.4):
+  prettier-plugin-svelte@4.1.1(prettier@3.9.9)(svelte@5.46.4):
     dependencies:
-      prettier: 3.9.6
+      prettier: 3.9.9
       svelte: 5.46.4
 
   prettier@3.8.4: {}
 
-  prettier@3.9.6: {}
+  prettier@3.9.9: {}
 
   react-devtools-core@7.0.1:
     dependencies:
@@ -2697,6 +2764,8 @@ snapshots:
 
   tinyexec@1.3.0: {}
 
+  tinyexec@1.3.1: {}
+
   tinyglobby@0.2.15:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.4)
@@ -2704,17 +2773,17 @@ snapshots:
 
   tinyrainbow@3.1.0: {}
 
-  tombi@1.5.4:
+  tombi@1.5.5:
     optionalDependencies:
-      '@tombi-toml/cli-darwin-arm64': 1.5.4
-      '@tombi-toml/cli-darwin-x64': 1.5.4
-      '@tombi-toml/cli-linux-arm64': 1.5.4
-      '@tombi-toml/cli-linux-arm64-musl': 1.5.4
-      '@tombi-toml/cli-linux-x64': 1.5.4
-      '@tombi-toml/cli-linux-x64-musl': 1.5.4
-      '@tombi-toml/cli-sunos-x64': 1.5.4
-      '@tombi-toml/cli-win32-arm64': 1.5.4
-      '@tombi-toml/cli-win32-x64': 1.5.4
+      '@tombi-toml/cli-darwin-arm64': 1.5.5
+      '@tombi-toml/cli-darwin-x64': 1.5.5
+      '@tombi-toml/cli-linux-arm64': 1.5.5
+      '@tombi-toml/cli-linux-arm64-musl': 1.5.5
+      '@tombi-toml/cli-linux-x64': 1.5.5
+      '@tombi-toml/cli-linux-x64-musl': 1.5.5
+      '@tombi-toml/cli-sunos-x64': 1.5.5
+      '@tombi-toml/cli-win32-arm64': 1.5.5
+      '@tombi-toml/cli-win32-x64': 1.5.5
 
   tsx@4.21.0:
     dependencies:
@@ -2724,7 +2793,7 @@ snapshots:
       fsevents: 2.3.3
     optional: true
 
-  tsx@4.23.13:
+  tsx@4.23.15:
     dependencies:
       esbuild: 0.28.2
     optionalDependencies:
@@ -2772,7 +2841,7 @@ snapshots:
       spdx-correct: 3.2.0
       spdx-expression-parse: 3.0.1
 
-  vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0):
+  vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.27.2
       fdir: 6.5.0(picomatch@4.0.4)
@@ -2781,15 +2850,15 @@ snapshots:
       rollup: 4.46.2
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
       fsevents: 2.3.3
       tsx: 4.21.0
       yaml: 2.9.0
 
-  vitest@4.1.11(@types/node@24.13.4)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)):
+  vitest@4.1.11(@types/node@24.13.6)(happy-dom@20.9.0)(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
-      '@vitest/mocker': 4.1.11(vite@7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.11(vite@7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.11
       '@vitest/runner': 4.1.11
       '@vitest/snapshot': 4.1.11
@@ -2806,10 +2875,10 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vite: 7.3.6(@types/node@24.13.4)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.6(@types/node@24.13.6)(tsx@4.21.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 24.13.4
+      '@types/node': 24.13.6
       happy-dom: 20.9.0
     transitivePeerDependencies:
       - msw

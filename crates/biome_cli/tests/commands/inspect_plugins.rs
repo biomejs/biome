@@ -1,10 +1,10 @@
+use crate::TestArgs as Args;
 use crate::{
     run_cli,
     snap_test::{SnapshotPayload, assert_cli_snapshot},
 };
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use serde_json::{Map, Value, json};
 
 #[test]

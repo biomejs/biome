@@ -1,7 +1,14 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 692
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/rejects_package_plugin_manifest_outside_package/test.js'
+```
+
 ## `biome.json`
 
 ```json

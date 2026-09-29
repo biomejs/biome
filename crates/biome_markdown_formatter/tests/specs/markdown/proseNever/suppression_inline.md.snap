@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/proseNever/suppression_inline.md
+---
+
+# Input
+
+```md
+First line <!-- biome-ignore lint: keep the following physical line unchanged -->
+second line
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "formatter": {
+      "proseWrap": "never",
+      "lineWidth": 40,
+      "indentStyle": "space"
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+First line <!-- biome-ignore lint: keep the following physical line unchanged -->
+second line
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: First line <!-- biome-ignore lint: keep the following physical line unchanged -->
+```

@@ -35,8 +35,8 @@ use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, Toke
 use rustc_hash::FxHashMap;
 
 use crate::globals::{
-    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
-    GLOBAL_UNDEFINED_ID,
+    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_KEYWORD_ID,
+    GLOBAL_STRING_KEYWORD_ID, GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
@@ -48,11 +48,12 @@ use crate::{
     TypeMemberAccessibility, TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference,
     TypeReferenceQualifier, TypeofAdditionExpression, TypeofAwaitExpression,
     TypeofBitwiseNotExpression, TypeofCallArgumentExpression, TypeofCallExpression,
-    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
-    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
-    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
-    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
+    TypeofComputedMemberExpression, TypeofConditionalExpression, TypeofDestructureExpression,
+    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
+    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
+    TypeofNullishCoalescingExpression, TypeofParameterExpression, TypeofStaticMemberExpression,
+    TypeofThisOrSuperExpression, TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -539,6 +540,13 @@ impl TypeData {
                             Err(_) => Self::unknown(),
                         })
                         .unwrap_or_default(),
+                    (Ok(object), Ok(member)) => Self::from(TypeofExpression::ComputedMember(
+                        TypeofComputedMemberExpression {
+                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                            member: collector.reference_to_resolved_expression(scope_id, &member),
+                            is_optional_chain: expr.is_optional_chain(),
+                        },
+                    )),
                     _ => Self::unknown(),
                 }
             }
@@ -621,7 +629,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
@@ -638,7 +653,14 @@ impl TypeData {
                 if is_const_reference_type(&annotation) {
                     type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(collector, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
@@ -792,7 +814,7 @@ impl TypeData {
                 }
                 Err(_) => Self::unknown(),
             },
-            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
+            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_KEYWORD_ID),
             AnyTsType::TsObjectType(ty) => {
                 let mut has_unknown_members = false;
                 let members = ty
@@ -820,7 +842,7 @@ impl TypeData {
                 Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => Self::unknown(),
             },
-            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
+            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_KEYWORD_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
                 Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
@@ -1369,6 +1391,15 @@ impl TypeData {
                 JsUnaryOperator::Delete => Self::Boolean,
                 JsUnaryOperator::Minus => {
                     Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                        is_literal_argument: expr.argument().is_ok_and(|argument| {
+                            matches!(
+                                argument,
+                                AnyJsExpression::AnyJsLiteralExpression(
+                                    AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                        | AnyJsLiteralExpression::JsBigintLiteralExpression(_)
+                                )
+                            )
+                        }),
                         argument: expr
                             .argument()
                             .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
@@ -1925,6 +1956,10 @@ impl GenericTypeParameter {
             .name()
             .and_then(|name| name.ident_token())
             .map(|name| Self {
+                is_const: param
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                 name: name.token_text_trimmed().into(),
                 constraint: param
                     .constraint()
@@ -1979,11 +2014,18 @@ impl ReturnType {
                                 Text::new_static("this")
                             }
                         },
-                        ty: ty
-                            .predicate()
-                            .and_then(|asserts| asserts.ty().ok())
-                            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                            .unwrap_or_default(),
+                        ty: match ty.predicate() {
+                            Some(predicate) => predicate
+                                .ty()
+                                .ok()
+                                .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                                .unwrap_or_default(),
+                            // Bare assertions require truthiness, rather than a specific type.
+                            // `Conditional` marks a value whose truthiness decides a condition,
+                            // and no type annotation resolves to it, so it cannot be confused
+                            // with an `asserts value is T` predicate.
+                            None => collector.reference_to_owned_data(TypeData::Conditional),
+                        },
                     })))
                 })
             }

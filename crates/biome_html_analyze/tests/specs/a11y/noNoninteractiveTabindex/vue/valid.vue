@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div></div>
 <div tabindex="-1"></div>
 <div v-bind:tabindex="tabindexValue"></div>
@@ -12,3 +13,4 @@
 <a href="#" tabindex="0"></a>
 <div role="button" tabindex="0"></div>
 <article tabindex="-1"></article>
+</template>

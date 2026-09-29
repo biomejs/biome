@@ -12,7 +12,7 @@ use biome_css_syntax::{
     CssSyntaxKind, CssSyntaxNode, ScssExpression, ScssIncludeArgumentList,
     css_grid_template_property,
 };
-use biome_formatter::comments::{CommentKind, CommentStyle, SourceComment};
+use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::{CstFormatContext, FormatOptions, FormatResult, FormatWithRule, write};
 use biome_rowan::{AstNode, AstNodeList, Text, TextSize};
 use std::cmp;

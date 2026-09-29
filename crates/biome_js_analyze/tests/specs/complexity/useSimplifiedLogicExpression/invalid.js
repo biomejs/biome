@@ -1,6 +1,4 @@
 const r = true && boolExp;
-const boolExp2 = true;
-const r2 = boolExp || true;
 const nonNullExp = 123;
 const r3 = null ?? nonNullExp;
 const boolExpr1 = true;
@@ -13,3 +11,12 @@ if (
 ) {
     console.log();
 }
+
+if (x || false) {}
+while (x && true) {}
+do {} while (x && true);
+for (; x || false; ) {}
+const t = x || false ? 1 : 2;
+const n = !(x && true);
+if (a && (x || false)) {}
+if ((x || false)) {}

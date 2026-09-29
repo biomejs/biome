@@ -6,8 +6,9 @@ use biome_module_graph::{
         ExpectedCallArgumentTypeRequest, ExpectedConstructorArgumentTypeRequest,
         FunctionReturnTypeRequest, MemberReturnTypeRequest, NormalizedExpressionTypeRequest,
         PromiseClassificationRequest, PromiseReturningFunctionClassificationRequest,
-        TypeInferenceArgument, TypeInferenceCaller, TypeInferenceClassification,
-        TypeInferenceRequestMetadata, TypeInferenceSource, execute_type_inference_request,
+        ThenableClassificationRequest, TypeInferenceArgument, TypeInferenceCaller,
+        TypeInferenceClassification, TypeInferenceRequestMetadata, TypeInferenceSource,
+        execute_type_inference_request,
     },
 };
 
@@ -561,4 +562,59 @@ fn classification_and_return_type_requests_stay_selective() {
 
     let events = db.take_salsa_events();
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+}
+
+#[test]
+fn thenable_request_checks_callback_signatures_without_whole_module_inference() {
+    let source = r#"
+        declare const parameterless: { then(): void };
+        declare const nonCallback: { then(value: number): void };
+        declare const callback: { then(value: () => void): void };
+        declare const uncertain: unknown;
+        declare const overloaded: { then(value: number): void; then(value: () => void): void };
+        parameterless; nonCallback; callback; uncertain; overloaded;
+    "#;
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), source);
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    for (name, expected) in [
+        ("parameterless", TypeInferenceClassification::NoMatch),
+        ("nonCallback", TypeInferenceClassification::NoMatch),
+        ("callback", TypeInferenceClassification::Match),
+        ("uncertain", TypeInferenceClassification::Indeterminate),
+        ("overloaded", TypeInferenceClassification::Indeterminate),
+    ] {
+        let expression = expression_range_by_source(&db, module, source, name);
+        let input = ExpressionTypeInput::new(&db, module, expression);
+        db.clear_salsa_events();
+        assert_eq!(
+            execute_type_inference_request(
+                &db,
+                TypeInferenceCaller::new("test", "thenable"),
+                ThenableClassificationRequest::new(module, expression),
+            ),
+            expected,
+            "{name}"
+        );
+        let events = db.take_salsa_events();
+        assert_function_query_was_run(&db, infer_expression_type, input, &events);
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+
+        db.clear_salsa_events();
+        assert_eq!(
+            execute_type_inference_request(
+                &db,
+                TypeInferenceCaller::new("test", "thenable"),
+                ThenableClassificationRequest::new(module, expression),
+            ),
+            expected,
+            "{name}"
+        );
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
 }

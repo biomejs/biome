@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoExtension.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import bar from "./invalidNoExtension";
+
+export default bar;
+
+```
+
+# Diagnostics
+```
+invalidNoExtension.js:2:17 lint/nursery/noSelfImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This module imports itself.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import bar from "./invalidNoExtension";
+      │                 ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ export default bar;
+  
+  i A module that imports itself is a circular dependency, which can leave the imported value undefined during evaluation and cause some bundlers to warn or fail.
+  
+  i Remove this import, or update it to point to the intended module.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

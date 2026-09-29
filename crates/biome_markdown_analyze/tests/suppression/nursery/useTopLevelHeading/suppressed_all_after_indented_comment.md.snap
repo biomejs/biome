@@ -1,0 +1,11 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressed_all_after_indented_comment.md
+---
+# Input
+```md
+  <!-- Copyright Biome contributors -->
+  <!-- biome-ignore-all lint/nursery/useTopLevelHeading: starts at level two -->
+## Second level heading
+
+```

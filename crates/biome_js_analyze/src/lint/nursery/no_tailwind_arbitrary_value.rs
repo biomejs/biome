@@ -1,12 +1,11 @@
-use crate::shared::any_class_string_like::AnyClassStringLike;
+use crate::tailwind::{AnyTailwindClassString, host_range};
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsSyntaxKind;
-use biome_rowan::{TextRange, TextSize, TokenText};
+use biome_rowan::{TextRange, TextSize};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::parse_tailwind;
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
 declare_lint_rule! {
@@ -43,36 +42,10 @@ declare_lint_rule! {
     /// <div className="[&:nth-child(3)]:px-2" />;
     /// ```
     ///
-    /// ## Options
-    ///
-    /// By default, this rule checks the `class` and `className` JSX attributes.
-    /// The `attributes` option adds more JSX attributes to check, and `functions`
-    /// enables checking string arguments and tagged templates in matching utilities.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "attributes": ["classList"],
-    ///         "functions": ["clsx"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ### attributes
-    ///
-    /// Additional JSX attribute names to check.
-    ///
-    /// Default: `[]` (the `class` and `className` attributes are always checked).
-    ///
-    /// ### functions
-    ///
-    /// Function or tagged template names whose classes will be checked for arbitrary values.
-    ///
-    /// Default: `[]`.
-    ///
-    /// ```jsx,use_options,expect_diagnostic
-    /// <div className={clsx("w-[400px]")} />;
-    /// ```
+    /// The rule checks `class` and `className` JSX attributes, and strings passed to
+    /// `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`, `cnb`, and `ctl`.
+    /// Tagged templates using these helpers, including members such as `tw.div`,
+    /// are also checked.
     ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",
@@ -85,31 +58,17 @@ declare_lint_rule! {
 }
 
 impl Rule for NoTailwindArbitraryValue {
-    type Query = Ast<AnyClassStringLike>;
+    type Query = TailwindSyntax<AnyTailwindClassString>;
     type State = TextRange;
     type Signals = Vec<TextRange>;
     type Options = NoTailwindArbitraryValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-
-        let Some(source) = class_string_source(node) else {
-            return vec![];
-        };
-
-        // Arbitrary values and properties always contain `[`. This cheap check
-        // runs before `should_visit`, whose ancestor walk would otherwise execute
-        // for every string literal in the file, not just class strings.
-        if !source.text.text().contains('[') {
-            return vec![];
-        }
-
-        if node.should_visit(ctx.options()).is_none() {
-            return vec![];
-        }
-
-        let parse = parse_tailwind(source.text.text());
-        arbitrary_ranges(&parse.tree().candidates(), source.content_start)
+        let query = ctx.query();
+        arbitrary_ranges(&query.tailwind_root().candidates(), TextSize::from(0))
+            .into_iter()
+            .filter_map(|range| host_range(query.node(), range))
+            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -126,49 +85,5 @@ impl Rule for NoTailwindArbitraryValue {
                 "Use a named utility from your Tailwind configuration instead."
             }),
         )
-    }
-}
-
-struct ClassStringSource {
-    text: TokenText,
-    content_start: TextSize,
-}
-
-fn class_string_source(node: &AnyClassStringLike) -> Option<ClassStringSource> {
-    match node {
-        AnyClassStringLike::JsxString(jsx_string) => {
-            let token = jsx_string.value_token().ok()?;
-            Some(ClassStringSource {
-                text: jsx_string.inner_string_text().ok()?,
-                content_start: token.text_trimmed_range().start() + TextSize::from(1),
-            })
-        }
-        AnyClassStringLike::JsStringLiteralExpression(string_literal) => {
-            let token = string_literal.value_token().ok()?;
-            Some(ClassStringSource {
-                text: string_literal.inner_string_text().ok()?,
-                content_start: token.text_trimmed_range().start() + TextSize::from(1),
-            })
-        }
-        AnyClassStringLike::JsTemplateChunkElement(chunk) => {
-            let token = chunk.template_chunk_token().ok()?;
-            Some(ClassStringSource {
-                text: token.token_text(),
-                content_start: token.text_trimmed_range().start(),
-            })
-        }
-        AnyClassStringLike::JsLiteralMemberName(member_name) => {
-            let token = member_name.value().ok()?;
-            let quote_offset = if token.kind() == JsSyntaxKind::JS_STRING_LITERAL {
-                TextSize::from(1)
-            } else {
-                TextSize::from(0)
-            };
-
-            Some(ClassStringSource {
-                text: member_name.name().ok()?,
-                content_start: token.text_trimmed_range().start() + quote_offset,
-            })
-        }
     }
 }

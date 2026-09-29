@@ -12,6 +12,7 @@ mod trivia;
 mod verbatim;
 pub(crate) mod words;
 
+use crate::comments::FormatMarkdownLeadingComments;
 pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
@@ -42,11 +43,11 @@ impl FormatLanguage for MdFormatLanguage {
 
     fn create_context(
         self,
-        _root: &MarkdownSyntaxNode,
+        root: &MarkdownSyntaxNode,
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
     ) -> MarkdownFormatContext {
-        MarkdownFormatContext::new(self.options.clone()).with_source_map(source_map)
+        MarkdownFormatContext::new(self.options.clone(), root, source_map)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -240,7 +241,8 @@ where
     fn fmt_fields(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()>;
 
     fn fmt_leading_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        format_leading_comments(node.syntax()).fmt(f)
+        let comments = f.context().comments().clone();
+        FormatMarkdownLeadingComments(comments.leading_comments(node.syntax())).fmt(f)
     }
 
     fn fmt_dangling_comments(&self, node: &N, f: &mut MarkdownFormatter) -> FormatResult<()> {

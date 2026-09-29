@@ -25,11 +25,7 @@ impl FormatNodeRule<MdQuote> for FormatMdQuote {
             QuoteBoundaryTrim::Leading
         };
         let trim_range = quote_boundary_trim_range(&content, quote_boundary_trim);
-        let starts_with_blank_line = content
-            .iter()
-            .next()
-            .is_some_and(|block| block.is_newline());
-        let remove_prefix = starts_with_blank_line && !trim_range.is_empty();
+        let remove_prefix = trim_range.start > 0 && !trim_range.is_empty();
 
         if remove_prefix {
             write!(

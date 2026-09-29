@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --files-max-size=-1 format.js
+```
+
 ## `format.js`
 
 ```js

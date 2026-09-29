@@ -3766,6 +3766,18 @@ impl JsVariableStatementBuilder {
         ))
     }
 }
+pub fn js_vue_slot_props_root(
+    parameters: JsParameterList,
+    eof_token: SyntaxToken,
+) -> JsVueSlotPropsRoot {
+    JsVueSlotPropsRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
+        [
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_while_statement(
     while_token: SyntaxToken,
     l_paren_token: SyntaxToken,
