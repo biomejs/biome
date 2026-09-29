@@ -5,4 +5,6 @@
 <Badge class="text-red-500" />
 <Other class="animate-spin mt-4 w-full" />
 <Panel.Root class="p-4" />
+<Card.Root class="rounded-none" />
+<UI.Card class="rounded-none" />
 </template>

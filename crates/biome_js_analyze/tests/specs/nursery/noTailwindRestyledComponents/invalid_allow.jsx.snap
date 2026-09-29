@@ -15,6 +15,8 @@ expression: invalid_allow.jsx
 <Color className="p-4" />;
 <Color className="stroke-2" />;
 <Button className="stroke-none" />;
+<UI className="shadow-lg" />;
+<Button.UI className="shadow-lg" />;
 
 ```
 
@@ -257,7 +259,7 @@ invalid_allow.jsx:10:19 lint/nursery/noTailwindRestyledComponents ━━━━�
   > 10 │ <Color className="stroke-2" />;
        │                   ^^^^^^^^
     11 │ <Button className="stroke-none" />;
-    12 │ 
+    12 │ <UI className="shadow-lg" />;
   
   i The design system should manage the component's appearance.
   
@@ -279,7 +281,53 @@ invalid_allow.jsx:11:20 lint/nursery/noTailwindRestyledComponents ━━━━�
     10 │ <Color className="stroke-2" />;
   > 11 │ <Button className="stroke-none" />;
        │                    ^^^^^^^^^^^
-    12 │ 
+    12 │ <UI className="shadow-lg" />;
+    13 │ <Button.UI className="shadow-lg" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:12:16 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    10 │ <Color className="stroke-2" />;
+    11 │ <Button className="stroke-none" />;
+  > 12 │ <UI className="shadow-lg" />;
+       │                ^^^^^^^^^
+    13 │ <Button.UI className="shadow-lg" />;
+    14 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allow.jsx:13:23 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    11 │ <Button className="stroke-none" />;
+    12 │ <UI className="shadow-lg" />;
+  > 13 │ <Button.UI className="shadow-lg" />;
+       │                       ^^^^^^^^^
+    14 │ 
   
   i The design system should manage the component's appearance.
   

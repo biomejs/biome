@@ -3,12 +3,15 @@ use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_syntax::JsxAttribute;
+use biome_js_syntax::{AnyJsxElementName, AnyJsxObjectName, JsxAttribute};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, TextRange, TokenText};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
-use biome_tailwind_logic::no_tailwind_restyled_components::restyled_component_ranges;
+use biome_tailwind_logic::no_tailwind_restyled_components::{
+    matches_component_name, restyled_component_ranges,
+};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
+use smallvec::{SmallVec, smallvec};
 
 declare_lint_rule! {
     /// Disallow Tailwind utilities that override the appearance of components.
@@ -61,6 +64,9 @@ declare_lint_rule! {
     /// - `components`: a component name, an array of names, or `"*"` for all components.
     /// - `categories`: any of `color`, `typography`, `spacing`, `shape`, `effects`, or `motion`. Default: `[]`.
     /// - `classes`: exact classes, including variants and modifiers. Default: `[]`.
+    ///
+    /// A name matches any segment of a member name, so both `UI` and `Button` match
+    /// `UI.Button`. Dotted names such as `UI.Button` match consecutive segments.
     ///
     /// ```json,options
     /// {
@@ -123,14 +129,17 @@ impl Rule for NoTailwindRestyledComponents {
         if !element.is_custom_component() && !element.is_custom_element() {
             return vec![];
         }
+        let segments = element.name().ok().and_then(|name| name_segments(&name));
         let allowances: Vec<_> = ctx
             .options()
             .allow()
             .iter()
             .filter(|allow| {
-                allow
-                    .components
-                    .matches(|name| element.matches_name(name).unwrap_or(false))
+                allow.components.matches(|name| match &segments {
+                    Some(segments) => matches_component_name(segments, name),
+                    // Namespaced names such as `svg:rect` are not split into segments.
+                    None => element.matches_name(name).unwrap_or(false),
+                })
             })
             .collect();
         restyled_component_ranges(&ctx.query().tailwind_root().candidates(), &allowances)
@@ -146,5 +155,37 @@ impl Rule for NoTailwindRestyledComponents {
             .note(markup! { "The design system should manage the component's appearance." })
             .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
         )
+    }
+}
+
+/// Returns the segments of `name`, such as `UI` and `Button` for `UI.Button`.
+/// Returns `None` for namespaced names.
+fn name_segments(name: &AnyJsxElementName) -> Option<SmallVec<[TokenText; 2]>> {
+    let mut object = match name {
+        AnyJsxElementName::JsxName(name) => {
+            return Some(smallvec![name.value_token().ok()?.token_text_trimmed()]);
+        }
+        AnyJsxElementName::JsxReferenceIdentifier(name) => {
+            AnyJsxObjectName::JsxReferenceIdentifier(name.clone())
+        }
+        AnyJsxElementName::JsxMemberName(name) => AnyJsxObjectName::JsxMemberName(name.clone()),
+        AnyJsxElementName::JsxNamespaceName(_) | AnyJsxElementName::JsMetavariable(_) => {
+            return None;
+        }
+    };
+    let mut segments = SmallVec::new();
+    loop {
+        match object {
+            AnyJsxObjectName::JsxMemberName(member) => {
+                segments.push(member.member().ok()?.value_token().ok()?.token_text_trimmed());
+                object = member.object().ok()?;
+            }
+            AnyJsxObjectName::JsxReferenceIdentifier(name) => {
+                segments.push(name.value_token().ok()?.token_text_trimmed());
+                segments.reverse();
+                return Some(segments);
+            }
+            AnyJsxObjectName::JsxNamespaceName(_) => return None,
+        }
     }
 }
