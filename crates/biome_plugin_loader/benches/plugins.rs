@@ -293,9 +293,10 @@ fn analyze(root: &AnyJsRoot, plugins: &Plugins) -> Vec<TextRange> {
     biome_js_analyze::analyze(root, filter, &options, plugins, services, |signal| {
         if let Some(diagnostic) = signal.diagnostic() {
             // Plugin failures are reported as diagnostics without a range.
-            let range = diagnostic.location().span.unwrap_or_else(|| {
-                panic!("the plugin failed: {}", PrintDescription(&diagnostic))
-            });
+            let range = diagnostic
+                .location()
+                .span
+                .unwrap_or_else(|| panic!("the plugin failed: {}", PrintDescription(&diagnostic)));
             ranges.push(range);
         }
         ControlFlow::<Never>::Continue(())
