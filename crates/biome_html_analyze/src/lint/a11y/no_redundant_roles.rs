@@ -51,6 +51,26 @@ declare_lint_rule! {
     /// <span></span>
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignoreElements`
+    ///
+    /// An array of element names that the rule ignores. The comparison is case-insensitive.
+    ///
+    /// Default: `[]`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreElements": ["button"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```html,use_options
+    /// <button role="button"></button>
+    /// ```
+    ///
     pub NoRedundantRoles {
         version: "2.5.0",
         name: "noRedundantRoles",
@@ -71,14 +91,23 @@ impl Rule for NoRedundantRoles {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let source_type = ctx.source_type::<HtmlFileSource>();
+        let element_name = node.tag_name()?;
+        let name_text = element_name.text();
 
-        if !source_type.is_html() {
-            let element_name = node.tag_name()?;
-            let name_text = element_name.text();
-            if name_text.chars().next().is_some_and(|c| c.is_uppercase()) || name_text.contains('-')
-            {
-                return None;
-            }
+        if ctx
+            .options()
+            .ignore_elements()
+            .iter()
+            .any(|ignored| ignored.eq_ignore_ascii_case(name_text))
+        {
+            return None;
+        }
+
+        if !source_type.is_html()
+            && (name_text.chars().next().is_some_and(|c| c.is_uppercase())
+                || name_text.contains('-'))
+        {
+            return None;
         }
 
         let role_attribute = node.find_attribute_or_vue_binding("role")?;
