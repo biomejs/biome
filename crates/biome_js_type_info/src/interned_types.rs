@@ -240,6 +240,8 @@ pub enum ConditionalSubset {
     Falsy,
     Truthy,
     NonNullish,
+    /// The subset that matches a `typeof` guard tag.
+    Typeof(raw::TypeofTag),
 }
 
 impl<'db> TypeData<'db> {
@@ -1358,6 +1360,7 @@ impl<'db> TypeDataSlots<'db> {
             TypeofExpression::LogicalOr(expression) => {
                 self.slots.extend([expression.left, expression.right]);
             }
+            TypeofExpression::Narrowed(expression) => self.slots.push(expression.ty),
             TypeofExpression::New(expression) => {
                 self.slots.push(expression.callee);
                 self.push_call_argument_slots(&expression.arguments);
@@ -1782,6 +1785,12 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     right: self.take_type()?,
                 })
             }
+            TypeofExpression::Narrowed(expression) => {
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: self.take_type()?,
+                    tag: expression.tag,
+                })
+            }
             TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
                 callee: self.take_type()?,
                 arguments: self.rebuild_call_arguments(&expression.arguments)?,
@@ -2137,6 +2146,7 @@ pub enum TypeofExpression<'db> {
     IterableValueOf(TypeofIterableValueOfExpression<'db>),
     LogicalAnd(TypeofLogicalAndExpression<'db>),
     LogicalOr(TypeofLogicalOrExpression<'db>),
+    Narrowed(TypeofNarrowedExpression<'db>),
     New(TypeofNewExpression<'db>),
     NullishCoalescing(TypeofNullishCoalescingExpression<'db>),
     Parameter(TypeofParameterExpression<'db>),
@@ -2213,6 +2223,12 @@ pub struct TypeofLogicalAndExpression<'db> {
 pub struct TypeofLogicalOrExpression<'db> {
     pub left: TypeData<'db>,
     pub right: TypeData<'db>,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
+pub struct TypeofNarrowedExpression<'db> {
+    pub ty: TypeData<'db>,
+    pub tag: raw::TypeofTag,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq, salsa::Update)]
@@ -2746,6 +2762,12 @@ fn convert_typeof_expression<'db>(
             TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
                 left: resolve_reference(&expression.left),
                 right: resolve_reference(&expression.right),
+            })
+        }
+        raw::TypeofExpression::Narrowed(expression) => {
+            TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                ty: resolve_reference(&expression.ty),
+                tag: expression.tag,
             })
         }
         raw::TypeofExpression::New(expression) => TypeofExpression::New(TypeofNewExpression {
@@ -3535,6 +3557,15 @@ mod tests {
                 TypeofExpression::LogicalOr(TypeofLogicalOrExpression {
                     left: s.next(),
                     right: s.next(),
+                }),
+            )
+        });
+        assert_identity(&db, |s| {
+            typeof_type(
+                &db,
+                TypeofExpression::Narrowed(TypeofNarrowedExpression {
+                    ty: s.next(),
+                    tag: raw::TypeofTag::String,
                 }),
             )
         });

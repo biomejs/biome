@@ -90,8 +90,10 @@ tikv-jemallocator = { workspace = true }
 mimalloc = { workspace = true }
 
 [features]
-schema = ["dep:schemars"]
-serde  = ["dep:serde"]
+schema         = ["dep:schemars"]
+serde          = ["dep:serde"]
+# Flow-sensitive type narrowing, still under development. Off by default.
+type_narrowing = []
 
 [lints]
 workspace = true
