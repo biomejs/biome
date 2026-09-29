@@ -1,5 +1,5 @@
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
     CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
@@ -7,8 +7,8 @@ use biome_css_syntax::{
     ScssPartialCombinatorSelector, decode_css_identifier, property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
-    TextSize, TokenText, declare_node_union,
+    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
+    declare_node_union,
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
@@ -116,7 +116,7 @@ impl SemanticModel {
         Some(Rule::new(self.data.clone(), rule))
     }
 
-    fn all_rules(&self) -> Vec<Rule> {
+    pub(crate) fn all_rules(&self) -> Vec<Rule> {
         self.data
             .all_rules
             .iter()
@@ -363,37 +363,19 @@ impl AnyRuleStart {
             Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
         }
     }
+
+    /// Returns `true` if the rule is an at-rule, which has no selectors and is
+    /// transparent for the purpose of nesting-selector resolution.
+    pub fn is_at_rule(&self) -> bool {
+        !matches!(
+            self,
+            Self::CssQualifiedRule(_) | Self::CssNestedQualifiedRule(_)
+        )
+    }
 }
 
 declare_node_union! {
     pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector | ScssPartialCombinatorSelector
-}
-
-impl AnyCssSelectorLike {
-    pub fn has_nesting_selectors(&self) -> bool {
-        self.nesting_level() > 0
-    }
-
-    pub fn nesting_level(&self) -> usize {
-        match self {
-            Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
-            Self::CssComplexSelector(node) => node.nesting_level(),
-            Self::ScssPartialCombinatorSelector(node) => {
-                node.left().as_ref().map_or(0, selector_nesting_level)
-            }
-        }
-    }
-}
-
-fn selector_nesting_level(selector: &AnyCssSelector) -> usize {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(node) => node.nesting_selectors().len(),
-        AnyCssSelector::CssComplexSelector(node) => node.nesting_level(),
-        AnyCssSelector::ScssPartialCombinatorSelector(node) => {
-            node.left().as_ref().map_or(0, selector_nesting_level)
-        }
-        AnyCssSelector::CssBogusSelector(_) | AnyCssSelector::CssMetavariable(_) => 0,
-    }
 }
 
 /// A resolved CSS selector represented as an ordered sequence of `(kind, text)` pairs.

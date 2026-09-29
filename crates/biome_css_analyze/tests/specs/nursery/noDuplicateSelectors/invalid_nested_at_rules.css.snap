@@ -1,0 +1,82 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid_nested_at_rules.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+/* Duplicate nested selectors inside `@container` */
+.card {
+  @container (min-width: 1px) {
+    & > p {}
+    & > p {}
+  }
+}
+
+/* Duplicate nested selectors inside `@starting-style` */
+.dialog {
+  @starting-style {
+    &:hover {}
+    &:hover {}
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid_nested_at_rules.css:7:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".card > p".
+  
+    5 │   @container (min-width: 1px) {
+    6 │     & > p {}
+  > 7 │     & > p {}
+      │     ^^^^^^^^
+    8 │   }
+    9 │ }
+  
+  i It was first defined here.
+  
+    4 │ .card {
+    5 │   @container (min-width: 1px) {
+  > 6 │     & > p {}
+      │     ^^^^^^^^
+    7 │     & > p {}
+    8 │   }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_at_rules.css:15:5 lint/nursery/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".dialog:hover".
+  
+    13 │   @starting-style {
+    14 │     &:hover {}
+  > 15 │     &:hover {}
+       │     ^^^^^^^^^^
+    16 │   }
+    17 │ }
+  
+  i It was first defined here.
+  
+    12 │ .dialog {
+    13 │   @starting-style {
+  > 14 │     &:hover {}
+       │     ^^^^^^^^^^
+    15 │     &:hover {}
+    16 │   }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

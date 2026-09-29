@@ -75,7 +75,7 @@ impl std::fmt::Display for SemanticModel {
 impl Format<FormatSemanticModelContext> for SemanticModel {
     fn fmt(&self, f: &mut Formatter<FormatSemanticModelContext>) -> FormatResult<()> {
         let mut selectors: Vec<Selector> = self
-            .rules()
+            .all_rules()
             .into_iter()
             .flat_map(|rule| rule.selectors().to_vec())
             .collect();
@@ -156,5 +156,30 @@ mod tests {
         let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
         let model = semantic_model(&parsed.tree());
         eprintln!("{}", model);
+    }
+
+    #[test]
+    fn prints_nested_selectors() {
+        let source = r#".card {
+  :root[data-theme="dark"] & {}
+  code {
+    html body & {}
+    & & > span {}
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] & {}
+  }
+  @container (min-width: 1px) {
+    & > p {}
+  }
+  @starting-style {
+    &:hover {}
+  }
+}"#;
+
+        let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default());
+        let model = semantic_model(&parsed.tree());
+
+        insta::assert_snapshot!(model.to_string());
     }
 }

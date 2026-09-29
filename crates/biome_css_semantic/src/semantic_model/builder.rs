@@ -8,7 +8,6 @@ use super::model::{
     RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
-use crate::model::AnyRuleStart;
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
@@ -46,73 +45,17 @@ impl SemanticModelBuilder {
         }
     }
 
+    /// Returns the nearest enclosing rule that carries selectors, skipping
+    /// at-rules such as `@media` or `@container`, which are transparent for
+    /// nesting-selector resolution.
     fn get_last_parent_selector_rule(&self) -> Option<&RuleData> {
-        let mut iterator = self.current_rule_stack.iter().rev();
-        let mut current_parent_id = iterator
-            .next()
-            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-            .and_then(|rule| rule.parent_id);
-
-        loop {
-            if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index())?;
-                let typed_node = rule.node.to_node(self.root.syntax());
-                if matches!(
-                    typed_node,
-                    AnyRuleStart::CssMediaAtRule(_)
-                        | AnyRuleStart::CssScopeAtRule(_)
-                        | AnyRuleStart::CssSupportsAtRule(_)
-                ) {
-                    current_parent_id = iterator
-                        .next()
-                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                        .and_then(|rule| rule.parent_id);
-                } else {
-                    return Some(rule);
-                }
-            } else {
-                return None;
-            }
-        }
-    }
-
-    fn get_parent_selector_at(&self, index: usize) -> Option<&RuleData> {
-        let mut iterator = self.current_rule_stack.iter().rev();
-        let mut current_index = 1;
-        let mut current_parent_id = iterator
-            .next()
-            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-            .and_then(|rule| rule.parent_id);
-
-        loop {
-            if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index())?;
-                let typed_node = rule.node.to_node(self.root.syntax());
-                if matches!(
-                    typed_node,
-                    AnyRuleStart::CssMediaAtRule(_)
-                        | AnyRuleStart::CssScopeAtRule(_)
-                        | AnyRuleStart::CssSupportsAtRule(_)
-                ) {
-                    current_parent_id = iterator
-                        .next()
-                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                        .and_then(|rule| rule.parent_id);
-                } else {
-                    if current_index == index {
-                        return Some(rule);
-                    }
-
-                    current_parent_id = iterator
-                        .next()
-                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                        .and_then(|rule| rule.parent_id);
-                    current_index += 1;
-                }
-            } else {
-                return None;
-            }
-        }
+        self.current_rule_stack
+            .iter()
+            .rev()
+            // The last entry is the rule currently being built
+            .skip(1)
+            .filter_map(|rule_id| self.all_rules.get(rule_id.index()))
+            .find(|rule| !rule.node.to_node(self.root.syntax()).is_at_rule())
     }
 
     pub fn build(self) -> SemanticModel {
@@ -169,32 +112,23 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::SelectorDeclaration { node, specificity } => {
                 if let Some(&current_rule_id) = self.current_rule_stack.last() {
-                    let parent_specificity = if node.has_nesting_selectors() {
-                        let nesting_level = node.nesting_level();
-                        self.get_parent_selector_at(nesting_level)
-                            .map(|rule| {
-                                rule.selectors
-                                    .iter()
-                                    .map(|s| s.specificity)
-                                    .max()
-                                    .unwrap_or_default()
-                            })
-                            .unwrap_or_default()
-                    } else {
-                        self.get_last_parent_selector_rule()
-                            .map(|rule| {
-                                rule.selectors
-                                    .iter()
-                                    .map(|s| s.specificity)
-                                    .max()
-                                    .unwrap_or_default()
-                            })
-                            .unwrap_or_default()
-                    };
-
                     let current_tokens = selector_tokens(&node);
 
                     let parent_rule = self.get_last_parent_selector_rule();
+                    // Every `&` refers to the nearest parent selector, whose
+                    // specificity already accounts for its own ancestors. Each
+                    // occurrence contributes it once; a selector without `&` is
+                    // implicitly prefixed by the parent, so it contributes once too.
+                    let parent_specificity = parent_rule
+                        .and_then(|rule| rule.selectors.iter().map(|s| s.specificity).max())
+                        .unwrap_or_default();
+                    let amp_count = current_tokens
+                        .iter()
+                        .filter(|token| token.kind() == T![&])
+                        .count()
+                        .max(1);
+                    let parent_specificity = (0..amp_count)
+                        .fold(Specificity::default(), |acc, _| acc + parent_specificity);
                     let resolved_selectors: Vec<ResolvedSelector> =
                         if let Some(parent_rule) = parent_rule {
                             resolve_selector(&current_tokens, &parent_rule.selectors)
