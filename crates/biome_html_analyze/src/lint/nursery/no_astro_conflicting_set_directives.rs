@@ -138,6 +138,7 @@ impl Rule for NoAstroConflictingSetDirectives {
         ctx.query()
             .syntax()
             .ancestors()
+            .skip(1)
             .find_map(AnyHtmlTagElement::cast)
             .map(|element| element.range())
     }
