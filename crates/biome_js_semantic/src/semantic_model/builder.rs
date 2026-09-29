@@ -23,7 +23,6 @@ pub struct SemanticModelBuilder {
     globals: Vec<SemanticModelGlobalBindingData>,
     globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
-    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     bindings: Vec<SemanticModelBindingData>,
     /// maps a binding range start to its index inside [SemanticModelBuilder::bindings] vec
@@ -47,7 +46,6 @@ impl SemanticModelBuilder {
             globals: vec![],
             globals_by_name: FxHashMap::default(),
             scopes: vec![],
-            scope_range_by_start: FxHashMap::default(),
             scope_hoisted_to_by_range: FxHashMap::default(),
             bindings: vec![],
             bindings_by_start: FxHashMap::default(),
@@ -188,16 +186,6 @@ impl SemanticModelBuilder {
                 if let Some(parent_scope_id) = parent_scope_id {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
-
-                let start = range.start();
-                self.scope_range_by_start
-                    .entry(start)
-                    .or_default()
-                    .insert(Interval {
-                        start: start.into(),
-                        stop: range.end().into(),
-                        val: scope_id,
-                    });
             }
             ScopeEnded { .. } => {}
             DeclarationFound {
@@ -433,15 +421,9 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            scope_by_range: ScopeRangeIndex::from_scopes(&self.scopes),
             flavor: self.flavor,
             scopes: self.scopes,
-            scope_by_range: Lapper::new(
-                self.scope_range_by_start
-                    .values()
-                    .flat_map(|scopes| scopes.iter())
-                    .cloned()
-                    .collect(),
-            ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
             binding_node_by_start: self
                 .binding_node_by_start

@@ -1219,7 +1219,6 @@ dependencies = [
  "biome_rowan",
  "camino",
  "insta",
- "rust-lapper",
  "rustc-hash 2.1.3",
  "salsa",
  "smallvec",
@@ -5579,15 +5578,6 @@ dependencies = [
  "biome_markdown_syntax",
  "biome_ruledoc_utils",
  "pulldown-cmark",
-]
-
-[[package]]
-name = "rust-lapper"
-version = "1.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aafed57460ca80eb88c33989af3a31348dbde8e68f86f4fe2107c1a5fcd55b8"
-dependencies = [
- "num-traits",
 ]
 
 [[package]]
