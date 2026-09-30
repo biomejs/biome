@@ -3003,6 +3003,11 @@ See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
 	/**
+	* Enforce a consistent hyphenation style for event names in v-on directives on custom components.
+See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation 
+	 */
+	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
+	/**
 	* Enforces Promise syntax when using Vue nextTick.
 See https://biomejs.dev/linter/rules/use-vue-next-tick-promise 
 	 */
@@ -5252,6 +5257,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
+export type UseVueConsistentEventHyphenationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentEventHyphenationOptions;
 export type UseVueNextTickPromiseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueNextTickPromiseOptions;
@@ -7399,6 +7407,11 @@ export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
 }
+export interface RuleWithUseVueConsistentEventHyphenationOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentEventHyphenationOptions;
+}
 export interface RuleWithUseVueNextTickPromiseOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueNextTickPromiseOptions;
@@ -9272,6 +9285,21 @@ export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
+export interface UseVueConsistentEventHyphenationOptions {
+	/**
+	* Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
+contain hyphens (`"never"`). If omitted, hyphenated names are required. 
+	 */
+	hyphenation?: EventHyphenation;
+	/**
+	 * List of event names to exempt from the check.
+	 */
+	ignore?: string[];
+	/**
+	 * List of tag names whose events should not be checked.
+	 */
+	ignoreTags?: string[];
+}
 export type UseVueNextTickPromiseOptions = {};
 export type UseVueValidVForOptions = {};
 export type NoAccumulatingSpreadOptions = {};
@@ -9996,6 +10024,7 @@ export type ComponentDefinitionStyle =
  */
 export type IgnoreClassesWithImplements = "none" | "all" | "public-fields";
 export type DeclarationStyle = "type" | "runtime";
+export type EventHyphenation = "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -10586,6 +10615,7 @@ export type Category =
 	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
+	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
