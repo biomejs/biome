@@ -786,7 +786,8 @@ impl FormatHtmlElementList {
                         };
 
                         if is_soft_break {
-                            write!(f, [soft_line_break()])?;
+                            // The newline renders as a space, so joining the lines must keep it.
+                            write!(f, [soft_line_break_or_space()])?;
                         } else {
                             child_breaks = true;
                             write!(f, [hard_line_break()])?;
