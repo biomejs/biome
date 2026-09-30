@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// - [noTailwindArbitraryValue](https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value/)
     ///
     pub NoTailwindRawColors {
-        version: "next",
+        version: "2.5.15",
         name: "noTailwindRawColors",
         language: "html",
         domains: &[RuleDomain::Tailwind],
