@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: repository.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+import type { Entity } from "./entity";
+
+export interface Repository<E extends Entity<any> = Entity<any>> {
+	find(): Promise<E>;
+}
+
+```
