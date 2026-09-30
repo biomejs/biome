@@ -339,6 +339,8 @@ fn parse_documentation(
         rule_metadata.domains.contains(&RuleDomain::Types),
     );
 
+    let mut html_checker = HtmlTagChecker::default();
+
     // Track the last configuration options block that was encountered
     let mut last_options: Option<Configuration> = None;
 
@@ -384,6 +386,9 @@ fn parse_documentation(
                     write!(block, "{text}")?;
                 }
             }
+            Event::Html(html) | Event::InlineHtml(html) => {
+                html_checker.push(&html);
+            }
             Event::Start(Tag::Heading { level, .. }) => {
                 // Major headings delineate testable sections. When we encounter a new section,
                 // run all tests from the previous section with the complete file system.
@@ -401,7 +406,74 @@ fn parse_documentation(
 
     test_runner.run_pending_tests()?;
 
+    if let Err(message) = html_checker.finish() {
+        bail!(
+            "The documentation of '{group}/{rule}' contains invalid HTML outside of a code block: {message}. The website renders rule docs as MDX, which fails to build on unclosed tags. Wrap the tag in backticks (e.g. `<div>`), or close it.",
+            rule = rule_metadata.name
+        );
+    }
+
     Ok(())
+}
+
+/// Checks that the raw HTML in a rule's documentation is valid MDX: every opening tag
+/// must be self-closing or have a matching closing tag.
+#[derive(Default)]
+struct HtmlTagChecker {
+    open_tags: Vec<String>,
+    error: Option<String>,
+}
+
+impl HtmlTagChecker {
+    fn push(&mut self, html: &str) {
+        if self.error.is_some() {
+            return;
+        }
+
+        let mut rest = html;
+        while let Some(start) = rest.find('<') {
+            rest = &rest[start + 1..];
+            if let Some(comment) = rest.strip_prefix("!--") {
+                rest = comment.find("-->").map_or("", |end| &comment[end + 3..]);
+                continue;
+            }
+
+            let Some(end) = rest.find('>') else {
+                self.error = Some(format!("`<{}` is never closed", rest.trim_end()));
+                return;
+            };
+            let tag = &rest[..end];
+            rest = &rest[end + 1..];
+
+            if let Some(name) = tag.strip_prefix('/') {
+                let name = name.trim();
+                match self.open_tags.pop() {
+                    Some(open) if open == name => {}
+                    Some(open) => {
+                        self.error = Some(format!("`</{name}>` doesn't match `<{open}>`"));
+                        return;
+                    }
+                    None => {
+                        self.error = Some(format!("`</{name}>` has no opening tag"));
+                        return;
+                    }
+                }
+            } else if !tag.ends_with('/') {
+                let name = tag.split_whitespace().next().unwrap_or_default();
+                self.open_tags.push(name.to_string());
+            }
+        }
+    }
+
+    fn finish(self) -> Result<(), String> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        match self.open_tags.first() {
+            Some(open) => Err(format!("`<{open}>` is never closed")),
+            None => Ok(()),
+        }
+    }
 }
 
 struct PendingTest {
