@@ -1,0 +1,7 @@
+$enabled: true;
+$name: "icon";
+
+.a { color: if(true, red, blue); width: 1px; }
+.a { color: if($enabled, red, blue); width: 1px; }
+.a { color: if(not false, red, blue); width: 1px; }
+.a { color: if((true), red, blue); width: 1px; }

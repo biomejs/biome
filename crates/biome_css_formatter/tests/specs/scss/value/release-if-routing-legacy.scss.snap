@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/release-if-routing-legacy.scss
+---
+
+# Input
+
+```scss
+$enabled :true;
+$name: "icon";
+.legacy{
+ color:if( not $enabled ,red, blue );
+ grouped:if( ($enabled and true) ,red , blue);
+ named:if( $condition:true ,$if-true:red ,$if-false:blue );
+}
+
+```
+
+
+# Formatted
+
+```scss
+$enabled: true;
+$name: "icon";
+.legacy {
+	color: if(not $enabled, red, blue);
+	grouped: if(($enabled and true), red, blue);
+	named: if($condition: true, $if-true: red, $if-false: blue);
+}
+
+```

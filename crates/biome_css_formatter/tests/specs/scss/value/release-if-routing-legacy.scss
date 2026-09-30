@@ -1,0 +1,7 @@
+$enabled :true;
+$name: "icon";
+.legacy{
+ color:if( not $enabled ,red, blue );
+ grouped:if( ($enabled and true) ,red , blue);
+ named:if( $condition:true ,$if-true:red ,$if-false:blue );
+}
