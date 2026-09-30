@@ -11,6 +11,24 @@ use biome_rule_options::use_button_type::UseButtonTypeOptions;
 declare_lint_rule! {
     /// Enforces the usage and validity of the attribute `type` for the element `button`
     ///
+    /// A `button` element without a `type` attribute behaves as `type="submit"`.
+    /// Inside a `form`, clicking it submits the form, which often reloads the page.
+    /// That is rarely the intent of a button that opens a menu, toggles a panel, or runs a click handler.
+    ///
+    /// This is easy to miss in Vue, Svelte, and Astro components, because a `button` rendered by one component
+    /// can end up inside a `form` rendered by another.
+    /// An explicit `type` makes the button behave the same wherever it's rendered.
+    ///
+    /// The HTML specification defines three values for `type`:
+    /// - `button`: the button has no default behavior. Use it for buttons handled by JavaScript.
+    /// - `submit`: the button submits its form.
+    /// - `reset`: the button resets the controls of its form to their initial values.
+    ///
+    /// Browsers treat any other value the same as a missing `type`, so the rule reports invalid values too.
+    ///
+    /// In Vue, Svelte, and Astro files, the rule ignores `type` values bound to an expression,
+    /// such as `:type="buttonType"` or `type={buttonType}`, because their value can't be known statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -23,10 +41,27 @@ declare_lint_rule! {
     /// <button type="incorrectType">Do something</button>
     /// ```
     ///
+    /// Clicking this button submits the form instead of only clearing the input:
+    ///
+    /// ```html,expect_diagnostic
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button onclick="clearQuery()">Clear</button>
+    /// </form>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
     /// <button type="button">Do something</button>
+    /// ```
+    ///
+    /// ```html
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button type="button" onclick="clearQuery()">Clear</button>
+    ///     <button type="submit">Search</button>
+    /// </form>
     /// ```
     ///
     pub UseButtonType {
