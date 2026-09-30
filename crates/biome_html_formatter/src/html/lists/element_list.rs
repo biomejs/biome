@@ -815,8 +815,14 @@ impl FormatHtmlElementList {
                         // If so, we need to wrap it in an outer group with `line` before it.
                         // This matches Prettier's "outer/inner" group pattern where the line break
                         // happens BEFORE the element rather than inside it.
+                        //
+                        // A newline counts as whitespace here. In inline content the two mean the
+                        // same thing, and the forward-looking check below already treats them
+                        // alike. Accepting only `Whitespace` made the formatter lose this group as
+                        // soon as it had wrapped the preceding text itself, so a second run broke
+                        // the line again after the element.
                         let needs_outer_group = css_display.is_externally_whitespace_sensitive(f)
-                            && matches!(last, Some(HtmlChild::Whitespace));
+                            && matches!(last, Some(HtmlChild::Whitespace | HtmlChild::Newline));
 
                         // For the outer group pattern, check if we need a trailing line inside the inner group.
                         // This handles cases like `<a>link</a> more` where there's whitespace then text after.

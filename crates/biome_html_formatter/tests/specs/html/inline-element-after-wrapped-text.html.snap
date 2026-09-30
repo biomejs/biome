@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: inline-element-after-wrapped-text.html
+---
+
+# Input
+
+```html
+<div>
+aaa bbb ccc ddd eee fff ggg hhh iii jjj kkk lll mmm nnn ooo <strong>x</strong> yyy
+</div>
+<div class="toast-body">
+Hello, world! This is a toast message with <strong>autohide</strong> in 2 seconds
+</div>
+<p>
+<a href="#" class="alert-link">Change a few things up</a> and try submitting again.
+</p>
+<td>
+Press <kbd>Tab</kbd> / <kbd><kbd>Shift</kbd> + <kbd>Tab</kbd></kbd>), and ensure that focus moves.
+</td>
+<p>
+Use the <code>oklch</code> variables for making palettes of any hue you like here.
+</p>
+
+```
+
+
+# Formatted
+
+```html
+<div>
+	aaa bbb ccc ddd eee fff ggg hhh iii jjj kkk lll mmm nnn ooo
+	<strong>x</strong> yyy
+</div>
+<div class="toast-body">
+	Hello, world! This is a toast message with <strong>autohide</strong> in 2
+	seconds
+</div>
+<p>
+	<a href="#" class="alert-link">Change a few things up</a>
+	and try submitting again.
+</p>
+<td>
+	Press <kbd>Tab</kbd> / <kbd><kbd>Shift</kbd> + <kbd>Tab</kbd></kbd>), and
+	ensure that focus moves.
+</td>
+<p>
+	Use the <code>oklch</code> variables for making palettes of any hue you like
+	here.
+</p>
+
+```
