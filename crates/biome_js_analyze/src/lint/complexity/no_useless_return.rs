@@ -133,8 +133,14 @@ impl Rule for NoUselessReturn {
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let ret = ctx.query();
+
+        // The direct body of an `if`, `else` or label is mandatory, so only a
+        // statement in a list can be removed.
+        ret.parent::<JsStatementList>()?;
+
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(ctx.query().clone());
+        mutation.remove_node(ret.clone());
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),

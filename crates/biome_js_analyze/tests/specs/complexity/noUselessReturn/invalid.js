@@ -92,3 +92,33 @@ function k() {
 function l() {
     if (foo) { return; }
 }
+
+// unbraced if consequent: reported, but removing the return would leave `if (a)` without a body
+function m() {
+    if (a) return;
+}
+
+// unbraced if and else branches: both reported, neither can be removed
+function n() {
+    if (a) return; else return;
+}
+
+// unbraced else branch
+function o() {
+    if (a) foo(); else return;
+}
+
+// labeled statement body
+function p() {
+    label: return;
+}
+
+// nested unbraced ifs
+function q() {
+    if (a) if (b) return;
+}
+
+// braced consequent is fixed, unbraced alternate is only reported
+function r() {
+    if (a) { return; } else return;
+}
