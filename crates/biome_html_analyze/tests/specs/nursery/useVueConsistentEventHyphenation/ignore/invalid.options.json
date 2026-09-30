@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useVueConsistentEventHyphenation": {
+          "level": "on",
+          "options": {
+            "ignore": ["customEvent"],
+            "ignoreTags": ["IgnoredComponent", "ignored-component"]
+          }
+        }
+      }
+    }
+  }
+}

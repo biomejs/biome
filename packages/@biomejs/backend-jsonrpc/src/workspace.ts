@@ -3328,6 +3328,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-base-import
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
+	/**
+	 * Enforce a consistent hyphenation style for event names in v-on directives on custom components.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
+	 */
+	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -5729,6 +5734,9 @@ export type UseValidTestTitleConfiguration =
 export type UseVueBaseImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBaseImportOptions;
+export type UseVueConsistentEventHyphenationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentEventHyphenationOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -8266,6 +8274,14 @@ export interface RuleWithUseVueBaseImportOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueBaseImportOptions;
 }
+export interface RuleWithUseVueConsistentEventHyphenationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentEventHyphenationOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -10508,6 +10524,21 @@ export interface UseValidTestTitleOptions {
 	disallowedWords?: string[];
 }
 export type UseVueBaseImportOptions = {};
+export interface UseVueConsistentEventHyphenationOptions {
+	/**
+	 * Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
+	 * contain hyphens (`"never"`). If omitted, hyphenated names are required.
+	 */
+	hyphenation?: EventHyphenation;
+	/**
+	 * List of event names to exempt from the check.
+	 */
+	ignore?: string[];
+	/**
+	 * List of tag names whose events should not be checked.
+	 */
+	ignoreTags?: string[];
+}
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -11395,6 +11426,7 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
+export type EventHyphenation = "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -11991,6 +12023,10 @@ export type Category =
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
+	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
+	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
