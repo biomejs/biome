@@ -5,3 +5,18 @@ $name: "icon";
 .a { color: if($enabled, red, blue); width: 1px; }
 .a { color: if(not false, red, blue); width: 1px; }
 .a { color: if((true), red, blue); width: 1px; }
+.a { color: if(sass(true), red, blue); width: 1px; }
+.a { color: if($condition: true, $if-true: red, $if-false: blue); }
+.a { color: if(not (false or false), red, blue); }
+.a { color: if(("#{if(true, '),:;', ':')}" == ':'), red, blue); }
+.a { color: if((url(//cdn.example/a,b:c.png)), red, blue); }
+.a { color: if((url(data:image/svg+xml;base64,AAAA)), red, blue); }
+.a { color: if((url(images/#{$name}.png)), red, blue); }
+.a { color: if((style(red)), red, blue); }
+.a { color: if((true /* ),:; */), if(sass(true): red; else: blue), blue); }
+.a { color: if(not url(https://example.com/a[b:c,d), red, blue); }
+.a { color: if((url(https://example.com/a{b:c,d)), red, blue); }
+.a { color: if(not "#{if(false, ")", ":,")}", red, blue); }
+.a { color: if((a: b), red, blue); }
+.a { color: if(not url (true and ")"), red, blue); }
+.a { color: if(not src/**/(true and ")"), red, blue); }
