@@ -1,5 +1,9 @@
 # @biomejs/backend-jsonrpc
 
+## 2.0.69
+
+No changes in this release.
+
 ## 2.0.68
 
 No changes in this release.

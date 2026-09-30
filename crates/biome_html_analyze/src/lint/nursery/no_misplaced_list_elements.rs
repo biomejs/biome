@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMisplacedListElements {
-        version: "next",
+        version: "2.5.15",
         name: "noMisplacedListElements",
         language: "html",
         recommended: true,

@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseSvelteKitRuneImports {
-        version: "next",
+        version: "2.5.15",
         name: "useSvelteKitRuneImports",
         language: "js",
         domains: &[RuleDomain::Svelte],
