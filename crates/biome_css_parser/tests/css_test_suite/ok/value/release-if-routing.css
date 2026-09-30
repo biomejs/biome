@@ -1,0 +1,7 @@
+.a {
+  first: if(not style(--enabled: true): red; else: blue);
+  second: if((style(--enabled: true)): red; else: blue);
+  nested: if(not (style(--value: fn("),:;", nested(red, blue)))): red; else: blue);
+  media: if(media(width > 10px): red; else: blue);
+  supports: if(supports(display: grid): red; else: blue);
+}
