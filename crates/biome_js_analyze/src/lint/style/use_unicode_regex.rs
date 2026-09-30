@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, JsCallArguments, JsNewOrCallExpression,
-    JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, global_identifier,
+    JsRegexLiteralExpression, JsSyntaxKind, JsSyntaxToken, global_identifier, inner_string_text,
+    static_value::StaticValue, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, declare_node_union};
 use biome_rule_options::use_unicode_regex::UseUnicodeRegexOptions;
@@ -29,6 +30,10 @@ declare_lint_rule! {
     /// - Set notation in character classes
     /// - String literals in character classes
     /// - Improved Unicode property escapes
+    ///
+    /// Some patterns that are valid without these flags become a syntax error
+    /// in Unicode mode, for example `/{/` or `/\-/`. The rule still reports them,
+    /// but no fix is offered because adding the `u` flag would break the code.
     ///
     /// ## Examples
     ///
@@ -121,6 +126,9 @@ impl Rule for UseUnicodeRegex {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
+        if !is_pattern_valid_with_unicode_flag(node)? {
+            return None;
+        }
         let mut mutation = ctx.root().begin();
 
         match (node, state) {
@@ -315,5 +323,221 @@ fn parse_regexp_node(node: &JsNewOrCallExpression) -> Option<(AnyJsExpression, J
             let args = node.arguments().ok()?;
             Some((callee, args))
         }
+    }
+}
+
+/// Returns whether the pattern of the regular expression is known to stay
+/// valid once the `u` flag is added.
+///
+/// Returns `None` if the pattern can't be retrieved statically.
+fn is_pattern_valid_with_unicode_flag(node: &AnyRegexExpression) -> Option<bool> {
+    match node {
+        AnyRegexExpression::JsRegexLiteralExpression(regex) => {
+            let (pattern, _) = regex.decompose().ok()?;
+            Some(is_valid_unicode_pattern(pattern.text()))
+        }
+        AnyRegexExpression::JsNewOrCallExpression(expr) => {
+            let (_, arguments) = parse_regexp_node(expr)?;
+            let pattern = arguments.args().iter().next()?.ok()?;
+            let pattern = pattern.as_any_js_expression()?.clone().omit_parentheses();
+            match pattern.as_static_value()? {
+                StaticValue::EmptyString(_) => Some(true),
+                StaticValue::String(token) if token.kind() == JsSyntaxKind::JS_STRING_LITERAL => {
+                    let pattern = unescape_js_string(inner_string_text(&token));
+                    // Lone surrogates are replaced with U+FFFD when unescaped,
+                    // so the pattern can't be checked reliably.
+                    Some(!pattern.contains('\u{fffd}') && is_valid_unicode_pattern(&pattern))
+                }
+                _ => None,
+            }
+        }
+    }
+}
+
+/// Conservatively checks that a pattern, valid without the `u` flag, is also
+/// valid with it.
+///
+/// Unicode mode doesn't allow the web compatibility syntax of Annex B, such as
+/// lone quantifier brackets (`/{/`, `/]/`), identity escapes (`/\a/`), or
+/// character class escapes used as range endpoints (`/[\d-z]/`).
+/// When in doubt, this function returns `false`.
+fn is_valid_unicode_pattern(pattern: &str) -> bool {
+    let chars: Vec<char> = pattern.chars().collect();
+
+    // Count the capturing groups to validate backreferences.
+    let mut capturing_groups = 0;
+    let mut has_named_groups = false;
+    let mut in_class = false;
+    let mut i = 0;
+    while i < chars.len() {
+        match chars[i] {
+            '\\' => i += 1,
+            '[' => in_class = true,
+            ']' => in_class = false,
+            '(' if !in_class => match (chars.get(i + 1), chars.get(i + 2), chars.get(i + 3)) {
+                (Some('?'), Some('<'), Some(c)) if !matches!(c, '=' | '!') => {
+                    capturing_groups += 1;
+                    has_named_groups = true;
+                }
+                (Some('?'), _, _) => {}
+                _ => capturing_groups += 1,
+            },
+            _ => {}
+        }
+        i += 1;
+    }
+
+    // Whether each open group is a lookaround assertion.
+    let mut groups: Vec<bool> = Vec::new();
+    // Whether the current character class contains an endpoint that may
+    // change or be invalid in Unicode mode, and whether it contains a range.
+    let mut class_has_unsafe_endpoint = false;
+    let mut class_has_range = false;
+    let mut class_start = 0;
+    in_class = false;
+    i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if in_class {
+            match c {
+                '\\' => match chars.get(i + 1) {
+                    Some('d' | 'D' | 's' | 'S' | 'w' | 'W') => {
+                        class_has_unsafe_endpoint = true;
+                        i += 1;
+                    }
+                    Some('b' | '-') => i += 1,
+                    _ => match unicode_character_escape_len(&chars, i, capturing_groups) {
+                        Some(len) => i += len - 1,
+                        None => return false,
+                    },
+                },
+                ']' => {
+                    if class_has_unsafe_endpoint && class_has_range {
+                        return false;
+                    }
+                    in_class = false;
+                }
+                '-' if i > class_start && chars.get(i + 1) != Some(&']') => {
+                    class_has_range = true;
+                }
+                c if c > '\u{ffff}' => class_has_unsafe_endpoint = true,
+                _ => {}
+            }
+        } else {
+            match c {
+                '\\' => match chars.get(i + 1) {
+                    Some('b' | 'B' | 'd' | 'D' | 's' | 'S' | 'w' | 'W') => i += 1,
+                    Some('k') if has_named_groups => i += 1,
+                    _ => match unicode_character_escape_len(&chars, i, capturing_groups) {
+                        Some(len) => i += len - 1,
+                        None => return false,
+                    },
+                },
+                '[' => {
+                    in_class = true;
+                    class_has_unsafe_endpoint = false;
+                    class_has_range = false;
+                    class_start = if chars.get(i + 1) == Some(&'^') {
+                        i + 2
+                    } else {
+                        i + 1
+                    };
+                    i = class_start - 1;
+                }
+                '(' => {
+                    if chars.get(i + 1) == Some(&'?') {
+                        match (chars.get(i + 2), chars.get(i + 3)) {
+                            (Some(':'), _) => groups.push(false),
+                            (Some('=' | '!'), _) | (Some('<'), Some('=' | '!')) => {
+                                groups.push(true);
+                            }
+                            (Some('<'), _) => {
+                                let name_len = chars[i + 3..]
+                                    .iter()
+                                    .take_while(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '$'))
+                                    .count();
+                                if name_len == 0 || chars.get(i + 3 + name_len) != Some(&'>') {
+                                    return false;
+                                }
+                                groups.push(false);
+                            }
+                            // Modifiers and other extensions
+                            _ => return false,
+                        }
+                    } else {
+                        groups.push(false);
+                    }
+                }
+                ')' => {
+                    // Lookaheads can be quantified only without the `u` flag.
+                    if groups.pop().unwrap_or(true)
+                        && matches!(chars.get(i + 1), Some('*' | '+' | '?' | '{'))
+                    {
+                        return false;
+                    }
+                }
+                '{' => {
+                    // A brace must start a valid quantifier in Unicode mode.
+                    let min_len = chars[i + 1..].iter().take_while(|c| c.is_ascii_digit()).count();
+                    if min_len == 0 {
+                        return false;
+                    }
+                    let mut end = i + 1 + min_len;
+                    if chars.get(end) == Some(&',') {
+                        end += 1;
+                        end += chars[end..].iter().take_while(|c| c.is_ascii_digit()).count();
+                    }
+                    if chars.get(end) != Some(&'}') {
+                        return false;
+                    }
+                    i = end;
+                }
+                '}' | ']' => return false,
+                _ => {}
+            }
+        }
+        i += 1;
+    }
+    !in_class
+}
+
+/// Returns the length of the character escape starting at `chars[start]`
+/// (a backslash) if it is valid in Unicode mode and has the same meaning
+/// without the `u` flag.
+fn unicode_character_escape_len(
+    chars: &[char],
+    start: usize,
+    capturing_groups: usize,
+) -> Option<usize> {
+    let is_hex = |index: usize| chars.get(index).is_some_and(char::is_ascii_hexdigit);
+    match chars.get(start + 1)? {
+        '^' | '$' | '\\' | '.' | '*' | '+' | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|'
+        | '/' | 'f' | 'n' | 'r' | 't' | 'v' => Some(2),
+        '0' => (!chars.get(start + 2).is_some_and(char::is_ascii_digit)).then_some(2),
+        'c' => chars
+            .get(start + 2)
+            .is_some_and(char::is_ascii_alphabetic)
+            .then_some(3),
+        'x' => (is_hex(start + 2) && is_hex(start + 3)).then_some(4),
+        'u' => {
+            if !(start + 2..start + 6).all(is_hex) {
+                return None;
+            }
+            let hex: String = chars[start + 2..start + 6].iter().collect();
+            let value = u32::from_str_radix(&hex, 16).ok()?;
+            // Surrogate pairs are combined into a single code point in Unicode mode.
+            (!(0xd800..=0xdfff).contains(&value)).then_some(6)
+        }
+        '1'..='9' => {
+            let len = chars[start + 1..]
+                .iter()
+                .take_while(|c| c.is_ascii_digit())
+                .count();
+            let digits: String = chars[start + 1..start + 1 + len].iter().collect();
+            // Without the `u` flag, a backreference to a missing group is an octal escape.
+            let group = digits.parse::<usize>().ok()?;
+            (group <= capturing_groups).then_some(len + 1)
+        }
+        _ => None,
     }
 }
