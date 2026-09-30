@@ -389,11 +389,13 @@ impl TypeData {
         ty: Option<impl Into<TypeReference>>,
         value_ty: Option<impl Into<TypeReference>>,
         namespace_ty: Option<impl Into<TypeReference>>,
+        separable: bool,
     ) -> Self {
         Self::MergedReference(Box::new(MergedReference {
             ty: ty.map(Into::into),
             value_ty: value_ty.map(Into::into),
             namespace_ty: namespace_ty.map(Into::into),
+            separable,
         }))
     }
 
@@ -563,6 +565,15 @@ pub struct MergedReference {
     pub ty: Option<TypeReference>,
     pub value_ty: Option<TypeReference>,
     pub namespace_ty: Option<TypeReference>,
+
+    /// Whether `ty` and `value_ty` come from separate declarations that
+    /// TypeScript never merges, such as a `const` and a type alias.
+    ///
+    /// When `true`, the name denotes exactly `ty` in a type position and
+    /// exactly `value_ty` in a value position, so a resolver may select one
+    /// side. When `false`, the sides may describe one merged entity, such as a
+    /// class and an interface, and a lookup must consider every side.
+    pub separable: bool,
 }
 
 impl MergedReference {
@@ -589,6 +600,7 @@ impl MergedReference {
                 ty,
                 value_ty,
                 namespace_ty,
+                separable: self.separable,
             })),
         }
     }

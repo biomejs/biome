@@ -72,6 +72,34 @@ impl<'db> ResolutionCtx<'db, '_> {
         None
     }
 
+    /// Selects the side of a separable merged reference that a qualifier names.
+    ///
+    /// A module that declares a variable or function and a type alias under
+    /// one name exports both as a merged reference marked
+    /// [`separable`](biome_js_type_info::MergedReference::separable) by the
+    /// exporting module's collector. A type-only qualifier selects the type
+    /// side and any other qualifier selects the value side. Every other type,
+    /// including merges of classes, interfaces, enums, and namespaces, is
+    /// returned unchanged so lookups can consider all of its sides.
+    fn select_merged_side(
+        &self,
+        ty: InferredTypeData<'db>,
+        type_only: bool,
+    ) -> InferredTypeData<'db> {
+        let InferredTypeData::MergedReference(reference) = ty else {
+            return ty;
+        };
+        if !reference.separable(self.db) {
+            return ty;
+        }
+        let side = if type_only {
+            reference.ty(self.db)
+        } else {
+            reference.value_ty(self.db)
+        };
+        side.unwrap_or(ty)
+    }
+
     /// Resolves a scoped name such as `ns.Widget<T>`.
     ///
     /// The first path segment is searched from `qualifier.scope_id` toward the
@@ -147,6 +175,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                             self.resolve(&reference)
                         })
                 };
+                target = self.select_merged_side(target, qualifier.type_only);
 
                 for member in members.iter().skip(usize::from(consumed_first_member)) {
                     let Some(member_ty) =
@@ -157,6 +186,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     target = member_ty;
                 }
 
+                let target = self.select_merged_side(target, qualifier.type_only);
                 return self.apply_qualifier_type_parameters(target, qualifier);
             }
 

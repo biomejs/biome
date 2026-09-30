@@ -1,7 +1,7 @@
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
-use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
+use biome_js_semantic::{JsDeclarationKind, Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
@@ -776,6 +776,22 @@ impl JsModuleInfoCollector {
                 value_ty,
                 namespace_ty,
             } => {
+                // A type alias never merges with another declaration, and a
+                // variable or function has no type meaning, so each side of
+                // such a pair is the name's entire meaning in its position.
+                let separable = namespace_ty.is_none()
+                    && ty.is_some_and(|id| {
+                        self.bindings[id.index()].declaration_kind == JsDeclarationKind::Type
+                    })
+                    && value_ty.is_some_and(|id| {
+                        matches!(
+                            self.bindings[id.index()].declaration_kind,
+                            JsDeclarationKind::Value
+                                | JsDeclarationKind::HoistedValue
+                                | JsDeclarationKind::Function
+                                | JsDeclarationKind::Using
+                        )
+                    });
                 let ty = ty.map(|ty| &self.bindings[ty.index()].ty);
                 let value_ty = value_ty.map(|ty| &self.bindings[ty.index()].ty);
                 let namespace_ty = namespace_ty.map(|ty| &self.bindings[ty.index()].ty);
@@ -797,6 +813,7 @@ impl JsModuleInfoCollector {
                             ty.cloned(),
                             value_ty.cloned(),
                             namespace_ty.cloned(),
+                            separable,
                         ));
                         JsOwnExport::Type(self.raw_id_to_local(ty))
                     }

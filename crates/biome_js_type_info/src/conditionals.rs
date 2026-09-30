@@ -415,6 +415,7 @@ fn to_filtered_value(
                         ty,
                         value_ty,
                         namespace_ty,
+                        separable: reference.separable,
                     })),
                 }
             }
