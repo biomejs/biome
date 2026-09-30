@@ -343,7 +343,13 @@ fn is_pattern_valid_with_unicode_flag(node: &AnyRegexExpression) -> Option<bool>
             match pattern.as_static_value()? {
                 StaticValue::EmptyString(_) => Some(true),
                 StaticValue::String(token) if token.kind() == JsSyntaxKind::JS_STRING_LITERAL => {
-                    let pattern = unescape_js_string(inner_string_text(&token));
+                    let text = inner_string_text(&token);
+                    // Legacy octal escapes, allowed in sloppy mode, aren't
+                    // supported by `unescape_js_string`.
+                    if has_legacy_octal_escape(text.text()) {
+                        return Some(false);
+                    }
+                    let pattern = unescape_js_string(text);
                     // Lone surrogates are replaced with U+FFFD when unescaped,
                     // so the pattern can't be checked reliably.
                     Some(!pattern.contains('\u{fffd}') && is_valid_unicode_pattern(&pattern))
@@ -352,6 +358,22 @@ fn is_pattern_valid_with_unicode_flag(node: &AnyRegexExpression) -> Option<bool>
             }
         }
     }
+}
+
+/// Returns whether the raw text of a string literal contains a legacy octal
+/// escape (`\1`, `\01`, `\173`) or a non-octal decimal escape (`\8`, `\9`).
+fn has_legacy_octal_escape(text: &str) -> bool {
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            match chars.next() {
+                Some('1'..='9') => return true,
+                Some('0') if chars.peek().is_some_and(char::is_ascii_digit) => return true,
+                _ => {}
+            }
+        }
+    }
+    false
 }
 
 /// Conservatively checks that a pattern, valid without the `u` flag, is also
@@ -406,6 +428,9 @@ fn is_valid_unicode_pattern(pattern: &str) -> bool {
                         i += 1;
                     }
                     Some('b' | '-') => i += 1,
+                    // Without the `u` flag, it is an octal escape. With it, a
+                    // decimal escape isn't allowed in a character class.
+                    Some('1'..='9') => return false,
                     _ => match unicode_character_escape_len(&chars, i, capturing_groups) {
                         Some(len) => i += len - 1,
                         None => return false,

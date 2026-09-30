@@ -91,6 +91,8 @@ new RegExp("\\d+", "g");
 /[\c1]/;
 /\1/;
 /\00/;
+/(a)[\1]/;
+/(a)(b)[\2]/;
 /[\B]/;
 /[\uD83D\uDE00-\uDE01]/;
 /[😀-\uFFFF]/;
@@ -1567,7 +1569,7 @@ invalid.js:86:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   > 86 │ /\1/;
        │ ^^^^
     87 │ /\00/;
-    88 │ /[\B]/;
+    88 │ /(a)[\1]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1587,8 +1589,8 @@ invalid.js:87:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
     86 │ /\1/;
   > 87 │ /\00/;
        │ ^^^^^
-    88 │ /[\B]/;
-    89 │ /[\uD83D\uDE00-\uDE01]/;
+    88 │ /(a)[\1]/;
+    89 │ /(a)(b)[\2]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1606,10 +1608,10 @@ invalid.js:88:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   
     86 │ /\1/;
     87 │ /\00/;
-  > 88 │ /[\B]/;
-       │ ^^^^^^
-    89 │ /[\uD83D\uDE00-\uDE01]/;
-    90 │ /[😀-\uFFFF]/;
+  > 88 │ /(a)[\1]/;
+       │ ^^^^^^^^^
+    89 │ /(a)(b)[\2]/;
+    90 │ /[\B]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1626,11 +1628,11 @@ invalid.js:89:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   i This regular expression is missing the u or v flag.
   
     87 │ /\00/;
-    88 │ /[\B]/;
-  > 89 │ /[\uD83D\uDE00-\uDE01]/;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    90 │ /[😀-\uFFFF]/;
-    91 │ new RegExp("\\-", "g");
+    88 │ /(a)[\1]/;
+  > 89 │ /(a)(b)[\2]/;
+       │ ^^^^^^^^^^^^
+    90 │ /[\B]/;
+    91 │ /[\uD83D\uDE00-\uDE01]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1646,12 +1648,12 @@ invalid.js:90:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    88 │ /[\B]/;
-    89 │ /[\uD83D\uDE00-\uDE01]/;
-  > 90 │ /[😀-\uFFFF]/;
-       │ ^^^^^^^^^^^^^
-    91 │ new RegExp("\\-", "g");
-    92 │ new RegExp("{", "g");
+    88 │ /(a)[\1]/;
+    89 │ /(a)(b)[\2]/;
+  > 90 │ /[\B]/;
+       │ ^^^^^^
+    91 │ /[\uD83D\uDE00-\uDE01]/;
+    92 │ /[😀-\uFFFF]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1667,12 +1669,12 @@ invalid.js:91:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    89 │ /[\uD83D\uDE00-\uDE01]/;
-    90 │ /[😀-\uFFFF]/;
-  > 91 │ new RegExp("\\-", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    92 │ new RegExp("{", "g");
-    93 │ 
+    89 │ /(a)(b)[\2]/;
+    90 │ /[\B]/;
+  > 91 │ /[\uD83D\uDE00-\uDE01]/;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ /[😀-\uFFFF]/;
+    93 │ new RegExp("\\-", "g");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1688,12 +1690,54 @@ invalid.js:92:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    90 │ /[😀-\uFFFF]/;
-    91 │ new RegExp("\\-", "g");
-  > 92 │ new RegExp("{", "g");
+    90 │ /[\B]/;
+    91 │ /[\uD83D\uDE00-\uDE01]/;
+  > 92 │ /[😀-\uFFFF]/;
+       │ ^^^^^^^^^^^^^
+    93 │ new RegExp("\\-", "g");
+    94 │ new RegExp("{", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:93:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    91 │ /[\uD83D\uDE00-\uDE01]/;
+    92 │ /[😀-\uFFFF]/;
+  > 93 │ new RegExp("\\-", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    94 │ new RegExp("{", "g");
+    95 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:94:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    92 │ /[😀-\uFFFF]/;
+    93 │ new RegExp("\\-", "g");
+  > 94 │ new RegExp("{", "g");
        │ ^^^^^^^^^^^^^^^^^^^^
-    93 │ 
-    94 │ // Patterns whose meaning changes with the u flag - should not be fixed
+    95 │ 
+    96 │ // Patterns whose meaning changes with the u flag - should not be fixed
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1705,15 +1749,15 @@ invalid.js:92:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:95:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:97:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    94 │ // Patterns whose meaning changes with the u flag - should not be fixed
-  > 95 │ /\p{L}/;
+    96 │ // Patterns whose meaning changes with the u flag - should not be fixed
+  > 97 │ /\p{L}/;
        │ ^^^^^^^
-    96 │ /\u{41}/;
-    97 │ 
+    98 │ /\u{41}/;
+    99 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1725,16 +1769,16 @@ invalid.js:95:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:96:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:98:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    94 │ // Patterns whose meaning changes with the u flag - should not be fixed
-    95 │ /\p{L}/;
-  > 96 │ /\u{41}/;
-       │ ^^^^^^^^
-    97 │ 
-    98 │ // Dynamic pattern - should not be fixed
+     96 │ // Patterns whose meaning changes with the u flag - should not be fixed
+     97 │ /\p{L}/;
+   > 98 │ /\u{41}/;
+        │ ^^^^^^^^
+     99 │ 
+    100 │ // Dynamic pattern - should not be fixed
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1746,14 +1790,14 @@ invalid.js:96:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:99:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:101:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-     98 │ // Dynamic pattern - should not be fixed
-   > 99 │ new RegExp(pattern, "g");
+    100 │ // Dynamic pattern - should not be fixed
+  > 101 │ new RegExp(pattern, "g");
         │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    100 │ 
+    102 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
