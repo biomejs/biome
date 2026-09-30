@@ -75,6 +75,49 @@ Cross-module relationships must remain references to data owned by the source
 module. Do not copy or clone inferred data from another module into the current
 module, including behind `Arc`.
 
+`ResolutionCtx` protects itself against endless recursion in two ways: it
+remembers which types it is currently resolving, and it gives up after a fixed
+number of nested steps. It also remembers the types it has already resolved.
+All of this is stored inside one context, so a newly created context starts
+with none of it.
+
+For this reason, do not create a new context in the middle of a resolution and
+keep resolving through it. The new context does not know what the old one was
+working on. Two declarations that refer to each other can then keep resolving
+each other until the program runs out of stack space and crashes.
+
+Create a new context only where something outside the context still limits the
+work:
+
+- at the start of a tracked query. If the same query is requested again before
+  it finishes, Salsa returns the query's fallback result instead of running it
+  again;
+- when following an import, because each import uses up part of a limited
+  import budget;
+- when sharing the declaration evaluator. It keeps one record of which
+  declarations depend on which, across all modules, and uses it to detect
+  loops;
+- when looking up a member of a namespace import, because that lookup has its
+  own step limit that decreases with each step.
+
+To resolve a type that belongs to another module, use a helper that follows one
+of these paths, such as `ResolutionCtx::resolve_foreign_type_id`. For example,
+in these two files each interface's type parameter refers to the other file's
+interface:
+
+```ts
+// a.ts
+import type { B } from "./b";
+export interface A<T extends B<any>> {}
+
+// b.ts
+import type { A } from "./a";
+export interface B<U extends A<any>> {}
+```
+
+Resolving `A`'s type parameter requires `B`, and resolving `B`'s type parameter
+requires `A`. If each step creates a new context, no context notices the loop.
+
 ## Vocabulary
 
 | Term | Meaning |
@@ -363,7 +406,8 @@ Cover the cases relevant to the request or query:
 - named, default, and namespace imports;
 - named, blanket, and namespace re-exports;
 - missing and ambiguous exports;
-- import and declaration cycles;
+- import and declaration cycles, including cycles through generic parameter
+  constraints and defaults declared in different modules;
 - disabled inference;
 - unsupported input shapes;
 - traversal budget exhaustion.
@@ -416,6 +460,9 @@ Before approving a request or query, verify:
       distinguished.
 - [ ] Recursive traversal has a budget, and recursively dependent tracked
       queries define cycle behavior.
+- [ ] Every `ResolutionCtx` created during resolution sits behind a tracked
+      query, a spent import or step budget, or the shared declaration
+      evaluator.
 - [ ] Namespace and import-chain breadth were reviewed.
 - [ ] Whole-module inference is absent or explicitly justified.
 - [ ] Cross-module data remains owned by its source module.
