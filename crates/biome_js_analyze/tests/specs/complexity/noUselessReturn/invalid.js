@@ -122,3 +122,35 @@ function q() {
 function r() {
     if (a) { return; } else return;
 }
+
+// leading line comment is preserved
+function s() {
+    doSomething();
+    // best effort
+    return;
+}
+
+// trailing comment
+function t() {
+    doSomething();
+    return; // done
+}
+
+// comment before the first statement of a block
+function u() {
+    if (a) { // reason
+        return;
+    }
+}
+
+// comment inside the return statement: no fix
+function v() {
+    doSomething();
+    return/**/;
+}
+
+// trailing comments on both this statement and the previous one
+function w() {
+    doSomething(); // a
+    return; // done
+}
