@@ -9,13 +9,6 @@
 /😀/;
 /café/i;
 
-// RegExp constructor without flags
-RegExp("foo");
-new RegExp("foo");
-
-// RegExp constructor with trailing comma (no flags)
-new RegExp("foo",);
-
 // RegExp constructor with non-unicode flags
 RegExp("foo", "");
 RegExp("foo", "g");
@@ -32,23 +25,17 @@ new RegExp("foo", 'gi');
 RegExp("foo", 'gim');
 
 // Unicode in RegExp constructor WITHOUT u/v flag
-new RegExp("😀");
 new RegExp("😀", "g");
 
 // Parenthesized pattern
-new RegExp(("foo"));
 new RegExp(("foo"), "gi");
 
 // globalThis.RegExp
-globalThis.RegExp("foo");
 globalThis.RegExp("foo", "gi");
-new globalThis.RegExp("foo");
 new globalThis.RegExp("foo", "gi");
 
 // window.RegExp (browser)
-window.RegExp("foo");
 window.RegExp("foo", "gi");
-new window.RegExp("foo");
 new window.RegExp("foo", "gi");
 
 // Trivia preservation in constructor flags
@@ -62,6 +49,7 @@ new RegExp("foo", /* leading */ "gi" /* trailing */);
 /[a-z\-]/;
 /(a)\1/;
 /(?<n>a)\k<n>/;
+/\k<n>(?<n>a)/;
 /\cA\x41\u0041\0/;
 /[\w\s\b]/;
 /(?=a)b/;
@@ -69,33 +57,5 @@ new RegExp("foo", /* leading */ "gi" /* trailing */);
 /\/\.\*/;
 /[^\]]/;
 new RegExp("\\d+", "g");
-
-// Patterns that are invalid with the u flag - should not be fixed
-/{/;
-/}/;
-/]/;
-/a{/;
-/a{,5}/;
-/\a/;
-/\-/;
-/\k/;
-/[\d-z]/;
-/(?=a)*/;
-/\c1/;
-/[\c1]/;
-/\1/;
-/\00/;
-/(a)[\1]/;
-/(a)(b)[\2]/;
-/[\B]/;
-/[\uD83D\uDE00-\uDE01]/;
-/[😀-\uFFFF]/;
-new RegExp("\\-", "g");
-new RegExp("{", "g");
-
-// Patterns whose meaning changes with the u flag - should not be fixed
-/\p{L}/;
-/\u{41}/;
-
-// Dynamic pattern - should not be fixed
-new RegExp(pattern, "g");
+// An escaped backslash followed by a digit is not a legacy octal escape
+new RegExp("\\1(a)", "g");

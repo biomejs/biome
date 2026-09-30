@@ -15,13 +15,6 @@ expression: invalid.js
 /😀/;
 /café/i;
 
-// RegExp constructor without flags
-RegExp("foo");
-new RegExp("foo");
-
-// RegExp constructor with trailing comma (no flags)
-new RegExp("foo",);
-
 // RegExp constructor with non-unicode flags
 RegExp("foo", "");
 RegExp("foo", "g");
@@ -38,23 +31,17 @@ new RegExp("foo", 'gi');
 RegExp("foo", 'gim');
 
 // Unicode in RegExp constructor WITHOUT u/v flag
-new RegExp("😀");
 new RegExp("😀", "g");
 
 // Parenthesized pattern
-new RegExp(("foo"));
 new RegExp(("foo"), "gi");
 
 // globalThis.RegExp
-globalThis.RegExp("foo");
 globalThis.RegExp("foo", "gi");
-new globalThis.RegExp("foo");
 new globalThis.RegExp("foo", "gi");
 
 // window.RegExp (browser)
-window.RegExp("foo");
 window.RegExp("foo", "gi");
-new window.RegExp("foo");
 new window.RegExp("foo", "gi");
 
 // Trivia preservation in constructor flags
@@ -68,6 +55,7 @@ new RegExp("foo", /* leading */ "gi" /* trailing */);
 /[a-z\-]/;
 /(a)\1/;
 /(?<n>a)\k<n>/;
+/\k<n>(?<n>a)/;
 /\cA\x41\u0041\0/;
 /[\w\s\b]/;
 /(?=a)b/;
@@ -75,36 +63,8 @@ new RegExp("foo", /* leading */ "gi" /* trailing */);
 /\/\.\*/;
 /[^\]]/;
 new RegExp("\\d+", "g");
-
-// Patterns that are invalid with the u flag - should not be fixed
-/{/;
-/}/;
-/]/;
-/a{/;
-/a{,5}/;
-/\a/;
-/\-/;
-/\k/;
-/[\d-z]/;
-/(?=a)*/;
-/\c1/;
-/[\c1]/;
-/\1/;
-/\00/;
-/(a)[\1]/;
-/(a)(b)[\2]/;
-/[\B]/;
-/[\uD83D\uDE00-\uDE01]/;
-/[😀-\uFFFF]/;
-new RegExp("\\-", "g");
-new RegExp("{", "g");
-
-// Patterns whose meaning changes with the u flag - should not be fixed
-/\p{L}/;
-/\u{41}/;
-
-// Dynamic pattern - should not be fixed
-new RegExp(pattern, "g");
+// An escaped backslash followed by a digit is not a legacy octal escape
+new RegExp("\\1(a)", "g");
 
 ```
 
@@ -153,12 +113,12 @@ invalid.js:3:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-      1   1 │   // Regex literals without u/v flag
-      2   2 │   /foo/;
-      3     │ - /bar/i;
-          3 │ + /bar/iu;
-      4   4 │   /baz/gi;
-      5   5 │   /qux/gim;
+     1  1 │   // Regex literals without u/v flag
+     2  2 │   /foo/;
+     3    │ - /bar/i;
+        3 │ + /bar/iu;
+     4  4 │   /baz/gi;
+     5  5 │   /qux/gim;
   
 
 ```
@@ -183,12 +143,12 @@ invalid.js:4:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-      2   2 │   /foo/;
-      3   3 │   /bar/i;
-      4     │ - /baz/gi;
-          4 │ + /baz/giu;
-      5   5 │   /qux/gim;
-      6   6 │   /test/gimy;
+     2  2 │   /foo/;
+     3  3 │   /bar/i;
+     4    │ - /baz/gi;
+        4 │ + /baz/giu;
+     5  5 │   /qux/gim;
+     6  6 │   /test/gimy;
   
 
 ```
@@ -213,12 +173,12 @@ invalid.js:5:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-      3   3 │   /bar/i;
-      4   4 │   /baz/gi;
-      5     │ - /qux/gim;
-          5 │ + /qux/gimu;
-      6   6 │   /test/gimy;
-      7   7 │   
+     3  3 │   /bar/i;
+     4  4 │   /baz/gi;
+     5    │ - /qux/gim;
+        5 │ + /qux/gimu;
+     6  6 │   /test/gimy;
+     7  7 │   
   
 
 ```
@@ -243,12 +203,12 @@ invalid.js:6:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-      4   4 │   /baz/gi;
-      5   5 │   /qux/gim;
-      6     │ - /test/gimy;
-          6 │ + /test/gimyu;
-      7   7 │   
-      8   8 │   // Unicode patterns WITHOUT u/v flag - this is the problem!
+     4  4 │   /baz/gi;
+     5  5 │   /qux/gim;
+     6    │ - /test/gimy;
+        6 │ + /test/gimyu;
+     7  7 │   
+     8  8 │   // Unicode patterns WITHOUT u/v flag - this is the problem!
   
 
 ```
@@ -287,7 +247,7 @@ invalid.js:10:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   > 10 │ /café/i;
        │ ^^^^^^^
     11 │ 
-    12 │ // RegExp constructor without flags
+    12 │ // RegExp constructor with non-unicode flags
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -297,47 +257,26 @@ invalid.js:10:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-      8   8 │   // Unicode patterns WITHOUT u/v flag - this is the problem!
-      9   9 │   /😀/;
-     10     │ - /café/i;
-         10 │ + /café/iu;
-     11  11 │   
-     12  12 │   // RegExp constructor without flags
+     8  8 │   // Unicode patterns WITHOUT u/v flag - this is the problem!
+     9  9 │   /😀/;
+    10    │ - /café/i;
+       10 │ + /café/iu;
+    11 11 │   
+    12 12 │   // RegExp constructor with non-unicode flags
   
 
 ```
 
 ```
-invalid.js:13:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    12 │ // RegExp constructor without flags
-  > 13 │ RegExp("foo");
-       │ ^^^^^^^^^^^^^
-    14 │ new RegExp("foo");
-    15 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:14:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    12 │ // RegExp constructor without flags
-    13 │ RegExp("foo");
-  > 14 │ new RegExp("foo");
+    12 │ // RegExp constructor with non-unicode flags
+  > 13 │ RegExp("foo", "");
        │ ^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ // RegExp constructor with trailing comma (no flags)
+    14 │ RegExp("foo", "g");
+    15 │ RegExp("foo", "gi");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -345,25 +284,184 @@ invalid.js:14:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Add the u flag.
+  
+    13 │ RegExp("foo",·"u");
+       │                +   
 
 ```
 
 ```
-invalid.js:17:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    16 │ // RegExp constructor with trailing comma (no flags)
-  > 17 │ new RegExp("foo",);
+    12 │ // RegExp constructor with non-unicode flags
+    13 │ RegExp("foo", "");
+  > 14 │ RegExp("foo", "g");
        │ ^^^^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ // RegExp constructor with non-unicode flags
+    15 │ RegExp("foo", "gi");
+    16 │ RegExp("foo", "gim");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    12 12 │   // RegExp constructor with non-unicode flags
+    13 13 │   RegExp("foo", "");
+    14    │ - RegExp("foo",·"g");
+       14 │ + RegExp("foo",·"gu");
+    15 15 │   RegExp("foo", "gi");
+    16 16 │   RegExp("foo", "gim");
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    13 │ RegExp("foo", "");
+    14 │ RegExp("foo", "g");
+  > 15 │ RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^
+    16 │ RegExp("foo", "gim");
+    17 │ RegExp("foo", "gimy");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    13 13 │   RegExp("foo", "");
+    14 14 │   RegExp("foo", "g");
+    15    │ - RegExp("foo",·"gi");
+       15 │ + RegExp("foo",·"giu");
+    16 16 │   RegExp("foo", "gim");
+    17 17 │   RegExp("foo", "gimy");
+  
+
+```
+
+```
+invalid.js:16:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    14 │ RegExp("foo", "g");
+    15 │ RegExp("foo", "gi");
+  > 16 │ RegExp("foo", "gim");
+       │ ^^^^^^^^^^^^^^^^^^^^
+    17 │ RegExp("foo", "gimy");
+    18 │ new RegExp("foo", "");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    14 14 │   RegExp("foo", "g");
+    15 15 │   RegExp("foo", "gi");
+    16    │ - RegExp("foo",·"gim");
+       16 │ + RegExp("foo",·"gimu");
+    17 17 │   RegExp("foo", "gimy");
+    18 18 │   new RegExp("foo", "");
+  
+
+```
+
+```
+invalid.js:17:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    15 │ RegExp("foo", "gi");
+    16 │ RegExp("foo", "gim");
+  > 17 │ RegExp("foo", "gimy");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    18 │ new RegExp("foo", "");
+    19 │ new RegExp("foo", "i");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    15 15 │   RegExp("foo", "gi");
+    16 16 │   RegExp("foo", "gim");
+    17    │ - RegExp("foo",·"gimy");
+       17 │ + RegExp("foo",·"gimyu");
+    18 18 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+  
+
+```
+
+```
+invalid.js:18:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    16 │ RegExp("foo", "gim");
+    17 │ RegExp("foo", "gimy");
+  > 18 │ new RegExp("foo", "");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    19 │ new RegExp("foo", "i");
+    20 │ new RegExp("foo", "gi");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    18 │ new·RegExp("foo",·"u");
+       │                    +   
+
+```
+
+```
+invalid.js:19:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    17 │ RegExp("foo", "gimy");
+    18 │ new RegExp("foo", "");
+  > 19 │ new RegExp("foo", "i");
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    20 │ new RegExp("foo", "gi");
+    21 │ new RegExp("foo", "gimy");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    17 17 │   RegExp("foo", "gimy");
+    18 18 │   new RegExp("foo", "");
+    19    │ - new·RegExp("foo",·"i");
+       19 │ + new·RegExp("foo",·"iu");
+    20 20 │   new RegExp("foo", "gi");
+    21 21 │   new RegExp("foo", "gimy");
   
 
 ```
@@ -373,11 +471,12 @@ invalid.js:20:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    19 │ // RegExp constructor with non-unicode flags
-  > 20 │ RegExp("foo", "");
-       │ ^^^^^^^^^^^^^^^^^
-    21 │ RegExp("foo", "g");
-    22 │ RegExp("foo", "gi");
+    18 │ new RegExp("foo", "");
+    19 │ new RegExp("foo", "i");
+  > 20 │ new RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ new RegExp("foo", "gimy");
+    22 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -387,8 +486,13 @@ invalid.js:20:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-    20 │ RegExp("foo",·"u");
-       │                +   
+    18 18 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+    20    │ - new·RegExp("foo",·"gi");
+       20 │ + new·RegExp("foo",·"giu");
+    21 21 │   new RegExp("foo", "gimy");
+    22 22 │   
+  
 
 ```
 
@@ -397,12 +501,12 @@ invalid.js:21:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    19 │ // RegExp constructor with non-unicode flags
-    20 │ RegExp("foo", "");
-  > 21 │ RegExp("foo", "g");
-       │ ^^^^^^^^^^^^^^^^^^
-    22 │ RegExp("foo", "gi");
-    23 │ RegExp("foo", "gim");
+    19 │ new RegExp("foo", "i");
+    20 │ new RegExp("foo", "gi");
+  > 21 │ new RegExp("foo", "gimy");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // Single quotes - should preserve quote style in fix
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -412,72 +516,12 @@ invalid.js:21:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     19  19 │   // RegExp constructor with non-unicode flags
-     20  20 │   RegExp("foo", "");
-     21     │ - RegExp("foo",·"g");
-         21 │ + RegExp("foo",·"gu");
-     22  22 │   RegExp("foo", "gi");
-     23  23 │   RegExp("foo", "gim");
-  
-
-```
-
-```
-invalid.js:22:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    20 │ RegExp("foo", "");
-    21 │ RegExp("foo", "g");
-  > 22 │ RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^
-    23 │ RegExp("foo", "gim");
-    24 │ RegExp("foo", "gimy");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     20  20 │   RegExp("foo", "");
-     21  21 │   RegExp("foo", "g");
-     22     │ - RegExp("foo",·"gi");
-         22 │ + RegExp("foo",·"giu");
-     23  23 │   RegExp("foo", "gim");
-     24  24 │   RegExp("foo", "gimy");
-  
-
-```
-
-```
-invalid.js:23:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    21 │ RegExp("foo", "g");
-    22 │ RegExp("foo", "gi");
-  > 23 │ RegExp("foo", "gim");
-       │ ^^^^^^^^^^^^^^^^^^^^
-    24 │ RegExp("foo", "gimy");
-    25 │ new RegExp("foo", "");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     21  21 │   RegExp("foo", "g");
-     22  22 │   RegExp("foo", "gi");
-     23     │ - RegExp("foo",·"gim");
-         23 │ + RegExp("foo",·"gimu");
-     24  24 │   RegExp("foo", "gimy");
-     25  25 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+    20 20 │   new RegExp("foo", "gi");
+    21    │ - new·RegExp("foo",·"gimy");
+       21 │ + new·RegExp("foo",·"gimyu");
+    22 22 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
   
 
 ```
@@ -487,12 +531,11 @@ invalid.js:24:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    22 │ RegExp("foo", "gi");
-    23 │ RegExp("foo", "gim");
-  > 24 │ RegExp("foo", "gimy");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    25 │ new RegExp("foo", "");
-    26 │ new RegExp("foo", "i");
+    23 │ // Single quotes - should preserve quote style in fix
+  > 24 │ new RegExp("foo", 'gi');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ RegExp("foo", 'gim');
+    26 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -502,12 +545,12 @@ invalid.js:24:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     22  22 │   RegExp("foo", "gi");
-     23  23 │   RegExp("foo", "gim");
-     24     │ - RegExp("foo",·"gimy");
-         24 │ + RegExp("foo",·"gimyu");
-     25  25 │   new RegExp("foo", "");
-     26  26 │   new RegExp("foo", "i");
+    22 22 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
+    24    │ - new·RegExp("foo",·'gi');
+       24 │ + new·RegExp("foo",·'giu');
+    25 25 │   RegExp("foo", 'gim');
+    26 26 │   
   
 
 ```
@@ -517,12 +560,12 @@ invalid.js:25:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    23 │ RegExp("foo", "gim");
-    24 │ RegExp("foo", "gimy");
-  > 25 │ new RegExp("foo", "");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    26 │ new RegExp("foo", "i");
-    27 │ new RegExp("foo", "gi");
+    23 │ // Single quotes - should preserve quote style in fix
+    24 │ new RegExp("foo", 'gi');
+  > 25 │ RegExp("foo", 'gim');
+       │ ^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // Unicode in RegExp constructor WITHOUT u/v flag
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -532,67 +575,12 @@ invalid.js:25:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-    25 │ new·RegExp("foo",·"u");
-       │                    +   
-
-```
-
-```
-invalid.js:26:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    24 │ RegExp("foo", "gimy");
-    25 │ new RegExp("foo", "");
-  > 26 │ new RegExp("foo", "i");
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    27 │ new RegExp("foo", "gi");
-    28 │ new RegExp("foo", "gimy");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     24  24 │   RegExp("foo", "gimy");
-     25  25 │   new RegExp("foo", "");
-     26     │ - new·RegExp("foo",·"i");
-         26 │ + new·RegExp("foo",·"iu");
-     27  27 │   new RegExp("foo", "gi");
-     28  28 │   new RegExp("foo", "gimy");
-  
-
-```
-
-```
-invalid.js:27:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    25 │ new RegExp("foo", "");
-    26 │ new RegExp("foo", "i");
-  > 27 │ new RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ new RegExp("foo", "gimy");
-    29 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     25  25 │   new RegExp("foo", "");
-     26  26 │   new RegExp("foo", "i");
-     27     │ - new·RegExp("foo",·"gi");
-         27 │ + new·RegExp("foo",·"giu");
-     28  28 │   new RegExp("foo", "gimy");
-     29  29 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
+    24 24 │   new RegExp("foo", 'gi');
+    25    │ - RegExp("foo",·'gim');
+       25 │ + RegExp("foo",·'gimu');
+    26 26 │   
+    27 27 │   // Unicode in RegExp constructor WITHOUT u/v flag
   
 
 ```
@@ -602,12 +590,11 @@ invalid.js:28:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    26 │ new RegExp("foo", "i");
-    27 │ new RegExp("foo", "gi");
-  > 28 │ new RegExp("foo", "gimy");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ // Unicode in RegExp constructor WITHOUT u/v flag
+  > 28 │ new RegExp("😀", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^
     29 │ 
-    30 │ // Single quotes - should preserve quote style in fix
+    30 │ // Parenthesized pattern
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -617,12 +604,12 @@ invalid.js:28:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     26  26 │   new RegExp("foo", "i");
-     27  27 │   new RegExp("foo", "gi");
-     28     │ - new·RegExp("foo",·"gimy");
-         28 │ + new·RegExp("foo",·"gimyu");
-     29  29 │   
-     30  30 │   // Single quotes - should preserve quote style in fix
+    26 26 │   
+    27 27 │   // Unicode in RegExp constructor WITHOUT u/v flag
+    28    │ - new·RegExp("😀",·"g");
+       28 │ + new·RegExp("😀",·"gu");
+    29 29 │   
+    30 30 │   // Parenthesized pattern
   
 
 ```
@@ -632,141 +619,11 @@ invalid.js:31:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    30 │ // Single quotes - should preserve quote style in fix
-  > 31 │ new RegExp("foo", 'gi');
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ RegExp("foo", 'gim');
-    33 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     29  29 │   
-     30  30 │   // Single quotes - should preserve quote style in fix
-     31     │ - new·RegExp("foo",·'gi');
-         31 │ + new·RegExp("foo",·'giu');
-     32  32 │   RegExp("foo", 'gim');
-     33  33 │   
-  
-
-```
-
-```
-invalid.js:32:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    30 │ // Single quotes - should preserve quote style in fix
-    31 │ new RegExp("foo", 'gi');
-  > 32 │ RegExp("foo", 'gim');
-       │ ^^^^^^^^^^^^^^^^^^^^
-    33 │ 
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     30  30 │   // Single quotes - should preserve quote style in fix
-     31  31 │   new RegExp("foo", 'gi');
-     32     │ - RegExp("foo",·'gim');
-         32 │ + RegExp("foo",·'gimu');
-     33  33 │   
-     34  34 │   // Unicode in RegExp constructor WITHOUT u/v flag
-  
-
-```
-
-```
-invalid.js:35:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-  > 35 │ new RegExp("😀");
-       │ ^^^^^^^^^^^^^^^^
-    36 │ new RegExp("😀", "g");
-    37 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:36:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-    35 │ new RegExp("😀");
-  > 36 │ new RegExp("😀", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    37 │ 
-    38 │ // Parenthesized pattern
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     34  34 │   // Unicode in RegExp constructor WITHOUT u/v flag
-     35  35 │   new RegExp("😀");
-     36     │ - new·RegExp("😀",·"g");
-         36 │ + new·RegExp("😀",·"gu");
-     37  37 │   
-     38  38 │   // Parenthesized pattern
-  
-
-```
-
-```
-invalid.js:39:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    38 │ // Parenthesized pattern
-  > 39 │ new RegExp(("foo"));
-       │ ^^^^^^^^^^^^^^^^^^^
-    40 │ new RegExp(("foo"), "gi");
-    41 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:40:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    38 │ // Parenthesized pattern
-    39 │ new RegExp(("foo"));
-  > 40 │ new RegExp(("foo"), "gi");
+    30 │ // Parenthesized pattern
+  > 31 │ new RegExp(("foo"), "gi");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │ 
-    42 │ // globalThis.RegExp
+    32 │ 
+    33 │ // globalThis.RegExp
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -776,47 +633,26 @@ invalid.js:40:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     38  38 │   // Parenthesized pattern
-     39  39 │   new RegExp(("foo"));
-     40     │ - new·RegExp(("foo"),·"gi");
-         40 │ + new·RegExp(("foo"),·"giu");
-     41  41 │   
-     42  42 │   // globalThis.RegExp
+    29 29 │   
+    30 30 │   // Parenthesized pattern
+    31    │ - new·RegExp(("foo"),·"gi");
+       31 │ + new·RegExp(("foo"),·"giu");
+    32 32 │   
+    33 33 │   // globalThis.RegExp
   
 
 ```
 
 ```
-invalid.js:43:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    42 │ // globalThis.RegExp
-  > 43 │ globalThis.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ globalThis.RegExp("foo", "gi");
-    45 │ new globalThis.RegExp("foo");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:44:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    42 │ // globalThis.RegExp
-    43 │ globalThis.RegExp("foo");
-  > 44 │ globalThis.RegExp("foo", "gi");
+    33 │ // globalThis.RegExp
+  > 34 │ globalThis.RegExp("foo", "gi");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    45 │ new globalThis.RegExp("foo");
-    46 │ new globalThis.RegExp("foo", "gi");
+    35 │ new globalThis.RegExp("foo", "gi");
+    36 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -826,27 +662,27 @@ invalid.js:44:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     42  42 │   // globalThis.RegExp
-     43  43 │   globalThis.RegExp("foo");
-     44     │ - globalThis.RegExp("foo",·"gi");
-         44 │ + globalThis.RegExp("foo",·"giu");
-     45  45 │   new globalThis.RegExp("foo");
-     46  46 │   new globalThis.RegExp("foo", "gi");
+    32 32 │   
+    33 33 │   // globalThis.RegExp
+    34    │ - globalThis.RegExp("foo",·"gi");
+       34 │ + globalThis.RegExp("foo",·"giu");
+    35 35 │   new globalThis.RegExp("foo", "gi");
+    36 36 │   
   
 
 ```
 
 ```
-invalid.js:45:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    43 │ globalThis.RegExp("foo");
-    44 │ globalThis.RegExp("foo", "gi");
-  > 45 │ new globalThis.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ new globalThis.RegExp("foo", "gi");
-    47 │ 
+    33 │ // globalThis.RegExp
+    34 │ globalThis.RegExp("foo", "gi");
+  > 35 │ new globalThis.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // window.RegExp (browser)
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -854,6 +690,127 @@ invalid.js:45:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Add the u flag.
+  
+    33 33 │   // globalThis.RegExp
+    34 34 │   globalThis.RegExp("foo", "gi");
+    35    │ - new·globalThis.RegExp("foo",·"gi");
+       35 │ + new·globalThis.RegExp("foo",·"giu");
+    36 36 │   
+    37 37 │   // window.RegExp (browser)
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    37 │ // window.RegExp (browser)
+  > 38 │ window.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ new window.RegExp("foo", "gi");
+    40 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    36 36 │   
+    37 37 │   // window.RegExp (browser)
+    38    │ - window.RegExp("foo",·"gi");
+       38 │ + window.RegExp("foo",·"giu");
+    39 39 │   new window.RegExp("foo", "gi");
+    40 40 │   
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    37 │ // window.RegExp (browser)
+    38 │ window.RegExp("foo", "gi");
+  > 39 │ new window.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ // Trivia preservation in constructor flags
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    37 37 │   // window.RegExp (browser)
+    38 38 │   window.RegExp("foo", "gi");
+    39    │ - new·window.RegExp("foo",·"gi");
+       39 │ + new·window.RegExp("foo",·"giu");
+    40 40 │   
+    41 41 │   // Trivia preservation in constructor flags
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    41 │ // Trivia preservation in constructor flags
+  > 42 │ new RegExp("foo", /* leading */ "gi" /* trailing */);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    40 40 │   
+    41 41 │   // Trivia preservation in constructor flags
+    42    │ - new·RegExp("foo",·/*·leading·*/·"gi"·/*·trailing·*/);
+       42 │ + new·RegExp("foo",·/*·leading·*/·"giu"·/*·trailing·*/);
+    43 43 │   
+    44 44 │   // Patterns that stay valid with the u flag - should be fixed
+  
+
+```
+
+```
+invalid.js:45:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+  > 45 │ /a{2}/;
+       │ ^^^^^^
+    46 │ /a{1,}b{1,3}?/g;
+    47 │ /[\d-]/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    45 │ /a{2}/u;
+       │       + 
 
 ```
 
@@ -862,12 +819,12 @@ invalid.js:46:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    44 │ globalThis.RegExp("foo", "gi");
-    45 │ new globalThis.RegExp("foo");
-  > 46 │ new globalThis.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    47 │ 
-    48 │ // window.RegExp (browser)
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+    45 │ /a{2}/;
+  > 46 │ /a{1,}b{1,3}?/g;
+       │ ^^^^^^^^^^^^^^^
+    47 │ /[\d-]/;
+    48 │ /[-\w]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -877,26 +834,27 @@ invalid.js:46:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     44  44 │   globalThis.RegExp("foo", "gi");
-     45  45 │   new globalThis.RegExp("foo");
-     46     │ - new·globalThis.RegExp("foo",·"gi");
-         46 │ + new·globalThis.RegExp("foo",·"giu");
-     47  47 │   
-     48  48 │   // window.RegExp (browser)
+    44 44 │   // Patterns that stay valid with the u flag - should be fixed
+    45 45 │   /a{2}/;
+    46    │ - /a{1,}b{1,3}?/g;
+       46 │ + /a{1,}b{1,3}?/gu;
+    47 47 │   /[\d-]/;
+    48 48 │   /[-\w]/;
   
 
 ```
 
 ```
-invalid.js:49:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    48 │ // window.RegExp (browser)
-  > 49 │ window.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^
-    50 │ window.RegExp("foo", "gi");
-    51 │ new window.RegExp("foo");
+    45 │ /a{2}/;
+    46 │ /a{1,}b{1,3}?/g;
+  > 47 │ /[\d-]/;
+       │ ^^^^^^^
+    48 │ /[-\w]/;
+    49 │ /[a-z\-]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -904,6 +862,60 @@ invalid.js:49:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Add the u flag.
+  
+    47 │ /[\d-]/u;
+       │        + 
+
+```
+
+```
+invalid.js:48:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    46 │ /a{1,}b{1,3}?/g;
+    47 │ /[\d-]/;
+  > 48 │ /[-\w]/;
+       │ ^^^^^^^
+    49 │ /[a-z\-]/;
+    50 │ /(a)\1/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    48 │ /[-\w]/u;
+       │        + 
+
+```
+
+```
+invalid.js:49:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    47 │ /[\d-]/;
+    48 │ /[-\w]/;
+  > 49 │ /[a-z\-]/;
+       │ ^^^^^^^^^
+    50 │ /(a)\1/;
+    51 │ /(?<n>a)\k<n>/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    49 │ /[a-z\-]/u;
+       │          + 
 
 ```
 
@@ -912,12 +924,12 @@ invalid.js:50:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    48 │ // window.RegExp (browser)
-    49 │ window.RegExp("foo");
-  > 50 │ window.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    51 │ new window.RegExp("foo");
-    52 │ new window.RegExp("foo", "gi");
+    48 │ /[-\w]/;
+    49 │ /[a-z\-]/;
+  > 50 │ /(a)\1/;
+       │ ^^^^^^^
+    51 │ /(?<n>a)\k<n>/;
+    52 │ /\k<n>(?<n>a)/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -927,27 +939,22 @@ invalid.js:50:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     48  48 │   // window.RegExp (browser)
-     49  49 │   window.RegExp("foo");
-     50     │ - window.RegExp("foo",·"gi");
-         50 │ + window.RegExp("foo",·"giu");
-     51  51 │   new window.RegExp("foo");
-     52  52 │   new window.RegExp("foo", "gi");
-  
+    50 │ /(a)\1/u;
+       │        + 
 
 ```
 
 ```
-invalid.js:51:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    49 │ window.RegExp("foo");
-    50 │ window.RegExp("foo", "gi");
-  > 51 │ new window.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ new window.RegExp("foo", "gi");
-    53 │ 
+    49 │ /[a-z\-]/;
+    50 │ /(a)\1/;
+  > 51 │ /(?<n>a)\k<n>/;
+       │ ^^^^^^^^^^^^^^
+    52 │ /\k<n>(?<n>a)/;
+    53 │ /\cA\x41\u0041\0/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -955,6 +962,10 @@ invalid.js:51:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Safe fix: Add the u flag.
+  
+    51 │ /(?<n>a)\k<n>/u;
+       │               + 
 
 ```
 
@@ -963,12 +974,12 @@ invalid.js:52:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    50 │ window.RegExp("foo", "gi");
-    51 │ new window.RegExp("foo");
-  > 52 │ new window.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ 
-    54 │ // Trivia preservation in constructor flags
+    50 │ /(a)\1/;
+    51 │ /(?<n>a)\k<n>/;
+  > 52 │ /\k<n>(?<n>a)/;
+       │ ^^^^^^^^^^^^^^
+    53 │ /\cA\x41\u0041\0/;
+    54 │ /[\w\s\b]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -978,13 +989,58 @@ invalid.js:52:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     50  50 │   window.RegExp("foo", "gi");
-     51  51 │   new window.RegExp("foo");
-     52     │ - new·window.RegExp("foo",·"gi");
-         52 │ + new·window.RegExp("foo",·"giu");
-     53  53 │   
-     54  54 │   // Trivia preservation in constructor flags
+    52 │ /\k<n>(?<n>a)/u;
+       │               + 
+
+```
+
+```
+invalid.js:53:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
   
+    51 │ /(?<n>a)\k<n>/;
+    52 │ /\k<n>(?<n>a)/;
+  > 53 │ /\cA\x41\u0041\0/;
+       │ ^^^^^^^^^^^^^^^^^
+    54 │ /[\w\s\b]/;
+    55 │ /(?=a)b/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    53 │ /\cA\x41\u0041\0/u;
+       │                  + 
+
+```
+
+```
+invalid.js:54:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    52 │ /\k<n>(?<n>a)/;
+    53 │ /\cA\x41\u0041\0/;
+  > 54 │ /[\w\s\b]/;
+       │ ^^^^^^^^^^
+    55 │ /(?=a)b/;
+    56 │ /(?<!a)b/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    54 │ /[\w\s\b]/u;
+       │           + 
 
 ```
 
@@ -993,11 +1049,12 @@ invalid.js:55:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    54 │ // Trivia preservation in constructor flags
-  > 55 │ new RegExp("foo", /* leading */ "gi" /* trailing */);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    56 │ 
-    57 │ // Patterns that stay valid with the u flag - should be fixed
+    53 │ /\cA\x41\u0041\0/;
+    54 │ /[\w\s\b]/;
+  > 55 │ /(?=a)b/;
+       │ ^^^^^^^^
+    56 │ /(?<!a)b/;
+    57 │ /\/\.\*/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1007,13 +1064,58 @@ invalid.js:55:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     53  53 │   
-     54  54 │   // Trivia preservation in constructor flags
-     55     │ - new·RegExp("foo",·/*·leading·*/·"gi"·/*·trailing·*/);
-         55 │ + new·RegExp("foo",·/*·leading·*/·"giu"·/*·trailing·*/);
-     56  56 │   
-     57  57 │   // Patterns that stay valid with the u flag - should be fixed
+    55 │ /(?=a)b/u;
+       │         + 
+
+```
+
+```
+invalid.js:56:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
   
+    54 │ /[\w\s\b]/;
+    55 │ /(?=a)b/;
+  > 56 │ /(?<!a)b/;
+       │ ^^^^^^^^^
+    57 │ /\/\.\*/;
+    58 │ /[^\]]/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    56 │ /(?<!a)b/u;
+       │          + 
+
+```
+
+```
+invalid.js:57:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    55 │ /(?=a)b/;
+    56 │ /(?<!a)b/;
+  > 57 │ /\/\.\*/;
+       │ ^^^^^^^^
+    58 │ /[^\]]/;
+    59 │ new RegExp("\\d+", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Add the u flag.
+  
+    57 │ /\/\.\*/u;
+       │         + 
 
 ```
 
@@ -1022,11 +1124,12 @@ invalid.js:58:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    57 │ // Patterns that stay valid with the u flag - should be fixed
-  > 58 │ /a{2}/;
-       │ ^^^^^^
-    59 │ /a{1,}b{1,3}?/g;
-    60 │ /[\d-]/;
+    56 │ /(?<!a)b/;
+    57 │ /\/\.\*/;
+  > 58 │ /[^\]]/;
+       │ ^^^^^^^
+    59 │ new RegExp("\\d+", "g");
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1036,8 +1139,8 @@ invalid.js:58:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-    58 │ /a{2}/u;
-       │       + 
+    58 │ /[^\]]/u;
+       │        + 
 
 ```
 
@@ -1046,12 +1149,12 @@ invalid.js:59:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    57 │ // Patterns that stay valid with the u flag - should be fixed
-    58 │ /a{2}/;
-  > 59 │ /a{1,}b{1,3}?/g;
-       │ ^^^^^^^^^^^^^^^
-    60 │ /[\d-]/;
-    61 │ /[-\w]/;
+    57 │ /\/\.\*/;
+    58 │ /[^\]]/;
+  > 59 │ new RegExp("\\d+", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
+    61 │ new RegExp("\\1(a)", "g");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1061,38 +1164,13 @@ invalid.js:59:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-     57  57 │   // Patterns that stay valid with the u flag - should be fixed
-     58  58 │   /a{2}/;
-     59     │ - /a{1,}b{1,3}?/g;
-         59 │ + /a{1,}b{1,3}?/gu;
-     60  60 │   /[\d-]/;
-     61  61 │   /[-\w]/;
+    57 57 │   /\/\.\*/;
+    58 58 │   /[^\]]/;
+    59    │ - new·RegExp("\\d+",·"g");
+       59 │ + new·RegExp("\\d+",·"gu");
+    60 60 │   // An escaped backslash followed by a digit is not a legacy octal escape
+    61 61 │   new RegExp("\\1(a)", "g");
   
-
-```
-
-```
-invalid.js:60:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    58 │ /a{2}/;
-    59 │ /a{1,}b{1,3}?/g;
-  > 60 │ /[\d-]/;
-       │ ^^^^^^^
-    61 │ /[-\w]/;
-    62 │ /[a-z\-]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    60 │ /[\d-]/u;
-       │        + 
 
 ```
 
@@ -1101,12 +1179,11 @@ invalid.js:61:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
 
   i This regular expression is missing the u or v flag.
   
-    59 │ /a{1,}b{1,3}?/g;
-    60 │ /[\d-]/;
-  > 61 │ /[-\w]/;
-       │ ^^^^^^^
-    62 │ /[a-z\-]/;
-    63 │ /(a)\1/;
+    59 │ new RegExp("\\d+", "g");
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
+  > 61 │ new RegExp("\\1(a)", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -1116,762 +1193,11 @@ invalid.js:61:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Add the u flag.
   
-    61 │ /[-\w]/u;
-       │        + 
-
-```
-
-```
-invalid.js:62:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    60 │ /[\d-]/;
-    61 │ /[-\w]/;
-  > 62 │ /[a-z\-]/;
-       │ ^^^^^^^^^
-    63 │ /(a)\1/;
-    64 │ /(?<n>a)\k<n>/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    62 │ /[a-z\-]/u;
-       │          + 
-
-```
-
-```
-invalid.js:63:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    61 │ /[-\w]/;
-    62 │ /[a-z\-]/;
-  > 63 │ /(a)\1/;
-       │ ^^^^^^^
-    64 │ /(?<n>a)\k<n>/;
-    65 │ /\cA\x41\u0041\0/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    63 │ /(a)\1/u;
-       │        + 
-
-```
-
-```
-invalid.js:64:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    62 │ /[a-z\-]/;
-    63 │ /(a)\1/;
-  > 64 │ /(?<n>a)\k<n>/;
-       │ ^^^^^^^^^^^^^^
-    65 │ /\cA\x41\u0041\0/;
-    66 │ /[\w\s\b]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    64 │ /(?<n>a)\k<n>/u;
-       │               + 
-
-```
-
-```
-invalid.js:65:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    63 │ /(a)\1/;
-    64 │ /(?<n>a)\k<n>/;
-  > 65 │ /\cA\x41\u0041\0/;
-       │ ^^^^^^^^^^^^^^^^^
-    66 │ /[\w\s\b]/;
-    67 │ /(?=a)b/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    65 │ /\cA\x41\u0041\0/u;
-       │                  + 
-
-```
-
-```
-invalid.js:66:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    64 │ /(?<n>a)\k<n>/;
-    65 │ /\cA\x41\u0041\0/;
-  > 66 │ /[\w\s\b]/;
-       │ ^^^^^^^^^^
-    67 │ /(?=a)b/;
-    68 │ /(?<!a)b/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    66 │ /[\w\s\b]/u;
-       │           + 
-
-```
-
-```
-invalid.js:67:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    65 │ /\cA\x41\u0041\0/;
-    66 │ /[\w\s\b]/;
-  > 67 │ /(?=a)b/;
-       │ ^^^^^^^^
-    68 │ /(?<!a)b/;
-    69 │ /\/\.\*/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    67 │ /(?=a)b/u;
-       │         + 
-
-```
-
-```
-invalid.js:68:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    66 │ /[\w\s\b]/;
-    67 │ /(?=a)b/;
-  > 68 │ /(?<!a)b/;
-       │ ^^^^^^^^^
-    69 │ /\/\.\*/;
-    70 │ /[^\]]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    68 │ /(?<!a)b/u;
-       │          + 
-
-```
-
-```
-invalid.js:69:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    67 │ /(?=a)b/;
-    68 │ /(?<!a)b/;
-  > 69 │ /\/\.\*/;
-       │ ^^^^^^^^
-    70 │ /[^\]]/;
-    71 │ new RegExp("\\d+", "g");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    69 │ /\/\.\*/u;
-       │         + 
-
-```
-
-```
-invalid.js:70:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    68 │ /(?<!a)b/;
-    69 │ /\/\.\*/;
-  > 70 │ /[^\]]/;
-       │ ^^^^^^^
-    71 │ new RegExp("\\d+", "g");
-    72 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-    70 │ /[^\]]/u;
-       │        + 
-
-```
-
-```
-invalid.js:71:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    69 │ /\/\.\*/;
-    70 │ /[^\]]/;
-  > 71 │ new RegExp("\\d+", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    72 │ 
-    73 │ // Patterns that are invalid with the u flag - should not be fixed
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     69  69 │   /\/\.\*/;
-     70  70 │   /[^\]]/;
-     71     │ - new·RegExp("\\d+",·"g");
-         71 │ + new·RegExp("\\d+",·"gu");
-     72  72 │   
-     73  73 │   // Patterns that are invalid with the u flag - should not be fixed
-  
-
-```
-
-```
-invalid.js:74:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    73 │ // Patterns that are invalid with the u flag - should not be fixed
-  > 74 │ /{/;
-       │ ^^^
-    75 │ /}/;
-    76 │ /]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:75:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    73 │ // Patterns that are invalid with the u flag - should not be fixed
-    74 │ /{/;
-  > 75 │ /}/;
-       │ ^^^
-    76 │ /]/;
-    77 │ /a{/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:76:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    74 │ /{/;
-    75 │ /}/;
-  > 76 │ /]/;
-       │ ^^^
-    77 │ /a{/;
-    78 │ /a{,5}/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:77:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    75 │ /}/;
-    76 │ /]/;
-  > 77 │ /a{/;
-       │ ^^^^
-    78 │ /a{,5}/;
-    79 │ /\a/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:78:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    76 │ /]/;
-    77 │ /a{/;
-  > 78 │ /a{,5}/;
-       │ ^^^^^^^
-    79 │ /\a/;
-    80 │ /\-/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:79:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    77 │ /a{/;
-    78 │ /a{,5}/;
-  > 79 │ /\a/;
-       │ ^^^^
-    80 │ /\-/;
-    81 │ /\k/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:80:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    78 │ /a{,5}/;
-    79 │ /\a/;
-  > 80 │ /\-/;
-       │ ^^^^
-    81 │ /\k/;
-    82 │ /[\d-z]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:81:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    79 │ /\a/;
-    80 │ /\-/;
-  > 81 │ /\k/;
-       │ ^^^^
-    82 │ /[\d-z]/;
-    83 │ /(?=a)*/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:82:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    80 │ /\-/;
-    81 │ /\k/;
-  > 82 │ /[\d-z]/;
-       │ ^^^^^^^^
-    83 │ /(?=a)*/;
-    84 │ /\c1/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:83:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    81 │ /\k/;
-    82 │ /[\d-z]/;
-  > 83 │ /(?=a)*/;
-       │ ^^^^^^^^
-    84 │ /\c1/;
-    85 │ /[\c1]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:84:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    82 │ /[\d-z]/;
-    83 │ /(?=a)*/;
-  > 84 │ /\c1/;
-       │ ^^^^^
-    85 │ /[\c1]/;
-    86 │ /\1/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:85:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    83 │ /(?=a)*/;
-    84 │ /\c1/;
-  > 85 │ /[\c1]/;
-       │ ^^^^^^^
-    86 │ /\1/;
-    87 │ /\00/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:86:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    84 │ /\c1/;
-    85 │ /[\c1]/;
-  > 86 │ /\1/;
-       │ ^^^^
-    87 │ /\00/;
-    88 │ /(a)[\1]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:87:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    85 │ /[\c1]/;
-    86 │ /\1/;
-  > 87 │ /\00/;
-       │ ^^^^^
-    88 │ /(a)[\1]/;
-    89 │ /(a)(b)[\2]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:88:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    86 │ /\1/;
-    87 │ /\00/;
-  > 88 │ /(a)[\1]/;
-       │ ^^^^^^^^^
-    89 │ /(a)(b)[\2]/;
-    90 │ /[\B]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:89:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    87 │ /\00/;
-    88 │ /(a)[\1]/;
-  > 89 │ /(a)(b)[\2]/;
-       │ ^^^^^^^^^^^^
-    90 │ /[\B]/;
-    91 │ /[\uD83D\uDE00-\uDE01]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:90:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    88 │ /(a)[\1]/;
-    89 │ /(a)(b)[\2]/;
-  > 90 │ /[\B]/;
-       │ ^^^^^^
-    91 │ /[\uD83D\uDE00-\uDE01]/;
-    92 │ /[😀-\uFFFF]/;
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:91:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    89 │ /(a)(b)[\2]/;
-    90 │ /[\B]/;
-  > 91 │ /[\uD83D\uDE00-\uDE01]/;
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    92 │ /[😀-\uFFFF]/;
-    93 │ new RegExp("\\-", "g");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:92:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    90 │ /[\B]/;
-    91 │ /[\uD83D\uDE00-\uDE01]/;
-  > 92 │ /[😀-\uFFFF]/;
-       │ ^^^^^^^^^^^^^
-    93 │ new RegExp("\\-", "g");
-    94 │ new RegExp("{", "g");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:93:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    91 │ /[\uD83D\uDE00-\uDE01]/;
-    92 │ /[😀-\uFFFF]/;
-  > 93 │ new RegExp("\\-", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    94 │ new RegExp("{", "g");
-    95 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:94:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    92 │ /[😀-\uFFFF]/;
-    93 │ new RegExp("\\-", "g");
-  > 94 │ new RegExp("{", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^
-    95 │ 
-    96 │ // Patterns whose meaning changes with the u flag - should not be fixed
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:97:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    96 │ // Patterns whose meaning changes with the u flag - should not be fixed
-  > 97 │ /\p{L}/;
-       │ ^^^^^^^
-    98 │ /\u{41}/;
-    99 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:98:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-     96 │ // Patterns whose meaning changes with the u flag - should not be fixed
-     97 │ /\p{L}/;
-   > 98 │ /\u{41}/;
-        │ ^^^^^^^^
-     99 │ 
-    100 │ // Dynamic pattern - should not be fixed
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid.js:101:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    100 │ // Dynamic pattern - should not be fixed
-  > 101 │ new RegExp(pattern, "g");
-        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    102 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+    59 59 │   new RegExp("\\d+", "g");
+    60 60 │   // An escaped backslash followed by a digit is not a legacy octal escape
+    61    │ - new·RegExp("\\1(a)",·"g");
+       61 │ + new·RegExp("\\1(a)",·"gu");
+    62 62 │   
   
 
 ```

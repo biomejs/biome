@@ -10,6 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece, declare_node_union};
 use biome_rule_options::use_unicode_regex::UseUnicodeRegexOptions;
+use biome_unicode_table::{Dispatch, lookup_byte};
 
 use crate::{JsRuleAction, services::semantic::Semantic};
 
@@ -360,15 +361,19 @@ fn is_pattern_valid_with_unicode_flag(node: &AnyRegexExpression) -> Option<bool>
     }
 }
 
+fn is_digit(byte: Option<u8>) -> bool {
+    byte.is_some_and(|byte| matches!(lookup_byte(byte), Dispatch::ZER | Dispatch::DIG))
+}
+
 /// Returns whether the raw text of a string literal contains a legacy octal
 /// escape (`\1`, `\01`, `\173`) or a non-octal decimal escape (`\8`, `\9`).
 fn has_legacy_octal_escape(text: &str) -> bool {
-    let mut chars = text.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c == '\\' {
-            match chars.next() {
-                Some('1'..='9') => return true,
-                Some('0') if chars.peek().is_some_and(char::is_ascii_digit) => return true,
+    let mut bytes = text.bytes().peekable();
+    while let Some(byte) = bytes.next() {
+        if byte == b'\\' {
+            match bytes.next().map(lookup_byte) {
+                Some(Dispatch::DIG) => return true,
+                Some(Dispatch::ZER) if is_digit(bytes.peek().copied()) => return true,
                 _ => {}
             }
         }
@@ -376,193 +381,168 @@ fn has_legacy_octal_escape(text: &str) -> bool {
     false
 }
 
-/// Conservatively checks that a pattern, valid without the `u` flag, is also
-/// valid with it.
+/// Conservatively checks, in a single pass, that a pattern valid without the
+/// `u` flag is also valid with it.
 ///
 /// Unicode mode doesn't allow the web compatibility syntax of Annex B, such as
 /// lone quantifier brackets (`/{/`, `/]/`), identity escapes (`/\a/`), or
 /// character class escapes used as range endpoints (`/[\d-z]/`).
 /// When in doubt, this function returns `false`.
 fn is_valid_unicode_pattern(pattern: &str) -> bool {
-    let chars: Vec<char> = pattern.chars().collect();
-
-    // Count the capturing groups to validate backreferences.
-    let mut capturing_groups = 0;
-    let mut has_named_groups = false;
-    let mut in_class = false;
-    let mut i = 0;
-    while i < chars.len() {
-        match chars[i] {
-            '\\' => i += 1,
-            '[' => in_class = true,
-            ']' => in_class = false,
-            '(' if !in_class => match (chars.get(i + 1), chars.get(i + 2), chars.get(i + 3)) {
-                (Some('?'), Some('<'), Some(c)) if !matches!(c, '=' | '!') => {
-                    capturing_groups += 1;
-                    has_named_groups = true;
-                }
-                (Some('?'), _, _) => {}
-                _ => capturing_groups += 1,
-            },
-            _ => {}
+    let bytes = pattern.as_bytes();
+    let at = |index: usize| bytes.get(index).copied();
+    let skip_digits = |mut index: usize| {
+        while is_digit(at(index)) {
+            index += 1;
         }
-        i += 1;
-    }
+        index
+    };
 
-    // Whether each open group is a lookaround assertion.
-    let mut groups: Vec<bool> = Vec::new();
+    // Backreferences may precede their group, so they are checked at the end.
+    let mut capturing_groups = 0;
+    let mut max_backreference = 0;
+    let mut has_named_groups = false;
+    let mut has_named_backreference = false;
+    // One bit per open group, set for lookarounds, above a sentinel bit.
+    let mut groups = 1u128;
     // Whether the current character class contains an endpoint that may
     // change or be invalid in Unicode mode, and whether it contains a range.
+    let mut in_class = false;
     let mut class_has_unsafe_endpoint = false;
     let mut class_has_range = false;
     let mut class_start = 0;
-    in_class = false;
-    i = 0;
-    while i < chars.len() {
-        let c = chars[i];
-        if in_class {
-            match c {
-                '\\' => match chars.get(i + 1) {
-                    Some('d' | 'D' | 's' | 'S' | 'w' | 'W') => {
-                        class_has_unsafe_endpoint = true;
+    let mut i = 0;
+    while let Some(byte) = at(i) {
+        if byte == b'\\' {
+            match at(i + 1) {
+                Some(b'd' | b'D' | b's' | b'S' | b'w' | b'W') => {
+                    class_has_unsafe_endpoint = true;
+                    i += 1;
+                }
+                Some(
+                    b'^' | b'$' | b'\\' | b'.' | b'*' | b'+' | b'?' | b'(' | b')' | b'[' | b']'
+                    | b'{' | b'}' | b'|' | b'/' | b'b' | b'f' | b'n' | b'r' | b't' | b'v',
+                ) => i += 1,
+                Some(b'B') if !in_class => i += 1,
+                Some(b'-') if in_class => i += 1,
+                Some(b'k') if !in_class => {
+                    has_named_backreference = true;
+                    i += 1;
+                }
+                Some(b'0') if !is_digit(at(i + 2)) => i += 1,
+                // A decimal escape is an octal escape without the `u` flag when
+                // it's in a class or refers to a missing group.
+                Some(b'1'..=b'9') if !in_class => {
+                    let mut group = 0usize;
+                    while is_digit(at(i + 1)) {
                         i += 1;
+                        group = group.saturating_mul(10).saturating_add(usize::from(bytes[i] - b'0'));
                     }
-                    Some('b' | '-') => i += 1,
-                    // Without the `u` flag, it is an octal escape. With it, a
-                    // decimal escape isn't allowed in a character class.
-                    Some('1'..='9') => return false,
-                    _ => match unicode_character_escape_len(&chars, i, capturing_groups) {
-                        Some(len) => i += len - 1,
-                        None => return false,
-                    },
-                },
-                ']' => {
+                    max_backreference = max_backreference.max(group);
+                }
+                Some(b'c') if at(i + 2).is_some_and(|byte| byte.is_ascii_alphabetic()) => i += 2,
+                Some(b'x') if bytes.get(i + 2..i + 4).is_some_and(|hex| hex.iter().all(u8::is_ascii_hexdigit)) => {
+                    i += 3;
+                }
+                Some(b'u') => {
+                    let value = bytes.get(i + 2..i + 6).and_then(|hex| {
+                        hex.iter().try_fold(0, |value, &digit| {
+                            Some(value * 16 + char::from(digit).to_digit(16)?)
+                        })
+                    });
+                    // Surrogate pairs are combined into a single code point in Unicode mode.
+                    match value {
+                        Some(value) if !(0xd800..=0xdfff).contains(&value) => i += 5,
+                        _ => return false,
+                    }
+                }
+                _ => return false,
+            }
+        } else if in_class {
+            match byte {
+                b']' => {
                     if class_has_unsafe_endpoint && class_has_range {
                         return false;
                     }
                     in_class = false;
                 }
-                '-' if i > class_start && chars.get(i + 1) != Some(&']') => {
-                    class_has_range = true;
-                }
-                c if c > '\u{ffff}' => class_has_unsafe_endpoint = true,
+                b'-' if i > class_start && at(i + 1) != Some(b']') => class_has_range = true,
+                // The first byte of a character outside the BMP
+                0xf0.. => class_has_unsafe_endpoint = true,
                 _ => {}
             }
         } else {
-            match c {
-                '\\' => match chars.get(i + 1) {
-                    Some('b' | 'B' | 'd' | 'D' | 's' | 'S' | 'w' | 'W') => i += 1,
-                    Some('k') if has_named_groups => i += 1,
-                    _ => match unicode_character_escape_len(&chars, i, capturing_groups) {
-                        Some(len) => i += len - 1,
-                        None => return false,
-                    },
-                },
-                '[' => {
+            match byte {
+                b'[' => {
                     in_class = true;
                     class_has_unsafe_endpoint = false;
                     class_has_range = false;
-                    class_start = if chars.get(i + 1) == Some(&'^') {
-                        i + 2
-                    } else {
-                        i + 1
-                    };
+                    class_start = if at(i + 1) == Some(b'^') { i + 2 } else { i + 1 };
                     i = class_start - 1;
                 }
-                '(' => {
-                    if chars.get(i + 1) == Some(&'?') {
-                        match (chars.get(i + 2), chars.get(i + 3)) {
-                            (Some(':'), _) => groups.push(false),
-                            (Some('=' | '!'), _) | (Some('<'), Some('=' | '!')) => {
-                                groups.push(true);
+                b'(' => {
+                    let is_lookaround = match (at(i + 1), at(i + 2), at(i + 3)) {
+                        (Some(b'?'), Some(b':'), _) => false,
+                        (Some(b'?'), Some(b'=' | b'!'), _)
+                        | (Some(b'?'), Some(b'<'), Some(b'=' | b'!')) => true,
+                        (Some(b'?'), Some(b'<'), _) => {
+                            let mut end = i + 3;
+                            while at(end).is_some_and(|byte| {
+                                matches!(
+                                    lookup_byte(byte),
+                                    Dispatch::IDT | Dispatch::DOL | Dispatch::ZER | Dispatch::DIG
+                                )
+                            }) {
+                                end += 1;
                             }
-                            (Some('<'), _) => {
-                                let name_len = chars[i + 3..]
-                                    .iter()
-                                    .take_while(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '$'))
-                                    .count();
-                                if name_len == 0 || chars.get(i + 3 + name_len) != Some(&'>') {
-                                    return false;
-                                }
-                                groups.push(false);
+                            if end == i + 3 || at(end) != Some(b'>') {
+                                return false;
                             }
-                            // Modifiers and other extensions
-                            _ => return false,
+                            has_named_groups = true;
+                            capturing_groups += 1;
+                            i = end;
+                            false
                         }
-                    } else {
-                        groups.push(false);
+                        // Modifiers and other extensions
+                        (Some(b'?'), _, _) => return false,
+                        _ => {
+                            capturing_groups += 1;
+                            false
+                        }
+                    };
+                    if groups.leading_zeros() == 0 {
+                        return false;
                     }
+                    groups = groups << 1 | u128::from(is_lookaround);
                 }
-                ')' => {
+                b')' => {
+                    let is_lookaround = groups == 1 || groups & 1 == 1;
+                    groups = (groups >> 1).max(1);
                     // Lookaheads can be quantified only without the `u` flag.
-                    if groups.pop().unwrap_or(true)
-                        && matches!(chars.get(i + 1), Some('*' | '+' | '?' | '{'))
-                    {
+                    if is_lookaround && matches!(at(i + 1), Some(b'*' | b'+' | b'?' | b'{')) {
                         return false;
                     }
                 }
-                '{' => {
+                b'{' => {
                     // A brace must start a valid quantifier in Unicode mode.
-                    let min_len = chars[i + 1..].iter().take_while(|c| c.is_ascii_digit()).count();
-                    if min_len == 0 {
-                        return false;
-                    }
-                    let mut end = i + 1 + min_len;
-                    if chars.get(end) == Some(&',') {
-                        end += 1;
-                        end += chars[end..].iter().take_while(|c| c.is_ascii_digit()).count();
-                    }
-                    if chars.get(end) != Some(&'}') {
+                    let min_end = skip_digits(i + 1);
+                    let end = if at(min_end) == Some(b',') {
+                        skip_digits(min_end + 1)
+                    } else {
+                        min_end
+                    };
+                    if min_end == i + 1 || at(end) != Some(b'}') {
                         return false;
                     }
                     i = end;
                 }
-                '}' | ']' => return false,
+                b'}' | b']' => return false,
                 _ => {}
             }
         }
         i += 1;
     }
     !in_class
-}
-
-/// Returns the length of the character escape starting at `chars[start]`
-/// (a backslash) if it is valid in Unicode mode and has the same meaning
-/// without the `u` flag.
-fn unicode_character_escape_len(
-    chars: &[char],
-    start: usize,
-    capturing_groups: usize,
-) -> Option<usize> {
-    let is_hex = |index: usize| chars.get(index).is_some_and(char::is_ascii_hexdigit);
-    match chars.get(start + 1)? {
-        '^' | '$' | '\\' | '.' | '*' | '+' | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|'
-        | '/' | 'f' | 'n' | 'r' | 't' | 'v' => Some(2),
-        '0' => (!chars.get(start + 2).is_some_and(char::is_ascii_digit)).then_some(2),
-        'c' => chars
-            .get(start + 2)
-            .is_some_and(char::is_ascii_alphabetic)
-            .then_some(3),
-        'x' => (is_hex(start + 2) && is_hex(start + 3)).then_some(4),
-        'u' => {
-            if !(start + 2..start + 6).all(is_hex) {
-                return None;
-            }
-            let hex: String = chars[start + 2..start + 6].iter().collect();
-            let value = u32::from_str_radix(&hex, 16).ok()?;
-            // Surrogate pairs are combined into a single code point in Unicode mode.
-            (!(0xd800..=0xdfff).contains(&value)).then_some(6)
-        }
-        '1'..='9' => {
-            let len = chars[start + 1..]
-                .iter()
-                .take_while(|c| c.is_ascii_digit())
-                .count();
-            let digits: String = chars[start + 1..start + 1 + len].iter().collect();
-            // Without the `u` flag, a backreference to a missing group is an octal escape.
-            let group = digits.parse::<usize>().ok()?;
-            (group <= capturing_groups).then_some(len + 1)
-        }
-        _ => None,
-    }
+        && max_backreference <= capturing_groups
+        && (has_named_groups || !has_named_backreference)
 }
