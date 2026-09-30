@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid-script.cjs
+expression: invalidNoFix.cjs
 ---
 # Input
 ```cjs
@@ -11,14 +11,11 @@ RegExp("\01", "g");
 new RegExp("\173", "g");
 new RegExp("\8", "g");
 
-// An escaped backslash followed by a digit is not a legacy octal escape - should be fixed
-new RegExp("\\1(a)", "g");
-
 ```
 
 # Diagnostics
 ```
-invalid-script.cjs:2:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoFix.cjs:2:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
@@ -32,13 +29,11 @@ invalid-script.cjs:2:1 lint/nursery/useUnicodeRegex ━━━━━━━━━�
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-invalid-script.cjs:3:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoFix.cjs:3:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
@@ -53,13 +48,11 @@ invalid-script.cjs:3:1 lint/nursery/useUnicodeRegex ━━━━━━━━━�
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-invalid-script.cjs:4:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoFix.cjs:4:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
@@ -74,13 +67,11 @@ invalid-script.cjs:4:1 lint/nursery/useUnicodeRegex ━━━━━━━━━�
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-invalid-script.cjs:5:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoFix.cjs:5:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
@@ -95,13 +86,11 @@ invalid-script.cjs:5:1 lint/nursery/useUnicodeRegex ━━━━━━━━━�
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
 
 ```
 
 ```
-invalid-script.cjs:6:1 lint/nursery/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidNoFix.cjs:6:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
@@ -110,40 +99,10 @@ invalid-script.cjs:6:1 lint/nursery/useUnicodeRegex ━━━━━━━━━�
   > 6 │ new RegExp("\8", "g");
       │ ^^^^^^^^^^^^^^^^^^^^^
     7 │ 
-    8 │ // An escaped backslash followed by a digit is not a legacy octal escape - should be fixed
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
-invalid-script.cjs:9:1 lint/nursery/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-     8 │ // An escaped backslash followed by a digit is not a legacy octal escape - should be fixed
-   > 9 │ new RegExp("\\1(a)", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Add the u flag.
-  
-     7  7 │   
-     8  8 │   // An escaped backslash followed by a digit is not a legacy octal escape - should be fixed
-     9    │ - new·RegExp("\\1(a)",·"g");
-        9 │ + new·RegExp("\\1(a)",·"gu");
-    10 10 │   
   
 
 ```
