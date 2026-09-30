@@ -1,0 +1,18 @@
+@function style($value) { @return true; }
+.a {
+  legacy: if(style((--x: if(sass(true): if(true, if(sass(false): red; else: blue), black); else: white))), green, black);
+  modern: if(style((--x: if(sass(true): if(true, if(sass(false): red; else: blue), black); else: white))): green; else: black);
+  nested-condition: if(sass(if(true, if(sass(true): true; else: false), false)): red; else: blue);
+  width: 1px;
+}
+
+.state {
+  modern: if(sass(true): red; else: blue);
+  legacy: if(sass(true), red, blue);
+  modern-with-legacy: if(sass(if(true, 1, 2)): red; else: blue);
+  legacy-with-modern: if(sass(if(sass(true): red; else: blue)), green, black);
+  modern-then-legacy: if(sass(true): red; else: blue) if(sass(true), red, blue);
+  legacy-then-modern: if(sass(true), red, blue) if(sass(true): red; else: blue);
+  width: 1px;
+}
+.after { height: 2px; }

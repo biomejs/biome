@@ -1,0 +1,7 @@
+.a {
+  color: if(style(--enabled: true) red; else: blue);
+  width: 1px;
+}
+.a { color: if(style(--enabled: true) red, blue); width: 1px; }
+.a { color: if(style(--enabled: true) red); width: 1px; }
+.after { color: green; }

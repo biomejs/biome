@@ -1,0 +1,10 @@
+.a {
+  color: if(sass(true) red; else: blue);
+  width: 1px;
+}
+.after-modern { height: 2px; }
+.b {
+  color: if(style((--x: 1)), red;
+  width: 3px;
+}
+.after-legacy { height: 4px; }

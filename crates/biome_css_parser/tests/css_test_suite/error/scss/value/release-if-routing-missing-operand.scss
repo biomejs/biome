@@ -1,0 +1,5 @@
+.a {
+  color: if(not : red; else: blue);
+  width: 1px;
+}
+.after { color: green; }
