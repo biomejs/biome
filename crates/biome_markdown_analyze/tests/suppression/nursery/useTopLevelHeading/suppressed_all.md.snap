@@ -1,0 +1,10 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressed_all.md
+---
+# Input
+```md
+<!-- biome-ignore-all lint/nursery/useTopLevelHeading: this document intentionally starts at level two -->
+## Second level heading
+
+```

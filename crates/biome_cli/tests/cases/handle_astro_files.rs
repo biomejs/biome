@@ -1,10 +1,10 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{
     SnapshotPayload, assert_cli_snapshot, assert_file_contents, markup_to_string,
 };
 use biome_console::{BufferConsole, markup};
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const ASTRO_FILE_UNFORMATTED: &str = r#"---
@@ -294,14 +294,17 @@ fn astro_template_suppressions_have_one_owner() {
 "#,
     );
 
-    let (fs, result) = run_cli(
+    let (fs, first_lint_result) = run_cli(
         fs,
         &mut console,
         Args::from(["lint", "--error-on-warnings", "file.astro"].as_slice()),
     );
 
-    assert!(result.is_ok(), "{result:?}\n{console:#?}");
-    let (fs, result) = run_cli(
+    assert!(
+        first_lint_result.is_ok(),
+        "{first_lint_result:?}\n{console:#?}"
+    );
+    let (fs, check_result) = run_cli(
         fs,
         &mut console,
         Args::from(
@@ -315,7 +318,7 @@ fn astro_template_suppressions_have_one_owner() {
             .as_slice(),
         ),
     );
-    assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    assert!(check_result.is_ok(), "{check_result:?}\n{console:#?}");
     let (fs, result) = run_cli(
         fs,
         &mut console,
@@ -323,6 +326,9 @@ fn astro_template_suppressions_have_one_owner() {
     );
 
     assert!(result.is_ok(), "{result:?}\n{console:#?}");
+    let result = first_lint_result
+        .followed_by(check_result)
+        .followed_by(result);
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "astro_template_suppressions_have_one_owner",
@@ -594,6 +600,157 @@ schema + sure()
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "full_support",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_write_indents_astro_map_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "assist": { "enabled": false },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  },
+  "linter": { "enabled": false }
+}"#
+        .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<section>
+	<div class="featured-users-grid">
+		{featuredUsers.map((user) => (
+				<div class="featured-user-card">
+					<Image
+						src={user.data.logo}
+						alt={`${user.data.id} logo`}
+						width={64}
+						height={64}
+						loading="lazy"
+					/>
+					<span class="user-name">{user.data.id}</span>
+				</div>
+			))}
+	</div>
+	<div>
+		{items.map((item) => <span class="long-class-name-that-forces-the-map-expression-to-break">{item}</span>)}
+	</div>
+</section>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["check", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_write_indents_astro_map_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_indents_astro_map_expression() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<section>
+	<div class="featured-users-grid">
+		{featuredUsers.map((user) => (
+				<div class="featured-user-card">
+					<span class="user-name">{user.data.id}</span>
+				</div>
+			))}
+	</div>
+	<p>Hello {user.name}, you have {items.filter((item) => item.isActive && item.owner === user.id).length} active items</p>
+</section>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}\n{console:#?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_indents_astro_map_expression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn format_keeps_astro_expression_with_syntax_error() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "formatter": { "formatWithErrors": true },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let astro_file_path = Utf8Path::new("file.astro");
+    fs.insert(
+        astro_file_path.into(),
+        r#"<div   >
+	<p>{items.map((item) => )}</p>
+</div>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", astro_file_path.as_str()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "format_keeps_astro_expression_with_syntax_error",
         fs,
         console,
         result,

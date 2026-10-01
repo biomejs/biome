@@ -419,7 +419,9 @@ impl HtmlElement {
             == Some(SCRIPT_KW)
     }
 
-    fn has_attribute_with_value(&self, name: &str, value: &str) -> bool {
+    /// Returns `true` if the element has an attribute named `name` whose string value is `value`.
+    /// Both the name and the value are compared case-insensitively.
+    pub fn has_attribute_with_value(&self, name: &str, value: &str) -> bool {
         let attribute = self.find_attribute_by_name(name);
         attribute.is_some_and(|attribute| {
             let Some(html_attribute) = attribute.as_html_attribute() else {

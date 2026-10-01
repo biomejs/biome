@@ -21,4 +21,13 @@ impl FormatNodeRule<SvelteKeyClosingBlock> for FormatSvelteKeyClosingBlock {
             ]
         )
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteKeyClosingBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

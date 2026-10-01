@@ -6,14 +6,13 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
-    JsSyntaxNode, JsVariableDeclaration, TsTypeParameter, inner_string_text,
+    JsSyntaxNode, JsVariableDeclaration, TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
     RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
     TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
-use biome_resolver::ResolutionKind;
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
@@ -21,7 +20,7 @@ use rustc_hash::FxHashMap;
 use super::utils::MAX_NUM_TYPES;
 use super::{
     Exports, ImportSymbol, Imports, JsExport, JsImport, JsModuleInfo, JsModuleInfoDiagnostic,
-    JsModuleInfoInner, JsOwnExport, JsReexport, ResolvedPath, binding::JsBindingData,
+    JsModuleInfoInner, JsOwnExport, JsReexport, NamespaceMember, binding::JsBindingData,
     is_named_type_declaration,
 };
 use crate::{ImportPathMap, JsImportKind, JsImportPath, JsImportPhase};
@@ -130,7 +129,7 @@ impl JsModuleInfoCollector {
                 .ok()
                 .map(|t| t.token_text_trimmed().into())
                 .unwrap_or_default();
-            let range = binding.syntax().text_trimmed_range();
+            let range = binding.range();
 
             bindings.push(JsBindingData {
                 name,
@@ -193,7 +192,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
+                self.import_paths.get(source.text())?;
 
                 let default_specifier = node.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
@@ -203,7 +202,6 @@ impl JsModuleInfoCollector {
                     local_name_token.token_text_trimmed().into(),
                     JsImport {
                         specifier: source.clone().into(),
-                        resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Default,
                     },
                 );
@@ -223,7 +221,6 @@ impl JsModuleInfoCollector {
                                 local_name_token.token_text_trimmed().into(),
                                 JsImport {
                                     specifier: source.clone().into(),
-                                    resolved_path: resolved_path.clone(),
                                     symbol: ImportSymbol::Named(symbol_name.into()),
                                 },
                             );
@@ -237,7 +234,6 @@ impl JsModuleInfoCollector {
                             local_name_token.token_text_trimmed().into(),
                             JsImport {
                                 specifier: source.into(),
-                                resolved_path: resolved_path.clone(),
                                 symbol: ImportSymbol::All,
                             },
                         );
@@ -248,7 +244,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
+                self.import_paths.get(source.text())?;
 
                 let local_name = node.default_specifier().ok()?.local_name().ok()?;
                 let local_name = local_name.as_js_identifier_binding()?;
@@ -257,7 +253,6 @@ impl JsModuleInfoCollector {
                     local_name_token.token_text_trimmed().into(),
                     JsImport {
                         specifier: source.into(),
-                        resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Default,
                     },
                 );
@@ -266,7 +261,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
+                self.import_paths.get(source.text())?;
 
                 for specifier in node.named_specifiers().ok()?.specifiers() {
                     let specifier = specifier.ok()?;
@@ -281,7 +276,6 @@ impl JsModuleInfoCollector {
                         local_name_token.token_text_trimmed().into(),
                         JsImport {
                             specifier: source.clone().into(),
-                            resolved_path: resolved_path.clone(),
                             symbol: ImportSymbol::Named(symbol_name.into()),
                         },
                     );
@@ -291,7 +285,7 @@ impl JsModuleInfoCollector {
                 let source = node.source().ok()?;
                 let source_token = source.as_js_module_source()?.value_token().ok()?;
                 let source = inner_string_text(&source_token);
-                let JsImportPath { resolved_path, .. } = self.import_paths.get(source.text())?;
+                self.import_paths.get(source.text())?;
 
                 let specifier = node.namespace_specifier().ok()?;
                 let local_name = specifier.local_name().ok()?;
@@ -301,7 +295,6 @@ impl JsModuleInfoCollector {
                     local_name_token.token_text_trimmed().into(),
                     JsImport {
                         specifier: source.into(),
-                        resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::All,
                     },
                 );
@@ -340,35 +333,21 @@ impl JsModuleInfoCollector {
         self.blanket_reexports.push(reexport);
     }
 
-    pub fn register_static_import_path(
-        &mut self,
-        specifier: TokenText,
-        resolved_path: ResolvedPath,
-        resolution_kind: ResolutionKind,
-        phase: JsImportPhase,
-    ) {
+    pub fn register_static_import_path(&mut self, specifier: TokenText, phase: JsImportPhase) {
         let import_path = JsImportPath {
-            resolved_path,
+            specifier: specifier.clone().into(),
             phase,
             kind: JsImportKind::Static,
-            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
     }
 
-    pub fn register_dynamic_import_path(
-        &mut self,
-        specifier: TokenText,
-        resolved_path: ResolvedPath,
-        resolution_kind: ResolutionKind,
-        phase: JsImportPhase,
-    ) {
+    pub fn register_dynamic_import_path(&mut self, specifier: TokenText, phase: JsImportPhase) {
         let import_path = JsImportPath {
-            resolved_path,
+            specifier: specifier.clone().into(),
             phase,
             kind: JsImportKind::Dynamic,
-            resolution_kind,
         };
         self.import_paths
             .insert_with(specifier.into(), import_path, merge_import_paths);
@@ -487,7 +466,7 @@ impl JsModuleInfoCollector {
         {
             return TypeReference::from(TypeImportQualifier {
                 symbol: import.symbol.clone(),
-                resolved_path: import.resolved_path.clone(),
+                specifier: Arc::new(import.specifier.clone()),
                 type_only: binding.declaration_kind.is_import_type_declaration(),
             });
         }
@@ -1028,6 +1007,11 @@ impl JsModuleInfo {
             .collect::<Vec<_>>();
         named_type_ids.sort_unstable();
         named_type_ids.dedup();
+        let namespace_members = collect_namespace_members(
+            &semantic_model,
+            &finalised.raw_types,
+            &finalised.raw_binding_types,
+        );
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
@@ -1039,11 +1023,61 @@ impl JsModuleInfo {
             raw_expressions: finalised.raw_expressions,
             raw_binding_types: finalised.raw_binding_types,
             named_type_ids: named_type_ids.into_boxed_slice(),
+            namespace_members,
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
             referenced_classes: collector.referenced_classes,
         }))
     }
+}
+
+/// Groups the bindings declared inside each `namespace` or `module`
+/// declaration by the raw type ID of that declaration.
+///
+/// See [`JsModuleInfoInner::namespace_members`] for the ordering contract.
+fn collect_namespace_members(
+    semantic_model: &SemanticModel,
+    raw_types: &[RawTypeData],
+    raw_binding_types: &FxHashMap<TextRange, TypeReference>,
+) -> FxHashMap<TypeId, Box<[NamespaceMember]>> {
+    let mut members = FxHashMap::<TypeId, Vec<NamespaceMember>>::default();
+    for binding in semantic_model.all_bindings() {
+        let Some(TypeReference::Resolved(RawTypeId::Local(type_id))) =
+            raw_binding_types.get(&binding.range())
+        else {
+            continue;
+        };
+        if !matches!(
+            raw_types.get(type_id.index()),
+            Some(RawTypeData::Module(_) | RawTypeData::Namespace(_))
+        ) {
+            continue;
+        }
+        let Some(declaration) = binding
+            .tree()
+            .declaration()
+            .and_then(|declaration| TsModuleDeclaration::cast(declaration.into_syntax()))
+        else {
+            continue;
+        };
+
+        let entry = members.entry(*type_id).or_default();
+        for member in semantic_model.scope(declaration.syntax()).bindings() {
+            let Ok(name) = member.tree().name_token() else {
+                continue;
+            };
+            entry.push(NamespaceMember {
+                name: name.token_text_trimmed().into(),
+                range: member.range(),
+            });
+        }
+    }
+
+    members
+        .into_iter()
+        .filter(|(_, members)| !members.is_empty())
+        .map(|(type_id, members)| (type_id, members.into_boxed_slice()))
+        .collect()
 }
 
 struct FinalisedModuleTypes {

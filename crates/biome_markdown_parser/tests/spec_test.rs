@@ -61,6 +61,11 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     };
     let parsed = parse_markdown_with_cache(&content, &mut NodeCache::default(), options);
     validate_eof_token(parsed.syntax());
+    assert_eq!(
+        parsed.syntax().to_string(),
+        content,
+        "The CST must preserve every source byte."
+    );
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_diagnostics_macros"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Macros to implement Biome's diagnostics"

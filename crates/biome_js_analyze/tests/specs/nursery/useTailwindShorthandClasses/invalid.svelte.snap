@@ -12,9 +12,9 @@ expression: invalid.svelte
 </script>
 
 <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
-<!-- known limitations, we can't generate diagnostics for these cases yet. requires additional plumbing -->
 <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
 <div class={{ "mr-3 ml-3": active }}></div>
+<div class={`border-x border-y ${extra}`}></div>
 
 ```
 
@@ -111,8 +111,8 @@ invalid.svelte:8:19 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━
      7 │ 
    > 8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
        │                   ^^^
-     9 │ <!-- known limitations, we can't generate diagnostics for these cases yet. requires additional plumbing -->
-    10 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
   
   i Compressible utility used here.
   
@@ -120,8 +120,8 @@ invalid.svelte:8:19 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━
      7 │ 
    > 8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
        │                       ^^^
-     9 │ <!-- known limitations, we can't generate diagnostics for these cases yet. requires additional plumbing -->
-    10 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -146,8 +146,8 @@ invalid.svelte:8:40 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━
      7 │ 
    > 8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
        │                                        ^^^^
-     9 │ <!-- known limitations, we can't generate diagnostics for these cases yet. requires additional plumbing -->
-    10 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
   
   i Compressible utility used here.
   
@@ -155,8 +155,8 @@ invalid.svelte:8:40 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━
      7 │ 
    > 8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
        │                                             ^^^^
-     9 │ <!-- known limitations, we can't generate diagnostics for these cases yet. requires additional plumbing -->
-    10 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
   
   i Using fewer classes reduces duplication and improves readability.
   
@@ -169,5 +169,146 @@ invalid.svelte:8:40 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━
   - clsx("w-4·h-4",·active·&&·"px-2·py-2")
   + clsx("w-4·h-4",·active·&&·"p-2")
   
+
+```
+
+```
+invalid.svelte:9:15 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+   > 9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+       │               ^^^^^^^^^^^^^^^
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+  
+  i Compressible utility used here.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+   > 9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+       │                               ^^^^^^^^^^^^^
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+  
+  i Compressible utility used here.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+   > 9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+       │                                             ^^^^^^^^^^^^^^^^^
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ["overflow-hidden·text-ellipsis·whitespace-nowrap",·selected·&&·"hover:w-6·hover:h-6"]
+  + ["truncate",·selected·&&·"hover:w-6·hover:h-6"]
+  
+
+```
+
+```
+invalid.svelte:9:78 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+   > 9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+       │                                                                              ^^^^^^^^^
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+  
+  i Compressible utility used here.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+   > 9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+       │                                                                                        ^^^^^^^^^
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - ["overflow-hidden·text-ellipsis·whitespace-nowrap",·selected·&&·"hover:w-6·hover:h-6"]
+  + ["overflow-hidden·text-ellipsis·whitespace-nowrap",·selected·&&·"hover:size-6"]
+  
+
+```
+
+```
+invalid.svelte:10:21 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+  > 10 │ <div class={{ "mr-3 ml-3": active }}></div>
+       │                     ^^^^
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+    12 │ 
+  
+  i Compressible utility used here.
+  
+     8 │ <div class={clsx("w-4 h-4", active && "px-2 py-2")}></div>
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+  > 10 │ <div class={{ "mr-3 ml-3": active }}></div>
+       │                ^^^^
+    11 │ <div class={`border-x border-y ${extra}`}></div>
+    12 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+  - {·"mr-3·ml-3":·active·}
+  + {·"mx-3":·active·}
+  
+
+```
+
+```
+invalid.svelte:11:14 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+  > 11 │ <div class={`border-x border-y ${extra}`}></div>
+       │              ^^^^^^^^
+    12 │ 
+  
+  i Compressible utility used here.
+  
+     9 │ <div class={["overflow-hidden text-ellipsis whitespace-nowrap", selected && "hover:w-6 hover:h-6"]}></div>
+    10 │ <div class={{ "mr-3 ml-3": active }}></div>
+  > 11 │ <div class={`border-x border-y ${extra}`}></div>
+       │                       ^^^^^^^^
+    12 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+    1 │ `border-x·border-y·${extra}`
+      │        -----------          
 
 ```

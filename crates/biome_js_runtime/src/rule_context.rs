@@ -125,6 +125,7 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
         JsEmbeddingKind::Svelte {
             file_kind,
             embedding_kind,
+            ..
         } => {
             let file_kind = match file_kind {
                 SvelteFileKind::Component => js_string!("component"),

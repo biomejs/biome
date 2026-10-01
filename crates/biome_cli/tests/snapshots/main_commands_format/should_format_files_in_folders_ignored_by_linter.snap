@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write build/file.js
+```
+
 ## `biome.json`
 
 ```json

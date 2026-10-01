@@ -16,8 +16,8 @@ use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
-    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage,
-    RuleAction, RuleRegistry,
+    ControlFlow, EmbeddedSignalInspector, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
@@ -43,6 +43,15 @@ pub struct JsonAnalyzeServices {
 
     /// The project layout, providing access to package manifests.
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+struct AnalyzerParams<'a, 'guest, 'registry> {
+    root: &'a LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter<'a>,
+    options: &'a AnalyzerOptions,
+    services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'guest, 'registry>>,
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -71,6 +80,34 @@ where
     )
 }
 
+/// Analyzes JSON embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    json_services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services: json_services,
+            plugins,
+            snippet_inspector: Some(inspector),
+        },
+        |_| {},
+        emit_signal,
+    )
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -84,6 +121,30 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     json_services: JsonAnalyzeServices,
     plugins: AnalyzerPluginSlice<'a>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<JsonLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services: json_services,
+            plugins,
+            snippet_inspector: None,
+        },
+        inspect_matcher,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
+    params: AnalyzerParams<'a, '_, '_>,
+    inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -91,6 +152,14 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let AnalyzerParams {
+        root,
+        filter,
+        options,
+        services: json_services,
+        plugins,
+        snippet_inspector,
+    } = params;
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -133,15 +202,18 @@ where
     services.insert_service(json_services.file_source);
     services.insert_service(json_services.project_layout);
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippet_inspector {
+        Some(inspector) => analyzer.run_snippet(ctx, inspector),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

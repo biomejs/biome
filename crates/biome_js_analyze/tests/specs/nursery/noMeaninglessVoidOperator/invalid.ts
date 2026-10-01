@@ -1,0 +1,25 @@
+/* should generate diagnostics */
+declare function log(): void;
+declare function nothing(): undefined;
+declare function maybe(): void | undefined;
+void log();
+void nothing();
+void maybe();
+void (log() as void);
+void (<void>log());
+void (log() satisfies void);
+void (nothing(), log());
+declare const box: { value: string; method(): void; optional?: () => void };
+void box;
+void box.value;
+void box.method();
+void (box.value as string);
+void (<string>box.value);
+void (box.value satisfies string);
+void box.value!;
+void (log(), box.value);
+const result = void box.value;
+const callResult = void log();
+type Empty = void | undefined;
+declare function alias(): Empty;
+void alias();

@@ -7,21 +7,18 @@ use biome_console::{
     fmt::{Display, Formatter as ConsoleFormatter},
     markup,
 };
-use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
-};
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlLanguage, HtmlSyntaxToken,
-};
+use biome_formatter::{Buffer, Format, FormatElement, FormatResult, prelude::*};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlLanguage, HtmlSyntaxToken};
 use biome_rowan::{
     AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
 };
+use biome_suppression::SuppressionKind;
 use biome_unicode_table::{
     is_cjk_punctuation, is_cjk_segment_break_character, is_default_ignorable_code_point,
 };
 
 use crate::{
-    HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext,
+    HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext,
     utils::metadata::get_element_css_display,
 };
 
@@ -259,7 +256,7 @@ const fn html_child_kind(child: &HtmlChild) -> &'static str {
 pub(crate) fn html_split_children<I>(
     children: I,
     opening_r_angle: Option<&HtmlSyntaxToken>,
-    closing_element: Option<&HtmlClosingElement>,
+    closing_token: Option<&HtmlSyntaxToken>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
@@ -268,7 +265,12 @@ where
     let mut builder = HtmlSplitChildrenBuilder::new();
 
     if let Some(opening_r_angle) = opening_r_angle {
-        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia(), false);
+        push_trivia_children(
+            &mut builder,
+            &opening_r_angle.trailing_trivia(),
+            false,
+            f.comments(),
+        );
     }
 
     let mut prev_child_was_content = false;
@@ -461,7 +463,11 @@ where
                         // Skip suppression comments here - they will be formatted as part of the
                         // verbatim output for the next (suppressed) element. This prevents the
                         // comment from being printed twice.
-                        if !HtmlCommentStyle::is_suppression(text.text()) {
+                        if !f
+                            .comments()
+                            .suppression_kind(TextRange::at(source_position, word.text_len()))
+                            .is_some_and(SuppressionKind::is_classic)
+                        {
                             builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
                         }
                     }
@@ -474,43 +480,60 @@ where
 
             prev_child_was_content = true;
         } else {
-            let text = child.to_string();
-            let mut chunks = HtmlSplitChunksIterator::new(&text).peekable();
-
-            // Text starting with a whitespace
-            if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
-                // SAFETY: We just checked this above.
-                match chunks.next().unwrap() {
-                    (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                        if whitespace.contains('\n') {
-                            // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
-                            // It can be entirely removed from the content without changing the semantics.
-                            let newlines = whitespace.chars().filter(|c| *c == '\n').count();
-
-                            // Keep up to one blank line between tags.
-                            // ```html
-                            // <div>
-                            //
-                            //   <MyElement />
-                            // </div>
-                            // ```
-                            if newlines > 1 {
-                                builder.entry(HtmlChild::EmptyLine);
-                            } else {
-                                builder.entry(HtmlChild::Newline);
+            // Only the leading whitespace of the child's text (including trivia) matters here,
+            // so scan the text chunk by chunk and stop at the first non-whitespace character
+            // instead of stringifying the whole subtree.
+            let mut has_leading_whitespace = false;
+            let mut newlines = 0usize;
+            let _ = child
+                .syntax()
+                .text_with_trivia()
+                .try_for_each_chunk(|chunk| {
+                    for c in chunk.chars() {
+                        match c {
+                            '\n' => {
+                                has_leading_whitespace = true;
+                                newlines += 1;
                             }
-                        } else {
-                            builder.entry(HtmlChild::Whitespace)
+                            ' ' | '\t' | '\r' => has_leading_whitespace = true,
+                            _ => return Err(()),
                         }
                     }
-                    _ => unreachable!(),
+                    Ok(())
+                });
+
+            // Text starting with a whitespace
+            if has_leading_whitespace {
+                if newlines > 0 {
+                    // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
+                    // It can be entirely removed from the content without changing the semantics.
+
+                    // Keep up to one blank line between tags.
+                    // ```html
+                    // <div>
+                    //
+                    //   <MyElement />
+                    // </div>
+                    // ```
+                    if newlines > 1 {
+                        builder.entry(HtmlChild::EmptyLine);
+                    } else {
+                        builder.entry(HtmlChild::Newline);
+                    }
+                } else {
+                    builder.entry(HtmlChild::Whitespace)
                 }
             }
 
             let is_suppressed = f.comments().is_suppressed(child.syntax());
 
             if let Some(first_token) = child.syntax().first_token() {
-                push_trivia_children(&mut builder, &first_token.leading_trivia(), is_suppressed);
+                push_trivia_children(
+                    &mut builder,
+                    &first_token.leading_trivia(),
+                    is_suppressed,
+                    f.comments(),
+                );
             }
 
             for comment in f.comments().leading_comments(child.syntax()) {
@@ -524,7 +547,12 @@ where
             }
 
             if let Some(last_token) = child.syntax().last_token() {
-                push_trivia_children(&mut builder, &last_token.trailing_trivia(), is_suppressed);
+                push_trivia_children(
+                    &mut builder,
+                    &last_token.trailing_trivia(),
+                    is_suppressed,
+                    f.comments(),
+                );
             }
 
             for comment in f.comments().trailing_comments(child.syntax()) {
@@ -535,17 +563,21 @@ where
         }
     }
 
-    // Include trailing whitespace from the closing element's l_angle_token leading trivia.
+    // Include trailing whitespace from the leading trivia of the closing token, which is the
+    // closing element's `<`, or the `{:` or `{/` that ends a Svelte block's children.
     // We do this because it makes handling whitespace sensitivity easier. We take the full content
     // of what is within the element so that we can properly classify what whitespace is meaningful
     // and what isn't.
     //
     // The reason this is necessary is because the trivia adjacent to the closing tag is attached to
     // the closing tag's leading trivia, not the content's trailing trivia.
-    if let Some(closing_element) = closing_element
-        && let Ok(l_angle_token) = closing_element.l_angle_token()
-    {
-        push_trivia_children(&mut builder, &l_angle_token.leading_trivia(), false);
+    if let Some(closing_token) = closing_token {
+        push_trivia_children(
+            &mut builder,
+            &closing_token.leading_trivia(),
+            false,
+            f.comments(),
+        );
     }
 
     Ok(builder.finish())
@@ -555,6 +587,7 @@ fn push_trivia_children(
     builder: &mut HtmlSplitChildrenBuilder,
     trivia: &SyntaxTrivia<HtmlLanguage>,
     skip_comments: bool,
+    comments: &HtmlComments,
 ) {
     let mut whitespace = PendingWhitespace::default();
 
@@ -564,7 +597,11 @@ fn push_trivia_children(
         } else if piece.is_comments() {
             whitespace.flush(builder);
 
-            if skip_comments || HtmlCommentStyle::is_suppression(piece.text()) {
+            if skip_comments
+                || comments
+                    .suppression_kind(piece.text_range())
+                    .is_some_and(SuppressionKind::is_classic)
+            {
                 // never add comments as children if the node is suppressed, because they will be handled as part of the verbatim content for the suppressed node. This also prevents comments from being added twice in cases where they are included both in the trivia for a node and as leading/trailing comments for the same node.
                 continue;
             }

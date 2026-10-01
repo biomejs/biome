@@ -2538,6 +2538,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow conflicting content sources on Astro elements.
+See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives 
+	 */
+	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
+	/**
 	* Disallow the use of Astro's set:html directive.
 See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
 	 */
@@ -2663,10 +2668,20 @@ See https://biomejs.dev/linter/rules/no-loop-func
 	 */
 	noLoopFunc?: NoLoopFuncConfiguration;
 	/**
+	* Disallow void when it does not discard a call's return value or a thenable.
+See https://biomejs.dev/linter/rules/no-meaningless-void-operator 
+	 */
+	noMeaninglessVoidOperator?: NoMeaninglessVoidOperatorConfiguration;
+	/**
 	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
 See https://biomejs.dev/linter/rules/no-misleading-return-type 
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
+	/**
+	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+See https://biomejs.dev/linter/rules/no-misplaced-list-elements 
+	 */
+	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
 	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
@@ -2753,6 +2768,11 @@ See https://biomejs.dev/linter/rules/no-react-native-raw-text
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
+	* Disallow array, object, and function values as default props in React components.
+See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop 
+	 */
+	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;
+	/**
 	* Disallow string refs in React components.
 See https://biomejs.dev/linter/rules/no-react-string-refs 
 	 */
@@ -2768,6 +2788,11 @@ See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
+	* Forbid a module from importing itself.
+See https://biomejs.dev/linter/rules/no-self-import 
+	 */
+	noSelfImport?: NoSelfImportConfiguration;
+	/**
 	* Disallow the use of Svelte's {@debug} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
 	 */
@@ -2777,6 +2802,11 @@ See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
+	/**
+	* Disallow declaring Svelte component props with export let.
+See https://biomejs.dev/linter/rules/no-svelte-export-let 
+	 */
+	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
 	* Disallow legacy Svelte {@const} tags.
 See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
@@ -2792,6 +2822,11 @@ See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap
 See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value 
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
+	* Disallow Tailwind CSS utility classes that use raw palette colors.
+See https://biomejs.dev/linter/rules/no-tailwind-raw-colors 
+	 */
+	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
 	* Disallow this outside of classes.
 See https://biomejs.dev/linter/rules/no-this-outside-of-class 
@@ -3006,6 +3041,11 @@ See https://biomejs.dev/linter/rules/use-layered-styles
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
+	* Enforce logical properties over physical properties.
+See https://biomejs.dev/linter/rules/use-logical-properties 
+	 */
+	useLogicalProperties?: UseLogicalPropertiesConfiguration;
+	/**
 	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 See https://biomejs.dev/linter/rules/use-math-min-max 
 	 */
@@ -3035,6 +3075,11 @@ See https://biomejs.dev/linter/rules/use-nullish-coalescing
 See https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback 
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
+	/**
+	* Require Error objects as Promise rejection reasons.
+See https://biomejs.dev/linter/rules/use-promise-reject-errors 
+	 */
+	usePromiseRejectErrors?: UsePromiseRejectErrorsConfiguration;
 	/**
 	* Enforce that Qwik loader functions are declared in the correct location.
 See https://biomejs.dev/linter/rules/use-qwik-loader-location 
@@ -3096,10 +3141,20 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	* Require unambiguous boolean expressions in conditions.
+See https://biomejs.dev/linter/rules/use-strict-boolean-expressions 
+	 */
+	useStrictBooleanExpressions?: UseStrictBooleanExpressionsConfiguration;
+	/**
 	* Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Require importing SvelteKit's app state from $app/state instead of $app/stores.
+See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports 
+	 */
+	useSvelteKitRuneImports?: UseSvelteKitRuneImportsConfiguration;
 	/**
 	* Require keyed {#each} blocks in Svelte templates.
 See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
@@ -5022,6 +5077,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroConflictingSetDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroConflictingSetDirectivesOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
@@ -5097,9 +5155,15 @@ export type NoJsxNamespaceConfiguration =
 export type NoLoopFuncConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLoopFuncOptions;
+export type NoMeaninglessVoidOperatorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMeaninglessVoidOperatorOptions;
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
+export type NoMisplacedListElementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisplacedListElementsOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -5151,6 +5215,9 @@ export type NoReactNativeLiteralColorsConfiguration =
 export type NoReactNativeRawTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeRawTextOptions;
+export type NoReactObjectTypeAsDefaultPropConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
 export type NoReactStringRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactStringRefsOptions;
@@ -5160,12 +5227,18 @@ export type NoRestrictedDependenciesConfiguration =
 export type NoReturnInFinallyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReturnInFinallyOptions;
+export type NoSelfImportConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfImportOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteExportLetConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteExportLetOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -5175,6 +5248,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindRawColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindRawColorsOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -5298,6 +5374,9 @@ export type UseIncludesConfiguration =
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
+export type UseLogicalPropertiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLogicalPropertiesOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -5316,6 +5395,9 @@ export type UseNullishCoalescingConfiguration =
 export type UsePlaywrightValidDescribeCallbackConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePlaywrightValidDescribeCallbackOptions;
+export type UsePromiseRejectErrorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePromiseRejectErrorsOptions;
 export type UseQwikLoaderLocationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseQwikLoaderLocationOptions;
@@ -5352,9 +5434,15 @@ export type UseSingleTopLevelHeadingConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseStrictBooleanExpressionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseStrictBooleanExpressionsOptions;
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteKitRuneImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteKitRuneImportsOptions;
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
@@ -6998,6 +7086,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroConflictingSetDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroConflictingSetDirectivesOptions;
+}
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
@@ -7102,9 +7194,18 @@ export interface RuleWithNoLoopFuncOptions {
 	level: RulePlainConfiguration;
 	options?: NoLoopFuncOptions;
 }
+export interface RuleWithNoMeaninglessVoidOperatorOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMeaninglessVoidOperatorOptions;
+}
 export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
+}
+export interface RuleWithNoMisplacedListElementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisplacedListElementsOptions;
 }
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
@@ -7180,6 +7281,10 @@ export interface RuleWithNoReactNativeRawTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeRawTextOptions;
 }
+export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
+	level: RulePlainConfiguration;
+	options?: NoReactObjectTypeAsDefaultPropOptions;
+}
 export interface RuleWithNoReactStringRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactStringRefsOptions;
@@ -7192,6 +7297,10 @@ export interface RuleWithNoReturnInFinallyOptions {
 	level: RulePlainConfiguration;
 	options?: NoReturnInFinallyOptions;
 }
+export interface RuleWithNoSelfImportOptions {
+	level: RulePlainConfiguration;
+	options?: NoSelfImportOptions;
+}
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7200,6 +7309,10 @@ export interface RuleWithNoSvelteAtDebugTagsOptions {
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
+}
+export interface RuleWithNoSvelteExportLetOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteExportLetOptions;
 }
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
@@ -7213,6 +7326,10 @@ export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
+}
+export interface RuleWithNoTailwindRawColorsOptions {
+	level: RulePlainConfiguration;
+	options?: NoTailwindRawColorsOptions;
 }
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
@@ -7391,6 +7508,10 @@ export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
 }
+export interface RuleWithUseLogicalPropertiesOptions {
+	level: RulePlainConfiguration;
+	options?: UseLogicalPropertiesOptions;
+}
 export interface RuleWithUseMathMinMaxOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7417,6 +7538,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 export interface RuleWithUsePlaywrightValidDescribeCallbackOptions {
 	level: RulePlainConfiguration;
 	options?: UsePlaywrightValidDescribeCallbackOptions;
+}
+export interface RuleWithUsePromiseRejectErrorsOptions {
+	level: RulePlainConfiguration;
+	options?: UsePromiseRejectErrorsOptions;
 }
 export interface RuleWithUseQwikLoaderLocationOptions {
 	level: RulePlainConfiguration;
@@ -7472,10 +7597,18 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseStrictBooleanExpressionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseStrictBooleanExpressionsOptions;
+}
 export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseSvelteKitRuneImportsOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteKitRuneImportsOptions;
 }
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
@@ -8962,6 +9095,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -9035,7 +9169,9 @@ export type NoJsonUnsafeValuesOptions = {};
 export type NoJsxLeakedDollarOptions = {};
 export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
+export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
+export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
@@ -9058,11 +9194,14 @@ export interface NoReactNativeRawTextOptions {
 	 */
 	skip?: string[];
 }
+export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
+export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteExportLetOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
@@ -9074,20 +9213,12 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	 */
 	allowReassign?: boolean;
 }
-/**
-	* Options for the `noTailwindArbitraryValue` rule.
-
-Controls which attributes and utility functions are checked for arbitrary values. 
-	 */
-export interface NoTailwindArbitraryValueOptions {
+export type NoTailwindArbitraryValueOptions = {};
+export interface NoTailwindRawColorsOptions {
 	/**
-	 * Additional attributes that will be checked.
+	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
 	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be checked.
-	 */
-	functions?: string[];
+	allowedColors?: string[];
 }
 export type NoThisOutsideOfClassOptions = {};
 export type NoTopLevelLiteralsOptions = {};
@@ -9291,6 +9422,12 @@ export interface UseLayeredStylesOptions {
 	 */
 	requireImportLayers?: boolean;
 }
+export interface UseLogicalPropertiesOptions {
+	/**
+	 * The text direction used to map physical inline properties. Defaults to `"ltr"`.
+	 */
+	direction?: UseLogicalPropertiesDirection;
+}
 export type UseMathMinMaxOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
@@ -9325,6 +9462,7 @@ export interface UseNullishCoalescingOptions {
 	ignoreTernaryTests?: boolean;
 }
 export type UsePlaywrightValidDescribeCallbackOptions = {};
+export type UsePromiseRejectErrorsOptions = {};
 export type UseQwikLoaderLocationOptions = {};
 export type UseReactAsyncServerFunctionOptions = {};
 export interface UseReactCompilerOptions {
@@ -9372,7 +9510,9 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
@@ -10122,6 +10262,7 @@ export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type UseLogicalPropertiesDirection = "ltr" | "rtl";
 export type IgnorePrimitives =
 	| boolean
 	| { bigint?: boolean; boolean?: boolean; number?: boolean; string?: boolean };
@@ -10576,6 +10717,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
@@ -10599,10 +10741,13 @@ export type Category =
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
 	| "lint/nursery/noJsRestrictedProperties"
+	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noJsxLeakedDollar"
 	| "lint/nursery/noJsxNamespace"
 	| "lint/nursery/noLoopFunc"
+	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
@@ -10621,14 +10766,18 @@ export type Category =
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
+	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noReactStringRefs"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
+	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noTopLevelLiterals"
 	| "lint/nursery/noUndeclaredClasses"
@@ -10636,10 +10785,8 @@ export type Category =
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnnecessaryTemplateExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
-	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
-	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
@@ -10660,6 +10807,7 @@ export type Category =
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
+	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
@@ -10680,6 +10828,7 @@ export type Category =
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
@@ -10687,6 +10836,7 @@ export type Category =
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePlaywrightValidDescribeCallback"
+	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useQwikLoaderLocation"
 	| "lint/nursery/useQwikMethodUsage"
 	| "lint/nursery/useQwikValidLexicalScope"
@@ -10701,7 +10851,9 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"
@@ -11296,6 +11448,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 */
 				event_handler: boolean;
 				/**
+	* Whether this snippet is from a class-related attribute
+(e.g. :class="...") 
+	 */
+				is_class_attribute: boolean;
+				/**
 				 * Where the bindings are defined
 				 */
 				is_source: boolean;
@@ -11303,6 +11460,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+				/**
+	* Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
+which is parsed as the parameters of an arrow function. 
+	 */
+				slot_props: boolean;
 			};
 	  }
 	| {
@@ -11315,6 +11477,16 @@ extracts `<script>` content or treats the file as a standalone JS/TS
 module. 
 	 */
 				file_kind: SvelteFileKind;
+				/**
+	* Whether this snippet is from a class attribute
+(e.g. class={...}) 
+	 */
+				is_class_attribute: boolean;
+				/**
+	* Whether this snippet is from a `<script module>` block, or the legacy
+`<script context="module">` block. 
+	 */
+				is_module_script: boolean;
 			};
 	  };
 export type Language =
@@ -11533,7 +11705,7 @@ specifier itself.
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Maps each local imported name to its source module specifier. 
 	 */
 	staticImports: Record<string, string>;
 }
@@ -11545,7 +11717,7 @@ export interface SerializedCssModuleInfo {
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Contains the import specifiers as they appeared in source text. 
 	 */
 	imports: string[];
 }

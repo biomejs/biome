@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/commands/rage.rs
 expression: content
 ---
+## Command
+
+```shell
+biome rage --config-path=custom/biome.json
+```
+
 ## `custom/biome.json`
 
 ```json

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --yaml-formatter-bracket-spacing false file.yaml --write
+```
+
 ## `file.yaml`
 
 ```yaml

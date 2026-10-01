@@ -219,6 +219,7 @@ where
 
 #[cfg(test)]
 mod tests {
+
     use super::MatchQueryParams;
     use crate::{
         Analyzer, AnalyzerContext, AnalyzerSignal, ApplySuppression, ControlFlow, MetadataRegistry,
@@ -226,6 +227,7 @@ mod tests {
         SuppressionAction, SyntaxVisitor, signals::DiagnosticSignal,
     };
     use crate::{AnalyzerOptions, AnalyzerSuppression};
+    use crate::{EmbeddedSignalInspector, SnippetAnalyzer};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_diagnostics::{DiagnosticExt, category};
     use biome_rowan::{
@@ -233,6 +235,7 @@ mod tests {
         raw_language::{RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
     };
     use std::convert::Infallible;
+    use std::sync::LazyLock;
 
     struct TestAction;
 
@@ -485,5 +488,163 @@ mod tests {
                 ),
             ]
         );
+    }
+
+    #[expect(clippy::type_complexity)]
+    #[test]
+    fn host_comment_suppresses_signal_from_snippet() {
+        struct HostSuppression;
+
+        impl Suppression for HostSuppression {
+            type Diagnostic = Infallible;
+
+            fn parse_comment<'a>(
+                &self,
+                text: &'a str,
+                _range: TextRange,
+            ) -> Vec<Result<AnalyzerSuppression<'a>, Self::Diagnostic>> {
+                vec![Ok(AnalyzerSuppression::rule(
+                    RuleCategory::Lint,
+                    text.trim_start_matches("//"),
+                    ("reason", TextRange::default()),
+                ))]
+            }
+        }
+
+        struct RawSnippet {
+            root: RawLanguageRoot,
+            diagnostics: Vec<TextRange>,
+            ran: bool,
+        }
+
+        impl SnippetAnalyzer<Never> for RawSnippet {
+            type Output = (bool, Vec<TextRange>);
+
+            fn diagnostics_offset(&self) -> TextSize {
+                TextSize::from(13)
+            }
+
+            fn metadata(&self) -> &'static MetadataRegistry {
+                static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+                    let mut metadata = MetadataRegistry::default();
+                    metadata.insert_rule("group", "rule");
+                    metadata
+                });
+                &METADATA
+            }
+
+            fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<Never> {
+                self.ran = true;
+                let metadata = self.metadata();
+                let mut emit_signal =
+                    |signal: &dyn AnalyzerSignal<RawLanguage>| -> ControlFlow<Never> {
+                        self.diagnostics
+                            .push(signal.diagnostic().expect("diagnostic").get_span().unwrap());
+                        ControlFlow::Continue(())
+                    };
+                let mut snippet_analyzer = Analyzer::new(
+                    metadata,
+                    SuppressionMatcher,
+                    Box::new(HostSuppression),
+                    Box::new(TestAction),
+                    &mut emit_signal,
+                );
+                snippet_analyzer
+                    .add_visitor(Phases::Syntax, Box::<SyntaxVisitor<RawLanguage>>::default());
+                let result = snippet_analyzer.run_snippet(
+                    AnalyzerContext {
+                        root: self.root.clone(),
+                        range: None,
+                        services: ServiceBag::default(),
+                        options: &AnalyzerOptions::default(),
+                    },
+                    inspector,
+                );
+                assert!(result.is_none());
+                ControlFlow::Continue(())
+            }
+
+            fn into_output(self: Box<Self>) -> Self::Output {
+                (self.ran, self.diagnostics)
+            }
+        }
+
+        let host_root = {
+            let mut builder = RawSyntaxTreeBuilder::new();
+            builder.start_node(RawLanguageKind::ROOT);
+            builder.start_node(RawLanguageKind::SEPARATED_EXPRESSION_LIST);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token(RawLanguageKind::STRING_TOKEN, "0000000000000");
+            builder.finish_node();
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "//group/rule\n\"warn_here\"",
+                &[
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
+                ],
+                &[],
+            );
+            builder.finish_node();
+            builder.finish_node();
+            builder.finish_node();
+            RawLanguageRoot::unwrap_cast(builder.finish())
+        };
+        let snippet_root = {
+            let mut builder = RawSyntaxTreeBuilder::new();
+            builder.start_node(RawLanguageKind::ROOT);
+            builder.start_node(RawLanguageKind::SEPARATED_EXPRESSION_LIST);
+            builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+            builder.token_with_trivia(
+                RawLanguageKind::STRING_TOKEN,
+                "//group/rule\n\"warn_here\"",
+                &[
+                    TriviaPiece::single_line_comment(12),
+                    TriviaPiece::newline(1),
+                ],
+                &[],
+            );
+            builder.finish_node();
+            builder.finish_node();
+            builder.finish_node();
+            RawLanguageRoot::unwrap_cast(builder.finish())
+        };
+
+        let host_metadata = MetadataRegistry::default();
+        let mut host_diagnostics = Vec::new();
+        let mut emit_host_signal =
+            |signal: &dyn AnalyzerSignal<RawLanguage>| -> ControlFlow<Never> {
+                host_diagnostics.push(signal.diagnostic().expect("diagnostic"));
+                ControlFlow::Continue(())
+            };
+        let host_analyzer = Analyzer::new(
+            &host_metadata,
+            SuppressionMatcher,
+            Box::new(HostSuppression),
+            Box::new(TestAction),
+            &mut emit_host_signal,
+        );
+        let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = (bool, Vec<TextRange>)>>> =
+            vec![Box::new(RawSnippet {
+                root: snippet_root,
+                diagnostics: Vec::new(),
+                ran: false,
+            })];
+
+        let result = host_analyzer.run_with_snippets(
+            AnalyzerContext {
+                root: host_root,
+                range: None,
+                services: ServiceBag::default(),
+                options: &AnalyzerOptions::default(),
+            },
+            &mut snippets,
+        );
+        assert!(result.is_none());
+        assert!(host_diagnostics.is_empty());
+        let (ran, snippet_diagnostics) = snippets.pop().unwrap().into_output();
+        assert!(ran);
+        assert!(snippet_diagnostics.is_empty());
     }
 }

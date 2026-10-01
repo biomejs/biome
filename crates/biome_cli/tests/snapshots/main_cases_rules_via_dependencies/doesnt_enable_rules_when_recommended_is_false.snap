@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/doesnt_enable_rules_when_recommended_is_false'
+```
+
 ## `biome.json`
 
 ```json

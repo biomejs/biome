@@ -1734,7 +1734,14 @@ fn render_autolink(autolink: &MdAutolink, out: &mut String) {
 /// Render inline HTML.
 fn render_inline_html(html: &MdInlineHtml, out: &mut String) {
     if let Ok(token) = html.value_token() {
-        out.push_str(token.text());
+        for comment in token
+            .leading_trivia()
+            .pieces()
+            .filter_map(|piece| piece.as_comments())
+        {
+            out.push_str(comment.text());
+        }
+        out.push_str(token.text_trimmed());
     }
 }
 

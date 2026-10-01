@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/package_qualified_suppression_only_suppresses_selected_package/test.js'
+```
+
 ## `biome.json`
 
 ```json

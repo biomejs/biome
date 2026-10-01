@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_semantic"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's semantic model for JavaScript"
@@ -19,7 +19,6 @@ biome_js_syntax     = { workspace = true }
 biome_jsdoc_comment = { workspace = true }
 biome_languages     = { workspace = true, features = ["lang_js"] }
 biome_rowan         = { workspace = true }
-rust-lapper         = { workspace = true }
 rustc-hash          = { workspace = true }
 salsa               = { workspace = true }
 smallvec            = { workspace = true }

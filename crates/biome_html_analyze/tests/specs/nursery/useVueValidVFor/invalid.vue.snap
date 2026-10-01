@@ -5,6 +5,7 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <div v-for:arg="item in items"></div>
 
 <div v-for.mod="item in items"></div>
@@ -30,68 +31,70 @@ expression: invalid.vue
 <template v-for="item in items">
   <div v-for="child in other" :key="child.id"></div>
 </template>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:8:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a v-for binding but instead found '"'.
   
-     6 │ <div v-for></div>
-     7 │ 
-   > 8 │ <div v-for=""></div>
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
        │             ^
-     9 │ 
-    10 │ <div v-for="(, index) in items"></div>
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
   
   i Expected a v-for binding here.
   
-     6 │ <div v-for></div>
-     7 │ 
-   > 8 │ <div v-for=""></div>
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
        │             ^
-     9 │ 
-    10 │ <div v-for="(, index) in items"></div>
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
   
 
 ```
 
 ```
-invalid.vue:10:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:11:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a v-for binding but instead found ','.
   
-     8 │ <div v-for=""></div>
-     9 │ 
-  > 10 │ <div v-for="(, index) in items"></div>
+     9 │ <div v-for=""></div>
+    10 │ 
+  > 11 │ <div v-for="(, index) in items"></div>
        │              ^
-    11 │ 
-    12 │ <div v-for="(item, { key }) in items"></div>
+    12 │ 
+    13 │ <div v-for="(item, { key }) in items"></div>
   
   i Expected a v-for binding here.
   
-     8 │ <div v-for=""></div>
-     9 │ 
-  > 10 │ <div v-for="(, index) in items"></div>
+     9 │ <div v-for=""></div>
+    10 │ 
+  > 11 │ <div v-for="(, index) in items"></div>
        │              ^
-    11 │ 
-    12 │ <div v-for="(item, { key }) in items"></div>
+    12 │ 
+    13 │ <div v-for="(item, { key }) in items"></div>
   
 
 ```
 
 ```
-invalid.vue:2:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The v-for directive does not accept an argument.
   
     1 │ <!-- should generate diagnostics -->
-  > 2 │ <div v-for:arg="item in items"></div>
+    2 │ <template>
+  > 3 │ <div v-for:arg="item in items"></div>
       │           ^^^^
-    3 │ 
-    4 │ <div v-for.mod="item in items"></div>
+    4 │ 
+    5 │ <div v-for.mod="item in items"></div>
   
   i v-for only accepts the special list-rendering syntax as its value.
   
@@ -103,16 +106,16 @@ invalid.vue:2:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:4:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:5:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The v-for directive does not support modifiers.
   
-    2 │ <div v-for:arg="item in items"></div>
-    3 │ 
-  > 4 │ <div v-for.mod="item in items"></div>
+    3 │ <div v-for:arg="item in items"></div>
+    4 │ 
+  > 5 │ <div v-for.mod="item in items"></div>
       │           ^^^^
-    5 │ 
-    6 │ <div v-for></div>
+    6 │ 
+    7 │ <div v-for></div>
   
   i Modifiers change the meaning of other Vue directives, but v-for has a fixed syntax.
   
@@ -124,16 +127,16 @@ invalid.vue:4:11 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:6:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The v-for directive requires a value.
   
-    4 │ <div v-for.mod="item in items"></div>
-    5 │ 
-  > 6 │ <div v-for></div>
+    5 │ <div v-for.mod="item in items"></div>
+    6 │ 
+  > 7 │ <div v-for></div>
       │      ^^^^^
-    7 │ 
-    8 │ <div v-for=""></div>
+    8 │ 
+    9 │ <div v-for=""></div>
   
   i Without an iteration expression, Vue cannot determine which items to render.
   
@@ -145,16 +148,16 @@ invalid.vue:6:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:8:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The v-for directive requires a value.
   
-     6 │ <div v-for></div>
-     7 │ 
-   > 8 │ <div v-for=""></div>
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
        │      ^^^^^^^^
-     9 │ 
-    10 │ <div v-for="(, index) in items"></div>
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
   
   i Without an iteration expression, Vue cannot determine which items to render.
   
@@ -166,16 +169,16 @@ invalid.vue:8:6 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:12:20 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:13:20 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The second and third v-for aliases must be identifiers.
   
-    10 │ <div v-for="(, index) in items"></div>
-    11 │ 
-  > 12 │ <div v-for="(item, { key }) in items"></div>
+    11 │ <div v-for="(, index) in items"></div>
+    12 │ 
+  > 13 │ <div v-for="(item, { key }) in items"></div>
        │                    ^^^^^^^
-    13 │ 
-    14 │ <MyItem v-for="item in items"></MyItem>
+    14 │ 
+    15 │ <MyItem v-for="item in items"></MyItem>
   
   i Only the main item alias may use destructuring. The optional key and index aliases must be simple names.
   
@@ -187,16 +190,16 @@ invalid.vue:12:20 lint/nursery/useVueValidVFor ━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:14:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:15:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Custom components rendered with v-for require a v-bind:key directive.
   
-    12 │ <div v-for="(item, { key }) in items"></div>
-    13 │ 
-  > 14 │ <MyItem v-for="item in items"></MyItem>
+    13 │ <div v-for="(item, { key }) in items"></div>
+    14 │ 
+  > 15 │ <MyItem v-for="item in items"></MyItem>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ <div is="MyItem" v-for="item in items"></div>
+    16 │ 
+    17 │ <div is="MyItem" v-for="item in items"></div>
   
   i Vue relies on keys to keep component instances stable across list updates.
   
@@ -208,16 +211,16 @@ invalid.vue:14:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:16:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:17:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Custom components rendered with v-for require a v-bind:key directive.
   
-    14 │ <MyItem v-for="item in items"></MyItem>
-    15 │ 
-  > 16 │ <div is="MyItem" v-for="item in items"></div>
+    15 │ <MyItem v-for="item in items"></MyItem>
+    16 │ 
+  > 17 │ <div is="MyItem" v-for="item in items"></div>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    17 │ 
-    18 │ <div v-for="item in items" :key="foo"></div>
+    18 │ 
+    19 │ <div v-for="item in items" :key="foo"></div>
   
   i Vue relies on keys to keep component instances stable across list updates.
   
@@ -229,16 +232,16 @@ invalid.vue:16:1 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:18:28 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:19:28 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind:key directive does not use any variables from the v-for directive.
   
-    16 │ <div is="MyItem" v-for="item in items"></div>
-    17 │ 
-  > 18 │ <div v-for="item in items" :key="foo"></div>
+    17 │ <div is="MyItem" v-for="item in items"></div>
+    18 │ 
+  > 19 │ <div v-for="item in items" :key="foo"></div>
        │                            ^^^^^^^^^^
-    19 │ 
-    20 │ <template v-for="item in items">
+    20 │ 
+    21 │ <template v-for="item in items">
   
   i Keys that are unrelated to the current iteration can cause Vue to reuse the wrong element or component instance.
   
@@ -250,15 +253,15 @@ invalid.vue:18:28 lint/nursery/useVueValidVFor ━━━━━━━━━━━
 ```
 
 ```
-invalid.vue:21:3 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:22:3 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Custom components rendered with v-for require a v-bind:key directive.
   
-    20 │ <template v-for="item in items">
-  > 21 │   <MyItem />
+    21 │ <template v-for="item in items">
+  > 22 │   <MyItem />
        │   ^^^^^^^^^^
-    22 │ </template>
-    23 │ 
+    23 │ </template>
+    24 │ 
   
   i Vue relies on keys to keep component instances stable across list updates.
   
@@ -270,15 +273,15 @@ invalid.vue:21:3 lint/nursery/useVueValidVFor ━━━━━━━━━━━�
 ```
 
 ```
-invalid.vue:25:31 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:26:31 lint/nursery/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This v-bind:key directive does not use any variables from the v-for directive.
   
-    24 │ <template v-for="item in items">
-  > 25 │   <div v-for="child in other" :key="child.id"></div>
+    25 │ <template v-for="item in items">
+  > 26 │   <div v-for="child in other" :key="child.id"></div>
        │                               ^^^^^^^^^^^^^^^
-    26 │ </template>
-    27 │ 
+    27 │ </template>
+    28 │ </template>
   
   i Keys that are unrelated to the current iteration can cause Vue to reuse the wrong element or component instance.
   

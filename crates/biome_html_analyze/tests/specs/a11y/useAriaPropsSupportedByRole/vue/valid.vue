@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <Foo bar />
 <div />
 <div id="main" />
@@ -90,3 +91,4 @@
 <select aria-expanded="true" />
 <div role="heading" aria-level />
 <div role="heading" aria-level="1" />
+</template>

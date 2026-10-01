@@ -15,6 +15,9 @@ expression: invalid.js
 "foo \751 bar";
 "foo \258 bar";
 "foo \25a bar";
+"foo \456 bar";
+"foo \777 bar";
+"foo \1234 bar";
 
 const o = {
     '\31': 0,
@@ -197,16 +200,16 @@ invalid.js:9:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━�
      7 │ "foo \381 bar";
      8 │ "foo \3a1 bar";
    > 9 │ "foo \751 bar";
-       │      ^^^^
+       │      ^^^
     10 │ "foo \258 bar";
     11 │ "foo \25a bar";
   
-  i Safe fix: Use unicode escape sequences instead.
+  i Safe fix: Use hexadecimal escape sequences instead.
   
      7  7 │   "foo \381 bar";
      8  8 │   "foo \3a1 bar";
      9    │ - "foo·\751·bar";
-        9 │ + "foo·\u01e9·bar";
+        9 │ + "foo·\x3d1·bar";
     10 10 │   "foo \258 bar";
     11 11 │   "foo \25a bar";
   
@@ -223,7 +226,7 @@ invalid.js:10:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
   > 10 │ "foo \258 bar";
        │      ^^^
     11 │ "foo \25a bar";
-    12 │ 
+    12 │ "foo \456 bar";
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -232,7 +235,7 @@ invalid.js:10:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     10    │ - "foo·\258·bar";
        10 │ + "foo·\x158·bar";
     11 11 │   "foo \25a bar";
-    12 12 │   
+    12 12 │   "foo \456 bar";
   
 
 ```
@@ -246,8 +249,8 @@ invalid.js:11:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     10 │ "foo \258 bar";
   > 11 │ "foo \25a bar";
        │      ^^^
-    12 │ 
-    13 │ const o = {
+    12 │ "foo \456 bar";
+    13 │ "foo \777 bar";
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
@@ -255,8 +258,56 @@ invalid.js:11:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
     10 10 │   "foo \258 bar";
     11    │ - "foo·\25a·bar";
        11 │ + "foo·\x15a·bar";
-    12 12 │   
-    13 13 │   const o = {
+    12 12 │   "foo \456 bar";
+    13 13 │   "foo \777 bar";
+  
+
+```
+
+```
+invalid.js:12:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    10 │ "foo \258 bar";
+    11 │ "foo \25a bar";
+  > 12 │ "foo \456 bar";
+       │      ^^^
+    13 │ "foo \777 bar";
+    14 │ "foo \1234 bar";
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+    10 10 │   "foo \258 bar";
+    11 11 │   "foo \25a bar";
+    12    │ - "foo·\456·bar";
+       12 │ + "foo·\x256·bar";
+    13 13 │   "foo \777 bar";
+    14 14 │   "foo \1234 bar";
+  
+
+```
+
+```
+invalid.js:13:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    11 │ "foo \25a bar";
+    12 │ "foo \456 bar";
+  > 13 │ "foo \777 bar";
+       │      ^^^
+    14 │ "foo \1234 bar";
+    15 │ 
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+    11 11 │   "foo \25a bar";
+    12 12 │   "foo \456 bar";
+    13    │ - "foo·\777·bar";
+       13 │ + "foo·\x3f7·bar";
+    14 14 │   "foo \1234 bar";
+    15 15 │   
   
 
 ```
@@ -266,20 +317,44 @@ invalid.js:14:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━
 
   ! Don't use deprecated octal escape sequences.
   
-    13 │ const o = {
-  > 14 │     '\31': 0,
-       │      ^^^
-    15 │ };
-    16 │ 
+    12 │ "foo \456 bar";
+    13 │ "foo \777 bar";
+  > 14 │ "foo \1234 bar";
+       │      ^^^^
+    15 │ 
+    16 │ const o = {
   
   i Safe fix: Use hexadecimal escape sequences instead.
   
-    12 12 │   
-    13 13 │   const o = {
-    14    │ - ····'\31':·0,
-       14 │ + ····'\x19':·0,
-    15 15 │   };
-    16 16 │   
+    12 12 │   "foo \456 bar";
+    13 13 │   "foo \777 bar";
+    14    │ - "foo·\1234·bar";
+       14 │ + "foo·\x534·bar";
+    15 15 │   
+    16 16 │   const o = {
+  
+
+```
+
+```
+invalid.js:17:6 lint/suspicious/noOctalEscape  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use deprecated octal escape sequences.
+  
+    16 │ const o = {
+  > 17 │     '\31': 0,
+       │      ^^^
+    18 │ };
+    19 │ 
+  
+  i Safe fix: Use hexadecimal escape sequences instead.
+  
+    15 15 │   
+    16 16 │   const o = {
+    17    │ - ····'\31':·0,
+       17 │ + ····'\x19':·0,
+    18 18 │   };
+    19 19 │   
   
 
 ```

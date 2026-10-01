@@ -1,0 +1,20 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<ul><><li>Item in a fragment</li></></ul>
+<ol><li /></ol>
+<menu><li>Action</li></menu>
+<Li />
+<li>Root item</li>
+<li />
+<><li>Fragment item</li><li /></>
+<List><li>Component child</li></List>
+<ul><slot><li>Slot fallback item</li></slot></ul>
+<ul><template><li>Template item</li></template></ul>
+<div><template><li>Template item</li></template></div>
+
+```

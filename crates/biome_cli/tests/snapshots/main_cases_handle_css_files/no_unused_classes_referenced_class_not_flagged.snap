@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint --only=nursery/noUnusedClasses '<TEMP_DIR>/no_unused_classes_referenced_class_not_flagged'
+```
+
 ## `App.jsx`
 
 ```jsx

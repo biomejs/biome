@@ -362,6 +362,20 @@
 	"w-full! flex! p-4!",
 	"flex [color:red]!",
 
+	// ─── utilities added in tailwindcss 4.3 ────────────────────────
+	// `tab-*`, `zoom-*`, `scrollbar-*`, `scrollbar-gutter-*`,
+	// `scrollbar-thumb-*`/`scrollbar-track-*`, and bare numbers on
+	// `auto-cols-*`/`auto-rows-*`. Expected order cross-checked against
+	// tailwindcss 4.3.3 `getClassOrder`.
+
+	"tab-8 tab-4 tab-2 flex",                              // tab-size bucket, name order
+	"flex zoom-2 p-4",
+	"scrollbar-none scrollbar-auto scrollbar-thin flex",   // scrollbar-width bucket
+	"scrollbar-gutter-both scrollbar-gutter-auto scrollbar-gutter-stable flex",
+	"flex scrollbar-track-red-500 scrollbar-thumb-blue-500 p-4",
+	"flex scrollbar-thumb-red-500/50 p-4",                  // opacity modifier on a color
+	"flex auto-cols-2 auto-rows-2 p-4",                     // NamedTyped(Number), new in 4.3
+
 	// ─── real-world strings (shadcn/ui v4, MIT) ─────────────────────
 	// Inputs scrambled; output captured by snapshot.
 	// Source: github.com/shadcn-ui/ui registry/new-york-v4.

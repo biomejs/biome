@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format '<TEMP_DIR>/include_vcs_ignore_cascade' --write
+```
+
 ## `biome.json`
 
 ```json

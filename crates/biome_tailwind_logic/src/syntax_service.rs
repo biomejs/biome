@@ -12,13 +12,21 @@ use biome_console::markup;
 use biome_diagnostics::{Diagnostic, MessageAndDescription, panic::catch_unwind};
 use biome_html_syntax::HtmlAttribute;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArguments, JsCallExpression, JsConditionalExpression, JsLanguage,
-    JsLiteralMemberName, JsStaticMemberExpression, JsStringLiteralExpression,
-    JsTemplateChunkElement, JsTemplateExpression, JsxAttribute, JsxString,
+    AnyJsExpression, JsArrayElementList, JsAssignmentExpression, JsAssignmentOperator,
+    JsAwaitExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsConditionalExpression, JsLanguage, JsLiteralMemberName,
+    JsLogicalExpression, JsLogicalOperator, JsObjectMemberList, JsParenthesizedExpression,
+    JsPropertyObjectMember, JsSequenceExpression, JsStaticMemberExpression,
+    JsStringLiteralExpression, JsSyntaxKind, JsTemplateChunkElement, JsTemplateElement,
+    JsTemplateElementList, JsTemplateExpression, JsxAttribute, JsxAttributeInitializerClause,
+    JsxExpressionAttributeValue, JsxString, TsAsExpression, TsNonNullAssertionExpression,
+    TsSatisfiesExpression, TsTypeAssertionExpression,
 };
+use biome_languages::JsFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{
-    AstNode, Language, NodeCache, SyntaxNode, TextLen, TextRange, TextSize, TokenText, WalkEvent,
+    AstNode, AstSeparatedList, Language, NodeCache, SyntaxKindSet, SyntaxNode, TextLen, TextRange,
+    TextSize, TokenText, WalkEvent,
 };
 use biome_tailwind_parser::{TailwindParse, parse_tailwind_with_cache};
 use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
@@ -168,7 +176,7 @@ fn parse_with_inner(
 }
 
 pub trait TailwindClassStringHost: AstNode {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString>;
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString>;
 }
 
 #[derive(Clone)]
@@ -256,7 +264,11 @@ where
     fn unwrap_match(services: &ServiceBag, node: &Self::Input) -> Self::Output {
         let node = N::unwrap_cast(node.0.clone());
         let class_string = node
-            .tailwind_class_string()
+            .tailwind_class_string(
+                services
+                    .get_service::<JsFileSource>()
+                    .is_some_and(|source| source.as_embedding_kind().is_class_attribute()),
+            )
             // SAFETY: The visitor emits matches only for nodes that host a Tailwind class string.
             .expect("TailwindSyntaxVisitor only emits Tailwind class strings");
         let parse = services
@@ -320,7 +332,11 @@ where
         let Some(ast_node) = N::cast_ref(node) else {
             return;
         };
-        let Some(class_string) = ast_node.tailwind_class_string() else {
+        let Some(class_string) = ast_node.tailwind_class_string(
+            ctx.services
+                .get_service::<JsFileSource>()
+                .is_some_and(|source| source.as_embedding_kind().is_class_attribute()),
+        ) else {
             return;
         };
         let Some(service) = ctx.services.get_service::<TwSyntaxService>() else {
@@ -424,38 +440,237 @@ fn is_class_attribute_name(name: &str) -> bool {
     matches!(name, "class" | "className")
 }
 
-fn inspect_string_literal(node: &SyntaxNode<JsLanguage>) -> Option<bool> {
-    let mut in_arguments = false;
-    for ancestor in node.ancestors().skip(1) {
-        if let Some(conditional) = JsConditionalExpression::cast_ref(&ancestor)
-            && conditional
-                .test()
-                .ok()?
-                .syntax()
-                .text_range()
-                .contains_range(node.text_range())
-        {
-            return None;
-        }
+const CLASS_CONFIGURATION_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsObjectMemberList::KIND_SET
+    .union(JsArrayElementList::KIND_SET)
+    .union(JsCallArguments::KIND_SET)
+    .union(JsCallArgumentList::KIND_SET)
+    .union(JsParenthesizedExpression::KIND_SET)
+    .union(JsAwaitExpression::KIND_SET)
+    .union(TsAsExpression::KIND_SET)
+    .union(TsSatisfiesExpression::KIND_SET)
+    .union(TsNonNullAssertionExpression::KIND_SET)
+    .union(TsTypeAssertionExpression::KIND_SET);
 
-        if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
-            let Some(attribute_name) = get_jsx_attribute_name(&jsx_attribute) else {
-                continue;
-            };
-            if is_class_attribute_name(attribute_name.text()) {
-                return Some(true);
-            }
-        }
+const CLASS_STRING_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = CLASS_CONFIGURATION_WRAPPER_KINDS
+    .union(JsTemplateElementList::KIND_SET)
+    .union(JsTemplateElement::KIND_SET)
+    .union(JsxExpressionAttributeValue::KIND_SET)
+    .union(JsxAttributeInitializerClause::KIND_SET);
 
-        if let Some(call_expression) = JsCallExpression::cast_ref(&ancestor) {
-            return in_arguments.then(|| is_call_expression_of_default_function(&call_expression));
+fn is_class_preserving_spread(
+    collection_kind: Option<JsSyntaxKind>,
+    parent_kind: JsSyntaxKind,
+) -> bool {
+    match collection_kind {
+        Some(JsSyntaxKind::JS_ARRAY_EXPRESSION) => matches!(
+            parent_kind,
+            JsSyntaxKind::JS_ARRAY_ELEMENT_LIST | JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+        ),
+        Some(JsSyntaxKind::JS_OBJECT_EXPRESSION) => {
+            parent_kind == JsSyntaxKind::JS_OBJECT_MEMBER_LIST
         }
-
-        if JsCallArguments::can_cast(ancestor.kind()) {
-            in_arguments = true;
-        }
+        _ => false,
     }
+}
 
+fn is_class_configuration_value(member: &JsPropertyObjectMember) -> Option<bool> {
+    let mut path = Vec::new();
+    let mut collection_kind = None;
+    let mut child = member.syntax().clone();
+    for ancestor in member.syntax().ancestors() {
+        match ancestor.kind() {
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
+                let member = JsPropertyObjectMember::cast_ref(&ancestor)?;
+                path.push(member.name().ok()?.name()?);
+            }
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+                let conditional = JsConditionalExpression::cast_ref(&ancestor)?;
+                if conditional.test().ok()?.syntax() == &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+                let logical = JsLogicalExpression::cast_ref(&ancestor)?;
+                if logical.operator().ok()? == JsLogicalOperator::LogicalAnd
+                    && logical.left().ok()?.syntax() == &child
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+                let sequence = JsSequenceExpression::cast_ref(&ancestor)?;
+                if sequence.right().ok()?.syntax() != &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                let assignment = JsAssignmentExpression::cast_ref(&ancestor)?;
+                if assignment.right().ok()?.syntax() != &child
+                    || !matches!(
+                        assignment.operator().ok()?,
+                        JsAssignmentOperator::Assign
+                            | JsAssignmentOperator::LogicalAndAssign
+                            | JsAssignmentOperator::LogicalOrAssign
+                            | JsAssignmentOperator::NullishCoalescingAssign
+                    )
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_CALL_EXPRESSION => {
+                let call = JsCallExpression::cast_ref(&ancestor)?;
+                let name = get_callee_name(&call)?;
+                let config_index = match name.text() {
+                    "cva" => 1,
+                    "tv" => 0,
+                    _ => return None,
+                };
+                let config = call
+                    .arguments()
+                    .ok()?
+                    .args()
+                    .iter()
+                    .nth(config_index)?
+                    .ok()?;
+                if !config.syntax().text_range().contains_range(member.range()) {
+                    return None;
+                }
+                return Some(match path.as_slice() {
+                    [base] => name.text() == "tv" && base.text() == "base",
+                    [_, slots] if name.text() == "tv" && slots.text() == "slots" => true,
+                    [_, _, variants] if variants.text() == "variants" => true,
+                    [_, _, _, variants] => name.text() == "tv" && variants.text() == "variants",
+                    [class, compound_variants] | [_, class, compound_variants] => {
+                        (path.len() == 2 || name.text() == "tv")
+                            && is_class_attribute_name(class.text())
+                            && (compound_variants.text() == "compoundVariants"
+                                || name.text() == "tv"
+                                    && compound_variants.text() == "compoundSlots")
+                    }
+                    _ => false,
+                });
+            }
+            JsSyntaxKind::JS_ARRAY_EXPRESSION | JsSyntaxKind::JS_OBJECT_EXPRESSION => {
+                collection_kind = Some(ancestor.kind());
+            }
+            JsSyntaxKind::JS_SPREAD => {
+                if !is_class_preserving_spread(collection_kind, ancestor.parent()?.kind()) {
+                    return None;
+                }
+            }
+            kind if CLASS_CONFIGURATION_WRAPPER_KINDS.matches(kind) => {}
+            _ => return None,
+        }
+        child = ancestor;
+    }
+    None
+}
+
+fn inspect_string_literal(node: &SyntaxNode<JsLanguage>, is_class_attribute: bool) -> Option<bool> {
+    let mut child = node.clone();
+    let mut collection_kind = None;
+    for ancestor in node.ancestors().skip(1) {
+        match ancestor.kind() {
+            JsSyntaxKind::JS_CONDITIONAL_EXPRESSION => {
+                let conditional = JsConditionalExpression::cast_ref(&ancestor)?;
+                if conditional.test().ok()?.syntax() == &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_BINARY_EXPRESSION => {
+                let binary = JsBinaryExpression::cast_ref(&ancestor)?;
+                if collection_kind.is_some() || binary.operator().ok()? != JsBinaryOperator::Plus {
+                    return None;
+                }
+                collection_kind = None;
+            }
+            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION => {
+                let assignment = JsAssignmentExpression::cast_ref(&ancestor)?;
+                if assignment.right().ok()?.syntax() != &child {
+                    return None;
+                }
+                match assignment.operator().ok()? {
+                    JsAssignmentOperator::Assign
+                    | JsAssignmentOperator::LogicalAndAssign
+                    | JsAssignmentOperator::LogicalOrAssign
+                    | JsAssignmentOperator::NullishCoalescingAssign => {}
+                    JsAssignmentOperator::AddAssign if collection_kind.is_none() => {}
+                    _ => return None,
+                }
+            }
+            JsSyntaxKind::JS_LOGICAL_EXPRESSION => {
+                let logical = JsLogicalExpression::cast_ref(&ancestor)?;
+                if logical.operator().ok()? == JsLogicalOperator::LogicalAnd
+                    && logical.left().ok()?.syntax() == &child
+                {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER => {
+                let member = JsPropertyObjectMember::cast_ref(&ancestor)?;
+                if member.name().ok()?.syntax() != &child {
+                    return is_class_configuration_value(&member);
+                }
+                if is_class_configuration_value(&member).unwrap_or(false) {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
+                let sequence = JsSequenceExpression::cast_ref(&ancestor)?;
+                if sequence.right().ok()?.syntax() != &child {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JSX_ATTRIBUTE => {
+                let attribute = JsxAttribute::cast_ref(&ancestor)?;
+                return Some(is_class_attribute_name(
+                    get_jsx_attribute_name(&attribute)?.text(),
+                ));
+            }
+            JsSyntaxKind::JS_CALL_EXPRESSION => {
+                let call = JsCallExpression::cast_ref(&ancestor)?;
+                return Some(
+                    JsCallArguments::can_cast(child.kind())
+                        && is_call_expression_of_default_function(&call),
+                );
+            }
+            JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
+                if collection_kind.is_some() {
+                    return None;
+                }
+                collection_kind = None;
+                let template = JsTemplateExpression::cast_ref(&ancestor)?;
+                if let Some(tag) = template.tag() {
+                    return match tag {
+                        AnyJsExpression::JsIdentifierExpression(tag) => {
+                            Some(is_default_function(tag.name().ok()?.name().ok()?.text()))
+                        }
+                        AnyJsExpression::JsStaticMemberExpression(tag) => {
+                            is_static_member_expression_of_default_function(&tag)
+                        }
+                        _ => None,
+                    };
+                }
+            }
+            JsSyntaxKind::JS_EXPRESSION_TEMPLATE_ROOT => return Some(is_class_attribute),
+            JsSyntaxKind::JS_ARRAY_EXPRESSION | JsSyntaxKind::JS_OBJECT_EXPRESSION => {
+                collection_kind = Some(ancestor.kind());
+            }
+            JsSyntaxKind::JS_SPREAD => {
+                if !is_class_preserving_spread(collection_kind, ancestor.parent()?.kind()) {
+                    return None;
+                }
+            }
+            JsSyntaxKind::JS_COMPUTED_MEMBER_NAME => {
+                if collection_kind.is_some() {
+                    return None;
+                }
+            }
+            kind if CLASS_STRING_WRAPPER_KINDS.matches(kind) => {}
+            _ => return None,
+        }
+        child = ancestor;
+    }
     None
 }
 
@@ -473,8 +688,8 @@ fn tailwind_class_string(
 }
 
 impl TailwindClassStringHost for JsStringLiteralExpression {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
-        if !inspect_string_literal(self.syntax()).unwrap_or(false) {
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), is_class_attribute).unwrap_or(false) {
             return None;
         }
         tailwind_class_string(
@@ -487,8 +702,8 @@ impl TailwindClassStringHost for JsStringLiteralExpression {
 }
 
 impl TailwindClassStringHost for JsLiteralMemberName {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
-        if !inspect_string_literal(self.syntax()).unwrap_or(false) {
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), is_class_attribute).unwrap_or(false) {
             return None;
         }
         tailwind_class_string(
@@ -501,7 +716,7 @@ impl TailwindClassStringHost for JsLiteralMemberName {
 }
 
 impl TailwindClassStringHost for JsxString {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+    fn tailwind_class_string(&self, _is_class_attribute: bool) -> Option<TailwindClassString> {
         let jsx_attribute = self
             .syntax()
             .ancestors()
@@ -521,71 +736,21 @@ impl TailwindClassStringHost for JsxString {
 }
 
 impl TailwindClassStringHost for JsTemplateChunkElement {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
-        for ancestor in self.syntax().ancestors().skip(1) {
-            if let Some(conditional) = JsConditionalExpression::cast_ref(&ancestor)
-                && conditional
-                    .test()
-                    .ok()?
-                    .syntax()
-                    .text_range()
-                    .contains_range(self.syntax().text_range())
-            {
-                return None;
-            }
-
-            if let Some(template_expression) = JsTemplateExpression::cast_ref(&ancestor) {
-                if let Some(AnyJsExpression::JsIdentifierExpression(tag)) =
-                    template_expression.tag()
-                {
-                    let name = tag.name().ok()?.name().ok()?;
-                    if is_default_function(name.text()) {
-                        return Some(tailwind_class_string(
-                            self.template_chunk_token().ok()?.token_text(),
-                            self.template_chunk_token()
-                                .ok()?
-                                .text_trimmed_range()
-                                .start(),
-                            ClassStringHostKind::JsTemplateChunkElement,
-                        ));
-                    }
-                }
-                if let Some(AnyJsExpression::JsStaticMemberExpression(tag)) =
-                    template_expression.tag()
-                    && is_static_member_expression_of_default_function(&tag).unwrap_or(false)
-                {
-                    return Some(tailwind_class_string(
-                        self.template_chunk_token().ok()?.token_text(),
-                        self.template_chunk_token()
-                            .ok()?
-                            .text_trimmed_range()
-                            .start(),
-                        ClassStringHostKind::JsTemplateChunkElement,
-                    ));
-                }
-            } else if let Some(jsx_attribute) = JsxAttribute::cast_ref(&ancestor) {
-                let Some(attribute_name) = get_jsx_attribute_name(&jsx_attribute) else {
-                    continue;
-                };
-                if is_class_attribute_name(attribute_name.text()) {
-                    return Some(tailwind_class_string(
-                        self.template_chunk_token().ok()?.token_text(),
-                        self.template_chunk_token()
-                            .ok()?
-                            .text_trimmed_range()
-                            .start(),
-                        ClassStringHostKind::JsTemplateChunkElement,
-                    ));
-                }
-            }
+    fn tailwind_class_string(&self, is_class_attribute: bool) -> Option<TailwindClassString> {
+        if !inspect_string_literal(self.syntax(), is_class_attribute).unwrap_or(false) {
+            return None;
         }
-
-        None
+        let token = self.template_chunk_token().ok()?;
+        Some(tailwind_class_string(
+            token.token_text(),
+            token.text_trimmed_range().start(),
+            ClassStringHostKind::JsTemplateChunkElement,
+        ))
     }
 }
 
 impl TailwindClassStringHost for HtmlAttribute {
-    fn tailwind_class_string(&self) -> Option<TailwindClassString> {
+    fn tailwind_class_string(&self, _is_class_attribute: bool) -> Option<TailwindClassString> {
         let name = self.name().ok()?.value_token().ok()?;
         if !name.text_trimmed().eq_ignore_ascii_case("class") {
             return None;

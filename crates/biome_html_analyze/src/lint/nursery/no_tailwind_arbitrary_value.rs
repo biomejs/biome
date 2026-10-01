@@ -1,11 +1,12 @@
+use crate::tailwind::host_range;
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_html_syntax::{AnyHtmlAttributeInitializer, HtmlAttribute, inner_string_text};
+use biome_html_syntax::HtmlAttribute;
 use biome_rowan::{TextRange, TextSize};
 use biome_rule_options::no_tailwind_arbitrary_value::NoTailwindArbitraryValueOptions;
-use biome_tailwind_parser::parse_tailwind;
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use biome_tailwind_syntax::lint_utils::arbitrary_ranges;
 
 declare_lint_rule! {
@@ -42,29 +43,6 @@ declare_lint_rule! {
     /// <div class="[&:nth-child(3)]:px-2"></div>
     /// ```
     ///
-    /// ## Options
-    ///
-    /// By default, this rule checks the `class` attribute. The `attributes`
-    /// option adds more HTML attributes to check.
-    ///
-    /// ```json,options
-    /// {
-    ///     "options": {
-    ///         "attributes": ["classList"]
-    ///     }
-    /// }
-    /// ```
-    ///
-    /// ```html,use_options,expect_diagnostic
-    /// <div classList="w-[400px]"></div>
-    /// ```
-    ///
-    /// ### attributes
-    ///
-    /// Additional HTML attribute names to check.
-    ///
-    /// Default: `[]` (the `class` attribute is always checked).
-    ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",
         name: "noTailwindArbitraryValue",
@@ -76,48 +54,17 @@ declare_lint_rule! {
 }
 
 impl Rule for NoTailwindArbitraryValue {
-    type Query = Ast<HtmlAttribute>;
+    type Query = TailwindSyntax<HtmlAttribute>;
     type State = TextRange;
     type Signals = Vec<TextRange>;
     type Options = NoTailwindArbitraryValueOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let attribute = ctx.query();
-        let options = ctx.options();
-
-        let Some(name) = attribute
-            .name()
-            .ok()
-            .and_then(|name| name.value_token().ok())
-            .map(|token| token.token_text_trimmed())
-        else {
-            return vec![];
-        };
-
-        if !is_html_class_attribute(name.text(), options) {
-            return vec![];
-        }
-
-        let Some(initializer) = attribute.initializer() else {
-            return vec![];
-        };
-        let Ok(AnyHtmlAttributeInitializer::HtmlString(html_string)) = initializer.value() else {
-            return vec![];
-        };
-        let Ok(token) = html_string.value_token() else {
-            return vec![];
-        };
-
-        let text = inner_string_text(&token);
-        if !text.text().contains('[') {
-            return vec![];
-        }
-
-        // HTML attribute values are always quoted per spec
-        let content_start = token.text_trimmed_range().start() + TextSize::from(1);
-
-        let parse = parse_tailwind(text.text());
-        arbitrary_ranges(&parse.tree().candidates(), content_start)
+        let query = ctx.query();
+        arbitrary_ranges(&query.tailwind_root().candidates(), TextSize::from(0))
+            .into_iter()
+            .filter_map(|range| host_range(query.node(), range))
+            .collect()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -136,13 +83,3 @@ impl Rule for NoTailwindArbitraryValue {
         )
     }
 }
-
-fn is_html_class_attribute(name: &str, options: &NoTailwindArbitraryValueOptions) -> bool {
-    name.eq_ignore_ascii_case("class")
-        || options
-            .attributes
-            .iter()
-            .flatten()
-            .any(|attribute| attribute.as_ref().eq_ignore_ascii_case(name))
-}
-

@@ -10,6 +10,7 @@ use crate::{
     TrailingNewline, TransformSourceMap,
 };
 use crate::{format, write};
+use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
 
@@ -149,48 +150,55 @@ impl Document {
         &self.elements
     }
 
-    /// Transforms the document by visiting every element, optionally replacing
-    /// them.
+    /// Transforms the document by visiting every embedded element, optionally
+    /// replacing its content.
     ///
-    /// Accepts a `visitor` that will be called to visit each element, and which
-    /// may optionally return a replacement.
-    ///
-    /// Elements that contain nested elements, such as [FormatElement::Interned]
-    /// and [FormatElement::BestFitting], have the visitor called on their
-    /// nested elements, but not on the elements themselves.
-    pub(crate) fn transform(
+    /// Accepts a `format_embedded` function that will be called with the range of
+    /// each embedded element, and which may optionally return the [Document] that
+    /// replaces the element's content.
+    pub(crate) fn replace_embedded(
         &mut self,
-        mut visitor: impl FnMut(&FormatElement) -> Option<FormatElement>,
+        format_embedded: &mut impl FnMut(TextRange) -> Option<Self>,
     ) {
-        transform_elements(&mut self.elements, &mut visitor);
+        replace_embedded_elements(&mut self.elements, format_embedded);
     }
 }
 
-/// Iterates over each of the given `elements` and optionally replaces each
-/// element with a new one.
+/// Iterates over each of the given `elements` and optionally replaces the
+/// content of each embedded element with a new one.
+///
+/// An embedded element is written as [Tag::StartEmbedded], one [FormatElement::Interned]
+/// holding the content the host formatter prints for it, and [Tag::EndEmbedded].
 ///
 /// Nested data structures such as [FormatElement::Interned] and
-/// [FormatElement::BestFitting] use recursion and call [transform_elements()]
-/// again. The visitor is *not* invoked on these elements.
-fn transform_elements(
+/// [FormatElement::BestFitting] use recursion and call [replace_embedded_elements()]
+/// again.
+fn replace_embedded_elements(
     elements: &mut [FormatElement],
-    visitor: &mut impl FnMut(&FormatElement) -> Option<FormatElement>,
+    format_embedded: &mut impl FnMut(TextRange) -> Option<Document>,
 ) {
+    // The range of the embedded element whose host content is the next element.
+    let mut embedded_range = None;
     for element in elements {
+        let host_content_range = embedded_range.take();
         match element {
-            FormatElement::Interned(interned) => {
-                let mut nested_elements = interned.deref().to_vec();
-                transform_elements(&mut nested_elements, visitor);
-                *element = FormatElement::Interned(Interned::new(nested_elements));
-            }
-            FormatElement::BestFitting(best_fitting) => {
-                transform_elements(best_fitting.as_slice_mut(), visitor);
-            }
-            _ => {
-                if let Some(replacement) = visitor(element) {
-                    *element = replacement;
+            FormatElement::Tag(Tag::StartEmbedded(range)) => embedded_range = Some(*range),
+            FormatElement::Interned(interned) => match host_content_range {
+                Some(range) => {
+                    if let Some(document) = format_embedded(range) {
+                        *interned = Interned::new(document.into_elements());
+                    }
                 }
+                None => {
+                    let mut nested_elements = interned.deref().to_vec();
+                    replace_embedded_elements(&mut nested_elements, format_embedded);
+                    *interned = Interned::new(nested_elements);
+                }
+            },
+            FormatElement::BestFitting(best_fitting) => {
+                replace_embedded_elements(best_fitting.as_slice_mut(), format_embedded);
             }
+            _ => {}
         }
     }
 }

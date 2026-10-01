@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div @click="() => { }"></div>
 <div v-on:click="() => { }"></div>
 <div @click.stop="() => { }"></div>
@@ -90,3 +91,4 @@
 <div role="timer" @click="() => { }"></div>
 <div role="tooltip" @click="() => { }"></div>
 <div role="progressbar" @click="() => { }"></div>
+</template>

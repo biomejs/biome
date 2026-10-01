@@ -15,8 +15,9 @@ pub use crate::suppression::JsSuppression;
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
     AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
-    AnalyzerSignal, BatchPluginVisitor, ControlFlow, InspectMatcher, LanguageRoot,
-    MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
+    AnalyzerSignal, BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, InspectMatcher,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
+    RuleRegistry, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
 use biome_db::AnyParsedSource;
@@ -65,6 +66,16 @@ pub struct JsAnalyzerServices {
     embedded_data: Option<Arc<EmbeddedData>>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
+}
+
+struct AnalyzerParams<'a, 'guest, 'registry, 'snippet, 'analyzer, B, Output> {
+    root: &'a LanguageRoot<JsLanguage>,
+    filter: AnalysisFilter<'a>,
+    options: &'a AnalyzerOptions,
+    plugins: AnalyzerPluginSlice<'a>,
+    services: JsAnalyzerServices,
+    snippet_inspector: Option<EmbeddedSignalInspector<'guest, 'registry>>,
+    snippets: Option<&'snippet mut [Box<dyn SnippetAnalyzer<B, Output = Output> + 'analyzer>]>,
 }
 
 impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerServices {
@@ -144,6 +155,31 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     plugins: AnalyzerPluginSlice<'a>,
     services: JsAnalyzerServices,
+    emit_signal: F,
+) -> (Option<B>, Vec<DiagnosticError>)
+where
+    V: FnMut(&MatchQueryParams<JsLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector::<V, F, B, ()>(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            plugins,
+            services,
+            snippet_inspector: None,
+            snippets: None,
+        },
+        inspect_matcher,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B, Output>(
+    params: AnalyzerParams<'a, '_, '_, '_, '_, B, Output>,
+    inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<DiagnosticError>)
 where
@@ -151,6 +187,15 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let AnalyzerParams {
+        root,
+        filter,
+        options,
+        plugins,
+        services,
+        snippet_inspector,
+        snippets,
+    } = params;
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -243,15 +288,21 @@ where
         services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
     }
 
-    (
-        analyzer.run(AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippet_inspector {
+        Some(inspector) => analyzer.run_snippet(ctx, inspector),
+        None => match snippets {
+            Some(snippets) => analyzer.run_with_snippets(ctx, snippets),
+            None => analyzer.run(ctx),
+        },
+    };
+
+    (result, diagnostics)
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -269,11 +320,89 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    let module_db = services.module_db.clone();
-    let language_db = services.language_db.clone();
-    analyze_with_inspect_matcher(
-        root,
-        filter,
+    analyze_with_optional_inspector::<F, B, ()>(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            plugins,
+            services,
+            snippet_inspector: None,
+            snippets: None,
+        },
+        emit_signal,
+    )
+}
+
+/// Analyzes JavaScript and embedded snippets together, allowing JavaScript
+/// ignore comments to apply to findings from the snippets.
+pub fn analyze_with_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<JsLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    plugins: AnalyzerPluginSlice<'a>,
+    services: JsAnalyzerServices,
+    snippets: &mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>],
+    emit_signal: F,
+) -> (Option<B>, Vec<DiagnosticError>)
+where
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            plugins,
+            services,
+            snippet_inspector: None,
+            snippets: Some(snippets),
+        },
+        emit_signal,
+    )
+}
+
+/// Analyzes JavaScript embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<JsLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    plugins: AnalyzerPluginSlice<'a>,
+    services: JsAnalyzerServices,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<DiagnosticError>)
+where
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_inspector::<F, B, ()>(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            plugins,
+            services,
+            snippet_inspector: Some(inspector),
+            snippets: None,
+        },
+        emit_signal,
+    )
+}
+
+fn analyze_with_optional_inspector<'a, F, B, Output>(
+    params: AnalyzerParams<'a, '_, '_, '_, '_, B, Output>,
+    emit_signal: F,
+) -> (Option<B>, Vec<DiagnosticError>)
+where
+    F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    let module_db = params.services.module_db.clone();
+    let language_db = params.services.language_db.clone();
+    analyze_with_inspect_matcher_and_inspector(
+        params,
         move |_| {
             if let Some(db) = module_db.as_ref() {
                 db.unwind_if_revision_cancelled();
@@ -282,9 +411,6 @@ where
                 db.unwind_if_revision_cancelled();
             }
         },
-        options,
-        plugins,
-        services,
         emit_signal,
     )
 }

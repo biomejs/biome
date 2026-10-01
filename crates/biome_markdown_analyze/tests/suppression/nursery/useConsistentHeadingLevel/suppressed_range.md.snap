@@ -1,0 +1,13 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressed_range.md
+---
+# Input
+```md
+# Heading
+
+<!-- biome-ignore-start lint/nursery/useConsistentHeadingLevel: generated section -->
+### Intentional level three heading
+<!-- biome-ignore-end lint/nursery/useConsistentHeadingLevel: generated section -->
+
+```

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_text_edit"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Utilities to edit text (This is taken from rust-analyzer)"

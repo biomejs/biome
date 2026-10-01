@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div v-for:arg="item in items"></div>
 
 <div v-for.mod="item in items"></div>
@@ -23,4 +24,5 @@
 
 <template v-for="item in items">
   <div v-for="child in other" :key="child.id"></div>
+</template>
 </template>

@@ -31,4 +31,23 @@ mfrac {
 ::view-transition-new(root) {
 	z-index: 1;
 }
+
+::view-transition-group(page),
+::view-transition-image-pair(sidebar),
+::view-transition-old(Page),
+::view-transition-new(page) {
+	z-index: 1;
+}
+
+::view-transition-group(page.card),
+::view-transition-group(.card),
+::view-transition-group(*) {
+	z-index: 1;
+}
+
+::VIEW-TRANSITION-OLD(page),
+::View-Transition-Group(page) {
+	z-index: 1;
+}
+
 ```

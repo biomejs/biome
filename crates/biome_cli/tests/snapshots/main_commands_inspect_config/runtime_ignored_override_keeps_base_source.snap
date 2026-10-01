@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome inspect config javascript.resolver.experimentalPnpmCatalogs --path=file.js
+```
+
 ## `biome.json`
 
 ```json

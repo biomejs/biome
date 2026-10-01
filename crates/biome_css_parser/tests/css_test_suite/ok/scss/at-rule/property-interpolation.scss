@@ -1,0 +1,13 @@
+@property --#{$name} {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: red;
+}
+
+@property --theme-#{$name} {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --#{$prefix}-#{$name}-color {}

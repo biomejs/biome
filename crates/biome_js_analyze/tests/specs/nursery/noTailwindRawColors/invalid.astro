@@ -1,0 +1,17 @@
+---
+// should generate diagnostics
+
+const staticClasses = clsx("bg-pink-500");
+const templateClasses = tw.div`bg-blue-500`;
+---
+
+<div class={clsx("bg-pink-500", active && "hover:text-red-500/80")}></div>
+<div class={["bg-blue-500", selected && "hover:bg-red-500"]}></div>
+<div class={{ "border-slate-950": active }}></div>
+<div class:list={["border-pink-500", condition && "dark:focus:bg-red-500"]}></div>
+
+{hidden && <div class={clsx("bg-pink-500", active && "hover:text-red-500/80")}></div>}
+{active ? <div class="bg-pink-500" /> : <span class="text-red-500" />}
+{items.map(item => <div class={["bg-blue-500", item.active && "border-slate-950"]} />)}
+{hidden && <><div class={{ "bg-pink-500": active }} /><span class={`text-red-500 ${extra}`} /></>}
+{hidden && <div><span class={active ? "bg-pink-500" : "text-red-500"} /></div>}

@@ -45,4 +45,12 @@ suite('valid suite title', () => {});
 // Spread argument (dynamic, cannot check statically)
 it(...args);
 
+// Calls on something that isn't a test function
+const lines = ["# comment", "code"];
+lines.filter((line) => !/^\s*#/.test(line));
+new RegExp("a").test(lines[0]);
+this.it(1);
+getSuite().describe(1, () => {});
+getSuite().test.each([])(1, () => {});
+
 ```

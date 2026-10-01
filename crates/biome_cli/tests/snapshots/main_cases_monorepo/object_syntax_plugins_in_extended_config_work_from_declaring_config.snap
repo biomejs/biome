@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/object_syntax_plugins_in_extended_config_work_from_declaring_config/packages/mobile/src/file.js'
+```
+
 ## `biome.json`
 
 ```json

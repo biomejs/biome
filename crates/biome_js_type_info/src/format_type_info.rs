@@ -356,6 +356,18 @@ impl Format<FormatTypeContext> for TypeMemberKind {
             | Self::ConstAssertedIndexSignature(index_signature_type) => {
                 write!(formatter, [token("["), index_signature_type, token("]")])
             }
+            Self::ComputedStatic(key_type) | Self::ConstAssertedComputedStatic(key_type) => {
+                write!(
+                    formatter,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        key_type,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 write!(
                     formatter,
@@ -511,6 +523,15 @@ impl Format<FormatTypeContext> for TypeofExpression {
                     )
                 }
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => {
                 write!(
                     f,
@@ -611,6 +632,9 @@ impl Format<FormatTypeContext> for TypeofExpression {
 
 impl Format<FormatTypeContext> for GenericTypeParameter {
     fn fmt(&self, f: &mut Formatter<FormatTypeContext>) -> FormatResult<()> {
+        if self.is_const {
+            write!(f, [token("const"), space()])?;
+        }
         let constraint = format_with(|f| {
             if self.constraint.is_known() {
                 write!(f, [space(), token("extends"), space(), &self.constraint])
@@ -726,7 +750,7 @@ impl Format<FormatTypeContext> for TypeImportQualifier {
                 space(),
                 token("from"),
                 space(),
-                self.resolved_path
+                self.specifier.as_ref()
             ]
         )
     }

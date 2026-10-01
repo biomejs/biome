@@ -1,0 +1,3 @@
+`console.log($args)` as $call where {
+    register_diagnostic(span = $call, message = "Unexpected console.log")
+}

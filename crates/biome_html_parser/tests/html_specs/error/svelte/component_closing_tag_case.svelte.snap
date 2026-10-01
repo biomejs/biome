@@ -1,0 +1,465 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```svelte
+  <Foo>a</foo></Foo>
+  <Foo>b</FOO></Foo>
+  <div>c</Div></div>
+  <custom-Tag>e</custom-tag></custom-Tag>
+  <form.Field>d</form.field></form.Field>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@0..3 "<" [Whitespace("  ")] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@3..6 "Foo" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@6..7 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@7..8 "a" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@8..9 "<" [] [],
+                        SLASH@9..10 "/" [] [],
+                        HtmlTagName {
+                            value_token: HTML_UNKNOWN_TAG@10..13 "foo" [] [],
+                        },
+                        R_ANGLE@13..14 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@14..15 "<" [] [],
+                    slash_token: SLASH@15..16 "/" [] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@16..19 "Foo" [] [],
+                    },
+                    r_angle_token: R_ANGLE@19..20 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@20..24 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@24..27 "Foo" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@27..28 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@28..29 "b" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@29..30 "<" [] [],
+                        SLASH@30..31 "/" [] [],
+                        HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@31..34 "FOO" [] [],
+                        },
+                        R_ANGLE@34..35 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@35..36 "<" [] [],
+                    slash_token: SLASH@36..37 "/" [] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@37..40 "Foo" [] [],
+                    },
+                    r_angle_token: R_ANGLE@40..41 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@41..45 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlTagName {
+                        value_token: DIV_KW@45..48 "div" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@48..49 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@49..50 "c" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@50..51 "<" [] [],
+                        SLASH@51..52 "/" [] [],
+                        HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@52..55 "Div" [] [],
+                        },
+                        R_ANGLE@55..56 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@56..57 "<" [] [],
+                    slash_token: SLASH@57..58 "/" [] [],
+                    name: HtmlTagName {
+                        value_token: DIV_KW@58..61 "div" [] [],
+                    },
+                    r_angle_token: R_ANGLE@61..62 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@62..66 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@66..76 "custom-Tag" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@76..77 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@77..78 "e" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@78..79 "<" [] [],
+                        SLASH@79..80 "/" [] [],
+                        HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@80..90 "custom-tag" [] [],
+                        },
+                        R_ANGLE@90..91 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@91..92 "<" [] [],
+                    slash_token: SLASH@92..93 "/" [] [],
+                    name: HtmlComponentName {
+                        value_token: HTML_COMPONENT_LITERAL@93..103 "custom-Tag" [] [],
+                    },
+                    r_angle_token: R_ANGLE@103..104 ">" [] [],
+                },
+            ],
+        },
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@104..108 "<" [Newline("\n"), Whitespace("  ")] [],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@108..112 "form" [] [],
+                        },
+                        dot_token: DOT@112..113 "." [] [],
+                        member: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@113..118 "Field" [] [],
+                        },
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@118..119 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@119..120 "d" [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@120..121 "<" [] [],
+                        SLASH@121..122 "/" [] [],
+                        HtmlMemberName {
+                            object: HtmlComponentName {
+                                value_token: HTML_COMPONENT_LITERAL@122..126 "form" [] [],
+                            },
+                            dot_token: DOT@126..127 "." [] [],
+                            member: HtmlComponentName {
+                                value_token: HTML_COMPONENT_LITERAL@127..132 "field" [] [],
+                            },
+                        },
+                        R_ANGLE@132..133 ">" [] [],
+                    ],
+                },
+                HtmlElementList [],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@133..134 "<" [] [],
+                    slash_token: SLASH@134..135 "/" [] [],
+                    name: HtmlMemberName {
+                        object: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@135..139 "form" [] [],
+                        },
+                        dot_token: DOT@139..140 "." [] [],
+                        member: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@140..145 "Field" [] [],
+                        },
+                    },
+                    r_angle_token: R_ANGLE@145..146 ">" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@146..147 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..147
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..146
+    0: HTML_BOGUS_ELEMENT@0..20
+      0: HTML_OPENING_ELEMENT@0..7
+        0: L_ANGLE@0..3 "<" [Whitespace("  ")] []
+        1: HTML_COMPONENT_NAME@3..6
+          0: HTML_COMPONENT_LITERAL@3..6 "Foo" [] []
+        2: HTML_ATTRIBUTE_LIST@6..6
+        3: R_ANGLE@6..7 ">" [] []
+      1: HTML_ELEMENT_LIST@7..8
+        0: HTML_CONTENT@7..8
+          0: HTML_LITERAL@7..8 "a" [] []
+      2: HTML_BOGUS_ELEMENT@8..14
+        0: L_ANGLE@8..9 "<" [] []
+        1: SLASH@9..10 "/" [] []
+        2: HTML_TAG_NAME@10..13
+          0: HTML_UNKNOWN_TAG@10..13 "foo" [] []
+        3: R_ANGLE@13..14 ">" [] []
+      3: HTML_ELEMENT_LIST@14..14
+      4: HTML_CLOSING_ELEMENT@14..20
+        0: L_ANGLE@14..15 "<" [] []
+        1: SLASH@15..16 "/" [] []
+        2: HTML_COMPONENT_NAME@16..19
+          0: HTML_COMPONENT_LITERAL@16..19 "Foo" [] []
+        3: R_ANGLE@19..20 ">" [] []
+    1: HTML_BOGUS_ELEMENT@20..41
+      0: HTML_OPENING_ELEMENT@20..28
+        0: L_ANGLE@20..24 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_COMPONENT_NAME@24..27
+          0: HTML_COMPONENT_LITERAL@24..27 "Foo" [] []
+        2: HTML_ATTRIBUTE_LIST@27..27
+        3: R_ANGLE@27..28 ">" [] []
+      1: HTML_ELEMENT_LIST@28..29
+        0: HTML_CONTENT@28..29
+          0: HTML_LITERAL@28..29 "b" [] []
+      2: HTML_BOGUS_ELEMENT@29..35
+        0: L_ANGLE@29..30 "<" [] []
+        1: SLASH@30..31 "/" [] []
+        2: HTML_COMPONENT_NAME@31..34
+          0: HTML_COMPONENT_LITERAL@31..34 "FOO" [] []
+        3: R_ANGLE@34..35 ">" [] []
+      3: HTML_ELEMENT_LIST@35..35
+      4: HTML_CLOSING_ELEMENT@35..41
+        0: L_ANGLE@35..36 "<" [] []
+        1: SLASH@36..37 "/" [] []
+        2: HTML_COMPONENT_NAME@37..40
+          0: HTML_COMPONENT_LITERAL@37..40 "Foo" [] []
+        3: R_ANGLE@40..41 ">" [] []
+    2: HTML_BOGUS_ELEMENT@41..62
+      0: HTML_OPENING_ELEMENT@41..49
+        0: L_ANGLE@41..45 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_TAG_NAME@45..48
+          0: DIV_KW@45..48 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@48..48
+        3: R_ANGLE@48..49 ">" [] []
+      1: HTML_ELEMENT_LIST@49..50
+        0: HTML_CONTENT@49..50
+          0: HTML_LITERAL@49..50 "c" [] []
+      2: HTML_BOGUS_ELEMENT@50..56
+        0: L_ANGLE@50..51 "<" [] []
+        1: SLASH@51..52 "/" [] []
+        2: HTML_COMPONENT_NAME@52..55
+          0: HTML_COMPONENT_LITERAL@52..55 "Div" [] []
+        3: R_ANGLE@55..56 ">" [] []
+      3: HTML_ELEMENT_LIST@56..56
+      4: HTML_CLOSING_ELEMENT@56..62
+        0: L_ANGLE@56..57 "<" [] []
+        1: SLASH@57..58 "/" [] []
+        2: HTML_TAG_NAME@58..61
+          0: DIV_KW@58..61 "div" [] []
+        3: R_ANGLE@61..62 ">" [] []
+    3: HTML_BOGUS_ELEMENT@62..104
+      0: HTML_OPENING_ELEMENT@62..77
+        0: L_ANGLE@62..66 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_COMPONENT_NAME@66..76
+          0: HTML_COMPONENT_LITERAL@66..76 "custom-Tag" [] []
+        2: HTML_ATTRIBUTE_LIST@76..76
+        3: R_ANGLE@76..77 ">" [] []
+      1: HTML_ELEMENT_LIST@77..78
+        0: HTML_CONTENT@77..78
+          0: HTML_LITERAL@77..78 "e" [] []
+      2: HTML_BOGUS_ELEMENT@78..91
+        0: L_ANGLE@78..79 "<" [] []
+        1: SLASH@79..80 "/" [] []
+        2: HTML_COMPONENT_NAME@80..90
+          0: HTML_COMPONENT_LITERAL@80..90 "custom-tag" [] []
+        3: R_ANGLE@90..91 ">" [] []
+      3: HTML_ELEMENT_LIST@91..91
+      4: HTML_CLOSING_ELEMENT@91..104
+        0: L_ANGLE@91..92 "<" [] []
+        1: SLASH@92..93 "/" [] []
+        2: HTML_COMPONENT_NAME@93..103
+          0: HTML_COMPONENT_LITERAL@93..103 "custom-Tag" [] []
+        3: R_ANGLE@103..104 ">" [] []
+    4: HTML_BOGUS_ELEMENT@104..146
+      0: HTML_OPENING_ELEMENT@104..119
+        0: L_ANGLE@104..108 "<" [Newline("\n"), Whitespace("  ")] []
+        1: HTML_MEMBER_NAME@108..118
+          0: HTML_COMPONENT_NAME@108..112
+            0: HTML_COMPONENT_LITERAL@108..112 "form" [] []
+          1: DOT@112..113 "." [] []
+          2: HTML_COMPONENT_NAME@113..118
+            0: HTML_COMPONENT_LITERAL@113..118 "Field" [] []
+        2: HTML_ATTRIBUTE_LIST@118..118
+        3: R_ANGLE@118..119 ">" [] []
+      1: HTML_ELEMENT_LIST@119..120
+        0: HTML_CONTENT@119..120
+          0: HTML_LITERAL@119..120 "d" [] []
+      2: HTML_BOGUS_ELEMENT@120..133
+        0: L_ANGLE@120..121 "<" [] []
+        1: SLASH@121..122 "/" [] []
+        2: HTML_MEMBER_NAME@122..132
+          0: HTML_COMPONENT_NAME@122..126
+            0: HTML_COMPONENT_LITERAL@122..126 "form" [] []
+          1: DOT@126..127 "." [] []
+          2: HTML_COMPONENT_NAME@127..132
+            0: HTML_COMPONENT_LITERAL@127..132 "field" [] []
+        3: R_ANGLE@132..133 ">" [] []
+      3: HTML_ELEMENT_LIST@133..133
+      4: HTML_CLOSING_ELEMENT@133..146
+        0: L_ANGLE@133..134 "<" [] []
+        1: SLASH@134..135 "/" [] []
+        2: HTML_MEMBER_NAME@135..145
+          0: HTML_COMPONENT_NAME@135..139
+            0: HTML_COMPONENT_LITERAL@135..139 "form" [] []
+          1: DOT@139..140 "." [] []
+          2: HTML_COMPONENT_NAME@140..145
+            0: HTML_COMPONENT_LITERAL@140..145 "Field" [] []
+        3: R_ANGLE@145..146 ">" [] []
+  5: EOF@146..147 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+component_closing_tag_case.svelte:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</foo>'.
+  
+  > 1 │   <Foo>a</foo></Foo>
+      │         ^^^^^^
+    2 │   <Foo>b</FOO></Foo>
+    3 │   <div>c</Div></div>
+  
+  i Expected a matching closing tag here.
+  
+  > 1 │   <Foo>a</foo></Foo>
+      │         ^^^^^^
+    2 │   <Foo>b</FOO></Foo>
+    3 │   <div>c</Div></div>
+  
+component_closing_tag_case.svelte:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</FOO>'.
+  
+    1 │   <Foo>a</foo></Foo>
+  > 2 │   <Foo>b</FOO></Foo>
+      │         ^^^^^^
+    3 │   <div>c</Div></div>
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+  
+  i Expected a matching closing tag here.
+  
+    1 │   <Foo>a</foo></Foo>
+  > 2 │   <Foo>b</FOO></Foo>
+      │         ^^^^^^
+    3 │   <div>c</Div></div>
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+  
+component_closing_tag_case.svelte:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</Div>'.
+  
+    1 │   <Foo>a</foo></Foo>
+    2 │   <Foo>b</FOO></Foo>
+  > 3 │   <div>c</Div></div>
+      │         ^^^^^^
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+    5 │   <form.Field>d</form.field></form.Field>
+  
+  i Expected a matching closing tag here.
+  
+    1 │   <Foo>a</foo></Foo>
+    2 │   <Foo>b</FOO></Foo>
+  > 3 │   <div>c</Div></div>
+      │         ^^^^^^
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+    5 │   <form.Field>d</form.field></form.Field>
+  
+component_closing_tag_case.svelte:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</custom-tag>'.
+  
+    2 │   <Foo>b</FOO></Foo>
+    3 │   <div>c</Div></div>
+  > 4 │   <custom-Tag>e</custom-tag></custom-Tag>
+      │                ^^^^^^^^^^^^^
+    5 │   <form.Field>d</form.field></form.Field>
+    6 │ 
+  
+  i Expected a matching closing tag here.
+  
+    2 │   <Foo>b</FOO></Foo>
+    3 │   <div>c</Div></div>
+  > 4 │   <custom-Tag>e</custom-tag></custom-Tag>
+      │                ^^^^^^^^^^^^^
+    5 │   <form.Field>d</form.field></form.Field>
+    6 │ 
+  
+component_closing_tag_case.svelte:5:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</form.field>'.
+  
+    3 │   <div>c</Div></div>
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+  > 5 │   <form.Field>d</form.field></form.Field>
+      │                ^^^^^^^^^^^^^
+    6 │ 
+  
+  i Expected a matching closing tag here.
+  
+    3 │   <div>c</Div></div>
+    4 │   <custom-Tag>e</custom-tag></custom-Tag>
+  > 5 │   <form.Field>d</form.field></form.Field>
+      │                ^^^^^^^^^^^^^
+    6 │ 
+  
+```

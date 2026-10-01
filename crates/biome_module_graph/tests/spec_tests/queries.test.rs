@@ -2167,3 +2167,54 @@ fn test_member_lookup_exhaustion_returns_unknown() {
         Some(InferredTypeData::Unknown)
     );
 }
+
+#[test]
+fn test_member_lookups_share_instance_substitutions() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Box<T> {
+                value: T;
+            }
+            declare const numbers: Box<number>;
+            export const first = numbers.value;
+            export const second = numbers.value;
+        "#,
+    );
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+
+    fn infer_binding<'db>(
+        db: &'db mut TestModuleDb,
+        module: ModuleInfo,
+        name: &str,
+    ) -> (InferredTypeData<'db>, usize) {
+        db.clear_salsa_events();
+        let range = binding_range_by_name(db, module, name);
+        let ty = infer_binding_type(db, BindingTypeInput::new(db, module, range))
+            .expect("binding type must be inferred");
+        let ty = normalize_type_query(db, NormalizeTypeInput::new(db, module, ty));
+        let events = db.take_salsa_events();
+        (
+            ty,
+            function_query_will_execute_count_by_name(db, "substitute_types", &events),
+        )
+    }
+
+    let (first, first_executions) = infer_binding(&mut db, module, "first");
+    assert_eq!(first, InferredTypeData::Number);
+    assert!(
+        first_executions > 0,
+        "the first lookup must substitute `T` in `Box<number>`"
+    );
+
+    let (second, second_executions) = infer_binding(&mut db, module, "second");
+    assert_eq!(second, InferredTypeData::Number);
+    assert_eq!(
+        second_executions, 0,
+        "the second lookup must reuse the substitutions of the first"
+    );
+}

@@ -18,8 +18,8 @@ pub use crate::suppression::CssSuppression;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AddVisitor, AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal,
-    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry,
+    BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
@@ -47,6 +47,15 @@ pub struct CssAnalyzerServices {
     pub file_source: CssFileSource,
     pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+struct AnalyzerParams<'a, 'guest, 'registry> {
+    root: &'a LanguageRoot<CssLanguage>,
+    filter: AnalysisFilter<'a>,
+    options: &'a AnalyzerOptions,
+    services: CssAnalyzerServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'guest, 'registry>>,
 }
 
 impl std::fmt::Debug for CssAnalyzerServices {
@@ -122,6 +131,43 @@ where
     )
 }
 
+/// Analyzes CSS embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<CssLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    services: CssAnalyzerServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    let module_db = services.module_db.clone();
+    let language_db = services.language_db.clone();
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services,
+            plugins,
+            snippet_inspector: Some(inspector),
+        },
+        move |_| {
+            if let Some(db) = module_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+            if let Some(db) = language_db.as_ref() {
+                db.unwind_if_revision_cancelled();
+            }
+        },
+        emit_signal,
+    )
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -135,6 +181,30 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     css_services: CssAnalyzerServices,
     plugins: AnalyzerPluginSlice<'a>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<CssLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services: css_services,
+            plugins,
+            snippet_inspector: None,
+        },
+        inspect_matcher,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
+    params: AnalyzerParams<'a, '_, '_>,
+    inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -142,6 +212,14 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let AnalyzerParams {
+        root,
+        filter,
+        options,
+        services: css_services,
+        plugins,
+        snippet_inspector,
+    } = params;
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -201,15 +279,18 @@ where
         }
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippet_inspector {
+        Some(inspector) => analyzer.run_snippet(ctx, inspector),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

@@ -331,6 +331,10 @@ Raw self-references use local handles. During raw conversion, re-entering a type
 currently being resolved returns its stable local handle; the outer resolution
 then stores the completed value in the module table.
 
+This re-entry check belongs to one resolution context. Recursion across modules
+relies on tracked queries, import budgets, and the shared declaration evaluator
+instead; see [Resolver helpers](../biome_module_graph/CONTRIBUTING.md#resolver-helpers).
+
 ## Work Limits and Inconclusive Results
 
 Walks over types and modules must terminate even when the input is recursive,

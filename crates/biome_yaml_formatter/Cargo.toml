@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_yaml_formatter"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's YAML formatter"

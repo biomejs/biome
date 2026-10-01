@@ -1,0 +1,67 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/parity-query-unary-values-comments.scss
+---
+
+# Input
+
+```scss
+$gap:16px;
+@media(min-width:/*before*/-/*operand*/$gap /*binary*/+ 800px){.block{display:block}}
+@media (min-width: // before
+-// operand
+$gap+800px){.line{display:block}}
+@media/*outer*/(min-width:-$gap+800px/*close*/)/*conjunction*/and/*next*/(max-width:+$gap+800px)/*block*/{.boundaries{display:block}}
+@media(min-width:-$gap+800px // close
+){.line-boundary{display:block}}
+@media(min-width:-$gap+800px)/*comma*/,// next
+(max-width:+$gap+800px){.comma{display:block}}
+/* biome-ignore format: preserve authored query spacing */
+@media (min-width: - $gap + 800px) { .suppressed {display:block} }
+
+```
+
+
+# Formatted
+
+```scss
+$gap: 16px;
+@media (/*before*/ min-width: -/*operand*/ $gap /*binary*/ + 800px) {
+	.block {
+		display: block;
+	}
+}
+@media (
+		// before
+		min-width: -// operand
+		$gap +
+			800px
+	) {
+	.line {
+		display: block;
+	}
+}
+@media /*outer*/ (
+		min-width: -$gap + 800px /*close*/
+	) /*conjunction*/ and /*next*/ (max-width: +$gap + 800px) /*block*/ {
+	.boundaries {
+		display: block;
+	}
+}
+@media (
+		min-width: -$gap + 800px // close
+	) {
+	.line-boundary {
+		display: block;
+	}
+}
+@media (min-width: -$gap + 800px) /*comma*/, // next
+	(max-width: +$gap + 800px) {
+	.comma {
+		display: block;
+	}
+}
+/* biome-ignore format: preserve authored query spacing */
+@media (min-width: - $gap + 800px) { .suppressed {display:block} }
+
+```

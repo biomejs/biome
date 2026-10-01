@@ -24,7 +24,7 @@ sections matching the boundary being changed:
 | Task | Canonical guide |
 | --- | --- |
 | Raw and inferred representations, collection, inference layers, handles, normalization, work limits | [`biome_js_type_info/CONTRIBUTING.md`](../../../crates/biome_js_type_info/CONTRIBUTING.md) |
-| Analyzer requests, tracked queries, widening, profiling, Salsa execution tests | [`biome_module_graph/CONTRIBUTING.md`](../../../crates/biome_module_graph/CONTRIBUTING.md) |
+| Analyzer requests, tracked queries, resolution contexts, widening, profiling, Salsa execution tests | [`biome_module_graph/CONTRIBUTING.md`](../../../crates/biome_module_graph/CONTRIBUTING.md) |
 
 Read both guides when changing the architecture across their boundary. Then
 inspect the implementation files for the specific request, query family, or
@@ -183,6 +183,12 @@ Unknown or indeterminate information is not a negative result. Preserve it to
 avoid false-positive diagnostics. Read the canonical widening, cycle recovery,
 and result-semantics sections before changing those paths.
 
+`ResolutionCtx` keeps its cycle set, depth limit, and cache per context. Do not
+create a context for another module during resolution and recurse through it.
+Cross a tracked query, a spent import or step budget, or the shared declaration
+evaluator instead. The module-graph guide's **Resolver helpers** section lists
+these boundaries.
+
 ## Testing and Profiling
 
 Test the narrowest affected boundary:
@@ -205,6 +211,8 @@ must not be added together. Load `testing-codegen` for snapshot mechanics.
 - The implementation uses the correct raw, inferred, or analyzer-facing world.
 - The request or query is the narrowest boundary satisfying its contract.
 - Missing data, ambiguity, cycles, and exhausted budgets preserve uncertainty.
+- No `ResolutionCtx` is created during resolution without a tracked query, a
+  spent budget, or the shared declaration evaluator bounding it.
 - Cross-module inferred data remains owned by its source module.
 - New request contracts are reusable and have stable metadata.
 - New query keys and dependencies are stable Salsa values.

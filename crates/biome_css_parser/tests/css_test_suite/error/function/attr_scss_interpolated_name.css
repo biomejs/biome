@@ -1,0 +1,4 @@
+.a::after {
+  content: attr(#{$name});
+  color: red;
+}

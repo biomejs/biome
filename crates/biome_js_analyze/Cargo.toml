@@ -10,7 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["!**/*_test.*", "!**/*_tests.*", "build.rs", "src/**/*"]
-publish              = true
+publish              = false
 
 [[bench]]
 harness = false

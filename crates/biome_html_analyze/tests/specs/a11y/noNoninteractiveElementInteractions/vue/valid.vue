@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <input @click="()=> void 0" />
 <input type="button" @click="()=> void 0" />
 <input type="checkbox" @click="()=> void 0" />
@@ -45,3 +46,4 @@
 <div role="presentation" @click="() => { }"></div>
 
 <div @click="() => { }" aria-hidden="true"></div>
+</template>

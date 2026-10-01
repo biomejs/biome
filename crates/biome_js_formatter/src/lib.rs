@@ -187,7 +187,9 @@ use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{
+    Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed, VecBuffer,
+};
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
@@ -388,15 +390,16 @@ where
         }
 
         if let Some(range) = self.embedded_node_range(node, f) {
-            // Tokens that belong to embedded nodes are formatted later on,
-            // so we track them, even though they aren't formatted now during this pass.
-            let state = f.state_mut();
-            for token in node.syntax().tokens() {
-                state.track_token(&token);
-            }
-
+            // The node's own formatting is printed unless the embedded formatter
+            // replaces it.
+            let content = {
+                let mut buffer = VecBuffer::new(f.state_mut());
+                write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
+                buffer.into_vec()
+            };
             f.write_elements(vec![
                 FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Interned(Interned::new(content)),
                 FormatElement::Tag(EndEmbedded),
             ])?;
         } else {

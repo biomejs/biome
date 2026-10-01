@@ -13,12 +13,12 @@ pub mod literal;
 
 use std::fmt::{self, Debug, Formatter, Result as FormatResult};
 use std::str::FromStr;
+use std::sync::Arc;
 
-use biome_resolver::ResolvedPath;
 use biome_rowan::Text;
 
 use crate::{
-    globals::{GLOBAL_NUMBER_ID, GLOBAL_STRING_ID, GLOBAL_UNKNOWN_ID},
+    globals::{GLOBAL_NUMBER_KEYWORD_ID, GLOBAL_STRING_KEYWORD_ID, GLOBAL_UNKNOWN_ID},
     globals_ids::{GlobalTypeId, global_type_name},
     literal::RegexpLiteral,
     type_data::literal::{BooleanLiteral, NumberLiteral, StringLiteral},
@@ -415,7 +415,7 @@ impl TypeData {
 
     #[inline]
     pub fn number() -> Self {
-        Self::Reference(TypeReference::Resolved(GLOBAL_NUMBER_ID))
+        Self::Reference(TypeReference::Resolved(GLOBAL_NUMBER_KEYWORD_ID))
     }
 
     pub fn reference(reference: impl Into<TypeReference>) -> Self {
@@ -485,7 +485,7 @@ impl TypeData {
 
     #[inline]
     pub fn string() -> Self {
-        Self::Reference(TypeReference::Resolved(GLOBAL_STRING_ID))
+        Self::Reference(TypeReference::Resolved(GLOBAL_STRING_KEYWORD_ID))
     }
 
     pub fn type_parameters(&self) -> Option<&[TypeReference]> {
@@ -720,6 +720,8 @@ pub struct FunctionParameterBinding {
 /// Definition of a generic type parameter.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GenericTypeParameter {
+    /// Whether inline call arguments use const-like inference for this parameter.
+    pub is_const: bool,
     /// Name of the type parameter.
     pub name: Text,
 
@@ -1101,6 +1103,8 @@ impl TypeMember {
         match &self.kind {
             TypeMemberKind::IndexSignature(key_type)
             | TypeMemberKind::ConstAssertedIndexSignature(key_type)
+            | TypeMemberKind::ComputedStatic(key_type)
+            | TypeMemberKind::ConstAssertedComputedStatic(key_type)
             | TypeMemberKind::ComputedValue(key_type)
             | TypeMemberKind::ConstAssertedComputedValue(key_type) => predicate(key_type),
             _ => false,
@@ -1132,9 +1136,11 @@ pub enum TypeMemberKind {
     /// still spells computed keys as [`Self::IndexSignature`], so the two spellings coexist and
     /// [`TypeMember::is_keyed_member_with_ty`] accepts either.
     ComputedValue(TypeReference),
+    ComputedStatic(TypeReference),
     ConstAssertedCallSignature,
     /// A [`Self::ComputedValue`] carried through an `as const` assertion.
     ConstAssertedComputedValue(TypeReference),
+    ConstAssertedComputedStatic(TypeReference),
     ConstAssertedConstructor,
     ConstAssertedGetter(Text),
     ConstAssertedIndexSignature(TypeReference),
@@ -1154,6 +1160,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1200,6 +1208,8 @@ impl TypeMemberKind {
             self,
             Self::Constructor
                 | Self::ConstAssertedConstructor
+                | Self::ComputedStatic(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::NamedStatic(_)
                 | Self::ConstAssertedNamedStatic(_)
         )
@@ -1211,6 +1221,7 @@ impl TypeMemberKind {
             self,
             Self::ConstAssertedCallSignature
                 | Self::ConstAssertedComputedValue(_)
+                | Self::ConstAssertedComputedStatic(_)
                 | Self::ConstAssertedConstructor
                 | Self::ConstAssertedGetter(_)
                 | Self::ConstAssertedIndexSignature(_)
@@ -1225,6 +1236,9 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature | Self::ConstAssertedCallSignature => {
                 Self::ConstAssertedCallSignature
+            }
+            Self::ComputedStatic(key_type) | Self::ConstAssertedComputedStatic(key_type) => {
+                Self::ConstAssertedComputedStatic(key_type)
             }
             Self::ComputedValue(key_type) | Self::ConstAssertedComputedValue(key_type) => {
                 Self::ConstAssertedComputedValue(key_type)
@@ -1249,6 +1263,7 @@ impl TypeMemberKind {
     pub fn without_const_asserted(&self) -> Self {
         match self {
             Self::ConstAssertedCallSignature => Self::CallSignature,
+            Self::ConstAssertedComputedStatic(key_type) => Self::ComputedStatic(key_type.clone()),
             Self::ConstAssertedComputedValue(key_type) => Self::ComputedValue(key_type.clone()),
             Self::ConstAssertedConstructor => Self::Constructor,
             Self::ConstAssertedGetter(name) => Self::Getter(name.clone()),
@@ -1284,6 +1299,8 @@ impl TypeMemberKind {
         match self {
             Self::CallSignature
             | Self::ConstAssertedCallSignature
+            | Self::ComputedStatic(_)
+            | Self::ConstAssertedComputedStatic(_)
             | Self::ComputedValue(_)
             | Self::ConstAssertedComputedValue(_)
             | Self::IndexSignature(_)
@@ -1337,6 +1354,7 @@ pub enum TypeofExpression {
     BitwiseNot(TypeofBitwiseNotExpression),
     Call(TypeofCallExpression),
     CallArgument(TypeofCallArgumentExpression),
+    ComputedMember(TypeofComputedMemberExpression),
     Conditional(TypeofConditionalExpression),
     Destructure(TypeofDestructureExpression),
     Index(TypeofIndexExpression),
@@ -1458,6 +1476,13 @@ pub enum CallArgumentType {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TypeofComputedMemberExpression {
+    pub object: TypeReference,
+    pub member: TypeReference,
+    pub is_optional_chain: bool,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofIndexExpression {
     pub object: TypeReference,
     pub index: usize,
@@ -1508,6 +1533,8 @@ pub struct TypeofValue {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypeofUnaryMinusExpression {
+    /// Whether the operand syntax is a number or bigint literal.
+    pub is_literal_argument: bool,
     pub argument: TypeReference,
 }
 
@@ -1639,8 +1666,8 @@ pub struct TypeImportQualifier {
     /// The imported symbol.
     pub symbol: ImportSymbol,
 
-    /// Resolved path of the module to import the type from.
-    pub resolved_path: ResolvedPath,
+    /// The module specifier as it appeared in source text.
+    pub specifier: Arc<Text>,
 
     /// If `true`, this qualifier imports the type only.
     pub type_only: bool,
@@ -1784,33 +1811,6 @@ impl TypeReferenceQualifier {
         self.path.is_identifier("Readonly")
     }
 
-    /// Checks whether this type qualifier references the `RegExp` type.
-    ///
-    /// This method simply checks whether the reference is for a literal
-    /// `RegExp`, without considering whether another symbol named `RegExp` is
-    /// in scope. It can be used _after_ type resolution has failed to find a
-    /// `RegExp` symbol in scope, but should not be used _instead of_ such type
-    /// resolution.
-    pub fn is_regex(&self) -> bool {
-        self.path.is_identifier("RegExp")
-    }
-
-    /// Checks whether this type qualifier references the `Symbol` type.
-    ///
-    /// This method simply checks whether the reference is for a literal
-    /// `Symbol`, without considering whether another symbol named `Symbol` is
-    /// in scope. It can be used _after_ type resolution has failed to find a
-    /// `Symbol` symbol in scope, but should not be used _instead of_ such type
-    /// resolution.
-    pub fn is_symbol(&self) -> bool {
-        self.path.is_identifier("Symbol")
-    }
-
-    /// Checks whether this type qualifier references the `Date` type.
-    pub fn is_date(&self) -> bool {
-        self.path.is_identifier("Date")
-    }
-
     /// Checks whether this type qualifier references the `Map` type.
     pub fn is_map(&self) -> bool {
         self.path.is_identifier("Map")
@@ -1824,33 +1824,6 @@ impl TypeReferenceQualifier {
     /// Checks whether this type qualifier references the `WeakMap` type.
     pub fn is_weak_map(&self) -> bool {
         self.path.is_identifier("WeakMap")
-    }
-
-    /// Checks whether this type qualifier references the `Error` type.
-    pub fn is_error(&self) -> bool {
-        self.path.is_identifier("Error")
-    }
-
-    /// Checks whether this type qualifier references the `Disposable` type.
-    ///
-    /// This method simply checks whether the reference is for a literal
-    /// `Disposable`, without considering whether another symbol named `Disposable` is
-    /// in scope. It can be used _after_ type resolution has failed to find a
-    /// `Disposable` symbol in scope, but should not be used _instead of_ such type
-    /// resolution.
-    pub fn is_disposable(&self) -> bool {
-        self.path.is_identifier("Disposable")
-    }
-
-    /// Checks whether this type qualifier references the `AsyncDisposable` type.
-    ///
-    /// This method simply checks whether the reference is for a literal
-    /// `AsyncDisposable`, without considering whether another symbol named `AsyncDisposable` is
-    /// in scope. It can be used _after_ type resolution has failed to find a
-    /// `AsyncDisposable` symbol in scope, but should not be used _instead of_ such type
-    /// resolution.
-    pub fn is_async_disposable(&self) -> bool {
-        self.path.is_identifier("AsyncDisposable")
     }
 
     pub fn with_excluded_binding_id(mut self, binding_id: BindingId) -> Self {
@@ -1907,19 +1880,19 @@ impl Union {
 #[cfg(test)]
 mod tests {
     use super::{RawTypeId, TypeId};
-    use crate::globals_ids::{STRING_ID_GLOBAL_TYPE_ID, UNKNOWN_ID_GLOBAL_TYPE_ID};
+    use crate::globals_ids::{STRING_KEYWORD_ID_GLOBAL_TYPE_ID, UNKNOWN_ID_GLOBAL_TYPE_ID};
 
     #[test]
     fn raw_type_id_identifies_unknown() {
         assert!(RawTypeId::Global(UNKNOWN_ID_GLOBAL_TYPE_ID).is_unknown());
-        assert!(!RawTypeId::Global(STRING_ID_GLOBAL_TYPE_ID).is_unknown());
+        assert!(!RawTypeId::Global(STRING_KEYWORD_ID_GLOBAL_TYPE_ID).is_unknown());
         assert!(!RawTypeId::Local(TypeId::new(0)).is_unknown());
     }
 
     #[test]
     fn raw_type_id_debug_is_readable() {
         assert_eq!(
-            format!("{:?}", RawTypeId::Global(STRING_ID_GLOBAL_TYPE_ID)),
+            format!("{:?}", RawTypeId::Global(STRING_KEYWORD_ID_GLOBAL_TYPE_ID)),
             "string"
         );
         assert_eq!(

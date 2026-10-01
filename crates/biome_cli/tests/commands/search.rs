@@ -1,6 +1,6 @@
+use crate::TestArgs as Args;
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 use crate::{

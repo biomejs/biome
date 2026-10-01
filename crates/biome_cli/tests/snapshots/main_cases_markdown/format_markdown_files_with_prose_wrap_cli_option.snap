@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --write --md-formatter-line-width 40 --md-formatter-prose-wrap always file.md
+```
+
 ## `file.md`
 
 ```md

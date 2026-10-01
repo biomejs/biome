@@ -22,6 +22,7 @@ pub trait DiagnosticWriter {
 pub struct DiagnosticConsoleWriter {
     pub all_diagnostics: Vec<biome_diagnostics::Error>,
     pub action_count: usize,
+    pub all_actions: Vec<TextEdit>,
     pub has_parse_error: bool,
     pub subtract_offset: TextSize,
 }
@@ -37,8 +38,9 @@ impl DiagnosticWriter for DiagnosticConsoleWriter {
         self.write_diagnostic(diag)
     }
 
-    fn write_action(&mut self, _source: &str, _file_path: &str, _edit: TextEdit) -> Result<()> {
+    fn write_action(&mut self, _source: &str, _file_path: &str, edit: TextEdit) -> Result<()> {
         self.action_count += 1;
+        self.all_actions.push(edit);
         Ok(())
     }
 

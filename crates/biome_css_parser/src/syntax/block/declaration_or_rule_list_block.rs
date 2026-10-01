@@ -224,7 +224,7 @@ impl ParseNodeList for DeclarationOrRuleList {
             }
 
             if let ParsedSyntax::Present(declaration) =
-                parse_exclusive_scss_nested_property_declaration(p)
+                parse_exclusive_scss_nested_property_declaration(p, CSS_BOGUS)
             {
                 return ParsedSyntax::Present(declaration);
             }

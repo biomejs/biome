@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_yaml_parser"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's YAML parser"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 [[bench]]
 harness = false
