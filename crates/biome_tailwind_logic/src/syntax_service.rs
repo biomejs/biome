@@ -1,3 +1,6 @@
+use crate::class_context::{
+    TailwindClassContextNode, get_callee_name, is_class_attribute_name, is_default_function,
+};
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::panic::AssertUnwindSafe;
@@ -384,29 +387,6 @@ fn emit_parse_diagnostics<L: Language>(
     }
 }
 
-const DEFAULT_FUNCTIONS: [&str; 10] = [
-    "clsx", "tw", "twMerge", "twJoin", "cva", "tv", "cn", "cc", "cnb", "ctl",
-];
-
-fn is_default_function(name: &str) -> bool {
-    DEFAULT_FUNCTIONS.contains(&name)
-}
-
-fn get_callee_name(call_expression: &JsCallExpression) -> Option<TokenText> {
-    call_expression
-        .callee()
-        .ok()?
-        .as_js_identifier_expression()?
-        .name()
-        .ok()?
-        .name()
-        .ok()
-}
-
-fn is_call_expression_of_default_function(call_expression: &JsCallExpression) -> bool {
-    get_callee_name(call_expression).is_some_and(|name| is_default_function(name.text()))
-}
-
 fn is_static_member_expression_of_default_function(
     static_member_expression: &JsStaticMemberExpression,
 ) -> Option<bool> {
@@ -422,22 +402,6 @@ fn is_static_member_expression_of_default_function(
         }
         return Some(false);
     }
-}
-
-fn get_jsx_attribute_name(attribute: &JsxAttribute) -> Option<TokenText> {
-    Some(
-        attribute
-            .name()
-            .ok()?
-            .as_jsx_name()?
-            .value_token()
-            .ok()?
-            .token_text_trimmed(),
-    )
-}
-
-fn is_class_attribute_name(name: &str) -> bool {
-    matches!(name, "class" | "className")
 }
 
 const CLASS_CONFIGURATION_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsObjectMemberList::KIND_SET
@@ -623,15 +587,12 @@ fn inspect_string_literal(node: &SyntaxNode<JsLanguage>, is_class_attribute: boo
             }
             JsSyntaxKind::JSX_ATTRIBUTE => {
                 let attribute = JsxAttribute::cast_ref(&ancestor)?;
-                return Some(is_class_attribute_name(
-                    get_jsx_attribute_name(&attribute)?.text(),
-                ));
+                return Some(attribute.is_tailwind_class_context());
             }
             JsSyntaxKind::JS_CALL_EXPRESSION => {
                 let call = JsCallExpression::cast_ref(&ancestor)?;
                 return Some(
-                    JsCallArguments::can_cast(child.kind())
-                        && is_call_expression_of_default_function(&call),
+                    JsCallArguments::can_cast(child.kind()) && call.is_tailwind_class_context(),
                 );
             }
             JsSyntaxKind::JS_TEMPLATE_EXPRESSION => {
@@ -722,8 +683,7 @@ impl TailwindClassStringHost for JsxString {
             .ancestors()
             .skip(1)
             .find_map(JsxAttribute::cast)?;
-        let name = get_jsx_attribute_name(&jsx_attribute)?;
-        if !is_class_attribute_name(name.text()) {
+        if !jsx_attribute.is_tailwind_class_context() {
             return None;
         }
         tailwind_class_string(
@@ -751,8 +711,7 @@ impl TailwindClassStringHost for JsTemplateChunkElement {
 
 impl TailwindClassStringHost for HtmlAttribute {
     fn tailwind_class_string(&self, _is_class_attribute: bool) -> Option<TailwindClassString> {
-        let name = self.name().ok()?.value_token().ok()?;
-        if !name.text_trimmed().eq_ignore_ascii_case("class") {
+        if !self.is_tailwind_class_context() {
             return None;
         }
         let html_string = self.html_string()?;

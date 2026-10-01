@@ -338,6 +338,7 @@ define_categories! {
     "lint/nursery/useSvelteKitRuneImports": "https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
+    "lint/nursery/useTailwindStaticClassStrings": "https://biomejs.dev/linter/rules/use-tailwind-static-class-strings",
     "lint/nursery/useTestHooksInOrder": "https://biomejs.dev/linter/rules/use-test-hooks-in-order",
     "lint/nursery/useTestHooksOnTop": "https://biomejs.dev/linter/rules/use-test-hooks-on-top",
     "lint/nursery/useThisInClassMethods": "https://biomejs.dev/linter/rules/use-this-in-class-methods",
