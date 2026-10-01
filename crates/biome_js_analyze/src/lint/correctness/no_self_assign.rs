@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsObjectMember, JsAssignmentExpression, JsAssignmentOperator, JsComputedMemberAssignment,
     JsComputedMemberExpression, JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName,
     JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
-    inner_string_text, unescape_js_identifier, unescape_js_string,
+    inner_string_text, unescape_js_identifier,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError, SyntaxResult, TextRange,
@@ -804,11 +804,11 @@ fn same_member_name(left: &AnyNameLike, right: &AnyNameLike) -> bool {
     }
 }
 
-/// A static property key. Legacy octal spellings stay separate from decoded text,
-/// so `a["\01"]` does not match `a["\\01"]`.
+/// A static property key. Decoded keys use JavaScript's UTF-16 code units.
+/// Legacy octal spellings stay separate, so `a["\01"]` does not match `a["\\01"]`.
 #[derive(PartialEq, Eq)]
 enum StaticPropertyKey {
-    Decoded(String),
+    Units(Vec<u16>),
     LegacyOctal(String),
 }
 
@@ -818,8 +818,8 @@ fn static_property_key(name: &AnyNameLike) -> Option<StaticPropertyKey> {
         AnyNameLike::AnyJsName(AnyJsName::JsName(node)) => {
             let token = node.value_token().ok()?;
             let text = token.text_trimmed();
-            Some(StaticPropertyKey::Decoded(
-                unescape_js_identifier(&text).into_owned(),
+            Some(StaticPropertyKey::Units(
+                unescape_js_identifier(&text).encode_utf16().collect(),
             ))
         }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
@@ -831,16 +831,16 @@ fn static_property_key(name: &AnyNameLike) -> Option<StaticPropertyKey> {
             if contains_legacy_octal_escape(&inner) {
                 Some(StaticPropertyKey::LegacyOctal(inner.to_string()))
             } else {
-                Some(StaticPropertyKey::Decoded(
-                    unescape_js_string(inner).text().to_string(),
-                ))
+                Some(StaticPropertyKey::Units(js_string_units(&inner)))
             }
         }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
             node,
-        )) => Some(StaticPropertyKey::Decoded(number_property_key(
-            node.as_number()?,
-        )?)),
+        )) => Some(StaticPropertyKey::Units(
+            number_property_key(node.as_number()?)?
+                .encode_utf16()
+                .collect(),
+        )),
         _ => None,
     }
 }
@@ -902,6 +902,107 @@ fn js_scientific_to_decimal(scientific: &str) -> Option<String> {
             &digits[..1],
             &digits[1..]
         ))
+    }
+}
+
+/// JavaScript string value as UTF-16 code units.
+///
+/// Lone surrogates stay as units. A pair such as `\uD83D\uDE00` therefore matches
+/// the same emoji written as a scalar, and `\uD800` does not match U+FFFD.
+fn js_string_units(text: &str) -> Vec<u16> {
+    if !text.contains('\\') {
+        return text.encode_utf16().collect();
+    }
+    let mut units = Vec::new();
+    let mut chars = text.chars().peekable();
+    while let Some(character) = chars.next() {
+        if character != '\\' {
+            push_char(&mut units, character);
+            continue;
+        }
+        match chars.next() {
+            Some('b') => units.push(0x0008),
+            Some('f') => units.push(0x000c),
+            Some('n') => units.push(u16::from(b'\n')),
+            Some('r') => units.push(u16::from(b'\r')),
+            Some('t') => units.push(u16::from(b'\t')),
+            Some('v') => units.push(0x000b),
+            Some('0') => units.push(0),
+            Some('x') => {
+                if let (Some(high), Some(low)) = (
+                    chars.next().and_then(hex_digit),
+                    chars.next().and_then(hex_digit),
+                ) {
+                    units.push((high << 4) | low);
+                }
+            }
+            Some('u') => {
+                if chars.peek() == Some(&'{') {
+                    chars.next();
+                    let mut value = 0u32;
+                    let mut closed = false;
+                    while let Some(&digit) = chars.peek() {
+                        if digit == '}' {
+                            chars.next();
+                            closed = true;
+                            break;
+                        }
+                        let Some(hex) = hex_digit(digit) else {
+                            break;
+                        };
+                        chars.next();
+                        value = value.saturating_mul(16).saturating_add(u32::from(hex));
+                    }
+                    if closed {
+                        push_code_point(&mut units, value);
+                    }
+                } else if let Some(value) = read_hex_units(&mut chars, 4) {
+                    units.push(value);
+                }
+            }
+            Some('\r') => {
+                if chars.peek() == Some(&'\n') {
+                    chars.next();
+                }
+            }
+            Some('\n' | '\u{2028}' | '\u{2029}') => {}
+            Some(other) => push_char(&mut units, other),
+            None => {}
+        }
+    }
+    units
+}
+
+fn push_char(units: &mut Vec<u16>, character: char) {
+    let mut encoded = [0; 2];
+    units.extend_from_slice(character.encode_utf16(&mut encoded));
+}
+
+fn push_code_point(units: &mut Vec<u16>, value: u32) {
+    if let Some(character) = char::from_u32(value) {
+        push_char(units, character);
+    } else if value <= u32::from(u16::MAX) {
+        units.push(value as u16);
+    }
+}
+
+fn read_hex_units(
+    chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
+    count: usize,
+) -> Option<u16> {
+    let mut value = 0u16;
+    for _ in 0..count {
+        value = (value << 4) | hex_digit(chars.next()?)?;
+    }
+    Some(value)
+}
+
+fn hex_digit(character: char) -> Option<u16> {
+    match character {
+        '0'..='9' => Some(u16::from(character as u8 - b'0')),
+        'a'..='f' => Some(u16::from(character as u8 - b'a' + 10)),
+        'A'..='F' => Some(u16::from(character as u8 - b'A' + 10)),
+        _ => None,
     }
 }
 

@@ -37,6 +37,7 @@ a[1] = a[1.0];
 a[0x10] = a[16];
 a[1e-7] = a["1e-7"];
 a["\u0062"] = a.b;
+a["\uD83D\uDE00"] = a["😀"];
 a["\01"] = a["\01"];
 a["b"].c = a.b.c;
 
@@ -1113,7 +1114,7 @@ invalid.js:32:13 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 32 │ a[1e-7] = a["1e-7"];
        │             ^^^^^^
     33 │ a["\u0062"] = a.b;
-    34 │ a["\01"] = a["\01"];
+    34 │ a["\uD83D\uDE00"] = a["😀"];
   
   i This is where is assigned.
   
@@ -1122,7 +1123,7 @@ invalid.js:32:13 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 32 │ a[1e-7] = a["1e-7"];
        │   ^^^^
     33 │ a["\u0062"] = a.b;
-    34 │ a["\01"] = a["\01"];
+    34 │ a["\uD83D\uDE00"] = a["😀"];
   
   i Self assignments have no effect and can be removed.
   
@@ -1138,8 +1139,8 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     32 │ a[1e-7] = a["1e-7"];
   > 33 │ a["\u0062"] = a.b;
        │                 ^
-    34 │ a["\01"] = a["\01"];
-    35 │ a["b"].c = a.b.c;
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+    35 │ a["\01"] = a["\01"];
   
   i This is where is assigned.
   
@@ -1147,8 +1148,8 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     32 │ a[1e-7] = a["1e-7"];
   > 33 │ a["\u0062"] = a.b;
        │   ^^^^^^^^
-    34 │ a["\01"] = a["\01"];
-    35 │ a["b"].c = a.b.c;
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+    35 │ a["\01"] = a["\01"];
   
   i Self assignments have no effect and can be removed.
   
@@ -1156,25 +1157,51 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:34:14 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:23 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "😀" is assigned to itself.
+  
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  > 34 │ a["\uD83D\uDE00"] = a["😀"];
+       │                       ^^^^
+    35 │ a["\01"] = a["\01"];
+    36 │ a["b"].c = a.b.c;
+  
+  i This is where is assigned.
+  
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  > 34 │ a["\uD83D\uDE00"] = a["😀"];
+       │   ^^^^^^^^^^^^^^
+    35 │ a["\01"] = a["\01"];
+    36 │ a["b"].c = a.b.c;
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:35:14 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × "\01" is assigned to itself.
   
-    32 │ a[1e-7] = a["1e-7"];
     33 │ a["\u0062"] = a.b;
-  > 34 │ a["\01"] = a["\01"];
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+  > 35 │ a["\01"] = a["\01"];
        │              ^^^^^
-    35 │ a["b"].c = a.b.c;
-    36 │ 
+    36 │ a["b"].c = a.b.c;
+    37 │ 
   
   i This is where is assigned.
   
-    32 │ a[1e-7] = a["1e-7"];
     33 │ a["\u0062"] = a.b;
-  > 34 │ a["\01"] = a["\01"];
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+  > 35 │ a["\01"] = a["\01"];
        │   ^^^^^
-    35 │ a["b"].c = a.b.c;
-    36 │ 
+    36 │ a["b"].c = a.b.c;
+    37 │ 
   
   i Self assignments have no effect and can be removed.
   
@@ -1182,23 +1209,23 @@ invalid.js:34:14 lint/correctness/noSelfAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:35:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × c is assigned to itself.
   
-    33 │ a["\u0062"] = a.b;
-    34 │ a["\01"] = a["\01"];
-  > 35 │ a["b"].c = a.b.c;
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+    35 │ a["\01"] = a["\01"];
+  > 36 │ a["b"].c = a.b.c;
        │                ^
-    36 │ 
+    37 │ 
   
   i This is where is assigned.
   
-    33 │ a["\u0062"] = a.b;
-    34 │ a["\01"] = a["\01"];
-  > 35 │ a["b"].c = a.b.c;
+    34 │ a["\uD83D\uDE00"] = a["😀"];
+    35 │ a["\01"] = a["\01"];
+  > 36 │ a["b"].c = a.b.c;
        │        ^
-    36 │ 
+    37 │ 
   
   i Self assignments have no effect and can be removed.
   
