@@ -134,10 +134,8 @@ CssRoot {
                                         CssIdentifier {
                                             value_token: IDENT@87..91 "red" [] [Whitespace(" ")],
                                         },
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@91..93 "if" [] [],
-                                            },
+                                        ScssLegacyIfFunction {
+                                            if_token: IF_KW@91..93 "if" [] [],
                                             l_paren_token: L_PAREN@93..94 "(" [] [],
                                             items: CssParameterList [
                                                 ScssExpression {
@@ -211,10 +209,8 @@ CssRoot {
                                         CssIdentifier {
                                             value_token: IDENT@147..151 "red" [] [Whitespace(" ")],
                                         },
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@151..153 "if" [] [],
-                                            },
+                                        ScssLegacyIfFunction {
+                                            if_token: IF_KW@151..153 "if" [] [],
                                             l_paren_token: L_PAREN@153..154 "(" [] [],
                                             items: CssParameterList [
                                                 ScssExpression {
@@ -502,9 +498,8 @@ CssRoot {
                   0: SCSS_EXPRESSION_ITEM_LIST@87..121
                     0: CSS_IDENTIFIER@87..91
                       0: IDENT@87..91 "red" [] [Whitespace(" ")]
-                    1: CSS_FUNCTION@91..121
-                      0: CSS_IDENTIFIER@91..93
-                        0: IDENT@91..93 "if" [] []
+                    1: SCSS_LEGACY_IF_FUNCTION@91..121
+                      0: IF_KW@91..93 "if" [] []
                       1: L_PAREN@93..94 "(" [] []
                       2: CSS_PARAMETER_LIST@94..120
                         0: SCSS_EXPRESSION@94..102
@@ -551,9 +546,8 @@ CssRoot {
                   0: SCSS_EXPRESSION_ITEM_LIST@147..178
                     0: CSS_IDENTIFIER@147..151
                       0: IDENT@147..151 "red" [] [Whitespace(" ")]
-                    1: CSS_FUNCTION@151..178
-                      0: CSS_IDENTIFIER@151..153
-                        0: IDENT@151..153 "if" [] []
+                    1: SCSS_LEGACY_IF_FUNCTION@151..178
+                      0: IF_KW@151..153 "if" [] []
                       1: L_PAREN@153..154 "(" [] []
                       2: CSS_PARAMETER_LIST@154..177
                         0: SCSS_EXPRESSION@154..159

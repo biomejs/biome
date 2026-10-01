@@ -1,7 +1,15 @@
 $name: "icon";
 $condition: "(display: grid)";
+$args:(true,red,blue);
 .legacy{
  named:if( $condition:true ,$if-true:red ,$if-false:blue );
+ spread:if( $args... /* end */ );
+ uppercase:IF( true ,red,blue );
+ mixed-case:If( true ,red,blue );
+ escaped:\69 f( true ,red,blue );
+ escaped-uppercase:\49 F( true ,red,blue );
+ empty:if( /* empty */ );
+ url-call:url(if( true ,"dark.png" ,"light.png" ));
  string:if( ("#{if(true, '),:;', ':')}" == ':') , red,blue );
  url:if( (url(//cdn.example/a,b:c.png)) ,red,blue );
  interpolation:if( (url(images/#{$name}.png)) ,red,blue );

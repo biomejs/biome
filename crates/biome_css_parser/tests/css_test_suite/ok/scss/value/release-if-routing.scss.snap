@@ -408,10 +408,8 @@ CssRoot {
                                                         l_paren_token: L_PAREN@361..362 "(" [] [],
                                                         test: ScssExpression {
                                                             items: ScssExpressionItemList [
-                                                                CssFunction {
-                                                                    name: CssIdentifier {
-                                                                        value_token: IDENT@362..364 "if" [] [],
-                                                                    },
+                                                                ScssLegacyIfFunction {
+                                                                    if_token: IF_KW@362..364 "if" [] [],
                                                                     l_paren_token: L_PAREN@364..365 "(" [] [],
                                                                     items: CssParameterList [
                                                                         ScssExpression {
@@ -1033,9 +1031,8 @@ CssRoot {
                             1: L_PAREN@361..362 "(" [] []
                             2: SCSS_EXPRESSION@362..388
                               0: SCSS_EXPRESSION_ITEM_LIST@362..388
-                                0: CSS_FUNCTION@362..388
-                                  0: CSS_IDENTIFIER@362..364
-                                    0: IDENT@362..364 "if" [] []
+                                0: SCSS_LEGACY_IF_FUNCTION@362..388
+                                  0: IF_KW@362..364 "if" [] []
                                   1: L_PAREN@364..365 "(" [] []
                                   2: CSS_PARAMETER_LIST@365..387
                                     0: SCSS_EXPRESSION@365..374

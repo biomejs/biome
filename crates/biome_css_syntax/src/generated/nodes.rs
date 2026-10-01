@@ -11474,6 +11474,56 @@ pub struct ScssKeywordArgumentFields {
     pub value: SyntaxResult<AnyScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssLegacyIfFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssLegacyIfFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssLegacyIfFunctionFields {
+        ScssLegacyIfFunctionFields {
+            if_token: self.if_token(),
+            l_paren_token: self.l_paren_token(),
+            items: self.items(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn if_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn items(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssLegacyIfFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssLegacyIfFunctionFields {
+    pub if_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub items: CssParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssListExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15322,6 +15372,7 @@ pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssIfFunction(CssIfFunction),
     CssUrlFunction(CssUrlFunction),
+    ScssLegacyIfFunction(ScssLegacyIfFunction),
 }
 impl AnyCssFunction {
     pub fn as_css_attr_function(&self) -> Option<&CssAttrFunction> {
@@ -15345,6 +15396,12 @@ impl AnyCssFunction {
     pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
         match &self {
             Self::CssUrlFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_legacy_if_function(&self) -> Option<&ScssLegacyIfFunction> {
+        match &self {
+            Self::ScssLegacyIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -17412,6 +17469,7 @@ pub enum AnyCssUrlModifier {
     CssBogusUrlModifier(CssBogusUrlModifier),
     CssFunction(CssFunction),
     CssIdentifier(CssIdentifier),
+    ScssLegacyIfFunction(ScssLegacyIfFunction),
 }
 impl AnyCssUrlModifier {
     pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
@@ -17429,6 +17487,12 @@ impl AnyCssUrlModifier {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_legacy_if_function(&self) -> Option<&ScssLegacyIfFunction> {
+        match &self {
+            Self::ScssLegacyIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -32299,6 +32363,62 @@ impl From<ScssKeywordArgument> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssLegacyIfFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_LEGACY_IF_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_LEGACY_IF_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssLegacyIfFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssLegacyIfFunction")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssLegacyIfFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssLegacyIfFunction> for SyntaxNode {
+    fn from(n: ScssLegacyIfFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssLegacyIfFunction> for SyntaxElement {
+    fn from(n: ScssLegacyIfFunction) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssListExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -39173,16 +39293,26 @@ impl From<CssUrlFunction> for AnyCssFunction {
         Self::CssUrlFunction(node)
     }
 }
+impl From<ScssLegacyIfFunction> for AnyCssFunction {
+    fn from(node: ScssLegacyIfFunction) -> Self {
+        Self::ScssLegacyIfFunction(node)
+    }
+}
 impl AstNode for AnyCssFunction {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAttrFunction::KIND_SET
         .union(CssFunction::KIND_SET)
         .union(CssIfFunction::KIND_SET)
-        .union(CssUrlFunction::KIND_SET);
+        .union(CssUrlFunction::KIND_SET)
+        .union(ScssLegacyIfFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_ATTR_FUNCTION | CSS_FUNCTION | CSS_IF_FUNCTION | CSS_URL_FUNCTION
+            CSS_ATTR_FUNCTION
+                | CSS_FUNCTION
+                | CSS_IF_FUNCTION
+                | CSS_URL_FUNCTION
+                | SCSS_LEGACY_IF_FUNCTION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -39191,6 +39321,7 @@ impl AstNode for AnyCssFunction {
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_IF_FUNCTION => Self::CssIfFunction(CssIfFunction { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
+            SCSS_LEGACY_IF_FUNCTION => Self::ScssLegacyIfFunction(ScssLegacyIfFunction { syntax }),
             _ => return None,
         };
         Some(res)
@@ -39201,6 +39332,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.syntax(),
             Self::CssIfFunction(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
+            Self::ScssLegacyIfFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -39209,6 +39341,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.into_syntax(),
             Self::CssIfFunction(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
+            Self::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -39219,6 +39352,7 @@ impl std::fmt::Debug for AnyCssFunction {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssLegacyIfFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39229,6 +39363,7 @@ impl From<AnyCssFunction> for SyntaxNode {
             AnyCssFunction::CssFunction(it) => it.into_syntax(),
             AnyCssFunction::CssIfFunction(it) => it.into_syntax(),
             AnyCssFunction::CssUrlFunction(it) => it.into_syntax(),
+            AnyCssFunction::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -45133,19 +45268,29 @@ impl From<CssIdentifier> for AnyCssUrlModifier {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssLegacyIfFunction> for AnyCssUrlModifier {
+    fn from(node: ScssLegacyIfFunction) -> Self {
+        Self::ScssLegacyIfFunction(node)
+    }
+}
 impl AstNode for AnyCssUrlModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusUrlModifier::KIND_SET
         .union(CssFunction::KIND_SET)
-        .union(CssIdentifier::KIND_SET);
+        .union(CssIdentifier::KIND_SET)
+        .union(ScssLegacyIfFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER | SCSS_LEGACY_IF_FUNCTION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_URL_MODIFIER => Self::CssBogusUrlModifier(CssBogusUrlModifier { syntax }),
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_LEGACY_IF_FUNCTION => Self::ScssLegacyIfFunction(ScssLegacyIfFunction { syntax }),
             _ => return None,
         };
         Some(res)
@@ -45155,6 +45300,7 @@ impl AstNode for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => it.syntax(),
             Self::CssFunction(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssLegacyIfFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -45162,6 +45308,7 @@ impl AstNode for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => it.into_syntax(),
             Self::CssFunction(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -45171,6 +45318,7 @@ impl std::fmt::Debug for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssLegacyIfFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -45180,6 +45328,7 @@ impl From<AnyCssUrlModifier> for SyntaxNode {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into_syntax(),
             AnyCssUrlModifier::CssFunction(it) => it.into_syntax(),
             AnyCssUrlModifier::CssIdentifier(it) => it.into_syntax(),
+            AnyCssUrlModifier::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -49777,6 +49926,11 @@ impl std::fmt::Display for ScssKeyframesVariableDeclaration {
     }
 }
 impl std::fmt::Display for ScssKeywordArgument {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssLegacyIfFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

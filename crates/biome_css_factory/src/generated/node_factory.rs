@@ -4072,6 +4072,22 @@ pub fn scss_keyword_argument(
         ],
     ))
 }
+pub fn scss_legacy_if_function(
+    if_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    items: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> ScssLegacyIfFunction {
+    ScssLegacyIfFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION,
+        [
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn scss_list_expression(elements: ScssListExpressionElementList) -> ScssListExpression {
     ScssListExpression::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_LIST_EXPRESSION,

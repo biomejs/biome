@@ -13,7 +13,7 @@ use crate::syntax::{
     is_nth_at_identifier, parse_regular_identifier, try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{T, TextSize};
+use biome_css_syntax::{T, TextSize, decode_css_identifier};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -267,9 +267,17 @@ fn parse_function_with_context(p: &mut CssParser, context: ValueParsingContext) 
         return Absent;
     }
 
+    // CSS keywords ignore case, but the legacy Sass builtin requires lowercase `if`.
+    let is_legacy_if = context.is_full_scss_parsing_allowed()
+        && is_at_if_function(p)
+        && decode_css_identifier(p.cur_text()) == "if";
     let m = p.start();
 
-    if context.is_scss_qualified_function_recovery_allowed() && is_at_scss_module_member_access(p) {
+    if is_legacy_if {
+        p.bump(T![if]);
+    } else if context.is_scss_qualified_function_recovery_allowed()
+        && is_at_scss_module_member_access(p)
+    {
         CssSyntaxFeatures::Scss
             .parse_exclusive_syntax(p, parse_scss_function_name, |p, marker| {
                 scss_only_syntax_error(p, "SCSS qualified function names", marker.range(p))
@@ -282,5 +290,12 @@ fn parse_function_with_context(p: &mut CssParser, context: ValueParsingContext) 
     ParameterList::new(context).parse_list(p);
     p.expect(T![')']);
 
-    Present(m.complete(p, CSS_FUNCTION))
+    Present(m.complete(
+        p,
+        if is_legacy_if {
+            SCSS_LEGACY_IF_FUNCTION
+        } else {
+            CSS_FUNCTION
+        },
+    ))
 }

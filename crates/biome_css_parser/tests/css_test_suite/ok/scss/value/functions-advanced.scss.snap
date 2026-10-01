@@ -5712,10 +5712,8 @@ CssRoot {
                                 colon_token: COLON@5982..5984 ":" [] [Whitespace(" ")],
                                 value: ScssExpression {
                                     items: ScssExpressionItemList [
-                                        CssFunction {
-                                            name: CssIdentifier {
-                                                value_token: IDENT@5984..5986 "if" [] [],
-                                            },
+                                        ScssLegacyIfFunction {
+                                            if_token: IF_KW@5984..5986 "if" [] [],
                                             l_paren_token: L_PAREN@5986..5987 "(" [] [],
                                             items: CssParameterList [
                                                 ScssExpression {
@@ -9393,9 +9391,8 @@ CssRoot {
                 1: COLON@5982..5984 ":" [] [Whitespace(" ")]
                 2: SCSS_EXPRESSION@5984..6022
                   0: SCSS_EXPRESSION_ITEM_LIST@5984..6022
-                    0: CSS_FUNCTION@5984..6022
-                      0: CSS_IDENTIFIER@5984..5986
-                        0: IDENT@5984..5986 "if" [] []
+                    0: SCSS_LEGACY_IF_FUNCTION@5984..6022
+                      0: IF_KW@5984..5986 "if" [] []
                       1: L_PAREN@5986..5987 "(" [] []
                       2: CSS_PARAMETER_LIST@5987..6021
                         0: SCSS_EXPRESSION@5987..6007

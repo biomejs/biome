@@ -1,0 +1,72 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+  color: IF(true, red, blue);
+  color: If(true, red, blue);
+  color: \49 F(true, red, blue);
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:10 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: IF
+  
+    1 │ /* should generate diagnostics */
+    2 │ .a {
+  > 3 │   color: IF(true, red, blue);
+      │          ^^
+    4 │   color: If(true, red, blue);
+    5 │   color: \49 F(true, red, blue);
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.scss:4:10 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: If
+  
+    2 │ .a {
+    3 │   color: IF(true, red, blue);
+  > 4 │   color: If(true, red, blue);
+      │          ^^
+    5 │   color: \49 F(true, red, blue);
+    6 │ }
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.scss:5:10 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown function: \49 F
+  
+    3 │   color: IF(true, red, blue);
+    4 │   color: If(true, red, blue);
+  > 5 │   color: \49 F(true, red, blue);
+      │          ^^^^^
+    6 │ }
+    7 │ 
+  
+  i Use a known function instead.
+  
+  i See MDN web docs for more details.
+  
+
+```
