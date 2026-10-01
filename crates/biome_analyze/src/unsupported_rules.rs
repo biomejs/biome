@@ -194,6 +194,17 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-spacing"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-quotes"), Stylistic),
+    UnsupportedRule(EslintSvelte("indent"), Stylistic),
+    UnsupportedRule(EslintSvelte("mustache-spacing"), Stylistic),
+    UnsupportedRule(
+        EslintSvelte("no-spaces-around-equal-signs-in-attribute"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
         EslintStylistic("array-bracket-spacing"),
@@ -409,6 +420,12 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(
         EslintVueJs("operator-linebreak"),
         FormatterOption("operatorLinebreak"),
+    ),
+    UnsupportedRule(EslintVueJs("padding-line-between-blocks"), Stylistic),
+    UnsupportedRule(EslintVueJs("padding-line-between-tags"), Stylistic),
+    UnsupportedRule(
+        EslintVueJs("padding-lines-in-component-definition"),
+        Stylistic,
     ),
     UnsupportedRule(EslintVueJs("quote-props"), Stylistic),
     UnsupportedRule(EslintVueJs("quotes"), FormatterOption("quoteStyle")),
