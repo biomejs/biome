@@ -804,13 +804,23 @@ fn same_member_name(left: &AnyNameLike, right: &AnyNameLike) -> bool {
     }
 }
 
+/// A static property key. Legacy octal spellings stay separate from decoded text,
+/// so `a["\01"]` does not match `a["\\01"]`.
+#[derive(PartialEq, Eq)]
+enum StaticPropertyKey {
+    Decoded(String),
+    LegacyOctal(String),
+}
+
 /// Object key for a static member. `None` when the key is computed.
-fn static_property_key(name: &AnyNameLike) -> Option<String> {
+fn static_property_key(name: &AnyNameLike) -> Option<StaticPropertyKey> {
     match name {
         AnyNameLike::AnyJsName(AnyJsName::JsName(node)) => {
             let token = node.value_token().ok()?;
             let text = token.text_trimmed();
-            Some(unescape_js_identifier(&text).into_owned())
+            Some(StaticPropertyKey::Decoded(
+                unescape_js_identifier(&text).into_owned(),
+            ))
         }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
             node,
@@ -819,14 +829,18 @@ fn static_property_key(name: &AnyNameLike) -> Option<String> {
             // `\0` followed by a digit is a legacy octal escape. `unescape_js_string`
             // hits `unimplemented!()` for that form, which is still valid in scripts.
             if contains_legacy_octal_escape(&inner) {
-                Some(inner.to_string())
+                Some(StaticPropertyKey::LegacyOctal(inner.to_string()))
             } else {
-                Some(unescape_js_string(inner).text().to_string())
+                Some(StaticPropertyKey::Decoded(
+                    unescape_js_string(inner).text().to_string(),
+                ))
             }
         }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
             node,
-        )) => number_property_key(node.as_number()?),
+        )) => Some(StaticPropertyKey::Decoded(number_property_key(
+            node.as_number()?,
+        )?)),
         _ => None,
     }
 }
