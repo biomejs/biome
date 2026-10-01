@@ -8756,7 +8756,12 @@ export type NoNoninteractiveElementToInteractiveRoleOptions = {};
 export type NoNoninteractiveTabindexOptions = {};
 export type NoPositiveTabindexOptions = {};
 export type NoRedundantAltOptions = {};
-export type NoRedundantRolesOptions = {};
+export interface NoRedundantRolesOptions {
+	/**
+	 * Array of element names that the rule should ignore.
+	 */
+	ignoreElements?: string[];
+}
 export type NoStaticElementInteractionsOptions = {};
 export type NoSvgWithoutTitleOptions = {};
 export type UseAltTextOptions = {};

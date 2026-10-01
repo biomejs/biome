@@ -1,0 +1,12 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validIgnoreElements.html
+---
+# Input
+```html
+<!-- should not generate diagnostics -->
+<button role="button"></button>
+<BUTTON role="button"></BUTTON>
+<nav role="navigation"></nav>
+
+```
