@@ -5737,6 +5737,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteAddEventListenerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteAddEventListenerOptions" }
+			]
+		},
+		"NoSvelteAddEventListenerOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteAtDebugTagsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7309,6 +7319,13 @@
 					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteAddEventListener": {
+					"description": "Disallow addEventListener in Svelte files.\nSee https://biomejs.dev/linter/rules/no-svelte-add-event-listener",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteAddEventListenerConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10877,6 +10894,16 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSuspiciousSemicolonInJsxOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteAddEventListenerOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteAddEventListenerOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

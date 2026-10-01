@@ -2605,6 +2605,11 @@ See https://biomejs.dev/linter/rules/no-self-import
 	 */
 	noSelfImport?: NoSelfImportConfiguration;
 	/**
+	* Disallow addEventListener in Svelte files.
+See https://biomejs.dev/linter/rules/no-svelte-add-event-listener 
+	 */
+	noSvelteAddEventListener?: NoSvelteAddEventListenerConfiguration;
+	/**
 	* Disallow the use of Svelte's {@debug} tag.
 See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
 	 */
@@ -5018,6 +5023,9 @@ export type NoReturnInFinallyConfiguration =
 export type NoSelfImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfImportOptions;
+export type NoSvelteAddEventListenerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteAddEventListenerOptions;
 export type NoSvelteAtDebugTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtDebugTagsOptions;
@@ -7058,6 +7066,11 @@ export interface RuleWithNoSelfImportOptions {
 	level: RulePlainConfiguration;
 	options?: NoSelfImportOptions;
 }
+export interface RuleWithNoSvelteAddEventListenerOptions {
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteAddEventListenerOptions;
+}
 export interface RuleWithNoSvelteAtDebugTagsOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -8939,6 +8952,7 @@ export type NoReactStringRefsOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
+export type NoSvelteAddEventListenerOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteExportLetOptions = {};
@@ -10487,6 +10501,7 @@ export type Category =
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSelfImport"
+	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteExportLet"
