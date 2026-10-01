@@ -1548,6 +1548,11 @@ export interface Source {
 	 * See https://biomejs.dev/assist/actions/use-sorted-type-fields
 	 */
 	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
+	/**
+	* Sort the variable definitions of GraphQL operations in natural order.
+See https://biomejs.dev/assist/actions/use-sorted-variables 
+	 */
+	useSortedVariables?: UseSortedVariablesConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1782,6 +1787,9 @@ export type UseSortedSelectionSetConfiguration =
 export type UseSortedTypeFieldsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedTypeFieldsOptions;
+export type UseSortedVariablesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedVariablesOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * Configures all rules in one lint group.
@@ -4796,6 +4804,10 @@ export interface RuleAssistWithUseSortedTypeFieldsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedTypeFieldsOptions;
 }
+export interface RuleAssistWithUseSortedVariablesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedVariablesOptions;
+}
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccessKeyOptions;
@@ -6557,6 +6569,7 @@ export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
 export type UseSortedSelectionSetOptions = {};
 export type UseSortedTypeFieldsOptions = {};
+export type UseSortedVariablesOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	/**
@@ -12127,6 +12140,7 @@ export type Category =
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedSelectionSet"
 	| "assist/source/useSortedTypeFields"
+	| "assist/source/useSortedVariables"
 	| "syntax/correctness/noInvalidPropertySyntax"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"

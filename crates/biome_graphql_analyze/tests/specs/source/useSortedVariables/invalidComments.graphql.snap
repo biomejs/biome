@@ -1,0 +1,321 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidComments.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query CommaThenComment(
+  $c: Int, # c
+  $a: Int # a
+) { x }
+
+query CommentAbove(
+  # about c
+  $c: Int
+  # about a
+  $a: Int
+) { x }
+
+query Mixed(
+  # header for c
+  $c: Int, # same c
+  $b: Int # same b
+  # header for a
+  $a: Int, # same a
+) { x }
+
+query PlainIntoCommentSlot(
+  $c: Int, # c
+  $a: Int,
+) { x }
+
+query CommentIntoPlainSlot(
+  $c: Int,
+  $b: Int, # b
+  $a: Int
+) { x }
+
+# The comment of `$a` would be followed by `$b` on the same line, so no fix is offered.
+query CommentWouldSwallowVariable($c: Int, $b: Int, $a: Int # a
+) { x }
+
+# The comment of `$b` would be followed by `)` on the same line, so no fix is offered.
+query CommentWouldSwallowParen($b: Int # b
+  $a: Int) { x }
+
+# The comment above `$b` would follow `$a` on the same line, so no fix is offered.
+query CommentAboveIntoInlineSlot($a: Int, $c: Int,
+  # about b
+  $b: Int) { x }
+
+# The comment above `$a` would follow `(` on the same line, so no fix is offered.
+query CommentAboveIntoFirstSlot($b: Int,
+  # about a
+  $a: Int) { x }
+
+query CommentAfterParen( # variables
+  $b: Int
+  $a: Int
+) { x }
+
+```
+
+# Diagnostics
+```
+invalidComments.graphql:2:23 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query CommaThenComment(
+      │                       ^
+  > 3 │   $c: Int, # c
+  > 4 │   $a: Int # a
+  > 5 │ ) { x }
+      │ ^
+    6 │ 
+    7 │ query CommentAbove(
+  
+  i Safe fix: Sort the variables.
+  
+     1  1 │   # should generate diagnostics
+     2  2 │   query CommaThenComment(
+     3    │ - ··$c:·Int,·#·c
+     4    │ - ··$a:·Int·#·a
+        3 │ + ··$a:·Int·#·a
+        4 │ + ··$c:·Int,·#·c
+     5  5 │   ) { x }
+     6  6 │   
+  
+
+```
+
+```
+invalidComments.graphql:7:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+     5 │ ) { x }
+     6 │ 
+   > 7 │ query CommentAbove(
+       │                   ^
+   > 8 │   # about c
+   > 9 │   $c: Int
+  > 10 │   # about a
+  > 11 │   $a: Int
+  > 12 │ ) { x }
+       │ ^
+    13 │ 
+    14 │ query Mixed(
+  
+  i Safe fix: Sort the variables.
+  
+     6  6 │   
+     7  7 │   query CommentAbove(
+     8    │ - ··#·about·c
+     9    │ - ··$c:·Int
+    10    │ - ··#·about·a
+    11    │ - ··$a:·Int
+        8 │ + ··#·about·a
+        9 │ + ··$a:·Int
+       10 │ + ··#·about·c
+       11 │ + ··$c:·Int
+    12 12 │   ) { x }
+    13 13 │   
+  
+
+```
+
+```
+invalidComments.graphql:14:12 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    12 │ ) { x }
+    13 │ 
+  > 14 │ query Mixed(
+       │            ^
+  > 15 │   # header for c
+        ...
+  > 19 │   $a: Int, # same a
+  > 20 │ ) { x }
+       │ ^
+    21 │ 
+    22 │ query PlainIntoCommentSlot(
+  
+  i Safe fix: Sort the variables.
+  
+    13 13 │   
+    14 14 │   query Mixed(
+    15    │ - ··#·header·for·c
+    16    │ - ··$c:·Int,·#·same·c
+       15 │ + ··#·header·for·a
+       16 │ + ··$a:·Int,·#·same·a
+    17 17 │     $b: Int # same b
+    18    │ - ··#·header·for·a
+    19    │ - ··$a:·Int,·#·same·a
+       18 │ + ··#·header·for·c
+       19 │ + ··$c:·Int,·#·same·c
+    20 20 │   ) { x }
+    21 21 │   
+  
+
+```
+
+```
+invalidComments.graphql:22:27 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    20 │ ) { x }
+    21 │ 
+  > 22 │ query PlainIntoCommentSlot(
+       │                           ^
+  > 23 │   $c: Int, # c
+  > 24 │   $a: Int,
+  > 25 │ ) { x }
+       │ ^
+    26 │ 
+    27 │ query CommentIntoPlainSlot(
+  
+  i Safe fix: Sort the variables.
+  
+    21 21 │   
+    22 22 │   query PlainIntoCommentSlot(
+    23    │ - ··$c:·Int,·#·c
+    24    │ - ··$a:·Int,
+       23 │ + ··$a:·Int
+       24 │ + ··$c:·Int,·#·c
+    25 25 │   ) { x }
+    26 26 │   
+  
+
+```
+
+```
+invalidComments.graphql:27:27 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    25 │ ) { x }
+    26 │ 
+  > 27 │ query CommentIntoPlainSlot(
+       │                           ^
+  > 28 │   $c: Int,
+  > 29 │   $b: Int, # b
+  > 30 │   $a: Int
+  > 31 │ ) { x }
+       │ ^
+    32 │ 
+    33 │ # The comment of `$a` would be followed by `$b` on the same line, so no fix is offered.
+  
+  i Safe fix: Sort the variables.
+  
+    26 26 │   
+    27 27 │   query CommentIntoPlainSlot(
+    28    │ - ··$c:·Int,
+       28 │ + ··$a:·Int,
+    29 29 │     $b: Int, # b
+    30    │ - ··$a:·Int
+       30 │ + ··$c:·Int
+    31 31 │   ) { x }
+    32 32 │   
+  
+
+```
+
+```
+invalidComments.graphql:34:34 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    33 │ # The comment of `$a` would be followed by `$b` on the same line, so no fix is offered.
+  > 34 │ query CommentWouldSwallowVariable($c: Int, $b: Int, $a: Int # a
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 35 │ ) { x }
+       │ ^
+    36 │ 
+    37 │ # The comment of `$b` would be followed by `)` on the same line, so no fix is offered.
+  
+
+```
+
+```
+invalidComments.graphql:38:31 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    37 │ # The comment of `$b` would be followed by `)` on the same line, so no fix is offered.
+  > 38 │ query CommentWouldSwallowParen($b: Int # b
+       │                               ^^^^^^^^^^^^
+  > 39 │   $a: Int) { x }
+       │   ^^^^^^^^
+    40 │ 
+    41 │ # The comment above `$b` would follow `$a` on the same line, so no fix is offered.
+  
+
+```
+
+```
+invalidComments.graphql:42:33 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    41 │ # The comment above `$b` would follow `$a` on the same line, so no fix is offered.
+  > 42 │ query CommentAboveIntoInlineSlot($a: Int, $c: Int,
+       │                                 ^^^^^^^^^^^^^^^^^^
+  > 43 │   # about b
+  > 44 │   $b: Int) { x }
+       │   ^^^^^^^^
+    45 │ 
+    46 │ # The comment above `$a` would follow `(` on the same line, so no fix is offered.
+  
+
+```
+
+```
+invalidComments.graphql:47:32 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    46 │ # The comment above `$a` would follow `(` on the same line, so no fix is offered.
+  > 47 │ query CommentAboveIntoFirstSlot($b: Int,
+       │                                ^^^^^^^^^
+  > 48 │   # about a
+  > 49 │   $a: Int) { x }
+       │   ^^^^^^^^
+    50 │ 
+    51 │ query CommentAfterParen( # variables
+  
+
+```
+
+```
+invalidComments.graphql:51:24 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    49 │   $a: Int) { x }
+    50 │ 
+  > 51 │ query CommentAfterParen( # variables
+       │                        ^^^^^^^^^^^^^
+  > 52 │   $b: Int
+  > 53 │   $a: Int
+  > 54 │ ) { x }
+       │ ^
+    55 │ 
+  
+  i Safe fix: Sort the variables.
+  
+    50 50 │   
+    51 51 │   query CommentAfterParen( # variables
+    52    │ - ··$b:·Int
+    53    │ - ··$a:·Int
+       52 │ + ··$a:·Int
+       53 │ + ··$b:·Int
+    54 54 │   ) { x }
+    55 55 │   
+  
+
+```
