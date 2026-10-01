@@ -1,0 +1,247 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<a href="/foo">Click me!</a>
+<a href="foo">Click me!</a>
+<a href="">Click me!</a>
+<a href={"/foo"}>Click me!</a>
+<a href={'/foo'}>Click me!</a>
+<a href="/posts/{id}">Click me!</a>
+<a href="{'/foo'}">Click me!</a>
+<a href="/foo" rel="noopener">Click me!</a>
+<a href="/foo" rel="">Click me!</a>
+<a HREF="/foo">Click me!</a>
+<a href="/foo" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:1:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+  > 1 │ <a href="/foo">Click me!</a>
+      │    ^^^^^^^^^^^
+    2 │ <a href="foo">Click me!</a>
+    3 │ <a href="">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:2:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    1 │ <a href="/foo">Click me!</a>
+  > 2 │ <a href="foo">Click me!</a>
+      │    ^^^^^^^^^^
+    3 │ <a href="">Click me!</a>
+    4 │ <a href={"/foo"}>Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    1 │ <a href="/foo">Click me!</a>
+    2 │ <a href="foo">Click me!</a>
+  > 3 │ <a href="">Click me!</a>
+      │    ^^^^^^^
+    4 │ <a href={"/foo"}>Click me!</a>
+    5 │ <a href={'/foo'}>Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:4:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    2 │ <a href="foo">Click me!</a>
+    3 │ <a href="">Click me!</a>
+  > 4 │ <a href={"/foo"}>Click me!</a>
+      │    ^^^^^^^^^^^^^
+    5 │ <a href={'/foo'}>Click me!</a>
+    6 │ <a href="/posts/{id}">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    3 │ <a href="">Click me!</a>
+    4 │ <a href={"/foo"}>Click me!</a>
+  > 5 │ <a href={'/foo'}>Click me!</a>
+      │    ^^^^^^^^^^^^^
+    6 │ <a href="/posts/{id}">Click me!</a>
+    7 │ <a href="{'/foo'}">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    4 │ <a href={"/foo"}>Click me!</a>
+    5 │ <a href={'/foo'}>Click me!</a>
+  > 6 │ <a href="/posts/{id}">Click me!</a>
+      │    ^^^^^^^^^^^^^^^^^^
+    7 │ <a href="{'/foo'}">Click me!</a>
+    8 │ <a href="/foo" rel="noopener">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+    5 │ <a href={'/foo'}>Click me!</a>
+    6 │ <a href="/posts/{id}">Click me!</a>
+  > 7 │ <a href="{'/foo'}">Click me!</a>
+      │    ^^^^^^^^^^^^^^^
+    8 │ <a href="/foo" rel="noopener">Click me!</a>
+    9 │ <a href="/foo" rel="">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+     6 │ <a href="/posts/{id}">Click me!</a>
+     7 │ <a href="{'/foo'}">Click me!</a>
+   > 8 │ <a href="/foo" rel="noopener">Click me!</a>
+       │    ^^^^^^^^^^^
+     9 │ <a href="/foo" rel="">Click me!</a>
+    10 │ <a HREF="/foo">Click me!</a>
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+     7 │ <a href="{'/foo'}">Click me!</a>
+     8 │ <a href="/foo" rel="noopener">Click me!</a>
+   > 9 │ <a href="/foo" rel="">Click me!</a>
+       │    ^^^^^^^^^^^
+    10 │ <a HREF="/foo">Click me!</a>
+    11 │ <a href="/foo" />
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:10:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+     8 │ <a href="/foo" rel="noopener">Click me!</a>
+     9 │ <a href="/foo" rel="">Click me!</a>
+  > 10 │ <a HREF="/foo">Click me!</a>
+       │    ^^^^^^^^^^^
+    11 │ <a href="/foo" />
+    12 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:4 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This link's href isn't built with resolve().
+  
+     9 │ <a href="/foo" rel="">Click me!</a>
+    10 │ <a HREF="/foo">Click me!</a>
+  > 11 │ <a href="/foo" />
+       │    ^^^^^^^^^^^
+    12 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. If the link leaves the app, add rel="external".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
