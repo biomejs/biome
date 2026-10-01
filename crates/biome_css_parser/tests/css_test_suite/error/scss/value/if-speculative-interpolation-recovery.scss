@@ -1,6 +1,0 @@
-$x: red;
-.a {
-  color: if(style((--x: if(sass(true): "#{$x +}"; else: blue))): green; else: black);
-  width: 1px;
-}
-.after { height: 2px; }

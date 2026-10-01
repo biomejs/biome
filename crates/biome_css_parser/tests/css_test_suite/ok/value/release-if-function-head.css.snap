@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_parser/tests/spec_test.rs
-assertion_line: 208
 expression: snapshot
 ---
 
@@ -13,6 +12,11 @@ expression: snapshot
   fallback: if(style(--enabled: true): serif; else: if);
   sequence: if(style(--enabled: true): if serif; else: serif);
   nested: if(style(--enabled: true): if(media(width > 10px): if; else: serif); else: if);
+}
+
+.queries {
+  grouped: if((style(--enabled: true)): red; else: blue);
+  nested: if(not (style(--value: fn("),:;", nested(red, blue)))): red; else: blue);
 }
 
 ```
@@ -347,17 +351,212 @@ CssRoot {
                 r_curly_token: R_CURLY@290..292 "}" [Newline("\n")] [],
             },
         },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@292..295 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@295..303 "queries" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@303..304 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@304..314 "grouped" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@314..316 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIfFunction {
+                                        if_token: IF_KW@316..318 "if" [] [],
+                                        l_paren_token: L_PAREN@318..319 "(" [] [],
+                                        css_if_branch_list: CssIfBranchList [
+                                            CssIfBranch {
+                                                condition: CssIfTestBooleanExprInParens {
+                                                    l_paren_token: L_PAREN@319..320 "(" [] [],
+                                                    expression: CssIfStyleTest {
+                                                        style_token: STYLE_KW@320..325 "style" [] [],
+                                                        l_paren_token: L_PAREN@325..326 "(" [] [],
+                                                        test: CssDeclaration {
+                                                            property: CssGenericProperty {
+                                                                name: CssDashedIdentifier {
+                                                                    value_token: IDENT@326..335 "--enabled" [] [],
+                                                                },
+                                                                colon_token: COLON@335..337 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssIdentifier {
+                                                                        value_token: IDENT@337..341 "true" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            important: missing (optional),
+                                                        },
+                                                        r_paren_token: R_PAREN@341..342 ")" [] [],
+                                                    },
+                                                    r_paren_token: R_PAREN@342..343 ")" [] [],
+                                                },
+                                                colon_token: COLON@343..345 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@345..348 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@348..350 ";" [] [Whitespace(" ")],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@350..354 "else" [] [],
+                                                },
+                                                colon_token: COLON@354..356 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@356..360 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@360..361 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@361..362 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@362..371 "nested" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@371..373 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIfFunction {
+                                        if_token: IF_KW@373..375 "if" [] [],
+                                        l_paren_token: L_PAREN@375..376 "(" [] [],
+                                        css_if_branch_list: CssIfBranchList [
+                                            CssIfBranch {
+                                                condition: CssIfTestBooleanNotExpr {
+                                                    not_token: NOT_KW@376..380 "not" [] [Whitespace(" ")],
+                                                    expression: CssIfTestBooleanExprInParens {
+                                                        l_paren_token: L_PAREN@380..381 "(" [] [],
+                                                        expression: CssIfStyleTest {
+                                                            style_token: STYLE_KW@381..386 "style" [] [],
+                                                            l_paren_token: L_PAREN@386..387 "(" [] [],
+                                                            test: CssDeclaration {
+                                                                property: CssGenericProperty {
+                                                                    name: CssDashedIdentifier {
+                                                                        value_token: IDENT@387..394 "--value" [] [],
+                                                                    },
+                                                                    colon_token: COLON@394..396 ":" [] [Whitespace(" ")],
+                                                                    value: CssGenericComponentValueList [
+                                                                        CssFunction {
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@396..398 "fn" [] [],
+                                                                            },
+                                                                            l_paren_token: L_PAREN@398..399 "(" [] [],
+                                                                            items: CssParameterList [
+                                                                                CssListOfComponentValuesExpression {
+                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                        CssString {
+                                                                                            value_token: CSS_STRING_LITERAL@399..405 "\"),:;\"" [] [],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                                COMMA@405..407 "," [] [Whitespace(" ")],
+                                                                                CssListOfComponentValuesExpression {
+                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                        CssFunction {
+                                                                                            name: CssIdentifier {
+                                                                                                value_token: IDENT@407..413 "nested" [] [],
+                                                                                            },
+                                                                                            l_paren_token: L_PAREN@413..414 "(" [] [],
+                                                                                            items: CssParameterList [
+                                                                                                CssListOfComponentValuesExpression {
+                                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                                        CssIdentifier {
+                                                                                                            value_token: IDENT@414..417 "red" [] [],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                                COMMA@417..419 "," [] [Whitespace(" ")],
+                                                                                                CssListOfComponentValuesExpression {
+                                                                                                    css_component_value_list: CssComponentValueList [
+                                                                                                        CssIdentifier {
+                                                                                                            value_token: IDENT@419..423 "blue" [] [],
+                                                                                                        },
+                                                                                                    ],
+                                                                                                },
+                                                                                            ],
+                                                                                            r_paren_token: R_PAREN@423..424 ")" [] [],
+                                                                                        },
+                                                                                    ],
+                                                                                },
+                                                                            ],
+                                                                            r_paren_token: R_PAREN@424..425 ")" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                important: missing (optional),
+                                                            },
+                                                            r_paren_token: R_PAREN@425..426 ")" [] [],
+                                                        },
+                                                        r_paren_token: R_PAREN@426..427 ")" [] [],
+                                                    },
+                                                },
+                                                colon_token: COLON@427..429 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@429..432 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@432..434 ";" [] [Whitespace(" ")],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@434..438 "else" [] [],
+                                                },
+                                                colon_token: COLON@438..440 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@440..444 "blue" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@444..445 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@445..446 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@446..448 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@292..293 "" [Newline("\n")] [],
+    eof_token: EOF@448..449 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..293
+0: CSS_ROOT@0..449
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..292
+  1: CSS_ROOT_ITEM_LIST@0..448
     0: CSS_QUALIFIED_RULE@0..292
       0: CSS_SELECTOR_LIST@0..3
         0: CSS_COMPOUND_SELECTOR@0..3
@@ -573,6 +772,134 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@289..290 ";" [] []
         2: R_CURLY@290..292 "}" [Newline("\n")] []
-  2: EOF@292..293 "" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@292..448
+      0: CSS_SELECTOR_LIST@292..303
+        0: CSS_COMPOUND_SELECTOR@292..303
+          0: CSS_NESTED_SELECTOR_LIST@292..292
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@292..303
+            0: CSS_CLASS_SELECTOR@292..303
+              0: DOT@292..295 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@295..303
+                0: IDENT@295..303 "queries" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@303..448
+        0: L_CURLY@303..304 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@304..446
+          0: CSS_DECLARATION_WITH_SEMICOLON@304..362
+            0: CSS_DECLARATION@304..361
+              0: CSS_GENERIC_PROPERTY@304..361
+                0: CSS_IDENTIFIER@304..314
+                  0: IDENT@304..314 "grouped" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@314..316 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@316..361
+                  0: CSS_IF_FUNCTION@316..361
+                    0: IF_KW@316..318 "if" [] []
+                    1: L_PAREN@318..319 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@319..360
+                      0: CSS_IF_BRANCH@319..348
+                        0: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@319..343
+                          0: L_PAREN@319..320 "(" [] []
+                          1: CSS_IF_STYLE_TEST@320..342
+                            0: STYLE_KW@320..325 "style" [] []
+                            1: L_PAREN@325..326 "(" [] []
+                            2: CSS_DECLARATION@326..341
+                              0: CSS_GENERIC_PROPERTY@326..341
+                                0: CSS_DASHED_IDENTIFIER@326..335
+                                  0: IDENT@326..335 "--enabled" [] []
+                                1: COLON@335..337 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@337..341
+                                  0: CSS_IDENTIFIER@337..341
+                                    0: IDENT@337..341 "true" [] []
+                              1: (empty)
+                            3: R_PAREN@341..342 ")" [] []
+                          2: R_PAREN@342..343 ")" [] []
+                        1: COLON@343..345 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@345..348
+                          0: CSS_IDENTIFIER@345..348
+                            0: IDENT@345..348 "red" [] []
+                      1: SEMICOLON@348..350 ";" [] [Whitespace(" ")]
+                      2: CSS_IF_BRANCH@350..360
+                        0: CSS_ELSE_KEYWORD@350..354
+                          0: ELSE_KW@350..354 "else" [] []
+                        1: COLON@354..356 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@356..360
+                          0: CSS_IDENTIFIER@356..360
+                            0: IDENT@356..360 "blue" [] []
+                    3: R_PAREN@360..361 ")" [] []
+              1: (empty)
+            1: SEMICOLON@361..362 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@362..446
+            0: CSS_DECLARATION@362..445
+              0: CSS_GENERIC_PROPERTY@362..445
+                0: CSS_IDENTIFIER@362..371
+                  0: IDENT@362..371 "nested" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@371..373 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@373..445
+                  0: CSS_IF_FUNCTION@373..445
+                    0: IF_KW@373..375 "if" [] []
+                    1: L_PAREN@375..376 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@376..444
+                      0: CSS_IF_BRANCH@376..432
+                        0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@376..427
+                          0: NOT_KW@376..380 "not" [] [Whitespace(" ")]
+                          1: CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS@380..427
+                            0: L_PAREN@380..381 "(" [] []
+                            1: CSS_IF_STYLE_TEST@381..426
+                              0: STYLE_KW@381..386 "style" [] []
+                              1: L_PAREN@386..387 "(" [] []
+                              2: CSS_DECLARATION@387..425
+                                0: CSS_GENERIC_PROPERTY@387..425
+                                  0: CSS_DASHED_IDENTIFIER@387..394
+                                    0: IDENT@387..394 "--value" [] []
+                                  1: COLON@394..396 ":" [] [Whitespace(" ")]
+                                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@396..425
+                                    0: CSS_FUNCTION@396..425
+                                      0: CSS_IDENTIFIER@396..398
+                                        0: IDENT@396..398 "fn" [] []
+                                      1: L_PAREN@398..399 "(" [] []
+                                      2: CSS_PARAMETER_LIST@399..424
+                                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@399..405
+                                          0: CSS_COMPONENT_VALUE_LIST@399..405
+                                            0: CSS_STRING@399..405
+                                              0: CSS_STRING_LITERAL@399..405 "\"),:;\"" [] []
+                                        1: COMMA@405..407 "," [] [Whitespace(" ")]
+                                        2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@407..424
+                                          0: CSS_COMPONENT_VALUE_LIST@407..424
+                                            0: CSS_FUNCTION@407..424
+                                              0: CSS_IDENTIFIER@407..413
+                                                0: IDENT@407..413 "nested" [] []
+                                              1: L_PAREN@413..414 "(" [] []
+                                              2: CSS_PARAMETER_LIST@414..423
+                                                0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@414..417
+                                                  0: CSS_COMPONENT_VALUE_LIST@414..417
+                                                    0: CSS_IDENTIFIER@414..417
+                                                      0: IDENT@414..417 "red" [] []
+                                                1: COMMA@417..419 "," [] [Whitespace(" ")]
+                                                2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@419..423
+                                                  0: CSS_COMPONENT_VALUE_LIST@419..423
+                                                    0: CSS_IDENTIFIER@419..423
+                                                      0: IDENT@419..423 "blue" [] []
+                                              3: R_PAREN@423..424 ")" [] []
+                                      3: R_PAREN@424..425 ")" [] []
+                                1: (empty)
+                              3: R_PAREN@425..426 ")" [] []
+                            2: R_PAREN@426..427 ")" [] []
+                        1: COLON@427..429 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@429..432
+                          0: CSS_IDENTIFIER@429..432
+                            0: IDENT@429..432 "red" [] []
+                      1: SEMICOLON@432..434 ";" [] [Whitespace(" ")]
+                      2: CSS_IF_BRANCH@434..444
+                        0: CSS_ELSE_KEYWORD@434..438
+                          0: ELSE_KW@434..438 "else" [] []
+                        1: COLON@438..440 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@440..444
+                          0: CSS_IDENTIFIER@440..444
+                            0: IDENT@440..444 "blue" [] []
+                    3: R_PAREN@444..445 ")" [] []
+              1: (empty)
+            1: SEMICOLON@445..446 ";" [] []
+        2: R_CURLY@446..448 "}" [Newline("\n")] []
+  2: EOF@448..449 "" [Newline("\n")] []
 
 ```

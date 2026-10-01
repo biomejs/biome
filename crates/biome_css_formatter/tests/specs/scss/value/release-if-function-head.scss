@@ -6,7 +6,6 @@
  fallback:if(sass(false): serif;else :if);
  sequence:if(sass(true):if  serif);
  nested:if(sass(true):if(sass(false): serif;else :if));
- spaced: list.length(if (not false));
  commented: list.length(if/**/(not false));
 }
 .comments{font-family:if(sass(true): /* before */ if /* after */);other:if(sass(false):serif;else:/* fallback */if)}

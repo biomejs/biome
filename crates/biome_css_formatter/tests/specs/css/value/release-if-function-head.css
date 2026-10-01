@@ -6,3 +6,8 @@
  nested:if(style(--enabled: true):if(media(width > 10px):if;else : serif);else :if);
 }
 .comments{font-family:if(style(--enabled: true): /* before */ if /* after */;else:/* fallback */if)}
+
+.queries{
+ grouped:if((style(--enabled: true)):red;else:blue);
+ nested:if(not (style(--value: fn("),:;", nested(red, blue)))):red;else:blue);
+}

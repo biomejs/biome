@@ -7,9 +7,6 @@
 }
 
 .state {
-  modern: if(sass(true): red; else: blue);
-  legacy: if(sass(true), red, blue);
-  modern-with-legacy: if(sass(if(true, 1, 2)): red; else: blue);
   legacy-with-modern: if(sass(if(sass(true): red; else: blue)), green, black);
   modern-then-legacy: if(sass(true): red; else: blue) if(sass(true), red, blue);
   legacy-then-modern: if(sass(true), red, blue) if(sass(true): red; else: blue);

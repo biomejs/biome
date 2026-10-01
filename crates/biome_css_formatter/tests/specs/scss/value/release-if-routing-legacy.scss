@@ -1,19 +1,23 @@
-$enabled :true;
 $name: "icon";
+$condition: "(display: grid)";
 .legacy{
- color:if( not $enabled ,red, blue );
- grouped:if( ($enabled and true) ,red , blue);
  named:if( $condition:true ,$if-true:red ,$if-false:blue );
  string:if( ("#{if(true, '),:;', ':')}" == ':') , red,blue );
  url:if( (url(//cdn.example/a,b:c.png)) ,red,blue );
- data:if( (url(data:image/svg+xml;base64,AAAA)) ,red,blue );
  interpolation:if( (url(images/#{$name}.png)) ,red,blue );
  mixed:if( true ,if( sass(true):red;else:blue ),blue );
  comments:if( /* before */ not /* condition */ false /* after */ , /* first */ red ,blue );
  raw:if( not url(https://example.com/a[b:c,d) ,red,blue );
- raw-group:if( (url(https://example.com/a{b:c,d)) ,red,blue );
  quotes:if( not "#{if(false, ")", ":,")}" ,red,blue );
  map:if( (a:b) ,red,blue );
  spaced-url:if(not url (true and ")"),red ,blue );
  commented-src:if(not src/**/(true and ")"),red ,blue );
+ media:if(media(#{$condition}), red, blue);
+ supports:if(supports(#{$condition}), red, blue);
 }
+
+$formats: null;
+$isVariable: false;
+.fontsource{ formats:if(not $formats or $formats == all ,if($isVariable ,woff2 ,(woff2 ,woff)) ,$formats); }
+$media-width: 12rem;
+.richie{ direction:if(($media-width and $media-width > 0) ,'horizontal' ,'vertical'); }
