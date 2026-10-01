@@ -152,25 +152,23 @@ impl Rule for UseLogicalProperties {
         };
         let normalized_name = name_token
             .text_trimmed()
-            .to_ascii_lowercase_cow()
-            .into_owned();
+            .to_ascii_lowercase_cow();
         let direction = ctx.options().direction();
         let mut states = Vec::new();
 
         if let Some(logical_property) =
-            physical_to_logical_property(normalized_name.as_str(), direction)
+            physical_to_logical_property(normalized_name.as_ref(), direction)
         {
             states.push(UseLogicalPropertiesState {
                 span: name.range(),
-                token: name_token,
+                token: name_token.clone(),
                 violation: LogicalPropertiesViolation::PropertyName {
-                    physical: normalized_name.clone(),
                     replacement: logical_property,
                 },
             });
         }
 
-        collect_value_violations(property, normalized_name.as_str(), direction, &mut states);
+        collect_value_violations(property, normalized_name.as_ref(), direction, &mut states);
 
         states.into_boxed_slice()
     }
@@ -182,9 +180,11 @@ impl Rule for UseLogicalProperties {
             },
         );
 
-        Some(if let Some((physical, replacement)) = state.replacement() {
+        Some(if let Some(replacement) = state.replacement() {
+            let decoded = decode_css_identifier(state.token.text_trimmed());
+            let physical = decoded.to_ascii_lowercase_cow();
             diagnostic.note(markup! {
-                "Replace "<Emphasis>{physical}</Emphasis>" with "<Emphasis>{replacement}</Emphasis>"."
+                "Replace "<Emphasis>{physical.as_ref()}</Emphasis>" with "<Emphasis>{replacement}</Emphasis>"."
             })
         } else {
             diagnostic.note(markup! {
@@ -194,7 +194,7 @@ impl Rule for UseLogicalProperties {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
-        let (_, replacement) = state.replacement()?;
+        let replacement = state.replacement()?;
         let mut mutation = ctx.root().begin();
         let new_token = CssSyntaxToken::new_detached(state.token.kind(), replacement, [], []);
         mutation.replace_token_transfer_trivia(state.token.clone(), new_token);
@@ -216,20 +216,16 @@ pub struct UseLogicalPropertiesState {
 
 enum LogicalPropertiesViolation {
     PropertyName {
-        physical: String,
         replacement: &'static str,
     },
     PropertyValue {
-        physical: String,
         replacement: &'static str,
     },
     JustifyContentValue,
     AnchorSizeValue {
-        physical: String,
         replacement: &'static str,
     },
     AnchorValue {
-        physical: String,
         replacement: &'static str,
     },
 }
@@ -253,24 +249,12 @@ impl UseLogicalPropertiesState {
         }
     }
 
-    fn replacement(&self) -> Option<(&str, &'static str)> {
+    fn replacement(&self) -> Option<&'static str> {
         match &self.violation {
-            LogicalPropertiesViolation::PropertyName {
-                physical,
-                replacement,
-            }
-            | LogicalPropertiesViolation::PropertyValue {
-                physical,
-                replacement,
-            }
-            | LogicalPropertiesViolation::AnchorSizeValue {
-                physical,
-                replacement,
-            }
-            | LogicalPropertiesViolation::AnchorValue {
-                physical,
-                replacement,
-            } => Some((physical.as_str(), replacement)),
+            LogicalPropertiesViolation::PropertyName { replacement }
+            | LogicalPropertiesViolation::PropertyValue { replacement }
+            | LogicalPropertiesViolation::AnchorSizeValue { replacement }
+            | LogicalPropertiesViolation::AnchorValue { replacement } => Some(replacement),
             LogicalPropertiesViolation::JustifyContentValue => None,
         }
     }
@@ -354,17 +338,16 @@ fn collect_value_violations(
         .iter()
         .filter_map(|component| component.as_any_css_value().cloned())
     {
-        if let Some((token, physical)) = value_identifier_token(&value) {
+        if let Some(token) = value_identifier_token(&value) {
+            let decoded = decode_css_identifier(token.text_trimmed());
+            let physical = decoded.to_ascii_lowercase_cow();
             let violation = if property_name == "justify-content"
-                && matches!(physical.as_str(), "left" | "right")
+                && matches!(physical.as_ref(), "left" | "right")
             {
                 Some(LogicalPropertiesViolation::JustifyContentValue)
             } else {
-                physical_to_logical_value(property_name, physical.as_str(), direction).map(
-                    |replacement| LogicalPropertiesViolation::PropertyValue {
-                        physical,
-                        replacement,
-                    },
+                physical_to_logical_value(property_name, physical.as_ref(), direction).map(
+                    |replacement| LogicalPropertiesViolation::PropertyValue { replacement },
                 )
             };
             if let Some(violation) = violation {
@@ -392,11 +375,13 @@ fn collect_function_violations(
     direction: UseLogicalPropertiesDirection,
     states: &mut Vec<UseLogicalPropertiesState>,
 ) {
-    let Some(function_name) = function_name(function) else {
+    let Some(name_token) = function_name(function) else {
         return;
     };
+    let decoded = decode_css_identifier(name_token.text_trimmed());
+    let function_name = decoded.to_ascii_lowercase_cow();
 
-    let function_kind = match function_name.as_str() {
+    let function_kind = match function_name.as_ref() {
         "anchor-size" => Some(true),
         "anchor" => Some(false),
         _ => None,
@@ -424,13 +409,15 @@ fn collect_function_expression_violations(
             continue;
         };
 
-        if let Some((token, physical)) = value_identifier_token(&value)
+        if let Some(token) = value_identifier_token(&value)
             && let Some(is_anchor_size) = function_kind
         {
+            let decoded = decode_css_identifier(token.text_trimmed());
+            let physical = decoded.to_ascii_lowercase_cow();
             let replacement = if is_anchor_size {
-                physical_to_logical_anchor_size(physical.as_str())
+                physical_to_logical_anchor_size(physical.as_ref())
             } else {
-                physical_to_logical_anchor_side(physical.as_str(), direction)
+                physical_to_logical_anchor_side(physical.as_ref(), direction)
             };
 
             if let Some(replacement) = replacement {
@@ -439,12 +426,10 @@ fn collect_function_expression_violations(
                     token,
                     violation: if is_anchor_size {
                         LogicalPropertiesViolation::AnchorSizeValue {
-                            physical,
                             replacement,
                         }
                     } else {
                         LogicalPropertiesViolation::AnchorValue {
-                            physical,
                             replacement,
                         }
                     },
@@ -458,34 +443,24 @@ fn collect_function_expression_violations(
     }
 }
 
-fn function_name(function: &CssFunction) -> Option<String> {
-    let token = function
+fn function_name(function: &CssFunction) -> Option<CssSyntaxToken> {
+    function
         .name()
         .ok()?
         .as_css_identifier()?
         .value_token()
-        .ok()?;
-    Some(
-        decode_css_identifier(token.text_trimmed())
-            .to_ascii_lowercase_cow()
-            .into_owned(),
-    )
+        .ok()
 }
 
-fn value_identifier_token(value: &AnyCssValue) -> Option<(CssSyntaxToken, String)> {
-    let token = match value {
+fn value_identifier_token(value: &AnyCssValue) -> Option<CssSyntaxToken> {
+    Some(match value {
         AnyCssValue::CssIdentifier(identifier) => identifier.value_token().ok()?,
         AnyCssValue::CssCustomIdentifier(identifier) => identifier.value_token().ok()?,
         AnyCssValue::AnyCssDashedIdentifier(identifier) => {
             identifier.as_css_dashed_identifier()?.value_token().ok()?
         }
         _ => return None,
-    };
-    let physical = decode_css_identifier(token.text_trimmed())
-        .to_ascii_lowercase_cow()
-        .into_owned();
-
-    Some((token, physical))
+    })
 }
 
 fn physical_to_logical_value(
