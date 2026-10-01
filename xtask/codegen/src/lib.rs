@@ -108,6 +108,8 @@ pub enum TaskCommand {
     Configuration,
     #[bpaf(command)]
     MigrateEslint,
+    #[bpaf(command)]
+    MigrateStylelint,
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,

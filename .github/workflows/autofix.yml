@@ -44,8 +44,10 @@ jobs:
         run: cargo codegen-schema
       - name: Run the bindings codegen
         run: cargo codegen-bindings
-      - name: Run the migrate codegen
+      - name: Run the ESLint migrate codegen
         run: cargo codegen-migrate
+      - name: Run the Stylelint migrate codegen
+        run: cargo run -p xtask_codegen --features configuration -- migrate-stylelint
 
       # Format Rust and TOML files
       - name: Run format

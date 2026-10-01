@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 use xtask_codegen::update;
 use xtask_glue::*;
 
-fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>) -> TokenStream {
+fn generate_multi_mapping(stylelint_name: Box<str>, mapped_rules: Vec<RuleMapping>) -> TokenStream {
     let rules = mapped_rules.iter().map(|RuleMapping{source_kind, rule_name, group_name}| {
         let name_ident = format_ident!("{}", Case::Snake.convert(rule_name));
         let group_ident = format_ident!("{group_name}");
@@ -24,7 +24,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
         let check_inspired = if source_kind.is_inspired() {
             quote! {
                 if !options.include_inspired {
-                    results.add(eslint_name, migration::RuleMigrationResult::Inspired);
+                    results.add(stylelint_name, migration::RuleMigrationResult::Inspired);
                     blocked = true;
                 }
             }
@@ -34,7 +34,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
         let check_nursery = if *group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
-                    results.add(eslint_name, migration::RuleMigrationResult::Nursery);
+                    results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
                     blocked = true;
                 }
             }
@@ -46,7 +46,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
                 if !blocked {
                     let group = rules.#group_ident.get_or_insert_with(Default::default);
                     let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
-                    rule.set_level(rule.level().max(rule_severity.into()));
+                    rule.set_level(rule.level().max(rule_level));
                     migrated = true;
                 }
             }
@@ -54,7 +54,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
             quote! {
                 let group = rules.#group_ident.get_or_insert_with(Default::default);
                 let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
-                rule.set_level(rule.level().max(rule_severity.into()));
+                rule.set_level(rule.level().max(rule_level));
                 migrated = true;
             }
         };
@@ -70,7 +70,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
     });
 
     quote! {
-        #eslint_name => {
+        #stylelint_name => {
             let mut migrated = false;
             #( #rules )*
             if !migrated {
@@ -80,7 +80,10 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
     }
 }
 
-fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>) -> TokenStream {
+fn generate_single_mapping(
+    stylelint_name: Box<str>,
+    mapped_rules: Vec<RuleMapping>,
+) -> TokenStream {
     let Some(RuleMapping {
         source_kind,
         rule_name,
@@ -95,7 +98,7 @@ fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>
     let check_inspired = if source_kind.is_inspired() {
         quote! {
             if !options.include_inspired {
-                results.add(eslint_name, migration::RuleMigrationResult::Inspired);
+                results.add(stylelint_name, migration::RuleMigrationResult::Inspired);
                 return false;
             }
         }
@@ -105,7 +108,7 @@ fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>
     let check_nursery = if *group_name == "nursery" {
         quote! {
             if !options.include_nursery {
-                results.add(eslint_name, migration::RuleMigrationResult::Nursery);
+                results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
                 return false;
             }
         }
@@ -114,63 +117,59 @@ fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>
     };
 
     quote! {
-        #eslint_name => {
+        #stylelint_name => {
             #check_inspired
             #check_nursery
             let group = rules.#group_ident.get_or_insert_with(Default::default);
             let rule = group.unwrap_group_as_mut().#name_ident.get_or_insert(Default::default());
-            rule.set_level(rule.level().max(rule_severity.into()));
+            rule.set_level(rule.level().max(rule_level));
         }
     }
 }
 
-pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
-    let mut visitor = EslintLintRulesVisitor::default();
-    biome_js_analyze::visit_registry(&mut visitor);
-    biome_json_analyze::visit_registry(&mut visitor);
-    biome_graphql_analyze::visit_registry(&mut visitor);
+pub(crate) fn generate_migrate_stylelint(mode: Mode) -> Result<()> {
+    let mut visitor = StylelintLintRulesVisitor::default();
     biome_css_analyze::visit_registry(&mut visitor);
-    biome_html_analyze::visit_registry(&mut visitor);
     let mut lines = Vec::with_capacity(visitor.0.len());
-    for (eslint_name, mapped_rules) in visitor.0 {
+    for (stylelint_name, mapped_rules) in visitor.0 {
         if mapped_rules.is_empty() {
             continue;
         }
 
         lines.push(if mapped_rules.len() > 1 {
-            generate_multi_mapping(eslint_name, mapped_rules)
+            generate_multi_mapping(stylelint_name, mapped_rules)
         } else {
-            generate_single_mapping(eslint_name, mapped_rules)
+            generate_single_mapping(stylelint_name, mapped_rules)
         });
     }
     let tokens = xtask_glue::reformat(quote! {
-        use super::{eslint_eslint, eslint_to_biome, migration};
-        pub(crate) fn migrate_eslint_any_rule(
+        use super::{stylelint_to_biome, migration};
+        pub(crate) fn migrate_stylelint_any_rule(
             rules: &mut biome_configuration::Rules,
-            eslint_name: &str,
-            rule_severity: eslint_eslint::Severity,
+            stylelint_name: &str,
+            rule_level: biome_configuration::RulePlainConfiguration,
             options: &migration::MigrationOptions,
-            results: &mut eslint_to_biome::EslintMigrationResults,
+            results: &mut stylelint_to_biome::StylelintMigrationResults,
         ) -> bool {
-            match eslint_name {
+            match stylelint_name {
                 #( #lines )*
                 _ => {
-                    results.add(eslint_name, migration::RuleMigrationResult::Unsupported);
+                    results.add(stylelint_name, migration::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
-            results.add(eslint_name, migration::RuleMigrationResult::Migrated);
+            results.add(stylelint_name, migration::RuleMigrationResult::Migrated);
             true
         }
     });
     let file_path =
-        project_root().join("crates/biome_cli/src/execute/migrate/eslint_any_rule_to_biome.rs");
+        project_root().join("crates/biome_cli/src/execute/migrate/stylelint_any_rule_to_biome.rs");
     update(&file_path, &tokens?, &mode)?;
     Ok(())
 }
 
 #[derive(Default)]
-struct EslintLintRulesVisitor(BTreeMap<Box<str>, Vec<RuleMapping>>);
+struct StylelintLintRulesVisitor(BTreeMap<Box<str>, Vec<RuleMapping>>);
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct RuleMapping {
@@ -179,7 +178,7 @@ struct RuleMapping {
     source_kind: RuleSourceKind,
 }
 
-impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
+impl<L: Language> RegistryVisitor<L> for StylelintLintRulesVisitor {
     fn record_category<C: GroupCategory<Language = L>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Lint) {
             C::record_groups(self);
@@ -192,7 +191,7 @@ impl<L: Language> RegistryVisitor<L> for EslintLintRulesVisitor {
         <R::Query as Queryable>::Output: Clone,
     {
         for RuleSourceWithKind { kind, source } in R::METADATA.sources {
-            if !source.is_eslint() && !source.is_eslint_plugin() {
+            if !source.is_stylelint() {
                 continue;
             }
 

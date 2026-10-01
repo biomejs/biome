@@ -701,6 +701,16 @@ pub enum MigrateSubCommand {
         #[bpaf(long("include-nursery"))]
         include_nursery: bool,
     },
+    /// Imports a Stylelint configuration and ignore settings from the current working directory into the Biome configuration.
+    #[bpaf(command)]
+    Stylelint {
+        /// Includes Biome rules inspired by Stylelint rules in the migration.
+        #[bpaf(long("include-inspired"))]
+        include_inspired: bool,
+        /// Includes nursery rules in the migration.
+        #[bpaf(long("include-nursery"))]
+        include_nursery: bool,
+    },
 }
 
 #[derive(Debug, Bpaf, Clone)]
