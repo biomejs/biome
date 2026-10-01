@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12057.js
+---
+# Input
+```js
+const obj = {
+  c: 1, b: 2, a: 3, // first row
+  d: 4,
+};
+console.log(obj);
+
+```
+
+# Diagnostics
+```
+issue12057.js:2:3 assist/source/useSortedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by key.
+  
+    1 │ const obj = {
+  > 2 │   c: 1, b: 2, a: 3, // first row
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │   d: 4,
+      │   ^^^^^
+    4 │ };
+    5 │ console.log(obj);
+  
+
+```
