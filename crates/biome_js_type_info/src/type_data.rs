@@ -175,6 +175,10 @@ pub enum TypeData {
     /// keys can be resolved.
     MappedType(Box<MappedType>),
 
+    /// A conditional type such as `T extends U ? X : Y`, kept unevaluated until
+    /// its operands can be resolved.
+    Extends(Box<ExtendsType>),
+
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
@@ -482,6 +486,7 @@ impl TypeData {
             | Self::Reference(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
+            | Self::Extends(_)
             | Self::TypeofExpression(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_) => false,
@@ -1633,6 +1638,31 @@ impl MappedTypeKeys {
 pub enum MappedTypeModifier {
     Add,
     Remove,
+}
+
+/// Stores the operands of a TypeScript conditional type.
+///
+/// In this example, `check_type` refers to `T`, `extends_type` refers to
+/// `Promise<infer U>`, `true_type` refers to `U`, and `false_type` refers to
+/// `T`. `infer_types` holds the generic declared by `infer U`:
+///
+/// ```ts
+/// type Unwrap<T> = T extends Promise<infer U> ? U : T;
+/// ```
+///
+/// The conditional is `distributive` because its check type is a bare type
+/// parameter. Instantiating `Unwrap<Promise<string> | number>` evaluates the
+/// conditional once for each union member, producing `string | number`.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct ExtendsType {
+    pub check_type: TypeReference,
+    pub extends_type: TypeReference,
+    pub true_type: TypeReference,
+    pub false_type: TypeReference,
+    /// Generics declared by `infer` inside `extends_type`.
+    pub infer_types: Box<[TypeReference]>,
+    /// Whether the check type is a bare type parameter.
+    pub distributive: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

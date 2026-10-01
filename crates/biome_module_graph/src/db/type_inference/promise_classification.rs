@@ -947,6 +947,7 @@ fn classify_expression(
                     | RawTypeData::TypeOperator(_)
                     | RawTypeData::IndexedAccess(_)
                     | RawTypeData::MappedType(_)
+                    | RawTypeData::Extends(_)
                     | RawTypeData::MergedReference(_)
                     | RawTypeData::AnyKeyword
                     | RawTypeData::UnknownKeyword => return Indeterminate,

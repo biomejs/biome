@@ -43,7 +43,7 @@ await new Promise((resolve) => resolve("value"));
 ## Inferred types
 
 ```
-Binding Cheating "Cheating" => instanceof instanceof Promise<string><T extends number: 1>
+Binding Cheating "Cheating" => instanceof (instanceof T extends number: 1 ? instanceof Promise<string> : instanceof Promise<string>)<T extends number: 1>
 
 Binding T "T" => T extends number: 1
 
