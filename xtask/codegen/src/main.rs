@@ -12,6 +12,8 @@ mod generate_license;
 mod generate_migrate_eslint;
 #[cfg(feature = "external_data")]
 mod generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+mod generate_rules_metadata;
 mod move_rule;
 use xtask_glue::{Result, project_root, pushd};
 
@@ -31,6 +33,8 @@ use crate::generate_license::generate_license;
 use crate::generate_migrate_eslint::generate_migrate_eslint;
 #[cfg(feature = "external_data")]
 use crate::generate_module_replacements::generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+use crate::generate_rules_metadata::generate_rules_metadata;
 use crate::move_rule::move_rule;
 
 #[cfg(feature = "global_types")]
@@ -64,6 +68,12 @@ fn main() -> Result<()> {
         TaskCommand::MigrateEslint => {
             #[cfg(feature = "configuration")]
             generate_migrate_eslint(Overwrite)?;
+        }
+        TaskCommand::RulesMetadata { out } => {
+            #[cfg(feature = "rules_metadata")]
+            generate_rules_metadata(out)?;
+            #[cfg(not(feature = "rules_metadata"))]
+            let _ = out;
         }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]

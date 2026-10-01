@@ -1,9 +1,59 @@
-//! Metadata about unsupported lint rules.
+//! Metadata about upstream lint rules that Biome deliberately doesn't implement.
 
-use biome_analyze::RuleSource::*;
+use biome_console::fmt::Display;
+use biome_console::markup;
 
-use crate::execute::migrate::eslint_to_biome::UnsupportedRule;
-use crate::execute::migrate::eslint_to_biome::UnsupportedRuleReason::*;
+use crate::RuleSource;
+use crate::RuleSource::*;
+use UnsupportedRuleReason::*;
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub enum UnsupportedRuleReason {
+    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
+    ///
+    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
+    Stylistic,
+    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
+    ///
+    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
+    FormatterCovers,
+    /// The functionality is covered by a Biome formatter option.
+    FormatterOption(&'static str),
+    /// The rule belongs to a known source, but it is not yet implemented in Biome.
+    KnownSourceNotImplemented,
+    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
+    UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
+}
+
+impl Display for UnsupportedRuleReason {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Stylistic => {
+                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
+            }
+            Self::FormatterCovers => {
+                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
+            }
+            Self::FormatterOption(option) => fmt.write_markup(
+                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
+            ),
+            Self::KnownSourceNotImplemented => {
+                fmt.write_markup(markup! { "Known source, not yet implemented." })
+            }
+            Self::UnknownSource => fmt.write_markup(markup! {
+                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
+            }),
+        }
+    }
+}
 
 // Sorted ESLint unsupported rules.
 /// The array is sorted to allow binary search.

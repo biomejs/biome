@@ -24,6 +24,7 @@ mod suppression;
 mod suppression_action;
 mod suppressions;
 mod syntax;
+mod unsupported_rules;
 pub mod utils;
 mod visitor;
 
@@ -64,6 +65,7 @@ pub use crate::signals::{
 pub use crate::snippet::{EmbeddedSignalInspector, SnippetAnalyzer};
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
+pub use crate::unsupported_rules::{UNSUPPORTED_RULES, UnsupportedRule, UnsupportedRuleReason};
 pub use crate::visitor::{
     NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
 };
