@@ -28,6 +28,15 @@ pub enum UnsupportedRuleReason {
     UnknownSource,
     /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
     CoveredByRule(&'static str),
+    /// The rule doesn't make sense to implement in Biome, e.g. because it relies on
+    /// infrastructure specific to the upstream tool, or it overwhelmingly applies to ESLint
+    /// itself (like `svelte/comment-directive`).
+    NotApplicable,
+    /// The rule has been deprecated upstream.
+    ///
+    /// This doesn't include rules that were deprecated because they moved to another package,
+    /// or because they were folded into or superseded by another rule.
+    Deprecated,
 }
 
 impl Display for UnsupportedRuleReason {
@@ -51,6 +60,10 @@ impl Display for UnsupportedRuleReason {
             Self::CoveredByRule(rule) => fmt.write_markup(markup! {
                 "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
             }),
+            Self::NotApplicable => {
+                fmt.write_markup(markup! { "Not applicable to Biome." })
+            }
+            Self::Deprecated => fmt.write_markup(markup! { "Deprecated upstream." }),
         }
     }
 }
@@ -194,6 +207,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSvelte("comment-directive"), NotApplicable),
     UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
     UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),
     UnsupportedRule(EslintSvelte("html-closing-bracket-spacing"), Stylistic),
@@ -205,6 +219,8 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         FormatterCovers,
     ),
     UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(EslintSvelte("system"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-compile"), NotApplicable),
     UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
         EslintStylistic("array-bracket-spacing"),

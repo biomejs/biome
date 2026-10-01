@@ -109,11 +109,13 @@ struct UnsupportedReason {
 }
 
 /// Every [UnsupportedRuleReason] variant, with placeholder arguments.
-const ALL_UNSUPPORTED_REASONS: [UnsupportedRuleReason; 6] = [
+const ALL_UNSUPPORTED_REASONS: [UnsupportedRuleReason; 8] = [
     UnsupportedRuleReason::Stylistic,
     UnsupportedRuleReason::FormatterCovers,
     UnsupportedRuleReason::FormatterOption(""),
     UnsupportedRuleReason::CoveredByRule(""),
+    UnsupportedRuleReason::NotApplicable,
+    UnsupportedRuleReason::Deprecated,
     UnsupportedRuleReason::KnownSourceNotImplemented,
     UnsupportedRuleReason::UnknownSource,
 ];
@@ -144,6 +146,8 @@ fn unsupported_reason(reason: &UnsupportedRuleReason) -> Option<UnsupportedReaso
             "Covered by another Biome rule",
             Some("biomeRule"),
         ),
+        UnsupportedRuleReason::NotApplicable => ("notApplicable", "Not applicable to Biome", None),
+        UnsupportedRuleReason::Deprecated => ("deprecated", "Deprecated upstream", None),
         UnsupportedRuleReason::KnownSourceNotImplemented | UnsupportedRuleReason::UnknownSource => {
             return None;
         }
