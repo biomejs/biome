@@ -14,7 +14,7 @@ console.log(obj);
 
 # Diagnostics
 ```
-issue12057.js:2:3 assist/source/useSortedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue12057.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The object properties are not sorted by key.
   
@@ -25,6 +25,16 @@ issue12057.js:2:3 assist/source/useSortedKeys ━━━━━━━━━━━�
       │   ^^^^^
     4 │ };
     5 │ console.log(obj);
+  
+  i Safe fix: Sort the object properties by key.
+  
+    1 1 │   const obj = {
+    2   │ - ··c:·1,·b:·2,·a:·3,·//·first·row
+      2 │ + ··a:·3,·//·first·row
+      3 │ + ··b:·2,·
+      4 │ + ··c:·1,·
+    3 5 │     d: 4,
+    4 6 │   };
   
 
 ```
