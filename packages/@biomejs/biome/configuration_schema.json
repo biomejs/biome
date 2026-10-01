@@ -5767,6 +5767,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteInspectConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteInspectOptions" }
+			]
+		},
+		"NoSvelteInspectOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteLegacyConstConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7330,6 +7340,13 @@
 					"description": "Disallow declaring Svelte component props with export let.\nSee https://biomejs.dev/linter/rules/no-svelte-export-let",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteExportLetConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteInspect": {
+					"description": "Disallow the use of the $inspect rune.\nSee https://biomejs.dev/linter/rules/no-svelte-inspect",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteInspectConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10905,6 +10922,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteExportLetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteInspectOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteInspectOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
