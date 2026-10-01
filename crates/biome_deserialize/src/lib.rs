@@ -18,7 +18,8 @@
 //! - array;
 //! - maps of key-value pairs (covers objects).
 //!
-//! It currently supports the JSON data format. See [biome_deserialize::json] for more details.
+//! It currently supports the JSON data format, see [biome_deserialize::json] for more details,
+//! and the YAML data format behind the `yaml` feature, see [biome_deserialize::yaml].
 //!
 //! The two most important traits are [Deserializable] and [DeserializableValue].
 //!
@@ -37,6 +38,8 @@ mod impls;
 pub mod json;
 mod merge;
 mod validator;
+#[cfg(feature = "yaml")]
+pub mod yaml;
 
 use biome_diagnostics::{Error, Severity};
 pub use biome_rowan::{Text, TextRange};
