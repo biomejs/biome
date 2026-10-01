@@ -534,6 +534,41 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
+    /// Resolves a local type ID owned by another module.
+    ///
+    /// The lookup crosses the same boundary as an imported type: a tracked
+    /// lookup query, the shared declaration evaluator inside the active import
+    /// cycle, or complete module tables. A dependency cycle through those
+    /// boundaries resolves to `Unknown`.
+    pub(super) fn resolve_foreign_type_id(
+        &self,
+        module: ModuleInfo,
+        js_info: &crate::JsModuleInfo,
+        resolved_id: ResolvedTypeId,
+    ) -> InferredTypeData<'db> {
+        match self.import_resolution {
+            super::ImportResolution::OnDemand { .. } => {
+                let resolve_declaration_directly = self.resolves_declarations_directly() && {
+                    let sccs = inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
+                    sccs.contains_cycle_between(self.module, module)
+                };
+                inferred_type_from_resolved_id_on_demand(
+                    self,
+                    module,
+                    js_info,
+                    resolved_id,
+                    resolve_declaration_directly,
+                )
+            }
+            super::ImportResolution::FromTables { .. }
+            | super::ImportResolution::CycleFallback(_) => self
+                .infer_imported_module(module)
+                .map_or(InferredTypeData::Unknown, |types| {
+                    inferred_type_from_resolved_id_from_tables(self.db, types, resolved_id)
+                }),
+        }
+    }
+
     fn resolve_js_import(&self, owner: ModuleInfo, import: &JsImport) -> InferredTypeData<'db> {
         let resolution_depth = self.resolution_depth.get();
         if resolution_depth >= MAX_RAW_TYPE_RESOLUTION_DEPTH {

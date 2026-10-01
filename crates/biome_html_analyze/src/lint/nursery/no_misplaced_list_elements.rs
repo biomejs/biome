@@ -19,7 +19,7 @@ declare_lint_rule! {
     ///
     /// The parent is the element the item is rendered into. List items that aren't inside
     /// any element in the file are ignored, because the file may be rendered inside a list
-    /// somewhere else, for example as a component. Items directly inside a <template> element are also
+    /// somewhere else, for example as a component. Items directly inside a `<template>` element are also
     /// ignored, because the template's content is inserted by a script, not rendered in place.
     /// Items whose parent is a component are also ignored,
     /// because the element a component renders is unknown.
@@ -97,7 +97,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMisplacedListElements {
-        version: "next",
+        version: "2.5.15",
         name: "noMisplacedListElements",
         language: "html",
         recommended: true,

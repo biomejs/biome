@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// import bar from "./bar.js";
     /// ```
     pub NoSelfImport {
-        version: "next",
+        version: "2.5.15",
         name: "noSelfImport",
         language: "js",
         sources: &[RuleSource::EslintImport("no-self-import").same()],

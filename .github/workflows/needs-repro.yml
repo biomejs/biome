@@ -25,10 +25,12 @@ jobs:
           REPO: ${{ github.repository }}
           AUTHOR: ${{ github.event.issue.user.login }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Hello @$AUTHOR, please provide a minimal reproduction. You can use one of the following options:
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Hello @$AUTHOR, please provide a minimal reproduction. You **MUST** use one of the following options:
 
           - Provide a link to [our playground](https://biomejs.dev/playground), if it's applicable.
           - Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via \`npm create @biomejs/biome-reproduction\`
+
+          These formats help us triage and fix issues faster. Failing to use these formats may cause your issue to be ignored or closed.
 
           Issues marked with \`S-Needs repro\` will be **closed** if they have **no activity within 3 days**."
 

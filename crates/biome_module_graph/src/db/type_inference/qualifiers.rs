@@ -1,11 +1,5 @@
-use super::{
-    ImportResolution, imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx,
-};
-use crate::db::queries::inference_module_sccs;
-use crate::{
-    ModuleGraphGeneration, js_module_info::TsBindingReferenceExt, module_for_key,
-    module_graph::ModuleInfoKind,
-};
+use super::{imports::MAX_NAMESPACE_IMPORT_MEMBER_STEPS, resolver::ResolutionCtx};
+use crate::{js_module_info::TsBindingReferenceExt, module_for_key, module_graph::ModuleInfoKind};
 use biome_js_type_info::{
     Path, TypeImportQualifier, TypeReference, TypeReferenceQualifier, TypeResolverLevel,
     global_type_id_for_qualifier,
@@ -496,34 +490,27 @@ impl<'db> ResolutionCtx<'db, '_> {
                     .raw_types
                     .get(type_id.index())
                     .and_then(|raw| raw.type_parameters())
-                    .map(<[_]>::to_vec)
+                    .and_then(|parameters| {
+                        parameters
+                            .iter()
+                            .map(|parameter| match parameter {
+                                TypeReference::Resolved(resolved_id) => Some(*resolved_id),
+                                TypeReference::Qualifier(_) | TypeReference::Import(_) => None,
+                            })
+                            .collect::<Option<Vec<_>>>()
+                    })
             {
-                let mut ctx = match self.import_resolution {
-                    ImportResolution::OnDemand { remaining } => {
-                        let resolve_declarations_directly = if self.resolves_declarations_directly()
-                        {
-                            let sccs =
-                                inference_module_sccs(self.db, ModuleGraphGeneration::get(self.db));
-                            sccs.contains_cycle_between(self.module, module)
-                        } else {
-                            false
-                        };
-                        self.for_on_demand_import(
-                            module,
-                            js_info,
-                            remaining,
-                            resolve_declarations_directly,
-                        )
-                    }
-                    import_resolution @ (ImportResolution::FromTables { .. }
-                    | ImportResolution::CycleFallback(_)) => {
-                        ResolutionCtx::new(self.db, module, js_info, import_resolution)
-                    }
-                };
+                // A foreign parameter must not be resolved in a fresh context.
+                // Its cycle and depth guards would start empty, and generic
+                // declarations in an import cycle whose parameters name each
+                // other, such as `A<T extends B<any>>` and `B<U extends A<any>>`,
+                // would recurse until the stack overflows.
                 return Some(
                     parameters
-                        .iter()
-                        .map(|parameter| ctx.resolve(parameter))
+                        .into_iter()
+                        .map(|resolved_id| {
+                            self.resolve_foreign_type_id(module, js_info, resolved_id)
+                        })
                         .collect(),
                 );
             }

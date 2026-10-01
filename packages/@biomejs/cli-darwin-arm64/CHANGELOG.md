@@ -1,5 +1,9 @@
 # @biomejs/cli-darwin-arm64
 
+## 2.5.15
+
+No changes in this release.
+
 ## 2.5.14
 
 No changes in this release.
