@@ -2620,6 +2620,11 @@ See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
 	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
+	* Succinct description of the rule.
+See https://biomejs.dev/linter/rules/no-svelte-inspect 
+	 */
+	noSvelteInspect?: NoSvelteInspectConfiguration;
+	/**
 	* Disallow legacy Svelte {@const} tags.
 See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
 	 */
@@ -5027,6 +5032,9 @@ export type NoSvelteAtHtmlTagsConfiguration =
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
+export type NoSvelteInspectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteInspectOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -7071,6 +7079,10 @@ export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
 }
+export interface RuleWithNoSvelteInspectOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteInspectOptions;
+}
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteLegacyConstOptions;
@@ -8942,6 +8954,7 @@ export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteExportLetOptions = {};
+export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
@@ -10490,6 +10503,7 @@ export type Category =
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteExportLet"
+	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"

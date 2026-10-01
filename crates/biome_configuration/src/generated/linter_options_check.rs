@@ -1227,6 +1227,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noSvelteInspect",
+        TypeId::of::<biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noSvelteLegacyConst",
         TypeId::of::<biome_rule_options::no_svelte_legacy_const::NoSvelteLegacyConstOptions>(),
     ));
