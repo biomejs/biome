@@ -40,7 +40,7 @@ Also, `biome_deserialize` is intended to deserialize textual data formats.
 - array;
 - maps of key-value pairs (covers objects).
 
-It currently supports the JSON data format.
+It currently supports the JSON data format, and the YAML data format behind the `yaml` feature.
 
 ## Design overview
 
