@@ -185,6 +185,8 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let mut known_source_not_implemented = Vec::new();
             let mut unknown_source = Vec::new();
             let mut covered_by_rule = Vec::new();
+            let mut not_applicable = Vec::new();
+            let mut deprecated = Vec::new();
 
             for (rule, reason) in &self.unsupported {
                 match reason {
@@ -198,6 +200,8 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                     }
                     UnsupportedRuleReason::UnknownSource => unknown_source.push(rule),
                     UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
+                    UnsupportedRuleReason::NotApplicable => not_applicable.push(rule),
+                    UnsupportedRuleReason::Deprecated => deprecated.push(rule),
                 }
             }
 
@@ -282,6 +286,30 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                 let list: Vec<_> = list
                     .iter()
                     .map(|item| item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !not_applicable.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules don't apply to Biome:" },
+                )?;
+                let list: Vec<_> = not_applicable
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !deprecated.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules have been deprecated upstream:" },
+                )?;
+                let list: Vec<_> = deprecated
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
                     .collect();
                 visitor.record_list(list.as_slice())?;
             }
