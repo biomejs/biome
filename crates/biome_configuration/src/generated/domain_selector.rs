@@ -5,6 +5,7 @@ use biome_analyze::{Rule, RuleFilter, RuleGroup};
 use std::sync::LazyLock;
 static ASTRO_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
+        RuleFilter::Rule("nursery", "noAstroConflictingSetDirectives"),
         RuleFilter::Rule("nursery", "noAstroSetHtmlDirective"),
         RuleFilter::Rule("nursery", "useAstroClientOnlyDirectiveValue"),
     ]
@@ -124,8 +125,10 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noSvelteAtDebugTags"),
         RuleFilter::Rule("nursery", "noSvelteAtHtmlTags"),
+        RuleFilter::Rule("nursery", "noSvelteExportLet"),
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
+        RuleFilter::Rule("nursery", "useSvelteKitRuneImports"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
     ]
 });
@@ -170,6 +173,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useIncludes"),
         RuleFilter::Rule("nursery", "useNullishCoalescing"),
         RuleFilter::Rule("nursery", "useRegexpExec"),
+        RuleFilter::Rule("nursery", "useStrictBooleanExpressions"),
         RuleFilter::Rule("nursery", "useStringStartsEndsWith"),
         RuleFilter::Rule("style", "useConsistentEnumValueType"),
         RuleFilter::Rule("suspicious", "noUnnecessaryConditions"),

@@ -9,7 +9,8 @@ use crate::syntax::scss::{
     parse_scss_interpolated_url_value,
 };
 use crate::syntax::value::function::{
-    is_nth_at_css_function, is_nth_at_function, parse_css_function, parse_function,
+    is_at_css_if_function_in_context, is_nth_at_css_function, is_nth_at_function,
+    parse_css_function, parse_function,
 };
 use crate::syntax::value::parse_error::expected_url_modifier;
 use crate::syntax::{
@@ -253,11 +254,14 @@ fn parse_url_value_with_context(
 /// ```scss
 /// url($path + ".css")
 /// url("#{$bg}" + ".png")
+/// url(if(sass($dark): "dark.png"; else: "light.png"))
 /// ```
 #[inline]
 fn is_at_scss_url_expression(p: &mut CssParser, context: ValueParsingContext) -> bool {
     context.is_full_scss_parsing_allowed()
-        && (is_at_scss_variable(p) || is_at_scss_string_concatenation(p))
+        && (is_at_scss_variable(p)
+            || is_at_scss_string_concatenation(p)
+            || is_at_css_if_function_in_context(p, context))
 }
 
 /// Detects quoted-string concatenation in a URL body.
@@ -285,6 +289,7 @@ fn is_at_scss_string_concatenation(p: &mut CssParser) -> bool {
 /// url($path + ".css")
 /// url("../" + $path)
 /// url("#{$bg}" + ".png")
+/// url(if(sass($dark): "dark.png"; else: "light.png"))
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/syntax/structure

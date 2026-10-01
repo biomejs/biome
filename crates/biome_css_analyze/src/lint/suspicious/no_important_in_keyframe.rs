@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssDeclarationBlock, AnyCssKeyframesItem, CssDeclarationImportant, CssKeyframesBlock,
+    AnyCssDeclarationOrStatementBlock, AnyCssKeyframesItem, CssDeclarationImportant,
+    CssDeclarationWithSemicolon, CssKeyframesBlock,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
@@ -66,19 +67,21 @@ impl Rule for NoImportantInKeyframe {
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => continue,
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };
-            let AnyCssDeclarationBlock::CssDeclarationBlock(block_declaration) =
-                keyframe_item.block().ok()?
-            else {
-                return None;
+            let important = match keyframe_item.block().ok()? {
+                AnyCssDeclarationOrStatementBlock::CssDeclarationBlock(block) => block
+                    .declarations()
+                    .into_iter()
+                    .find_map(|item| find_important(item.as_css_declaration_with_semicolon())),
+                // SCSS keyframe steps can also contain statements such as `@include`.
+                AnyCssDeclarationOrStatementBlock::CssDeclarationOrAtRuleBlock(block) => block
+                    .items()
+                    .into_iter()
+                    .find_map(|item| find_important(item.as_css_declaration_with_semicolon())),
+                AnyCssDeclarationOrStatementBlock::CssBogusBlock(_) => return None,
             };
 
-            for any_colon_declaration in block_declaration.declarations() {
-                if let Some(important) = any_colon_declaration
-                    .as_css_declaration_with_semicolon()
-                    .and_then(|decl| decl.declaration().ok()?.important())
-                {
-                    return Some(important);
-                }
+            if important.is_some() {
+                return important;
             }
         }
         None
@@ -99,4 +102,10 @@ impl Rule for NoImportantInKeyframe {
             }),
         )
     }
+}
+
+fn find_important(
+    declaration: Option<&CssDeclarationWithSemicolon>,
+) -> Option<CssDeclarationImportant> {
+    declaration?.declaration().ok()?.important()
 }

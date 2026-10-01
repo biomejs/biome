@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div tabindex="1"></div>
 <div tabindex="5"></div>
 <button tabindex="2"></button>
@@ -8,3 +9,4 @@
 <div :tabindex="'1'"></div>
 <div v-bind:tabindex="'5'"></div>
 <button :tabindex="'2'"></button>
+</template>

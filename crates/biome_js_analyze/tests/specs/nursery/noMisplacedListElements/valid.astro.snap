@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+{visible && <ul><li>Conditional item</li></ul>}
+{visible ? <ol><li /></ol> : null}
+{items.map((item) => <li>{item}</li>)}
+<ul>{items.map((item) => <li>{item}</li>)}</ul>
+<ul>{visible && <li>Conditional item</li>}</ul>
+{items.map((item) => <List><li>{item}</li></List>)}
+
+```

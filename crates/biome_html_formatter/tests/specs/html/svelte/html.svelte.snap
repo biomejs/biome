@@ -22,6 +22,6 @@ info: svelte/html.svelte
 	{@html content}
 </article>
 
-{@html '<div>'}content{@html '</div>'}
+{@html "<div>"}content{@html "</div>"}
 
 ```

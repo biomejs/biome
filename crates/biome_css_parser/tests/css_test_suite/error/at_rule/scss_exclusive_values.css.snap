@@ -1432,30 +1432,28 @@ CssRoot {
                                 CssBogus {
                                     items: [
                                         L_PAREN@1300..1301 "(" [] [],
-                                        CssBogus {
-                                            items: [
-                                                ScssInterpolation {
-                                                    hash_token: HASH@1301..1302 "#" [] [],
-                                                    l_curly_token: L_CURLY@1302..1303 "{" [] [],
-                                                    value: ScssExpression {
-                                                        items: ScssExpressionItemList [
-                                                            ScssVariable {
-                                                                dollar_token: DOLLAR@1303..1304 "$" [] [],
-                                                                name: CssIdentifier {
-                                                                    value_token: IDENT@1304..1307 "min" [] [],
-                                                                },
+                                        CssQueryFeatureReverseRange {
+                                            left: ScssInterpolation {
+                                                hash_token: HASH@1301..1302 "#" [] [],
+                                                l_curly_token: L_CURLY@1302..1303 "{" [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@1303..1304 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@1304..1307 "min" [] [],
                                                             },
-                                                        ],
-                                                    },
-                                                    r_curly_token: R_CURLY@1307..1309 "}" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
                                                 },
-                                                CssQueryFeatureRangeComparison {
-                                                    operator: LTEQ@1309..1312 "<=" [] [Whitespace(" ")],
-                                                },
-                                                CssIdentifier {
-                                                    value_token: IDENT@1312..1317 "width" [] [],
-                                                },
-                                            ],
+                                                r_curly_token: R_CURLY@1307..1309 "}" [] [Whitespace(" ")],
+                                            },
+                                            comparison: CssQueryFeatureRangeComparison {
+                                                operator: LTEQ@1309..1312 "<=" [] [Whitespace(" ")],
+                                            },
+                                            right: CssIdentifier {
+                                                value_token: IDENT@1312..1317 "width" [] [],
+                                            },
                                         },
                                         R_PAREN@1317..1319 ")" [] [Whitespace(" ")],
                                     ],
@@ -2672,7 +2670,7 @@ CssRoot {
             0: CSS_BOGUS_MEDIA_QUERY@1300..1319
               0: CSS_BOGUS@1300..1319
                 0: L_PAREN@1300..1301 "(" [] []
-                1: CSS_BOGUS@1301..1317
+                1: CSS_QUERY_FEATURE_REVERSE_RANGE@1301..1317
                   0: SCSS_INTERPOLATION@1301..1309
                     0: HASH@1301..1302 "#" [] []
                     1: L_CURLY@1302..1303 "{" [] []
@@ -3124,25 +3122,25 @@ scss_exclusive_values.css:65:8 parse ━━━━━━━━━━━━━━�
     66 │   .media-query {}
     67 │ }
   
-scss_exclusive_values.css:69:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss_exclusive_values.css:69:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS interpolated query features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS interpolated media conditions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     67 │ }
     68 │ 
   > 69 │ @media (#{$min} <= width) {
-       │         ^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^^
     70 │   .media-reverse-range {}
     71 │ }
   
-scss_exclusive_values.css:73:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scss_exclusive_values.css:73:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS interpolated query features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS interpolated media conditions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     71 │ }
     72 │ 
   > 73 │ @media (#{$min} <= width <= #{$max}) {
-       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     74 │   .media-interval-range {}
     75 │ }
   

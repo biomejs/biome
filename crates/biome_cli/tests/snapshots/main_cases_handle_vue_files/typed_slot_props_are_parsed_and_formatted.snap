@@ -1,0 +1,50 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome check --write file.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": { "enabled": true },
+    "linter": { "enabled": true },
+    "experimentalFullSupportEnabled": true
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<template>
+	<Component v-slot="{value}:{value:ValueType}">{{
+		value.innerValue
+	}}</Component>
+	<Component #item="{ item=fallback }:{ item?: ItemType }">{{
+		item
+	}}</Component>
+</template>
+<script lang="ts" setup>
+import Component from "./Component.vue";
+
+interface ValueType {
+	innerValue: string;
+}
+type ItemType = string;
+const fallback: ItemType = "fallback";
+</script>
+
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

@@ -965,7 +965,9 @@ impl AnyJsExpression {
     ///
     /// [article]: https://craftinginterpreters.com/scanning-on-demand.html#tries-and-state-machines
     pub fn contains_a_test_pattern(&self) -> bool {
-        let members = CalleeNamesIterator::new(self.clone()).collect::<SmallVec<[TokenText; 5]>>();
+        let Some(members) = callee_names(self.clone()) else {
+            return false;
+        };
         if members
             .iter()
             .enumerate()
@@ -1101,12 +1103,11 @@ impl AnyJsExpression {
     /// Checks whether the current function call is:
     /// - `describe` or `suite`
     pub fn contains_describe_call(&self) -> bool {
-        let mut members = CalleeNamesIterator::new(self.clone());
-
-        if let Some(member) = members.next() {
-            return matches!(member.text(), "describe" | "suite");
-        }
-        false
+        callee_names(self.clone()).is_some_and(|members| {
+            members
+                .first()
+                .is_some_and(|member| matches!(member.text(), "describe" | "suite"))
+        })
     }
 
     /// Checks whether the current function call is a test body context:
@@ -1120,7 +1121,9 @@ impl AnyJsExpression {
     /// [`contains_a_test_pattern`]: crate::AnyJsExpression::contains_a_test_pattern
     /// [`contains_a_test_each_pattern`]: crate::AnyJsExpression::contains_a_test_each_pattern
     pub fn contains_it_call(&self) -> bool {
-        let members = CalleeNamesIterator::new(self.clone()).collect::<SmallVec<[TokenText; 5]>>();
+        let Some(members) = callee_names(self.clone()) else {
+            return false;
+        };
         let mut members = members.iter().rev();
         let first = members.next().map(TokenText::text);
         let second = members.next().map(TokenText::text);
@@ -1154,15 +1157,26 @@ impl AnyJsExpression {
     /// test() // returns false
     /// ```
     pub fn contains_focused_test(&self) -> SyntaxResult<bool> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let Some(members) = callee_names(self.clone()) else {
+            return Ok(false);
+        };
+        let mut members = members.iter();
 
         let first = members.next();
         let second = members.next();
 
         // Jasmine / Angular focused test patterns (f prepended)
+        let is_direct_call = self
+            .clone()
+            .omit_parentheses()
+            .as_js_identifier_expression()
+            .is_some();
         if let Some(token) = &first {
             let name = token.text();
-            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite") && second.is_none() {
+            if matches!(name, "fdescribe" | "fit" | "ftest" | "fsuite")
+                && second.is_none()
+                && is_direct_call
+            {
                 return Ok(true);
             }
         }
@@ -1205,7 +1219,10 @@ impl AnyJsExpression {
     /// test.each // returns false
     /// ```
     pub fn contains_only_each_pattern(&self) -> SyntaxResult<bool> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let Some(members) = callee_names(self.clone()) else {
+            return Ok(false);
+        };
+        let mut members = members.iter();
 
         let first = members.next();
         let second = members.next();
@@ -1263,30 +1280,24 @@ impl AnyJsExpression {
     /// - `assert`
     /// - `assertEquals`
     pub fn to_assertion_call(&self) -> Option<TokenText> {
-        let mut members = CalleeNamesIterator::new(self.clone());
+        let members = callee_names(self.clone())?;
 
-        let texts: [Option<TokenText>; 2] = [members.next(), members.next()];
+        let (first, second) = match members.as_slice() {
+            [first] => (first, None),
+            [second, first, ..] => (first, Some(second)),
+            [] => return None,
+        };
 
-        let mut rev = texts.iter().rev().flatten();
-
-        let first = rev.next();
-        let second = rev.next();
-
-        match first {
-            Some(first) => {
-                if first.text() == "assert" {
-                    if second.is_some() {
-                        Some(first.clone())
-                    } else {
-                        None
-                    }
-                } else if matches!(first.text(), "expect" | "assertEquals") {
-                    Some(first.clone())
-                } else {
-                    None
-                }
+        if first.text() == "assert" {
+            if second.is_some() {
+                Some(first.clone())
+            } else {
+                None
             }
-            None => None,
+        } else if matches!(first.text(), "expect" | "assertEquals") {
+            Some(first.clone())
+        } else {
+            None
         }
     }
 
@@ -1463,57 +1474,45 @@ pub fn is_transparent_expression_wrapper(node: &JsSyntaxNode) -> bool {
     )
 }
 
-/// Iterator that returns the callee names in "top down order".
+/// Returns the callee names in "top down order".
+///
+/// Returns `None` unless the callee is a chain of names rooted in an identifier,
+/// so a callee like `/re/.test` isn't mistaken for `test`.
 ///
 /// # Examples
 ///
 /// ```javascript
-/// it.only() -> [`only`, `it`]
+/// it.only() -> Some([`only`, `it`])
+/// /re/.test() -> None
 /// ```
-struct CalleeNamesIterator {
-    next: Option<AnyJsExpression>,
-}
+fn callee_names(callee: AnyJsExpression) -> Option<SmallVec<[TokenText; 5]>> {
+    use AnyJsExpression::*;
 
-impl CalleeNamesIterator {
-    fn new(callee: AnyJsExpression) -> Self {
-        Self { next: Some(callee) }
-    }
-}
-
-impl Iterator for CalleeNamesIterator {
-    type Item = TokenText;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        use AnyJsExpression::*;
-
-        let current = self.next.take()?;
-
+    let mut names = SmallVec::new();
+    let mut current = callee;
+    loop {
         match current {
-            JsIdentifierExpression(identifier) => identifier
-                .name()
-                .and_then(|reference| reference.value_token())
-                .ok()
-                .map(|value| value.token_text_trimmed()),
-            JsStaticMemberExpression(member_expression) => match member_expression.member() {
-                Ok(AnyJsName::JsName(name)) => {
-                    self.next = member_expression.object().ok();
-                    name.value_token()
-                        .ok()
-                        .map(|name| name.token_text_trimmed())
-                }
-                _ => None,
-            },
+            JsIdentifierExpression(identifier) => {
+                let name = identifier.name().ok()?.value_token().ok()?;
+                names.push(name.token_text_trimmed());
+                return Some(names);
+            }
+            JsStaticMemberExpression(member_expression) => {
+                let AnyJsName::JsName(name) = member_expression.member().ok()? else {
+                    return None;
+                };
+                names.push(name.value_token().ok()?.token_text_trimmed());
+                current = member_expression.object().ok()?;
+            }
             JsComputedMemberExpression(member_expression) => {
                 let member = member_expression.member().ok()?;
-                if let AnyJsExpression::AnyJsLiteralExpression(lit) = &member
-                    && let Some(string_lit) = lit.as_js_string_literal_expression()
-                {
-                    self.next = member_expression.object().ok();
-                    return string_lit.inner_string_text().ok();
-                }
-                None
+                let string_lit = member
+                    .as_any_js_literal_expression()?
+                    .as_js_string_literal_expression()?;
+                names.push(string_lit.inner_string_text().ok()?);
+                current = member_expression.object().ok()?;
             }
-            _ => None,
+            _ => return None,
         }
     }
 }
@@ -2721,6 +2720,8 @@ mod test {
             "describe('name', () => {});",
             "it('name', () => {});",
             "foo.fit()",
+            "builder.image('url').fit('max');",
+            "builder.image('url').auto('format').quality(90).fit('max');",
         ];
         for valid_case in VALID {
             let call_expression = extract_call_expression(valid_case);

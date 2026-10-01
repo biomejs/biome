@@ -1,0 +1,19 @@
+<!-- should not generate diagnostics -->
+<script setup lang="ts">
+import Component from "./Component.vue";
+
+interface ValueType {
+  innerValue: string;
+}
+type ItemType = { label: string };
+const fallback: ItemType = { label: "fallback" };
+</script>
+
+<template>
+  <Component v-slot="{ value }: { value: ValueType }">
+    <span v-if="!!value.innerValue">{{ value.innerValue }}</span>
+  </Component>
+  <Component>
+    <template #item="{ item = fallback }: { item?: ItemType }">{{ item.label }}</template>
+  </Component>
+</template>

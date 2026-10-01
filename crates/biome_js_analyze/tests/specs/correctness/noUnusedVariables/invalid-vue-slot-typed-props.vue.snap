@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-slot-typed-props.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+import Component from "./Component.vue";
+
+interface ValueType {
+  innerValue: string;
+}
+interface UnusedType {
+  innerValue: string;
+}
+</script>
+
+<template>
+  <Component v-slot="{ value }: { value: ValueType }">{{ value.innerValue }}</Component>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-slot-typed-props.vue:8:11 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This interface UnusedType is unused.
+
+     6 │   innerValue: string;
+     7 │ }
+   > 8 │ interface UnusedType {
+       │           ^^^^^^^^^^
+     9 │   innerValue: string;
+    10 │ }
+
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+
+
+```

@@ -127,7 +127,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseLogicalProperties {
-        version: "next",
+        version: "2.5.15",
         name: "useLogicalProperties",
         language: "css",
         recommended: false,

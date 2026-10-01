@@ -1,12 +1,11 @@
 mod visitor;
 
-use crate::ImportPathMap;
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
+use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
 use biome_css_syntax::TextRange;
 use biome_languages::css::EmbeddingStyleApplicability;
-use biome_resolver::ResolvedPath;
-use biome_rowan::TokenText;
-use camino::Utf8Path;
+use biome_resolver::ResolvedSpecifier;
+use biome_rowan::{Text, TokenText};
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -14,6 +13,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 pub(crate) use visitor::HtmlModuleVisitor;
+pub use visitor::{PreparedHtmlModule, prepare_html_module};
 
 /// Information restricted to a single HTML module in the [ModuleGraph].
 ///
@@ -76,24 +76,37 @@ impl HtmlModuleInfo {
 pub struct HtmlImport {
     /// Absolute range of the element or JavaScript import expression.
     pub range: TextRange,
-    /// Resolved import path.
-    pub resolved_path: ResolvedPath,
+    /// The module specifier as it appeared in source text.
+    pub specifier: Text,
     /// Whether the import is visible outside the containing HTML-like component.
     pub applicability: EmbeddingStyleApplicability,
 }
 
 impl HtmlImport {
-    /// Returns the resolved filesystem path, when resolution succeeded.
-    pub fn as_path(&self) -> Option<&Utf8Path> {
-        self.resolved_path.as_path()
+    /// Resolves this stylesheet import of the HTML-like `module`, such as a
+    /// `<link rel="stylesheet">` element or an `@import` in a `<style>` block.
+    ///
+    /// Use this for the imports in `imported_stylesheets`. See
+    /// [ResolutionMode::Css] for the resolution rules.
+    pub fn resolve_css<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
     }
-}
 
-impl Deref for HtmlImport {
-    type Target = ResolvedPath;
-
-    fn deref(&self) -> &Self::Target {
-        &self.resolved_path
+    /// Resolves this import made by a `<script>` block of the HTML-like
+    /// `module`.
+    ///
+    /// Use this for the imports in `import_paths`. See
+    /// [ResolutionMode::HtmlScript] for the resolution rules.
+    pub fn resolve_html<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::HtmlScript)
     }
 }
 
@@ -116,7 +129,7 @@ pub struct HtmlModuleInfoInner {
     /// Stylesheet imports from `<link>` elements and embedded `<style>` blocks.
     pub imported_stylesheets: Vec<HtmlImport>,
 
-    /// Resolved paths imported from embedded `<script>` blocks in source order.
+    /// Import specifiers from embedded `<script>` blocks in source order.
     pub import_paths: ImportPathMap<HtmlImport>,
 }
 

@@ -59,6 +59,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAssignInExpressions",
         TypeId::of::<biome_rule_options::no_assign_in_expressions::NoAssignInExpressionsOptions>(),
     ));
+    result.push(("nursery", "noAstroConflictingSetDirectives", TypeId::of::<biome_rule_options::no_astro_conflicting_set_directives::NoAstroConflictingSetDirectivesOptions>()));
     result.push(("nursery", "noAstroSetHtmlDirective", TypeId::of::<biome_rule_options::no_astro_set_html_directive::NoAstroSetHtmlDirectiveOptions>()));
     result.push((
         "suspicious",
@@ -806,6 +807,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noMisplacedAssertion",
         TypeId::of::<biome_rule_options::no_misplaced_assertion::NoMisplacedAssertionOptions>(),
     ));
+    result.push(("nursery", "noMisplacedListElements", TypeId::of::<biome_rule_options::no_misplaced_list_elements::NoMisplacedListElementsOptions>()));
     result.push(("suspicious", "noMisrefactoredShorthandAssign", TypeId::of::<biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions>()));
     result.push((
         "correctness",
@@ -1217,6 +1219,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noSvelteAtHtmlTags",
         TypeId::of::<biome_rule_options::no_svelte_at_html_tags::NoSvelteAtHtmlTagsOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noSvelteExportLet",
+        TypeId::of::<biome_rule_options::no_svelte_export_let::NoSvelteExportLetOptions>(),
     ));
     result.push((
         "nursery",
@@ -2429,11 +2436,19 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useStrictBooleanExpressions",
+        TypeId::of::<
+            biome_rule_options::use_strict_boolean_expressions::UseStrictBooleanExpressionsOptions,
+        >(),
+    ));
+    result.push((
         "suspicious",
         "useStrictMode",
         TypeId::of::<biome_rule_options::use_strict_mode::UseStrictModeOptions>(),
     ));
     result.push(("nursery", "useStringStartsEndsWith", TypeId::of::<biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions>()));
+    result.push(("nursery", "useSvelteKitRuneImports", TypeId::of::<biome_rule_options::use_svelte_kit_rune_imports::UseSvelteKitRuneImportsOptions>()));
     result.push(("nursery", "useSvelteRequireEachKey", TypeId::of::<biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions>()));
     result.push((
         "style",

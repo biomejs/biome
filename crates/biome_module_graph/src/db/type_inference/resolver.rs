@@ -23,7 +23,6 @@ use crate::db::queries::{
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
-use biome_js_syntax::TsModuleDeclaration;
 use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
@@ -33,7 +32,7 @@ use biome_js_type_info::{
         TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
     },
 };
-use biome_rowan::{AstNode, Text, TextRange};
+use biome_rowan::{Text, TextRange};
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::plumbing::AsId;
 use std::{
@@ -559,7 +558,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         let ImportResolution::OnDemand { remaining } = self.import_resolution else {
             return InferredTypeData::Unknown;
         };
-        let mut ctx = self.for_on_demand_import(module, &js_info, remaining, true);
+        let mut ctx = self.for_on_demand_import(module, js_info, remaining, true);
         match declaration {
             OnDemandDeclaration::Binding { range, .. } => js_info
                 .raw_binding_types
@@ -770,49 +769,22 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             _ => return fallback,
         };
         let resolves_declarations_directly = self.resolves_declarations_directly();
-        let members = self
-            .js_info
-            .semantic_model
-            .all_bindings()
-            .filter_map(|binding| {
-                let reference = self
-                    .js_info
-                    .raw_binding_types
-                    .get(&binding.syntax().text_trimmed_range())?;
-                if !matches!(
-                    reference,
-                    TypeReference::Resolved(id)
-                        if id.level() == TypeResolverLevel::Thin && id.id() == type_id
-                ) {
-                    return None;
-                }
-                let declaration = binding.tree().declaration()?;
-                TsModuleDeclaration::cast(declaration.syntax().clone())
-            })
-            .flat_map(|declaration| {
-                self.js_info
-                    .semantic_model
-                    .scope(declaration.syntax())
-                    .bindings()
-            })
-            .filter_map(|binding| {
-                let name = binding
-                    .tree()
-                    .name_token()
-                    .ok()?
-                    .token_text_trimmed()
-                    .into();
-                let range = binding.syntax().text_trimmed_range();
-                let reference = self.js_info.raw_binding_types.get(&range)?.clone();
-                Some((name, range, reference))
-            })
-            .map(|(name, range, reference)| InferredTypeMember {
-                kind: InferredTypeMemberKind::NamedStatic(name),
-                ty: if resolves_declarations_directly {
-                    self.resolve_local_binding(range)
-                } else {
-                    self.resolve(&reference)
-                },
+        let js_info = self.js_info;
+        let members = js_info
+            .namespace_members
+            .get(&type_id)
+            .into_iter()
+            .flatten()
+            .filter_map(|member| {
+                let reference = js_info.raw_binding_types.get(&member.range)?;
+                Some(InferredTypeMember {
+                    kind: InferredTypeMemberKind::NamedStatic(member.name.clone()),
+                    ty: if resolves_declarations_directly {
+                        self.resolve_local_binding(member.range)
+                    } else {
+                        self.resolve(reference)
+                    },
+                })
             })
             .collect::<Box<[_]>>();
 
@@ -892,6 +864,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 InferredTypeData::Unknown
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::BigInt
                 | InferredTypeData::Boolean
                 | InferredTypeData::Null
@@ -937,6 +910,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
         let mut seen = FxHashSet::default();
 
         for _ in 0..MAX_LOCAL_TYPE_RESOLUTION_STEPS {
+            ty = ty.expand_global_local(self.db);
             let InferredTypeData::Local(local) = ty else {
                 return ty;
             };

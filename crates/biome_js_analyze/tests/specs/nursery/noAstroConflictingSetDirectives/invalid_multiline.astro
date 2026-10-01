@@ -1,0 +1,43 @@
+<!-- should generate diagnostics -->
+
+<div>{(
+    <div
+        set:html={html}
+        set:text={text}
+    ></div>
+)}</div>
+
+<div>{(
+    <Component
+        set:html={html}
+        set:text={text}
+    />
+)}</div>
+
+<div>{(
+    <div
+        set:html={html}
+    >child content</div>
+)}</div>
+
+<div>{(
+    <div
+        set:text={text}
+    ><span>child content</span></div>
+)}</div>
+
+<div>{(
+    <div set:html={html} set:text={text}></div>
+)}</div>
+
+<div>{(
+    <Component set:html={html} set:text={text} />
+)}</div>
+
+<div>{(
+    <div set:html={html}>child content</div>
+)}</div>
+
+<div>{(
+    <div set:text={text}><span>child content</span></div>
+)}</div>

@@ -803,16 +803,17 @@ impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let fs: Arc<dyn FsWithResolverProxy> = Arc::new(OsFileSystem::default());
         Self {
             cancellation: Arc::default(),
+            db_state: Arc::new(DbState::lsp(fs.clone())),
             workspace: Arc::new(WorkspaceServer::new(
-                Arc::new(OsFileSystem::default()),
+                fs,
                 instruction_tx,
                 service_tx,
                 Arc::new(biome_service::workspace::GritSearchQuery::default()),
                 None,
             )),
-            db_state: Arc::new(DbState::lsp()),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -823,7 +824,7 @@ impl ServerFactory {
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
-        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::lsp()))
+        Self::new_with_fs_and_db_state(fs.clone(), Arc::new(DbState::lsp(fs)))
     }
 
     /// Constructor for CLI socket tests.
@@ -831,7 +832,7 @@ impl ServerFactory {
     /// These tests exercise CLI traversal through the socket transport, but
     /// should keep the CLI database update strategy.
     pub fn new_cli_test_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
-        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::default()))
+        Self::new_with_fs_and_db_state(fs.clone(), Arc::new(DbState::new(fs)))
     }
 
     fn new_with_fs_and_db_state(fs: Arc<dyn FsWithResolverProxy>, db_state: Arc<DbState>) -> Self {

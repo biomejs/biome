@@ -1,0 +1,12 @@
+$gap:16px;
+@media(min-width:/*before*/-/*operand*/$gap /*binary*/+ 800px){.block{display:block}}
+@media (min-width: // before
+-// operand
+$gap+800px){.line{display:block}}
+@media/*outer*/(min-width:-$gap+800px/*close*/)/*conjunction*/and/*next*/(max-width:+$gap+800px)/*block*/{.boundaries{display:block}}
+@media(min-width:-$gap+800px // close
+){.line-boundary{display:block}}
+@media(min-width:-$gap+800px)/*comma*/,// next
+(max-width:+$gap+800px){.comma{display:block}}
+/* biome-ignore format: preserve authored query spacing */
+@media (min-width: - $gap + 800px) { .suppressed {display:block} }

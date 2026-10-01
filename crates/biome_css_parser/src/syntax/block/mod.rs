@@ -5,10 +5,11 @@ mod declaration_or_rule_list_block;
 mod rule_block;
 
 use crate::parser::CssParser;
+use crate::syntax::CssSyntaxFeatures;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
-use biome_parser::{CompletedMarker, Parser};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
 use biome_rowan::TextRange;
 
 pub(crate) use conditional_block::parse_conditional_block;
@@ -18,6 +19,24 @@ pub(crate) use declaration_or_rule_list_block::{
     DeclarationOrRuleList, parse_declaration_or_rule_list_block,
 };
 pub(crate) use rule_block::parse_rule_block;
+
+/// Parses the body of a declaration-only CSS host that SCSS extends with
+/// statements, such as `@font-face` and keyframe steps.
+///
+/// ```scss
+/// @font-face {
+///   @include font-options;
+///   font-family: Example;
+/// }
+/// ```
+#[inline]
+pub(crate) fn parse_declaration_or_statement_block(p: &mut CssParser) -> CompletedMarker {
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        parse_declaration_or_at_rule_list_block(p)
+    } else {
+        parse_declaration_block(p)
+    }
+}
 
 pub(crate) trait ParseBlockBody {
     const BLOCK_KIND: CssSyntaxKind;

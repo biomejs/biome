@@ -15,9 +15,9 @@
     "execute:v4": "tsx src/v4/generate-tailwind-preset-v4.ts"
   },
   "devDependencies": {
-    "@types/node": "24.13.4",
+    "@types/node": "24.13.6",
     "read-package-up": "12.0.0",
-    "tsx": "4.23.13",
+    "tsx": "4.23.15",
     "typescript": "5.9.3"
   }
 }

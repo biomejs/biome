@@ -5,43 +5,26 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <div aria-activedescendant="some-id"></div>
 <span aria-activedescendant="some-id"></span>
 <a aria-activedescendant="some-id"></a>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Enforce elements with aria-activedescendant are tabbable.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <div aria-activedescendant="some-id"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <span aria-activedescendant="some-id"></span>
-    4 │ <a aria-activedescendant="some-id"></a>
-  
-  i aria-activedescendant is used to manage focus within a composite widget.
-    The element with the attribute aria-activedescendant retains the active document focus.
-  
-  i Add the tabindex attribute to the element with a value greater than or equal to -1.
-  
-
-```
-
 ```
 invalid.vue:3:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Enforce elements with aria-activedescendant are tabbable.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <div aria-activedescendant="some-id"></div>
-  > 3 │ <span aria-activedescendant="some-id"></span>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <a aria-activedescendant="some-id"></a>
-    5 │ 
+    2 │ <template>
+  > 3 │ <div aria-activedescendant="some-id"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <span aria-activedescendant="some-id"></span>
+    5 │ <a aria-activedescendant="some-id"></a>
   
   i aria-activedescendant is used to manage focus within a composite widget.
     The element with the attribute aria-activedescendant retains the active document focus.
@@ -56,11 +39,32 @@ invalid.vue:4:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━
 
   × Enforce elements with aria-activedescendant are tabbable.
   
-    2 │ <div aria-activedescendant="some-id"></div>
-    3 │ <span aria-activedescendant="some-id"></span>
-  > 4 │ <a aria-activedescendant="some-id"></a>
+    2 │ <template>
+    3 │ <div aria-activedescendant="some-id"></div>
+  > 4 │ <span aria-activedescendant="some-id"></span>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <a aria-activedescendant="some-id"></a>
+    6 │ </template>
+  
+  i aria-activedescendant is used to manage focus within a composite widget.
+    The element with the attribute aria-activedescendant retains the active document focus.
+  
+  i Add the tabindex attribute to the element with a value greater than or equal to -1.
+  
+
+```
+
+```
+invalid.vue:5:1 lint/a11y/useAriaActivedescendantWithTabindex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Enforce elements with aria-activedescendant are tabbable.
+  
+    3 │ <div aria-activedescendant="some-id"></div>
+    4 │ <span aria-activedescendant="some-id"></span>
+  > 5 │ <a aria-activedescendant="some-id"></a>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ 
+    6 │ </template>
+    7 │ 
   
   i aria-activedescendant is used to manage focus within a composite widget.
     The element with the attribute aria-activedescendant retains the active document focus.

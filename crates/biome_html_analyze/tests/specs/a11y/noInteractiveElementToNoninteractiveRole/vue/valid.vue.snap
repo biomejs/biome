@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 <TestComponent onClick="doFoo" />
 <Button onClick="doFoo" />
 
@@ -283,5 +284,6 @@ expression: valid.vue
     alt='An ASCII-style headshot'
   />
 </picture>
+</template>
 
 ```

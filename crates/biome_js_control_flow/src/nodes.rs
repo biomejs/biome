@@ -31,3 +31,46 @@ pub(super) use throw_stmt::*;
 pub(super) use try_catch::*;
 pub(super) use variable::*;
 pub(super) use while_stmt::*;
+
+pub(super) fn is_truthy_literal(expression: &biome_js_syntax::AnyJsExpression) -> bool {
+    use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, numbers::parse_js_number};
+
+    let AnyJsExpression::AnyJsLiteralExpression(literal) = expression.clone().omit_parentheses()
+    else {
+        return false;
+    };
+
+    match literal {
+        AnyJsLiteralExpression::JsNumberLiteralExpression(number) => number
+            .value_token()
+            .ok()
+            .and_then(|token| parse_js_number(token.text_trimmed()))
+            .is_some_and(|number| number != 0.0 && !number.is_nan()),
+        AnyJsLiteralExpression::JsStringLiteralExpression(string) => {
+            let Ok(text) = string.inner_string_text() else {
+                return false;
+            };
+            let mut chars = text.chars().peekable();
+            while let Some(character) = chars.next() {
+                if character != '\\' {
+                    return true;
+                }
+                match chars.next() {
+                    Some('\r') => {
+                        if chars.peek() == Some(&'\n') {
+                            chars.next();
+                        }
+                    }
+                    Some('\n' | '\u{2028}' | '\u{2029}') => {}
+                    Some(_) => return true,
+                    None => return false,
+                }
+            }
+            false
+        }
+        AnyJsLiteralExpression::JsRegexLiteralExpression(_) => true,
+        _ => literal
+            .as_static_value()
+            .is_some_and(|value| !value.is_falsy()),
+    }
+}

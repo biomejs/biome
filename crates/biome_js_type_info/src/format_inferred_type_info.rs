@@ -113,6 +113,10 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                     )
                 }
             }
+            Self::GlobalLocal(local) => {
+                let data = local.expand(db);
+                write!(f, [&data])
+            }
             Self::GlobalType(id) => {
                 if let Some(name) = crate::globals_ids::global_type_name(id.as_type_id()) {
                     write!(f, [text(name, None)])

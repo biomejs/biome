@@ -432,7 +432,7 @@ impl CssContainerAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: Option<CssCustomIdentifier>) -> Self {
+    pub fn with_name(self, element: Option<AnyCssContainerName>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1084,7 +1084,7 @@ impl CssFontFaceAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+    pub fn with_block(self, element: AnyCssDeclarationOrStatementBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1754,7 +1754,7 @@ impl CssKeyframesItem {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: AnyCssDeclarationBlock) -> Self {
+    pub fn with_block(self, element: AnyCssDeclarationOrStatementBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2346,7 +2346,7 @@ impl CssPropertyAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssDashedIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3862,6 +3862,14 @@ impl ScssBinaryExpression {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl ScssContainerInterpolatedQuery {
+    pub fn with_query(self, element: ScssInterpolation) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

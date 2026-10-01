@@ -19,3 +19,7 @@ interface SymbolConstructor {
 }
 
 declare var Symbol: SymbolConstructor;
+
+interface AsyncDisposable {
+    [Symbol.asyncDispose](): PromiseLike<void>;
+}

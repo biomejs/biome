@@ -4,7 +4,8 @@
 //! incremental boundary. The algorithms here share bounded traversal state and
 //! resolved argument representations with expression inference.
 
-use crate::db::queries::resolve_callable_type;
+use super::resolve_callable_function;
+use crate::db::queries::{CallableFunctionInput, resolve_callable_type};
 use crate::db::type_inference::{
     apply_substitutions_to_root_body, collected_type_result, find_member_type_on_demand,
     resolve_local_type_on_demand, substitutions_for_instance,
@@ -437,7 +438,7 @@ fn infer_call_signature_argument_type<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.callable_function(db));
+        .filter_map(|member| member.ty.expand_global_local(db).callable_function(db));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_parameter_type(db, first, args, argument_index);
@@ -532,6 +533,9 @@ fn infer_argument_type<'db>(
                 InferredTypeData::GlobalType(id) => {
                     pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
                 }
+                InferredTypeData::GlobalLocal(local) => {
+                    pending.push(ArgumentTypeItem::Type(local.expand(db)));
+                }
                 InferredTypeData::InstanceOf(instance) => {
                     let target = resolve_local_type_on_demand(db, instance.ty(db));
                     let substitutions =
@@ -602,7 +606,9 @@ fn select_constructor_argument_type<'db>(
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_constructor())
-        .filter_map(|member| ResolvedParameters::from_constructor_signature(db, member.ty));
+        .filter_map(|member| {
+            ResolvedParameters::from_constructor_signature(db, member.ty.expand_global_local(db))
+        });
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_resolved_parameter_type(
@@ -910,14 +916,8 @@ fn merged_reference_targets<'db>(
     .collect()
 }
 
-/// Finds the function a value of type `ty` can be called as.
-///
-/// A class instance contributes its type arguments, so a callable reached
-/// through `InstanceOf` describes its parameters and return type in terms of
-/// the arguments the instance was built with. Every other wrapper, and the
-/// shapes that are too ambiguous to resolve, are described on
-/// [`resolve_callable_type`].
-pub(in crate::db) fn resolve_callable_function<'db>(
+/// Computes the result of [`super::resolve_callable_function`].
+pub(super) fn resolve_callable_function_impl<'db>(
     db: &'db dyn ModuleDb,
     ty: InferredTypeData<'db>,
 ) -> Option<InferredFunction<'db>> {
@@ -978,8 +978,8 @@ impl<'db> ArgumentTypeCompatibility<'db> {
         }
 
         match (
-            resolve_callable_function(db, self.parameter_ty),
-            resolve_callable_function(db, self.argument_ty),
+            resolve_callable_function(db, CallableFunctionInput::new(db, self.parameter_ty)),
+            resolve_callable_function(db, CallableFunctionInput::new(db, self.argument_ty)),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
                 returns_void(db, parameter_function)
@@ -1251,6 +1251,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
@@ -1263,6 +1264,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                 InferredTypeData::Conditional
                 | InferredTypeData::Global
                 | InferredTypeData::GlobalType(_)
+                | InferredTypeData::GlobalLocal(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::ObjectKeyword
                 | InferredTypeData::TypeOperator(_)
@@ -1829,13 +1831,17 @@ fn infer_generic_return_type<'db>(
             continue;
         }
 
-        let Some(parameter_function) = resolve_callable_function(db, parameter_ty) else {
+        let Some(parameter_function) =
+            resolve_callable_function(db, CallableFunctionInput::new(db, parameter_ty))
+        else {
             continue;
         };
         let ReturnType::Type(parameter_return_ty) = parameter_function.return_type(db) else {
             continue;
         };
-        let Some(argument_function) = resolve_callable_function(db, arg) else {
+        let Some(argument_function) =
+            resolve_callable_function(db, CallableFunctionInput::new(db, arg))
+        else {
             continue;
         };
         let ReturnType::Type(argument_return_ty) = argument_function.return_type(db) else {

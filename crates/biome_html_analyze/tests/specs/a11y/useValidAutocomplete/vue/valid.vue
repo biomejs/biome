@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <input type="text" />
 <input type="text" autocomplete="name" />
 <input type="text" autocomplete="" />
@@ -16,3 +17,4 @@
 <!-- Static Vue bindings with valid autocomplete values are valid -->
 <input type="text" :autocomplete="'name'" />
 <input type="text" v-bind:autocomplete="'email'" />
+</template>

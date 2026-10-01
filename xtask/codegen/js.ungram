@@ -57,6 +57,7 @@ AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
+	| JsVueSlotPropsRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -93,6 +94,12 @@ JsExpressionTemplateRoot =
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
 		parameters: JsParameters
+		eof: 'EOF'
+
+// Special root created for the props of Vue slot directives: `v-slot="{ item }: Props"`
+// Vue compiles the value as the parameters of an arrow function, without parentheses.
+JsVueSlotPropsRoot =
+		parameters: JsParameterList
 		eof: 'EOF'
 
 // Special root created for Svelte declaration tags

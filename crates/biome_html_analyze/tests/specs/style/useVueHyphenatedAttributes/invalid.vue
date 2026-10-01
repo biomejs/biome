@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 
 <!-- Plain HTML attributes: these should be flagged -->
 <div someAttr="x"></div>
@@ -15,3 +16,4 @@
 <!-- Custom component props written in non-hyphenated forms -->
 <MyComp someProp="x" AnotherProp="y"></MyComp>
 <MyComp someProp="x" AnotherProp="y" />
+</template>

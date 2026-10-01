@@ -533,25 +533,21 @@ fn extract_html_embedded_js<'a>(
                 };
 
                 let file_source = if host_file_source.is_svelte() {
+                    let is_module_script = element.find_attribute_by_name("module").is_some()
+                        || element.has_attribute_with_value("context", "module");
                     base_source.with_embedding_kind(JsEmbeddingKind::Svelte {
+                        is_module_script,
                         file_kind: SvelteFileKind::Component,
                         embedding_kind: SvelteEmbeddingKind::Source,
                         is_class_attribute: false,
                     })
                 } else if host_file_source.is_vue() {
-                    let is_setup = opening.as_ref().is_some_and(|o| {
-                        o.attributes().into_iter().any(|attr| {
-                            attr.as_html_attribute()
-                                .and_then(|a| a.name().ok())
-                                .and_then(|n| n.value_token().ok())
-                                .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case("setup"))
-                        })
-                    });
                     base_source.with_embedding_kind(JsEmbeddingKind::Vue {
-                        setup: is_setup,
+                        setup: element.find_attribute_by_name("setup").is_some(),
                         is_source: true,
                         event_handler: false,
                         allow_statements: true,
+                        slot_props: false,
                         is_class_attribute: false,
                     })
                 } else {
@@ -597,6 +593,7 @@ fn extract_html_embedded_js<'a>(
                 })
             } else if host_file_source.is_svelte() {
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
                     file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::Expression,
                     is_class_attribute,
@@ -607,6 +604,7 @@ fn extract_html_embedded_js<'a>(
                     is_source: false,
                     event_handler: false,
                     allow_statements: false,
+                    slot_props: false,
                     is_class_attribute,
                 })
             } else {

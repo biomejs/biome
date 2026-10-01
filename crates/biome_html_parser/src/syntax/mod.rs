@@ -135,6 +135,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     ElementList {
         vue_sfc_top_level: Vue.is_supported(p) && !p.options().is_html(),
         in_math: false,
+        at_root: true,
     }
     .parse_list(p);
 
@@ -387,7 +388,7 @@ fn parse_element_allowing_sfc_blocks(
         && name_kind != HTML_COMPONENT_LITERAL
         && opening_tag_name.eq_ignore_ascii_case("math");
 
-    parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
+    let opening_name = parse_any_tag_name(p).or_add_diagnostic(p, expected_element_name);
 
     match html_framework(p) {
         HtmlFramework::Svelte => {
@@ -466,36 +467,41 @@ fn parse_element_allowing_sfc_blocks(
             }
             list.complete(p, HTML_ELEMENT_LIST);
 
-            let closing_tag = parse_closing_tag(p);
-            if is_raw_text_block && closing_tag.is_absent() {
-                // The lexer read to the end of the file looking for the closing
-                // tag, so the block is unclosed. Give up and let the caller
-                // parse the element as ordinary markup.
-                return Absent;
+            if parse_closing_tag(p).is_none() {
+                if is_raw_text_block {
+                    // The lexer read to the end of the file looking for the
+                    // closing tag, so the block is unclosed. Give up and let
+                    // the caller parse the element as ordinary markup.
+                    return Absent;
+                }
+                p.error(expected_closing_tag(p, p.cur_range()));
             }
-            closing_tag.or_add_diagnostic(p, expected_closing_tag);
         } else {
             loop {
                 ElementList {
                     vue_sfc_top_level: false,
                     in_math: in_math || is_astro_math,
+                    at_root: false,
                 }
                 .parse_list(p);
-                if let Some(mut closing) =
-                    parse_closing_tag(p).or_add_diagnostic(p, expected_closing_tag)
-                {
-                    if is_void_closing_tag(p, &closing) {
-                        closing.change_to_bogus(p);
-                        continue;
-                    }
+                let Some(ClosingTag {
+                    marker: mut closing,
+                    name: closing_name,
+                }) = parse_closing_tag(p)
+                else {
+                    p.error(expected_closing_tag(p, p.cur_range()));
+                    break;
+                };
 
-                    if !closing.text(p).contains(opening_tag_name.as_str()) {
-                        p.error(
-                            expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p),
-                        );
-                        closing.change_to_bogus(p);
-                        continue;
-                    }
+                if is_void_closing_tag(p, &closing) {
+                    closing.change_to_bogus(p);
+                    continue;
+                }
+
+                if !tag_names_match(p, opening_name.as_ref(), closing_name.as_ref()) {
+                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                    closing.change_to_bogus(p);
+                    continue;
                 }
                 break;
             }
@@ -522,6 +528,7 @@ fn parse_astro_fragment(
     ElementList {
         vue_sfc_top_level: false,
         in_math,
+        at_root: false,
     }
     .parse_list(p);
 
@@ -534,9 +541,16 @@ fn parse_astro_fragment(
     Present(m.complete(p, ASTRO_FRAGMENT))
 }
 
-fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
+/// A parsed closing tag, e.g. `</div>`.
+struct ClosingTag {
+    marker: CompletedMarker,
+    /// The tag name, which is missing in `</>`.
+    name: Option<CompletedMarker>,
+}
+
+fn parse_closing_tag(p: &mut HtmlParser) -> Option<ClosingTag> {
     if !p.at(T![<]) || !p.nth_at(1, T![/]) {
-        return Absent;
+        return None;
     }
     let m = p.start();
     p.bump_with_context(T![<], inside_tag_context(p));
@@ -545,7 +559,7 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
     // The closing tag name has been classified by the lexer; component closings
     // (`HTML_COMPONENT_LITERAL`) are never void, so this is `O(1)` and correct.
     let is_void_element = VOID_ELEMENTS.contains(p.cur());
-    let _name = parse_any_tag_name(p);
+    let name = parse_any_tag_name(p).ok();
 
     // There shouldn't be any attributes in a closing tag.
     while p.at(HTML_LITERAL) || p.at(T!["{{"]) || p.at(T!["}}"]) {
@@ -559,7 +573,33 @@ fn parse_closing_tag(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(void_element_should_not_have_closing_tag(p, closing.range(p)).into_diagnostic(p));
     }
 
-    Present(closing)
+    Some(ClosingTag {
+        marker: closing,
+        name,
+    })
+}
+
+/// Returns whether a closing tag name closes the element with the given opening
+/// tag name. The whole names are compared, so `</span>` doesn't close a `<p>`.
+///
+/// HTML tag names match regardless of case, as in `<DIV></div>`. Component
+/// names, such as `<Foo>` in a Vue file, must match exactly. A missing name
+/// only matches another missing name.
+fn tag_names_match(
+    p: &HtmlParser,
+    opening: Option<&CompletedMarker>,
+    closing: Option<&CompletedMarker>,
+) -> bool {
+    match (opening, closing) {
+        (Some(opening), Some(closing)) => {
+            if opening.kind(p) == HTML_TAG_NAME && closing.kind(p) == HTML_TAG_NAME {
+                opening.text(p).eq_ignore_ascii_case(closing.text(p))
+            } else {
+                opening.text(p) == closing.text(p)
+            }
+        }
+        (opening, closing) => opening.is_none() && closing.is_none(),
+    }
 }
 
 fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
@@ -655,6 +695,41 @@ struct ElementList {
     vue_sfc_top_level: bool,
     /// Whether this list sits inside an Astro `<math>`, where a `{` is text.
     in_math: bool,
+    /// Whether this is the list of the document root. It has no parent to be
+    /// closed, so it runs to the end of the file, and whatever it can't parse
+    /// becomes bogus. Otherwise the tree sink would put the rest of the source
+    /// into the EOF token, which the formatter drops.
+    at_root: bool,
+}
+
+impl ElementList {
+    /// Parses a closing tag in the document root as a bogus element, reporting
+    /// that it has no opening tag. Void closing tags such as `</br>` get the
+    /// diagnostic from [parse_closing_tag] instead.
+    ///
+    /// Only the root list can hold a stray closing tag. Every other list ends
+    /// at a closing tag, which the enclosing element then matches against its
+    /// own opening tag. Returns `Absent` when this list isn't the root or the
+    /// parser isn't at `</`.
+    #[cold]
+    fn parse_stray_closing_tag(&self, p: &mut HtmlParser) -> ParsedSyntax {
+        if !self.at_root {
+            return Absent;
+        }
+        let Some(ClosingTag {
+            marker: mut closing,
+            ..
+        }) = parse_closing_tag(p)
+        else {
+            return Absent;
+        };
+
+        if !is_void_closing_tag(p, &closing) {
+            p.error(unexpected_closing_tag(p, closing.range(p)));
+        }
+        closing.change_to_bogus(p);
+        Present(closing)
+    }
 }
 
 impl ParseNodeList for ElementList {
@@ -663,11 +738,14 @@ impl ParseNodeList for ElementList {
     const LIST_KIND: Self::Kind = HTML_ELEMENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if p.at(T![<]) && p.nth_at(1, T![/]) {
+            return self.parse_stray_closing_tag(p);
+        }
         parse_html_element(p, self.vue_sfc_top_level, self.in_math)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(EOF) || p.at(T![<]) && p.nth_at(1, T![/])
+        p.at(EOF) || !self.at_root && p.at(T![<]) && p.nth_at(1, T![/])
     }
 
     fn recover(
@@ -675,11 +753,20 @@ impl ParseNodeList for ElementList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
-        parsed_element.or_recover_with_token_set(
+        let recovered = parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(HTML_BOGUS_ELEMENT, token_set![T![<], T![>]]),
             expected_child,
-        )
+        );
+        if recovered.is_err() && self.at_root && !p.at(EOF) {
+            // Recovery stops at a token it can't skip, which would end the
+            // list. The root must reach the end of the file, so take the token
+            // as bogus and keep going. The diagnostic has already been added.
+            let m = p.start();
+            p.bump_any();
+            return Ok(m.complete(p, HTML_BOGUS_ELEMENT));
+        }
+        recovered
     }
 }
 

@@ -72,6 +72,8 @@ pub(crate) enum EmbedCandidate {
         content: EmbedContent,
         is_event_handler: bool,
         is_class_attribute: bool,
+        /// Whether the value holds the props of a Vue slot (`v-slot="{ item }"`)
+        is_slot_props: bool,
     },
     Attribute {
         name: TokenText,

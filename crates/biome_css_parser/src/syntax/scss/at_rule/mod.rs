@@ -1,4 +1,5 @@
 mod at_root_at_rule;
+mod container;
 mod content_at_rule;
 mod debug;
 mod each_at_rule;
@@ -32,6 +33,10 @@ use biome_parser::prelude::*;
 use biome_parser::{TokenSet, token_set};
 
 pub(crate) use at_root_at_rule::parse_scss_at_root_at_rule;
+pub(crate) use container::{
+    is_at_scss_container_interpolated_query, is_at_scss_container_name_or_query,
+    parse_scss_container_interpolated_query, parse_scss_container_name_or_query,
+};
 pub(crate) use content_at_rule::parse_scss_content_at_rule;
 pub(crate) use debug::parse_scss_debug_at_rule;
 pub(crate) use each_at_rule::parse_scss_each_at_rule;

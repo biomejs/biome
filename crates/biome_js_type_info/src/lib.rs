@@ -13,7 +13,6 @@ mod format_inferred_type_info;
 mod format_type_info;
 pub(crate) mod generated;
 mod globals;
-mod globals_builder;
 pub(crate) mod globals_ids;
 mod inferred_type;
 pub mod interned_types;
@@ -28,11 +27,12 @@ mod type_transform;
 mod type_traversal;
 
 pub use globals::{
-    GlobalTypes, global_type_id_for_qualifier, global_type_id_for_value, global_types,
+    GlobalTypeInput, GlobalTypes, global_type_id_for_qualifier, global_type_id_for_value,
+    global_types,
 };
 pub use globals_ids::GlobalTypeId;
 pub use inferred_type::{
-    IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, TypeTraversalError,
+    BooleanCoercion, IgnoredPrimitiveTypes, InferredSwitchCase, InferredType, TypeTraversalError,
 };
 pub use interned_types::{RawTypeData, TypeDb};
 pub use return_type_relation::{

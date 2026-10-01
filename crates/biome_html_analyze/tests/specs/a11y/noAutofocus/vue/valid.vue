@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <input />
 <textarea>content</textarea>
 <button>Submit</button>
@@ -26,3 +27,4 @@
         <input autofocus />
     </div>
 </div>
+</template>

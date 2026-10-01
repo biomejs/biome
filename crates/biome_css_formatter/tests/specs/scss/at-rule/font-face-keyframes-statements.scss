@@ -1,0 +1,19 @@
+@font-face {
+  @include   font-options;
+  @if true {font-weight:400;}
+  font-family:Example;
+  src: url(example.woff2);
+}
+
+@keyframes fade {
+  from {@include fade-start; opacity:0;}
+  50% {
+    @if $bounce { transform: scale(1.1); }   @else { transform: none; }
+    opacity: 0.5;
+  }
+  to {
+    $end:1;
+    opacity: $end;
+    @each $prop in $props { #{$prop}: none; }
+  }
+}

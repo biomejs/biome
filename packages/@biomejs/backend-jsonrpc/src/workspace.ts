@@ -2355,6 +2355,11 @@ See https://biomejs.dev/linter/rules/use-yield
  */
 export interface Nursery {
 	/**
+	* Disallow conflicting content sources on Astro elements.
+See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives 
+	 */
+	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
+	/**
 	* Disallow the use of Astro's set:html directive.
 See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
 	 */
@@ -2485,6 +2490,11 @@ See https://biomejs.dev/linter/rules/no-misleading-return-type
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
+	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+See https://biomejs.dev/linter/rules/no-misplaced-list-elements 
+	 */
+	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
+	/**
 	* Disallow Promises to be used in places where they are almost certainly a mistake.
 See https://biomejs.dev/linter/rules/no-misused-promises 
 	 */
@@ -2604,6 +2614,11 @@ See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags
 See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
+	/**
+	* Disallow declaring Svelte component props with export let.
+See https://biomejs.dev/linter/rules/no-svelte-export-let 
+	 */
+	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
 	* Disallow legacy Svelte {@const} tags.
 See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
@@ -2923,10 +2938,20 @@ See https://biomejs.dev/linter/rules/use-sorted-classes
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
+	* Require unambiguous boolean expressions in conditions.
+See https://biomejs.dev/linter/rules/use-strict-boolean-expressions 
+	 */
+	useStrictBooleanExpressions?: UseStrictBooleanExpressionsConfiguration;
+	/**
 	* Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
 See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	* Require importing SvelteKit's app state from $app/state instead of $app/stores.
+See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports 
+	 */
+	useSvelteKitRuneImports?: UseSvelteKitRuneImportsConfiguration;
 	/**
 	* Require keyed {#each} blocks in Svelte templates.
 See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
@@ -4843,6 +4868,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAstroConflictingSetDirectivesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroConflictingSetDirectivesOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
@@ -4921,6 +4949,9 @@ export type NoMeaninglessVoidOperatorConfiguration =
 export type NoMisleadingReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisleadingReturnTypeOptions;
+export type NoMisplacedListElementsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMisplacedListElementsOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -4993,6 +5024,9 @@ export type NoSvelteAtDebugTagsConfiguration =
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteExportLetConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteExportLetOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -5179,9 +5213,15 @@ export type UseScopedStylesConfiguration =
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
+export type UseStrictBooleanExpressionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseStrictBooleanExpressionsOptions;
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteKitRuneImportsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteKitRuneImportsOptions;
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
@@ -6807,6 +6847,10 @@ export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
 }
+export interface RuleWithNoAstroConflictingSetDirectivesOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroConflictingSetDirectivesOptions;
+}
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroSetHtmlDirectiveOptions;
@@ -6916,6 +6960,10 @@ export interface RuleWithNoMisleadingReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisleadingReturnTypeOptions;
 }
+export interface RuleWithNoMisplacedListElementsOptions {
+	level: RulePlainConfiguration;
+	options?: NoMisplacedListElementsOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
@@ -7018,6 +7066,10 @@ export interface RuleWithNoSvelteAtDebugTagsOptions {
 export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
+}
+export interface RuleWithNoSvelteExportLetOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteExportLetOptions;
 }
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
@@ -7291,10 +7343,18 @@ export interface RuleWithUseSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseSortedClassesOptions;
 }
+export interface RuleWithUseStrictBooleanExpressionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseStrictBooleanExpressionsOptions;
+}
 export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseSvelteKitRuneImportsOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteKitRuneImportsOptions;
 }
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
@@ -8777,6 +8837,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -8851,6 +8912,7 @@ export type NoJsxNamespaceOptions = {};
 export type NoLoopFuncOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
+export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
@@ -8880,6 +8942,7 @@ export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteExportLetOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
@@ -9166,7 +9229,9 @@ export interface UseSortedClassesOptions {
 	 */
 	functions?: string[];
 }
+export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
@@ -10370,6 +10435,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
@@ -10398,6 +10464,7 @@ export type Category =
 	| "lint/nursery/noLoopFunc"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
+	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
@@ -10423,6 +10490,7 @@ export type Category =
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
@@ -10476,8 +10544,8 @@ export type Category =
 	| "lint/nursery/useImportsFirst"
 	| "lint/nursery/useIncludes"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLayeredStyles"
+	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
@@ -10500,7 +10568,9 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"
@@ -11093,6 +11163,11 @@ Source-level embeds (`<script>`) use `true`; directives and text expressions use
 				 * Whether the script is inside script tag with setup attribute
 				 */
 				setup: boolean;
+				/**
+	* Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
+which is parsed as the parameters of an arrow function. 
+	 */
+				slot_props: boolean;
 			};
 	  }
 	| {
@@ -11110,6 +11185,11 @@ module.
 (e.g. class={...}) 
 	 */
 				is_class_attribute: boolean;
+				/**
+	* Whether this snippet is from a `<script module>` block, or the legacy
+`<script context="module">` block. 
+	 */
+				is_module_script: boolean;
 			};
 	  };
 export type Language =
@@ -11327,7 +11407,7 @@ specifier itself.
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Maps each local imported name to its source module specifier. 
 	 */
 	staticImports: Record<string, string>;
 }
@@ -11339,7 +11419,7 @@ export interface SerializedCssModuleInfo {
 	/**
 	* Map of all static imports found in the module.
 
-Maps from the local imported name to the absolute path it resolves to. 
+Contains the import specifiers as they appeared in source text. 
 	 */
 	imports: string[];
 }

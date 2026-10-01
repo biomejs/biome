@@ -1,0 +1,23 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLoopExits.js
+---
+# Input
+```js
+// should not generate diagnostics
+export function whileBreak(stop) { while (true) { if (stop) break; } return 1; }
+export function doWhileBreak(stop) { do { if (stop) break; } while (true); return 1; }
+export function labeledBreak(stop) { outer: while (true) { while (true) { if (stop) break outer; } } return 1; }
+export function labeledDoBreak(stop) { outer: do { while (stop) { break outer; } } while (true); return 1; }
+export function dynamic(test) { while (test) {} return 1; }
+export function dynamicDo(test) { do {} while (test); return 1; }
+export function falsy() { while (false) {} return 1; }
+export function zero() { while (0.0) {} return 1; }
+export function hexZero() { do {} while (0x0); return 1; }
+export function underflow() { while (1e-999) {} return 1; }
+export function empty() { do {} while (""); return 1; }
+export function emptyContinuation() { while ("\
+") {} return 1; }
+export function bigintZero() { while (0x0n) {} return 1; }
+
+```
