@@ -510,6 +510,7 @@ pub mod use_sorted_package_json;
 pub mod use_sorted_properties;
 pub mod use_sorted_selection_set;
 pub mod use_sorted_type_fields;
+pub mod use_sorted_variables;
 pub mod use_spread_over_apply;
 pub mod use_static_response_methods;
 pub mod use_strict_mode;
