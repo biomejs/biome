@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+	<div :class="active ? 'rounded-none' : 'bg-red-500'"></div>
+	<Button :class="'mt-4 w-full'" />
+</template>
+
+```
