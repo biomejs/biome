@@ -37,6 +37,7 @@ a[1] = a[1.0];
 a[0x10] = a[16];
 a[1e-7] = a["1e-7"];
 a["\u0062"] = a.b;
+a["\01"] = a["\01"];
 a["b"].c = a.b.c;
 
 ```
@@ -1112,7 +1113,7 @@ invalid.js:32:13 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 32 │ a[1e-7] = a["1e-7"];
        │             ^^^^^^
     33 │ a["\u0062"] = a.b;
-    34 │ a["b"].c = a.b.c;
+    34 │ a["\01"] = a["\01"];
   
   i This is where is assigned.
   
@@ -1121,7 +1122,7 @@ invalid.js:32:13 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 32 │ a[1e-7] = a["1e-7"];
        │   ^^^^
     33 │ a["\u0062"] = a.b;
-    34 │ a["b"].c = a.b.c;
+    34 │ a["\01"] = a["\01"];
   
   i Self assignments have no effect and can be removed.
   
@@ -1137,8 +1138,8 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     32 │ a[1e-7] = a["1e-7"];
   > 33 │ a["\u0062"] = a.b;
        │                 ^
-    34 │ a["b"].c = a.b.c;
-    35 │ 
+    34 │ a["\01"] = a["\01"];
+    35 │ a["b"].c = a.b.c;
   
   i This is where is assigned.
   
@@ -1146,8 +1147,8 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
     32 │ a[1e-7] = a["1e-7"];
   > 33 │ a["\u0062"] = a.b;
        │   ^^^^^^^^
-    34 │ a["b"].c = a.b.c;
-    35 │ 
+    34 │ a["\01"] = a["\01"];
+    35 │ a["b"].c = a.b.c;
   
   i Self assignments have no effect and can be removed.
   
@@ -1155,23 +1156,49 @@ invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:34:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:14 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × c is assigned to itself.
+  × "\01" is assigned to itself.
   
     32 │ a[1e-7] = a["1e-7"];
     33 │ a["\u0062"] = a.b;
-  > 34 │ a["b"].c = a.b.c;
-       │                ^
-    35 │ 
+  > 34 │ a["\01"] = a["\01"];
+       │              ^^^^^
+    35 │ a["b"].c = a.b.c;
+    36 │ 
   
   i This is where is assigned.
   
     32 │ a[1e-7] = a["1e-7"];
     33 │ a["\u0062"] = a.b;
-  > 34 │ a["b"].c = a.b.c;
+  > 34 │ a["\01"] = a["\01"];
+       │   ^^^^^
+    35 │ a["b"].c = a.b.c;
+    36 │ 
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:35:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × c is assigned to itself.
+  
+    33 │ a["\u0062"] = a.b;
+    34 │ a["\01"] = a["\01"];
+  > 35 │ a["b"].c = a.b.c;
+       │                ^
+    36 │ 
+  
+  i This is where is assigned.
+  
+    33 │ a["\u0062"] = a.b;
+    34 │ a["\01"] = a["\01"];
+  > 35 │ a["b"].c = a.b.c;
        │        ^
-    35 │ 
+    36 │ 
   
   i Self assignments have no effect and can be removed.
   

@@ -814,11 +814,16 @@ fn static_property_key(name: &AnyNameLike) -> Option<String> {
         }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
             node,
-        )) => Some(
-            unescape_js_string(node.inner_string_text().ok()?)
-                .text()
-                .to_string(),
-        ),
+        )) => {
+            let inner = node.inner_string_text().ok()?;
+            // `\0` followed by a digit is a legacy octal escape. `unescape_js_string`
+            // hits `unimplemented!()` for that form, which is still valid in scripts.
+            if contains_legacy_octal_escape(&inner) {
+                Some(inner.to_string())
+            } else {
+                Some(unescape_js_string(inner).text().to_string())
+            }
+        }
         AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
             node,
         )) => number_property_key(node.as_number()?),
@@ -884,6 +889,25 @@ fn js_scientific_to_decimal(scientific: &str) -> Option<String> {
             &digits[1..]
         ))
     }
+}
+
+/// `\0` followed by another digit. `unescape_js_string` does not implement that escape.
+fn contains_legacy_octal_escape(text: &str) -> bool {
+    let bytes = text.as_bytes();
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] != b'\\' {
+            index += 1;
+            continue;
+        }
+        if bytes.get(index + 1) == Some(&b'0')
+            && bytes.get(index + 2).is_some_and(u8::is_ascii_digit)
+        {
+            return true;
+        }
+        index += 2;
+    }
+    false
 }
 
 fn name_token(name: &AnyNameLike) -> Option<JsSyntaxToken> {
