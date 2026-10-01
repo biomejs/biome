@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSuppressed.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+// biome-ignore lint/nursery/noExcessiveStatementsPerFunction: test
+function foo() {
+	s1; s2; s3; s4; s5; s6; s7; s8; s9; s10; s11;
+}
+
+class Bar {
+	// biome-ignore lint/nursery/noExcessiveStatementsPerFunction: test
+	@decorator
+	method() {
+		s1; s2; s3; s4; s5; s6; s7; s8; s9; s10; s11;
+	}
+}
+
+```
