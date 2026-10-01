@@ -11,6 +11,8 @@ use super::migration::{
 };
 use super::stylelint_any_rule_to_biome::migrate_stylelint_any_rule;
 use super::stylelint_stylelint::{self, Severity};
+use super::stylelint_unsupported_rules::STYLELINT_UNSUPPORTED_RULES;
+use biome_analyze::RuleSource;
 use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
 use biome_console::markup;
@@ -202,21 +204,14 @@ fn record_rule_list(
 
 /// Determines why an unmapped Stylelint rule is unsupported.
 fn unsupported_rule_reason(rule_name: &str) -> UnsupportedRuleReason {
-    if FORMATTER_COVERED_RULES.binary_search(&rule_name).is_ok() {
-        UnsupportedRuleReason::FormatterCovers
-    } else {
-        UnsupportedRuleReason::KnownSourceNotImplemented
+    let sourced_rule = RuleSource::Stylelint(rule_name);
+    if let Ok(index) =
+        STYLELINT_UNSUPPORTED_RULES.binary_search_by(|rule| rule.0.cmp_any(&sourced_rule))
+    {
+        return STYLELINT_UNSUPPORTED_RULES[index].1.clone();
     }
+    UnsupportedRuleReason::KnownSourceNotImplemented
 }
-
-/// Stylelint rules whose behavior is covered by Biome's formatter.
-///
-/// Most of these are stylistic rules that Stylelint deprecated in favor of a
-/// dedicated formatter. They are kept here so the migration can report that the
-/// functionality is not lost when using Biome's formatter.
-///
-/// Keep this list sorted so that [`slice::binary_search`] stays correct.
-const FORMATTER_COVERED_RULES: &[&str] = &[];
 
 pub(crate) fn merge_biome_config_with_stylelint(
     mut biome_config: biome_config::Configuration,

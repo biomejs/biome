@@ -22,10 +22,14 @@ use super::stylelint_stylelint;
 ///
 /// Order is important. It translates the priority of the files, matching the
 /// lookup order used by Stylelint's `cosmiconfig` search.
-/// (YAML is currently not supported as the infrastructure is not ready yet)
-const CONFIG_FILES: [&str; 8] = [
+///
+/// YAML files are listed so that they are reported as unsupported instead of
+/// being skipped in favor of a lower-priority file.
+const CONFIG_FILES: [&str; 10] = [
     ".stylelintrc",
     ".stylelintrc.json",
+    ".stylelintrc.yaml",
+    ".stylelintrc.yml",
     // Prefixed with `./` to ensure that it is loadable via Node.js's `import()`.
     "./.stylelintrc.js",
     "./.stylelintrc.cjs",

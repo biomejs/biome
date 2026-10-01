@@ -215,3 +215,138 @@ fn migrate_stylelintrcjson_not_found() {
         result,
     ));
 }
+
+#[test]
+fn migrate_stylelintrcyaml_unsupported() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let stylelintrc = "rules:\n  block-no-empty: true\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(
+        Utf8Path::new(".stylelintrc.yaml").into(),
+        stylelintrc.as_bytes(),
+    );
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "stylelint"].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_stylelintrcyaml_unsupported",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_stylelintignore_and_ignore_files() {
+    let biomejson = r#"{}"#;
+    let stylelintrc = r#"{
+        "rules": { "block-no-empty": true },
+        "ignoreFiles": ["dist/**"]
+    }"#;
+    let stylelintignore = "build/\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(
+        Utf8Path::new(".stylelintrc.json").into(),
+        stylelintrc.as_bytes(),
+    );
+    fs.insert(
+        Utf8Path::new(".stylelintignore").into(),
+        stylelintignore.as_bytes(),
+    );
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "stylelint", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_stylelintignore_and_ignore_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_stylelint_ignore_files_with_existing_includes() {
+    let biomejson = r#"{ "linter": { "includes": ["src/**"] } }"#;
+    let stylelintrc = r#"{
+        "rules": { "block-no-empty": true },
+        "ignoreFiles": ["dist/**"]
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(
+        Utf8Path::new(".stylelintrc.json").into(),
+        stylelintrc.as_bytes(),
+    );
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "stylelint", "--write"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_stylelint_ignore_files_with_existing_includes",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn migrate_stylelint_rules_covered_by_formatter() {
+    let biomejson = r#"{ "linter": { "enabled": true } }"#;
+    let stylelintrc = r#"{
+        "rules": {
+            "block-no-empty": true,
+            "color-hex-case": "lower",
+            "indentation": 2,
+            "string-quotes": "double",
+            "unicode-bom": "never"
+        }
+    }"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(
+        Utf8Path::new(".stylelintrc.json").into(),
+        stylelintrc.as_bytes(),
+    );
+
+    let mut console = BufferConsole::default();
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["migrate", "stylelint"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_stylelint_rules_covered_by_formatter",
+        fs,
+        console,
+        result,
+    ));
+}

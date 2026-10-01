@@ -14,13 +14,11 @@ expression: redactor(content)
 {
         "rules": {
             "block-no-empty": true,
-            "color-no-hex": true,
-            "no-descending-specificity": null,
-            "unit-no-unknown": [true, { "severity": "warning" }],
+            "color-hex-case": "lower",
             "indentation": 2,
-            "unknown-stylelint-rule": true
-        },
-        "ignoreFiles": ["dist/**"]
+            "string-quotes": "double",
+            "unicode-bom": "never"
+        }
     }
 ```
 
@@ -31,20 +29,14 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 
   i Configuration file can be updated.
   
-    1    │ - {·"linter":·{·"enabled":·true·}·}
-       1 │ + {
-       2 │ + → "linter":·{
-       3 │ + → → "enabled":·true,
-       4 │ + → → "rules":·{
-       5 │ + → → → "preset":·"none",
-       6 │ + → → → "correctness":·{·"noUnknownUnit":·"warn"·},
-       7 │ + → → → "style":·{·"noHexColors":·"error"·},
-       8 │ + → → → "suspicious":·{·"noEmptyBlock":·"error"·}
-       9 │ + → → },
-      10 │ + → → "includes":·["**",·"!dist/**"]
-      11 │ + → }
-      12 │ + }
-      13 │ + 
+    1   │ - {·"linter":·{·"enabled":·true·}·}
+      1 │ + {
+      2 │ + → "linter":·{
+      3 │ + → → "enabled":·true,
+      4 │ + → → "rules":·{·"preset":·"none",·"suspicious":·{·"noEmptyBlock":·"error"·}·}
+      5 │ + → }
+      6 │ + }
+      7 │ + 
   
 
 ```
@@ -53,25 +45,25 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 5 Stylelint rules found
-    - 1 are obsolete because of Biome's formatter
-    - 3 can be migrated to Biome's rules (run with --write to migrate)
+    - 3 are obsolete because of Biome's formatter
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
     - 80% (4) of your Stylelint rules are fully covered by Biome
-      - 60% (3) via direct migration to Biome rules
+      - 20% (1) via direct migration to Biome rules
   
   
   i Rules that can be migrated:
   
   - block-no-empty
-  - color-no-hex
-  - unit-no-unknown
   
   i These rules enforce styles handled by Biome's formatter (so you don't lose the functionality):
   
+  - color-hex-case
   - indentation
+  - string-quotes
   
   i These rules don't have an equivalent Biome rule yet:
   
-  - unknown-stylelint-rule
+  - unicode-bom
   
 
 ```

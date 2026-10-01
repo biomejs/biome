@@ -44,6 +44,7 @@ mod stylelint;
 mod stylelint_any_rule_to_biome;
 mod stylelint_stylelint;
 mod stylelint_to_biome;
+mod stylelint_unsupported_rules;
 
 pub(crate) struct MigratePayload<'a> {
     pub(crate) session: CliSession<'a>,
