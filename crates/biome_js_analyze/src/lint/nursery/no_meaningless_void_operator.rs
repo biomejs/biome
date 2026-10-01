@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// void 0;
     /// ```
     pub NoMeaninglessVoidOperator {
-        version: "next",
+        version: "2.5.15",
         name: "noMeaninglessVoidOperator",
         language: "js",
         recommended: false,

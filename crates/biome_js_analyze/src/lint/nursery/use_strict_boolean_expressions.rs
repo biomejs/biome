@@ -63,7 +63,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub UseStrictBooleanExpressions {
-        version: "next",
+        version: "2.5.15",
         name: "useStrictBooleanExpressions",
         language: "js",
         recommended: false,

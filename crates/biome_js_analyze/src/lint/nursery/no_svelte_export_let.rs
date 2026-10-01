@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// - [Svelte `$props`](https://svelte.dev/docs/svelte/$props)
     /// - [Svelte 5 migration guide](https://svelte.dev/docs/svelte/v5-migration-guide#Let-exports-become-$props)
     pub NoSvelteExportLet {
-        version: "next",
+        version: "2.5.15",
         name: "noSvelteExportLet",
         language: "js",
         domains: &[RuleDomain::Svelte],

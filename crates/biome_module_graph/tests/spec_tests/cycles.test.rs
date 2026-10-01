@@ -830,3 +830,76 @@ fn test_binding_query_is_invalidated_when_import_cycle_is_broken() {
     let events = db.take_salsa_events();
     assert_function_query_was_run(&db, infer_binding_type, input, &events);
 }
+
+fn insert_generic_parameter_import_cycle(fs: &MemoryFileSystem) {
+    fs.insert(
+        "/src/entity.ts".into(),
+        r#"
+            import type { Repository } from "./repository.ts";
+            export interface Entity<R extends Repository<any> = Repository<any>> {
+                repository: R;
+            }
+            export declare const entity: Entity<number>;
+        "#,
+    );
+    fs.insert(
+        "/src/repository.ts".into(),
+        r#"
+            import type { Entity } from "./entity.ts";
+            export interface Repository<E extends Entity<any> = Entity<any>> {
+                find(): E;
+            }
+        "#,
+    );
+}
+
+#[test]
+fn test_generic_parameters_that_name_each_other_across_an_import_cycle() {
+    let fs = MemoryFileSystem::default();
+    insert_generic_parameter_import_cycle(&fs);
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import type { Entity } from "./entity.ts";
+            export declare const value: Entity<string>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(
+        &fs,
+        &["/src/entity.ts", "/src/repository.ts", "/src/index.ts"],
+        true,
+    );
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let input = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "value"));
+
+    let ty = infer_binding_type(&db, input).expect("value must be inferred");
+    let repository =
+        find_member_type(&db, ty, "repository").expect("repository member must be inferred");
+    assert!(
+        is_inferred_string(&db, repository),
+        "explicit type argument must be preserved, got {repository:?}"
+    );
+}
+
+#[test]
+fn test_generic_parameters_that_name_each_other_inside_an_import_cycle() {
+    let fs = MemoryFileSystem::default();
+    insert_generic_parameter_import_cycle(&fs);
+
+    let db = build_js_test_module_db(&fs, &["/src/entity.ts", "/src/repository.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/entity.ts"))
+        .expect("entity module must exist");
+    let input = BindingTypeInput::new(&db, module, binding_range_by_name(&db, module, "entity"));
+
+    let ty = infer_binding_type(&db, input).expect("entity must be inferred");
+    let repository =
+        find_member_type(&db, ty, "repository").expect("repository member must be inferred");
+    assert!(
+        is_inferred_number(&db, repository),
+        "explicit type argument must be preserved, got {repository:?}"
+    );
+}

@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoReactObjectTypeAsDefaultProp {
-        version: "next",
+        version: "2.5.15",
         name: "noReactObjectTypeAsDefaultProp",
         language: "js",
         sources: &[RuleSource::EslintReact("no-object-type-as-default-prop").same()],

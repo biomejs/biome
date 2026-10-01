@@ -69,6 +69,7 @@ Load `type-inference`.
 - A Salsa query must track every input that can change its result.
 - Cross-module data must remain reference-based so edits cannot leave copied data stale.
 - Trace changed resolution paths from caller result through each query, reference, import, fallback, and owning module.
+- A new `ResolutionCtx` created mid-resolution starts with empty cycle and depth guards. Unless a tracked query, a spent import or step budget, or the shared declaration evaluator bounds it, mutually referencing declarations across an import cycle overflow the stack.
 - Require semantic tests for the type shapes actually traversed. Require query-event tests only for claims about dependency or inference scope.
 
 ## Code Generation and Registration

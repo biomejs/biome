@@ -42,7 +42,7 @@ declare_lint_rule! {
     ///
     /// - [Astro template directives](https://docs.astro.build/en/reference/directives-reference/#sethtml)
     pub NoAstroConflictingSetDirectives {
-        version: "next",
+        version: "2.5.15",
         name: "noAstroConflictingSetDirectives",
         language: "html",
         severity: Severity::Error,
