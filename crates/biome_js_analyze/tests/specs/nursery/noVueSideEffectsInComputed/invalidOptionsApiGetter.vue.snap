@@ -1,0 +1,69 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOptionsApiGetter.vue
+---
+# Input
+```vue
+<script>
+export default {
+  computed: {
+    pair: {
+      get() {
+        this.firstName = 'lorem'
+        return this.firstName + ' ' + this.lastName
+      },
+      set(value) {
+        this.firstName = value
+      },
+    },
+    assigned: function () {
+      return this.items.reverse()
+    },
+  },
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalidOptionsApiGetter.vue:6:9 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside the pair computed property.
+  
+    4 │     pair: {
+    5 │       get() {
+  > 6 │         this.firstName = 'lorem'
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         return this.firstName + ' ' + this.lastName
+    8 │       },
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidOptionsApiGetter.vue:14:14 lint/nursery/noVueSideEffectsInComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This mutates state inside the assigned computed property.
+  
+    12 │     },
+    13 │     assigned: function () {
+  > 14 │       return this.items.reverse()
+       │              ^^^^^^^^^^^^^^^^^^^^
+    15 │     },
+    16 │   },
+  
+  i A computed value is cached and recomputed only when a dependency changes, so the getter does not run a predictable number of times — and neither does this mutation.
+  
+  i Derive the value instead of mutating: copy before reordering, with slice() or toReversed(). If the write is the point, move it to a watcher, a method, or the computed property's own setter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
