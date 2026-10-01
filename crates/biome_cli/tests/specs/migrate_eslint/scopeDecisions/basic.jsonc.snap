@@ -1,0 +1,68 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/prefer-promise-reject-errors": "error",
+		"no-catch-shadow": "error",
+		"svelte/button-has-type": "warn",
+		"svelte/first-attribute-linebreak": "error",
+		"svelte/html-closing-bracket-new-line": "error",
+		"svelte/html-closing-bracket-spacing": "error",
+		"svelte/html-quotes": "error",
+		"svelte/indent": "error",
+		"svelte/mustache-spacing": "error",
+		"svelte/no-at-const-tags": "error",
+		"svelte/no-spaces-around-equal-signs-in-attribute": "error",
+		"svelte/no-trailing-spaces": "error",
+		"vue/eqeqeq": "error",
+		"vue/html-button-has-type": "error",
+		"vue/no-console": "error",
+		"vue/no-irregular-whitespace": "error",
+		"vue/no-restricted-v-on": "error",
+		"vue/no-unused-vars": "error",
+		"vue/object-shorthand": "error",
+		"vue/padding-line-between-blocks": "error",
+		"vue/padding-line-between-tags": "error",
+		"vue/padding-lines-in-component-definition": "error"
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"a11y": { "useButtonType": "error" },
+			"correctness": { "noUnusedVariables": "error" },
+			"nursery": {
+				"noSvelteLegacyConst": "error",
+				"usePromiseRejectErrors": "error"
+			},
+			"style": { "useConsistentObjectDefinitions": "error" },
+			"suspicious": {
+				"noConsole": "error",
+				"noDoubleEquals": "error",
+				"noIrregularWhitespace": "error",
+				"noShadow": "error"
+			}
+		}
+	}
+}
+
+```
