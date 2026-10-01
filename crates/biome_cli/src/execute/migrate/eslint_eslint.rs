@@ -553,6 +553,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
                             }
                         }
+                        "max-statements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxStatements(conf));
+                            }
+                        }
                         "no-console" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
@@ -731,6 +736,62 @@ impl From<MaxNestedCallbacksOptions>
     }
 }
 
+#[derive(Debug, Default)]
+pub(crate) struct MaxStatementsOptions {
+    max: Option<u16>,
+}
+
+impl Deserializable for MaxStatementsOptions {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxStatementsObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsObjectOptions {
+    max: Option<u16>,
+    maximum: Option<u16>,
+}
+
+impl From<MaxStatementsObjectOptions> for MaxStatementsOptions {
+    fn from(value: MaxStatementsObjectOptions) -> Self {
+        // ESLint gives precedence to the deprecated `maximum` option.
+        Self {
+            max: value.maximum.or(value.max),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsTopLevelOptions {
+    #[deserializable(rename = "ignoreTopLevelFunctions")]
+    ignore_top_level_functions: Option<bool>,
+}
+
+impl MaxStatementsOptions {
+    pub(crate) fn into_biome_options(
+        self,
+        top_level_options: Option<MaxStatementsTopLevelOptions>,
+    ) -> biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions
+    {
+        biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions {
+            max: self.max,
+            ignore_top_level_functions: top_level_options
+                .and_then(|options| options.ignore_top_level_functions),
+        }
+    }
+}
+
 #[derive(Debug, Default, Deserializable)]
 pub(crate) struct ArrayCallbackReturnOptions {
     #[deserializable(rename = "allowImplicit")]
@@ -871,6 +932,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
+    MaxStatements(RuleConf<MaxStatementsOptions, MaxStatementsTopLevelOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
@@ -901,6 +963,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::FuncStyle(_) => Cow::Borrowed("func-style"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
+            Self::MaxStatements(_) => Cow::Borrowed("max-statements"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
