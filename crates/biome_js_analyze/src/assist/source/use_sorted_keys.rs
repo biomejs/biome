@@ -13,7 +13,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult, SyntaxToken, TriviaPieceKind};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -263,6 +263,15 @@ impl Rule for UseSortedKeys {
             .ok()?
         };
 
+        // A `//` comment swallows the rest of its line. Sorting carries each
+        // member's trailing trivia along with it, so a member sorted to follow
+        // such a comment on the same line would become part of the comment and
+        // change runtime behavior. Withhold the fix instead of offering it.
+        // See https://github.com/biomejs/biome/issues/12057
+        if would_swallow_code_in_line_comment(&new_list) {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);
 
@@ -273,6 +282,34 @@ impl Rule for UseSortedKeys {
             mutation,
         ))
     }
+}
+
+/// Returns `true` if any token of `list` is followed on the same line by a
+/// token that a `//` comment in its trailing trivia would swallow.
+///
+/// Trivia after and including a newline belongs to the leading trivia of the
+/// next token, so a `//` comment in a token's trailing trivia is only harmless
+/// when the next token starts on a new line. Sorting reorders members together
+/// with their trailing trivia, which can place a member right after such a
+/// comment on the same line, turning it into part of the comment.
+fn would_swallow_code_in_line_comment(list: &JsObjectMemberList) -> bool {
+    let mut tokens = list.syntax().descendants_tokens(Direction::Next);
+    let mut previous = match tokens.next() {
+        Some(token) => token,
+        None => return false,
+    };
+    tokens.any(|token| {
+        let swallows_next_token = previous
+            .trailing_trivia()
+            .pieces()
+            .any(|piece| piece.kind().is_single_line_comment())
+            && !token
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_newline());
+        previous = token;
+        swallows_next_token
+    })
 }
 
 /// Checks if an object/array spans multiple lines by examining CST trivia.
