@@ -8,7 +8,7 @@ use biome_js_syntax::{
     AnyJsObjectMember, JsAssignmentExpression, JsAssignmentOperator, JsComputedMemberAssignment,
     JsComputedMemberExpression, JsIdentifierAssignment, JsLanguage, JsName, JsPrivateName,
     JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxToken,
-    inner_string_text,
+    inner_string_text, unescape_js_identifier, unescape_js_string,
 };
 use biome_rowan::{
     AstNode, AstSeparatedList, AstSeparatedListNodesIterator, SyntaxError, SyntaxResult, TextRange,
@@ -55,10 +55,20 @@ declare_lint_rule! {
     /// a['b'].foo = a['b'].foo;
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// a["b"] = a.b;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// a[0] = a["0"];
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// a &= a;
+    /// a[b] = a["b"];
+    /// a[0] = a["1"];
     /// var a = a;
     /// let a = a;
     /// const a = a;
@@ -328,9 +338,7 @@ impl SameIdentifiers {
             let (left_name, left_reference) = left_item;
             let (right_name, right_reference) = right_item;
 
-            if let Ok(identifier_like) = IdentifiersLike::try_from((left_name, right_name))
-                && with_same_identifiers(&identifier_like).is_some()
-            {
+            if same_member_name(&left_name, &right_name) {
                 if let (Some(left_reference), Some(right_reference)) =
                     (left_reference, right_reference)
                 {
@@ -340,11 +348,10 @@ impl SameIdentifiers {
                     ))
                     .is_some()
                     {
-                        let source_identifier = IdentifiersLike::try_from((
+                        let source_identifier = identifiers_like(
                             left.source_member.clone(),
                             right.source_member.clone(),
-                        ))
-                        .ok()?;
+                        )?;
                         return Some(AnyAssignmentLike::Identifiers(source_identifier));
                     }
                 } else {
@@ -637,6 +644,30 @@ impl TryFrom<(AnyJsAssignmentPattern, AnyJsExpression)> for AnyAssignmentLike {
                     &right,
                 )?,
             },
+            (
+                AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsStaticMemberAssignment(
+                    left,
+                )),
+                AnyJsExpression::JsComputedMemberExpression(right),
+            ) => Self::StaticExpression {
+                left: AnyJsAssignmentExpressionLikeIterator::from_static_member_assignment(&left)?,
+                right: AnyJsAssignmentExpressionLikeIterator::from_computed_member_expression(
+                    &right,
+                )?,
+            },
+            (
+                AnyJsAssignmentPattern::AnyJsAssignment(
+                    AnyJsAssignment::JsComputedMemberAssignment(left),
+                ),
+                AnyJsExpression::JsStaticMemberExpression(right),
+            ) => Self::StaticExpression {
+                left: AnyJsAssignmentExpressionLikeIterator::from_computed_member_assignment(
+                    &left,
+                )?,
+                right: AnyJsAssignmentExpressionLikeIterator::from_static_member_expression(
+                    &right,
+                )?,
+            },
             _ => Self::None,
         })
     }
@@ -682,6 +713,8 @@ pub enum IdentifiersLike {
     /// a[3].d = a[4].d
     /// ```
     Literal(AnyJsLiteralExpression, AnyJsLiteralExpression),
+    /// Property names written with different static syntax, such as `a.b = a["b"]`.
+    Members(AnyNameLike, AnyNameLike),
 }
 
 impl TryFrom<(AnyNameLike, AnyNameLike)> for IdentifiersLike {
@@ -721,6 +754,7 @@ impl IdentifiersLike {
             Self::PrivateName(left, _) => left.range(),
             Self::References(left, _) => left.range(),
             Self::Literal(left, _) => left.range(),
+            Self::Members(left, _) => left.syntax().text_trimmed_range(),
         }
     }
 
@@ -731,6 +765,7 @@ impl IdentifiersLike {
             Self::PrivateName(_, right) => right.range(),
             Self::References(_, right) => right.range(),
             Self::Literal(_, right) => right.range(),
+            Self::Members(_, right) => right.syntax().text_trimmed_range(),
         }
     }
 
@@ -741,7 +776,123 @@ impl IdentifiersLike {
             Self::PrivateName(_, right) => right.value_token().ok(),
             Self::References(_, right) => right.value_token().ok(),
             Self::Literal(_, right) => right.value_token().ok(),
+            Self::Members(_, right) => name_token(right),
         }
+    }
+}
+
+fn identifiers_like(left: AnyNameLike, right: AnyNameLike) -> Option<IdentifiersLike> {
+    IdentifiersLike::try_from((left.clone(), right.clone()))
+        .ok()
+        .or(Some(IdentifiersLike::Members(left, right)))
+}
+
+/// Whether two member names refer to the same property without running code.
+///
+/// Dot names, string literals, and numeric literals are compared by the
+/// property key JavaScript would use. `a.b`, `a["b"]`, and `a[0]` / `a["0"]`
+/// match. A computed name such as `a[b]` does not match a literal.
+fn same_member_name(left: &AnyNameLike, right: &AnyNameLike) -> bool {
+    if let Ok(pair) = IdentifiersLike::try_from((left.clone(), right.clone()))
+        && with_same_identifiers(&pair).is_some()
+    {
+        return true;
+    }
+    match (static_property_key(left), static_property_key(right)) {
+        (Some(left_key), Some(right_key)) => left_key == right_key,
+        _ => false,
+    }
+}
+
+/// Object key for a static member. `None` when the key is computed.
+fn static_property_key(name: &AnyNameLike) -> Option<String> {
+    match name {
+        AnyNameLike::AnyJsName(AnyJsName::JsName(node)) => {
+            let token = node.value_token().ok()?;
+            let text = token.text_trimmed();
+            Some(unescape_js_identifier(&text).into_owned())
+        }
+        AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsStringLiteralExpression(
+            node,
+        )) => Some(
+            unescape_js_string(node.inner_string_text().ok()?)
+                .text()
+                .to_string(),
+        ),
+        AnyNameLike::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
+            node,
+        )) => number_property_key(node.as_number()?),
+        _ => None,
+    }
+}
+
+/// `Number::toString` for a finite value, the property key of a numeric literal.
+fn number_property_key(value: f64) -> Option<String> {
+    if !value.is_finite() {
+        return None;
+    }
+    if value == 0.0 {
+        return Some("0".to_string());
+    }
+    let negative = value.is_sign_negative();
+    let scientific = format!("{:e}", value.abs());
+    let key = js_scientific_to_decimal(&scientific)?;
+    Some(if negative { format!("-{key}") } else { key })
+}
+
+/// Rewrites Rust's shortest `d.ddde±exp` form into ECMA-262 `Number::toString`.
+fn js_scientific_to_decimal(scientific: &str) -> Option<String> {
+    let (mantissa, exponent) = scientific.split_once('e')?;
+    let exponent: i32 = exponent.parse().ok()?;
+    let digits: String = mantissa
+        .chars()
+        .filter(|character| *character != '.')
+        .collect();
+    if digits.is_empty() || !digits.chars().all(|character| character.is_ascii_digit()) {
+        return None;
+    }
+    let digit_count = i32::try_from(digits.len()).ok()?;
+    let position = exponent.checked_add(1)?;
+    if digit_count <= position && position <= 21 {
+        let mut out = digits;
+        for _ in 0..(position - digit_count) {
+            out.push('0');
+        }
+        return Some(out);
+    }
+    if (0 < position) && position <= 21 {
+        let split = usize::try_from(position).ok()?;
+        return Some(format!("{}.{}", &digits[..split], &digits[split..]));
+    }
+    if (-6 < position) && position <= 0 {
+        let mut out = String::from("0.");
+        for _ in 0..(-position) {
+            out.push('0');
+        }
+        out.push_str(&digits);
+        return Some(out);
+    }
+    let exponent_value = position - 1;
+    let exponent_sign = if exponent_value < 0 { "-" } else { "+" };
+    let exponent_digits = exponent_value.unsigned_abs();
+    if digit_count == 1 {
+        Some(format!("{digits}e{exponent_sign}{exponent_digits}"))
+    } else {
+        Some(format!(
+            "{}.{}e{exponent_sign}{exponent_digits}",
+            &digits[..1],
+            &digits[1..]
+        ))
+    }
+}
+
+fn name_token(name: &AnyNameLike) -> Option<JsSyntaxToken> {
+    match name {
+        AnyNameLike::AnyJsName(AnyJsName::JsName(node)) => node.value_token().ok(),
+        AnyNameLike::AnyJsName(AnyJsName::JsPrivateName(node)) => node.value_token().ok(),
+        AnyNameLike::JsReferenceIdentifier(node) => node.value_token().ok(),
+        AnyNameLike::AnyJsLiteralExpression(node) => node.value_token().ok(),
+        AnyNameLike::AnyJsName(AnyJsName::JsMetavariable(_)) => None,
     }
 }
 
@@ -768,27 +919,15 @@ fn with_same_identifiers(identifiers_like: &IdentifiersLike) -> Option<()> {
             let right_value = right.value_token().ok()?;
             (left_value, right_value)
         }
-        IdentifiersLike::Literal(left, right) => match (left, right) {
-            (
-                AnyJsLiteralExpression::JsStringLiteralExpression(left),
-                AnyJsLiteralExpression::JsStringLiteralExpression(right),
-            ) => {
-                let left_value = left.value_token().ok()?;
-                let right_value = right.value_token().ok()?;
-                (left_value, right_value)
-            }
-
-            (
-                AnyJsLiteralExpression::JsNumberLiteralExpression(left),
-                AnyJsLiteralExpression::JsNumberLiteralExpression(right),
-            ) => {
-                let left_value = left.value_token().ok()?;
-                let right_value = right.value_token().ok()?;
-                (left_value, right_value)
-            }
-
-            _ => return None,
-        },
+        IdentifiersLike::Literal(left, right) => {
+            let left_key = static_property_key(&AnyNameLike::AnyJsLiteralExpression(left.clone()))?;
+            let right_key =
+                static_property_key(&AnyNameLike::AnyJsLiteralExpression(right.clone()))?;
+            return (left_key == right_key).then_some(());
+        }
+        IdentifiersLike::Members(left, right) => {
+            return same_member_name(left, right).then_some(());
+        }
     };
 
     if inner_string_text(&left_value) == inner_string_text(&right_value) {

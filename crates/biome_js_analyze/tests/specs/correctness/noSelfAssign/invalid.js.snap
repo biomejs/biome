@@ -30,6 +30,14 @@ a['b'].bar = a['b'].bar;
 a[foobar].b = a[foobar].b;
 a[10].b = a[10].b;
 a[4] = a[4];
+a["b"] = a.b;
+a.b = a["b"];
+a[0] = a["0"];
+a[1] = a[1.0];
+a[0x10] = a[16];
+a[1e-7] = a["1e-7"];
+a["\u0062"] = a.b;
+a["b"].c = a.b.c;
 
 ```
 
@@ -922,7 +930,7 @@ invalid.js:25:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 25 │ a[10].b = a[10].b;
        │                 ^
     26 │ a[4] = a[4];
-    27 │ 
+    27 │ a["b"] = a.b;
   
   i This is where is assigned.
   
@@ -931,7 +939,7 @@ invalid.js:25:17 lint/correctness/noSelfAssign ━━━━━━━━━━━
   > 25 │ a[10].b = a[10].b;
        │       ^
     26 │ a[4] = a[4];
-    27 │ 
+    27 │ a["b"] = a.b;
   
   i Self assignments have no effect and can be removed.
   
@@ -947,7 +955,8 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     25 │ a[10].b = a[10].b;
   > 26 │ a[4] = a[4];
        │          ^
-    27 │ 
+    27 │ a["b"] = a.b;
+    28 │ a.b = a["b"];
   
   i This is where is assigned.
   
@@ -955,7 +964,214 @@ invalid.js:26:10 lint/correctness/noSelfAssign ━━━━━━━━━━━
     25 │ a[10].b = a[10].b;
   > 26 │ a[4] = a[4];
        │   ^
-    27 │ 
+    27 │ a["b"] = a.b;
+    28 │ a.b = a["b"];
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:27:12 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × b is assigned to itself.
+  
+    25 │ a[10].b = a[10].b;
+    26 │ a[4] = a[4];
+  > 27 │ a["b"] = a.b;
+       │            ^
+    28 │ a.b = a["b"];
+    29 │ a[0] = a["0"];
+  
+  i This is where is assigned.
+  
+    25 │ a[10].b = a[10].b;
+    26 │ a[4] = a[4];
+  > 27 │ a["b"] = a.b;
+       │   ^^^
+    28 │ a.b = a["b"];
+    29 │ a[0] = a["0"];
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:28:9 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "b" is assigned to itself.
+  
+    26 │ a[4] = a[4];
+    27 │ a["b"] = a.b;
+  > 28 │ a.b = a["b"];
+       │         ^^^
+    29 │ a[0] = a["0"];
+    30 │ a[1] = a[1.0];
+  
+  i This is where is assigned.
+  
+    26 │ a[4] = a[4];
+    27 │ a["b"] = a.b;
+  > 28 │ a.b = a["b"];
+       │   ^
+    29 │ a[0] = a["0"];
+    30 │ a[1] = a[1.0];
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:29:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "0" is assigned to itself.
+  
+    27 │ a["b"] = a.b;
+    28 │ a.b = a["b"];
+  > 29 │ a[0] = a["0"];
+       │          ^^^
+    30 │ a[1] = a[1.0];
+    31 │ a[0x10] = a[16];
+  
+  i This is where is assigned.
+  
+    27 │ a["b"] = a.b;
+    28 │ a.b = a["b"];
+  > 29 │ a[0] = a["0"];
+       │   ^
+    30 │ a[1] = a[1.0];
+    31 │ a[0x10] = a[16];
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:30:10 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 1.0 is assigned to itself.
+  
+    28 │ a.b = a["b"];
+    29 │ a[0] = a["0"];
+  > 30 │ a[1] = a[1.0];
+       │          ^^^
+    31 │ a[0x10] = a[16];
+    32 │ a[1e-7] = a["1e-7"];
+  
+  i This is where is assigned.
+  
+    28 │ a.b = a["b"];
+    29 │ a[0] = a["0"];
+  > 30 │ a[1] = a[1.0];
+       │   ^
+    31 │ a[0x10] = a[16];
+    32 │ a[1e-7] = a["1e-7"];
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:31:13 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 16 is assigned to itself.
+  
+    29 │ a[0] = a["0"];
+    30 │ a[1] = a[1.0];
+  > 31 │ a[0x10] = a[16];
+       │             ^^
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  
+  i This is where is assigned.
+  
+    29 │ a[0] = a["0"];
+    30 │ a[1] = a[1.0];
+  > 31 │ a[0x10] = a[16];
+       │   ^^^^
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:32:13 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × "1e-7" is assigned to itself.
+  
+    30 │ a[1] = a[1.0];
+    31 │ a[0x10] = a[16];
+  > 32 │ a[1e-7] = a["1e-7"];
+       │             ^^^^^^
+    33 │ a["\u0062"] = a.b;
+    34 │ a["b"].c = a.b.c;
+  
+  i This is where is assigned.
+  
+    30 │ a[1] = a[1.0];
+    31 │ a[0x10] = a[16];
+  > 32 │ a[1e-7] = a["1e-7"];
+       │   ^^^^
+    33 │ a["\u0062"] = a.b;
+    34 │ a["b"].c = a.b.c;
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:33:17 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × b is assigned to itself.
+  
+    31 │ a[0x10] = a[16];
+    32 │ a[1e-7] = a["1e-7"];
+  > 33 │ a["\u0062"] = a.b;
+       │                 ^
+    34 │ a["b"].c = a.b.c;
+    35 │ 
+  
+  i This is where is assigned.
+  
+    31 │ a[0x10] = a[16];
+    32 │ a[1e-7] = a["1e-7"];
+  > 33 │ a["\u0062"] = a.b;
+       │   ^^^^^^^^
+    34 │ a["b"].c = a.b.c;
+    35 │ 
+  
+  i Self assignments have no effect and can be removed.
+  
+
+```
+
+```
+invalid.js:34:16 lint/correctness/noSelfAssign ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × c is assigned to itself.
+  
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  > 34 │ a["b"].c = a.b.c;
+       │                ^
+    35 │ 
+  
+  i This is where is assigned.
+  
+    32 │ a[1e-7] = a["1e-7"];
+    33 │ a["\u0062"] = a.b;
+  > 34 │ a["b"].c = a.b.c;
+       │        ^
+    35 │ 
   
   i Self assignments have no effect and can be removed.
   
