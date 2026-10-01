@@ -6,8 +6,8 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
-    JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
-    inner_string_text,
+    JsSyntaxNode, JsVariableDeclaration, TsInferType, TsMappedType, TsModuleDeclaration,
+    TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -546,6 +546,11 @@ impl JsModuleInfoCollector {
                 };
             } else if let Some(mapped) = TsMappedType::cast_ref(&ancestor) {
                 return match GenericTypeParameter::from_ts_mapped_type(&mapped) {
+                    Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
+                    None => TypeReference::unknown(),
+                };
+            } else if let Some(infer) = TsInferType::cast_ref(&ancestor) {
+                return match GenericTypeParameter::from_ts_infer_type(self, scope_id, &infer) {
                     Some(generic) => self.reference_to_owned_data(TypeData::from(generic)),
                     None => TypeReference::unknown(),
                 };

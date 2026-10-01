@@ -6,12 +6,24 @@
 //! callers use semantic operations such as generic substitution.
 
 use crate::TypeOperator;
-use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
+use crate::generated::global_types::ids::AWAITED_ID_GLOBAL_TYPE_ID;
+use crate::interned_types::{InternedTypeInstance, TypeData, TypeDataSlotRebuilder, TypeDb};
 use crate::type_operations::{indexed_access, keyof, mapped_type};
+use crate::type_relation::{
+    evaluate_extends, may_refer_to_free_generic, referenced_generic, substitute_all,
+    type_parameter_substitutions,
+};
 use rustc_hash::FxHashSet;
 
 pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
 const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
+
+/// Maximum number of times one normalization normalizes a conditional type
+/// again after instantiating it. This bounds recursive conditional types.
+const MAX_CONDITIONAL_INSTANTIATIONS: usize = 64;
+
+/// Maximum number of union members a distributive conditional is split into.
+const MAX_DISTRIBUTED_MEMBERS: usize = 64;
 
 /// A generic type and the type that replaces its references.
 ///
@@ -391,6 +403,65 @@ impl<'a, 'db> TypeSubstituter<'a, 'db> {
     }
 }
 
+impl<'db> TypeSubstituter<'_, 'db> {
+    /// Distributes a conditional type over a union that replaces its check type.
+    ///
+    /// For example, substituting `T` with `string | number` in
+    /// `T extends string ? "yes" : "no"` produces the union of the conditional
+    /// substituted with `string` and with `number`. Substituting `never`
+    /// produces `never`. The other substitutions apply to every member.
+    ///
+    /// Returns `None` when no substitution replaces the check type of a
+    /// distributive conditional with a union or `never`.
+    fn distribute(&self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> Option<TypeData<'db>> {
+        let TypeData::Extends(extends) = ty else {
+            return None;
+        };
+        if !extends.distributive(db) {
+            return None;
+        }
+        let generic = referenced_generic(db, extends.check_type(db))?;
+        let (check_substitutions, other_substitutions): (Vec<_>, Vec<_>) = self
+            .substitutions
+            .iter()
+            .copied()
+            .filter(|substitution| !self.shadowed.contains(&substitution.binder_generic(db)))
+            .partition(|substitution| {
+                referenced_generic(db, substitution.binder_generic(db)) == Some(generic)
+            });
+        let members = match check_substitutions
+            .first()?
+            .replacement
+            .expand_global_local(db)
+        {
+            TypeData::Union(union) => union.types(db).to_vec(),
+            TypeData::NeverKeyword => Vec::new(),
+            _ => return None,
+        };
+        if members.len() > MAX_DISTRIBUTED_MEMBERS {
+            return Some(TypeData::Unknown);
+        }
+
+        let mut distributed = Vec::with_capacity(members.len());
+        for member in members {
+            let mut substitutions = other_substitutions.clone();
+            substitutions.extend(
+                check_substitutions
+                    .iter()
+                    .map(|substitution| TypeSubstitution {
+                        replacement: member,
+                        ..*substitution
+                    }),
+            );
+            distributed.push(
+                ty.substitute_types(db, &substitutions)
+                    .map_or(TypeData::Unknown, |ty| ty),
+            );
+        }
+        Some(TypeData::union_from_types(db, distributed))
+    }
+}
+
 impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         // A global's supporting type may mention the global's type parameters.
@@ -400,10 +471,15 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
         }) {
             return TypeTransformAction::Replace(substitution.replacement);
         }
+        if let Some(distributed) = self.distribute(db, ty) {
+            return TypeTransformAction::Replace(distributed);
+        }
         if matches!(ty, TypeData::Generic(_))
             || self.substitutions.iter().all(|substitution| {
                 let generic = substitution.binder_generic(db);
-                self.shadowed.contains(&generic) || ty.declares_generic(db, generic)
+                self.shadowed.contains(&generic)
+                    || ty.declares_generic(db, generic)
+                    || ty.declares_infer_generic(db, generic)
             })
         {
             return TypeTransformAction::Replace(ty);
@@ -412,6 +488,16 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
         self.scopes.push(self.shadowed.len());
         if let Some(parameters) = ty.declared_type_parameters(db) {
             self.shadowed.extend_from_slice(parameters);
+        }
+        // Generics declared by `infer` shadow outer generics of the same identity.
+        if let TypeData::Extends(extends) = ty {
+            self.shadowed.extend(
+                extends
+                    .infer_types(db)
+                    .iter()
+                    .filter_map(|infer| referenced_generic(db, *infer))
+                    .map(TypeData::Generic),
+            );
         }
         TypeTransformAction::Descend(ty)
     }
@@ -424,16 +510,169 @@ impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
     }
 }
 
-struct TypeNormalizer<Resolve> {
-    resolve: Resolve,
+/// Normalizes types with the resolver `R`.
+///
+/// The resolver is generic so that resolving each visited type is a direct,
+/// inlinable call. Nested normalizations reborrow the same resolver, so they
+/// use the same `TypeNormalizer<R>` type rather than a new instantiation.
+struct TypeNormalizer<'a, R> {
+    resolve: &'a mut R,
+    /// Remaining conditional instantiations, shared with nested normalizations.
+    remaining_instantiations: &'a mut usize,
 }
 
-impl<'db, Resolve> TypeTransform<'db> for TypeNormalizer<Resolve>
+impl<'db, R> TypeNormalizer<'_, R>
 where
-    Resolve: FnMut(TypeData<'db>) -> TypeData<'db>,
+    R: FnMut(TypeData<'db>) -> TypeData<'db>,
+{
+    /// Normalizes a type produced by evaluating a conditional type.
+    ///
+    /// Once the instantiation budget is exhausted, `ty` is returned as is. Its
+    /// remaining conditionals stay unevaluated.
+    fn normalize_instantiation(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+        if *self.remaining_instantiations == 0 {
+            return ty;
+        }
+        *self.remaining_instantiations -= 1;
+        TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS)
+            .transform(
+                ty,
+                db,
+                &mut TypeNormalizer {
+                    resolve: &mut *self.resolve,
+                    remaining_instantiations: &mut *self.remaining_instantiations,
+                },
+            )
+            .map_or(ty, |ty| ty)
+    }
+
+    /// Unwraps the promises passed to the built-in `Awaited`.
+    ///
+    /// `Awaited<T>` matches `T` against `{ then(onfulfilled: infer F): any }`.
+    /// Built-in promises are modeled without the parameters of `then`, so this
+    /// evaluates `Awaited<Promise<X>>` as `Awaited<X>` directly. Other
+    /// arguments use the conditional in the declaration of `Awaited`.
+    fn instantiate_awaited(
+        &mut self,
+        db: &'db dyn TypeDb,
+        instance: InternedTypeInstance<'db>,
+    ) -> Option<TypeData<'db>> {
+        let awaited = TypeData::GlobalType(AWAITED_ID_GLOBAL_TYPE_ID);
+        let [argument] = instance.type_parameters(db).as_ref() else {
+            return None;
+        };
+        // `Awaited` is referenced either through its handle or, once a type
+        // reference has expanded it, through its alias declaration, which is
+        // itself an instance. Expanding the handle to compare with the
+        // declaration is costly, so cheaper checks rule out other instances,
+        // such as `Promise<T>`, first.
+        let target = instance.ty(db);
+        if target != awaited && !matches!(target, TypeData::InstanceOf(_)) {
+            return None;
+        }
+        let members = match (self.resolve)(*argument) {
+            TypeData::Union(union) => union.types(db).to_vec(),
+            argument => Vec::from([argument]),
+        };
+        if !members.iter().any(|member| member.is_promise_instance(db)) {
+            return None;
+        }
+        if target != awaited && target != awaited.expand_canonical_global(db) {
+            return None;
+        }
+
+        let members = members
+            .into_iter()
+            .map(|member| {
+                let member = match member {
+                    TypeData::InstanceOf(promise) if member.is_promise_instance(db) => promise
+                        .type_parameters(db)
+                        .first()
+                        .copied()
+                        .unwrap_or(TypeData::Unknown),
+                    member => member,
+                };
+                TypeData::instance_of(db, awaited, Box::new([member]))
+            })
+            .collect();
+        Some(self.normalize_instantiation(db, TypeData::union_from_types(db, members)))
+    }
+
+    /// Instantiates a generic alias whose body is a conditional type.
+    ///
+    /// Generic aliases are represented as instances of their declarations. For
+    /// example, `IsString<"a">` below is an instance of `IsString` with the
+    /// type argument `"a"`. Substituting the argument into the body lets the
+    /// conditional be evaluated, producing `"yes"`:
+    ///
+    /// ```ts
+    /// type IsString<T> = T extends string ? "yes" : "no";
+    /// type Yes = IsString<"a">;
+    /// ```
+    ///
+    /// Aliases with other bodies are left as instances, so they keep their
+    /// identity.
+    fn instantiate_conditional_alias(
+        &mut self,
+        db: &'db dyn TypeDb,
+        instance: InternedTypeInstance<'db>,
+    ) -> Option<TypeData<'db>> {
+        let type_arguments = instance.type_parameters(db);
+        if type_arguments.is_empty() {
+            return None;
+        }
+        let TypeData::InstanceOf(alias) = (self.resolve)(instance.ty(db)) else {
+            return None;
+        };
+        let body = (self.resolve)(alias.ty(db));
+        // A conditional can't be evaluated while its arguments are generic,
+        // and instantiating a recursive alias with them would never end.
+        if !matches!(body, TypeData::Extends(_))
+            || type_arguments
+                .iter()
+                .any(|argument| may_refer_to_free_generic(db, *argument))
+        {
+            return None;
+        }
+
+        let mut substitutions = Vec::with_capacity(alias.type_parameters(db).len() * 2);
+        for (index, type_parameter) in alias.type_parameters(db).iter().enumerate() {
+            let argument = match type_arguments.get(index) {
+                Some(argument) => *argument,
+                // A default may refer to the preceding parameters.
+                None => {
+                    let default = referenced_generic(db, *type_parameter)?.default(db)?;
+                    substitute_all(db, default, substitutions.clone())?
+                }
+            };
+            substitutions.extend(type_parameter_substitutions(db, *type_parameter, argument)?.1);
+        }
+        let body = substitute_all(db, body, substitutions)?;
+        Some(self.normalize_instantiation(db, body))
+    }
+}
+
+impl<'db, R> TypeTransform<'db> for TypeNormalizer<'_, R>
+where
+    R: FnMut(TypeData<'db>) -> TypeData<'db>,
 {
     fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
         let ty = (self.resolve)(ty);
+        // This runs before the instance's target is expanded to its declaration.
+        if let TypeData::InstanceOf(instance) = ty
+            && let Some(awaited) = self.instantiate_awaited(db, instance)
+        {
+            return TypeTransformAction::Replace(awaited);
+        }
+        // A conditional whose check type is generic can't be evaluated yet,
+        // and it is normalized again once instantiated. Its operands are often
+        // large, so normalizing them now could exhaust the budget of the
+        // enclosing type.
+        if let TypeData::Extends(extends) = ty
+            && may_refer_to_free_generic(db, (self.resolve)(extends.check_type(db)))
+        {
+            return TypeTransformAction::Replace(ty);
+        }
         if let TypeData::TypeofValue(value) = ty
             && value.ty(db) == TypeData::Unknown
         {
@@ -458,6 +697,16 @@ where
             {
                 instance.ty(db)
             }
+            TypeData::InstanceOf(instance) => self
+                .instantiate_conditional_alias(db, instance)
+                .unwrap_or(ty),
+            TypeData::Extends(extends) => match evaluate_extends(db, extends, self.resolve) {
+                Some(evaluated) if evaluated.needs_normalization => {
+                    self.normalize_instantiation(db, evaluated.ty)
+                }
+                Some(evaluated) => evaluated.ty,
+                None => ty,
+            },
             TypeData::MergedReference(reference) => {
                 let targets = reference.targets(db).collect::<Vec<_>>();
                 match targets.first().copied() {
@@ -501,12 +750,16 @@ impl<'db> TypeData<'db> {
     pub fn normalize_nested_types(
         self,
         db: &'db dyn TypeDb,
-        resolve: impl FnMut(Self) -> Self,
+        mut resolve: impl FnMut(Self) -> Self,
     ) -> TypeTransformResult<Self> {
+        let mut remaining_instantiations = MAX_CONDITIONAL_INSTANTIATIONS;
         TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
             self,
             db,
-            &mut TypeNormalizer { resolve },
+            &mut TypeNormalizer {
+                resolve: &mut resolve,
+                remaining_instantiations: &mut remaining_instantiations,
+            },
         )
     }
 
@@ -612,6 +865,18 @@ impl<'db> TypeData<'db> {
     fn declares_generic(self, db: &'db dyn TypeDb, generic: Self) -> bool {
         self.declared_type_parameters(db)
             .is_some_and(|parameters| parameters.contains(&generic))
+    }
+
+    /// Returns whether this is a conditional type declaring `generic` with
+    /// `infer`, which shadows any outer generic of the same identity.
+    fn declares_infer_generic(self, db: &'db dyn TypeDb, generic: Self) -> bool {
+        match self {
+            Self::Extends(extends) => extends.infer_types(db).iter().any(|infer| {
+                *infer == generic
+                    || referenced_generic(db, *infer).map(Self::Generic) == Some(generic)
+            }),
+            _ => false,
+        }
     }
 }
 
