@@ -176,21 +176,25 @@ impl Rule for UseLogicalProperties {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (physical, replacement) = state.replacement();
+        let diagnostic = RuleDiagnostic::new(rule_category!(), state.span, state.message()).note(
+            markup! {
+                "Logical properties adapt better to different writing modes and layout directions."
+            },
+        );
 
-        Some(
-            RuleDiagnostic::new(rule_category!(), state.span, state.message())
-                .note(markup! {
-                    "Logical properties adapt better to different writing modes and layout directions."
-                })
-                .note(markup! {
-                    "Replace "<Emphasis>{physical}</Emphasis>" with "<Emphasis>{replacement}</Emphasis>"."
-                }),
-        )
+        Some(if let Some((physical, replacement)) = state.replacement() {
+            diagnostic.note(markup! {
+                "Replace "<Emphasis>{physical}</Emphasis>" with "<Emphasis>{replacement}</Emphasis>"."
+            })
+        } else {
+            diagnostic.note(markup! {
+                "Choose a logical alignment value based on the layout axis."
+            })
+        })
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
-        let (_, replacement) = state.replacement();
+        let (_, replacement) = state.replacement()?;
         let mut mutation = ctx.root().begin();
         let new_token = CssSyntaxToken::new_detached(state.token.kind(), replacement, [], []);
         mutation.replace_token_transfer_trivia(state.token.clone(), new_token);
@@ -219,6 +223,7 @@ enum LogicalPropertiesViolation {
         physical: String,
         replacement: &'static str,
     },
+    JustifyContentValue,
     AnchorSizeValue {
         physical: String,
         replacement: &'static str,
@@ -238,6 +243,9 @@ impl UseLogicalPropertiesState {
             LogicalPropertiesViolation::PropertyValue { .. } => {
                 "Use logical CSS values over physical ones."
             }
+            LogicalPropertiesViolation::JustifyContentValue => {
+                "Use logical CSS values over physical ones."
+            }
             LogicalPropertiesViolation::AnchorSizeValue { .. } => {
                 "Use a logical size in anchor-size()."
             }
@@ -245,7 +253,7 @@ impl UseLogicalPropertiesState {
         }
     }
 
-    fn replacement(&self) -> (&str, &'static str) {
+    fn replacement(&self) -> Option<(&str, &'static str)> {
         match &self.violation {
             LogicalPropertiesViolation::PropertyName {
                 physical,
@@ -262,7 +270,8 @@ impl UseLogicalPropertiesState {
             | LogicalPropertiesViolation::AnchorValue {
                 physical,
                 replacement,
-            } => (physical.as_str(), replacement),
+            } => Some((physical.as_str(), replacement)),
+            LogicalPropertiesViolation::JustifyContentValue => None,
         }
     }
 }
@@ -345,18 +354,26 @@ fn collect_value_violations(
         .iter()
         .filter_map(|component| component.as_any_css_value().cloned())
     {
-        if let Some((token, physical)) = value_identifier_token(&value)
-            && let Some(replacement) =
-                physical_to_logical_value(property_name, physical.as_str(), direction)
-        {
-            states.push(UseLogicalPropertiesState {
-                span: token.text_trimmed_range(),
-                token,
-                violation: LogicalPropertiesViolation::PropertyValue {
-                    physical,
-                    replacement,
-                },
-            });
+        if let Some((token, physical)) = value_identifier_token(&value) {
+            let violation = if property_name == "justify-content"
+                && matches!(physical.as_str(), "left" | "right")
+            {
+                Some(LogicalPropertiesViolation::JustifyContentValue)
+            } else {
+                physical_to_logical_value(property_name, physical.as_str(), direction).map(
+                    |replacement| LogicalPropertiesViolation::PropertyValue {
+                        physical,
+                        replacement,
+                    },
+                )
+            };
+            if let Some(violation) = violation {
+                states.push(UseLogicalPropertiesState {
+                    span: token.text_trimmed_range(),
+                    token,
+                    violation,
+                });
+            }
         }
     }
 
@@ -483,7 +500,7 @@ fn physical_to_logical_value(
             _ => None,
         },
         "float" | "clear" => physical_to_logical_inline_value(value, direction),
-        "text-align" | "justify-content" | "justify-items" | "justify-self" => {
+        "text-align" | "justify-items" | "justify-self" => {
             physical_to_logical_start_end_value(value, direction)
         }
         _ => None,

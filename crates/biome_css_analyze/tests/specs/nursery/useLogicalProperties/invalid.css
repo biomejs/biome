@@ -79,3 +79,10 @@
 	top: anchor(bottom);
 	left: anchor(right);
 }
+
+.column-flex {
+	display: flex;
+	flex-direction: column;
+	justify-content: right;
+	justify-content: left;
+}

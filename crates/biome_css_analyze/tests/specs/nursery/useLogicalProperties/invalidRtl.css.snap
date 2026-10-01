@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 148
 expression: invalidRtl.css
 ---
 # Input
@@ -778,7 +777,7 @@ invalidRtl.css:41:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
 ```
 
 ```
-invalidRtl.css:42:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:42:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
@@ -791,24 +790,15 @@ invalidRtl.css:42:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace right with start.
+  i Choose a logical alignment value based on the layout axis.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
-  
-    40 40 │     text-align: right;
-    41 41 │     text-align: left;
-    42    │ - → justify-content:·right;
-       42 │ + → justify-content:·start;
-    43 43 │     justify-content: left;
-    44 44 │     justify-items: right;
-  
 
 ```
 
 ```
-invalidRtl.css:43:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:43:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
@@ -821,18 +811,9 @@ invalidRtl.css:43:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace left with end.
+  i Choose a logical alignment value based on the layout axis.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    41 41 │     text-align: left;
-    42 42 │     justify-content: right;
-    43    │ - → justify-content:·left;
-       43 │ + → justify-content:·end;
-    44 44 │     justify-items: right;
-    45 45 │     justify-items: left;
   
 
 ```

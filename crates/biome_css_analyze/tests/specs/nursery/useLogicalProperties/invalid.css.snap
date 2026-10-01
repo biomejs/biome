@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 148
 expression: invalid.css
 ---
 # Input
@@ -85,6 +84,13 @@ expression: invalid.css
 	width: var(--size, anchor-size(width));
 	top: anchor(bottom);
 	left: anchor(right);
+}
+
+.column-flex {
+	display: flex;
+	flex-direction: column;
+	justify-content: right;
+	justify-content: left;
 }
 
 ```
@@ -1465,7 +1471,7 @@ invalid.css:66:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.css:67:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:67:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
@@ -1478,24 +1484,15 @@ invalid.css:67:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace left with start.
+  i Choose a logical alignment value based on the layout axis.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
-  
-    65 65 │     text-align: left;
-    66 66 │     text-align: right;
-    67    │ - → justify-content:·left;
-       67 │ + → justify-content:·start;
-    68 68 │     justify-content: right;
-    69 69 │     justify-items: left;
-  
 
 ```
 
 ```
-invalid.css:68:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:68:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
@@ -1508,18 +1505,9 @@ invalid.css:68:19 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace right with end.
+  i Choose a logical alignment value based on the layout axis.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    66 66 │     text-align: right;
-    67 67 │     justify-content: left;
-    68    │ - → justify-content:·right;
-       68 │ + → justify-content:·end;
-    69 69 │     justify-items: left;
-    70 70 │     justify-items: right;
   
 
 ```
@@ -1938,6 +1926,48 @@ invalid.css:80:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
        80 │ + → left:·anchor(end);
     81 81 │   }
     82 82 │   
+  
+
+```
+
+```
+invalid.css:86:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    84 │ 	display: flex;
+    85 │ 	flex-direction: column;
+  > 86 │ 	justify-content: right;
+       │ 	                 ^^^^^
+    87 │ 	justify-content: left;
+    88 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Choose a logical alignment value based on the layout axis.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:87:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    85 │ 	flex-direction: column;
+    86 │ 	justify-content: right;
+  > 87 │ 	justify-content: left;
+       │ 	                 ^^^^
+    88 │ }
+    89 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Choose a logical alignment value based on the layout axis.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
 
 ```
