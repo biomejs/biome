@@ -502,6 +502,83 @@ fn test_member_lookup_preserves_recursive_argument_swaps() {
 }
 
 #[test]
+fn test_member_lookup_selects_conditional_branch_lazily() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Pick<T> = T extends { kind: "text" } ? { value: string } : { value: number };
+            interface Text { kind: "text"; body: string; size: number }
+            interface Count { kind: "count"; total: number }
+            export declare function readText(): Pick<Text>;
+            export declare function readCount(): Pick<Count>;
+            export declare function readEither(): Pick<Text | Count>;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+
+    for (function, has_string, has_number) in [
+        ("readText", true, false),
+        ("readCount", false, true),
+        ("readEither", true, true),
+    ] {
+        let ty = inferred_function_return_ty_by_name(&db, module, inferred, function).unwrap();
+        let value = inferred.find_member_type(&db, ty, "value").unwrap();
+        assert_eq!(
+            contains_inferred_string(&db, value),
+            has_string,
+            "{function}"
+        );
+        assert_eq!(
+            contains_inferred_number(&db, value),
+            has_number,
+            "{function}"
+        );
+    }
+}
+
+#[test]
+fn test_member_lookup_selects_conditional_branch_by_interface_key() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Tables { a: { id: string }; b: { id: string } }
+            interface Builder<DB, TB extends keyof DB, O> {
+                join<TE extends string>(table: TE): Joined<DB, TB, O, TE>;
+                execute(): Promise<O[]>;
+            }
+            type Joined<DB, TB extends keyof DB, O, TE extends string> = TE extends keyof DB
+                ? Builder<DB, TB | TE, O>
+                : { missing: TE };
+            declare const builder: Builder<Tables, "a", number>;
+            export const known = builder.join("b");
+            export const chained = builder.join("b").join("a");
+            export const missing = builder.join("c");
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+
+    for (binding, has_execute, has_missing) in [
+        ("known", true, false),
+        ("chained", true, false),
+        ("missing", false, true),
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, module, inferred, binding).unwrap();
+        for (member, expected) in [("execute", has_execute), ("missing", has_missing)] {
+            let found = inferred
+                .find_member_type(&db, ty, member)
+                .is_some_and(|ty| ty != InferredTypeData::Unknown);
+            assert_eq!(found, expected, "{binding}.{member}");
+        }
+    }
+}
+
+#[test]
 fn test_member_lookup_applies_inherited_bindings_once() {
     let fs = MemoryFileSystem::default();
     fs.insert(

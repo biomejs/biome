@@ -26,11 +26,11 @@ use biome_js_syntax::{
     JsPropertyObjectMember, JsReferenceIdentifier, JsRestParameter, JsReturnStatement,
     JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsTemplateExpression,
     JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration, JsVariableDeclarator,
-    TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInstantiationExpression,
-    TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration, TsPropertyParameterModifierList,
-    TsReferenceType, TsReturnTypeAnnotation, TsSatisfiesExpression, TsTypeAliasDeclaration,
-    TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter, TsTypeParameters, TsTypeofType,
-    inner_string_text, unescape_js_string,
+    TsConditionalType, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration, TsInferType,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration,
+    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    TsSatisfiesExpression, TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -42,9 +42,9 @@ use crate::globals::{
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
-    DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    IndexedAccessType, Interface, Intersection, Literal, MappedType, MappedTypeKeys,
-    MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object, Path,
+    DestructureField, ExtendsType, Function, FunctionParameter, FunctionParameterBinding,
+    GenericTypeParameter, IndexedAccessType, Interface, Intersection, Literal, MappedType,
+    MappedTypeKeys, MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object, Path,
     PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
     ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
     TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
@@ -737,18 +737,7 @@ impl TypeData {
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
             AnyTsType::TsConditionalType(ty) => {
-                // We don't attempt to evaluate the condition, so we simply
-                // infer a union of both the possibilities.
-                let types = Box::new([
-                    ty.true_type()
-                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                        .unwrap_or_default(),
-                    ty.false_type()
-                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
-                        .unwrap_or_default(),
-                ]);
-
-                Self::Union(Box::new(Union(types)))
+                Self::from_ts_conditional_type(collector, scope_id, ty)
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(
@@ -788,9 +777,9 @@ impl TypeData {
                 })),
                 _ => Self::unknown(),
             },
-            AnyTsType::TsInferType(_) => {
-                // TODO: Handle `infer T` syntax.
-                Self::unknown()
+            AnyTsType::TsInferType(ty) => {
+                GenericTypeParameter::from_ts_infer_type(collector, scope_id, ty)
+                    .map_or_else(Self::unknown, Self::from)
             }
             AnyTsType::TsIntersectionType(ty) => Self::Intersection(Box::new(Intersection(
                 ty.types()
@@ -1528,8 +1517,9 @@ impl TypeData {
             members: decl
                 .members()
                 .into_iter()
-                .filter_map(|member| {
+                .map(|member| {
                     TypeMember::from_any_ts_type_member(collector, scope_id, &member)
+                        .unwrap_or_else(TypeMember::uncollected)
                 })
                 .collect(),
         }))
@@ -1565,6 +1555,50 @@ impl TypeData {
                 )))
             })
             .unwrap_or_default()
+    }
+
+    pub fn from_ts_conditional_type(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: &TsConditionalType,
+    ) -> Self {
+        let reference = |collector: &mut dyn RawTypeCollector, ty: SyntaxResult<AnyTsType>| {
+            ty.map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                .unwrap_or_default()
+        };
+        let check_type = ty.check_type();
+        let distributive = check_type.as_ref().is_ok_and(is_naked_type_parameter);
+        let check_type = reference(collector, check_type);
+        let extends_type = reference(collector, ty.extends_type());
+        // Names declared by `infer` are scoped to the true branch.
+        let true_type = ty
+            .true_type()
+            .map(|true_type| {
+                let scope_id = collector
+                    .scope_for_node(true_type.syntax())
+                    .unwrap_or(scope_id);
+                TypeReference::from_any_ts_type(collector, scope_id, &true_type)
+            })
+            .unwrap_or_default();
+        let false_type = reference(collector, ty.false_type());
+        let infer_types = ty
+            .extends_type()
+            .map(|extends_type| infer_types_declared_by(&extends_type))
+            .unwrap_or_default()
+            .into_iter()
+            .map(|infer| {
+                TypeReference::from_any_ts_type(collector, scope_id, &AnyTsType::from(infer))
+            })
+            .collect();
+
+        Self::Extends(Box::new(ExtendsType {
+            check_type,
+            extends_type,
+            true_type,
+            false_type,
+            infer_types,
+            distributive,
+        }))
     }
 
     pub fn from_ts_type_alias_declaration(
@@ -2031,6 +2065,25 @@ impl FunctionParameterBinding {
 }
 
 impl GenericTypeParameter {
+    /// Creates the generic declared by `infer U` in a conditional type.
+    pub fn from_ts_infer_type(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: &TsInferType,
+    ) -> Option<Self> {
+        let name = ty.name().ok()?.ident_token().ok()?;
+        Some(Self {
+            is_const: false,
+            name: name.token_text_trimmed().into(),
+            constraint: ty
+                .constraint()
+                .and_then(|constraint| constraint.ty().ok())
+                .map(|constraint| TypeReference::from_any_ts_type(collector, scope_id, &constraint))
+                .unwrap_or_default(),
+            default: TypeReference::unknown(),
+        })
+    }
+
     pub fn from_ts_type_parameter(
         collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
@@ -2735,6 +2788,24 @@ impl TypeMember {
                 false => ty,
             },
         })
+    }
+
+    /// Stands in for an interface member that inference cannot turn into a
+    /// [`TypeMember`], such as one with a computed key.
+    ///
+    /// An interface has no equivalent of [`Object::has_unknown_members`], so
+    /// leaving the member out would make the member list look complete. For
+    /// example, `keyof Shape` would be `"a"` here, without the key `"b"`:
+    ///
+    /// ```ts
+    /// declare const key: "b";
+    /// interface Shape { a: number; [key]: number }
+    /// ```
+    fn uncollected() -> Self {
+        Self {
+            kind: TypeMemberKind::ComputedValue(TypeReference::unknown()),
+            ty: TypeReference::unknown(),
+        }
     }
 
     #[inline]
@@ -3667,4 +3738,82 @@ fn apply_deep_const_reference(
 #[inline]
 fn unescaped_text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
     Some(unescape_js_string(inner_string_text(&token.ok()?)))
+}
+
+/// Returns the `infer` types declared by the `extends` clause of a conditional.
+///
+/// An `infer` inside a nested conditional's `extends` clause belongs to the
+/// nested conditional instead.
+fn infer_types_declared_by(extends_type: &AnyTsType) -> Vec<TsInferType> {
+    extends_type
+        .syntax()
+        .descendants()
+        .filter_map(TsInferType::cast)
+        .filter(|infer| {
+            infer
+                .syntax()
+                .ancestors()
+                .take_while(|ancestor| ancestor != extends_type.syntax())
+                .filter_map(TsConditionalType::cast)
+                .all(|conditional| {
+                    conditional.extends_type().is_ok_and(|nested| {
+                        !nested
+                            .syntax()
+                            .text_trimmed_range()
+                            .contains_range(infer.syntax().text_trimmed_range())
+                    })
+                })
+        })
+        .collect()
+}
+
+/// Returns whether `ty` is a bare reference to a type parameter, which makes
+/// a conditional type with this check type distributive.
+///
+/// For example, `T` is naked in `T extends string ? 1 : 2`, but `[T]` is not.
+fn is_naked_type_parameter(ty: &AnyTsType) -> bool {
+    let Some(reference) = ty.as_ts_reference_type() else {
+        return false;
+    };
+    if reference.type_arguments().is_some() {
+        return false;
+    }
+    let Some(name) = reference
+        .name()
+        .ok()
+        .and_then(|name| name.as_js_reference_identifier().cloned())
+        .and_then(|name| name.value_token().ok())
+    else {
+        return false;
+    };
+    let name = name.token_text_trimmed();
+
+    reference.syntax().ancestors().any(|ancestor| {
+        let declares_parameter = ancestor
+            .children()
+            .filter_map(TsTypeParameters::cast)
+            .flat_map(|params| params.items().into_iter().flatten())
+            .filter_map(|param| param.name().ok()?.ident_token().ok())
+            .any(|param| param.token_text_trimmed() == name);
+        let declares_infer = TsConditionalType::cast_ref(&ancestor)
+            .filter(|conditional| {
+                conditional.true_type().is_ok_and(|true_type| {
+                    true_type
+                        .syntax()
+                        .text_trimmed_range()
+                        .contains_range(reference.syntax().text_trimmed_range())
+                })
+            })
+            .and_then(|conditional| conditional.extends_type().ok())
+            .is_some_and(|extends_type| {
+                infer_types_declared_by(&extends_type).iter().any(|infer| {
+                    infer
+                        .name()
+                        .ok()
+                        .and_then(|name| name.ident_token().ok())
+                        .is_some_and(|infer| infer.token_text_trimmed() == name)
+                })
+            });
+        declares_parameter || declares_infer
+    })
 }
