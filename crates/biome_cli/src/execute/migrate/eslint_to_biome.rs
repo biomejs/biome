@@ -1,16 +1,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::execute::migrate::unsupported_rules::UNSUPPORTED_RULES;
-
 use super::{
     eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
     eslint_typescript,
 };
-use biome_analyze::RuleSource;
+use biome_analyze::{RuleSource, UNSUPPORTED_RULES, UnsupportedRuleReason};
 use biome_configuration::analyzer::SeverityOrGroup;
 use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
-use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
@@ -31,54 +28,6 @@ pub(crate) struct MigrationOptions {
     pub(crate) include_inspired: bool,
     /// Migrate nursery rules from eslint and its plugins?
     pub(crate) include_nursery: bool,
-}
-
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub(crate) struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
-
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub(crate) enum UnsupportedRuleReason {
-    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
-    ///
-    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
-    Stylistic,
-    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
-    ///
-    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
-    FormatterCovers,
-    /// The functionality is covered by a Biome formatter option.
-    FormatterOption(&'static str),
-    /// The rule belongs to a known source, but it is not yet implemented in Biome.
-    KnownSourceNotImplemented,
-    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
-    UnknownSource,
-    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
-    CoveredByRule(&'static str),
-}
-
-impl Display for UnsupportedRuleReason {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            Self::Stylistic => {
-                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
-            }
-            Self::FormatterCovers => {
-                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
-            }
-            Self::FormatterOption(option) => fmt.write_markup(
-                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
-            ),
-            Self::KnownSourceNotImplemented => {
-                fmt.write_markup(markup! { "Known source, not yet implemented." })
-            }
-            Self::UnknownSource => fmt.write_markup(markup! {
-                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
-            }),
-            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
-                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
-            }),
-        }
-    }
 }
 
 #[derive(Debug, Default)]
