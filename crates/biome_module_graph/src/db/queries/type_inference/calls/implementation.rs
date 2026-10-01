@@ -1817,9 +1817,24 @@ fn infer_generic_return_type<'db>(
             continue;
         };
         if parameter_ty.is_generic_reference(db) {
+            // A nullish argument only adds nullability to the generic. When
+            // another parameter also mentions the generic, its candidate isn't
+            // inferred here, so the generic can't be resolved to `undefined`.
+            let replacement =
+                if matches!(
+                    arg,
+                    InferredTypeData::Undefined
+                        | InferredTypeData::Null
+                        | InferredTypeData::VoidKeyword
+                ) && is_generic_mentioned_by_other_parameter(db, function, index, parameter_ty)
+                {
+                    InferredTypeData::Unknown
+                } else {
+                    arg
+                };
             let substitution = InferredTypeSubstitution {
                 generic: parameter_ty,
-                replacement: arg,
+                replacement,
             };
             let TypeTransformResult::Transformed(substituted) =
                 return_ty.substitute_type(db, substitution)
@@ -1924,6 +1939,42 @@ fn infer_generic_return_type<'db>(
     }
 
     return_ty
+}
+
+/// Returns whether a parameter other than the one at `index` mentions
+/// `generic`, either as the generic itself or as an instance of it.
+fn is_generic_mentioned_by_other_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    index: usize,
+    generic: InferredTypeData<'db>,
+) -> bool {
+    let alternate = match generic {
+        InferredTypeData::Generic(_) => InferredTypeData::instance_of(db, generic, Box::default()),
+        InferredTypeData::InstanceOf(instance) => instance.ty(db),
+        _ => generic,
+    };
+    function
+        .parameters(db)
+        .iter()
+        .enumerate()
+        .filter(|(other_index, _)| *other_index != index)
+        .any(|(_, other)| {
+            let other_ty = other.ty();
+            [generic, alternate].into_iter().any(|generic| {
+                let substitution = InferredTypeSubstitution {
+                    generic,
+                    replacement: InferredTypeData::Unknown,
+                };
+                match other_ty.substitute_type(db, substitution) {
+                    TypeTransformResult::Transformed(substituted) => substituted != other_ty,
+                    // An incomplete walk can't rule out a mention.
+                    TypeTransformResult::LimitExceeded | TypeTransformResult::InvalidRebuild => {
+                        true
+                    }
+                }
+            })
+        })
 }
 
 /// Determines the value produced by a callback with a generic return type.

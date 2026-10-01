@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12040Invalid.ts
+---
+# Input
+```ts
+declare function identity<T>(value: T): T;
+declare function pick<T>(value: T, label: string): T;
+
+export function identityLoading() {
+	const loading = identity(undefined);
+
+	if (loading) {
+		return loading;
+	}
+}
+
+export function pickedLoading() {
+	const loading = pick(undefined, "loading");
+
+	if (loading) {
+		return loading;
+	}
+}
+
+```
+
+# Diagnostics
+```
+issue12040Invalid.ts:7:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    5 │ 	const loading = identity(undefined);
+    6 │ 
+  > 7 │ 	if (loading) {
+      │ 	    ^^^^^^^
+    8 │ 		return loading;
+    9 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+issue12040Invalid.ts:15:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    13 │ 	const loading = pick(undefined, "loading");
+    14 │ 
+  > 15 │ 	if (loading) {
+       │ 	    ^^^^^^^
+    16 │ 		return loading;
+    17 │ 	}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
