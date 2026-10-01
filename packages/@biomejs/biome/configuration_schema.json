@@ -1810,6 +1810,20 @@
 			},
 			"additionalProperties": false
 		},
+		"EventHyphenation": {
+			"oneOf": [
+				{
+					"description": "Event names must be hyphenated, e.g. `custom-event`.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Event names must not contain hyphens, e.g. `customEvent`.",
+					"type": "string",
+					"const": "never"
+				}
+			]
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -7872,6 +7886,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentEventHyphenation": {
+					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentEventHyphenationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueNextTickPromise": {
 					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
 					"anyOf": [
@@ -13558,6 +13579,16 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": { "anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }] },
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentEventHyphenationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentVBindStyleOptions": {
 			"type": "object",
 			"properties": {
@@ -18036,6 +18067,32 @@
 			"properties": {
 				"style": {
 					"anyOf": [{ "$ref": "#/$defs/DeclarationStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentEventHyphenationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentEventHyphenationOptions" }
+			]
+		},
+		"UseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"hyphenation": {
+					"description": "Whether event names in `v-on` directives must be hyphenated (`\"always\"`) or must not\ncontain hyphens (`\"never\"`). If omitted, hyphenated names are required.",
+					"anyOf": [{ "$ref": "#/$defs/EventHyphenation" }, { "type": "null" }]
+				},
+				"ignore": {
+					"description": "List of event names to exempt from the check.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreTags": {
+					"description": "List of tag names whose events should not be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

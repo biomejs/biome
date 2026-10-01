@@ -1,0 +1,9 @@
+<!-- should not generate diagnostics -->
+<template>
+  <VueComponent @customEvent="onEvent" />
+  <VueComponent v-on:customEvent="onEvent" />
+  <VueComponent @update:modelValue="onEvent" />
+  <VueComponent @CustomEvent="onEvent" />
+  <VueComponent @custom_event="onEvent" />
+  <div @custom-event="onEvent"></div>
+</template>
