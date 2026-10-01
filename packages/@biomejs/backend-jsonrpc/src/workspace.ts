@@ -2620,7 +2620,7 @@ See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
 	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
-	* Succinct description of the rule.
+	* Disallow the use of the $inspect rune.
 See https://biomejs.dev/linter/rules/no-svelte-inspect 
 	 */
 	noSvelteInspect?: NoSvelteInspectConfiguration;

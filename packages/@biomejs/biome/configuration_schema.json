@@ -7344,7 +7344,7 @@
 					]
 				},
 				"noSvelteInspect": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-svelte-inspect",
+					"description": "Disallow the use of the $inspect rune.\nSee https://biomejs.dev/linter/rules/no-svelte-inspect",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteInspectConfiguration" },
 						{ "type": "null" }
