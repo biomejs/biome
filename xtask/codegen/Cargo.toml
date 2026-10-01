@@ -35,12 +35,15 @@ biome_json_formatter   = { workspace = true, optional = true }
 biome_json_parser      = { workspace = true, optional = true }
 biome_json_syntax      = { workspace = true, optional = true }
 biome_languages        = { workspace = true, features = ["lang_js"] }
+biome_manifest         = { workspace = true, features = ["schema"], optional = true }
 biome_markdown_analyze = { workspace = true, optional = true }
 biome_markdown_syntax  = { workspace = true, optional = true }
 biome_rowan            = { workspace = true }
 biome_service          = { workspace = true, features = ["schema"], optional = true }
 biome_string_case      = { workspace = true }
 biome_ungrammar        = { workspace = true }
+biome_yaml_analyze     = { workspace = true, optional = true }
+biome_yaml_syntax      = { workspace = true, optional = true }
 bpaf                   = { workspace = true, features = ["derive"] }
 git2                   = { version = "0.21.0", default-features = false }
 prettyplease           = { workspace = true }
@@ -68,6 +71,8 @@ configuration = [
   "biome_json_syntax",
   "biome_markdown_analyze",
   "biome_markdown_syntax",
+  "biome_yaml_analyze",
+  "biome_yaml_syntax",
   "pulldown-cmark",
 ]
 external_data = ["serde", "serde_json", "ureq/default", "ureq/json"]
@@ -77,6 +82,7 @@ schema        = [
   "biome_configuration",
   "biome_json_formatter",
   "biome_json_parser",
+  "biome_manifest",
   "biome_service",
   "serde_json",
 ]

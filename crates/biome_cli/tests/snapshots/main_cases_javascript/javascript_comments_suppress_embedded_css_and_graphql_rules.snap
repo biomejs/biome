@@ -50,6 +50,30 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+biome.json:3:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+     2 │   "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+   > 3 │   "linter": {
+       │             ^
+   > 4 │     "rules": {
+        ...
+   > 9 │       }
+  > 10 │     }
+  > 11 │   }
+       │   ^
+    12 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 file.js:3:20 lint/correctness/useGraphqlNamedOperations  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Anonymous GraphQL operations are forbidden. Make sure to name your query.

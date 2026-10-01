@@ -210,6 +210,7 @@ define_categories! {
     "lint/nursery/noDrizzleDeleteWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
     "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
     "lint/nursery/noDuplicateFieldDefinitionNames": "https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
+    "lint/nursery/noDuplicateMapKeys": "https://biomejs.dev/linter/rules/no-duplicate-map-keys",
     "lint/nursery/noDuplicateSelectors": "https://biomejs.dev/linter/rules/no-duplicate-selectors",
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noExcessiveNestedCallbacks": "https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
@@ -635,6 +636,7 @@ define_categories! {
     "plugin",
     "project",
     "search",
+    "inspect",
     "internalError/io",
     "internalError/fs",
     "internalError/panic",
@@ -642,6 +644,7 @@ define_categories! {
     "reporter/parse",
     "reporter/format",
     "reporter/violations",
+    "reporter/profiler",
     // parse categories
     "parse",
 

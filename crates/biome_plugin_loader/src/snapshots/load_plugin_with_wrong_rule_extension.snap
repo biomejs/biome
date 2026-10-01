@@ -9,7 +9,10 @@ expression: content
 ```jsonc
 {
     "version": 1,
-    "rules": ["rules/1.js"]
+    "plugins": {
+        "rules": [{ "one": "rules/1.js" }],
+        "presets": { "recommended": ["one"] }
+    }
 }
 ```
 
@@ -22,5 +25,5 @@ No input was analyzed.
 ```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Unsupported rule format for plugin rule rules/1.js
+  × Unsupported rule format for plugin rule rules/1.js.
 ```

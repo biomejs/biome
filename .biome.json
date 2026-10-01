@@ -4,7 +4,8 @@
     "enabled": true,
     "includes": [
       "**",
-      "!./packages/@biomejs/biome/configuration_schema.json"
+      "!./packages/@biomejs/biome/configuration_schema.json",
+      "!./packages/@biomejs/biome/manifest_schema.json"
     ],
     "actions": {
       "source": {
@@ -25,6 +26,7 @@
       "**/packages/prettier-compare/**",
       "**/packages/tailwindcss-config-analyzer/**",
       "**/benchmark/**",
+      "**/.github/**",
       "plugins/*.js",
       "scripts/**",
       "!**/crates",
@@ -50,6 +52,11 @@
     "formatter": {
       "indentStyle": "space",
       "lineWidth": 1
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "quoteStyle": "single"
     }
   },
   "linter": {

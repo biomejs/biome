@@ -27,7 +27,7 @@ biome lint '<TEMP_DIR>/plugins_in_child_config_with_extends_root/packages/mobile
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   }
 }

@@ -5,7 +5,7 @@ expression: redactor(content)
 ## Command
 
 ```shell
-biome format format.yml format.js
+biome format format.unknown format.js
 ```
 
 ## `biome.json`
@@ -20,9 +20,9 @@ biome format format.yml format.js
   statement(  )  
 ```
 
-## `format.yml`
+## `format.unknown`
 
-```yml
+```unknown
 
 ```
 

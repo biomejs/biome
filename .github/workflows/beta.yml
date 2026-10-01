@@ -84,7 +84,7 @@ jobs:
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
-          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          RUSTFLAGS: '-C strip=symbols -C codegen-units=1'
           # Inline the version of the npm package in the CLI binary
           BIOME_VERSION: ${{ env.version }}
 
@@ -145,7 +145,7 @@ jobs:
         run: cargo build -p biome_cli --release --target ${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
-          RUSTFLAGS: "-C strip=symbols -C codegen-units=1"
+          RUSTFLAGS: '-C strip=symbols -C codegen-units=1'
           # Inline the version of the npm package in the CLI binary
           BIOME_VERSION: ${{ env.version }}
 
@@ -253,7 +253,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: CLI v${{ needs.build.outputs.version }}
-          tag_name: "@biomejs/biome@${{ needs.build.outputs.version }}"
+          tag_name: '@biomejs/biome@${{ needs.build.outputs.version }}'
           draft: false
           prerelease: true
           files: |

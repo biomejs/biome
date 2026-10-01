@@ -1,4 +1,4 @@
-use crate::globals::is_js_global;
+use crate::globals::{is_google_apps_script_global, is_js_global};
 
 use crate::services::embedded::EmbeddedService;
 use crate::services::semantic::Semantic;
@@ -78,7 +78,13 @@ impl Rule for NoGlobalAssign {
             }
         }
 
-        is_js_global(token.text_trimmed()).then(|| token.text_trimmed_range())
+        let name = token.text_trimmed();
+        // Apps Script service globals (e.g. `SpreadsheetApp`) are read-only
+        // globals too, so reassigning them in a `.gs` file is reported.
+        let source_type = ctx.source_type::<JsFileSource>();
+        let is_global_var = is_js_global(name)
+            || (source_type.is_google_apps_script() && is_google_apps_script_global(name));
+        is_global_var.then(|| token.text_trimmed_range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

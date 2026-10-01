@@ -16,7 +16,7 @@ biome check --write --stdin-file-path apps/test/index.tsx
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "formatter": {

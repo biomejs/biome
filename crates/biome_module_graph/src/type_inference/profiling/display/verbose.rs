@@ -1,18 +1,16 @@
-//! Detailed terminal output for type-inference profiles.
-//!
-//! The report prints every captured source record, a short interpretation of
-//! the largest timings, and the Rust locations that produced the records.
+//! Detailed diagnostic advice for type-inference profiles.
 
-use std::collections::BTreeSet;
 use std::io;
 
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{HARD_LINE, HorizontalLine, Padding, markup};
+use biome_console::markup;
+use biome_diagnostics::{Advices, LogCategory, Visit};
 use camino::Utf8Path;
 
+use super::compact::{FileProfiles, FileTitle, ProfileSummary, collect_files};
 use super::{
-    CapacityWarning, DisplayDuration, HighlightedDuration, RECORD_INDENT, SourceLocation,
-    TimingCutoffs, TimingMetrics,
+    HighlightedDuration, QUERY_LIMIT, REQUEST_LIMIT, SourceLocation, SourceRange, TimingCutoffs,
+    TimingMetrics, WHOLE_MODULE_LIMIT, record_capacity_warning,
 };
 use crate::type_inference::TypeInferenceCodeReference;
 use crate::type_inference::profiling::{
@@ -23,99 +21,222 @@ use crate::type_inference::profiling::{
 pub(super) struct VerboseTypeInferenceProfile<'a> {
     snapshot: &'a TypeInferenceProfileSnapshot,
     working_directory: Option<&'a Utf8Path>,
-    version: &'a str,
 }
 
 impl<'a> VerboseTypeInferenceProfile<'a> {
     pub(super) const fn new(
         snapshot: &'a TypeInferenceProfileSnapshot,
         working_directory: Option<&'a Utf8Path>,
-        version: &'a str,
     ) -> Self {
         Self {
             snapshot,
             working_directory,
-            version,
         }
     }
 }
 
-impl Display for VerboseTypeInferenceProfile<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        f.write_markup(markup! {
-            {HorizontalLine::new(20)}
-            <Emphasis>"Type inference profile"</Emphasis>" "<Dim>"(Biome "{self.version}")"</Dim>"\n"
-            <Dim>"Times are inclusive; nested query times must not be added together."</Dim>"\n"
-            <Dim>"Ranges are zero-based, half-open UTF-8 byte offsets."</Dim>"\n"
-            <Dim>"Timings exclude aborted work and profiler aggregation. In sections with at least ten records, the highest 10% are highlighted."</Dim>"\n"
-            <Dim>"Paths may reveal project structure."</Dim>
-            {HARD_LINE}
-        })?;
+impl Advices for VerboseTypeInferenceProfile<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        visitor.record_log(
+            LogCategory::None,
+            &ProfileSummary {
+                snapshot: self.snapshot,
+                verbose: true,
+            },
+        )?;
 
         if self.snapshot.is_empty() {
-            f.write_markup(markup! {
-                "No type-inference requests or queries were recorded.\n"
-                {CapacityWarning(self.snapshot)}
-            })?;
-            return Ok(());
+            visitor.record_log(
+                LogCategory::None,
+                &"No type-inference requests or queries were recorded.",
+            )?;
+            return record_capacity_warning(visitor, self.snapshot);
         }
 
-        f.write_markup(markup! {
-            {RequestProfiles {
-                profiles: &self.snapshot.requests,
-                working_directory: self.working_directory,
-            }}
-            {QueryProfiles {
-                profiles: &self.snapshot.queries,
-                working_directory: self.working_directory,
-            }}
-            {WholeModuleProfiles {
-                profiles: &self.snapshot.whole_module_inferences,
-                working_directory: self.working_directory,
-            }}
-            {ProfileInterpretation {
-                snapshot: self.snapshot,
-                working_directory: self.working_directory,
-            }}
-            {CodeReferences(self.snapshot)}
-            {CapacityWarning(self.snapshot)}
-        })
+        for file in collect_files(self.snapshot) {
+            visitor.record_group(
+                &FileTitle::new(&file, self.working_directory),
+                &VerboseFileAdvice {
+                    file: &file,
+                    working_directory: self.working_directory,
+                },
+            )?;
+        }
+
+        record_capacity_warning(visitor, self.snapshot)
     }
 }
 
-struct RequestProfiles<'a> {
-    profiles: &'a [TypeInferenceRequestProfile],
+struct VerboseFileAdvice<'a> {
+    file: &'a FileProfiles<'a>,
     working_directory: Option<&'a Utf8Path>,
 }
 
-impl Display for RequestProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        if self.profiles.is_empty() {
-            return Ok(());
+impl Advices for VerboseFileAdvice<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        if !self.file.requests.is_empty() {
+            visitor.record_group(
+                &VerboseSectionTitle::new(
+                    "Requests",
+                    self.file.requests.len().min(REQUEST_LIMIT),
+                    self.file.requests.len(),
+                    completed_requests(&self.file.requests),
+                ),
+                &VerboseRequestProfiles {
+                    profiles: &self.file.requests,
+                },
+            )?;
         }
 
-        f.write_markup(markup! {
-            <Emphasis>"Hot request origins"</Emphasis>" "<Dim>"(sorted by cumulative request time)"</Dim>"\n"
-        })?;
-        let cutoffs = TimingCutoffs::new(self.profiles.iter().map(TimingMetrics::from));
-        for profile in self.profiles.iter() {
-            f.write_markup(markup! {
-                {RequestProfileRecord {
-                    profile,
-                    working_directory: self.working_directory,
-                    cutoffs,
-                }}
-            })?;
+        if !self.file.queries.is_empty() {
+            visitor.record_group(
+                &VerboseSectionTitle::new(
+                    "Queries",
+                    self.file.queries.len().min(QUERY_LIMIT),
+                    self.file.queries.len(),
+                    completed_queries(&self.file.queries),
+                ),
+                &VerboseQueryProfiles {
+                    profiles: &self.file.queries,
+                },
+            )?;
         }
+
+        let advice = VerboseWholeModuleProfiles {
+            profiles: &self.file.whole_modules,
+            working_directory: self.working_directory,
+        };
+        if self.file.whole_modules.is_empty() {
+            visitor.record_group(&"Whole-module inference", &advice)
+        } else {
+            visitor.record_group(
+                &VerboseSectionTitle::new(
+                    "Whole-module inference",
+                    self.file.whole_modules.len().min(WHOLE_MODULE_LIMIT),
+                    self.file.whole_modules.len(),
+                    completed_whole_modules(&self.file.whole_modules),
+                ),
+                &advice,
+            )
+        }
+    }
+}
+
+fn completed_requests(profiles: &[&TypeInferenceRequestProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_queries(profiles: &[&TypeInferenceQueryProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+fn completed_whole_modules(profiles: &[&TypeInferenceWholeModuleProfile]) -> u64 {
+    profiles
+        .iter()
+        .map(|profile| u64::from(profile.completed))
+        .sum()
+}
+
+struct VerboseSectionTitle {
+    label: &'static str,
+    shown: usize,
+    source_records: usize,
+    executions: u64,
+}
+
+impl VerboseSectionTitle {
+    const fn new(
+        label: &'static str,
+        shown: usize,
+        source_records: usize,
+        executions: u64,
+    ) -> Self {
+        Self {
+            label,
+            shown,
+            source_records,
+            executions,
+        }
+    }
+}
+
+impl Display for VerboseSectionTitle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         f.write_markup(markup! {
-            {HARD_LINE}
+            {self.label}" (top "{self.shown}" of "{SourceRecordCount(self.source_records)}"; "
+            {ExecutionCount(self.executions)}")"
         })
+    }
+}
+
+struct SourceRecordCount(usize);
+
+impl Display for SourceRecordCount {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        f.write_fmt(format_args!(
+            "{} source {}",
+            self.0,
+            if self.0 == 1 { "record" } else { "records" }
+        ))
+    }
+}
+
+struct ExecutionCount(u64);
+
+impl Display for ExecutionCount {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        f.write_fmt(format_args!(
+            "{} {}",
+            self.0,
+            if self.0 == 1 {
+                "execution"
+            } else {
+                "executions"
+            }
+        ))
+    }
+}
+
+struct VerboseRequestProfiles<'a> {
+    profiles: &'a [&'a TypeInferenceRequestProfile],
+}
+
+impl Advices for VerboseRequestProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let cutoffs = TimingCutoffs::new(
+            self.profiles
+                .iter()
+                .map(|profile| TimingMetrics::from(*profile)),
+        );
+        for (index, profile) in self.profiles.iter().take(REQUEST_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &RequestProfileRecord {
+                    index: index + 1,
+                    profile,
+                    cutoffs,
+                },
+            )?;
+        }
+        record_omitted(
+            visitor,
+            self.profiles.len(),
+            REQUEST_LIMIT,
+            "request source record",
+            "request source records",
+        )
     }
 }
 
 struct RequestProfileRecord<'a> {
+    index: usize,
     profile: &'a TypeInferenceRequestProfile,
-    working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
 }
 
@@ -123,47 +244,49 @@ impl Display for RequestProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let profile = self.profile;
         f.write_markup(markup! {
-            <Info>{profile.metadata.label()}</Info>"\n"
-            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}
-            {Padding::new(RECORD_INDENT)}<Dim>"source: "</Dim>{SourceLocation::new(&profile.location, self.working_directory)}"\n"
-            {Padding::new(RECORD_INDENT)}<Dim>"caller: "</Dim>{profile.caller.group()}"/"{profile.caller.name()}"\n"
+            {self.index}". "<Success>{profile.metadata.label()}</Success>"\n"
+            <Info>"Range: "</Info>{SourceRange(profile.location.range)}"\n"
+            <Info>"Caller: "</Info>{profile.caller.group()}"/"{profile.caller.name()}"\n"
+            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}"\n"
+            {CodeReference::new(profile.implementation)}
         })
     }
 }
 
-struct QueryProfiles<'a> {
-    profiles: &'a [TypeInferenceQueryProfile],
-    working_directory: Option<&'a Utf8Path>,
+struct VerboseQueryProfiles<'a> {
+    profiles: &'a [&'a TypeInferenceQueryProfile],
 }
 
-impl Display for QueryProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        if self.profiles.is_empty() {
-            return Ok(());
-        }
-
-        f.write_markup(markup! {
-            <Emphasis>"Hot inference queries"</Emphasis>" "<Dim>"(tracked query bodies)"</Dim>"\n"
-        })?;
-        let cutoffs = TimingCutoffs::new(self.profiles.iter().map(TimingMetrics::from));
-        for profile in self.profiles.iter() {
-            f.write_markup(markup! {
-                {QueryProfileRecord {
+impl Advices for VerboseQueryProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let cutoffs = TimingCutoffs::new(
+            self.profiles
+                .iter()
+                .map(|profile| TimingMetrics::from(*profile)),
+        );
+        for (index, profile) in self.profiles.iter().take(QUERY_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &QueryProfileRecord {
+                    index: index + 1,
                     profile,
-                    working_directory: self.working_directory,
                     cutoffs,
-                }}
-            })?;
+                },
+            )?;
         }
-        f.write_markup(markup! {
-            {HARD_LINE}
-        })
+        record_omitted(
+            visitor,
+            self.profiles.len(),
+            QUERY_LIMIT,
+            "query source record",
+            "query source records",
+        )
     }
 }
 
 struct QueryProfileRecord<'a> {
+    index: usize,
     profile: &'a TypeInferenceQueryProfile,
-    working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
 }
 
@@ -171,50 +294,60 @@ impl Display for QueryProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let profile = self.profile;
         f.write_markup(markup! {
-            <Info>{profile.kind.label()}</Info><Dim>" / "</Dim>{profile.implementation.symbol()}"\n"
-            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}
-            {Padding::new(RECORD_INDENT)}<Dim>"source: "</Dim>{SourceLocation::new(&profile.location, self.working_directory)}<Dim>" ("{profile.location.attribution}")"</Dim>"\n"
-            {Padding::new(RECORD_INDENT)}<Dim>"request: "</Dim>{profile.request.label()}"\n"
-            {Padding::new(RECORD_INDENT)}<Dim>"caller: "</Dim>{profile.caller.group()}"/"{profile.caller.name()}"\n"
+            {self.index}". "<Success>{profile.kind.label()}</Success><Dim>" / "</Dim>
+            {profile.implementation.symbol()}"\n"
+            <Info>"Range: "</Info>{SourceRange(profile.location.range)}"\n"
+            <Info>"Attribution: "</Info>{profile.location.attribution}"\n"
+            <Info>"Request: "</Info>{profile.request.label()}"\n"
+            <Info>"Caller: "</Info>{profile.caller.group()}"/"{profile.caller.name()}"\n"
+            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}"\n"
+            {CodeReference::new(profile.implementation)}
         })
     }
 }
 
-struct WholeModuleProfiles<'a> {
-    profiles: &'a [TypeInferenceWholeModuleProfile],
+struct VerboseWholeModuleProfiles<'a> {
+    profiles: &'a [&'a TypeInferenceWholeModuleProfile],
     working_directory: Option<&'a Utf8Path>,
 }
 
-impl Display for WholeModuleProfiles<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        f.write_markup(markup! {
-            <Emphasis>"Whole-module inference"</Emphasis>"\n"
-        })?;
+impl Advices for VerboseWholeModuleProfiles<'_> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
         if self.profiles.is_empty() {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"No request required complete module tables."
-                {HARD_LINE}
-            })?;
-            return Ok(());
+            return visitor.record_log(
+                LogCategory::None,
+                &"No requests triggered whole-module inference.",
+            );
         }
 
-        let cutoffs = TimingCutoffs::new(self.profiles.iter().map(TimingMetrics::from));
-        for profile in self.profiles.iter() {
-            f.write_markup(markup! {
-                {WholeModuleProfileRecord {
+        let cutoffs = TimingCutoffs::new(
+            self.profiles
+                .iter()
+                .map(|profile| TimingMetrics::from(*profile)),
+        );
+        for (index, profile) in self.profiles.iter().take(WHOLE_MODULE_LIMIT).enumerate() {
+            visitor.record_log(
+                LogCategory::None,
+                &WholeModuleProfileRecord {
+                    index: index + 1,
                     profile,
                     working_directory: self.working_directory,
                     cutoffs,
-                }}
-            })?;
+                },
+            )?;
         }
-        f.write_markup(markup! {
-            {HARD_LINE}
-        })
+        record_omitted(
+            visitor,
+            self.profiles.len(),
+            WHOLE_MODULE_LIMIT,
+            "whole-module source record",
+            "whole-module source records",
+        )
     }
 }
 
 struct WholeModuleProfileRecord<'a> {
+    index: usize,
     profile: &'a TypeInferenceWholeModuleProfile,
     working_directory: Option<&'a Utf8Path>,
     cutoffs: TimingCutoffs,
@@ -224,21 +357,21 @@ impl Display for WholeModuleProfileRecord<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         let profile = self.profile;
         f.write_markup(markup! {
-            <Info>{profile.reason.label()}</Info>"\n"
-            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}
-            {Padding::new(RECORD_INDENT)}<Dim>"root: "</Dim>{SourceLocation::new(&profile.root, self.working_directory)}"\n"
-            {Padding::new(RECORD_INDENT)}<Dim>"trigger: "</Dim>{SourceLocation::new(&profile.trigger, self.working_directory)}"\n"
-            {BreadthMetrics::new("modules", profile.modules)}
-            {BreadthMetrics::new("type slots", profile.type_slots)}
-            {BreadthMetrics::new("expression slots", profile.expression_slots)}
-            {BreadthMetrics::new("binding slots", profile.binding_slots)}
+            {self.index}". "<Success>{profile.reason.label()}</Success>"\n"
+            <Info>"Root range: "</Info>{SourceRange(profile.root.range)}"\n"
+            <Info>"Trigger: "</Info>{SourceLocation::new(&profile.trigger, self.working_directory)}"\n"
+            {TimingMetricsDisplay::new(TimingMetrics::from(profile), self.cutoffs)}"\n"
+            {BreadthMetrics::new("Modules", profile.modules)}"\n"
+            {BreadthMetrics::new("Type slots", profile.type_slots)}"\n"
+            {BreadthMetrics::new("Expression slots", profile.expression_slots)}"\n"
+            {BreadthMetrics::new("Binding slots", profile.binding_slots)}"\n"
         })?;
         if profile.cycle_recoveries > 0 {
             f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}<Dim>"cycle recoveries: "</Dim>{profile.cycle_recoveries}"\n"
+                <Info>"Cycle recoveries: "</Info>{profile.cycle_recoveries}"\n"
             })?;
         }
-        Ok(())
+        CodeReference::new(profile.implementation).fmt(f)
     }
 }
 
@@ -256,11 +389,12 @@ impl TimingMetricsDisplay {
 impl Display for TimingMetricsDisplay {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>"time: total "</Dim>{HighlightedDuration::new(self.metrics.total, self.cutoffs.total)}
-            <Dim>", average "</Dim>{HighlightedDuration::new(self.metrics.average, self.cutoffs.average)}
-            <Dim>", min "</Dim>{HighlightedDuration::new(self.metrics.min, self.cutoffs.min)}
-            <Dim>", max "</Dim>{HighlightedDuration::new(self.metrics.max, self.cutoffs.max)}"\n"
-            {Padding::new(RECORD_INDENT)}<Dim>"runs: "</Dim>{self.metrics.completed}<Dim>" completed, "</Dim>{self.metrics.aborted}<Dim>" aborted"</Dim>"\n"
+            <Info>"Total "</Info>{HighlightedDuration::new(self.metrics.total, self.cutoffs.total)}
+            <Info>", Average "</Info>{HighlightedDuration::new(self.metrics.average, self.cutoffs.average)}
+            <Info>", Min "</Info>{HighlightedDuration::new(self.metrics.min, self.cutoffs.min)}
+            <Info>", Max "</Info>{HighlightedDuration::new(self.metrics.max, self.cutoffs.max)}"\n"
+            <Info>"Executions: "</Info>{self.metrics.completed}<Info>" completed, "</Info>
+            {self.metrics.aborted}<Info>" aborted"</Info>
         })
     }
 }
@@ -279,9 +413,9 @@ impl BreadthMetrics {
 impl Display for BreadthMetrics {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}<Dim>{self.label}": min "</Dim>{self.metrics.min}
-            <Dim>", average "</Dim>{DisplayAverage(self.metrics.average)}
-            <Dim>", max "</Dim>{self.metrics.max}"\n"
+            <Info>{self.label}": Min "</Info>{self.metrics.min}
+            <Info>", Average "</Info>{DisplayAverage(self.metrics.average)}
+            <Info>", Max "</Info>{self.metrics.max}
         })
     }
 }
@@ -294,81 +428,15 @@ impl Display for DisplayAverage {
     }
 }
 
-struct ProfileInterpretation<'a> {
-    snapshot: &'a TypeInferenceProfileSnapshot,
-    working_directory: Option<&'a Utf8Path>,
-}
-
-impl Display for ProfileInterpretation<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        f.write_markup(markup! { <Emphasis>"Interpretation"</Emphasis>"\n" })?;
-        if let Some(request) = self.snapshot.requests.first() {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"The largest cumulative request was "{request.metadata.label()}" at "
-                {SourceLocation::new(&request.location, self.working_directory)}" ("
-                {DisplayDuration(request.total)}" total, "{DisplayDuration(request.max)}" max).\n"
-            })?;
-        }
-        if let Some(query) = self.snapshot.queries.first() {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"The largest inference query was "{query.implementation.symbol()}
-                " in "{query.kind.label()}" ("{DisplayDuration(query.total)}" total, "
-                {DisplayDuration(query.max)}" max).\n"
-            })?;
-        }
-        if let Some(whole_module) = self.snapshot.whole_module_inferences.first() {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"Complete module tables were inferred because of "
-                {whole_module.reason.label()}" at "
-                {SourceLocation::new(&whole_module.trigger, self.working_directory)}
-                ". The widest run covered "{whole_module.modules.max}" modules.\n"
-            })?;
-        } else {
-            f.write_markup(markup! {
-                {Padding::new(RECORD_INDENT)}"No request required complete module tables.\n"
-            })?;
-        }
-        f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}"A high max with a low min indicates an outlier; a high min indicates consistently expensive work."
-            {HARD_LINE}
-        })
-    }
-}
-
-struct CodeReferences<'a>(&'a TypeInferenceProfileSnapshot);
-
-impl Display for CodeReferences<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        let mut references = BTreeSet::new();
-        for profile in self.0.requests.iter() {
-            references.insert((profile.metadata.id(), profile.implementation));
-        }
-        for profile in self.0.queries.iter() {
-            references.insert((profile.kind.id(), profile.implementation));
-        }
-        for profile in self.0.whole_module_inferences.iter() {
-            references.insert((profile.reason.id(), profile.implementation));
-        }
-        if references.is_empty() {
-            return Ok(());
-        }
-
-        f.write_markup(markup! { <Emphasis>"Code references"</Emphasis>"\n" })?;
-        for (id, reference) in references {
-            f.write_markup(markup! {
-                {CodeReference { id, reference }}
-            })?;
-        }
-        Ok(())
-    }
-}
-
 struct CodeReference {
-    id: &'static str,
     reference: TypeInferenceCodeReference,
 }
 
 impl CodeReference {
+    const fn new(reference: TypeInferenceCodeReference) -> Self {
+        Self { reference }
+    }
+
     fn repository_path(&self) -> &'static str {
         let file = self.reference.file();
         if let Some(index) = file.find("crates/").or_else(|| file.find("crates\\")) {
@@ -382,9 +450,26 @@ impl CodeReference {
 impl Display for CodeReference {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
         f.write_markup(markup! {
-            {Padding::new(RECORD_INDENT)}{self.id}"\n"
-            {Padding::new(RECORD_INDENT * 2)}{self.repository_path()}":"{self.reference.line()}
-            " ("{self.reference.symbol()}")\n"
+            <Info>"Implementation: "</Info>{self.repository_path()}":"{self.reference.line()}"\n"
+            <Info>"Symbol: "</Info>{self.reference.symbol()}
         })
     }
+}
+
+fn record_omitted(
+    visitor: &mut dyn Visit,
+    total: usize,
+    limit: usize,
+    singular: &'static str,
+    plural: &'static str,
+) -> io::Result<()> {
+    let omitted = total.saturating_sub(limit);
+    if omitted > 0 {
+        let label = if omitted == 1 { singular } else { plural };
+        visitor.record_log(
+            LogCategory::None,
+            &markup! { <Dim>{omitted}" "{label}" omitted."</Dim> },
+        )?;
+    }
+    Ok(())
 }

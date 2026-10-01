@@ -1,0 +1,15 @@
+---
+source: crates/biome_manifest/src/lib.rs
+assertion_line: 430
+expression: diagnostics
+---
+deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The manifest preset name company/recommended must not contain slashes, whitespace, :, or (.
+  
+    3 │                 "plugins": {
+    4 │                     "rules": [{ "useMyLogger": "./useMyLogger.grit" }],
+  > 5 │                     "presets": { "company/recommended": ["useMyLogger"] }
+      │                                  ^^^^^^^^^^^^^^^^^^^^^
+    6 │                 }
+    7 │             }

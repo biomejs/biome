@@ -88,10 +88,6 @@ impl CliRunResult {
     pub fn into_parts(self) -> (Vec<Vec<String>>, Result<(), CliDiagnostic>) {
         (self.commands, self.result)
     }
-
-    pub fn into_result(self) -> Result<(), CliDiagnostic> {
-        self.result
-    }
 }
 
 impl std::fmt::Debug for CliRunResult {

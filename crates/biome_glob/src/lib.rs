@@ -146,7 +146,7 @@
 pub mod editorconfig;
 
 /// Normalized Biome glob pattern that strips `./` from the pattern.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 #[cfg_attr(
     feature = "biome_deserialize",
     derive(biome_deserialize_macros::Deserializable)

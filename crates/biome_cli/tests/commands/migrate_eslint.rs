@@ -219,7 +219,7 @@ fn migrate_eslintrcjson_fix() {
 
 #[test]
 fn migrate_eslintrcjson_override_existing_config() {
-    let biomejson = r#"{ "linter": { "rules": { "recommended": true, "suspicious": { "noDoubleEquals": "error" } } } }"#;
+    let biomejson = r#"{ "linter": { "rules": { "preset": "recommended", "suspicious": { "noDoubleEquals": "error" } } } }"#;
     let eslintrc = r#"{ "rules": { "eqeqeq": "off" } }"#;
 
     let fs = MemoryFileSystem::default();

@@ -146,6 +146,7 @@ dependencies = [
  "biome_suppression",
  "biome_text_edit",
  "biome_unicode_table",
+ "bitvec",
  "camino",
  "either",
  "enumflags2",
@@ -233,11 +234,14 @@ dependencies = [
  "biome_migrate",
  "biome_module_graph",
  "biome_package",
+ "biome_plugin_loader",
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
  "biome_service",
  "biome_text_edit",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "bpaf",
  "camino",
  "crossbeam",
@@ -291,6 +295,7 @@ dependencies = [
  "biome_resolver",
  "biome_rowan",
  "biome_rule_options",
+ "biome_string_case",
  "biome_yaml_syntax",
  "bpaf",
  "camino",
@@ -323,6 +328,8 @@ dependencies = [
  "biome_markdown_analyze",
  "biome_markdown_syntax",
  "biome_string_case",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "proc-macro2",
  "pulldown-cmark",
  "quote",
@@ -1066,7 +1073,6 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
- "bitvec",
  "camino",
  "codspeed-criterion-compat",
  "either",
@@ -1496,6 +1502,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_manifest"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_fs",
+ "biome_json_parser",
+ "biome_resolver",
+ "biome_rowan",
+ "camino",
+ "insta",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_markdown_analyze"
 version = "0.1.0"
 dependencies = [
@@ -1761,6 +1785,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_parser",
  "biome_resolver",
  "biome_rowan",
@@ -1917,6 +1942,9 @@ dependencies = [
  "biome_service",
  "biome_test_utils",
  "biome_text_edit",
+ "biome_yaml_analyze",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
  "camino",
 ]
 
@@ -1965,6 +1993,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_markdown_analyze",
  "biome_markdown_formatter",
  "biome_markdown_parser",
@@ -1980,6 +2009,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "biome_unicode_table",
+ "biome_yaml_analyze",
  "biome_yaml_formatter",
  "biome_yaml_parser",
  "biome_yaml_syntax",
@@ -2192,6 +2222,36 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "biome_yaml_analyze"
+version = "0.1.0"
+dependencies = [
+ "biome_analyze",
+ "biome_analyze_macros",
+ "biome_console",
+ "biome_deserialize",
+ "biome_deserialize_macros",
+ "biome_diagnostics",
+ "biome_languages",
+ "biome_rowan",
+ "biome_rule_options",
+ "biome_suppression",
+ "biome_test_utils",
+ "biome_yaml_factory",
+ "biome_yaml_parser",
+ "biome_yaml_syntax",
+ "camino",
+ "codspeed-criterion-compat",
+ "filetime",
+ "insta",
+ "mimalloc",
+ "rustc-hash 2.1.3",
+ "schemars",
+ "serde",
+ "tests_macros",
+ "tikv-jemallocator",
 ]
 
 [[package]]
@@ -2547,9 +2607,9 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
 
 [[package]]
 name = "cc"
-version = "1.4.1"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9066c49992464636f92905fa096ec58baaa4d57ec19a5c096c68d3e25ef3d136"
+checksum = "5add81bb678e6cb321aff7fa0dc7689ad82b112dbc032cea19f91d6b8e3582b9"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -2618,18 +2678,18 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.6.1"
+version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ddb117e43bbf7dacf0a4190fef4d345b9bad68dfc649cb349e7d17d28428e51"
+checksum = "aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946"
 dependencies = [
  "clap_builder",
 ]
 
 [[package]]
 name = "clap_builder"
-version = "4.6.0"
+version = "4.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "714a53001bf66416adb0e2ef5ac857140e7dc3a0c48fb28b2f10762fc4b5069f"
+checksum = "ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d"
 dependencies = [
  "anstyle",
  "clap_lex",
@@ -3294,9 +3354,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.10"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26b73573e6edcd2af0cdf47bd6cb58f0b3839491263c314eaad1ccf24430e1de"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "fixedbitset"
@@ -4341,12 +4401,11 @@ dependencies = [
 
 [[package]]
 name = "libmimalloc-sys"
-version = "0.1.44"
+version = "0.1.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "667f4fec20f29dfc6bc7357c582d91796c169ad7e2fce709468aefeb2c099870"
+checksum = "2d1eacfa31c33ec25e873c136ba5669f00f9866d0688bea7be4d3f7e43067df6"
 dependencies = [
  "cc",
- "libc",
 ]
 
 [[package]]
@@ -4406,9 +4465,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.26"
+version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30bde2b3dc3671ae49d8e2e9f044c7c005836e7a023ee57cffa25ab82764bb9e"
+checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 
 [[package]]
 name = "lru-slab"
@@ -4890,9 +4949,9 @@ checksum = "8afb450f006bf6385ca15ef45d71d2288452bc3683ce2e2cacc0d18e4be60b58"
 
 [[package]]
 name = "pkg-config"
-version = "0.3.26"
+version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ac9a59f73473f1b8d852421e59e64809f025994837ef743615c6d0c5b305160"
+checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
 name = "plotters"
@@ -5581,6 +5640,8 @@ dependencies = [
  "biome_markdown_analyze",
  "biome_markdown_syntax",
  "biome_ruledoc_utils",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "pulldown-cmark",
 ]
 
@@ -7493,12 +7554,15 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_languages",
+ "biome_manifest",
  "biome_markdown_analyze",
  "biome_markdown_syntax",
  "biome_rowan",
  "biome_service",
  "biome_string_case",
  "biome_ungrammar",
+ "biome_yaml_analyze",
+ "biome_yaml_syntax",
  "bpaf",
  "git2",
  "prettyplease",

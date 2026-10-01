@@ -71,9 +71,10 @@ gen-module-replacements:
 gen-configuration:
   cargo run -p xtask_codegen --features configuration -- configuration
 
-# Generates code for eslint migration
+# Generates code for eslint and stylelint migration
 gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo run -p xtask_codegen --features configuration -- migrate-stylelint
 
 # Generates the initial files for all formatter crates
 gen-formatter *args='':
@@ -224,6 +225,16 @@ new-html-vue-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=html-vue --category=lint --name={{rulename}}
   just gen-analyzer
 
+# Creates a new yaml lint rule with the given name. Name has to be camel case.
+new-yaml-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=yaml --category=lint --name={{rulename}}
+  just gen-analyzer
+
+# Creates a new yaml assist rule with the given name. Name has to be camel case.
+new-yaml-assistrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=yaml --category=assist --name={{rulename}}
+  just gen-analyzer
+
 # Promotes a rule from the nursery group to a new group
 move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
@@ -289,6 +300,7 @@ test-lintrule rulename:
   just test-graphql-lintrule {{rulename}}
   just test-html-lintrule {{rulename}}
   just test-markdown-lintrule {{rulename}}
+  just test-yaml-lintrule {{rulename}}
 
 # Test a js lint rule. The name of the rule needs to be camel case
 test-js-lintrule rulename:
@@ -319,6 +331,11 @@ test-html-lintrule rulename:
 test-markdown-lintrule rulename:
   just _touch crates/biome_markdown_analyze/tests/spec_tests.rs
   cargo test -p biome_markdown_analyze -- {{snakecase(rulename)}} --show-output
+
+# Test a yaml lint rule. The name of the rule needs to be camel case
+test-yaml-lintrule rulename:
+  just _touch crates/biome_yaml_analyze/tests/spec_tests.rs
+  cargo test -p biome_yaml_analyze -- {{snakecase(rulename)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

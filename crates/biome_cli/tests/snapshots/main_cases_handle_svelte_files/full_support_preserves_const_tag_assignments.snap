@@ -37,5 +37,24 @@ biome check --write file.svelte
 # Emitted Messages
 
 ```block
+biome.json:6:23 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    4 │                 "formatter": { "enabled": true }
+    5 │             },
+  > 6 │             "linter": { "rules": { "recommended": false } },
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │             "assist": { "enabled": false }
+    8 │         }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. Fixed 1 file.
 ```
