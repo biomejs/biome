@@ -172,29 +172,35 @@ fn enclosing_pair_and_role<N>(node: &N) -> Option<(ScssMapExpressionPair, ScssMa
 where
     N: AstNode<Language = CssLanguage>,
 {
-    let range = node.syntax().text_trimmed_range();
-
-    node.syntax()
+    let mut pairs = node
+        .syntax()
         .ancestors()
         .skip(1)
         .filter_map(ScssMapExpressionPair::cast)
-        .find_map(|pair| {
-            let is_key = pair
-                .key()
-                .is_ok_and(|key| key.syntax().text_trimmed_range().contains_range(range));
+        .peekable();
+    let has_enclosing_pair = pairs.peek().is_some();
+    if !has_enclosing_pair {
+        return None;
+    }
+    let range = node.syntax().text_trimmed_range();
 
-            if is_key {
-                return Some((pair, ScssMapRole::Key));
-            }
+    pairs.find_map(|pair| {
+        let is_key = pair
+            .key()
+            .is_ok_and(|key| key.syntax().text_trimmed_range().contains_range(range));
 
-            pair.value().ok().and_then(|value| {
-                value
-                    .syntax()
-                    .text_trimmed_range()
-                    .contains_range(range)
-                    .then_some((pair, ScssMapRole::Value))
-            })
+        if is_key {
+            return Some((pair, ScssMapRole::Key));
+        }
+
+        pair.value().ok().and_then(|value| {
+            value
+                .syntax()
+                .text_trimmed_range()
+                .contains_range(range)
+                .then_some((pair, ScssMapRole::Value))
         })
+    })
 }
 
 /// Classifies whether `node` is the outer expression or a nested descendant.

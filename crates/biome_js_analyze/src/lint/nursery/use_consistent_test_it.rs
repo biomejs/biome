@@ -1,21 +1,28 @@
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsExpression, AnyJsName, JsCallExpression, JsLanguage, JsSyntaxToken, T};
-use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, TextRange};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsName, AnyJsNamedImportSpecifier, JsCallExpression,
+    JsDefaultImportSpecifier, JsLanguage, JsNamedImportSpecifierList, JsReferenceIdentifier,
+    JsSyntaxToken, T, unescape_js_identifier,
+};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TextRange, TriviaPieceKind,
+};
 use biome_rule_options::use_consistent_test_it::{TestFunctionKind, UseConsistentTestItOptions};
 
-use crate::JsRuleAction;
+use crate::{JsRuleAction, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Enforce consistent use of `it` or `test` for test functions.
     ///
     /// `it` and `test` are aliases for the same function in most test frameworks.
     /// This rule enforces using one over the other for consistency.
+    /// Imported functions keep their original export through an import alias.
+    /// The fix is unavailable when the preferred name conflicts with another binding or global reference.
     ///
     ///
     /// ## Examples
@@ -162,7 +169,7 @@ impl RenameKind {
 }
 
 impl Rule for UseConsistentTestIt {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = ConsistentTestItState;
     type Signals = Option<Self::State>;
     type Options = UseConsistentTestItOptions;
@@ -183,6 +190,15 @@ impl Rule for UseConsistentTestIt {
 
         // Get the base identifier name (it, test, xit, xtest, fit)
         let (base_name, base_token) = get_test_base_name(callee.clone())?;
+
+        let reference = JsReferenceIdentifier::cast(base_token.parent()?)?;
+        if ctx
+            .model()
+            .binding(&reference)
+            .is_some_and(|binding| !binding.is_imported())
+        {
+            return None;
+        }
 
         let rename_kind = match (base_name, required_kind) {
             // `it` when `test` is required
@@ -239,6 +255,7 @@ impl Rule for UseConsistentTestIt {
         let mut mutation = ctx.root().begin();
 
         let (_, suggested) = state.rename_kind.names();
+        update_import(ctx, &callee, suggested, &mut mutation)?;
         match state.rename_kind {
             RenameKind::ItToTest => {
                 rename_base_identifier(&callee, TestFunctionName::Test, &mut mutation)?;
@@ -271,6 +288,158 @@ impl Rule for UseConsistentTestIt {
             mutation,
         ))
     }
+}
+
+/// If the function is being imported from somewhere, attempt to also fix the import.
+///
+/// This performs the safest way to do this fix, by adding `as <function>` to the import.
+///
+/// Suppose we have this code:
+/// ```js
+/// import { test } from "foo";
+/// ```
+/// We don't necessarily know if `test` or `it` exists in the imported package.
+/// Instead of naively changing `test` to `it`, we alias the import to the desired name. So it
+/// becomes:
+///
+/// ```js
+/// import { test as it } from "foo";
+/// ```
+fn update_import(
+    ctx: &RuleContext<UseConsistentTestIt>,
+    callee: &AnyJsExpression,
+    suggested: &str,
+    mutation: &mut BatchMutation<JsLanguage>,
+) -> Option<()> {
+    let base = get_base_identifier(callee)?;
+    let reference = JsReferenceIdentifier::cast(base.parent()?)?;
+    let model = ctx.model();
+    let target = suggested.split('.').next()?;
+    let target_binding = model
+        .scope(reference.syntax())
+        .ancestors()
+        .find_map(|scope| scope.get_binding(target));
+    let Some(binding) = model.binding(&reference) else {
+        return (target_binding.is_none()
+            && !model
+                .scope(reference.syntax())
+                .ancestors()
+                .any(|scope| scope.get_binding(base.text_trimmed()).is_some()))
+        .then_some(());
+    };
+    if suggested.contains('.') || !binding.is_imported() {
+        return None;
+    }
+    let parent = binding.syntax().parent()?;
+    let single_reference = binding.all_references().count() == 1;
+    let specifier = AnyJsNamedImportSpecifier::cast(parent.clone());
+    if let Some(target_binding) = target_binding {
+        let target_specifier = AnyJsNamedImportSpecifier::cast(target_binding.syntax().parent()?)?;
+        let specifier = specifier?;
+        if target_specifier.syntax().parent() != specifier.syntax().parent()
+            || target_specifier.imported_name()?.text_trimmed()
+                != specifier.imported_name()?.text_trimmed()
+            || target_specifier.imports_only_types()
+        {
+            return None;
+        }
+        if single_reference && !specifier.syntax().parent()?.has_comments_descendants() {
+            let list = JsNamedImportSpecifierList::cast(specifier.syntax().parent()?)?;
+            let mut items = Vec::new();
+            let mut separators = Vec::new();
+            for element in list.elements() {
+                let item = element.node().ok()?.clone();
+                let separator = element.trailing_separator().ok()?.cloned();
+                if item != specifier {
+                    items.push(item);
+                    separators.extend(separator);
+                }
+            }
+            separators.truncate(items.len().saturating_sub(1));
+            mutation.replace_node(
+                list,
+                make::js_named_import_specifier_list(items, separators),
+            );
+        }
+        return Some(());
+    }
+    // An import alias would capture existing uses of the test-runner global.
+    if model.all_unresolved_references().any(|reference| {
+        reference
+            .tree()
+            .value_token()
+            .is_ok_and(|token| unescape_js_identifier(token.text_trimmed()) == target)
+    }) {
+        return None;
+    }
+    if let Some(specifier) = specifier {
+        if specifier.imports_only_types() {
+            return None;
+        }
+        if single_reference
+            && let AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named) = &specifier
+        {
+            mutation.replace_token(
+                named
+                    .local_name()
+                    .ok()?
+                    .as_js_identifier_binding()?
+                    .name_token()
+                    .ok()?,
+                make::ident(target),
+            );
+            return Some(());
+        }
+        let name = match &specifier {
+            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(specifier) => {
+                specifier.name().ok()?
+            }
+            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(specifier) => {
+                make::js_literal_export_name(
+                    specifier
+                        .local_name()
+                        .ok()?
+                        .as_js_identifier_binding()?
+                        .name_token()
+                        .ok()?,
+                )
+                .into()
+            }
+            _ => return None,
+        };
+        let alias: AnyJsNamedImportSpecifier = make::js_named_import_specifier(
+            name.with_leading_trivia_pieces([])?
+                .with_trailing_trivia_pieces([])?,
+            make::token(T![as])
+                .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::js_identifier_binding(make::ident(target)).into(),
+        )
+        .build()
+        .into();
+        if single_reference {
+            mutation.replace_node(specifier, alias);
+        } else {
+            let list = JsNamedImportSpecifierList::cast(specifier.syntax().parent()?)?;
+            let mut items = list.iter().collect::<Result<Vec<_>, _>>().ok()?;
+            let mut separators = list.separators().collect::<Result<Vec<_>, _>>().ok()?;
+            if separators.len() < items.len() {
+                separators.push(
+                    make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                );
+            }
+            items.push(alias);
+            mutation.replace_node(
+                list,
+                make::js_named_import_specifier_list(items, separators),
+            );
+        }
+    } else if JsDefaultImportSpecifier::can_cast(parent.kind()) && single_reference {
+        mutation.replace_token(binding.syntax().first_token()?, make::ident(target));
+    } else {
+        return None;
+    }
+    Some(())
 }
 
 /// The recognized JS test function identifier names.
@@ -445,6 +614,7 @@ fn is_within_describe(node: &JsCallExpression) -> bool {
         .filter_map(JsCallExpression::cast)
         .any(|ancestor| {
             ancestor
-                .callee().is_ok_and(|callee| callee.contains_describe_call())
+                .callee()
+                .is_ok_and(|callee| callee.contains_describe_call())
         })
 }

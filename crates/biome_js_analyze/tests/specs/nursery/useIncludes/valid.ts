@@ -1,0 +1,25 @@
+// should not generate diagnostics
+
+// `String.prototype.some` does not exist, so a string-typed receiver must not
+// be rewritten to `includes`.
+declare const str: string;
+str.some((item) => item === "a");
+
+declare const literal: "a" | "b";
+literal.some((item) => item === "a");
+
+// template literal type is still a string
+declare const tpl: `prefix-${string}`;
+tpl.some((item) => item === "a");
+
+// `some()` uses strict equality and skips holes, while `includes()` uses
+// SameValueZero and treats holes as `undefined`. Searching for `NaN` or
+// `undefined` is therefore not equivalent and must not be rewritten.
+declare const arr: number[];
+arr.some((item) => item === NaN);
+arr.some((item) => item === Number.NaN);
+
+declare const objs: (number | undefined)[];
+objs.some((item) => item === undefined);
+objs.some((item) => item === void 0);
+

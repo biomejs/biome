@@ -9,11 +9,11 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallExpression, JsClassExpression, JsForStatement, JsFunctionExpression,
-    JsIdentifierExpression, JsModuleItemList, JsSequenceExpression, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration,
-    TsInferType, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeParameterList,
-    TsTypeParameters,
+    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsClassExpression,
+    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsModuleItemList,
+    JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsConditionalType,
+    TsDeclarationModule, TsDeclareFunctionDeclaration, TsInferType, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration, TsTypeParameterList, TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
@@ -111,14 +111,12 @@ declare_lint_rule! {
     ///
     /// In Astro files, a top-level interface or a type alias named `Props` is always ignored
     /// as it's implicitly read by the framework.
-    /// ```astro,ignore
+    /// ```astro
     /// ---
     /// interface Props {
     ///   name: string;
     ///   greeting?: string;
     /// }
-    ///
-    /// const { name, greeting } = Astro.props;
     /// ---
     /// ```
     ///
@@ -211,6 +209,7 @@ declare_lint_rule! {
             RuleSource::Eslint("no-unused-vars").same(),
             RuleSource::EslintTypeScript("no-unused-vars").same(),
             RuleSource::EslintUnusedImports("no-unused-vars").same(),
+            RuleSource::EslintVueJs("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
@@ -477,7 +476,7 @@ fn is_implemented_overload_type_parameter(
         signatures.iter().any(|id| {
             model
                 .binding_by_id(*id)
-                .is_some_and(|binding| binding.syntax().text_trimmed_range() == signature_range)
+                .is_some_and(|binding| binding.range() == signature_range)
         })
     })
 }
@@ -877,6 +876,17 @@ fn is_unused_by_references(
                     JsSyntaxKind::JS_FUNCTION_BODY => {
                         // reset because we are inside a function
                         is_unused = true;
+                    }
+                    JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION => {
+                        if let Some(arrow) = JsArrowFunctionExpression::cast(ancestor)
+                            && let Ok(body) = arrow.body()
+                            && body
+                                .syntax()
+                                .text_trimmed_range()
+                                .contains_range(ref_parent.text_trimmed_range())
+                        {
+                            is_unused = true;
+                        }
                     }
                     JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
                     | JsSyntaxKind::JS_CALL_EXPRESSION

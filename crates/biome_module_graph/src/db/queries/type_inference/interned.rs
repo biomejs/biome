@@ -7,7 +7,7 @@
 use crate::ModuleInfo;
 use biome_js_type_info::interned_types::{
     CallArgumentType as InferredCallArgumentType, LocalTypeId as InferredLocalTypeId,
-    TypeData as InferredTypeData,
+    TypeData as InferredTypeData, TypeSubstitution as InferredTypeSubstitution,
 };
 use biome_rowan::TextRange;
 
@@ -17,8 +17,10 @@ use biome_rowan::TextRange;
 #[salsa::interned]
 #[derive(Debug)]
 pub struct ExpressionTypeInput<'db> {
+    #[returns(copy)]
     pub module: ModuleInfo,
     /// Source location that identifies the expression in the module's raw table.
+    #[returns(copy)]
     pub expression: TextRange,
 }
 
@@ -26,8 +28,10 @@ pub struct ExpressionTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct BindingTypeInput<'db> {
+    #[returns(copy)]
     pub module: ModuleInfo,
     /// Source range used to identify the binding.
+    #[returns(copy)]
     pub range: TextRange,
 }
 
@@ -35,7 +39,9 @@ pub struct BindingTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct LocalTypeInput<'db> {
+    #[returns(copy)]
     pub module: ModuleInfo,
+    #[returns(copy)]
     pub type_id: InferredLocalTypeId,
 }
 
@@ -43,7 +49,9 @@ pub struct LocalTypeInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct BindingTypeWithImportBudgetInput<'db> {
+    #[returns(copy)]
     pub lookup: BindingTypeInput<'db>,
+    #[returns(copy)]
     pub remaining: u8,
 }
 
@@ -51,7 +59,9 @@ pub(crate) struct BindingTypeWithImportBudgetInput<'db> {
 #[salsa::interned]
 #[derive(Debug)]
 pub(crate) struct LocalTypeWithImportBudgetInput<'db> {
+    #[returns(copy)]
     pub lookup: LocalTypeInput<'db>,
+    #[returns(copy)]
     pub remaining: u8,
 }
 
@@ -60,22 +70,41 @@ pub(crate) struct LocalTypeWithImportBudgetInput<'db> {
 #[derive(Debug)]
 pub struct CallExpressionTypeInput<'db> {
     /// Module used to resolve local callee and return types.
+    #[returns(copy)]
     pub module: ModuleInfo,
+    #[returns(copy)]
     pub callee: InferredTypeData<'db>,
     /// Definite positional argument types in source order.
-    #[returns(ref)]
     pub args: Box<[InferredTypeData<'db>]>,
+}
+
+/// Interned input for [`super::resolve_callable_function`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct CallableFunctionInput<'db> {
+    #[returns(copy)]
+    pub ty: InferredTypeData<'db>,
+}
+
+/// Interned input for [`super::substitute_types`].
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct TypeSubstitutionInput<'db> {
+    #[returns(copy)]
+    pub ty: InferredTypeData<'db>,
+    pub substitutions: Box<[InferredTypeSubstitution<'db>]>,
 }
 
 /// Interned input for call and constructor argument-type inference.
 #[salsa::interned]
 #[derive(Debug)]
 pub struct CallArgumentTypeInput<'db> {
+    #[returns(copy)]
     pub callee: InferredTypeData<'db>,
     /// Source arguments in order, including unexpanded spread arguments.
-    #[returns(ref)]
     pub args: Box<[InferredCallArgumentType<'db>]>,
     /// Index of the source argument whose expected type is requested.
+    #[returns(copy)]
     pub argument_index: usize,
 }
 
@@ -84,7 +113,9 @@ pub struct CallArgumentTypeInput<'db> {
 #[derive(Debug)]
 pub struct NormalizeTypeInput<'db> {
     /// Module used to resolve local type handles.
+    #[returns(copy)]
     pub module: ModuleInfo,
+    #[returns(copy)]
     pub ty: InferredTypeData<'db>,
 }
 

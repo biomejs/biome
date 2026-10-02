@@ -1,11 +1,12 @@
-use crate::services::database::ResolvedImports;
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use crate::services::database::{DbService, ResolvedImports};
+use crate::services::semantic::SemanticModelBuilderVisitor;
+use biome_analyze::{AddVisitor, Phases, QueryKey, Queryable, Rule, RuleDiagnostic, RuleDomain, ServiceBag, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
     AnyJsObjectMember, AnyJsxAttributeValue, JsExpressionTemplateRoot, JsxAttribute,
-    binding_ext::AnyJsBindingDeclaration,
+    AnyJsRoot, JsLanguage, JsSyntaxNode, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_languages::JsFileSource;
 use biome_module_graph::{
@@ -66,8 +67,28 @@ declare_node_union! {
     pub AnyClassLikeAttribute = JsxAttribute | JsExpressionTemplateRoot
 }
 
+impl Queryable for AnyClassLikeAttribute {
+    type Input = JsSyntaxNode;
+    type Output = Self;
+    type Language = JsLanguage;
+    type Services = DbService;
+
+    fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+        ResolvedImports::<Self>::build_visitor(analyzer, root);
+    }
+
+    fn key() -> QueryKey<JsLanguage> {
+        ResolvedImports::<Self>::key()
+    }
+
+    fn unwrap_match(services: &ServiceBag, node: &JsSyntaxNode) -> Self {
+        ResolvedImports::<Self>::unwrap_match(services, node)
+    }
+}
+
 impl Rule for NoUndeclaredClasses {
-    type Query = ResolvedImports<AnyClassLikeAttribute>;
+    type Query = AnyClassLikeAttribute;
     type State = UndeclaredClass;
     type Signals = Vec<Self::State>;
     type Options = NoUndeclaredClassesOptions;
@@ -133,9 +154,9 @@ impl Rule for NoUndeclaredClasses {
 
             if !found_class && let Some(module) = db.module_for_path(file_path) {
                 let import_tree = if is_html_like {
-                    build_import_tree_for_html(db, module)
+                    build_import_tree_for_html(db, module).clone()
                 } else {
-                    build_import_tree_for_js(db, module)
+                    build_import_tree_for_js(db, module).clone()
                 };
                 signals.push(UndeclaredClass {
                     range: entry.range,
@@ -310,7 +331,7 @@ fn run_without_semantic(
         });
 
         if !found_class && let Some(module) = db.module_for_path(file_path) {
-            let import_tree = build_import_tree_for_html(db, module);
+            let import_tree = build_import_tree_for_html(db, module).clone();
             signals.push(UndeclaredClass {
                 range: entry.range,
                 name: entry.name.clone(),

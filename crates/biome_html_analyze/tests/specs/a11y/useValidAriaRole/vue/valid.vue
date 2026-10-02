@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div role="button"></div>
 <div role="switch" />
 <div role></div>
@@ -14,3 +15,4 @@
 <div :role="'button'" />
 <div v-bind:role="'switch'" />
 <div :role="'button row'" />
+</template>

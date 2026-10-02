@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_graphql_analyze"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's GraphQL linter"

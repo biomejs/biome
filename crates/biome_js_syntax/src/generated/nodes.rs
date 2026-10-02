@@ -35,10 +35,10 @@ impl AstroImplicitFragment {
     }
     pub fn as_fields(&self) -> AstroImplicitFragmentFields {
         AstroImplicitFragmentFields {
-            children: self.children(),
+            elements: self.elements(),
         }
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 0usize)
     }
 }
@@ -52,7 +52,7 @@ impl Serialize for AstroImplicitFragment {
 }
 #[derive(Serialize)]
 pub struct AstroImplicitFragmentFields {
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsAccessorModifier {
@@ -7184,6 +7184,46 @@ pub struct JsVariableStatementFields {
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsVueSlotPropsRoot {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsVueSlotPropsRoot {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsVueSlotPropsRootFields {
+        JsVueSlotPropsRootFields {
+            parameters: self.parameters(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn parameters(&self) -> JsParameterList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for JsVueSlotPropsRoot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsVueSlotPropsRootFields {
+    pub parameters: JsParameterList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsWhileStatement {
     pub(crate) syntax: SyntaxNode,
 }
@@ -7565,14 +7605,14 @@ impl JsxElement {
     pub fn as_fields(&self) -> JsxElementFields {
         JsxElementFields {
             opening_element: self.opening_element(),
-            children: self.children(),
+            elements: self.elements(),
             closing_element: self.closing_element(),
         }
     }
     pub fn opening_element(&self) -> SyntaxResult<JsxOpeningElement> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_element(&self) -> SyntaxResult<JsxClosingElement> {
@@ -7590,7 +7630,7 @@ impl Serialize for JsxElement {
 #[derive(Serialize)]
 pub struct JsxElementFields {
     pub opening_element: SyntaxResult<JsxOpeningElement>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_element: SyntaxResult<JsxClosingElement>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -7700,14 +7740,14 @@ impl JsxFragment {
     pub fn as_fields(&self) -> JsxFragmentFields {
         JsxFragmentFields {
             opening_fragment: self.opening_fragment(),
-            children: self.children(),
+            elements: self.elements(),
             closing_fragment: self.closing_fragment(),
         }
     }
     pub fn opening_fragment(&self) -> SyntaxResult<JsxOpeningFragment> {
         support::required_node(&self.syntax, 0usize)
     }
-    pub fn children(&self) -> JsxChildList {
+    pub fn elements(&self) -> JsxChildList {
         support::list(&self.syntax, 1usize)
     }
     pub fn closing_fragment(&self) -> SyntaxResult<JsxClosingFragment> {
@@ -7725,7 +7765,7 @@ impl Serialize for JsxFragment {
 #[derive(Serialize)]
 pub struct JsxFragmentFields {
     pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
-    pub children: JsxChildList,
+    pub elements: JsxChildList,
     pub closing_fragment: SyntaxResult<JsxClosingFragment>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15378,6 +15418,7 @@ pub enum AnyJsRoot {
     JsScript(JsScript),
     JsSvelteDeclarationRoot(JsSvelteDeclarationRoot),
     JsSvelteSnippetRoot(JsSvelteSnippetRoot),
+    JsVueSlotPropsRoot(JsVueSlotPropsRoot),
     TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
@@ -15414,6 +15455,12 @@ impl AnyJsRoot {
     pub fn as_js_svelte_snippet_root(&self) -> Option<&JsSvelteSnippetRoot> {
         match &self {
             Self::JsSvelteSnippetRoot(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_vue_slot_props_root(&self) -> Option<&JsVueSlotPropsRoot> {
+        match &self {
+            Self::JsVueSlotPropsRoot(item) => Some(item),
             _ => None,
         }
     }
@@ -16619,6 +16666,7 @@ impl AnyTsType {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeMember {
     JsBogusMember(JsBogusMember),
+    JsMetavariable(JsMetavariable),
     TsCallSignatureTypeMember(TsCallSignatureTypeMember),
     TsConstructSignatureTypeMember(TsConstructSignatureTypeMember),
     TsGetterSignatureTypeMember(TsGetterSignatureTypeMember),
@@ -16631,6 +16679,12 @@ impl AnyTsTypeMember {
     pub fn as_js_bogus_member(&self) -> Option<&JsBogusMember> {
         match &self {
             Self::JsBogusMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            Self::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -16769,7 +16823,7 @@ impl std::fmt::Debug for AstroImplicitFragment {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("AstroImplicitFragment")
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .finish()
         } else {
             f.debug_struct("AstroImplicitFragment").finish()
@@ -25122,6 +25176,54 @@ impl From<JsVariableStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for JsVueSlotPropsRoot {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_VUE_SLOT_PROPS_ROOT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_VUE_SLOT_PROPS_ROOT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsVueSlotPropsRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("JsVueSlotPropsRoot")
+                .field("parameters", &self.parameters())
+                .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+                .finish()
+        } else {
+            f.debug_struct("JsVueSlotPropsRoot").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<JsVueSlotPropsRoot> for SyntaxNode {
+    fn from(n: JsVueSlotPropsRoot) -> Self {
+        n.syntax
+    }
+}
+impl From<JsVueSlotPropsRoot> for SyntaxElement {
+    fn from(n: JsVueSlotPropsRoot) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for JsWhileStatement {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -25589,7 +25691,7 @@ impl std::fmt::Debug for JsxElement {
                     "opening_element",
                     &support::DebugSyntaxResult(self.opening_element()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_element",
                     &support::DebugSyntaxResult(self.closing_element()),
@@ -25757,7 +25859,7 @@ impl std::fmt::Debug for JsxFragment {
                     "opening_fragment",
                     &support::DebugSyntaxResult(self.opening_fragment()),
                 )
-                .field("children", &self.children())
+                .field("elements", &self.elements())
                 .field(
                     "closing_fragment",
                     &support::DebugSyntaxResult(self.closing_fragment()),
@@ -37382,6 +37484,11 @@ impl From<JsSvelteSnippetRoot> for AnyJsRoot {
         Self::JsSvelteSnippetRoot(node)
     }
 }
+impl From<JsVueSlotPropsRoot> for AnyJsRoot {
+    fn from(node: JsVueSlotPropsRoot) -> Self {
+        Self::JsVueSlotPropsRoot(node)
+    }
+}
 impl From<TsDeclarationModule> for AnyJsRoot {
     fn from(node: TsDeclarationModule) -> Self {
         Self::TsDeclarationModule(node)
@@ -37395,6 +37502,7 @@ impl AstNode for AnyJsRoot {
         .union(JsScript::KIND_SET)
         .union(JsSvelteDeclarationRoot::KIND_SET)
         .union(JsSvelteSnippetRoot::KIND_SET)
+        .union(JsVueSlotPropsRoot::KIND_SET)
         .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
@@ -37405,6 +37513,7 @@ impl AstNode for AnyJsRoot {
                 | JS_SCRIPT
                 | JS_SVELTE_DECLARATION_ROOT
                 | JS_SVELTE_SNIPPET_ROOT
+                | JS_VUE_SLOT_PROPS_ROOT
                 | TS_DECLARATION_MODULE
         )
     }
@@ -37420,6 +37529,7 @@ impl AstNode for AnyJsRoot {
                 Self::JsSvelteDeclarationRoot(JsSvelteDeclarationRoot { syntax })
             }
             JS_SVELTE_SNIPPET_ROOT => Self::JsSvelteSnippetRoot(JsSvelteSnippetRoot { syntax }),
+            JS_VUE_SLOT_PROPS_ROOT => Self::JsVueSlotPropsRoot(JsVueSlotPropsRoot { syntax }),
             TS_DECLARATION_MODULE => Self::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
@@ -37433,6 +37543,7 @@ impl AstNode for AnyJsRoot {
             Self::JsScript(it) => it.syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.syntax(),
             Self::JsSvelteSnippetRoot(it) => it.syntax(),
+            Self::JsVueSlotPropsRoot(it) => it.syntax(),
             Self::TsDeclarationModule(it) => it.syntax(),
         }
     }
@@ -37444,6 +37555,7 @@ impl AstNode for AnyJsRoot {
             Self::JsScript(it) => it.into_syntax(),
             Self::JsSvelteDeclarationRoot(it) => it.into_syntax(),
             Self::JsSvelteSnippetRoot(it) => it.into_syntax(),
+            Self::JsVueSlotPropsRoot(it) => it.into_syntax(),
             Self::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -37457,6 +37569,7 @@ impl std::fmt::Debug for AnyJsRoot {
             Self::JsScript(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSvelteDeclarationRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::JsSvelteSnippetRoot(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsVueSlotPropsRoot(it) => std::fmt::Debug::fmt(it, f),
             Self::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -37470,6 +37583,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsScript(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteDeclarationRoot(it) => it.into_syntax(),
             AnyJsRoot::JsSvelteSnippetRoot(it) => it.into_syntax(),
+            AnyJsRoot::JsVueSlotPropsRoot(it) => it.into_syntax(),
             AnyJsRoot::TsDeclarationModule(it) => it.into_syntax(),
         }
     }
@@ -40415,6 +40529,11 @@ impl From<JsBogusMember> for AnyTsTypeMember {
         Self::JsBogusMember(node)
     }
 }
+impl From<JsMetavariable> for AnyTsTypeMember {
+    fn from(node: JsMetavariable) -> Self {
+        Self::JsMetavariable(node)
+    }
+}
 impl From<TsCallSignatureTypeMember> for AnyTsTypeMember {
     fn from(node: TsCallSignatureTypeMember) -> Self {
         Self::TsCallSignatureTypeMember(node)
@@ -40453,6 +40572,7 @@ impl From<TsSetterSignatureTypeMember> for AnyTsTypeMember {
 impl AstNode for AnyTsTypeMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusMember::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(TsCallSignatureTypeMember::KIND_SET)
         .union(TsConstructSignatureTypeMember::KIND_SET)
         .union(TsGetterSignatureTypeMember::KIND_SET)
@@ -40464,6 +40584,7 @@ impl AstNode for AnyTsTypeMember {
         matches!(
             kind,
             JS_BOGUS_MEMBER
+                | JS_METAVARIABLE
                 | TS_CALL_SIGNATURE_TYPE_MEMBER
                 | TS_CONSTRUCT_SIGNATURE_TYPE_MEMBER
                 | TS_GETTER_SIGNATURE_TYPE_MEMBER
@@ -40476,6 +40597,7 @@ impl AstNode for AnyTsTypeMember {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_BOGUS_MEMBER => Self::JsBogusMember(JsBogusMember { syntax }),
+            JS_METAVARIABLE => Self::JsMetavariable(JsMetavariable { syntax }),
             TS_CALL_SIGNATURE_TYPE_MEMBER => {
                 Self::TsCallSignatureTypeMember(TsCallSignatureTypeMember { syntax })
             }
@@ -40504,6 +40626,7 @@ impl AstNode for AnyTsTypeMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.syntax(),
+            Self::JsMetavariable(it) => it.syntax(),
             Self::TsCallSignatureTypeMember(it) => it.syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.syntax(),
@@ -40516,6 +40639,7 @@ impl AstNode for AnyTsTypeMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::JsBogusMember(it) => it.into_syntax(),
+            Self::JsMetavariable(it) => it.into_syntax(),
             Self::TsCallSignatureTypeMember(it) => it.into_syntax(),
             Self::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             Self::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -40530,6 +40654,7 @@ impl std::fmt::Debug for AnyTsTypeMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::JsBogusMember(it) => std::fmt::Debug::fmt(it, f),
+            Self::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::TsCallSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsConstructSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
             Self::TsGetterSignatureTypeMember(it) => std::fmt::Debug::fmt(it, f),
@@ -40544,6 +40669,7 @@ impl From<AnyTsTypeMember> for SyntaxNode {
     fn from(n: AnyTsTypeMember) -> Self {
         match n {
             AnyTsTypeMember::JsBogusMember(it) => it.into_syntax(),
+            AnyTsTypeMember::JsMetavariable(it) => it.into_syntax(),
             AnyTsTypeMember::TsCallSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsConstructSignatureTypeMember(it) => it.into_syntax(),
             AnyTsTypeMember::TsGetterSignatureTypeMember(it) => it.into_syntax(),
@@ -41891,6 +42017,11 @@ impl std::fmt::Display for JsVariableDeclarator {
     }
 }
 impl std::fmt::Display for JsVariableStatement {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsVueSlotPropsRoot {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

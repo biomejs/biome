@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/release-forward-underscore-prefix.scss
+---
+
+# Input
+
+```scss
+@forward   './button' /* module */as /* prefix */components_* /* exports */show $components_gap,components_reset with( $components_gap:4px !default );
+@forward './button' as components-*;
+@forward  './button' as Components_* hide components_internal ;
+@forward './button' as components*;
+@forward './button' as components\5f *;
+@forward
+'./button'
+as // prefix follows
+components_*; // forwarded
+
+```
+
+
+# Formatted
+
+```scss
+@forward "./button" /* module */ as /* prefix */ components_* /* exports */ show $components_gap,
+components_reset with($components_gap: 4px !default);
+@forward "./button" as components-*;
+@forward "./button" as Components_* hide components_internal;
+@forward "./button" as components*;
+@forward "./button" as components\5f *;
+@forward "./button" as // prefix follows
+components_*; // forwarded
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: @forward "./button" /* module */ as /* prefix */ components_* /* exports */ show $components_gap,
+```

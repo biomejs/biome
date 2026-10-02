@@ -5,23 +5,24 @@ mod lint;
 
 mod registry;
 mod services;
+mod suppression;
 mod suppression_action;
 pub mod utils;
 
 pub use crate::registry::visit_registry;
 use crate::services::config_source::ConfigSource;
+pub use crate::suppression::JsonSuppression;
 use crate::suppression_action::JsonSuppressionAction;
 pub use biome_analyze::ExtendedConfigurationProvider;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, AnalyzerSuppression,
-    BatchPluginVisitor, ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
-    PluginTargetLanguage, RuleAction, RuleRegistry, to_analyzer_suppressions,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal, BatchPluginVisitor,
+    ControlFlow, EmbeddedSignalInspector, LanguageRoot, MatchQueryParams, MetadataRegistry, Phases,
+    PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
-use biome_json_syntax::{JsonLanguage, TextRange};
+use biome_json_syntax::JsonLanguage;
 use biome_languages::JsonFileSource;
 use biome_project_layout::ProjectLayout;
-use biome_suppression::{SuppressionDiagnostic, parse_suppression_comment};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
@@ -42,6 +43,15 @@ pub struct JsonAnalyzeServices {
 
     /// The project layout, providing access to package manifests.
     pub project_layout: Option<Arc<ProjectLayout>>,
+}
+
+struct AnalyzerParams<'a, 'guest, 'registry> {
+    root: &'a LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter<'a>,
+    options: &'a AnalyzerOptions,
+    services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    snippet_inspector: Option<EmbeddedSignalInspector<'guest, 'registry>>,
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -70,6 +80,34 @@ where
     )
 }
 
+/// Analyzes JSON embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<JsonLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    json_services: JsonAnalyzeServices,
+    plugins: AnalyzerPluginSlice<'a>,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services: json_services,
+            plugins,
+            snippet_inspector: Some(inspector),
+        },
+        |_| {},
+        emit_signal,
+    )
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -83,6 +121,30 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     options: &'a AnalyzerOptions,
     json_services: JsonAnalyzeServices,
     plugins: AnalyzerPluginSlice<'a>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<JsonLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher_and_inspector(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            services: json_services,
+            plugins,
+            snippet_inspector: None,
+        },
+        inspect_matcher,
+        emit_signal,
+    )
+}
+
+fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
+    params: AnalyzerParams<'a, '_, '_>,
+    inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -90,31 +152,14 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-        piece_range: TextRange,
-    ) -> Vec<Result<AnalyzerSuppression<'_>, SuppressionDiagnostic>> {
-        let mut result = Vec::new();
-
-        for suppression in parse_suppression_comment(text) {
-            let suppression = match suppression {
-                Ok(suppression) => suppression,
-                Err(err) => {
-                    result.push(Err(err));
-                    continue;
-                }
-            };
-
-            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
-                .into_iter()
-                .map(Ok)
-                .collect();
-
-            result.extend(analyzer_suppressions)
-        }
-
-        result
-    }
+    let AnalyzerParams {
+        root,
+        filter,
+        options,
+        services: json_services,
+        plugins,
+        snippet_inspector,
+    } = params;
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -128,7 +173,7 @@ where
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
-        parse_linter_suppression_comment,
+        Box::new(JsonSuppression),
         Box::new(JsonSuppressionAction),
         &mut emit_signal,
     );
@@ -157,15 +202,18 @@ where
     services.insert_service(json_services.file_source);
     services.insert_service(json_services.project_layout);
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match snippet_inspector {
+        Some(inspector) => analyzer.run_snippet(ctx, inspector),
+        None => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

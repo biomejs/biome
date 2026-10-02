@@ -30,20 +30,20 @@ impl CssPropertyDefinition {
     }
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
 
 /// Returns custom property definitions from a parsed CSS document.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn css_property_definitions_from_source(
     db: &dyn Db,
     file: ParsedSource,
@@ -53,7 +53,7 @@ pub fn css_property_definitions_from_source(
 }
 
 /// Returns custom property definitions from an embedded CSS document.
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 pub fn css_property_definitions_from_snippet(
     db: &dyn Db,
     file: ParsedSnippet,
@@ -300,13 +300,13 @@ mod tests {
         );
     }
 
-    #[salsa::tracked]
+    #[salsa::tracked(returns(copy))]
     fn rule_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
         let model = css_model_from_parsed_source(db, file);
         model.rules().len()
     }
 
-    #[salsa::tracked]
+    #[salsa::tracked(returns(copy))]
     fn property_syntax_type(db: &dyn LanguageDb, file: ParsedSource) -> Option<PropertySyntaxType> {
         let model = css_model_from_parsed_source(db, file);
         let at_property = model

@@ -1,0 +1,214 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.disabled {
+  @apply py-3;
+  width: 1px;
+}
+.after { height: 2px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..10 "disabled" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@10..11 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@11..15 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: CssBogusAtRule {
+                            items: [
+                                APPLY_KW@15..21 "apply" [] [Whitespace(" ")],
+                                TwApplyClassList [
+                                    CssIdentifier {
+                                        value_token: IDENT@21..25 "py-3" [] [],
+                                    },
+                                ],
+                                SEMICOLON@25..26 ";" [] [],
+                            ],
+                        },
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@26..34 "width" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@36..37 "1" [] [],
+                                            unit_token: IDENT@37..39 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@39..40 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@40..42 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@42..44 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@44..50 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@50..52 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@52..58 "height" [] [],
+                                },
+                                colon_token: COLON@58..60 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@60..61 "2" [] [],
+                                            unit_token: IDENT@61..63 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@63..65 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@65..66 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@66..67 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..67
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..66
+    0: CSS_QUALIFIED_RULE@0..42
+      0: CSS_SELECTOR_LIST@0..10
+        0: CSS_COMPOUND_SELECTOR@0..10
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..10
+            0: CSS_CLASS_SELECTOR@0..10
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..10
+                0: IDENT@1..10 "disabled" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@10..42
+        0: L_CURLY@10..11 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@11..40
+          0: CSS_AT_RULE@11..26
+            0: AT@11..15 "@" [Newline("\n"), Whitespace("  ")] []
+            1: CSS_BOGUS_AT_RULE@15..26
+              0: APPLY_KW@15..21 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@21..25
+                0: CSS_IDENTIFIER@21..25
+                  0: IDENT@21..25 "py-3" [] []
+              2: SEMICOLON@25..26 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@26..40
+            0: CSS_DECLARATION@26..39
+              0: CSS_GENERIC_PROPERTY@26..39
+                0: CSS_IDENTIFIER@26..34
+                  0: IDENT@26..34 "width" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@34..36 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@36..39
+                  0: SCSS_EXPRESSION_ITEM_LIST@36..39
+                    0: CSS_REGULAR_DIMENSION@36..39
+                      0: CSS_NUMBER_LITERAL@36..37 "1" [] []
+                      1: IDENT@37..39 "px" [] []
+              1: (empty)
+            1: SEMICOLON@39..40 ";" [] []
+        2: R_CURLY@40..42 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@42..66
+      0: CSS_SELECTOR_LIST@42..50
+        0: CSS_COMPOUND_SELECTOR@42..50
+          0: CSS_NESTED_SELECTOR_LIST@42..42
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@42..50
+            0: CSS_CLASS_SELECTOR@42..50
+              0: DOT@42..44 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@44..50
+                0: IDENT@44..50 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@50..66
+        0: L_CURLY@50..52 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@52..65
+          0: CSS_DECLARATION_WITH_SEMICOLON@52..65
+            0: CSS_DECLARATION@52..63
+              0: CSS_GENERIC_PROPERTY@52..63
+                0: CSS_IDENTIFIER@52..58
+                  0: IDENT@52..58 "height" [] []
+                1: COLON@58..60 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@60..63
+                  0: SCSS_EXPRESSION_ITEM_LIST@60..63
+                    0: CSS_REGULAR_DIMENSION@60..63
+                      0: CSS_NUMBER_LITERAL@60..61 "2" [] []
+                      1: IDENT@61..63 "px" [] []
+              1: (empty)
+            1: SEMICOLON@63..65 ";" [] [Whitespace(" ")]
+        2: R_CURLY@65..66 "}" [] []
+  2: EOF@66..67 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+release-final-statement-apply-disabled.scss:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tailwind-specific syntax is disabled.
+  
+    1 │ .disabled {
+  > 2 │   @apply py-3;
+      │    ^^^^^^^^^^^
+    3 │   width: 1px;
+    4 │ }
+  
+  i Enable `tailwindDirectives` in the css parser options, or remove this if you are not using Tailwind CSS.
+  
+```

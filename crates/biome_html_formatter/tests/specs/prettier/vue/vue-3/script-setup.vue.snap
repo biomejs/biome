@@ -33,12 +33,12 @@ info: vue/vue-3/script-setup.vue
 reformat: output mismatch
 --- re-formatted
 +++ formatted
-@@ -14,5 +14,5 @@
- 
+@@ -15,6 +15,5 @@
  <!-- Not attribute -->
  <script>
--<setup>{not:{a:attribute}} < /;>epstu;
-+<setup>{not:{a:attribute}} < />epstu;
+ 
+-
+ <setup>{not:{a:attribute}}</setup>
  </script>
 
 ```

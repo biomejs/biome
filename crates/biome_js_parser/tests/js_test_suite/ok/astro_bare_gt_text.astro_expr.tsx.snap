@@ -32,7 +32,7 @@ JsExpressionTemplateRoot {
                     attributes: JsxAttributeList [],
                     r_angle_token: R_ANGLE@9..10 ">" [] [],
                 },
-                children: JsxChildList [
+                elements: JsxChildList [
                     JsxText {
                         value_token: JSX_TEXT_LITERAL@10..15 "a > b" [] [],
                     },

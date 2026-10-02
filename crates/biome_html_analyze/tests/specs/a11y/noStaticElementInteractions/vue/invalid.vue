@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div @click="() => void 0"></div>
 <div v-on:click="() => void 0"></div>
 <div onkeyup="() => void 0" aria-hidden="false"></div>
@@ -70,3 +71,4 @@
 <div role="structure" @click="() => {}"></div>
 <div role="widget" @click="() => {}"></div>
 <div role="window" @click="() => {}"></div>
+</template>

@@ -62,7 +62,7 @@ const ONLY_KEYWORD: &str = "only";
 const FDESCRIBE_KEYWORD: &str = "fdescribe";
 /// Focused test keyword as used in e.g. Jasmine or Angular
 const FIT_KEYWORD: &str = "fit";
-const CALLEE_NAMES: [&str; 3] = ["describe", "it", "test"];
+const CALLEE_NAMES: [&str; 4] = ["describe", "it", "test", "suite"];
 
 impl Rule for NoFocusedTests {
     type Query = Ast<JsCallExpression>;
@@ -185,9 +185,12 @@ fn match_function_name_pattern(callee: &AnyJsExpression) -> Option<FunctionNameA
         .get_callee_member_name()
         .filter(|function_name| {
             let name = function_name.text_trimmed();
-            // Detect f-prefixed functions like fdescribe, fit
+            // Detect f-prefixed functions like fdescribe, fit, ftest, fsuite
             name.starts_with('f')
-                && (name == FDESCRIBE_KEYWORD || name == FIT_KEYWORD || name == "ftest")
+                && (name == FDESCRIBE_KEYWORD
+                    || name == FIT_KEYWORD
+                    || name == "ftest"
+                    || name == "fsuite")
         })
         .map(|function_name| FunctionNameAndRange {
             name: function_name.token_text_trimmed(),
@@ -307,6 +310,11 @@ fn fix_function_name_pattern(
         "ftest" => {
             // Replace ftest with test
             mutation.replace_token(function_name, make::ident("test"));
+            Some(())
+        }
+        "fsuite" => {
+            // Replace fsuite with suite
+            mutation.replace_token(function_name, make::ident("suite"));
             Some(())
         }
         _ => None,

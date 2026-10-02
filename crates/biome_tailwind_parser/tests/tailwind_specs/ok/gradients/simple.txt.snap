@@ -23,10 +23,10 @@ TwRoot {
             legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
-                base_token: TW_BASE@0..2 "bg" [] [],
-                minus_token: DASH@2..3 "-" [] [],
+                base_token: TW_BASE@0..14 "bg-gradient-to" [] [],
+                minus_token: DASH@14..15 "-" [] [],
                 value: TwNamedValue {
-                    value_token: TW_VALUE@3..16 "gradient-to-r" [] [],
+                    value_token: TW_VALUE@15..16 "r" [] [],
                 },
                 modifier: missing (optional),
             },
@@ -95,10 +95,10 @@ TwRoot {
       1: (empty)
       2: (empty)
       3: TW_FUNCTIONAL_CANDIDATE@0..16
-        0: TW_BASE@0..2 "bg" [] []
-        1: DASH@2..3 "-" [] []
-        2: TW_NAMED_VALUE@3..16
-          0: TW_VALUE@3..16 "gradient-to-r" [] []
+        0: TW_BASE@0..14 "bg-gradient-to" [] []
+        1: DASH@14..15 "-" [] []
+        2: TW_NAMED_VALUE@15..16
+          0: TW_VALUE@15..16 "r" [] []
         3: (empty)
       4: (empty)
     1: WHITESPACE@16..17 " " [] []

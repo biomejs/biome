@@ -21,6 +21,7 @@ impl SuppressionAction for JsonSuppressionAction {
         _apply_suppression: ApplySuppression<Self::Language>,
         _suppression_text: &str,
         _suppression_reason: &str,
+        _diagnostic_text_range: &biome_rowan::TextRange,
     ) {
         unreachable!("find_token_to_apply_suppression return None")
     }

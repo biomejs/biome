@@ -1,14 +1,12 @@
-use std::slice;
-use std::sync::Arc;
-
-use boa_engine::{JsNativeError, JsResult};
-use camino::Utf8Path;
-
 use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter};
 use biome_diagnostics::{Error, PrintDescription};
 use biome_js_parser::JsParserOptions;
 use biome_languages::JsFileSource;
 use biome_resolver::FsWithResolverProxy;
+use boa_engine::{JsNativeError, JsResult};
+use camino::Utf8Path;
+use std::slice;
+use std::sync::Arc;
 
 /// Reads the ECMAScript source of the module at `path`.
 ///

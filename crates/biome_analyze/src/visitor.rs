@@ -37,6 +37,12 @@ impl<'phase, L: Language> VisitorContext<'phase, '_, L> {
     }
 }
 
+/// Mutable services available before a phase starts traversing its syntax tree.
+pub struct VisitorStartContext<'a, L: Language> {
+    pub root: &'a LanguageRoot<L>,
+    pub services: &'a mut ServiceBag,
+}
+
 /// Mutable context objects provided to the finish hook of visitors
 pub struct VisitorFinishContext<'a, L: Language> {
     pub root: &'a LanguageRoot<L>,
@@ -48,6 +54,11 @@ pub struct VisitorFinishContext<'a, L: Language> {
 /// the syntax tree, and emit rule query matches through the [crate::RuleRegistry]
 pub trait Visitor {
     type Language: Language;
+
+    /// Initializes services before any visitor in this phase receives walk events.
+    fn start(&mut self, ctx: VisitorStartContext<Self::Language>) {
+        let _ = ctx;
+    }
 
     fn visit(
         &mut self,

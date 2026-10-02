@@ -133,8 +133,23 @@ impl Rule for NoUselessReturn {
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let ret = ctx.query();
+
+        // The direct body of an `if`, `else` or label is mandatory, so only a
+        // statement in a list can be removed.
+        ret.parent::<JsStatementList>()?;
+
+        // The removal below keeps comments around the statement but drops those inside it.
+        if has_comments_between_tokens(ret) {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(ctx.query().clone());
+        if ret.syntax().has_leading_comments() || ret.syntax().has_trailing_comments() {
+            mutation.remove_node_keep_trivia(ret.clone());
+        } else {
+            mutation.remove_node(ret.clone());
+        }
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -143,6 +158,20 @@ impl Rule for NoUselessReturn {
             mutation,
         ))
     }
+}
+
+/// Returns `true` if a comment sits between the `return` keyword and its
+/// semicolon, as in `return /* note */;`.
+///
+/// Comments before the statement or after its semicolon are ignored.
+fn has_comments_between_tokens(ret: &JsReturnStatement) -> bool {
+    let Some(semicolon) = ret.semicolon_token() else {
+        return false;
+    };
+    semicolon.has_leading_comments()
+        || ret
+            .return_token()
+            .is_ok_and(|token| token.has_trailing_comments())
 }
 
 /// Check if the return statement is inside a loop or switch statement

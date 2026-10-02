@@ -1,0 +1,8 @@
+<Foo>a</FooBar></Foo>
+<FooBar>b</Foo></FooBar>
+<form.Field>c</form></form.Field>
+<form.Field>d</form.Fields></form.Field>
+<Data.Client>e</Data></Data.Client>
+<p>f</Paragraph></p>
+<Foo>g</foo></Foo>
+<after>h</after>

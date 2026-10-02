@@ -973,7 +973,7 @@ pattern adjust_imports() {
 		contains import_specifier(name=`Component`) as $specifier where {
 			$specifier <: within import_statement($source) where {
 				$source <: `"react"`
-			} ,
+			},
 			$specifier => $hooks
 		},
 		contains `import React, { $x } from "react"` => `import React, { $x, $hooks } from "react"`,
@@ -1045,7 +1045,7 @@ pattern first_step($use_ref_from, $handler_callback_suffix) {
 			}
 		},
 		$body <: not contains `componentDidCatch`,
-		$class <: not within class_declaration(name=not $class_name) ,
+		$class <: not within class_declaration(name=not $class_name),
 		if ($body <: contains `static defaultProps = $default_props`) {
 			$the_props = "inputProps"
 		} else { $the_props = "props" },
@@ -1104,10 +1104,10 @@ private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $ha
 			}) { $p => `$property` } else if ($hoisted_refs <: some $property) {
 				or {
 					and {
-						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current" ,
+						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current",
 						$p => `$property`
 					},
-					if ($p <: within member_expression(property=`current`) ) {
+					if ($p <: within member_expression(property=`current`)) {
 						$p => `$property`
 					} else { $p => `$property.current` }
 				}
@@ -1163,7 +1163,7 @@ private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $ha
 				$set_state <: within arrow_function($body) where {
 					$body <: $set_state,
 					$set_state => `{ $statements }`
-				} ,
+				},
 				$set_state => `$statements`
 			}
 		},
@@ -1284,7 +1284,7 @@ private pattern fix_react_default_export() {
   395: 			$previous_value_hook = `\nfunction usePreviousValue(){\n    const ref = useRef();\n    useEffect(() => {\n        ref.current = props;\n    });\n    return ref.current;\n}\n`
   402: 		$the_function = `($args) => {\n    $states_statements\n\n    $statements\n\n    $constructor_statements\n\n    $render_statements \n}`,
   427: private pattern rewrite_accesses($hoisted_states, $hoisted_refs, $use_memos, $handler_callback_suffix) {
-  437: 						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current" ,
+  437: 						$property <: within member_expression() as $already_ref where $already_ref <: js"$p.current",
   512: 		// clean-up props arg -- not needed if only used in constructor, and first step introduced it
   527: 	contains bubble($hoisted_states, $hoisted_refs, $use_memos) variable_declarator($name, $value) where {
   570: 			$statements <: maybe gather_accesses($hoisted_states, $hoisted_refs, $use_memos),

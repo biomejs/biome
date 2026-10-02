@@ -7,7 +7,7 @@ use biome_diagnostics::Severity;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::{TokenSet, token_set};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
+use biome_rowan::{BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_element_to_interactive_role::NoNoninteractiveElementToInteractiveRoleOptions;
 
 use crate::{Aria, HtmlRuleAction};

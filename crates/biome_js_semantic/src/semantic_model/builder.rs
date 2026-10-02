@@ -1,7 +1,8 @@
 use super::*;
 use biome_js_syntax::{
-    AnyJsDeclaration, AnyJsRoot, JsExport, JsIdentifierAssignment, JsSyntaxNode, TextRange,
-    TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    AnyJsDeclaration, AnyJsIdentifierReference, AnyJsRoot, JsExport, JsIdentifierAssignment,
+    JsSyntaxNode, TextRange, TsConditionalType, TsDeclareStatement, TsTypeParameterName,
+    unescape_js_identifier,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_rowan::SyntaxNodePtr;
@@ -22,7 +23,6 @@ pub struct SemanticModelBuilder {
     globals: Vec<SemanticModelGlobalBindingData>,
     globals_by_name: FxHashMap<String, Option<u32>>,
     scopes: Vec<SemanticModelScopeData>,
-    scope_range_by_start: FxHashMap<TextSize, BTreeSet<Interval<u32, ScopeId>>>,
     scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     bindings: Vec<SemanticModelBindingData>,
     /// maps a binding range start to its index inside [SemanticModelBuilder::bindings] vec
@@ -46,7 +46,6 @@ impl SemanticModelBuilder {
             globals: vec![],
             globals_by_name: FxHashMap::default(),
             scopes: vec![],
-            scope_range_by_start: FxHashMap::default(),
             scope_hoisted_to_by_range: FxHashMap::default(),
             bindings: vec![],
             bindings_by_start: FxHashMap::default(),
@@ -87,6 +86,7 @@ impl SemanticModelBuilder {
             | JS_EXPRESSION_TEMPLATE_ROOT
             | JS_SVELTE_DECLARATION_ROOT
             | JS_SVELTE_SNIPPET_ROOT
+            | JS_VUE_SLOT_PROPS_ROOT
             | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
@@ -152,7 +152,12 @@ impl SemanticModelBuilder {
 
     #[inline]
     pub fn push_global(&mut self, name: impl Into<String>) {
-        self.globals_by_name.insert(name.into(), None);
+        let name = name.into();
+        let decoded = match unescape_js_identifier(&name) {
+            std::borrow::Cow::Borrowed(_) => None,
+            std::borrow::Cow::Owned(decoded) => Some(decoded),
+        };
+        self.globals_by_name.insert(decoded.unwrap_or(name), None);
     }
 
     #[inline]
@@ -182,16 +187,6 @@ impl SemanticModelBuilder {
                 if let Some(parent_scope_id) = parent_scope_id {
                     self.scopes[parent_scope_id.index()].children.push(scope_id);
                 }
-
-                let start = range.start();
-                self.scope_range_by_start
-                    .entry(start)
-                    .or_default()
-                    .insert(Interval {
-                        start: start.into(),
-                        stop: range.end().into(),
-                        val: scope_id,
-                    });
             }
             ScopeEnded { .. } => {}
             DeclarationFound {
@@ -226,11 +221,17 @@ impl SemanticModelBuilder {
                 // Handle bindings with a bogus name
                 if let Some(node) = self.binding_node_by_start.get(&range.start()) {
                     let name = if let Some(node) = JsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsIdentifierBinding::cast_ref(node) {
-                        node.name_token().ok().map(|t| t.token_text_trimmed())
+                        node.name_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else if let Some(node) = TsTypeParameterName::cast_ref(node) {
-                        node.ident_token().ok().map(|t| t.token_text_trimmed())
+                        node.ident_token()
+                            .ok()
+                            .map(|t| crate::identifier_name(t.token_text_trimmed()))
                     } else {
                         None
                     };
@@ -369,9 +370,14 @@ impl SemanticModelBuilder {
                 };
 
                 let node = &self.binding_node_by_start[&range.start()];
-                let unresolved_name = node.text_trimmed().to_string();
+                let unresolved_name = AnyJsIdentifierReference::cast_ref(node)
+                    .and_then(|reference| reference.value_token().ok())
+                    .map_or_else(
+                        || node.text_trimmed().to_string().into(),
+                        |token| crate::identifier_name(token.token_text_trimmed()),
+                    );
 
-                if let Some(global_name) = self.resolve_global_name(&unresolved_name) {
+                if let Some(global_name) = self.resolve_global_name(unresolved_name.text()) {
                     self.global_references_by_start.insert(range.start());
                     if let Some(index) = self.globals_by_name[global_name] {
                         self.globals[index as usize].references.push(
@@ -416,15 +422,9 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root.syntax().as_send().expect("To be a root node"),
+            scope_by_range: ScopeRangeIndex::from_scopes(&self.scopes),
             flavor: self.flavor,
             scopes: self.scopes,
-            scope_by_range: Lapper::new(
-                self.scope_range_by_start
-                    .values()
-                    .flat_map(|scopes| scopes.iter())
-                    .cloned()
-                    .collect(),
-            ),
             scope_hoisted_to_by_range: self.scope_hoisted_to_by_range,
             binding_node_by_start: self
                 .binding_node_by_start
@@ -483,8 +483,9 @@ impl SemanticModelBuilder {
         let Ok(reference_name) = identifier_assignment.name_token() else {
             return false;
         };
+        let reference_name = crate::identifier_name(reference_name.token_text_trimmed());
         self.flavor
-            .store_reference_name(reference_name.text_trimmed())
+            .store_reference_name(reference_name.text())
             .is_some()
     }
 }

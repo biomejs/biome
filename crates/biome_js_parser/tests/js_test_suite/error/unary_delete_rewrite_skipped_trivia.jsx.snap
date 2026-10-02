@@ -51,7 +51,7 @@ JsModule {
                             ],
                             r_angle_token: missing (required),
                         },
-                        children: JsxChildList [],
+                        elements: JsxChildList [],
                         closing_element: JsxClosingElement {
                             l_angle_token: missing (required),
                             slash_token: missing (required),

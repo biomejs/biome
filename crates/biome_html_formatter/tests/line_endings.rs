@@ -13,7 +13,7 @@ fn assert_format(options: HtmlFormatOptions, source: &str, expected: &str) {
     let parse = parse_html(source, options.file_source().into());
     assert!(!parse.has_errors(), "source failed to parse: {source:?}");
 
-    let formatted = format_node(options, &parse.syntax(), false).unwrap();
+    let formatted = format_node(options, &parse.syntax(), Vec::new()).unwrap();
     let output = formatted.print().unwrap().as_code().to_string();
 
     assert_eq!(output, expected, "for source {source:?}");
@@ -52,5 +52,23 @@ fn astro_expression_follows_the_line_ending_option() {
         HtmlFormatOptions::new(HtmlFileSource::astro()).with_line_ending(LineEnding::Crlf),
         "<p>{a +\r\n  b}</p>\r\n",
         "<p>\r\n\t{a +\r\n  b}\r\n</p>\r\n",
+    );
+}
+
+#[test]
+fn cjk_segment_break_with_carriage_return() {
+    assert_format(
+        HtmlFormatOptions::new(HtmlFileSource::html()),
+        "<div>漢\r字</div>",
+        "<div>\n\t漢\n\t字\n</div>\n",
+    );
+}
+
+#[test]
+fn cjk_segment_break_with_carriage_return_line_feed() {
+    assert_format(
+        HtmlFormatOptions::new(HtmlFileSource::html()),
+        "<div>漢\r\n字</div>",
+        "<div>\n\t漢\n\t字\n</div>\n",
     );
 }

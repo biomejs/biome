@@ -260,6 +260,73 @@ fn test_infer_call_expression_type_resolves_annotated_function_return_type() {
 }
 
 #[test]
+fn class_call_signatures_select_declared_returns() {
+    use biome_js_type_info::interned_types::InternedClass;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        interface Signatures {
+            (): string;
+            (value: number): boolean;
+            new(): number;
+        }
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let signatures = inferred
+        .types
+        .iter()
+        .find_map(|ty| match ty {
+            InferredTypeData::Interface(interface)
+                if interface.name(&db).text() == "Signatures" =>
+            {
+                Some(interface.members(&db).clone())
+            }
+            _ => None,
+        })
+        .expect("expected controlled signatures");
+    let class = |members| {
+        InferredTypeData::Class(InternedClass::new(
+            &db,
+            Box::default(),
+            None,
+            Box::default(),
+            members,
+            Some(Text::from("Callable")),
+            false,
+        ))
+    };
+    let callable = class(signatures.clone());
+    assert!(is_inferred_string(
+        &db,
+        infer_call_expression_type(&db, module, callable, Vec::new())
+    ));
+    assert!(is_inferred_boolean(
+        &db,
+        infer_call_expression_type(&db, module, callable, vec![InferredTypeData::Number])
+    ));
+    let instance = InferredTypeData::instance_of(&db, callable, Box::default());
+    assert_eq!(
+        infer_call_expression_type(&db, module, instance, Vec::new()),
+        InferredTypeData::Unknown
+    );
+    let constructor_only = class(
+        signatures
+            .into_iter()
+            .filter(|member| !member.kind.is_call_signature())
+            .collect(),
+    );
+    assert_eq!(
+        infer_call_expression_type(&db, module, constructor_only, Vec::new()),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
 fn test_infer_call_expression_type_resolves_callable_interface_return_type() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -890,4 +957,207 @@ fn test_infer_call_expression_type_resolves_union_function_return_type() {
         &db,
         &fs,
     );
+}
+
+#[test]
+fn test_call_and_new_expressions_apply_explicit_type_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function make<T>(): T;
+            export declare class Box<T> {
+                value: T;
+            }
+            export const made = make<string>();
+            export const boxed = new Box<number>();
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+
+    let made = inferred_binding_ty_by_name(&db, module, inferred, "made")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("made binding type must be inferred");
+    assert!(
+        is_inferred_string(&db, made),
+        "explicit type argument must instantiate the return type, got {made:?}"
+    );
+
+    let boxed = inferred_binding_ty_by_name(&db, module, inferred, "boxed")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("boxed binding type must be inferred");
+    let value = find_value_member_type(&db, boxed, "value")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("value member must be inferred");
+    assert!(
+        is_inferred_number(&db, value),
+        "explicit type argument must instantiate the class, got {value:?}"
+    );
+}
+
+#[test]
+fn test_const_generic_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { imported } from "./helper";
+        export const fromImport = imported({ name: "value" });
+        declare const receiver: { method<const T>(value: T): T };
+        export const fromMethod = receiver.method({ name: "value" });
+        declare function keep<const T>(value: T): T;
+        declare function ordinary<T>(value: T): T;
+        const existing = { name: "value" };
+        export const inline = keep({ name: "value", nested: ["a", "b"] });
+        export const named = keep(existing);
+        export const normal = ordinary(existing);
+        export const item = inline.name;
+        declare function mutable<const T extends string[]>(value: T): T;
+        declare function readonly<const T extends readonly string[]>(value: T): T;
+        export const fallback = mutable(["a", "b"]);
+        declare function unionConstraint<const T extends string[] | undefined>(value: T): T;
+        declare function nestedConstraint<const T extends { nested: string[] }>(value: T): T;
+        export const unionFallback = unionConstraint(["a"]);
+        export const unionExpected = undefined as string[] | undefined;
+        export const nestedFallback = nestedConstraint({ nested: ["a"] });
+        export const nestedExpected = undefined as { nested: string[] };
+        export const constrained = readonly(["a", "b"]);
+        const array: string[] = ["a", "b"];
+        export const existingArray = keep(array);
+        export const ordinaryArray = ordinary(array);
+        export const tuple = keep(["a", "b"]);
+        export const negative = keep(-1);
+        export const negativeBigint = keep(-1n);
+        declare function bigint<const T extends bigint>(value: T): T;
+        export const constrainedNegativeBigint = bigint(-1n);
+        declare function bigintObject<const T extends { value: bigint }>(value: T): T;
+        export const constrainedNegativeObject = bigintObject({ value: -1n }).value;
+        export const negatedAssertion = keep(-(-1 as const));
+        export const ordinaryNegatedAssertion = ordinary(-(-1 as const));
+        export const negatedBigintAssertion = keep(-(-1n as const));
+        export const ordinaryNegatedBigintAssertion = ordinary(-(-1n as const));
+        export const negatedTypedAssertion = keep(-(1 as 1));
+        export const ordinaryNegatedTypedAssertion = ordinary(-(1 as 1));
+        declare function sideEffect(): void;
+        export const commaOperand = keep(-(sideEffect(), 1));
+        export const ordinaryCommaOperand = ordinary(-(sideEffect(), 1));
+        export const parenthesizedOperand = keep(-(1));
+        export const ordinaryParenthesizedOperand = ordinary(-(1));
+        export const negativeObject = keep({ number: -1, bigint: -1n });
+        export const nestedNegative = negativeObject.number;
+        export const nestedNegativeBigint = negativeObject.bigint;
+        export const expectedNegative = -1 as const;
+        export const expectedNegativeBigint = -1n as const;
+        export const asserted = keep(["a"] as [string]);
+        export const angleAsserted = keep(<[string]>["a"]);
+        export const ordinaryAsserted = ordinary(["a"] as [string]);
+        export const nestedAsserted = keep({ nested: ["a"] as [string] });
+        export const assertedMember = nestedAsserted.nested;
+        export const assertedObject = keep({ name: "value" } as { name: string });
+        export const ordinaryAssertedObject = ordinary({ name: "value" } as { name: string });
+        declare function rest<const T extends readonly unknown[]>(...values: T): T;
+        export const collected = rest("a", "b");
+        export const empty = rest();
+        class Box<const T> { constructor(public value: T) {} }
+        export const boxed = new Box({ name: "value" }).value;
+    "#,
+    );
+    fs.insert(
+        "/src/helper.ts".into(),
+        "export function imported<const T>(value: T): T { return value; }",
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts", "/src/helper.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let binding = |name| {
+        inferred.resolve_type(
+            &db,
+            inferred_binding_ty_by_name(&db, module, inferred, name).unwrap(),
+        )
+    };
+    assert!(is_inferred_string_literal(&db, binding("item"), "value"));
+    assert_eq!(binding("fromImport"), binding("fromMethod"));
+    let InferredTypeData::Object(imported) = binding("fromImport") else {
+        panic!("expected imported call result")
+    };
+    assert!(
+        imported
+            .members(&db)
+            .iter()
+            .all(|member| member.kind.is_const_asserted())
+    );
+    let InferredTypeData::Object(inline) = binding("inline") else {
+        panic!("expected inline object")
+    };
+    assert!(
+        inline
+            .members(&db)
+            .iter()
+            .all(|member| member.kind.is_const_asserted())
+    );
+    let InferredTypeData::Object(named) = binding("named") else {
+        panic!("expected named object")
+    };
+    assert!(
+        named
+            .members(&db)
+            .iter()
+            .all(|member| !member.kind.is_const_asserted())
+    );
+    assert_eq!(binding("named"), binding("normal"));
+    assert_eq!(binding("boxed"), binding("fromImport"));
+    assert_eq!(binding("commaOperand"), binding("ordinaryCommaOperand"));
+    assert_eq!(
+        binding("parenthesizedOperand"),
+        binding("ordinaryParenthesizedOperand")
+    );
+    assert_eq!(
+        binding("negatedAssertion"),
+        binding("ordinaryNegatedAssertion")
+    );
+    assert_eq!(
+        binding("negatedBigintAssertion"),
+        binding("ordinaryNegatedBigintAssertion")
+    );
+    assert_eq!(
+        binding("negatedTypedAssertion"),
+        binding("ordinaryNegatedTypedAssertion")
+    );
+    for name in ["negative", "nestedNegative"] {
+        assert_eq!(binding(name), binding("expectedNegative"));
+    }
+    for name in [
+        "negativeBigint",
+        "nestedNegativeBigint",
+        "constrainedNegativeBigint",
+        "constrainedNegativeObject",
+    ] {
+        assert_eq!(binding(name), binding("expectedNegativeBigint"));
+    }
+    for name in ["asserted", "angleAsserted", "assertedMember"] {
+        assert_eq!(binding(name), binding("ordinaryAsserted"));
+    }
+    assert_eq!(binding("assertedObject"), binding("ordinaryAssertedObject"));
+    assert!(matches!(
+        binding("tuple"),
+        InferredTypeData::TypeOperator(_)
+    ));
+    assert_eq!(binding("tuple"), binding("constrained"));
+    assert_eq!(binding("tuple"), binding("collected"));
+    let InferredTypeData::TypeOperator(empty) = binding("empty") else {
+        panic!("expected readonly tuple")
+    };
+    let InferredTypeData::Tuple(empty) = empty.ty(&db) else {
+        panic!("expected tuple")
+    };
+    assert!(empty.elements(&db).is_empty());
+    assert_eq!(binding("fallback"), binding("ordinaryArray"));
+    assert_eq!(binding("unionFallback"), binding("unionExpected"));
+    assert_eq!(binding("nestedFallback"), binding("nestedExpected"));
+    assert_eq!(binding("existingArray"), binding("ordinaryArray"));
 }

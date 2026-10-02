@@ -355,7 +355,7 @@ impl<'src> UrlBodyScanner<'src> {
     fn is_url_raw_value_start(byte: u8) -> bool {
         matches!(
             lookup_byte(byte),
-            IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS
+            IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS | AT_ | EXL
         )
     }
 

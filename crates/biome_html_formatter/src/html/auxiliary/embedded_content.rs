@@ -1,6 +1,8 @@
+use crate::FormatEmbedded;
 use crate::prelude::*;
-use biome_html_syntax::{HtmlElement, HtmlEmbeddedContent};
-use biome_rowan::{AstNode, TextRange};
+use biome_formatter::{format_args, write};
+use biome_html_syntax::HtmlEmbeddedContent;
+use biome_rowan::AstNode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlEmbeddedContent;
 impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
@@ -8,23 +10,24 @@ impl FormatNodeRule<HtmlEmbeddedContent> for FormatHtmlEmbeddedContent {
         format_verbatim_skipped(node.syntax()).fmt(f)
     }
 
-    fn embedded_node_range(
+    fn wrap_embed(
         &self,
-        node: &HtmlEmbeddedContent,
+        _node: &HtmlEmbeddedContent,
+        embedded: &FormatEmbedded,
         f: &mut HtmlFormatter,
-    ) -> Option<TextRange> {
-        if !f.context().should_delegate_fmt_embedded_nodes() {
-            return None;
-        }
-        let element = node
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find_map(HtmlElement::cast)?;
-        if element.is_supported_script_tag() || element.is_supported_style_tag() {
-            Some(node.range())
+    ) -> FormatResult<()> {
+        // The content of `<script>` and `<style>` tags starts on its own line.
+        if f.options().indent_script_and_style().value() {
+            write!(
+                f,
+                [
+                    hard_line_break(),
+                    indent(&format_args![hard_line_break(), embedded]),
+                    hard_line_break()
+                ]
+            )
         } else {
-            None
+            write!(f, [hard_line_break(), embedded, hard_line_break()])
         }
     }
 }

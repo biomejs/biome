@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605Invalid.ts
+---
+# Input
+```ts
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<string>((value) => {
+	value[0] === "v";
+});
+
+```
+
+# Diagnostics
+```
+issue11605Invalid.ts:4:2 lint/nursery/useStringStartsEndsWith  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This index access comparison looks like you're checking a string prefix.
+  
+    3 │ consume<string>((value) => {
+  > 4 │ 	value[0] === "v";
+      │ 	^^^^^^^^^^^^^^^^
+    5 │ });
+    6 │ 
+  
+  i Using the built-in string method is clearer and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use startsWith() instead.
+  
+    2 2 │   
+    3 3 │   consume<string>((value) => {
+    4   │ - → value[0]·===·"v";
+      4 │ + → value.startsWith("v");
+    5 5 │   });
+    6 6 │   
+  
+
+```

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_runtime"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "ECMAScript runtime for JS plugins"
@@ -15,6 +15,7 @@ publish              = true
 biome_analyze      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_js_parser    = { workspace = true }
+biome_js_semantic  = { workspace = true }
 biome_js_syntax    = { workspace = true }
 biome_js_transform = { workspace = true }
 biome_languages    = { workspace = true, features = ["lang_js"] }
@@ -27,7 +28,6 @@ rustc-hash         = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 boa_engine = { workspace = true, features = ["js"] }
-web-time   = { workspace = true }
 
 [lints]
 workspace = true

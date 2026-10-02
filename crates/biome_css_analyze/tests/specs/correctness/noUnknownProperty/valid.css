@@ -75,6 +75,7 @@ a { reading-flow: flex-visual; }
 a { reading-order: 1; }
 a { overlay: auto; }
 a { dynamic-range-limit: standard; }
+a { frame-sizing: auto; }
 
 /* View Transition navigation property (should not be flagged) */
 view-transition {

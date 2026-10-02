@@ -17,6 +17,7 @@ use react_compiler_hir::environment_config::{EnvironmentConfig, ExhaustiveEffect
 pub use crate::error::{ReactCompilerError, Result};
 pub use react_compiler::entrypoint::compile_result::CompilerErrorDetailInfo;
 
+#[cfg(not(target_family = "wasm"))]
 const COMPILER_STACK_SIZE: usize = 64 * 1024 * 1024;
 
 pub struct ConvertInput<'a> {
@@ -98,6 +99,7 @@ pub fn compile_program(input: CompileInput<'_>) -> Result<CompileOutput> {
 /// Compiler's recursion; its upstream entrypoint budgets the same
 /// [`COMPILER_STACK_SIZE`]. A panic on the worker is re-raised on the calling
 /// thread, where the analyzer's existing panic handling takes over.
+#[cfg(not(target_family = "wasm"))]
 fn run_on_compiler_stack<T, F>(f: F) -> Result<T>
 where
     T: Send,
@@ -117,14 +119,27 @@ where
     })
 }
 
+#[cfg(target_family = "wasm")]
+fn run_on_compiler_stack<T, F>(f: F) -> Result<T>
+where
+    F: FnOnce() -> Result<T>,
+{
+    // Browser WebAssembly cannot spawn native threads, so compilation uses
+    // the caller's stack. For wasm32-unknown-unknown, .cargo/config.toml sets
+    // a 64 MiB linker stack budget to match COMPILER_STACK_SIZE.
+    f()
+}
+
 pub fn default_lint_options(source: &str) -> PluginOptions {
     let environment = EnvironmentConfig {
-        validate_exhaustive_effect_dependencies: ExhaustiveEffectDepsMode::All,
+        // Upstream's recommended lint preset excludes these checks. They can
+        // flag valid built-in calls and effect-local captures.
+        validate_no_capitalized_calls: None,
+        validate_exhaustive_effect_dependencies: ExhaustiveEffectDepsMode::Off,
         validate_no_set_state_in_effects: true,
         validate_no_derived_computations_in_effects: true,
         validate_no_jsx_in_try_statements: true,
         validate_static_components: true,
-        validate_no_capitalized_calls: Some(Vec::new()),
         validate_no_impure_functions_in_render: true,
         validate_no_freezing_known_mutable_functions: true,
         enable_treat_set_identifiers_as_state_setters: true,

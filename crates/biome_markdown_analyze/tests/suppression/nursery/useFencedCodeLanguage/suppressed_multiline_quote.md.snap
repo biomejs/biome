@@ -1,0 +1,21 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressed_multiline_quote.md
+---
+# Input
+```md
+> <!--
+> biome-ignore lint/nursery/useFencedCodeLanguage: language is intentionally omitted
+> -->
+> ```
+> code
+> ```
+
+> Text before <!--
+> biome-ignore lint/nursery/useFencedCodeLanguage: language is intentionally omitted
+> -->
+> ```
+> inline comment
+> ```
+
+```

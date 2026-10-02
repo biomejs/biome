@@ -1,0 +1,12 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "func-style": [
+        "error",
+        "declaration",
+        {}
+      ]
+    }
+  }
+}

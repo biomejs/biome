@@ -1,0 +1,16 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: noHeaderScope.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <!-- biome-ignore lint/a11y/noHeaderScope: intentional scope attribute -->
+  <div scope="col"></div>
+
+  <!-- biome-ignore lint/a11y/noHeaderScope: intentional scope binding -->
+  <div :scope="'row'"></div>
+</template>
+
+```

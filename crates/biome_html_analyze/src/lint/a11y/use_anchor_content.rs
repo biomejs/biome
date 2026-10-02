@@ -10,7 +10,7 @@ use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
-    get_truthy_aria_hidden_attribute, has_accessible_name, html_element_has_truthy_aria_hidden,
+    get_truthy_aria_hidden_attribute, html_element_has_truthy_aria_hidden,
     html_self_closing_element_has_accessible_name,
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
@@ -21,7 +21,7 @@ declare_lint_rule! {
     ///
     /// Accessible means the content is not hidden using the `aria-hidden` attribute.
     /// Anchor tags should have text content that describes the link destination for screen reader users.
-    /// Alternatively, the anchor can have an accessible name via the `aria-label` or `title` attribute.
+    /// An `aria-label`, `aria-labelledby`, or `title` attribute alone doesn't satisfy this rule.
     ///
     /// :::note
     /// In `.html` files, this rule matches element names case-insensitively (e.g., `<A>`, `<a>`).
@@ -50,26 +50,22 @@ declare_lint_rule! {
     /// <a><span aria-hidden="true">content</span></a>
     /// ```
     ///
+    /// ```html,expect_diagnostic
+    /// <a aria-label="Navigate to home"></a>
+    /// ```
+    ///
+    /// ```html,expect_diagnostic
+    /// <a title="Home page"></a>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
     /// <a>content</a>
-    /// ```
-    ///
-    /// ```html
     /// <a><span>content</span></a>
-    /// ```
-    ///
-    /// ```html
     /// <a><span aria-hidden="true"></span>content</a>
-    /// ```
-    ///
-    /// ```html
-    /// <a aria-label="Navigate to home"></a>
-    /// ```
-    ///
-    /// ```html
-    /// <a title="Home page"></a>
+    /// <a aria-label="Navigate to home">Home</a>
+    /// <a title="Home page">Home</a>
     /// ```
     ///
     /// ## Accessibility guidelines
@@ -114,11 +110,6 @@ impl Rule for UseAnchorContent {
             return Some(UseAnchorContentState {
                 aria_hidden_attribute: Some(aria_hidden_attr),
             });
-        }
-
-        // Check if anchor has accessible name via aria-label or title
-        if has_accessible_name(&tag_element) {
-            return None;
         }
 
         // Handle self-closing anchors - they have no content

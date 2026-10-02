@@ -1,0 +1,29 @@
+[package]
+name                 = "biome_js_control_flow"
+version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "JavaScript control-flow graph construction and semantic service"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_control_flow = { workspace = true }
+biome_db           = { workspace = true }
+biome_js_syntax    = { workspace = true }
+biome_rowan        = { workspace = true }
+rustc-hash         = { workspace = true }
+salsa              = { workspace = true }
+
+[dev-dependencies]
+biome_js_parser   = { path = "../biome_js_parser" }
+biome_languages   = { path = "../biome_languages", features = ["lang_js"] }
+camino            = { workspace = true }
+static_assertions = { workspace = true }
+
+[lints]
+workspace = true

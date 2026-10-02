@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <input @click="()=> void 0" />
 <input type="button" @click="()=> void 0" />
 <input type="checkbox" @click="()=> void 0" />
@@ -8,6 +9,7 @@
 <a @click="()=> void 0"></a>
 <area @click="() => { }" />
 <button @click="()=> void 0"></button>
+<dialog @keyup="() => { }"></dialog>
 <menuitem @click="() => { }">
 </menuitem>
 <option @click="()=> void 0" class="foo"></option>
@@ -44,3 +46,4 @@
 <div role="presentation" @click="() => { }"></div>
 
 <div @click="() => { }" aria-hidden="true"></div>
+</template>

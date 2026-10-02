@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605Invalid.ts
+---
+# Input
+```ts
+class PlainObject {
+	value = "value";
+}
+
+declare function consume<T>(callback: (value: T) => void): void;
+
+consume<PlainObject>((value) => {
+	`${value}`;
+});
+
+```
+
+# Diagnostics
+```
+issue11605Invalid.ts:8:5 lint/nursery/noBaseToString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This expression will use the default object stringification format, such as [object Object], when stringified.
+  
+     7 │ consume<PlainObject>((value) => {
+   > 8 │ 	`${value}`;
+       │ 	   ^^^^^
+     9 │ });
+    10 │ 
+  
+  i Stringify a primitive value, define a custom stringification method, or serialize the object explicitly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

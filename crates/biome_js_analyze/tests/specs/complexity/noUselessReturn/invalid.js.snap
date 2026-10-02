@@ -99,6 +99,68 @@ function l() {
     if (foo) { return; }
 }
 
+// unbraced if consequent: reported, but removing the return would leave `if (a)` without a body
+function m() {
+    if (a) return;
+}
+
+// unbraced if and else branches: both reported, neither can be removed
+function n() {
+    if (a) return; else return;
+}
+
+// unbraced else branch
+function o() {
+    if (a) foo(); else return;
+}
+
+// labeled statement body
+function p() {
+    label: return;
+}
+
+// nested unbraced ifs
+function q() {
+    if (a) if (b) return;
+}
+
+// braced consequent is fixed, unbraced alternate is only reported
+function r() {
+    if (a) { return; } else return;
+}
+
+// leading line comment is preserved
+function s() {
+    doSomething();
+    // best effort
+    return;
+}
+
+// trailing comment
+function t() {
+    doSomething();
+    return; // done
+}
+
+// comment before the first statement of a block
+function u() {
+    if (a) { // reason
+        return;
+    }
+}
+
+// comment inside the return statement: no fix
+function v() {
+    doSomething();
+    return/**/;
+}
+
+// trailing comments on both this statement and the previous one
+function w() {
+    doSomething(); // a
+    return; // done
+}
+
 ```
 
 # Diagnostics
@@ -118,11 +180,11 @@ invalid.js:5:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-     3  3 │   // return at end of function body
-     4  4 │   function a() {
-     5    │ - ····return;
-     6  5 │   }
-     7  6 │   
+      3   3 │   // return at end of function body
+      4   4 │   function a() {
+      5     │ - ····return;
+      6   5 │   }
+      7   6 │   
   
 
 ```
@@ -143,11 +205,11 @@ invalid.js:11:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-     9  9 │   function b() {
-    10 10 │       doSomething();
-    11    │ - ····return;
-    12 11 │   }
-    13 12 │   
+      9   9 │   function b() {
+     10  10 │       doSomething();
+     11     │ - ····return;
+     12  11 │   }
+     13  12 │   
   
 
 ```
@@ -168,11 +230,11 @@ invalid.js:18:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    16 16 │       if (condition) {
-    17 17 │           bar();
-    18    │ - ········return;
-    19 18 │       }
-    20 19 │   }
+     16  16 │       if (condition) {
+     17  17 │           bar();
+     18     │ - ········return;
+     19  18 │       }
+     20  19 │   }
   
 
 ```
@@ -193,11 +255,11 @@ invalid.js:28:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    26 26 │       } else {
-    27 27 │           bar();
-    28    │ - ········return;
-    29 28 │       }
-    30 29 │   }
+     26  26 │       } else {
+     27  27 │           bar();
+     28     │ - ········return;
+     29  28 │       }
+     30  29 │   }
   
 
 ```
@@ -218,11 +280,11 @@ invalid.js:35:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    33 33 │   function e() {
-    34 34 │       if (condition) {
-    35    │ - ········return;
-    36 35 │       } else {
-    37 36 │           return;
+     33  33 │   function e() {
+     34  34 │       if (condition) {
+     35     │ - ········return;
+     36  35 │       } else {
+     37  36 │           return;
   
 
 ```
@@ -243,11 +305,11 @@ invalid.js:37:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    35 35 │           return;
-    36 36 │       } else {
-    37    │ - ········return;
-    38 37 │       }
-    39 38 │   }
+     35  35 │           return;
+     36  36 │       } else {
+     37     │ - ········return;
+     38  37 │       }
+     39  38 │   }
   
 
 ```
@@ -268,11 +330,11 @@ invalid.js:45:13 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unnecessary return statement.
   
-    43 43 │       if (a) {
-    44 44 │           if (b) {
-    45    │ - ············return;
-    46 45 │           }
-    47 46 │       }
+     43  43 │       if (a) {
+     44  44 │           if (b) {
+     45     │ - ············return;
+     46  45 │           }
+     47  46 │       }
   
 
 ```
@@ -293,11 +355,11 @@ invalid.js:54:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    52 52 │       try {
-    53 53 │           doSomething();
-    54    │ - ········return;
-    55 54 │       } catch (e) {
-    56 55 │           handleError();
+     52  52 │       try {
+     53  53 │           doSomething();
+     54     │ - ········return;
+     55  54 │       } catch (e) {
+     56  55 │           handleError();
   
 
 ```
@@ -318,11 +380,11 @@ invalid.js:66:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    64 64 │       } catch (e) {
-    65 65 │           handleError();
-    66    │ - ········return;
-    67 66 │       }
-    68 67 │   }
+     64  64 │       } catch (e) {
+     65  65 │           handleError();
+     66     │ - ········return;
+     67  66 │       }
+     68  67 │   }
   
 
 ```
@@ -343,11 +405,11 @@ invalid.js:72:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    70 70 │   // arrow function
-    71 71 │   const i = () => {
-    72    │ - ····return;
-    73 72 │   }
-    74 73 │   
+     70  70 │   // arrow function
+     71  71 │   const i = () => {
+     72     │ - ····return;
+     73  72 │   }
+     74  73 │   
   
 
 ```
@@ -368,11 +430,11 @@ invalid.js:78:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    76 76 │   function j() {
-    77 77 │       label: {
-    78    │ - ········return;
-    79 78 │       }
-    80 79 │   }
+     76  76 │   function j() {
+     77  77 │       label: {
+     78     │ - ········return;
+     79  78 │       }
+     80  79 │   }
   
 
 ```
@@ -393,11 +455,11 @@ invalid.js:85:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unnecessary return statement.
   
-    83 83 │   function k() {
-    84 84 │       try {
-    85    │ - ········return;
-    86 85 │       } finally {
-    87 86 │           cleanup();
+     83  83 │   function k() {
+     84  84 │       try {
+     85     │ - ········return;
+     86  85 │       } finally {
+     87  86 │           cleanup();
   
 
 ```
@@ -420,5 +482,267 @@ invalid.js:93:16 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━
   
     93 │ ····if·(foo)·{·return;·}
        │                -------- 
+
+```
+
+```
+invalid.js:98:12 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+     96 │ // unbraced if consequent: reported, but removing the return would leave `if (a)` without a body
+     97 │ function m() {
+   > 98 │     if (a) return;
+        │            ^^^^^^^
+     99 │ }
+    100 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:103:12 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    101 │ // unbraced if and else branches: both reported, neither can be removed
+    102 │ function n() {
+  > 103 │     if (a) return; else return;
+        │            ^^^^^^^
+    104 │ }
+    105 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:103:25 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    101 │ // unbraced if and else branches: both reported, neither can be removed
+    102 │ function n() {
+  > 103 │     if (a) return; else return;
+        │                         ^^^^^^^
+    104 │ }
+    105 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:108:24 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    106 │ // unbraced else branch
+    107 │ function o() {
+  > 108 │     if (a) foo(); else return;
+        │                        ^^^^^^^
+    109 │ }
+    110 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:113:12 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    111 │ // labeled statement body
+    112 │ function p() {
+  > 113 │     label: return;
+        │            ^^^^^^^
+    114 │ }
+    115 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:118:19 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    116 │ // nested unbraced ifs
+    117 │ function q() {
+  > 118 │     if (a) if (b) return;
+        │                   ^^^^^^^
+    119 │ }
+    120 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:123:14 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    121 │ // braced consequent is fixed, unbraced alternate is only reported
+    122 │ function r() {
+  > 123 │     if (a) { return; } else return;
+        │              ^^^^^^^
+    124 │ }
+    125 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    123 │ ····if·(a)·{·return;·}·else·return;
+        │              --------              
+
+```
+
+```
+invalid.js:123:29 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    121 │ // braced consequent is fixed, unbraced alternate is only reported
+    122 │ function r() {
+  > 123 │     if (a) { return; } else return;
+        │                             ^^^^^^^
+    124 │ }
+    125 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:130:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    128 │     doSomething();
+    129 │     // best effort
+  > 130 │     return;
+        │     ^^^^^^^
+    131 │ }
+    132 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    127 127 │   function s() {
+    128 128 │       doSomething();
+    129     │ - ····//·best·effort
+    130     │ - ····return;
+        129 │ + ····//·best·effort
+        130 │ + ····
+    131 131 │   }
+    132 132 │   
+  
+
+```
+
+```
+invalid.js:136:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    134 │ function t() {
+    135 │     doSomething();
+  > 136 │     return; // done
+        │     ^^^^^^^
+    137 │ }
+    138 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    134 134 │   function t() {
+    135 135 │       doSomething();
+    136     │ - ····return;·//·done
+        136 │ + ·····//·done
+    137 137 │   }
+    138 138 │   
+  
+
+```
+
+```
+invalid.js:142:9 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    140 │ function u() {
+    141 │     if (a) { // reason
+  > 142 │         return;
+        │         ^^^^^^^
+    143 │     }
+    144 │ }
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    140 140 │   function u() {
+    141 141 │       if (a) { // reason
+    142     │ - ········return;
+    143 142 │       }
+    144 143 │   }
+  
+
+```
+
+```
+invalid.js:149:5 lint/complexity/noUselessReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    147 │ function v() {
+    148 │     doSomething();
+  > 149 │     return/**/;
+        │     ^^^^^^^^^^^
+    150 │ }
+    151 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+
+```
+
+```
+invalid.js:155:5 lint/complexity/noUselessReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This return statement is unnecessary.
+  
+    153 │ function w() {
+    154 │     doSomething(); // a
+  > 155 │     return; // done
+        │     ^^^^^^^
+    156 │ }
+    157 │ 
+  
+  i Removing this statement does not change the control flow of the function.
+  
+  i Safe fix: Remove the unnecessary return statement.
+  
+    153 153 │   function w() {
+    154 154 │       doSomething(); // a
+    155     │ - ····return;·//·done
+        155 │ + ·····//·done
+    156 156 │   }
+    157 157 │   
+  
 
 ```

@@ -7,11 +7,12 @@ use crate::{
     grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetSyntaxKind},
     grit_tree::GritTargetTree,
 };
+use biome_js_syntax::JsSyntaxKind;
 use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
-        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Pattern, RegexLike, RegexPattern,
-        Variable, VariableSource, is_reserved_metavariable,
+        DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Or, Pattern, RegexLike,
+        RegexPattern, Variable, VariableSource, is_reserved_metavariable,
     },
 };
 use grit_util::{Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree, traverse};
@@ -242,6 +243,42 @@ fn pattern_from_node(
         })
         .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
         .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()?;
+
+    if kind.as_js_kind() == Some(JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE)
+        && node.child_by_slot_index(1).is_none()
+        && args.iter().any(|arg| {
+            arg.slot_index == 2 && matches!(arg.pattern, Pattern::Variable(_) | Pattern::Underscore)
+        })
+    {
+        // A whole import metavariable can capture default, named, or namespace
+        // specifiers. `Or` requires an explicit pattern for each node kind.
+        let has_type = node.child_by_slot_index(0).is_some();
+        let args: Vec<_> = args
+            .into_iter()
+            .filter(|arg| arg.slot_index != 0 || has_type)
+            .collect();
+        let named_args = args
+            .iter()
+            .filter(|arg| arg.slot_index != 1)
+            .map(|arg| {
+                GritNodePatternArg::new(arg.slot_index.saturating_sub(1), arg.pattern.clone())
+            })
+            .collect();
+        return Ok(Pattern::Or(Box::new(Or::new(vec![
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind,
+                args: args.clone(),
+            })),
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind: JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE.into(),
+                args: named_args,
+            })),
+            Pattern::AstNode(Box::new(GritNodePattern {
+                kind: JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE.into(),
+                args,
+            })),
+        ]))));
+    }
 
     Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
 }

@@ -237,42 +237,6 @@ fn skip_list_marker_indent(p: &mut MarkdownParser) {
     }
 }
 
-/// Emit an MdIndentTokenList containing 0-N MdIndentToken nodes.
-///
-/// Consumes whitespace-only MD_TEXTUAL_LITERAL tokens up to `max_columns`
-/// columns of indent. Pass 0 for max_columns to consume all remaining whitespace.
-/// Returns the number of columns consumed.
-fn emit_indent_char_list(p: &mut MarkdownParser, max_columns: usize) -> usize {
-    let list_m = p.start();
-    let mut consumed = 0usize;
-
-    // Indentation arrives as one whitespace token per character; measure the
-    // run on the source and consume it as a single MdIndentToken.
-    if p.at(MD_TEXTUAL_LITERAL) && is_whitespace_only(p.cur_text()) {
-        let mut len = 0usize;
-        for byte in p.source_after_current().bytes() {
-            let width = match byte {
-                b' ' => 1,
-                b'\t' => TAB_STOP_SPACES,
-                _ => break,
-            };
-            if max_columns > 0 && consumed + width > max_columns {
-                break;
-            }
-            consumed += width;
-            len += 1;
-        }
-
-        if len > 0 {
-            let end = p.cur_range().start() + TextSize::from(len as u32);
-            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
-        }
-    }
-
-    list_m.complete(p, MD_INDENT_TOKEN_LIST);
-    consumed
-}
-
 /// Consume the first whitespace token after the list marker as MD_LIST_POST_MARKER_SPACE.
 /// Returns true if a space/tab separator was recognized.
 fn emit_list_post_marker_space(p: &mut MarkdownParser, preserve_tab: bool) -> bool {
@@ -864,7 +828,7 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     // Pre-marker indent: consume all whitespace before the marker.
     // The 0-3 column rule is enforced by at_bullet_list_item(); no cap needed here.
     // Nested contexts may leave more than 3 columns before the marker.
-    emit_indent_char_list(p, 0);
+    p.parse_indent_token_list(usize::MAX);
 
     // Bullet marker is 1 character (-, *, or +)
     let marker_width = 1;
@@ -906,17 +870,16 @@ fn parse_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankInfo) {
     // Content indent (remaining whitespace tokens on first line).
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if spaces_after_marker > 1 {
+    // Tabs bundled with code stay in content for column-based expansion.
+    if spaces_after_marker > 1 && is_whitespace_only(p.cur_text()) {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {
-            0
+            usize::MAX
         };
-        emit_indent_char_list(p, max_columns);
+        p.parse_indent_token_list(max_columns);
     } else {
-        // Empty first line or no content indent -- emit empty MdIndentTokenList
-        let empty_m = p.start();
-        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+        p.parse_indent_token_list(0);
     }
 
     prefix_m.complete(p, MD_LIST_MARKER_PREFIX);
@@ -1210,7 +1173,7 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     // Pre-marker indent: consume all whitespace before the marker.
     // The 0-3 column rule is enforced by at_order_list_item(); no cap needed here.
     // Nested contexts may leave more than 3 columns before the marker.
-    emit_indent_char_list(p, 0);
+    p.parse_indent_token_list(usize::MAX);
 
     // Ordered marker (variable width: "1." = 2, "10." = 3, etc.)
     let marker_width = p.cur_text().len();
@@ -1236,16 +1199,16 @@ fn parse_ordered_bullet(p: &mut MarkdownParser) -> (ParsedSyntax, ListItemBlankI
     // Content indent.
     // For first-line indented code, only the 4-column code indent is consumed
     // here so any additional padding remains in the code content.
-    if spaces_after_marker > 1 {
+    // Tabs bundled with code stay in content for column-based expansion.
+    if spaces_after_marker > 1 && is_whitespace_only(p.cur_text()) {
         let max_columns = if spaces_after_marker > INDENT_CODE_BLOCK_SPACES {
             INDENT_CODE_BLOCK_SPACES
         } else {
-            0
+            usize::MAX
         };
-        emit_indent_char_list(p, max_columns);
+        p.parse_indent_token_list(max_columns);
     } else {
-        let empty_m = p.start();
-        empty_m.complete(p, MD_INDENT_TOKEN_LIST);
+        p.parse_indent_token_list(0);
     }
 
     prefix_m.complete(p, MD_LIST_MARKER_PREFIX);
@@ -2475,30 +2438,6 @@ fn is_dash_only_thematic_break_line_text(text: &str) -> bool {
     dash_count >= MIN_THEMATIC_BREAK_RUN
 }
 
-fn emit_current_line_indent_list_bytes(p: &mut MarkdownParser, byte_count: usize) {
-    let list_m = p.start();
-
-    // Indentation may arrive as per-character tokens or bundled together
-    // with marker text in one token (for example "  1. child"). Measure the
-    // whitespace prefix on the source and consume up to `byte_count` bytes
-    // of it as a single MdIndentToken, regardless of how it was tokenized.
-    if byte_count > 0 && p.at(MD_TEXTUAL_LITERAL) && p.cur_text().starts_with([' ', '\t']) {
-        let len = p
-            .source_after_current()
-            .bytes()
-            .take(byte_count)
-            .take_while(|byte| matches!(byte, b' ' | b'\t'))
-            .count();
-
-        if len > 0 {
-            let end = p.cur_range().start() + TextSize::from(len as u32);
-            p.emit_span_as(end, MD_INDENT_CHAR, MD_INDENT_TOKEN);
-        }
-    }
-
-    list_m.complete(p, MD_INDENT_TOKEN_LIST);
-}
-
 /// Return true when the current line's ordered marker starts with `1`.
 ///
 /// The cursor may still be on separate indentation tokens, or the lexer may
@@ -2554,7 +2493,7 @@ fn line_starts_with_ordered_marker_after_whitespace(p: &mut MarkdownParser) -> b
 fn emit_required_continuation_indent(p: &mut MarkdownParser, indent: usize) {
     let ci_m = p.start();
     if let Some(indent_bytes) = current_line_required_indent_byte_count(p, indent) {
-        emit_current_line_indent_list_bytes(p, indent_bytes);
+        p.parse_indent_token_list_bytes(indent_bytes);
     } else {
         p.emit_line_indent(indent);
     }
@@ -2777,11 +2716,11 @@ fn check_continuation_indent(
             if let Some(indent_bytes) =
                 current_line_dash_thematic_break_after_required_indent(p, state.required_indent)
             {
-                emit_current_line_indent_list_bytes(p, indent_bytes);
+                p.parse_indent_token_list_bytes(indent_bytes);
             } else if let Some(indent_bytes) =
                 current_line_required_indent_byte_count(p, state.required_indent)
             {
-                emit_current_line_indent_list_bytes(p, indent_bytes);
+                p.parse_indent_token_list_bytes(indent_bytes);
             } else {
                 p.emit_line_indent(state.required_indent);
             }

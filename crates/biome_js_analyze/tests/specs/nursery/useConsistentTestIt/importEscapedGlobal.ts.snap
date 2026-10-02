@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importEscapedGlobal.ts
+---
+# Input
+```ts
+import { test } from "custom-runner";
+test("first", () => {});
+\u0069t("global", () => {});
+
+```
+
+# Diagnostics
+```
+importEscapedGlobal.ts:2:1 lint/nursery/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "custom-runner";
+  > 2 │ test("first", () => {});
+      │ ^^^^
+    3 │ \u0069t("global", () => {});
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

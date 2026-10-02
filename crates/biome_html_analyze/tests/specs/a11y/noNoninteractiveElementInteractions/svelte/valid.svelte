@@ -13,6 +13,7 @@
 <a onclick={() => void 0} />
 <area onclick={() => {}} />
 <button onclick={() => void 0} />
+<dialog onkeyup={() => {}}></dialog>
 <menuitem onclick={() => {}} />
 <option onclick={() => void 0} class="foo" />
 <select onclick={() => void 0} class="foo" />

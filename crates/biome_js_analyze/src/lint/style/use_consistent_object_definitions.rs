@@ -116,7 +116,10 @@ declare_lint_rule! {
         recommended: false,
         fix_kind: FixKind::Safe,
         severity: Severity::Warning,
-        sources: &[RuleSource::Eslint("object-shorthand").inspired()],
+        sources: &[
+            RuleSource::Eslint("object-shorthand").inspired(),
+            RuleSource::EslintVueJs("object-shorthand").same(),
+        ],
     }
 }
 

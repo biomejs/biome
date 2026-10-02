@@ -1,9 +1,9 @@
 pub(crate) mod traverse;
 mod visitor;
 
-use crate::ImportPathMap;
+use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
 use biome_languages::css::EmbeddingStyleApplicability;
-use biome_resolver::ResolvedPath;
+use biome_resolver::ResolvedSpecifier;
 use biome_rowan::{Text, TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
 use indexmap::IndexMap;
@@ -152,8 +152,7 @@ impl CssModuleInfo {
 pub struct CssModuleInfoInner {
     /// Map of all static imports found in the module.
     ///
-    /// Preserves duplicate imports and source order. Resolved paths may be
-    /// looked up in the module graph, although they are not required to exist.
+    /// Preserves duplicate imports and source order.
     pub imports: CssImports,
 
     /// Map of all CSS class names to their selector ranges in this file.
@@ -180,14 +179,19 @@ pub struct CssImport {
 
     /// The specifier for the imported as it appeared in the source text.
     pub specifier: Text,
+}
 
-    /// Absolute path of the resource being imported, if it can be resolved.
+impl CssImport {
+    /// Resolves this `@import` of the CSS `module`.
     ///
-    /// If the import statement referred to a package dependency, the path will
-    /// point towards the resolved entry point of the package.
-    ///
-    /// If `None`, import resolution failed.
-    pub resolved_path: ResolvedPath,
+    /// See [ResolutionMode::Css] for the resolution rules.
+    pub fn resolve_css<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
+    }
 }
 
 #[derive(Debug)]
@@ -197,7 +201,7 @@ pub struct CssImport {
 pub struct SerializedCssModuleInfo {
     /// Map of all static imports found in the module.
     ///
-    /// Maps from the local imported name to the absolute path it resolves to.
+    /// Contains the import specifiers as they appeared in source text.
     pub imports: BTreeSet<String>,
 
     /// Set of all CSS class names defined in this file.

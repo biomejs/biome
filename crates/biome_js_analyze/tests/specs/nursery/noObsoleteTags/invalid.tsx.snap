@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.tsx
+---
+# Input
+```tsx
+/* should generate diagnostics */
+const content = <center><font color="red">Text</font></center>;
+const legacy = <applet />;
+
+```
+
+# Diagnostics
+```
+invalid.tsx:2:18 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The center element is obsolete.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const content = <center><font color="red">Text</font></center>;
+      │                  ^^^^^^
+    3 │ const legacy = <applet />;
+    4 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:2:26 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The font element is obsolete.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const content = <center><font color="red">Text</font></center>;
+      │                          ^^^^
+    3 │ const legacy = <applet />;
+    4 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.tsx:3:17 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The applet element is obsolete.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const content = <center><font color="red">Text</font></center>;
+  > 3 │ const legacy = <applet />;
+      │                 ^^^^^^
+    4 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

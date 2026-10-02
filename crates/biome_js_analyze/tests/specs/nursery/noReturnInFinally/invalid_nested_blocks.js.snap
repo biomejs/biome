@@ -1,0 +1,343 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_nested_blocks.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+p.finally(() => {
+    {
+        return 1;
+    }
+});
+
+p.finally(() => {
+    if (condition) {
+        return 1;
+    }
+});
+
+p.finally(function () {
+    if (condition) return 1;
+});
+
+p.finally(function () {
+    if (condition) {
+        cleanup();
+    } else {
+        return 1;
+    }
+});
+
+p.finally(() => {
+    for (const item of items) {
+        if (item) return item;
+    }
+});
+
+p.finally(function () {
+    while (condition) {
+        return 1;
+    }
+});
+
+p.finally(() => {
+    switch (value) {
+        case 1:
+            return 1;
+    }
+});
+
+p.finally(function () {
+    try {
+        return 1;
+    } catch (error) {
+        cleanup(error);
+    }
+});
+
+p.finally(() => {
+    try {
+        cleanup();
+    } catch (error) {
+        return 1;
+    }
+});
+
+p.finally(() => {
+    try {
+        cleanup();
+    } finally {
+        return 1;
+    }
+});
+
+p.finally(() => {
+    label: {
+        return;
+    }
+});
+
+p.finally(() => {
+    function nested() {
+        return 1;
+    }
+    if (condition) {
+        return 2;
+    }
+});
+
+```
+
+# Diagnostics
+```
+invalid_nested_blocks.js:5:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    3 │ p.finally(() => {
+    4 │     {
+  > 5 │         return 1;
+      │         ^^^^^^^^^
+    6 │     }
+    7 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:11:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+     9 │ p.finally(() => {
+    10 │     if (condition) {
+  > 11 │         return 1;
+       │         ^^^^^^^^^
+    12 │     }
+    13 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:16:20 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    15 │ p.finally(function () {
+  > 16 │     if (condition) return 1;
+       │                    ^^^^^^^^^
+    17 │ });
+    18 │ 
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:23:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    21 │         cleanup();
+    22 │     } else {
+  > 23 │         return 1;
+       │         ^^^^^^^^^
+    24 │     }
+    25 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:29:19 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    27 │ p.finally(() => {
+    28 │     for (const item of items) {
+  > 29 │         if (item) return item;
+       │                   ^^^^^^^^^^^^
+    30 │     }
+    31 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:35:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    33 │ p.finally(function () {
+    34 │     while (condition) {
+  > 35 │         return 1;
+       │         ^^^^^^^^^
+    36 │     }
+    37 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:42:13 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    40 │     switch (value) {
+    41 │         case 1:
+  > 42 │             return 1;
+       │             ^^^^^^^^^
+    43 │     }
+    44 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:48:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    46 │ p.finally(function () {
+    47 │     try {
+  > 48 │         return 1;
+       │         ^^^^^^^^^
+    49 │     } catch (error) {
+    50 │         cleanup(error);
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:58:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    56 │         cleanup();
+    57 │     } catch (error) {
+  > 58 │         return 1;
+       │         ^^^^^^^^^
+    59 │     }
+    60 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:66:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    64 │         cleanup();
+    65 │     } finally {
+  > 66 │         return 1;
+       │         ^^^^^^^^^
+    67 │     }
+    68 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:72:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    70 │ p.finally(() => {
+    71 │     label: {
+  > 72 │         return;
+       │         ^^^^^^^
+    73 │     }
+    74 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_nested_blocks.js:81:9 lint/nursery/noReturnInFinally ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Returning a value from a finally callback is not allowed.
+  
+    79 │     }
+    80 │     if (condition) {
+  > 81 │         return 2;
+       │         ^^^^^^^^^
+    82 │     }
+    83 │ });
+  
+  i The return value in a finally callback is ignored, making any return statement potentially confusing.
+  
+  i Remove the return statement from the finally callback to resolve this issue.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

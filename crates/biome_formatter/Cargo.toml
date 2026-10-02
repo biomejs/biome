@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_formatter"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's formatter shared infrastructure"
@@ -25,6 +25,7 @@ biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true }
+biome_suppression        = { workspace = true }
 camino                   = { workspace = true }
 cfg-if                   = { workspace = true }
 countme                  = { workspace = true, optional = true }

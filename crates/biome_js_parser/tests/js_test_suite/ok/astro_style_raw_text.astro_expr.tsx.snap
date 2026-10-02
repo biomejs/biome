@@ -36,7 +36,7 @@ JsExpressionTemplateRoot {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@16..17 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@17..33 "a { color: red }" [] [],
                         },

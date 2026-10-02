@@ -1,0 +1,1031 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$target: base;
+%base { color: red; }
+.target:not(.x) { color: red; }
+.target[data-theme="dark"] { color: red; }
+
+.media {
+  @import "theme.css" screen and (min-width: 1px) /* media */
+}
+.modifiers {
+  @import "theme.css" layer(theme) supports(display: grid) screen // media
+}
+.multiple {
+  @import "one.css" /* first */, "two.css" /* last */
+}
+.pseudo { @extend :not(.x) /* target */ }
+.attribute {
+  @extend [data-theme="dark"] // target
+}
+.interpolation { @extend %#{$target}}
+.after { width: 1px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..7 "target" [] [],
+                },
+            },
+            colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@9..13 "base" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@13..14 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: ScssPlaceholderSelector {
+                        percent_token: PERCENT@14..16 "%" [Newline("\n")] [],
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@16..21 "base" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@21..23 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@23..28 "color" [] [],
+                                },
+                                colon_token: COLON@28..30 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@30..33 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@33..35 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@35..36 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@36..38 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@38..44 "target" [] [],
+                            },
+                        },
+                        CssPseudoClassSelector {
+                            colon_token: COLON@44..45 ":" [] [],
+                            class: CssPseudoClassFunctionSelectorList {
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..48 "not" [] [],
+                                },
+                                l_paren_token: L_PAREN@48..49 "(" [] [],
+                                selectors: CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@49..50 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@50..51 "x" [] [],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                r_paren_token: R_PAREN@51..53 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@53..55 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@55..60 "color" [] [],
+                                },
+                                colon_token: COLON@60..62 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@62..65 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@65..67 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@67..68 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@68..70 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@70..76 "target" [] [],
+                            },
+                        },
+                        CssAttributeSelector {
+                            l_brack_token: L_BRACK@76..77 "[" [] [],
+                            name: CssAttributeName {
+                                namespace: missing (optional),
+                                name: CssIdentifier {
+                                    value_token: IDENT@77..87 "data-theme" [] [],
+                                },
+                            },
+                            matcher: CssAttributeMatcher {
+                                operator: EQ@87..88 "=" [] [],
+                                value: CssAttributeMatcherValue {
+                                    name: CssString {
+                                        value_token: CSS_STRING_LITERAL@88..94 "\"dark\"" [] [],
+                                    },
+                                },
+                                modifier: missing (optional),
+                            },
+                            r_brack_token: R_BRACK@94..96 "]" [] [Whitespace(" ")],
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@96..98 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@98..103 "color" [] [],
+                                },
+                                colon_token: COLON@103..105 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@105..108 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@108..110 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@110..111 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@111..114 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@114..120 "media" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@120..121 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@121..125 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssImportAtRule {
+                            import_token: IMPORT_KW@125..132 "import" [] [Whitespace(" ")],
+                            imports: ScssImportItemList [
+                                ScssPlainImport {
+                                    url: CssString {
+                                        value_token: CSS_STRING_LITERAL@132..144 "\"theme.css\"" [] [Whitespace(" ")],
+                                    },
+                                    layer: missing (optional),
+                                    supports: missing (optional),
+                                    media: CssMediaQueryList [
+                                        CssMediaAndTypeQuery {
+                                            left: CssMediaTypeQuery {
+                                                modifier: missing (optional),
+                                                ty: CssMediaType {
+                                                    value: CssIdentifier {
+                                                        value_token: IDENT@144..151 "screen" [] [Whitespace(" ")],
+                                                    },
+                                                },
+                                            },
+                                            and_token: AND_KW@151..155 "and" [] [Whitespace(" ")],
+                                            right: CssMediaFeatureInParens {
+                                                l_paren_token: L_PAREN@155..156 "(" [] [],
+                                                feature: CssQueryFeaturePlain {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@156..165 "min-width" [] [],
+                                                    },
+                                                    colon_token: COLON@165..167 ":" [] [Whitespace(" ")],
+                                                    value: CssRegularDimension {
+                                                        value_token: CSS_NUMBER_LITERAL@167..168 "1" [] [],
+                                                        unit_token: IDENT@168..170 "px" [] [],
+                                                    },
+                                                },
+                                                r_paren_token: R_PAREN@170..183 ")" [] [Whitespace(" "), Comments("/* media */")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@183..185 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@185..187 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@187..197 "modifiers" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@197..198 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@198..202 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssImportAtRule {
+                            import_token: IMPORT_KW@202..209 "import" [] [Whitespace(" ")],
+                            imports: ScssImportItemList [
+                                ScssPlainImport {
+                                    url: CssString {
+                                        value_token: CSS_STRING_LITERAL@209..221 "\"theme.css\"" [] [Whitespace(" ")],
+                                    },
+                                    layer: CssImportNamedLayer {
+                                        layer_token: LAYER_KW@221..226 "layer" [] [],
+                                        l_paren_token: L_PAREN@226..227 "(" [] [],
+                                        name: CssLayerNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@227..232 "theme" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@232..234 ")" [] [Whitespace(" ")],
+                                    },
+                                    supports: CssImportSupports {
+                                        supports_token: SUPPORTS_KW@234..242 "supports" [] [],
+                                        l_paren_token: L_PAREN@242..243 "(" [] [],
+                                        condition: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@243..250 "display" [] [],
+                                                },
+                                                colon_token: COLON@250..252 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@252..256 "grid" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        r_paren_token: R_PAREN@256..258 ")" [] [Whitespace(" ")],
+                                    },
+                                    media: CssMediaQueryList [
+                                        CssMediaTypeQuery {
+                                            modifier: missing (optional),
+                                            ty: CssMediaType {
+                                                value: CssIdentifier {
+                                                    value_token: IDENT@258..273 "screen" [] [Whitespace(" "), Comments("// media")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@273..275 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@275..277 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@277..286 "multiple" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@286..287 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@287..291 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssImportAtRule {
+                            import_token: IMPORT_KW@291..298 "import" [] [Whitespace(" ")],
+                            imports: ScssImportItemList [
+                                ScssPlainImport {
+                                    url: CssString {
+                                        value_token: CSS_STRING_LITERAL@298..319 "\"one.css\"" [] [Whitespace(" "), Comments("/* first */")],
+                                    },
+                                    layer: missing (optional),
+                                    supports: missing (optional),
+                                    media: CssMediaQueryList [],
+                                },
+                                COMMA@319..321 "," [] [Whitespace(" ")],
+                                ScssPlainImport {
+                                    url: CssString {
+                                        value_token: CSS_STRING_LITERAL@321..341 "\"two.css\"" [] [Whitespace(" "), Comments("/* last */")],
+                                    },
+                                    layer: missing (optional),
+                                    supports: missing (optional),
+                                    media: CssMediaQueryList [],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@341..343 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@343..345 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@345..352 "pseudo" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@352..354 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@354..355 "@" [] [],
+                        rule: ScssExtendAtRule {
+                            extend_token: EXTEND_KW@355..362 "extend" [] [Whitespace(" ")],
+                            css_selector_list: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssPseudoClassSelector {
+                                            colon_token: COLON@362..363 ":" [] [],
+                                            class: CssPseudoClassFunctionSelectorList {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@363..366 "not" [] [],
+                                                },
+                                                l_paren_token: L_PAREN@366..367 "(" [] [],
+                                                selectors: CssSelectorList [
+                                                    CssCompoundSelector {
+                                                        nesting_selectors: CssNestedSelectorList [],
+                                                        simple_selector: missing (optional),
+                                                        sub_selectors: CssSubSelectorList [
+                                                            CssClassSelector {
+                                                                dot_token: DOT@367..368 "." [] [],
+                                                                name: CssCustomIdentifier {
+                                                                    value_token: IDENT@368..369 "x" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@369..384 ")" [] [Whitespace(" "), Comments("/* target */"), Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            optional_modifier: missing (optional),
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@384..385 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@385..387 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@387..397 "attribute" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@397..398 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@398..402 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: ScssExtendAtRule {
+                            extend_token: EXTEND_KW@402..409 "extend" [] [Whitespace(" ")],
+                            css_selector_list: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssAttributeSelector {
+                                            l_brack_token: L_BRACK@409..410 "[" [] [],
+                                            name: CssAttributeName {
+                                                namespace: missing (optional),
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@410..420 "data-theme" [] [],
+                                                },
+                                            },
+                                            matcher: CssAttributeMatcher {
+                                                operator: EQ@420..421 "=" [] [],
+                                                value: CssAttributeMatcherValue {
+                                                    name: CssString {
+                                                        value_token: CSS_STRING_LITERAL@421..427 "\"dark\"" [] [],
+                                                    },
+                                                },
+                                                modifier: missing (optional),
+                                            },
+                                            r_brack_token: R_BRACK@427..438 "]" [] [Whitespace(" "), Comments("// target")],
+                                        },
+                                    ],
+                                },
+                            ],
+                            optional_modifier: missing (optional),
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@438..440 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@440..442 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@442..456 "interpolation" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@456..458 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@458..459 "@" [] [],
+                        rule: ScssExtendAtRule {
+                            extend_token: EXTEND_KW@459..466 "extend" [] [Whitespace(" ")],
+                            css_selector_list: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: ScssPlaceholderSelector {
+                                        percent_token: PERCENT@466..467 "%" [] [],
+                                        name: ScssInterpolatedIdentifier {
+                                            items: ScssInterpolatedIdentifierPartList [
+                                                ScssInterpolation {
+                                                    hash_token: HASH@467..468 "#" [] [],
+                                                    l_curly_token: L_CURLY@468..469 "{" [] [],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssVariable {
+                                                                dollar_token: DOLLAR@469..470 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@470..476 "target" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    r_curly_token: R_CURLY@476..477 "}" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
+                                    sub_selectors: CssSubSelectorList [],
+                                },
+                            ],
+                            optional_modifier: missing (optional),
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@477..478 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@478..480 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@480..486 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@486..488 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@488..493 "width" [] [],
+                                },
+                                colon_token: COLON@493..495 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@495..496 "1" [] [],
+                                            unit_token: IDENT@496..498 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@498..500 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@500..501 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@501..502 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..502
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..501
+    0: SCSS_VARIABLE_DECLARATION@0..14
+      0: SCSS_VARIABLE@0..7
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..7
+          0: IDENT@1..7 "target" [] []
+      1: COLON@7..9 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@9..13
+        0: SCSS_EXPRESSION_ITEM_LIST@9..13
+          0: CSS_IDENTIFIER@9..13
+            0: IDENT@9..13 "base" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@13..13
+      4: SEMICOLON@13..14 ";" [] []
+    1: CSS_QUALIFIED_RULE@14..36
+      0: CSS_SELECTOR_LIST@14..21
+        0: CSS_COMPOUND_SELECTOR@14..21
+          0: CSS_NESTED_SELECTOR_LIST@14..14
+          1: SCSS_PLACEHOLDER_SELECTOR@14..21
+            0: PERCENT@14..16 "%" [Newline("\n")] []
+            1: CSS_CUSTOM_IDENTIFIER@16..21
+              0: IDENT@16..21 "base" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@21..21
+      1: CSS_DECLARATION_OR_RULE_BLOCK@21..36
+        0: L_CURLY@21..23 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@23..35
+          0: CSS_DECLARATION_WITH_SEMICOLON@23..35
+            0: CSS_DECLARATION@23..33
+              0: CSS_GENERIC_PROPERTY@23..33
+                0: CSS_IDENTIFIER@23..28
+                  0: IDENT@23..28 "color" [] []
+                1: COLON@28..30 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@30..33
+                  0: SCSS_EXPRESSION_ITEM_LIST@30..33
+                    0: CSS_IDENTIFIER@30..33
+                      0: IDENT@30..33 "red" [] []
+              1: (empty)
+            1: SEMICOLON@33..35 ";" [] [Whitespace(" ")]
+        2: R_CURLY@35..36 "}" [] []
+    2: CSS_QUALIFIED_RULE@36..68
+      0: CSS_SELECTOR_LIST@36..53
+        0: CSS_COMPOUND_SELECTOR@36..53
+          0: CSS_NESTED_SELECTOR_LIST@36..36
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@36..53
+            0: CSS_CLASS_SELECTOR@36..44
+              0: DOT@36..38 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@38..44
+                0: IDENT@38..44 "target" [] []
+            1: CSS_PSEUDO_CLASS_SELECTOR@44..53
+              0: COLON@44..45 ":" [] []
+              1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@45..53
+                0: CSS_IDENTIFIER@45..48
+                  0: IDENT@45..48 "not" [] []
+                1: L_PAREN@48..49 "(" [] []
+                2: CSS_SELECTOR_LIST@49..51
+                  0: CSS_COMPOUND_SELECTOR@49..51
+                    0: CSS_NESTED_SELECTOR_LIST@49..49
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@49..51
+                      0: CSS_CLASS_SELECTOR@49..51
+                        0: DOT@49..50 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@50..51
+                          0: IDENT@50..51 "x" [] []
+                3: R_PAREN@51..53 ")" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@53..68
+        0: L_CURLY@53..55 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@55..67
+          0: CSS_DECLARATION_WITH_SEMICOLON@55..67
+            0: CSS_DECLARATION@55..65
+              0: CSS_GENERIC_PROPERTY@55..65
+                0: CSS_IDENTIFIER@55..60
+                  0: IDENT@55..60 "color" [] []
+                1: COLON@60..62 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@62..65
+                  0: SCSS_EXPRESSION_ITEM_LIST@62..65
+                    0: CSS_IDENTIFIER@62..65
+                      0: IDENT@62..65 "red" [] []
+              1: (empty)
+            1: SEMICOLON@65..67 ";" [] [Whitespace(" ")]
+        2: R_CURLY@67..68 "}" [] []
+    3: CSS_QUALIFIED_RULE@68..111
+      0: CSS_SELECTOR_LIST@68..96
+        0: CSS_COMPOUND_SELECTOR@68..96
+          0: CSS_NESTED_SELECTOR_LIST@68..68
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@68..96
+            0: CSS_CLASS_SELECTOR@68..76
+              0: DOT@68..70 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@70..76
+                0: IDENT@70..76 "target" [] []
+            1: CSS_ATTRIBUTE_SELECTOR@76..96
+              0: L_BRACK@76..77 "[" [] []
+              1: CSS_ATTRIBUTE_NAME@77..87
+                0: (empty)
+                1: CSS_IDENTIFIER@77..87
+                  0: IDENT@77..87 "data-theme" [] []
+              2: CSS_ATTRIBUTE_MATCHER@87..94
+                0: EQ@87..88 "=" [] []
+                1: CSS_ATTRIBUTE_MATCHER_VALUE@88..94
+                  0: CSS_STRING@88..94
+                    0: CSS_STRING_LITERAL@88..94 "\"dark\"" [] []
+                2: (empty)
+              3: R_BRACK@94..96 "]" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@96..111
+        0: L_CURLY@96..98 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@98..110
+          0: CSS_DECLARATION_WITH_SEMICOLON@98..110
+            0: CSS_DECLARATION@98..108
+              0: CSS_GENERIC_PROPERTY@98..108
+                0: CSS_IDENTIFIER@98..103
+                  0: IDENT@98..103 "color" [] []
+                1: COLON@103..105 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@105..108
+                  0: SCSS_EXPRESSION_ITEM_LIST@105..108
+                    0: CSS_IDENTIFIER@105..108
+                      0: IDENT@105..108 "red" [] []
+              1: (empty)
+            1: SEMICOLON@108..110 ";" [] [Whitespace(" ")]
+        2: R_CURLY@110..111 "}" [] []
+    4: CSS_QUALIFIED_RULE@111..185
+      0: CSS_SELECTOR_LIST@111..120
+        0: CSS_COMPOUND_SELECTOR@111..120
+          0: CSS_NESTED_SELECTOR_LIST@111..111
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@111..120
+            0: CSS_CLASS_SELECTOR@111..120
+              0: DOT@111..114 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@114..120
+                0: IDENT@114..120 "media" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@120..185
+        0: L_CURLY@120..121 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@121..183
+          0: CSS_AT_RULE@121..183
+            0: AT@121..125 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_IMPORT_AT_RULE@125..183
+              0: IMPORT_KW@125..132 "import" [] [Whitespace(" ")]
+              1: SCSS_IMPORT_ITEM_LIST@132..183
+                0: SCSS_PLAIN_IMPORT@132..183
+                  0: CSS_STRING@132..144
+                    0: CSS_STRING_LITERAL@132..144 "\"theme.css\"" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: (empty)
+                  3: CSS_MEDIA_QUERY_LIST@144..183
+                    0: CSS_MEDIA_AND_TYPE_QUERY@144..183
+                      0: CSS_MEDIA_TYPE_QUERY@144..151
+                        0: (empty)
+                        1: CSS_MEDIA_TYPE@144..151
+                          0: CSS_IDENTIFIER@144..151
+                            0: IDENT@144..151 "screen" [] [Whitespace(" ")]
+                      1: AND_KW@151..155 "and" [] [Whitespace(" ")]
+                      2: CSS_MEDIA_FEATURE_IN_PARENS@155..183
+                        0: L_PAREN@155..156 "(" [] []
+                        1: CSS_QUERY_FEATURE_PLAIN@156..170
+                          0: CSS_IDENTIFIER@156..165
+                            0: IDENT@156..165 "min-width" [] []
+                          1: COLON@165..167 ":" [] [Whitespace(" ")]
+                          2: CSS_REGULAR_DIMENSION@167..170
+                            0: CSS_NUMBER_LITERAL@167..168 "1" [] []
+                            1: IDENT@168..170 "px" [] []
+                        2: R_PAREN@170..183 ")" [] [Whitespace(" "), Comments("/* media */")]
+              2: (empty)
+        2: R_CURLY@183..185 "}" [Newline("\n")] []
+    5: CSS_QUALIFIED_RULE@185..275
+      0: CSS_SELECTOR_LIST@185..197
+        0: CSS_COMPOUND_SELECTOR@185..197
+          0: CSS_NESTED_SELECTOR_LIST@185..185
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@185..197
+            0: CSS_CLASS_SELECTOR@185..197
+              0: DOT@185..187 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@187..197
+                0: IDENT@187..197 "modifiers" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@197..275
+        0: L_CURLY@197..198 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@198..273
+          0: CSS_AT_RULE@198..273
+            0: AT@198..202 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_IMPORT_AT_RULE@202..273
+              0: IMPORT_KW@202..209 "import" [] [Whitespace(" ")]
+              1: SCSS_IMPORT_ITEM_LIST@209..273
+                0: SCSS_PLAIN_IMPORT@209..273
+                  0: CSS_STRING@209..221
+                    0: CSS_STRING_LITERAL@209..221 "\"theme.css\"" [] [Whitespace(" ")]
+                  1: CSS_IMPORT_NAMED_LAYER@221..234
+                    0: LAYER_KW@221..226 "layer" [] []
+                    1: L_PAREN@226..227 "(" [] []
+                    2: CSS_LAYER_NAME_LIST@227..232
+                      0: CSS_IDENTIFIER@227..232
+                        0: IDENT@227..232 "theme" [] []
+                    3: R_PAREN@232..234 ")" [] [Whitespace(" ")]
+                  2: CSS_IMPORT_SUPPORTS@234..258
+                    0: SUPPORTS_KW@234..242 "supports" [] []
+                    1: L_PAREN@242..243 "(" [] []
+                    2: CSS_DECLARATION@243..256
+                      0: CSS_GENERIC_PROPERTY@243..256
+                        0: CSS_IDENTIFIER@243..250
+                          0: IDENT@243..250 "display" [] []
+                        1: COLON@250..252 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@252..256
+                          0: SCSS_EXPRESSION_ITEM_LIST@252..256
+                            0: CSS_IDENTIFIER@252..256
+                              0: IDENT@252..256 "grid" [] []
+                      1: (empty)
+                    3: R_PAREN@256..258 ")" [] [Whitespace(" ")]
+                  3: CSS_MEDIA_QUERY_LIST@258..273
+                    0: CSS_MEDIA_TYPE_QUERY@258..273
+                      0: (empty)
+                      1: CSS_MEDIA_TYPE@258..273
+                        0: CSS_IDENTIFIER@258..273
+                          0: IDENT@258..273 "screen" [] [Whitespace(" "), Comments("// media")]
+              2: (empty)
+        2: R_CURLY@273..275 "}" [Newline("\n")] []
+    6: CSS_QUALIFIED_RULE@275..343
+      0: CSS_SELECTOR_LIST@275..286
+        0: CSS_COMPOUND_SELECTOR@275..286
+          0: CSS_NESTED_SELECTOR_LIST@275..275
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@275..286
+            0: CSS_CLASS_SELECTOR@275..286
+              0: DOT@275..277 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@277..286
+                0: IDENT@277..286 "multiple" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@286..343
+        0: L_CURLY@286..287 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@287..341
+          0: CSS_AT_RULE@287..341
+            0: AT@287..291 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_IMPORT_AT_RULE@291..341
+              0: IMPORT_KW@291..298 "import" [] [Whitespace(" ")]
+              1: SCSS_IMPORT_ITEM_LIST@298..341
+                0: SCSS_PLAIN_IMPORT@298..319
+                  0: CSS_STRING@298..319
+                    0: CSS_STRING_LITERAL@298..319 "\"one.css\"" [] [Whitespace(" "), Comments("/* first */")]
+                  1: (empty)
+                  2: (empty)
+                  3: CSS_MEDIA_QUERY_LIST@319..319
+                1: COMMA@319..321 "," [] [Whitespace(" ")]
+                2: SCSS_PLAIN_IMPORT@321..341
+                  0: CSS_STRING@321..341
+                    0: CSS_STRING_LITERAL@321..341 "\"two.css\"" [] [Whitespace(" "), Comments("/* last */")]
+                  1: (empty)
+                  2: (empty)
+                  3: CSS_MEDIA_QUERY_LIST@341..341
+              2: (empty)
+        2: R_CURLY@341..343 "}" [Newline("\n")] []
+    7: CSS_QUALIFIED_RULE@343..385
+      0: CSS_SELECTOR_LIST@343..352
+        0: CSS_COMPOUND_SELECTOR@343..352
+          0: CSS_NESTED_SELECTOR_LIST@343..343
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@343..352
+            0: CSS_CLASS_SELECTOR@343..352
+              0: DOT@343..345 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@345..352
+                0: IDENT@345..352 "pseudo" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@352..385
+        0: L_CURLY@352..354 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@354..384
+          0: CSS_AT_RULE@354..384
+            0: AT@354..355 "@" [] []
+            1: SCSS_EXTEND_AT_RULE@355..384
+              0: EXTEND_KW@355..362 "extend" [] [Whitespace(" ")]
+              1: CSS_SELECTOR_LIST@362..384
+                0: CSS_COMPOUND_SELECTOR@362..384
+                  0: CSS_NESTED_SELECTOR_LIST@362..362
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@362..384
+                    0: CSS_PSEUDO_CLASS_SELECTOR@362..384
+                      0: COLON@362..363 ":" [] []
+                      1: CSS_PSEUDO_CLASS_FUNCTION_SELECTOR_LIST@363..384
+                        0: CSS_IDENTIFIER@363..366
+                          0: IDENT@363..366 "not" [] []
+                        1: L_PAREN@366..367 "(" [] []
+                        2: CSS_SELECTOR_LIST@367..369
+                          0: CSS_COMPOUND_SELECTOR@367..369
+                            0: CSS_NESTED_SELECTOR_LIST@367..367
+                            1: (empty)
+                            2: CSS_SUB_SELECTOR_LIST@367..369
+                              0: CSS_CLASS_SELECTOR@367..369
+                                0: DOT@367..368 "." [] []
+                                1: CSS_CUSTOM_IDENTIFIER@368..369
+                                  0: IDENT@368..369 "x" [] []
+                        3: R_PAREN@369..384 ")" [] [Whitespace(" "), Comments("/* target */"), Whitespace(" ")]
+              2: (empty)
+              3: (empty)
+        2: R_CURLY@384..385 "}" [] []
+    8: CSS_QUALIFIED_RULE@385..440
+      0: CSS_SELECTOR_LIST@385..397
+        0: CSS_COMPOUND_SELECTOR@385..397
+          0: CSS_NESTED_SELECTOR_LIST@385..385
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@385..397
+            0: CSS_CLASS_SELECTOR@385..397
+              0: DOT@385..387 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@387..397
+                0: IDENT@387..397 "attribute" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@397..440
+        0: L_CURLY@397..398 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@398..438
+          0: CSS_AT_RULE@398..438
+            0: AT@398..402 "@" [Newline("\n"), Whitespace("  ")] []
+            1: SCSS_EXTEND_AT_RULE@402..438
+              0: EXTEND_KW@402..409 "extend" [] [Whitespace(" ")]
+              1: CSS_SELECTOR_LIST@409..438
+                0: CSS_COMPOUND_SELECTOR@409..438
+                  0: CSS_NESTED_SELECTOR_LIST@409..409
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@409..438
+                    0: CSS_ATTRIBUTE_SELECTOR@409..438
+                      0: L_BRACK@409..410 "[" [] []
+                      1: CSS_ATTRIBUTE_NAME@410..420
+                        0: (empty)
+                        1: CSS_IDENTIFIER@410..420
+                          0: IDENT@410..420 "data-theme" [] []
+                      2: CSS_ATTRIBUTE_MATCHER@420..427
+                        0: EQ@420..421 "=" [] []
+                        1: CSS_ATTRIBUTE_MATCHER_VALUE@421..427
+                          0: CSS_STRING@421..427
+                            0: CSS_STRING_LITERAL@421..427 "\"dark\"" [] []
+                        2: (empty)
+                      3: R_BRACK@427..438 "]" [] [Whitespace(" "), Comments("// target")]
+              2: (empty)
+              3: (empty)
+        2: R_CURLY@438..440 "}" [Newline("\n")] []
+    9: CSS_QUALIFIED_RULE@440..478
+      0: CSS_SELECTOR_LIST@440..456
+        0: CSS_COMPOUND_SELECTOR@440..456
+          0: CSS_NESTED_SELECTOR_LIST@440..440
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@440..456
+            0: CSS_CLASS_SELECTOR@440..456
+              0: DOT@440..442 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@442..456
+                0: IDENT@442..456 "interpolation" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@456..478
+        0: L_CURLY@456..458 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@458..477
+          0: CSS_AT_RULE@458..477
+            0: AT@458..459 "@" [] []
+            1: SCSS_EXTEND_AT_RULE@459..477
+              0: EXTEND_KW@459..466 "extend" [] [Whitespace(" ")]
+              1: CSS_SELECTOR_LIST@466..477
+                0: CSS_COMPOUND_SELECTOR@466..477
+                  0: CSS_NESTED_SELECTOR_LIST@466..466
+                  1: SCSS_PLACEHOLDER_SELECTOR@466..477
+                    0: PERCENT@466..467 "%" [] []
+                    1: SCSS_INTERPOLATED_IDENTIFIER@467..477
+                      0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@467..477
+                        0: SCSS_INTERPOLATION@467..477
+                          0: HASH@467..468 "#" [] []
+                          1: L_CURLY@468..469 "{" [] []
+                          2: SCSS_EXPRESSION@469..476
+                            0: SCSS_EXPRESSION_ITEM_LIST@469..476
+                              0: SCSS_VARIABLE@469..476
+                                0: DOLLAR@469..470 "$" [] []
+                                1: CSS_IDENTIFIER@470..476
+                                  0: IDENT@470..476 "target" [] []
+                          3: R_CURLY@476..477 "}" [] []
+                  2: CSS_SUB_SELECTOR_LIST@477..477
+              2: (empty)
+              3: (empty)
+        2: R_CURLY@477..478 "}" [] []
+    10: CSS_QUALIFIED_RULE@478..501
+      0: CSS_SELECTOR_LIST@478..486
+        0: CSS_COMPOUND_SELECTOR@478..486
+          0: CSS_NESTED_SELECTOR_LIST@478..478
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@478..486
+            0: CSS_CLASS_SELECTOR@478..486
+              0: DOT@478..480 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@480..486
+                0: IDENT@480..486 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@486..501
+        0: L_CURLY@486..488 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@488..500
+          0: CSS_DECLARATION_WITH_SEMICOLON@488..500
+            0: CSS_DECLARATION@488..498
+              0: CSS_GENERIC_PROPERTY@488..498
+                0: CSS_IDENTIFIER@488..493
+                  0: IDENT@488..493 "width" [] []
+                1: COLON@493..495 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@495..498
+                  0: SCSS_EXPRESSION_ITEM_LIST@495..498
+                    0: CSS_REGULAR_DIMENSION@495..498
+                      0: CSS_NUMBER_LITERAL@495..496 "1" [] []
+                      1: IDENT@496..498 "px" [] []
+              1: (empty)
+            1: SEMICOLON@498..500 ";" [] [Whitespace(" ")]
+        2: R_CURLY@500..501 "}" [] []
+  2: EOF@501..502 "" [Newline("\n")] []
+
+```

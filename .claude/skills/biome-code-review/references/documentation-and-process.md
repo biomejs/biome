@@ -1,6 +1,6 @@
-# Documentation and Process Review
+# Behavioral Documentation Review
 
-Load this reference only when the diff changes comments, rustdoc, user documentation, changesets, branch targeting, or PR metadata.
+Use only for in-scope requirements and contracts, not writing-style, release-policy, or PR-process audits.
 
 ## Internal Documentation
 
@@ -8,47 +8,22 @@ Load `doc-comments` for `//`, `///`, and `//!` changes. Review only:
 
 - comments added or changed by the diff;
 - existing comments made inaccurate by the new behavior;
-- documentation removed when its invariant still exists in replacement code;
-- new vocabulary or extension points whose contract is not recoverable from names and types.
+- documentation removed when an affected caller or implementor still needs its contract.
 
-Do not request documentation merely because an item is public. Report missing prose when a caller or implementor must preserve an unstated invariant, ordering, fallback, or safety contract.
+Require prose only for an explicit requirement or a caller/implementor contract needed for correct behavior. Name the contract and resulting misuse; public visibility alone is insufficient.
 
 ## Rule and Assist Documentation
 
-Rustdoc inside `declare_lint_rule!` and `declare_assist_rule!` is end-user documentation. Load `lint-rule-development` rather than `doc-comments`.
+For end-user rustdoc in `declare_lint_rule!` or `declare_assist_rule!`, load `lint-rule-development` and `doc-comments` for contracts, not style or process checks.
 
-Check what automated validation cannot establish:
+Check agreement with the required behavior:
 
-- the first paragraph accurately summarizes behavior;
-- invalid examples precede valid examples and demonstrate the actual rule;
-- each option states its default and shows configuration plus an applied example;
-- `ignore` is not used to bypass a snippet that should be validated;
-- prose explains why the pattern is a problem.
+- descriptions and examples reflect what the rule should report;
+- documented option defaults and configuration examples match the intended behavior;
+- advice and fix descriptions do not promise semantics the implementation violates.
 
-## Feature Documentation
+## User-Facing Documentation and Changesets
 
-Non-rule user-facing features may require a website PR. Verify current policy in `CONTRIBUTING.md` and the live PR template. Do not infer documentation requirements from an old skill copy.
+Check changed documentation and changeset claims against requirements and implementation before reporting contradictions.
 
-## Changesets
-
-Load `changeset` for format and release-level policy. The reviewer additionally checks:
-
-- a user-facing change has a real `.changeset/*.md` entry, including untracked files;
-- the entry describes the behavior in the diff rather than an earlier design;
-- an issue link identifies the issue actually addressed by the test and implementation;
-- the release level agrees with the target branch and the special policy for nursery rules;
-- internal-only or documentation-only changes do not add release noise.
-
-Do not create or edit a changeset during static review.
-
-## Pull Request Process
-
-Use `CONTRIBUTING.md` and `.github/PULL_REQUEST_TEMPLATE.md` as the current sources of truth.
-
-- The title follows the supported conventional-commit format.
-- The base branch matches the change type.
-- The template remains intact.
-- The contributor, not the reviewing agent, authored the PR description and communication.
-- AI assistance is disclosed to the extent required by `CONTRIBUTING.md`.
-
-Do not generate replacement PR prose as part of a finding. State the missing or contradictory requirement.
+Do not audit changeset presence, release levels, branch targets, or PR metadata; `AGENTS.md` and `CONTRIBUTING.md` govern these outside this review.

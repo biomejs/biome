@@ -2208,8 +2208,8 @@ impl ClassMemberModifiers {
     //     protected readonly abstract i: string;
     //     protected abstract readonly j: string;
     //     protected override readonly base1: string;
-    //     private static accessor readonly k: string;
-    //     protected abstract accessor readonly l: string;
+    //     private static accessor k: string;
+    //     protected abstract accessor l: string;
     // }
 
     // test_err ts ts_class_modifier_precedence
@@ -2226,7 +2226,7 @@ impl ClassMemberModifiers {
     //     override static base2: string;
     //     // Accessor
     //     readonly accessor e: string;
-    //     override accessor f: string;
+    //     accessor override f: string;
     //     // abstract
     //     override abstract base3: string;
     //     // override
@@ -2412,6 +2412,12 @@ impl ClassMemberModifiers {
                         p,
                         modifier.as_text_range(),
                         self.get_first_range_unchecked(ModifierKind::Readonly),
+                    ));
+                } else if preceding_modifiers.contains(ModifierFlags::ACCESSOR) {
+                    return Some(modifier_cannot_be_used_with_modifier(
+                        p,
+                        modifier.as_text_range(),
+                        self.get_first_range_unchecked(ModifierKind::Accessor),
                     ));
                 } else if !matches!(
                     member_kind,
@@ -2647,16 +2653,10 @@ impl ClassMemberModifiers {
                 //     readonly accessor foo: number = 1;
                 // }
                 else if preceding_modifiers.contains(ModifierFlags::READONLY) {
-                    return Some(modifier_must_precede_modifier(
-                        p,
-                        modifier.as_text_range(),
-                        self.get_first_range_unchecked(ModifierKind::Readonly),
-                    ));
-                } else if preceding_modifiers.contains(ModifierFlags::OVERRIDE) {
                     return Some(modifier_cannot_be_used_with_modifier(
                         p,
                         modifier.as_text_range(),
-                        self.get_first_range_unchecked(ModifierKind::Override),
+                        self.get_first_range_unchecked(ModifierKind::Readonly),
                     ));
                 } else if !matches!(
                     member_kind,
@@ -2674,6 +2674,12 @@ impl ClassMemberModifiers {
                         p,
                         modifier.as_text_range(),
                         self.get_first_range_unchecked(ModifierKind::Override),
+                    ));
+                } else if preceding_modifiers.contains(ModifierFlags::ACCESSOR) {
+                    return Some(modifier_must_precede_modifier(
+                        p,
+                        modifier.as_text_range(),
+                        self.get_first_range_unchecked(ModifierKind::Accessor),
                     ));
                 } else if preceding_modifiers.contains(ModifierFlags::READONLY) {
                     return Some(modifier_must_precede_modifier(

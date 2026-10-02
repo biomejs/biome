@@ -2,6 +2,37 @@
 source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
 expression: content
 ---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+export const useMyPlugin = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		registerDiagnostic(root, "information", "Hello, world!");
+	},
+});
+```
+
+# Input
+
+## `/foo.js`
+
+```js
+let foo;
+```
+
+## `/bar.js`
+
+```js
+let bar;
+```
+
+# Diagnostics
+
+```block
 /foo.js:1:1 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Hello, world!
@@ -16,3 +47,4 @@ expression: content
   
   > 1 │ let bar;
       │ ^^^^^^^^
+```

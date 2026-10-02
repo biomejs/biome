@@ -21,4 +21,13 @@ impl FormatNodeRule<SvelteSnippetBlock> for FormatSvelteSnippetBlock {
         // handled by element list formatter
         Ok(())
     }
+
+    fn fmt_trailing_comments(
+        &self,
+        _node: &SvelteSnippetBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

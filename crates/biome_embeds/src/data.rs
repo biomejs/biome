@@ -3,6 +3,115 @@ use crate::references::{
     EmbeddedTypeReference, EmbeddedValueReference, is_potential_vue_directive_reference,
     svelte_store_reference_name, vue_directive_name_matches_reference_name,
 };
+use biome_rowan::TokenText;
+
+/// The result of resolving a Vue custom directive in an embedded document.
+///
+/// The three states let a lint rule distinguish "declared nowhere we can see"
+/// from "declared somewhere we cannot see". Only [`Self::Undeclared`] is a
+/// reportable finding; [`Self::Unknown`] means the component's declarations
+/// are incomplete, so silence is the only answer that avoids false positives.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum VueDirectiveResolution {
+    /// A local declaration resolves the directive.
+    Declared,
+    /// No local declaration resolves the directive, and every declaration
+    /// site in the component was readable.
+    Undeclared,
+    /// The component may declare the directive through syntax that cannot be
+    /// resolved statically. See `VueDirectiveDeclarations` for the syntax
+    /// that produces this state.
+    Unknown,
+}
+
+/// Vue custom-directive declarations collected from a single-file component.
+///
+/// Vue resolves `v-foo` in a template against three sources, in this order:
+/// the `<script setup>` binding `vFoo`, the component's `directives` option,
+/// and the application's global registry. The first two are collected here;
+/// the global registry lives outside the component and is the caller's
+/// concern (a lint rule takes it as an option).
+///
+/// Collection is purely syntactic, so it gives up as soon as a declaration
+/// site could be populated by something it cannot read:
+///
+/// - the component options use `extends` or `mixins`, whose directives are
+///   defined in another module;
+/// - the `directives` value is not an object literal, or contains a spread
+///   or a computed key whose name is not a literal (`[name]` as opposed to
+///   `["focus"]`);
+/// - the default export is neither an object literal nor a
+///   `defineComponent(...)` call whose last argument is an object literal;
+/// - a `<script>` block uses `src="..."`, which moves its entire content into
+///   a file that is not part of the embedded snippets.
+///
+/// In each of those cases `has_unknown_options` is set and [`Self::resolve`]
+/// answers [`VueDirectiveResolution::Unknown`] for every name it cannot find,
+/// instead of [`VueDirectiveResolution::Undeclared`].
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct VueDirectiveDeclarations {
+    /// Runtime bindings declared at the top level of `<script setup>`.
+    setup_bindings: Box<[TokenText]>,
+    /// Keys of the component's `directives` option, taken from
+    /// `export default { ... }`, `defineComponent({ ... })`, or
+    /// `defineOptions({ ... })`.
+    option_names: Box<[TokenText]>,
+    /// Whether a declaration site was found that cannot be read statically.
+    /// See the type-level documentation for the list of such sites.
+    has_unknown_options: bool,
+}
+
+impl VueDirectiveDeclarations {
+    /// Builds declarations from the bindings and option keys collected by the
+    /// embedded-language visitor.
+    pub(crate) fn new(
+        setup_bindings: Vec<TokenText>,
+        option_names: Vec<TokenText>,
+        has_unknown_options: bool,
+    ) -> Self {
+        Self {
+            setup_bindings: setup_bindings.into_boxed_slice(),
+            option_names: option_names.into_boxed_slice(),
+            has_unknown_options,
+        }
+    }
+
+    /// Declarations for a document we could not read, so that every directive
+    /// resolves to [`VueDirectiveResolution::Unknown`] instead of being reported.
+    pub(crate) fn unknown() -> Self {
+        Self {
+            has_unknown_options: true,
+            ..Self::default()
+        }
+    }
+
+    /// Resolves a template directive name such as `v-click-outside` against
+    /// the collected declarations.
+    ///
+    /// A name that is not shaped like a custom directive (no `v-` prefix, a
+    /// trailing or doubled hyphen) is [`VueDirectiveResolution::Undeclared`]
+    /// regardless of `has_unknown_options`, because no declaration could ever
+    /// match it.
+    pub fn resolve(&self, directive_name: &str) -> VueDirectiveResolution {
+        if !is_potential_vue_directive_name(directive_name) {
+            return VueDirectiveResolution::Undeclared;
+        }
+
+        if self.setup_bindings.iter().any(|binding| {
+            vue_directive_name_matches_reference_name(directive_name, binding.text())
+        }) || self
+            .option_names
+            .iter()
+            .any(|name| vue_directive_name_matches_option_name(directive_name, name.text()))
+        {
+            VueDirectiveResolution::Declared
+        } else if self.has_unknown_options {
+            VueDirectiveResolution::Unknown
+        } else {
+            VueDirectiveResolution::Undeclared
+        }
+    }
+}
 
 /// Bindings and references collected across a host document and its embedded
 /// language snippets.
@@ -18,6 +127,8 @@ pub struct EmbeddedData {
     value_references: Vec<EmbeddedValueReference>,
     /// References that are only used in type contexts
     type_references: Vec<EmbeddedTypeReference>,
+    /// Vue custom-directive declarations available to the host template.
+    vue_directive_declarations: VueDirectiveDeclarations,
 }
 
 impl EmbeddedData {
@@ -25,11 +136,13 @@ impl EmbeddedData {
         bindings: Vec<EmbeddedBinding>,
         value_references: Vec<EmbeddedValueReference>,
         type_references: Vec<EmbeddedTypeReference>,
+        vue_directive_declarations: VueDirectiveDeclarations,
     ) -> Self {
         Self {
             bindings,
             value_references,
             type_references,
+            vue_directive_declarations,
         }
     }
 
@@ -79,6 +192,106 @@ impl EmbeddedData {
                 vue_directive_name_matches_reference_name(reference.text.text(), name)
             })
     }
+
+    /// Resolves a Vue custom directive against declarations in the host component.
+    pub fn resolve_vue_directive(&self, name: &str) -> VueDirectiveResolution {
+        self.vue_directive_declarations.resolve(name)
+    }
+}
+
+/// Returns whether `directive_name` can be a custom Vue directive.
+pub fn is_potential_vue_directive_name(directive_name: &str) -> bool {
+    let Some(name) = directive_name.strip_prefix("v-") else {
+        return false;
+    };
+
+    is_valid_vue_directive_suffix(name)
+}
+
+fn is_valid_vue_directive_suffix(name: &str) -> bool {
+    !name.is_empty()
+        && !name.ends_with('-')
+        && !name.as_bytes().windows(2).any(|pair| pair == b"--")
+}
+
+/// Returns the canonical `<script setup>` binding name for a custom Vue directive.
+pub fn vue_directive_binding_name(directive_name: &str) -> Option<String> {
+    if !is_potential_vue_directive_name(directive_name) {
+        return None;
+    }
+
+    let mut binding_name = String::with_capacity(directive_name.len());
+    binding_name.push('v');
+
+    let mut capitalize = true;
+    for character in directive_name.strip_prefix("v-")?.chars() {
+        if character == '-' {
+            capitalize = true;
+        } else if capitalize {
+            binding_name.extend(character.to_uppercase());
+            capitalize = false;
+        } else {
+            binding_name.push(character);
+        }
+    }
+
+    Some(binding_name)
+}
+
+/// Returns whether the template directive `directive_name` is registered under
+/// the `directives` option key `option_name`.
+///
+/// Vue's runtime looks the key up under its literal, camelCase, and PascalCase
+/// forms, so `v-click-outside` matches `click-outside`, `clickOutside`, and
+/// `ClickOutside`. The comparison walks both strings once without allocating.
+pub(crate) fn vue_directive_name_matches_option_name(
+    directive_name: &str,
+    option_name: &str,
+) -> bool {
+    let Some(directive_name) = directive_name.strip_prefix("v-") else {
+        return false;
+    };
+    if !is_valid_vue_directive_suffix(directive_name) {
+        return false;
+    }
+
+    if directive_name == option_name {
+        return true;
+    }
+
+    let directive_characters = directive_name.chars();
+    let mut option_characters = option_name.chars();
+    let mut capitalize_next = false;
+    let mut first_character = true;
+
+    for directive_character in directive_characters {
+        if directive_character == '-' {
+            capitalize_next = true;
+            continue;
+        }
+
+        let Some(option_character) = option_characters.next() else {
+            return false;
+        };
+        let matches = if first_character && directive_character.is_ascii_lowercase() {
+            option_character == directive_character
+                || (option_character.is_ascii_uppercase()
+                    && option_character.eq_ignore_ascii_case(&directive_character))
+        } else if capitalize_next && directive_character.is_ascii_alphabetic() {
+            option_character.is_ascii_uppercase()
+                && option_character.eq_ignore_ascii_case(&directive_character)
+        } else {
+            option_character == directive_character
+        };
+        if !matches {
+            return false;
+        }
+
+        capitalize_next = false;
+        first_character = false;
+    }
+
+    option_characters.next().is_none()
 }
 
 #[cfg(test)]
@@ -95,8 +308,72 @@ mod tests {
                 text: TokenText::new_raw(RawSyntaxKind(0), "v-click-outside"),
             }],
             Vec::new(),
+            VueDirectiveDeclarations::default(),
         );
 
         assert!(data.is_vue_directive_used("vClickOutside"));
+    }
+
+    #[test]
+    fn resolve_vue_directive_matches_setup_bindings_and_option_names() {
+        let declarations = VueDirectiveDeclarations::new(
+            vec![TokenText::new_raw(RawSyntaxKind(0), "vSetupDirective")],
+            vec![
+                TokenText::new_raw(RawSyntaxKind(0), "kebab-directive"),
+                TokenText::new_raw(RawSyntaxKind(0), "camelDirective"),
+                TokenText::new_raw(RawSyntaxKind(0), "PascalDirective"),
+            ],
+            false,
+        );
+
+        assert_eq!(
+            declarations.resolve("v-setup-directive"),
+            VueDirectiveResolution::Declared
+        );
+        assert_eq!(
+            declarations.resolve("v-kebab-directive"),
+            VueDirectiveResolution::Declared
+        );
+        assert_eq!(
+            declarations.resolve("v-camel-directive"),
+            VueDirectiveResolution::Declared
+        );
+        assert_eq!(
+            declarations.resolve("v-pascal-directive"),
+            VueDirectiveResolution::Declared
+        );
+        assert_eq!(
+            declarations.resolve("v-missing-directive"),
+            VueDirectiveResolution::Undeclared
+        );
+    }
+
+    #[test]
+    fn resolve_vue_directive_keeps_known_names_when_options_are_unknown() {
+        let declarations = VueDirectiveDeclarations::new(
+            Vec::new(),
+            vec![TokenText::new_raw(RawSyntaxKind(0), "knownDirective")],
+            true,
+        );
+
+        assert_eq!(
+            declarations.resolve("v-known-directive"),
+            VueDirectiveResolution::Declared
+        );
+        assert_eq!(
+            declarations.resolve("v-may-be-declared"),
+            VueDirectiveResolution::Unknown
+        );
+    }
+
+    #[test]
+    fn vue_directive_binding_name_rejects_malformed_names() {
+        assert_eq!(
+            vue_directive_binding_name("v-click-outside").as_deref(),
+            Some("vClickOutside")
+        );
+        assert_eq!(vue_directive_binding_name("v-"), None);
+        assert_eq!(vue_directive_binding_name("v-trailing-"), None);
+        assert_eq!(vue_directive_binding_name("v-double--hyphen"), None);
     }
 }

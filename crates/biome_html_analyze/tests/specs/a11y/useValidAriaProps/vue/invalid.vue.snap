@@ -5,62 +5,68 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <div :aria-labell="value"></div>
 <div v-bind:aria-lorem="value"></div>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The element contains an invalid ARIA attribute.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <div :aria-labell="value"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^
-    3 │ <div v-bind:aria-lorem="value"></div>
-    4 │ 
-  
-  i aria-labell is not a valid ARIA attribute.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <div :aria-labell="value"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^
-    3 │ <div v-bind:aria-lorem="value"></div>
-    4 │ 
-  
-  i Unsafe fix: Remove the invalid aria-* attribute.
-                    Check the list of all valid aria-* attributes.
-  
-    2 │ <div·:aria-labell="value"></div>
-      │      --------------------       
-
-```
-
 ```
 invalid.vue:3:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The element contains an invalid ARIA attribute.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <div :aria-labell="value"></div>
-  > 3 │ <div v-bind:aria-lorem="value"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
+    2 │ <template>
+  > 3 │ <div :aria-labell="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    4 │ <div v-bind:aria-lorem="value"></div>
+    5 │ </template>
   
-  i aria-lorem is not a valid ARIA attribute.
+  i aria-labell is not a valid ARIA attribute.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <div :aria-labell="value"></div>
-  > 3 │ <div v-bind:aria-lorem="value"></div>
-      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ 
+    2 │ <template>
+  > 3 │ <div :aria-labell="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^
+    4 │ <div v-bind:aria-lorem="value"></div>
+    5 │ </template>
   
   i Unsafe fix: Remove the invalid aria-* attribute.
                     Check the list of all valid aria-* attributes.
   
-    3 │ <div·v-bind:aria-lorem="value"></div>
+    3 │ <div·:aria-labell="value"></div>
+      │      --------------------       
+
+```
+
+```
+invalid.vue:4:6 lint/a11y/useValidAriaProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The element contains an invalid ARIA attribute.
+  
+    2 │ <template>
+    3 │ <div :aria-labell="value"></div>
+  > 4 │ <div v-bind:aria-lorem="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i aria-lorem is not a valid ARIA attribute.
+  
+    2 │ <template>
+    3 │ <div :aria-labell="value"></div>
+  > 4 │ <div v-bind:aria-lorem="value"></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Unsafe fix: Remove the invalid aria-* attribute.
+                    Check the list of all valid aria-* attributes.
+  
+    4 │ <div·v-bind:aria-lorem="value"></div>
       │      -------------------------       
 
 ```

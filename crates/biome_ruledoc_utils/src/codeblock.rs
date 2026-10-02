@@ -57,13 +57,7 @@ pub enum OptionsParsingMode {
 }
 
 impl CodeBlock {
-    pub fn create_analyzer_options<L>(
-        &self,
-        config: Option<Configuration>,
-    ) -> Result<AnalyzerOptions>
-    where
-        L: ServiceLanguage,
-    {
+    pub fn create_settings(&self, config: Option<Configuration>) -> Result<Settings> {
         let mut settings = Settings::default();
 
         if self.use_options {
@@ -77,6 +71,17 @@ impl CodeBlock {
             settings.merge_with_configuration(config, None, vec![])?;
         }
 
+        Ok(settings)
+    }
+
+    pub fn create_analyzer_options<L>(
+        &self,
+        config: Option<Configuration>,
+    ) -> Result<AnalyzerOptions>
+    where
+        L: ServiceLanguage,
+    {
+        let settings = self.create_settings(config)?;
         let path = BiomePath::new(self.file_path());
 
         Ok(settings

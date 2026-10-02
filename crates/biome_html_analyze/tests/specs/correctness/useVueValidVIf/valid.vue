@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div v-if="ok"></div>
 <div v-if="a < b"></div>
 <div v-if="a"></div>
@@ -9,3 +10,4 @@
 <!-- Nested conditionals with self-closing tag -->
 <div v-if="cond1"></div>
 <div v-else><span v-if="cond2"/></div>
+</template>

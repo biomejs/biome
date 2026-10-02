@@ -196,13 +196,16 @@ impl Rule for NoJsxLiterals {
             }
         };
 
+        let value = inner_string_text(&value_token);
+        let value = value.trim();
+
         for allowed_string in options.allowed_strings.iter().flatten() {
-            if inner_string_text(&value_token) == allowed_string.as_ref() {
+            if value == allowed_string.trim() {
                 return None;
             }
         }
 
-        if inner_string_text(&value_token).trim().is_empty() {
+        if value.is_empty() {
             return None;
         }
 

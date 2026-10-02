@@ -1,0 +1,6 @@
+# should generate diagnostics
+query Foo { id }
+
+
+query Bar { id }
+

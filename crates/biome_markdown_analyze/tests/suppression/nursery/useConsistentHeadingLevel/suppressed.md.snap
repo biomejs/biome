@@ -1,0 +1,12 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: suppressed.md
+---
+# Input
+```md
+# Heading
+
+<!-- biome-ignore lint/nursery/useConsistentHeadingLevel: level three is intentional -->
+### Intentional level three heading
+
+```

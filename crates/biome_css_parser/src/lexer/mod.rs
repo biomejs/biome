@@ -1589,6 +1589,9 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
+            SLH if self.is_scss() && matches!(self.peek_byte(), Some(b'/' | b'*')) => {
+                self.consume_slash()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {

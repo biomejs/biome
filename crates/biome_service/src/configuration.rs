@@ -102,10 +102,10 @@ impl LoadedConfiguration {
         let ConfigurationPayload {
             external_resolution_base_path,
             configuration_file_path,
-            deserialized,
+            deserialized_configuration: partial_configuration,
+            mut diagnostics,
             loaded_location,
         } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
 
         let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
 
@@ -223,14 +223,15 @@ pub fn load_configuration(
 
 #[derive(Debug)]
 pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
     /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
-
     pub loaded_location: LoadedLocation,
+    /// Diagnostics emitted during the deserialization of the configuration
+    pub diagnostics: Vec<Error>,
+    /// The deserialized configuration.
+    pub deserialized_configuration: Option<Configuration>,
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -294,7 +295,8 @@ pub fn read_config(
     };
 
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
-    let mut deserialized = None;
+    let mut deserialized_configuration = None;
+    let mut diagnostics = vec![];
     let mut predicate = |file_path: &Utf8Path, content: &str| -> bool {
         let parser_options = match file_path.extension() {
             Some("json") => JsonParserOptions::default(),
@@ -309,12 +311,17 @@ pub fn read_config(
             .deserialized
             .as_ref()
             .is_some_and(|config| if seek_root { config.is_root() } else { true });
+        if deserialized_content.has_errors() {
+            diagnostics = deserialized_content.into_diagnostics();
+            return true;
+        }
+        let (configuration, errors) = deserialized_content.consume();
         if is_found {
-            deserialized = Some(deserialized_content);
+            deserialized_configuration = configuration;
+            diagnostics = errors;
         }
         is_found
     };
-
     let Some((auto_search_result, loaded_location)) = fs
         .auto_search_files_with_predicate(
             &configuration_directory,
@@ -342,7 +349,8 @@ pub fn read_config(
     Ok(Some(ConfigurationPayload {
         // SAFETY: unwrapping is safe because the predicate in the search above would
         // only return `true` if it assigned `Some` value:
-        deserialized: deserialized.unwrap(),
+        deserialized_configuration,
+        diagnostics,
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
         loaded_location,
@@ -373,8 +381,10 @@ fn load_user_config(
                 LoadedLocation::ParentFolder
             }
         });
+        let (deserialized_configuration, diagnostics) = deserialized.consume();
         Ok(Some(ConfigurationPayload {
-            deserialized,
+            deserialized_configuration,
+            diagnostics,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
             loaded_location,
@@ -411,8 +421,10 @@ fn load_user_config(
                 LoadedLocation::ParentFolder
             }
         });
+        let (deserialized_configuration, diagnostics) = deserialized.consume();
         Ok(Some(ConfigurationPayload {
-            deserialized,
+            deserialized_configuration,
+            diagnostics,
             configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
             loaded_location,

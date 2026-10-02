@@ -5,10 +5,10 @@ use biome_js_syntax::{
     JsSyntaxElement as SyntaxElement, JsSyntaxNode as SyntaxNode, JsSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn astro_implicit_fragment(children: JsxChildList) -> AstroImplicitFragment {
+pub fn astro_implicit_fragment(elements: JsxChildList) -> AstroImplicitFragment {
     AstroImplicitFragment::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT,
-        [Some(SyntaxElement::Node(children.into_syntax()))],
+        [Some(SyntaxElement::Node(elements.into_syntax()))],
     ))
 }
 pub fn js_accessor_modifier(modifier_token: SyntaxToken) -> JsAccessorModifier {
@@ -3766,6 +3766,18 @@ impl JsVariableStatementBuilder {
         ))
     }
 }
+pub fn js_vue_slot_props_root(
+    parameters: JsParameterList,
+    eof_token: SyntaxToken,
+) -> JsVueSlotPropsRoot {
+    JsVueSlotPropsRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT,
+        [
+            Some(SyntaxElement::Node(parameters.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_while_statement(
     while_token: SyntaxToken,
     l_paren_token: SyntaxToken,
@@ -3923,14 +3935,14 @@ pub fn jsx_closing_fragment(
 }
 pub fn jsx_element(
     opening_element: JsxOpeningElement,
-    children: JsxChildList,
+    elements: JsxChildList,
     closing_element: JsxClosingElement,
 ) -> JsxElement {
     JsxElement::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JSX_ELEMENT,
         [
             Some(SyntaxElement::Node(opening_element.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(elements.into_syntax())),
             Some(SyntaxElement::Node(closing_element.into_syntax())),
         ],
     ))
@@ -3983,14 +3995,14 @@ impl JsxExpressionChildBuilder {
 }
 pub fn jsx_fragment(
     opening_fragment: JsxOpeningFragment,
-    children: JsxChildList,
+    elements: JsxChildList,
     closing_fragment: JsxClosingFragment,
 ) -> JsxFragment {
     JsxFragment::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JSX_FRAGMENT,
         [
             Some(SyntaxElement::Node(opening_fragment.into_syntax())),
-            Some(SyntaxElement::Node(children.into_syntax())),
+            Some(SyntaxElement::Node(elements.into_syntax())),
             Some(SyntaxElement::Node(closing_fragment.into_syntax())),
         ],
     ))

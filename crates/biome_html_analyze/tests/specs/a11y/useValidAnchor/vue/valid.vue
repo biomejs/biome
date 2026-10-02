@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <a href="#id">ok</a>
 <a href="https://example.com">ok</a>
 <Link :href="somewhere">ok</Link>
@@ -9,3 +10,4 @@
 <!-- Static Vue bindings with valid href are valid -->
 <a :href="'https://example.com'">ok</a>
 <a v-bind:href="'#id'">ok</a>
+</template>

@@ -5,6 +5,7 @@ expression: valid.vue
 # Input
 ```vue
 <!-- should not generate diagnostics -->
+<template>
 
 <!-- Basic long-form and shorthand bindings with a simple argument -->
 <div v-bind:foo="bar"></div>
@@ -53,5 +54,6 @@ expression: valid.vue
 
 <!-- Edge-case: argument with hyphen / kebab-case -->
 <div v-bind:data-value="payload"></div>
+</template>
 
 ```

@@ -8,6 +8,7 @@ use biome_formatter::{
 };
 use biome_html_syntax::HtmlLanguage;
 use biome_languages::HtmlFileSource;
+use biome_rowan::TextRange;
 
 use crate::comments::{FormatHtmlComment, HtmlCommentStyle, HtmlComments};
 
@@ -420,7 +421,9 @@ pub struct HtmlFormatContext {
 
     source_map: Option<TransformSourceMap>,
 
-    should_delegate_fmt_embedded_nodes: bool,
+    /// Content ranges of the embedded snippets whose formatting is delegated to
+    /// the formatter of their language, sorted by position.
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl HtmlFormatContext {
@@ -429,7 +432,7 @@ impl HtmlFormatContext {
             options,
             comments: Rc::new(comments),
             source_map: None,
-            should_delegate_fmt_embedded_nodes: false,
+            embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -438,13 +441,27 @@ impl HtmlFormatContext {
         self
     }
 
-    pub fn with_fmt_embedded_nodes(mut self) -> Self {
-        self.should_delegate_fmt_embedded_nodes = true;
+    pub fn with_embedded_node_ranges(mut self, mut embedded_node_ranges: Vec<TextRange>) -> Self {
+        embedded_node_ranges.sort_unstable_by_key(|range| (range.start(), range.end()));
+        self.embedded_node_ranges = embedded_node_ranges;
         self
     }
 
     pub fn should_delegate_fmt_embedded_nodes(&self) -> bool {
-        self.should_delegate_fmt_embedded_nodes
+        !self.embedded_node_ranges.is_empty()
+    }
+
+    /// Returns `true` when the embedded snippet whose content spans `range` is
+    /// formatted by the formatter of its language.
+    ///
+    /// A node must only emit embedded tags for such a range: the embedded tags
+    /// of any other range are never filled, and the node's content is lost.
+    pub fn is_embedded_node_range(&self, range: TextRange) -> bool {
+        self.embedded_node_ranges
+            .binary_search_by_key(&(range.start(), range.end()), |range| {
+                (range.start(), range.end())
+            })
+            .is_ok()
     }
 }
 

@@ -5,40 +5,26 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <iframe />
 <iframe></iframe>
 <iframe title=""></iframe>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Provide a title attribute when using iframe elements.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <iframe />
-      │ ^^^^^^^^^^
-    3 │ <iframe></iframe>
-    4 │ <iframe title=""></iframe>
-  
-  i Screen readers rely on the title set on an iframe to describe the content being displayed.
-  
-
-```
-
 ```
 invalid.vue:3:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Provide a title attribute when using iframe elements.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <iframe />
-  > 3 │ <iframe></iframe>
-      │ ^^^^^^^^
-    4 │ <iframe title=""></iframe>
-    5 │ 
+    2 │ <template>
+  > 3 │ <iframe />
+      │ ^^^^^^^^^^
+    4 │ <iframe></iframe>
+    5 │ <iframe title=""></iframe>
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.
   
@@ -50,11 +36,29 @@ invalid.vue:4:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━
 
   × Provide a title attribute when using iframe elements.
   
-    2 │ <iframe />
-    3 │ <iframe></iframe>
-  > 4 │ <iframe title=""></iframe>
+    2 │ <template>
+    3 │ <iframe />
+  > 4 │ <iframe></iframe>
+      │ ^^^^^^^^
+    5 │ <iframe title=""></iframe>
+    6 │ </template>
+  
+  i Screen readers rely on the title set on an iframe to describe the content being displayed.
+  
+
+```
+
+```
+invalid.vue:5:1 lint/a11y/useIframeTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a title attribute when using iframe elements.
+  
+    3 │ <iframe />
+    4 │ <iframe></iframe>
+  > 5 │ <iframe title=""></iframe>
       │ ^^^^^^^^^^^^^^^^^
-    5 │ 
+    6 │ </template>
+    7 │ 
   
   i Screen readers rely on the title set on an iframe to describe the content being displayed.
   

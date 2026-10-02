@@ -1,0 +1,18 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/release-final-statement-boundaries-import-eof.scss
+---
+
+# Input
+
+```scss
+@import "theme.css"
+```
+
+
+# Formatted
+
+```scss
+@import "theme.css";
+
+```

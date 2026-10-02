@@ -1,0 +1,6 @@
+border-bs border-be-2
+hover:-inset-bs-4!
+font-features-['ss01']
+min-inline-[12rem]
+scrollbar-thumb-red-500/50
+bg-blend-color-dodge

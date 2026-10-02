@@ -20,9 +20,9 @@ biome_languages    = { workspace = true, features = ["lang_js"] }
 biome_line_index   = { workspace = true }
 biome_rowan        = { workspace = true }
 indexmap           = { workspace = true }
-react_compiler     = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
-react_compiler_ast = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
-react_compiler_hir = { git = "https://github.com/react/react", rev = "e71a6393e66b0d2add46ba2b2c5db563a0563828" }
+react_compiler     = { git = "https://github.com/react/react", rev = "78c2d377d79a7284339fc24b560dd503daf314cc" }
+react_compiler_ast = { git = "https://github.com/react/react", rev = "78c2d377d79a7284339fc24b560dd503daf314cc" }
+react_compiler_hir = { git = "https://github.com/react/react", rev = "78c2d377d79a7284339fc24b560dd503daf314cc" }
 rustc-hash         = { workspace = true }
 serde_json         = { workspace = true }
 

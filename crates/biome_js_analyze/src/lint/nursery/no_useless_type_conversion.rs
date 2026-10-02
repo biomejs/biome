@@ -436,7 +436,7 @@ fn run_unary_expression(
             let ty = ctx.type_of_expression(&nested_argument)?;
             let primitive = if matches_primitive_type(ty, PrimitiveKind::BigInt) {
                 PrimitiveKind::BigInt
-            } else if ty.is_all_integer_like() {
+            } else if ty.is_unchanged_by_double_bitwise_not() {
                 PrimitiveKind::Number
             } else {
                 return None;

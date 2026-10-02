@@ -44,6 +44,7 @@ impl SuppressionAction for HtmlSuppressionAction {
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
         suppression_reason: &str,
+        _diagnostic_text_range: &biome_rowan::TextRange,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,

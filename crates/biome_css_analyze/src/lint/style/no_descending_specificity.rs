@@ -3,7 +3,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity};
-use biome_css_syntax::{AnyCssRoot, AnyCssSelector};
+use biome_css_syntax::{AnyCssRoot, AnyCssSelector, CssLayerAtRule};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
@@ -108,6 +108,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css
+    /// @layer one {
+    ///   b a { color: green; }
+    /// }
+    ///
+    /// @layer two {
+    ///   a { color: blue; }
+    /// }
+    /// ```
+    ///
     pub NoDescendingSpecificity {
         version: "1.9.3",
         name: "noDescendingSpecificity",
@@ -142,14 +152,22 @@ impl Rule for NoDescendingSpecificity {
                 continue;
             }
 
+            let rule_node = rule.node(&root);
             find_descending_selector(
                 &rule,
-                at_rule_context,
+                SelectorContext {
+                    at_rule: at_rule_context,
+                    layer: rule_node
+                        .syntax()
+                        .ancestors()
+                        .find_map(CssLayerAtRule::cast)
+                        .map(|layer| layer.range()),
+                },
                 &mut visited_selectors,
                 &mut descending_selectors,
             );
 
-            let child_at_rule_context = match rule.node(&root) {
+            let child_at_rule_context = match rule_node {
                 AnyRuleStart::CssContainerAtRule(_)
                 | AnyRuleStart::CssMediaAtRule(_)
                 | AnyRuleStart::CssScopeAtRule(_)
@@ -190,8 +208,16 @@ pub struct DescendingSelector {
     low: (TextRange, Specificity),
 }
 
-// `None` represents the top-level comparison context, which has no enclosing at-rule.
-type SelectorContexts = FxHashMap<Option<RuleId>, FxHashMap<String, (TextRange, Specificity)>>;
+/// Identifies the at-rule and cascade-layer scopes in which selectors can be compared.
+#[derive(Eq, Hash, PartialEq)]
+struct SelectorContext {
+    /// The nearest enclosing at-rule tracked as an independent comparison scope, or `None` at the top level.
+    at_rule: Option<RuleId>,
+    /// The range of the nearest enclosing `@layer` block, or `None` for unlayered selectors.
+    layer: Option<TextRange>,
+}
+
+type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
 /// find tail selector
 /// ```css
 /// a b:hover {
@@ -227,11 +253,11 @@ fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
 /// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
     rule: &CssSemanticRule,
-    at_rule_context: Option<RuleId>,
+    context: SelectorContext,
     visited_selectors: &mut SelectorContexts,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
-    let visited_selectors = visited_selectors.entry(at_rule_context).or_default();
+    let visited_selectors = visited_selectors.entry(context).or_default();
 
     for selector in rule.selectors() {
         let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {

@@ -52,7 +52,7 @@ JsModule {
                                             attributes: JsxAttributeList [],
                                             r_angle_token: R_ANGLE@22..23 ">" [] [],
                                         },
-                                        children: JsxChildList [
+                                        elements: JsxChildList [
                                             JsxExpressionChild {
                                                 l_curly_token: L_CURLY@23..24 "{" [] [],
                                                 expression: JsIdentifierExpression {

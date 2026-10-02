@@ -1,17 +1,151 @@
-name: Publish to crates.io
+name: Publish crates
+
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Version component to increment
+        required: true
+        default: minor
+        type: choice
+        options:
+          - minor
+          - patch
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+concurrency:
+  group: publish-crates
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    environment: crate-publish
+  prepare:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: depot-ubuntu-24.04-arm-16
+    permissions:
+      # Push the automated release branch.
+      contents: write
+      # Create the release pull request.
+      pull-requests: write
     steps:
-      - name: Checkout PR Branch
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Require main
+        if: github.ref != 'refs/heads/main'
+        run: exit 1
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check for an existing release pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existing=$(gh pr list --base main --head automated-release/crates --state open --json url --jq 'first | .url // empty')
+          if [ -n "$existing" ]; then
+            echo "A crate release pull request is already open: $existing"
+            exit 1
+          fi
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cargo publish --workspace --token ${{ secrets.CRATES_IO_TOKEN }}
+      - name: Bump crate versions
+        id: version
+        run: echo "version=$(node --experimental-strip-types scripts/update-crates-versions.ts bump '${{ inputs.bump }}')" >> "$GITHUB_OUTPUT"
+      - name: Update Cargo.lock
+        run: cargo metadata --format-version=1 > /dev/null
+      - name: Commit release
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -c automated-release/crates
+          git add Cargo.toml Cargo.lock
+          git commit -m "release: crates v$VERSION"
+      - name: Create release pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git push origin HEAD:automated-release/crates
+          gh pr create \
+            --base main \
+            --head automated-release/crates \
+            --title "release: crates v$VERSION" \
+            --body-file .github/PULL_REQUEST_TEMPLATE.md
+
+  detect:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'automated-release/crates' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: depot-ubuntu-24.04-arm-small
+    permissions:
+      # Check out the merged release commit.
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Install Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
+      - name: Detect crate release
+        id: version
+        run: echo "version=$(node --experimental-strip-types scripts/update-crates-versions.ts detect 'HEAD^1')" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: detect
+    if: needs.detect.outputs.version != ''
+    runs-on: depot-ubuntu-24.04-arm-16
+    environment: crate-publish
+    permissions:
+      # Check out the release, create its tag, and delete its branch after publication.
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish crates
+        run: cargo publish --workspace --locked
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - name: Create release tag
+        env:
+          VERSION: ${{ needs.detect.outputs.version }}
+        run: |
+          tag="crates@v$VERSION"
+          git tag "$tag"
+          git push origin "$tag"
+      - name: Delete release branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${{ github.repository }}/git/ref/heads/automated-release/crates" --silent; then
+            gh api --method DELETE "repos/${{ github.repository }}/git/refs/heads/automated-release/crates"
+          fi

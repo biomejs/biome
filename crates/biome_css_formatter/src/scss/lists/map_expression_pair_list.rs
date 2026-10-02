@@ -25,8 +25,8 @@ impl FormatRule<ScssMapExpressionPairList> for FormatScssMapExpressionPairList {
         // Preserve source blank lines between pairs, e.g. comment-heavy maps.
         let mut join = f.join_nodes_with_soft_line();
 
-        for (element, formatted) in node.elements().zip(separated) {
-            join.entry(element.node()?.syntax(), &formatted);
+        for formatted in separated {
+            join.entry(formatted.node()?.syntax(), &formatted);
         }
 
         join.finish()?;

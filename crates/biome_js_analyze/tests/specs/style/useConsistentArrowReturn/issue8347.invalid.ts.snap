@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue8347.invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+const kek = (field: "first" | "second") => {
+    return {
+        first: 1,
+        second: 2,
+    }[field];
+};
+
+```
+
+# Diagnostics
+```
+issue8347.invalid.ts:2:13 lint/style/useConsistentArrowReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The body of this arrow function contains a single return statement.
+  
+    1 │ // should generate diagnostics
+  > 2 │ const kek = (field: "first" | "second") => {
+      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │     return {
+  > 4 │         first: 1,
+  > 5 │         second: 2,
+  > 6 │     }[field];
+  > 7 │ };
+      │ ^
+    8 │ 
+  
+  i Safe fix: Remove the return statement.
+  
+    1 1 │   // should generate diagnostics
+    2   │ - const·kek·=·(field:·"first"·|·"second")·=>·{
+    3   │ - ····return·{
+      2 │ + const·kek·=·(field:·"first"·|·"second")·=>·({
+    4 3 │           first: 1,
+    5 4 │           second: 2,
+    6   │ - ····}[field];
+    7   │ - };
+      5 │ + ····}[field]);
+    8 6 │   
+  
+
+```

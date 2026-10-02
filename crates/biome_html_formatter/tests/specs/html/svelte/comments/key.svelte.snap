@@ -24,7 +24,7 @@ info: svelte/comments/key.svelte
 {#key expression}
 	<!-- 2 -->
 	<div></div>
-<!-- 3 -->
+	<!-- 3 -->
 {/key}
 <!-- 4 -->
 

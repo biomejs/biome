@@ -204,9 +204,11 @@ use biome_formatter::{FormatRuleWithOptions, GroupId, prelude::*};
 use biome_formatter::{format_args, write};
 use biome_html_syntax::{
     AnyHtmlContent, AnyHtmlElement, AnyHtmlTextExpression, HtmlClosingElement,
-    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxToken,
+    HtmlClosingElementFields, HtmlElement, HtmlElementList, HtmlRoot, HtmlSyntaxKind,
+    HtmlSyntaxToken,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, NodeOrToken};
+use biome_suppression::SuppressionKind;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
@@ -267,7 +269,9 @@ impl FormatRuleWithOptions<HtmlElementList> for FormatHtmlElementList {
 impl FormatRule<HtmlElementList> for FormatHtmlElementList {
     type Context = HtmlFormatContext;
     fn fmt(&self, node: &HtmlElementList, f: &mut HtmlFormatter) -> FormatResult<()> {
-        if node.is_empty() {
+        if node.is_empty()
+            && !SvelteBlockBoundary::for_list(node).is_some_and(|boundary| boundary.has_comments())
+        {
             return Ok(());
         }
 
@@ -382,18 +386,49 @@ impl FormatHtmlElementList {
     ) -> FormatResult<()> {
         let is_root = list.parent::<HtmlRoot>().is_some();
 
+        let svelte_block_boundary = SvelteBlockBoundary::for_list(list);
+        let (opening_token, closing_token) = match &svelte_block_boundary {
+            Some(boundary) => (
+                boundary.empty_list_preceding_token.clone(),
+                Some(boundary.token.clone()),
+            ),
+            None => {
+                let element = list.parent::<HtmlElement>();
+                (
+                    element
+                        .as_ref()
+                        .and_then(|p| p.opening_element().ok())
+                        .and_then(|opening| opening.r_angle_token().ok()),
+                    element
+                        .and_then(|p| p.closing_element().ok())
+                        .and_then(|closing| closing.l_angle_token().ok()),
+                )
+            }
+        };
+
         // Split children into HtmlChild variants
         let children = html_split_children(
             list.iter(),
-            list.parent::<HtmlElement>()
-                .and_then(|p| p.opening_element().ok())
-                .and_then(|opening| opening.r_angle_token().ok())
-                .as_ref(),
-            list.parent::<HtmlElement>()
-                .and_then(|p| p.closing_element().ok())
-                .as_ref(),
+            opening_token.as_ref(),
+            closing_token.as_ref(),
             f,
         )?;
+
+        // The comments before a Svelte block's `{:...}` or `{/...}` token have just been added as
+        // children, so the node that starts with that token must not print them again.
+        if let Some(boundary) = svelte_block_boundary
+            && let Some(parent) = boundary.token.parent()
+        {
+            let comments = f.comments();
+            for comment in comments.leading_comments(&parent) {
+                if !comments
+                    .suppression_kind(comment.piece().text_range())
+                    .is_some_and(SuppressionKind::is_classic)
+                {
+                    comment.mark_formatted();
+                }
+            }
+        }
 
         #[cfg(debug_assertions)]
         if std::env::var("DEBUG_HTML_FORMATTER_CHILDREN").is_ok() {
@@ -751,11 +786,17 @@ impl FormatHtmlElementList {
                         };
 
                         if is_soft_break {
-                            write!(f, [soft_line_break()])?;
+                            // The newline renders as a space, so joining the lines must keep it.
+                            write!(f, [soft_line_break_or_space()])?;
                         } else {
                             child_breaks = true;
                             write!(f, [hard_line_break()])?;
                         }
+                    }
+
+                    HtmlChild::PreservedSegmentBreak => {
+                        child_breaks = true;
+                        write!(f, [hard_line_break()])?;
                     }
 
                     // An empty line between children
@@ -856,7 +897,10 @@ impl FormatHtmlElementList {
                             }
 
                             Some(
-                                HtmlChild::Whitespace | HtmlChild::Newline | HtmlChild::EmptyLine,
+                                HtmlChild::Whitespace
+                                | HtmlChild::Newline
+                                | HtmlChild::EmptyLine
+                                | HtmlChild::PreservedSegmentBreak,
                             ) => None,
 
                             Some(HtmlChild::Verbatim(verbatim_element)) => {
@@ -1075,8 +1119,18 @@ impl FormatHtmlElementList {
                             last_nontext_had_trailing_line = false;
                         }
 
-                        // Track this element's group ID if it's followed by another adjacent inline element
-                        if next_is_adjacent_inline {
+                        // A single-brace expression cannot lend its closing token to the
+                        // next child, so a sibling break would insert rendered whitespace.
+                        if next_is_adjacent_inline
+                            && !matches!(
+                                non_text,
+                                AnyHtmlElement::AnyHtmlContent(
+                                    AnyHtmlContent::AnyHtmlTextExpression(
+                                        AnyHtmlTextExpression::HtmlSingleTextExpression(_)
+                                    )
+                                )
+                            )
+                        {
                             prev_inline_group_id = Some(non_text_group_id);
                         } else {
                             prev_inline_group_id = None;
@@ -1143,6 +1197,57 @@ impl FormatHtmlElementList {
         } else {
             write!(f, [&soft_block_indent(&formatted_children)])
         }
+    }
+}
+
+/// The `{:` or `{/` token that directly follows the children of a Svelte block, e.g. the `{/` in
+/// `{#if a}...{/if}` or the `{:` in `{#if a}...{:else}`.
+///
+/// The comments before that token are formatted as children of the list. Otherwise, they would be
+/// printed outside the indentation of the children.
+struct SvelteBlockBoundary {
+    /// The `{:` or `{/` token.
+    token: HtmlSyntaxToken,
+    /// The token before the list, e.g. the `}` of `{#if a}`, if the list is empty. A comment on the
+    /// same line as it is in its trailing trivia, e.g. in `{#if a}<!-- comment -->{/if}`.
+    empty_list_preceding_token: Option<HtmlSyntaxToken>,
+}
+
+impl SvelteBlockBoundary {
+    fn for_list(list: &HtmlElementList) -> Option<Self> {
+        // A malformed element with no closing tag can also be followed by one of these tokens, but
+        // then the token belongs to the enclosing Svelte block's children.
+        if list.parent::<HtmlElement>().is_some() {
+            return None;
+        }
+
+        let (token, empty_list_preceding_token) = match list.syntax().last_token() {
+            Some(last_token) => (last_token.next_token()?, None),
+            None => {
+                let preceding_token = match list.syntax().prev_sibling_or_token()? {
+                    NodeOrToken::Node(node) => node.last_token()?,
+                    NodeOrToken::Token(token) => token,
+                };
+                (preceding_token.next_token()?, Some(preceding_token))
+            }
+        };
+
+        matches!(
+            token.kind(),
+            HtmlSyntaxKind::SV_CURLY_COLON | HtmlSyntaxKind::SV_CURLY_SLASH
+        )
+        .then_some(Self {
+            token,
+            empty_list_preceding_token,
+        })
+    }
+
+    fn has_comments(&self) -> bool {
+        self.token.has_leading_comments()
+            || self
+                .empty_list_preceding_token
+                .as_ref()
+                .is_some_and(|token| token.has_trailing_comments())
     }
 }
 

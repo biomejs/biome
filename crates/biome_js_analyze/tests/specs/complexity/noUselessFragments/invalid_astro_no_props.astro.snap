@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_astro_no_props.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+{item && (
+  <Foo>
+    <Fragment>{item.text}</Fragment>
+    <>{item.text}</>
+  </Foo>
+)}
+
+```
+
+# Diagnostics
+```
+invalid_astro_no_props.astro:4:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    2 │ {item && (
+    3 │   <Foo>
+  > 4 │     <Fragment>{item.text}</Fragment>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │     <>{item.text}</>
+    6 │   </Foo>
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    3 │ ····<Fragment>{item.text}</Fragment>
+      │     ----------           -----------
+
+```
+
+```
+invalid_astro_no_props.astro:5:5 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    3 │   <Foo>
+    4 │     <Fragment>{item.text}</Fragment>
+  > 5 │     <>{item.text}</>
+      │     ^^^^^^^^^^^^^^^^
+    6 │   </Foo>
+    7 │ )}
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    4 │ ····<>{item.text}</>
+      │     --           ---
+
+```

@@ -24,7 +24,7 @@ JsExpressionTemplateRoot {
         operator_token: AMP2@5..8 "&&" [] [Whitespace(" ")],
         right: JsxTagExpression {
             tag: AstroImplicitFragment {
-                children: JsxChildList [
+                elements: JsxChildList [
                     JsxElement {
                         opening_element: JsxOpeningElement {
                             l_angle_token: L_ANGLE@8..9 "<" [] [],
@@ -35,7 +35,7 @@ JsExpressionTemplateRoot {
                             attributes: JsxAttributeList [],
                             r_angle_token: R_ANGLE@10..11 ">" [] [],
                         },
-                        children: JsxChildList [],
+                        elements: JsxChildList [],
                         closing_element: JsxClosingElement {
                             l_angle_token: L_ANGLE@11..12 "<" [] [],
                             slash_token: SLASH@12..13 "/" [] [],
@@ -55,7 +55,7 @@ JsExpressionTemplateRoot {
                             attributes: JsxAttributeList [],
                             r_angle_token: R_ANGLE@27..28 ">" [] [],
                         },
-                        children: JsxChildList [],
+                        elements: JsxChildList [],
                         closing_element: JsxClosingElement {
                             l_angle_token: L_ANGLE@28..29 "<" [] [],
                             slash_token: SLASH@29..30 "/" [] [],

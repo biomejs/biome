@@ -1,6 +1,6 @@
 use crate::{MarkdownFormatContext, prelude::*};
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
+use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult, normalize_newlines};
 use biome_markdown_syntax::{
     MarkdownLanguage, MarkdownSyntaxNode, MarkdownSyntaxToken, map_syntax_node,
 };
@@ -24,6 +24,19 @@ impl FormatRule<MarkdownSyntaxToken> for FormatMdSyntaxToken {
 }
 
 impl FormatToken<MarkdownLanguage, MarkdownFormatContext> for FormatMdSyntaxToken {
+    fn format_trimmed_token_trivia(
+        &self,
+        token: &MarkdownSyntaxToken,
+        f: &mut Formatter<MarkdownFormatContext>,
+    ) -> FormatResult<()> {
+        syntax_token_cow_slice(
+            normalize_newlines(token.text_trimmed(), ['\r']),
+            token,
+            token.text_trimmed_range().start(),
+        )
+        .fmt(f)
+    }
+
     fn format_skipped_token_trivia(
         &self,
         token: &MarkdownSyntaxToken,

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,7 +9,7 @@ use biome_js_factory::make::{
     js_binary_expression, js_string_literal, js_string_literal_expression,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
@@ -20,7 +22,7 @@ declare_lint_rule! {
     /// This rule aims to flag concatenation of string or template literals when they could be combined into a single literal.
     /// Notably, this also includes concatenating a string with a number (unlike the derivative ESLint rule).
     ///
-    /// Concatenation of multiple strings is allowed for multi-line strings (such as ones used to prevent exceeding the maximum line width).
+    /// Concatenations split across multiple lines are allowed (such as ones used to prevent exceeding the maximum line width).
     ///
     /// ## Examples
     ///
@@ -140,7 +142,7 @@ impl Rule for NoUselessStringConcat {
             (_, Some(left_string_value), Some(right_string_value)) => {
                 let concatenated_string = left_string_value + right_string_value.as_str();
                 let string_literal_expression =
-                    js_string_literal_expression(js_string_literal(concatenated_string.as_str()));
+                    js_string_literal_expression(escaped_string_literal(&concatenated_string));
 
                 mutation.replace_element(node.clone().into(), string_literal_expression.into());
                 Some(())
@@ -314,29 +316,12 @@ fn get_concatenation_range(binary_expression: &JsBinaryExpression) -> Option<Tex
 /// meaning either the operator or RHS have a leading newline.
 /// Assumes the expression is known to be a valid concatenation that will otherwise trigger the rule.
 fn is_stylistic_concatenation(binary_expression: &JsBinaryExpression) -> bool {
-    // TODO: Review desired rule behavior if the first operand is a number
     let has_newline_in_operator = binary_expression
         .operator_token()
         .is_ok_and(|operator| operator.has_leading_newline());
-    let has_newline_in_right = binary_expression.right().is_ok_and(|right| {
-        match (
-            right.as_any_js_literal_expression(),
-            right.as_js_template_expression(),
-        ) {
-            (Some(literal_expression), _) => literal_expression
-                .as_js_string_literal_expression()
-                .is_some_and(|string_literal_expression| {
-                    string_literal_expression
-                        .as_fields()
-                        .value_token
-                        .is_ok_and(|token| token.has_leading_newline())
-                }),
-            (_, Some(template_expression)) => template_expression
-                .l_tick_token()
-                .is_ok_and(|token| token.has_leading_newline()),
-            _ => false,
-        }
-    });
+    let has_newline_in_right = binary_expression
+        .right()
+        .is_ok_and(|right| right.syntax().has_leading_newline());
 
     has_newline_in_operator || has_newline_in_right
 }
@@ -432,6 +417,36 @@ fn get_parent_binary_expression(node: &JsBinaryExpression) -> Option<JsBinaryExp
     None
 }
 
+fn escaped_string_literal(value: &str) -> JsSyntaxToken {
+    js_string_literal(&escape_double_quotes(value))
+}
+
+fn escape_double_quotes(value: &str) -> Cow<'_, str> {
+    let mut escaped = String::new();
+    let mut bytes = value.bytes().enumerate();
+    let mut last_copied_index = 0;
+
+    while let Some((index, byte)) = bytes.next() {
+        if byte == b'\\' {
+            bytes.next();
+        } else if byte == b'"' {
+            if escaped.is_empty() {
+                escaped = String::with_capacity(value.len());
+            }
+            escaped.push_str(&value[last_copied_index..index]);
+            escaped.push('\\');
+            last_copied_index = index;
+        }
+    }
+
+    if escaped.is_empty() {
+        Cow::Borrowed(value)
+    } else {
+        escaped.push_str(&value[last_copied_index..]);
+        Cow::Owned(escaped)
+    }
+}
+
 fn concat_binary_expression(
     left_binary_expression: &JsBinaryExpression,
     right_string_value: &str,
@@ -443,7 +458,7 @@ fn concat_binary_expression(
         let concatenated_string = value + right_string_value;
         let string_literal_expression =
             AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::from(
-                js_string_literal_expression(js_string_literal(&concatenated_string)),
+                js_string_literal_expression(escaped_string_literal(&concatenated_string)),
             ));
         let left = left_binary_expression.left().ok()?;
         let operator = left_binary_expression.operator_token().ok()?;

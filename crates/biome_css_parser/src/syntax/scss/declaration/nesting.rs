@@ -306,10 +306,14 @@ fn try_parse_scss_nested_property_declaration(p: &mut CssParser) -> Result<Parse
 }
 
 #[inline]
-pub(crate) fn parse_exclusive_scss_nested_property_declaration(p: &mut CssParser) -> ParsedSyntax {
-    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+pub(crate) fn parse_exclusive_scss_nested_property_declaration(
+    p: &mut CssParser,
+    bogus_kind: CssSyntaxKind,
+) -> ParsedSyntax {
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
         p,
         |p| try_parse_scss_nested_property_declaration(p).unwrap_or(Absent),
         |p, marker| scss_only_syntax_error(p, "SCSS nested property declarations", marker.range(p)),
+        Some(bogus_kind),
     )
 }

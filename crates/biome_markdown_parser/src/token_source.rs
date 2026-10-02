@@ -1,4 +1,4 @@
-use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
+use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext, html_comment_len};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::{EOF, WHITESPACE};
@@ -104,6 +104,40 @@ impl<'source> MarkdownTokenSource<'source> {
                         .push(Trivia::new(trivia_kind, self.current_range(), trailing));
                 }
             }
+        }
+    }
+
+    /// Records leading comments after the parser has identified an HTML span.
+    /// Keeping them visible until then preserves HTML block and container boundaries.
+    /// A comment-only literal retains an empty token to anchor its trivia and syntax node.
+    pub(crate) fn record_html_comment_trivia(&mut self) {
+        let range = self.current_range();
+        let mut text = &self.lexer.source()[range];
+        let mut offset = range.start();
+        while let Some(length) = html_comment_len(text) {
+            let end = offset + TextSize::from(length as u32);
+            self.trivia_list.push(Trivia::new(
+                TriviaPieceKind::MultiLineComment,
+                TextRange::new(offset, end),
+                false,
+            ));
+            text = &text[length..];
+            offset = end;
+
+            let next = text.trim_start_matches([' ', '\t']);
+            if !next.is_empty() && !next.starts_with("<!--") {
+                break;
+            }
+            let whitespace = TextSize::from((text.len() - next.len()) as u32);
+            if whitespace > TextSize::from(0) {
+                self.trivia_list.push(Trivia::new(
+                    TriviaPieceKind::Whitespace,
+                    TextRange::at(offset, whitespace),
+                    false,
+                ));
+                offset += whitespace;
+            }
+            text = next;
         }
     }
 

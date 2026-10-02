@@ -1,0 +1,7 @@
+{
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
+}

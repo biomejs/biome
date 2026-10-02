@@ -186,7 +186,10 @@ fn quote_boundary_trim_start(node: &MdBlockList) -> usize {
 
     // The first empty line of a blockquote is represented by the quote node's
     // own prefix plus a leading newline in the content list.
-    if iter.peek().is_some_and(|(_, block)| block.is_newline()) {
+    if iter
+        .peek()
+        .is_some_and(|(_, block)| block.is_newline() && !newline_block_has_comments(block))
+    {
         iter.next();
         start = 1;
     }
@@ -195,7 +198,10 @@ fn quote_boundary_trim_start(node: &MdBlockList) -> usize {
     // MdQuotePrefix + MdNewline pairs. Stop as soon as a quote prefix is
     // followed by real content; that prefix belongs to the content line.
     while let Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) = iter.next() {
-        if iter.peek().is_some_and(|(_, block)| block.is_newline()) {
+        if iter
+            .peek()
+            .is_some_and(|(_, block)| block.is_newline() && !newline_block_has_comments(block))
+        {
             iter.next();
             start = prefix_index + 2;
         } else {
@@ -225,12 +231,14 @@ fn quote_boundary_trim_end(node: &MdBlockList, start: usize) -> usize {
             }
             // A final newline can belong to a quote-only trailing line only
             // when it is immediately preceded by an MdQuotePrefix.
-            Some((_, block)) if block.is_newline() => match iter.next_back() {
-                Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) if prefix_index >= start => {
-                    end = prefix_index;
+            Some((_, block)) if block.is_newline() && !newline_block_has_comments(&block) => {
+                match iter.next_back() {
+                    Some((prefix_index, AnyMdBlock::MdQuotePrefix(_))) if prefix_index >= start => {
+                        end = prefix_index;
+                    }
+                    _ => break,
                 }
-                _ => break,
-            },
+            }
             _ => break,
         }
     }
@@ -290,9 +298,11 @@ impl PreviousBlock {
             matches!(
                 block,
                 AnyMdBlock::AnyMdLeafBlock(
-                    AnyMdLeafBlock::MdHtmlBlock(_)
-                        | AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdIndentCodeBlock(_))
+                    AnyMdLeafBlock::AnyMdCodeBlock(AnyMdCodeBlock::MdIndentCodeBlock(_))
                 )
+            ) || matches!(
+                block,
+                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
             ) || matches!(
                 block,
                 AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))
@@ -312,7 +322,10 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
 
         // Count trailing newlines using next_back
         let mut trailing_count = 0;
-        while iter.next_back().is_some_and(|block| block.is_newline()) {
+        while iter
+            .next_back()
+            .is_some_and(|block| block.is_newline() && !newline_block_has_comments(&block))
+        {
             trailing_count += 1;
         }
 
@@ -329,11 +342,29 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
             if let AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(newline)) = &node {
                 let is_leading = still_leading;
                 let is_trailing = index >= content_count;
+                let has_comments = newline.value_token().is_ok_and(|token| {
+                    token
+                        .leading_trivia()
+                        .pieces()
+                        .any(|piece| piece.is_comments())
+                        || token
+                            .trailing_trivia()
+                            .pieces()
+                            .any(|piece| piece.is_comments())
+                });
                 let next_is_bull_item = iter.peek().is_some_and(|(_, next)| next.is_list());
                 let next_content_is_thematic_break =
                     next_content_block_is_thematic_break(&self.node, index + 1, content_count);
 
-                if previous_block.is_link_reference_definition()
+                if has_comments {
+                    joiner.entry(&newline.format());
+                    previous_block.set(node.clone());
+                    still_leading = false;
+                } else if previous_block.0.as_ref().is_some_and(|block| {
+                    newline_block_has_comments(block) || block.is_html_comment()
+                }) {
+                    joiner.entry(&newline.format());
+                } else if previous_block.is_link_reference_definition()
                     && !is_leading
                     && !is_trailing
                     && next_content_block_is_link_reference_definition(
@@ -345,10 +376,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         print_mode: TextPrintMode::Remove,
                     }));
-                    while iter
-                        .peek()
-                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
-                    {
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
                         if let Some((
                             _,
                             AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
@@ -368,10 +398,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         print_mode: TextPrintMode::Remove,
                     }));
-                    while iter
-                        .peek()
-                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
-                    {
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
                         if let Some((
                             _,
                             AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
@@ -391,7 +420,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         print_mode: TextPrintMode::Remove,
                     }));
-                    while iter.peek().is_some_and(|(_, next)| next.is_newline()) {
+                    while iter.peek().is_some_and(|(_, next)| {
+                        next.is_newline() && !newline_block_has_comments(next)
+                    }) {
                         if let Some((
                             _,
                             AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
@@ -410,10 +441,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     // double-counts the line ending when the last block of
                     // the list (e.g. a thematic break) doesn't swallow it.
                     let mut run = vec![newline.clone()];
-                    while iter
-                        .peek()
-                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
-                    {
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
                         if let Some((
                             _,
                             AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(nl)),
@@ -468,10 +498,9 @@ impl Format<MarkdownFormatContext> for DefaultBlockListFormatter {
                     joiner.entry(&newline.format().with_options(FormatMdNewlineOptions {
                         print_mode: TextPrintMode::Remove,
                     }));
-                    while iter
-                        .peek()
-                        .is_some_and(|(i, next)| next.is_newline() && *i < content_count)
-                    {
+                    while iter.peek().is_some_and(|(i, next)| {
+                        next.is_newline() && !newline_block_has_comments(next) && *i < content_count
+                    }) {
                         if let Some((
                             _,
                             AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdNewline(extra)),
@@ -566,6 +595,23 @@ fn next_content_block_is_list(
         .is_some_and(|(_, block)| block.is_list())
 }
 
+fn newline_block_has_comments(block: &AnyMdBlock) -> bool {
+    block
+        .as_any_md_leaf_block()
+        .and_then(AnyMdLeafBlock::as_md_newline)
+        .and_then(|newline| newline.value_token().ok())
+        .is_some_and(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_comments())
+                || token
+                    .trailing_trivia()
+                    .pieces()
+                    .any(|piece| piece.is_comments())
+        })
+}
+
 fn next_content_block_is_thematic_break(
     block_list: &MdBlockList,
     start: usize,
@@ -614,7 +660,7 @@ fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {
 /// enclosing block list.
 ///
 /// [MdNewline]: biome_markdown_syntax::MdNewline
-fn list_ends_with_line_break(item: &AnyListItem) -> bool {
+pub(crate) fn list_ends_with_line_break(item: &AnyListItem) -> bool {
     let Some(last_bullet) = item.list().iter().last() else {
         return false;
     };

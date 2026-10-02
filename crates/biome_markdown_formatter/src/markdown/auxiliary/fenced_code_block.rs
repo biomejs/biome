@@ -1,8 +1,9 @@
 use crate::markdown::auxiliary::code_content::FormatMdCodeContentOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
+use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdFencedCodeBlockFields};
 
 #[derive(Debug, Clone, Default)]
@@ -33,6 +34,9 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         let normalized_fence: String = std::iter::repeat_n('`', fence_len).collect();
 
         let inside_list = self.text_context.is_list();
+        let has_quote_prefix = content
+            .iter()
+            .any(|item| matches!(item, AnyMdInline::MdQuotePrefix(_)));
         let has_code_content = content
             .iter()
             .any(|item| matches!(item, AnyMdInline::MdCodeContent(_)));
@@ -42,6 +46,10 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
             .sum::<Result<usize, _>>()?;
 
         for token in indent.iter() {
+            if has_quote_prefix {
+                write!(f, [token.format()])?;
+                continue;
+            }
             let char_token = token.md_indent_char_token()?;
             f.context()
                 .comments()
@@ -62,7 +70,23 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                 code_list.format(),
                 hard_line_break(),
                 format_with(|f| {
-                    if !has_code_content {
+                    if has_quote_prefix {
+                        // These lines include their quote and list prefixes in the source.
+                        // Applying list alignment before them would move `>` into the list content.
+                        write!(
+                            f,
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                content.format().with_options(
+                                    FormatMdFormatInlineItemListOptions {
+                                        print_mode: TextPrintMode::Clean,
+                                        keep_fences_in_italics: true,
+                                        text_context: TextContext::Neutral,
+                                    }
+                                )
+                            ])]
+                        )
+                    } else if !has_code_content {
                         content
                             .format()
                             .with_options(FormatMdFormatInlineItemListOptions {
@@ -94,6 +118,10 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         )?;
 
         for token in r_fence_indent.iter() {
+            if has_quote_prefix {
+                write!(f, [token.format()])?;
+                continue;
+            }
             let char_token = token.md_indent_char_token()?;
             f.context()
                 .comments()
@@ -111,6 +139,18 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                         Some(r_fence.text_trimmed_range().start())
                     )
                 )]
+            )?;
+        } else if has_quote_prefix {
+            let prefix = quote_line_prefix(node.syntax())?;
+            write!(
+                f,
+                [dedent_to_root(&format_with(|f| {
+                    write!(f, [hard_line_break(), prefix.format(true)])?;
+                    for _ in 0..opening_fence_indent {
+                        write!(f, [token(" ")])?;
+                    }
+                    write!(f, [text(&normalized_fence, None)])
+                }))]
             )?;
         } else {
             write!(f, [text(&normalized_fence, None)])?;

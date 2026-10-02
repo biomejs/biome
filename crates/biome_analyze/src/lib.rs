@@ -1,7 +1,6 @@
 #![deny(clippy::use_self, rustdoc::broken_intra_doc_links)]
 
 use biome_console::markup;
-use rustc_hash::FxHashSet;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops;
@@ -20,9 +19,12 @@ mod rule;
 mod services;
 pub mod shared;
 mod signals;
+mod snippet;
+mod suppression;
 mod suppression_action;
 mod suppressions;
 mod syntax;
+mod unsupported_rules;
 pub mod utils;
 mod visitor;
 
@@ -60,15 +62,21 @@ pub use crate::signals::{
     ActionFilter, ActionMetadata, AnalyzerAction, AnalyzerSignal, AnalyzerTransformation,
     DiagnosticSignal, PluginSignal,
 };
+pub use crate::snippet::{EmbeddedSignalInspector, SnippetAnalyzer};
 use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
-pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
+pub use crate::unsupported_rules::{UNSUPPORTED_RULES, UnsupportedRule, UnsupportedRuleReason};
+pub use crate::visitor::{
+    NodeVisitor, Visitor, VisitorContext, VisitorFinishContext, VisitorStartContext,
+};
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind,
 };
-use biome_suppression::{Suppression, SuppressionKind};
+use biome_suppression::{Suppression as ParsedSuppression, SuppressionKind};
+use rustc_hash::FxHashSet;
+pub use suppression::{Suppression, SuppressionComment};
 pub use suppression_action::{ApplySuppression, SuppressionAction};
 
 /// The analyzer is the main entry point into the `biome_analyze` infrastructure.
@@ -88,8 +96,8 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
     query_matcher: Matcher,
-    /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    /// Parses native comments and any supplied embedded snippets.
+    suppression: Box<dyn Suppression<Diagnostic = Diag> + 'analyzer>,
     /// Language-specific suppression comment emitter
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
@@ -114,7 +122,7 @@ where
     pub fn new(
         metadata: &'analyzer MetadataRegistry,
         query_matcher: Matcher,
-        parse_suppression_comment: SuppressionParser<Diag>,
+        suppression: Box<dyn Suppression<Diagnostic = Diag> + 'analyzer>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
     ) -> Self {
@@ -122,7 +130,7 @@ where
             phases: BTreeMap::new(),
             metadata,
             query_matcher,
-            parse_suppression_comment,
+            suppression,
             suppression_action,
             emit_signal,
         }
@@ -137,26 +145,82 @@ where
         self.phases.entry(phase).or_default().push(visitor);
     }
 
-    pub fn run(self, mut ctx: AnalyzerContext<L>) -> Option<Break> {
+    pub fn run(self, ctx: AnalyzerContext<L>) -> Option<Break> {
+        self.run_with_optional_inspector::<()>(ctx, None, &mut [])
+    }
+
+    /// Analyzes `ctx.root`, an embedded snippet. It checks ignore comments in
+    /// the snippet; `inspector` checks comments in the file containing it.
+    pub fn run_snippet(
+        self,
+        ctx: AnalyzerContext<L>,
+        inspector: EmbeddedSignalInspector<'_, '_>,
+    ) -> Option<Break> {
+        self.run_with_optional_inspector::<()>(ctx, Some(inspector), &mut [])
+    }
+
+    /// Analyzes `ctx.root` and its embedded snippets. Ignore comments in `ctx.root`
+    /// can also apply to findings in those snippets.
+    pub fn run_with_snippets<Output>(
+        self,
+        ctx: AnalyzerContext<L>,
+        snippets: &mut [Box<dyn SnippetAnalyzer<Break, Output = Output> + '_>],
+    ) -> Option<Break> {
+        self.run_with_optional_inspector(ctx, None, snippets)
+    }
+
+    fn run_with_optional_inspector<Output>(
+        self,
+        mut ctx: AnalyzerContext<L>,
+        mut inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+        snippets: &mut [Box<dyn SnippetAnalyzer<Break, Output = Output> + '_>],
+    ) -> Option<Break> {
         let Self {
             phases,
             mut query_matcher,
-            parse_suppression_comment,
+            suppression,
             mut emit_signal,
             suppression_action,
             metadata: _,
         } = self;
 
+        let mut metadata = MetadataRegistry::default();
+        let suppression_metadata = if snippets.is_empty() {
+            self.metadata
+        } else {
+            metadata.extend(self.metadata);
+            let mut seen = FxHashSet::default();
+            for snippet in snippets.iter() {
+                let registry = snippet.metadata();
+                if seen.insert(std::ptr::from_ref(registry)) {
+                    metadata.extend(registry);
+                }
+            }
+            &metadata
+        };
+
         let mut line_index = 0;
-        let mut suppressions = Suppressions::new(self.metadata);
+        let mut suppressions = Suppressions::new(suppression_metadata);
+
+        let mut phases = phases;
+        // Read host comments even when only a snippet has active rules.
+        if !snippets.is_empty() {
+            phases.entry(Phases::Syntax).or_default();
+        }
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
+            for visitor in &mut visitors {
+                visitor.start(VisitorStartContext {
+                    root: &ctx.root,
+                    services: &mut ctx.services,
+                });
+            }
             let runner = PhaseRunner {
                 phase,
                 visitors: &mut visitors,
                 query_matcher: &mut query_matcher,
                 signal_queue: BinaryHeap::new(),
-                parse_suppression_comment,
+                suppression: suppression.as_ref(),
                 line_index: &mut line_index,
                 emit_signal: &mut emit_signal,
                 root: &ctx.root,
@@ -165,6 +229,7 @@ where
                 suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
                 suppressions: &mut suppressions,
+                inspector: inspector.as_mut(),
                 deny_top_level_suppressions: false,
             };
 
@@ -189,6 +254,14 @@ where
                     root: &ctx.root,
                     services: &mut ctx.services,
                 });
+            }
+        }
+
+        for snippet in snippets.iter_mut() {
+            let inspector =
+                EmbeddedSignalInspector::new(&mut suppressions, snippet.diagnostics_offset());
+            if let ControlFlow::Break(br) = snippet.run(inspector) {
+                return Some(br);
             }
         }
 
@@ -247,7 +320,17 @@ where
 }
 
 /// Holds all the state required to run a single analysis phase to completion
-struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
+struct PhaseRunner<
+    'analyzer,
+    'phase,
+    'local_registry,
+    'guest,
+    'host_registry,
+    L: Language,
+    Matcher,
+    Break,
+    Diag,
+> {
     /// Identifier of the phase this runner is executing
     phase: Phases,
     /// List of visitors being run by this instance of the analyzer for each phase
@@ -256,8 +339,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     query_matcher: &'phase mut Matcher,
     /// Queue for pending analyzer signals
     signal_queue: BinaryHeap<SignalEntry<'phase, L>>,
-    /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    suppression: &'phase dyn Suppression<Diagnostic = Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
@@ -273,12 +355,14 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Analyzer options
     options: &'phase AnalyzerOptions,
     /// Tracks all suppressions during the analyzer phase
-    suppressions: &'phase mut Suppressions<'analyzer>,
+    suppressions: &'phase mut Suppressions<'local_registry>,
+    /// When analyzing a snippet, also checks ignore comments in the file containing it.
+    inspector: Option<&'phase mut EmbeddedSignalInspector<'guest, 'host_registry>>,
     /// Whether we have already encountered a token that can't precede top level suppressions
     deny_top_level_suppressions: bool,
 }
 
-impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, L, Matcher, Break, Diag>
+impl<L, Matcher, Break, Diag> PhaseRunner<'_, '_, '_, '_, '_, L, Matcher, Break, Diag>
 where
     L: Language,
     Matcher: QueryMatcher<L>,
@@ -350,9 +434,8 @@ where
         ControlFlow::Continue(())
     }
 
-    /// Process the text for a single token, parsing suppression comments and
-    /// handling line breaks, then flush all pending query signals in the queue
-    /// whose position is less than the end of the token within the file
+    /// Registers native and embedded suppression comments in source order while
+    /// tracking line breaks in the original token and trivia.
     fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
         for piece in token.leading_trivia().pieces() {
@@ -366,12 +449,37 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(comment.text(), piece.text_range())?;
+                let range = piece.text_range();
+                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                self.handle_comment(SuppressionComment {
+                    range,
+                    suppressions,
+                })?;
             }
         }
 
-        self.bump_line_index(token.text_trimmed(), token.text_trimmed_range());
-        if !self.deny_top_level_suppressions {
+        let token_range = token.text_trimmed_range();
+        let mut position = token_range.start();
+        for comment in self.suppression.parse_snippet(token_range) {
+            debug_assert!(token_range.contains_range(comment.range));
+            debug_assert!(position <= comment.range.start());
+            // Advance through each comment before registration, as for native
+            // multiline trivia, without counting the token's newlines twice.
+            let gap = TextRange::new(position, comment.range.start());
+            self.bump_line_index(&token.text()[gap - token.text_range().start()], gap);
+            self.bump_line_index(
+                &token.text()[comment.range - token.text_range().start()],
+                comment.range,
+            );
+            position = comment.range.end();
+            self.handle_comment(comment)?;
+        }
+        let remaining = TextRange::new(position, token_range.end());
+        self.bump_line_index(
+            &token.text()[remaining - token.text_range().start()],
+            remaining,
+        );
+        if !self.deny_top_level_suppressions && !token_range.is_empty() {
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 
@@ -386,7 +494,12 @@ where
             }
 
             if let Some(comment) = piece.as_comments() {
-                self.handle_comment(comment.text(), piece.text_range())?;
+                let range = piece.text_range();
+                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                self.handle_comment(SuppressionComment {
+                    range,
+                    suppressions,
+                })?;
             }
         }
 
@@ -404,100 +517,28 @@ where
                 break;
             }
 
-            if self
-                .suppressions
-                .top_level_suppression
-                .suppressed_categories
-                .contains(entry.category)
-            {
+            // Match before filtering by range so suppressions still record
+            // signals outside the requested range.
+            let is_suppressed_by_host = self.inspector.as_mut().is_some_and(|inspector| {
+                inspector.suppresses(
+                    entry.category,
+                    &entry.rule,
+                    &entry.instances,
+                    entry.text_range,
+                )
+            });
+            let is_suppressed_by_snippet = self.suppressions.suppresses(
+                entry.category,
+                &entry.rule,
+                &entry.instances,
+                entry.text_range,
+            );
+            if is_suppressed_by_host || is_suppressed_by_snippet {
                 self.signal_queue.pop();
                 continue;
             }
 
-            let is_suppressed = match &entry.rule {
-                SignalRuleKey::Rule(rule) => {
-                    self.suppressions
-                        .top_level_suppression
-                        .contains_rule_key(&entry.category, rule)
-                        || self.suppressions.range_suppressions.suppress_rule(
-                            &entry.category,
-                            rule,
-                            &entry.text_range,
-                        )
-                }
-                SignalRuleKey::Plugin(plugin) => {
-                    self.suppressions
-                        .top_level_suppression
-                        .suppressed_plugin(plugin)
-                        || self
-                            .suppressions
-                            .range_suppressions
-                            .suppress_plugin(plugin.as_ref(), &entry.text_range)
-                }
-            };
-            if is_suppressed {
-                self.signal_queue.pop();
-                continue;
-            }
-
-            // Search for an active line suppression comment covering the range of
-            // this signal: first try to load the last line suppression and see
-            // if it matches the current line index, otherwise perform a binary
-            // search over all the previously seen suppressions to find one
-            // with a matching range
-            let mut is_fully_suppressed = false;
-            // Check that instance-based comments do indeed suppress all instances
-            // Every match is discarded from this set. Use `Option` for lazy init,
-            // because most of the rules do not use instances.
-            let mut instances: Option<FxHashSet<&Box<str>>> = None;
-            for suppression in self
-                .suppressions
-                .overlapping_line_suppressions(&entry.text_range)
-                .iter_mut()
-            {
-                if !suppression.text_range.contains(start) {
-                    continue;
-                }
-                let (is_match, is_exhaustive) =
-                    if suppression.suppressed_categories.contains(entry.category) {
-                        (true, true)
-                    } else {
-                        match &entry.rule {
-                            SignalRuleKey::Rule(rule)
-                                if suppression.matches_rule(&entry.category, rule) =>
-                            {
-                                match suppression.suppressed_instance.as_ref() {
-                                    None => (true, true),
-                                    Some(v) => {
-                                        let matches_instance = instances
-                                            .get_or_insert_with(|| entry.instances.iter().collect())
-                                            .remove(v);
-                                        (matches_instance, false)
-                                    }
-                                }
-                            }
-                            SignalRuleKey::Plugin(plugin)
-                                if suppression.suppress_all_plugins
-                                    || suppression.suppressed_plugins.contains(plugin.as_ref()) =>
-                            {
-                                (true, true)
-                            }
-                            _ => (false, false),
-                        }
-                    };
-                if is_match {
-                    suppression.did_suppress_signal = true;
-                    is_fully_suppressed =
-                        is_exhaustive || instances.as_ref().is_some_and(|v| v.is_empty());
-                    if is_fully_suppressed {
-                        break;
-                    }
-                }
-            }
-
-            // If the signal is being suppressed, mark the line suppression as
-            // hit, otherwise emit the signal
-            if !is_fully_suppressed && range_match(self.range, entry.text_range) {
+            if range_match(self.range, entry.text_range) {
                 // TODO: would be nice to remove suppressed instances, if any, before emitting
                 (self.emit_signal)(&*entry.signal)?;
             }
@@ -509,10 +550,13 @@ where
         ControlFlow::Continue(())
     }
 
-    /// Parse the text content of a comment trivia piece for suppression
-    /// comments, and create line suppression entries accordingly
-    fn handle_comment(&mut self, text: &str, range: TextRange) -> ControlFlow<Break> {
-        for result in (self.parse_suppression_comment)(text, range) {
+    /// Reports parser diagnostics and registers parsed suppressions from a comment.
+    fn handle_comment(&mut self, comment: SuppressionComment<'_, Diag>) -> ControlFlow<Break> {
+        let SuppressionComment {
+            range,
+            suppressions,
+        } = comment;
+        for result in suppressions {
             let suppression: AnalyzerSuppression = match result {
                 Ok(kind) => kind,
                 Err(diag) => {
@@ -584,27 +628,6 @@ where
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
     filter.is_none_or(|filter| filter.intersect(range).is_some())
 }
-
-/// Signature for a suppression comment parser function
-///
-/// This function receives two parameters:
-/// 1. The text content of a comment.
-/// 2. The range of the token the comment belongs too. The range is calculated from [SyntaxToken::text_range], so the range
-///    includes all trivia.
-///
-/// It returns the lint suppressions as an optional lint rule (if the lint rule is `None` the
-/// comment is interpreted as suppressing all lints)
-///
-/// # Examples
-///
-/// - `// biome-ignore format` -> `vec![]`
-/// - `// biome-ignore lint` -> `vec![Everything]`
-/// - `// biome-ignore lint/complexity/useWhile` -> `vec![Rule("complexity/useWhile")]`
-/// - `// biome-ignore lint/complexity/useWhile(foo)` -> `vec![RuleWithValue("complexity/useWhile", "foo")]`
-/// - `// biome-ignore lint/complexity/useWhile lint/nursery/noUnreachable` -> `vec![Rule("complexity/useWhile"), Rule("nursery/noUnreachable")]`
-/// - `/** biome-ignore lint/complexity/useWhile */` if the comment is top-level -> `vec![TopLevel("complexity/useWhile")]`
-type SuppressionParser<D> =
-    for<'a> fn(&'a str, TextRange) -> Vec<Result<AnalyzerSuppression<'a>, D>>;
 
 #[derive(Debug, Clone)]
 /// This enum is used to categorize what is disabled by a suppression comment and with what syntax
@@ -717,9 +740,9 @@ pub enum AnalyzerSuppressionKind<'a> {
     Plugin(Option<&'a str>),
 }
 
-/// Takes a [Suppression] and returns an [AnalyzerSuppression]
+/// Takes a [ParsedSuppression] and returns an [AnalyzerSuppression]
 pub fn to_analyzer_suppressions(
-    suppression: Suppression,
+    suppression: ParsedSuppression,
     piece_range: TextRange,
 ) -> Vec<AnalyzerSuppression> {
     let mut result = Vec::with_capacity(suppression.categories.len());

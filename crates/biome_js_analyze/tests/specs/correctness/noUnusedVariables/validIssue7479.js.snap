@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIssue7479.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+var \u0065 = 10;
+console.log(e);
+
+var value = 10;
+console.log(\u{76}alue);
+
+```

@@ -210,7 +210,13 @@ AnyCssSubSelector =
 	| CssPseudoClassSelector
 	| CssPseudoElementSelector
 	| CssNestedSelector
+	| ScssInterpolatedSubSelector
 	| CssBogusSubSelector
+
+// [hidden]#{$suffix} {}
+//         ^^^^^^^^^^
+ScssInterpolatedSubSelector =
+	name: ScssInterpolatedIdentifier
 
 // * {}
 // ^
@@ -698,6 +704,15 @@ AnyCssDeclarationBlock =
 	CssDeclarationBlock
 	| CssBogusBlock
 
+// Declaration-only CSS bodies that SCSS extends with statements.
+// CSS files produce `CssDeclarationBlock`, SCSS files `CssDeclarationOrAtRuleBlock`.
+// @font-face { @include font-options; font-family: Example; }
+//            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssDeclarationOrStatementBlock =
+	CssDeclarationBlock
+	| CssDeclarationOrAtRuleBlock
+	| CssBogusBlock
+
 CssDeclarationBlock =
 	'{'
 	declarations: CssDeclarationList
@@ -973,8 +988,16 @@ CssMediaAtRuleDeclarator =
 
 CssContainerAtRuleDeclarator =
 	'container'
-	name: CssCustomIdentifier?
+	name: AnyCssContainerName?
 	query: AnyCssContainerQuery
+
+// @container sidebar (width <= 500px) {  }
+//            ^^^^^^^
+// @container #{$name} (width <= 500px) {  }
+//            ^^^^^^^^
+AnyCssContainerName =
+	CssCustomIdentifier
+	| ScssInterpolatedIdentifier
 
 CssSupportsAtRuleDeclarator =
 	'supports'
@@ -996,9 +1019,13 @@ CssCounterStyleAtRuleDeclarator =
 	'counter-style'
 	name: CssCustomIdentifier
 
+// @property --accent {}
+//           ^^^^^^^^
+// @property --#{$name} {}
+//           ^^^^^^^^^^
 CssPropertyAtRuleDeclarator =
 	'property'
-	name: CssDashedIdentifier
+	name: AnyCssDashedIdentifier
 
 CssFontFaceAtRuleDeclarator =
 	'font-face'
@@ -1050,7 +1077,7 @@ CssPropertyAtRule =
 // ^^^^^^^^^^^^^
 CssFontFaceAtRule =
 	declarator: CssFontFaceAtRuleDeclarator
-	block: AnyCssDeclarationBlock
+	block: AnyCssDeclarationOrStatementBlock
 
 
 // https://drafts.csswg.org/css-fonts/#font-feature-values
@@ -1200,7 +1227,13 @@ AnyCssContainerQueryInParens =
 	| CssContainerSizeFeatureInParens
 	| CssContainerScrollStateQueryInParens
 	| CssContainerStyleQueryInParens
+	| ScssContainerInterpolatedQuery
 	| AnyCssValue // general-enclosed
+
+// @container #{$query} {  }
+//            ^^^^^^^^^
+ScssContainerInterpolatedQuery =
+	query: ScssInterpolation
 
 // ( <container-query> )
 // @container name (width <= 500px) and ((width <= 500px) or (width <= 500px)) {  }
@@ -1424,7 +1457,7 @@ ScssKeyframesVariableDeclaration =
 //                          ^^^^^^^^^^^
 CssKeyframesItem =
 	selectors: CssKeyframesSelectorList
-	block: AnyCssDeclarationBlock
+	block: AnyCssDeclarationOrStatementBlock
 
 CssKeyframesSelectorList =  (AnyCssKeyframesSelector (',' AnyCssKeyframesSelector)*)
 
@@ -1807,7 +1840,15 @@ CssLayerReferenceList = (CssLayerNameList (',' CssLayerNameList)*)
 
 // @layer framework, bar.baz;
 //                   ^^^^^^^
-CssLayerNameList = (CssIdentifier ('.' CssIdentifier)*)
+CssLayerNameList = (AnyCssLayerName ('.' AnyCssLayerName)*)
+
+// @layer framework, bar.baz;
+//                   ^^^
+// @layer #{$layers};
+//        ^^^^^^^^^
+AnyCssLayerName =
+	CssIdentifier
+	| ScssInterpolatedIdentifier
 
 // https://drafts.csswg.org/css-conditional-3/#at-supports
 // https://drafts.csswg.org/css-conditional-4/#at-supports-ext
@@ -2131,7 +2172,7 @@ CssUnknownBlockAtRule =
 CssUnknownValueAtRule =
 	name: AnyCssUnknownAtRuleName
 	components: CssUnknownAtRuleComponentList
-	';'
+	';'?
 
 AnyCssUnknownAtRuleName =
 	CssIdentifier
@@ -2636,8 +2677,13 @@ CssAttrFunction =
 //      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
 
+// attr(data-test)
+//      ^^^^^^^^^
+// attr(#{$name})
+//      ^^^^^^^^
 AnyCssAttrName =
 	CssIdentifier
+	| ScssInterpolatedIdentifier
 	| CssBogusAttrName
 
 // Literal value that can be used as a type in the attr() function.
@@ -2854,7 +2900,7 @@ TwCustomVariantShorthand =
 TwApplyAtRule =
   'apply'
   classes: TwApplyClassList
-  ';'
+  ';'?
 
 TwApplyClassList = CssIdentifier*
 
@@ -3027,7 +3073,7 @@ ScssHideClause =
 ScssImportAtRule =
 	'import'
 	imports: ScssImportItemList
-	';'
+	';'?
 
 ScssImportItemList =
 	AnyScssImportItem (',' AnyScssImportItem)*
@@ -3053,7 +3099,7 @@ ScssExtendAtRule =
 	'extend'
 	CssSelectorList
 	optional_modifier: ScssExtendOptionalModifier?
-	';'
+	';'?
 
 // @at-root { .root-only { color: red; } }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -5,6 +5,7 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <div @click="() => { }"></div>
 <div v-on:click="() => { }"></div>
 <div @click.stop="() => { }"></div>
@@ -96,37 +97,22 @@ expression: invalid.vue
 <div role="timer" @click="() => { }"></div>
 <div role="tooltip" @click="() => { }"></div>
 <div role="progressbar" @click="() => { }"></div>
+</template>
 
 ```
 
 # Diagnostics
-```
-invalid.vue:2:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i Unexpected event handler on non-interactive element.
-  
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <div @click="() => { }"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    3 │ <div v-on:click="() => { }"></div>
-    4 │ <div @click.stop="() => { }"></div>
-  
-  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
-  
-
-```
-
 ```
 invalid.vue:3:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
     1 │ <!-- should generate diagnostics -->
-    2 │ <div @click="() => { }"></div>
-  > 3 │ <div v-on:click="() => { }"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ <div @click.stop="() => { }"></div>
-    5 │ <main @click="()=> void 0"></main>
+    2 │ <template>
+  > 3 │ <div @click="() => { }"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ <div v-on:click="() => { }"></div>
+    5 │ <div @click.stop="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -138,12 +124,12 @@ invalid.vue:4:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-    2 │ <div @click="() => { }"></div>
-    3 │ <div v-on:click="() => { }"></div>
-  > 4 │ <div @click.stop="() => { }"></div>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    5 │ <main @click="()=> void 0"></main>
-    6 │ <article @click="() => { }"></article>
+    2 │ <template>
+    3 │ <div @click="() => { }"></div>
+  > 4 │ <div v-on:click="() => { }"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div @click.stop="() => { }"></div>
+    6 │ <main @click="()=> void 0"></main>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -155,12 +141,12 @@ invalid.vue:5:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-    3 │ <div v-on:click="() => { }"></div>
-    4 │ <div @click.stop="() => { }"></div>
-  > 5 │ <main @click="()=> void 0"></main>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <article @click="() => { }"></article>
-    7 │ <aside @click="() => { }"></aside>
+    3 │ <div @click="() => { }"></div>
+    4 │ <div v-on:click="() => { }"></div>
+  > 5 │ <div @click.stop="() => { }"></div>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ <main @click="()=> void 0"></main>
+    7 │ <article @click="() => { }"></article>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -172,12 +158,12 @@ invalid.vue:6:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-    4 │ <div @click.stop="() => { }"></div>
-    5 │ <main @click="()=> void 0"></main>
-  > 6 │ <article @click="() => { }"></article>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ <aside @click="() => { }"></aside>
-    8 │ <blockquote @click="() => { }"></blockquote>
+    4 │ <div v-on:click="() => { }"></div>
+    5 │ <div @click.stop="() => { }"></div>
+  > 6 │ <main @click="()=> void 0"></main>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <article @click="() => { }"></article>
+    8 │ <aside @click="() => { }"></aside>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -189,12 +175,12 @@ invalid.vue:7:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-    5 │ <main @click="()=> void 0"></main>
-    6 │ <article @click="() => { }"></article>
-  > 7 │ <aside @click="() => { }"></aside>
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ <blockquote @click="() => { }"></blockquote>
-    9 │ 
+    5 │ <div @click.stop="() => { }"></div>
+    6 │ <main @click="()=> void 0"></main>
+  > 7 │ <article @click="() => { }"></article>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ <aside @click="() => { }"></aside>
+    9 │ <blockquote @click="() => { }"></blockquote>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -206,12 +192,12 @@ invalid.vue:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-     6 │ <article @click="() => { }"></article>
-     7 │ <aside @click="() => { }"></aside>
-   > 8 │ <blockquote @click="() => { }"></blockquote>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-     9 │ 
-    10 │ <body @click="() => { }"></body>
+     6 │ <main @click="()=> void 0"></main>
+     7 │ <article @click="() => { }"></article>
+   > 8 │ <aside @click="() => { }"></aside>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ <blockquote @click="() => { }"></blockquote>
+    10 │ 
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -219,16 +205,16 @@ invalid.vue:8:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━
 ```
 
 ```
-invalid.vue:10:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:9:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-     8 │ <blockquote @click="() => { }"></blockquote>
-     9 │ 
-  > 10 │ <body @click="() => { }"></body>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    11 │ <br @click="() => { }" />
-    12 │ <caption @click="() => { }"></caption>
+     7 │ <article @click="() => { }"></article>
+     8 │ <aside @click="() => { }"></aside>
+   > 9 │ <blockquote @click="() => { }"></blockquote>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │ <body @click="() => { }"></body>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -240,11 +226,12 @@ invalid.vue:11:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    10 │ <body @click="() => { }"></body>
-  > 11 │ <br @click="() => { }" />
+     9 │ <blockquote @click="() => { }"></blockquote>
+    10 │ 
+  > 11 │ <body @click="() => { }"></body>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ <caption @click="() => { }"></caption>
-    13 │ <dd @click="() => { }"></dd>
+    12 │ <br @click="() => { }" />
+    13 │ <caption @click="() => { }"></caption>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -256,12 +243,11 @@ invalid.vue:12:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    10 │ <body @click="() => { }"></body>
-    11 │ <br @click="() => { }" />
-  > 12 │ <caption @click="() => { }"></caption>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ <dd @click="() => { }"></dd>
-    14 │ <details @click="() => { }"></details>
+    11 │ <body @click="() => { }"></body>
+  > 12 │ <br @click="() => { }" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ <caption @click="() => { }"></caption>
+    14 │ <dd @click="() => { }"></dd>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -273,12 +259,12 @@ invalid.vue:13:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    11 │ <br @click="() => { }" />
-    12 │ <caption @click="() => { }"></caption>
-  > 13 │ <dd @click="() => { }"></dd>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    14 │ <details @click="() => { }"></details>
-    15 │ <dfn @click="() => { }"></dfn>
+    11 │ <body @click="() => { }"></body>
+    12 │ <br @click="() => { }" />
+  > 13 │ <caption @click="() => { }"></caption>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ <dd @click="() => { }"></dd>
+    15 │ <details @click="() => { }"></details>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -290,12 +276,12 @@ invalid.vue:14:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    12 │ <caption @click="() => { }"></caption>
-    13 │ <dd @click="() => { }"></dd>
-  > 14 │ <details @click="() => { }"></details>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    15 │ <dfn @click="() => { }"></dfn>
-    16 │ <dl @click="() => { }"></dl>
+    12 │ <br @click="() => { }" />
+    13 │ <caption @click="() => { }"></caption>
+  > 14 │ <dd @click="() => { }"></dd>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ <details @click="() => { }"></details>
+    16 │ <dfn @click="() => { }"></dfn>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -307,12 +293,12 @@ invalid.vue:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    13 │ <dd @click="() => { }"></dd>
-    14 │ <details @click="() => { }"></details>
-  > 15 │ <dfn @click="() => { }"></dfn>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    16 │ <dl @click="() => { }"></dl>
-    17 │ <dir @click="() => { }"></dir>
+    13 │ <caption @click="() => { }"></caption>
+    14 │ <dd @click="() => { }"></dd>
+  > 15 │ <details @click="() => { }"></details>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ <dfn @click="() => { }"></dfn>
+    17 │ <dl @click="() => { }"></dl>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -320,16 +306,16 @@ invalid.vue:15:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 ```
 
 ```
-invalid.vue:17:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:16:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Unexpected event handler on non-interactive element.
   
-    15 │ <dfn @click="() => { }"></dfn>
-    16 │ <dl @click="() => { }"></dl>
-  > 17 │ <dir @click="() => { }"></dir>
+    14 │ <dd @click="() => { }"></dd>
+    15 │ <details @click="() => { }"></details>
+  > 16 │ <dfn @click="() => { }"></dfn>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    18 │ <dt @click="() => { }"></dt>
-    19 │ <fieldset @click="() => { }"></fieldset>
+    17 │ <dl @click="() => { }"></dl>
+    18 │ <dir @click="() => { }"></dir>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -341,12 +327,12 @@ invalid.vue:18:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    16 │ <dl @click="() => { }"></dl>
-    17 │ <dir @click="() => { }"></dir>
-  > 18 │ <dt @click="() => { }"></dt>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ <fieldset @click="() => { }"></fieldset>
-    20 │ <figcaption @click="() => { }"></figcaption>
+    16 │ <dfn @click="() => { }"></dfn>
+    17 │ <dl @click="() => { }"></dl>
+  > 18 │ <dir @click="() => { }"></dir>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ <dt @click="() => { }"></dt>
+    20 │ <fieldset @click="() => { }"></fieldset>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -358,12 +344,12 @@ invalid.vue:19:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    17 │ <dir @click="() => { }"></dir>
-    18 │ <dt @click="() => { }"></dt>
-  > 19 │ <fieldset @click="() => { }"></fieldset>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ <figcaption @click="() => { }"></figcaption>
-    21 │ <figure @click="() => { }"></figure>
+    17 │ <dl @click="() => { }"></dl>
+    18 │ <dir @click="() => { }"></dir>
+  > 19 │ <dt @click="() => { }"></dt>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <fieldset @click="() => { }"></fieldset>
+    21 │ <figcaption @click="() => { }"></figcaption>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -375,12 +361,12 @@ invalid.vue:20:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    18 │ <dt @click="() => { }"></dt>
-    19 │ <fieldset @click="() => { }"></fieldset>
-  > 20 │ <figcaption @click="() => { }"></figcaption>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ <figure @click="() => { }"></figure>
-    22 │ <footer @click="() => { }"></footer>
+    18 │ <dir @click="() => { }"></dir>
+    19 │ <dt @click="() => { }"></dt>
+  > 20 │ <fieldset @click="() => { }"></fieldset>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ <figcaption @click="() => { }"></figcaption>
+    22 │ <figure @click="() => { }"></figure>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -392,12 +378,12 @@ invalid.vue:21:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    19 │ <fieldset @click="() => { }"></fieldset>
-    20 │ <figcaption @click="() => { }"></figcaption>
-  > 21 │ <figure @click="() => { }"></figure>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ <footer @click="() => { }"></footer>
-    23 │ <form @click="() => { }"></form>
+    19 │ <dt @click="() => { }"></dt>
+    20 │ <fieldset @click="() => { }"></fieldset>
+  > 21 │ <figcaption @click="() => { }"></figcaption>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ <figure @click="() => { }"></figure>
+    23 │ <footer @click="() => { }"></footer>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -409,12 +395,12 @@ invalid.vue:22:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    20 │ <figcaption @click="() => { }"></figcaption>
-    21 │ <figure @click="() => { }"></figure>
-  > 22 │ <footer @click="() => { }"></footer>
+    20 │ <fieldset @click="() => { }"></fieldset>
+    21 │ <figcaption @click="() => { }"></figcaption>
+  > 22 │ <figure @click="() => { }"></figure>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ <form @click="() => { }"></form>
-    24 │ <frame @click="() => { }" />
+    23 │ <footer @click="() => { }"></footer>
+    24 │ <form @click="() => { }"></form>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -426,12 +412,12 @@ invalid.vue:23:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    21 │ <figure @click="() => { }"></figure>
-    22 │ <footer @click="() => { }"></footer>
-  > 23 │ <form @click="() => { }"></form>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ <frame @click="() => { }" />
-    25 │ <h1 @click="() => { }"></h1>
+    21 │ <figcaption @click="() => { }"></figcaption>
+    22 │ <figure @click="() => { }"></figure>
+  > 23 │ <footer @click="() => { }"></footer>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ <form @click="() => { }"></form>
+    25 │ <frame @click="() => { }" />
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -443,12 +429,12 @@ invalid.vue:24:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    22 │ <footer @click="() => { }"></footer>
-    23 │ <form @click="() => { }"></form>
-  > 24 │ <frame @click="() => { }" />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ <h1 @click="() => { }"></h1>
-    26 │ <h2 @click="() => { }"></h2>
+    22 │ <figure @click="() => { }"></figure>
+    23 │ <footer @click="() => { }"></footer>
+  > 24 │ <form @click="() => { }"></form>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ <frame @click="() => { }" />
+    26 │ <h1 @click="() => { }"></h1>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -460,12 +446,12 @@ invalid.vue:25:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    23 │ <form @click="() => { }"></form>
-    24 │ <frame @click="() => { }" />
-  > 25 │ <h1 @click="() => { }"></h1>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ <h2 @click="() => { }"></h2>
-    27 │ <h3 @click="() => { }"></h3>
+    23 │ <footer @click="() => { }"></footer>
+    24 │ <form @click="() => { }"></form>
+  > 25 │ <frame @click="() => { }" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ <h1 @click="() => { }"></h1>
+    27 │ <h2 @click="() => { }"></h2>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -477,12 +463,12 @@ invalid.vue:26:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    24 │ <frame @click="() => { }" />
-    25 │ <h1 @click="() => { }"></h1>
-  > 26 │ <h2 @click="() => { }"></h2>
+    24 │ <form @click="() => { }"></form>
+    25 │ <frame @click="() => { }" />
+  > 26 │ <h1 @click="() => { }"></h1>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ <h3 @click="() => { }"></h3>
-    28 │ <h4 @click="() => { }"></h4>
+    27 │ <h2 @click="() => { }"></h2>
+    28 │ <h3 @click="() => { }"></h3>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -494,12 +480,12 @@ invalid.vue:27:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    25 │ <h1 @click="() => { }"></h1>
-    26 │ <h2 @click="() => { }"></h2>
-  > 27 │ <h3 @click="() => { }"></h3>
+    25 │ <frame @click="() => { }" />
+    26 │ <h1 @click="() => { }"></h1>
+  > 27 │ <h2 @click="() => { }"></h2>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ <h4 @click="() => { }"></h4>
-    29 │ <h5 @click="() => { }"></h5>
+    28 │ <h3 @click="() => { }"></h3>
+    29 │ <h4 @click="() => { }"></h4>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -511,12 +497,12 @@ invalid.vue:28:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    26 │ <h2 @click="() => { }"></h2>
-    27 │ <h3 @click="() => { }"></h3>
-  > 28 │ <h4 @click="() => { }"></h4>
+    26 │ <h1 @click="() => { }"></h1>
+    27 │ <h2 @click="() => { }"></h2>
+  > 28 │ <h3 @click="() => { }"></h3>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    29 │ <h5 @click="() => { }"></h5>
-    30 │ <h6 @click="() => { }"></h6>
+    29 │ <h4 @click="() => { }"></h4>
+    30 │ <h5 @click="() => { }"></h5>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -528,12 +514,12 @@ invalid.vue:29:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    27 │ <h3 @click="() => { }"></h3>
-    28 │ <h4 @click="() => { }"></h4>
-  > 29 │ <h5 @click="() => { }"></h5>
+    27 │ <h2 @click="() => { }"></h2>
+    28 │ <h3 @click="() => { }"></h3>
+  > 29 │ <h4 @click="() => { }"></h4>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ <h6 @click="() => { }"></h6>
-    31 │ <iframe @click="() => { }"></iframe>
+    30 │ <h5 @click="() => { }"></h5>
+    31 │ <h6 @click="() => { }"></h6>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -545,12 +531,12 @@ invalid.vue:30:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    28 │ <h4 @click="() => { }"></h4>
-    29 │ <h5 @click="() => { }"></h5>
-  > 30 │ <h6 @click="() => { }"></h6>
+    28 │ <h3 @click="() => { }"></h3>
+    29 │ <h4 @click="() => { }"></h4>
+  > 30 │ <h5 @click="() => { }"></h5>
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ <iframe @click="() => { }"></iframe>
-    32 │ <img @click="() => { }" />
+    31 │ <h6 @click="() => { }"></h6>
+    32 │ <iframe @click="() => { }"></iframe>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -562,12 +548,12 @@ invalid.vue:31:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    29 │ <h5 @click="() => { }"></h5>
-    30 │ <h6 @click="() => { }"></h6>
-  > 31 │ <iframe @click="() => { }"></iframe>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ <img @click="() => { }" />
-    33 │ <label @click="() => { }"></label>
+    29 │ <h4 @click="() => { }"></h4>
+    30 │ <h5 @click="() => { }"></h5>
+  > 31 │ <h6 @click="() => { }"></h6>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ <iframe @click="() => { }"></iframe>
+    33 │ <img @click="() => { }" />
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -579,12 +565,12 @@ invalid.vue:32:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    30 │ <h6 @click="() => { }"></h6>
-    31 │ <iframe @click="() => { }"></iframe>
-  > 32 │ <img @click="() => { }" />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    33 │ <label @click="() => { }"></label>
-    34 │ <legend @click="() => { }"></legend>
+    30 │ <h5 @click="() => { }"></h5>
+    31 │ <h6 @click="() => { }"></h6>
+  > 32 │ <iframe @click="() => { }"></iframe>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <img @click="() => { }" />
+    34 │ <label @click="() => { }"></label>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -596,12 +582,12 @@ invalid.vue:33:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    31 │ <iframe @click="() => { }"></iframe>
-    32 │ <img @click="() => { }" />
-  > 33 │ <label @click="() => { }"></label>
+    31 │ <h6 @click="() => { }"></h6>
+    32 │ <iframe @click="() => { }"></iframe>
+  > 33 │ <img @click="() => { }" />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    34 │ <legend @click="() => { }"></legend>
-    35 │ <li @click="() => { }"></li>
+    34 │ <label @click="() => { }"></label>
+    35 │ <legend @click="() => { }"></legend>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -613,12 +599,12 @@ invalid.vue:34:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    32 │ <img @click="() => { }" />
-    33 │ <label @click="() => { }"></label>
-  > 34 │ <legend @click="() => { }"></legend>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    35 │ <li @click="() => { }"></li>
-    36 │ <mark @click="() => { }"></mark>
+    32 │ <iframe @click="() => { }"></iframe>
+    33 │ <img @click="() => { }" />
+  > 34 │ <label @click="() => { }"></label>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <legend @click="() => { }"></legend>
+    36 │ <li @click="() => { }"></li>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -630,12 +616,12 @@ invalid.vue:35:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    33 │ <label @click="() => { }"></label>
-    34 │ <legend @click="() => { }"></legend>
-  > 35 │ <li @click="() => { }"></li>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    36 │ <mark @click="() => { }"></mark>
-    37 │ <marquee @click="() => { }"></marquee>
+    33 │ <img @click="() => { }" />
+    34 │ <label @click="() => { }"></label>
+  > 35 │ <legend @click="() => { }"></legend>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ <li @click="() => { }"></li>
+    37 │ <mark @click="() => { }"></mark>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -647,12 +633,12 @@ invalid.vue:36:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    34 │ <legend @click="() => { }"></legend>
-    35 │ <li @click="() => { }"></li>
-  > 36 │ <mark @click="() => { }"></mark>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    37 │ <marquee @click="() => { }"></marquee>
-    38 │ <menu @click="() => { }"></menu>
+    34 │ <label @click="() => { }"></label>
+    35 │ <legend @click="() => { }"></legend>
+  > 36 │ <li @click="() => { }"></li>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ <mark @click="() => { }"></mark>
+    38 │ <marquee @click="() => { }"></marquee>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -664,12 +650,12 @@ invalid.vue:37:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    35 │ <li @click="() => { }"></li>
-    36 │ <mark @click="() => { }"></mark>
-  > 37 │ <marquee @click="() => { }"></marquee>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    38 │ <menu @click="() => { }"></menu>
-    39 │ <meter @click="() => { }"></meter>
+    35 │ <legend @click="() => { }"></legend>
+    36 │ <li @click="() => { }"></li>
+  > 37 │ <mark @click="() => { }"></mark>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ <marquee @click="() => { }"></marquee>
+    39 │ <menu @click="() => { }"></menu>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -681,12 +667,12 @@ invalid.vue:38:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    36 │ <mark @click="() => { }"></mark>
-    37 │ <marquee @click="() => { }"></marquee>
-  > 38 │ <menu @click="() => { }"></menu>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    39 │ <meter @click="() => { }"></meter>
-    40 │ <nav @click="() => { }"></nav>
+    36 │ <li @click="() => { }"></li>
+    37 │ <mark @click="() => { }"></mark>
+  > 38 │ <marquee @click="() => { }"></marquee>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ <menu @click="() => { }"></menu>
+    40 │ <meter @click="() => { }"></meter>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -698,12 +684,12 @@ invalid.vue:39:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    37 │ <marquee @click="() => { }"></marquee>
-    38 │ <menu @click="() => { }"></menu>
-  > 39 │ <meter @click="() => { }"></meter>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    40 │ <nav @click="() => { }"></nav>
-    41 │ <ol @click="() => { }"></ol>
+    37 │ <mark @click="() => { }"></mark>
+    38 │ <marquee @click="() => { }"></marquee>
+  > 39 │ <menu @click="() => { }"></menu>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ <meter @click="() => { }"></meter>
+    41 │ <nav @click="() => { }"></nav>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -715,12 +701,12 @@ invalid.vue:40:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    38 │ <menu @click="() => { }"></menu>
-    39 │ <meter @click="() => { }"></meter>
-  > 40 │ <nav @click="() => { }"></nav>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │ <ol @click="() => { }"></ol>
-    42 │ <optgroup @click="() => { }"></optgroup>
+    38 │ <marquee @click="() => { }"></marquee>
+    39 │ <menu @click="() => { }"></menu>
+  > 40 │ <meter @click="() => { }"></meter>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ <nav @click="() => { }"></nav>
+    42 │ <ol @click="() => { }"></ol>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -732,12 +718,12 @@ invalid.vue:41:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    39 │ <meter @click="() => { }"></meter>
-    40 │ <nav @click="() => { }"></nav>
-  > 41 │ <ol @click="() => { }"></ol>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    42 │ <optgroup @click="() => { }"></optgroup>
-    43 │ <output @click="() => { }"></output>
+    39 │ <menu @click="() => { }"></menu>
+    40 │ <meter @click="() => { }"></meter>
+  > 41 │ <nav @click="() => { }"></nav>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ <ol @click="() => { }"></ol>
+    43 │ <optgroup @click="() => { }"></optgroup>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -749,12 +735,12 @@ invalid.vue:42:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    40 │ <nav @click="() => { }"></nav>
-    41 │ <ol @click="() => { }"></ol>
-  > 42 │ <optgroup @click="() => { }"></optgroup>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    43 │ <output @click="() => { }"></output>
-    44 │ <p @click="() => { }"></p>
+    40 │ <meter @click="() => { }"></meter>
+    41 │ <nav @click="() => { }"></nav>
+  > 42 │ <ol @click="() => { }"></ol>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ <optgroup @click="() => { }"></optgroup>
+    44 │ <output @click="() => { }"></output>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -766,12 +752,12 @@ invalid.vue:43:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    41 │ <ol @click="() => { }"></ol>
-    42 │ <optgroup @click="() => { }"></optgroup>
-  > 43 │ <output @click="() => { }"></output>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ <p @click="() => { }"></p>
-    45 │ <pre @click="() => { }"></pre>
+    41 │ <nav @click="() => { }"></nav>
+    42 │ <ol @click="() => { }"></ol>
+  > 43 │ <optgroup @click="() => { }"></optgroup>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ <output @click="() => { }"></output>
+    45 │ <p @click="() => { }"></p>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -783,12 +769,12 @@ invalid.vue:44:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    42 │ <optgroup @click="() => { }"></optgroup>
-    43 │ <output @click="() => { }"></output>
-  > 44 │ <p @click="() => { }"></p>
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    45 │ <pre @click="() => { }"></pre>
-    46 │ <progress @click="() => { }"></progress>
+    42 │ <ol @click="() => { }"></ol>
+    43 │ <optgroup @click="() => { }"></optgroup>
+  > 44 │ <output @click="() => { }"></output>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ <p @click="() => { }"></p>
+    46 │ <pre @click="() => { }"></pre>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -800,12 +786,12 @@ invalid.vue:45:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    43 │ <output @click="() => { }"></output>
-    44 │ <p @click="() => { }"></p>
-  > 45 │ <pre @click="() => { }"></pre>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ <progress @click="() => { }"></progress>
-    47 │ <ruby @click="() => { }"></ruby>
+    43 │ <optgroup @click="() => { }"></optgroup>
+    44 │ <output @click="() => { }"></output>
+  > 45 │ <p @click="() => { }"></p>
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    46 │ <pre @click="() => { }"></pre>
+    47 │ <progress @click="() => { }"></progress>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -817,12 +803,12 @@ invalid.vue:46:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    44 │ <p @click="() => { }"></p>
-    45 │ <pre @click="() => { }"></pre>
-  > 46 │ <progress @click="() => { }"></progress>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    47 │ <ruby @click="() => { }"></ruby>
-    48 │ <section @click="() => { }" aria-label="Aardvark"></section>
+    44 │ <output @click="() => { }"></output>
+    45 │ <p @click="() => { }"></p>
+  > 46 │ <pre @click="() => { }"></pre>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ <progress @click="() => { }"></progress>
+    48 │ <ruby @click="() => { }"></ruby>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -834,12 +820,12 @@ invalid.vue:47:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    45 │ <pre @click="() => { }"></pre>
-    46 │ <progress @click="() => { }"></progress>
-  > 47 │ <ruby @click="() => { }"></ruby>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    48 │ <section @click="() => { }" aria-label="Aardvark"></section>
-    49 │ <section @click="() => { }" aria-labelledby="js_1"></section>
+    45 │ <p @click="() => { }"></p>
+    46 │ <pre @click="() => { }"></pre>
+  > 47 │ <progress @click="() => { }"></progress>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ <ruby @click="() => { }"></ruby>
+    49 │ <section @click="() => { }" aria-label="Aardvark"></section>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -851,12 +837,12 @@ invalid.vue:48:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    46 │ <progress @click="() => { }"></progress>
-    47 │ <ruby @click="() => { }"></ruby>
-  > 48 │ <section @click="() => { }" aria-label="Aardvark"></section>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    49 │ <section @click="() => { }" aria-labelledby="js_1"></section>
-    50 │ <table @click="() => { }"></table>
+    46 │ <pre @click="() => { }"></pre>
+    47 │ <progress @click="() => { }"></progress>
+  > 48 │ <ruby @click="() => { }"></ruby>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ <section @click="() => { }" aria-label="Aardvark"></section>
+    50 │ <section @click="() => { }" aria-labelledby="js_1"></section>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -868,12 +854,12 @@ invalid.vue:49:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    47 │ <ruby @click="() => { }"></ruby>
-    48 │ <section @click="() => { }" aria-label="Aardvark"></section>
-  > 49 │ <section @click="() => { }" aria-labelledby="js_1"></section>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    50 │ <table @click="() => { }"></table>
-    51 │ <tbody @click="() => { }"></tbody>
+    47 │ <progress @click="() => { }"></progress>
+    48 │ <ruby @click="() => { }"></ruby>
+  > 49 │ <section @click="() => { }" aria-label="Aardvark"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ <section @click="() => { }" aria-labelledby="js_1"></section>
+    51 │ <table @click="() => { }"></table>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -885,12 +871,12 @@ invalid.vue:50:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    48 │ <section @click="() => { }" aria-label="Aardvark"></section>
-    49 │ <section @click="() => { }" aria-labelledby="js_1"></section>
-  > 50 │ <table @click="() => { }"></table>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    51 │ <tbody @click="() => { }"></tbody>
-    52 │ <td @click="() => { }"></td>
+    48 │ <ruby @click="() => { }"></ruby>
+    49 │ <section @click="() => { }" aria-label="Aardvark"></section>
+  > 50 │ <section @click="() => { }" aria-labelledby="js_1"></section>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ <table @click="() => { }"></table>
+    52 │ <tbody @click="() => { }"></tbody>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -902,12 +888,12 @@ invalid.vue:51:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    49 │ <section @click="() => { }" aria-labelledby="js_1"></section>
-    50 │ <table @click="() => { }"></table>
-  > 51 │ <tbody @click="() => { }"></tbody>
+    49 │ <section @click="() => { }" aria-label="Aardvark"></section>
+    50 │ <section @click="() => { }" aria-labelledby="js_1"></section>
+  > 51 │ <table @click="() => { }"></table>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ <td @click="() => { }"></td>
-    53 │ <tfoot @click="() => { }"></tfoot>
+    52 │ <tbody @click="() => { }"></tbody>
+    53 │ <td @click="() => { }"></td>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -919,12 +905,12 @@ invalid.vue:52:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    50 │ <table @click="() => { }"></table>
-    51 │ <tbody @click="() => { }"></tbody>
-  > 52 │ <td @click="() => { }"></td>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ <tfoot @click="() => { }"></tfoot>
-    54 │ <thead @click="() => { }"></thead>
+    50 │ <section @click="() => { }" aria-labelledby="js_1"></section>
+    51 │ <table @click="() => { }"></table>
+  > 52 │ <tbody @click="() => { }"></tbody>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ <td @click="() => { }"></td>
+    54 │ <tfoot @click="() => { }"></tfoot>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -936,12 +922,12 @@ invalid.vue:53:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    51 │ <tbody @click="() => { }"></tbody>
-    52 │ <td @click="() => { }"></td>
-  > 53 │ <tfoot @click="() => { }"></tfoot>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    54 │ <thead @click="() => { }"></thead>
-    55 │ <time @click="() => { }"></time>
+    51 │ <table @click="() => { }"></table>
+    52 │ <tbody @click="() => { }"></tbody>
+  > 53 │ <td @click="() => { }"></td>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ <tfoot @click="() => { }"></tfoot>
+    55 │ <thead @click="() => { }"></thead>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -953,12 +939,12 @@ invalid.vue:54:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    52 │ <td @click="() => { }"></td>
-    53 │ <tfoot @click="() => { }"></tfoot>
-  > 54 │ <thead @click="() => { }"></thead>
+    52 │ <tbody @click="() => { }"></tbody>
+    53 │ <td @click="() => { }"></td>
+  > 54 │ <tfoot @click="() => { }"></tfoot>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    55 │ <time @click="() => { }"></time>
-    56 │ <ul @click="() => { }"></ul>
+    55 │ <thead @click="() => { }"></thead>
+    56 │ <time @click="() => { }"></time>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -970,12 +956,12 @@ invalid.vue:55:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    53 │ <tfoot @click="() => { }"></tfoot>
-    54 │ <thead @click="() => { }"></thead>
-  > 55 │ <time @click="() => { }"></time>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    56 │ <ul @click="() => { }"></ul>
-    57 │ <ul contenteditable="false" @click="() => { }"></ul>
+    53 │ <td @click="() => { }"></td>
+    54 │ <tfoot @click="() => { }"></tfoot>
+  > 55 │ <thead @click="() => { }"></thead>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ <time @click="() => { }"></time>
+    57 │ <ul @click="() => { }"></ul>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -987,12 +973,12 @@ invalid.vue:56:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    54 │ <thead @click="() => { }"></thead>
-    55 │ <time @click="() => { }"></time>
-  > 56 │ <ul @click="() => { }"></ul>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    57 │ <ul contenteditable="false" @click="() => { }"></ul>
-    58 │ <div role="alert" @click="() => { }"></div>
+    54 │ <tfoot @click="() => { }"></tfoot>
+    55 │ <thead @click="() => { }"></thead>
+  > 56 │ <time @click="() => { }"></time>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ <ul @click="() => { }"></ul>
+    58 │ <ul contenteditable="false" @click="() => { }"></ul>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1004,12 +990,12 @@ invalid.vue:57:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    55 │ <time @click="() => { }"></time>
-    56 │ <ul @click="() => { }"></ul>
-  > 57 │ <ul contenteditable="false" @click="() => { }"></ul>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    58 │ <div role="alert" @click="() => { }"></div>
-    59 │ <div role="alertdialog" @click="() => { }"></div>
+    55 │ <thead @click="() => { }"></thead>
+    56 │ <time @click="() => { }"></time>
+  > 57 │ <ul @click="() => { }"></ul>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ <ul contenteditable="false" @click="() => { }"></ul>
+    59 │ <div role="alert" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1021,12 +1007,12 @@ invalid.vue:58:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    56 │ <ul @click="() => { }"></ul>
-    57 │ <ul contenteditable="false" @click="() => { }"></ul>
-  > 58 │ <div role="alert" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    59 │ <div role="alertdialog" @click="() => { }"></div>
-    60 │ <div role="application" @click="() => { }"></div>
+    56 │ <time @click="() => { }"></time>
+    57 │ <ul @click="() => { }"></ul>
+  > 58 │ <ul contenteditable="false" @click="() => { }"></ul>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ <div role="alert" @click="() => { }"></div>
+    60 │ <div role="alertdialog" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1038,12 +1024,12 @@ invalid.vue:59:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    57 │ <ul contenteditable="false" @click="() => { }"></ul>
-    58 │ <div role="alert" @click="() => { }"></div>
-  > 59 │ <div role="alertdialog" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    60 │ <div role="application" @click="() => { }"></div>
-    61 │ <div role="banner" @click="() => { }"></div>
+    57 │ <ul @click="() => { }"></ul>
+    58 │ <ul contenteditable="false" @click="() => { }"></ul>
+  > 59 │ <div role="alert" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ <div role="alertdialog" @click="() => { }"></div>
+    61 │ <div role="application" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1055,12 +1041,12 @@ invalid.vue:60:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    58 │ <div role="alert" @click="() => { }"></div>
-    59 │ <div role="alertdialog" @click="() => { }"></div>
-  > 60 │ <div role="application" @click="() => { }"></div>
+    58 │ <ul contenteditable="false" @click="() => { }"></ul>
+    59 │ <div role="alert" @click="() => { }"></div>
+  > 60 │ <div role="alertdialog" @click="() => { }"></div>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    61 │ <div role="banner" @click="() => { }"></div>
-    62 │ <div role="cell" @click="() => { }"></div>
+    61 │ <div role="application" @click="() => { }"></div>
+    62 │ <div role="banner" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1072,12 +1058,12 @@ invalid.vue:61:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    59 │ <div role="alertdialog" @click="() => { }"></div>
-    60 │ <div role="application" @click="() => { }"></div>
-  > 61 │ <div role="banner" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    62 │ <div role="cell" @click="() => { }"></div>
-    63 │ <div role="complementary" @click="() => { }"></div>
+    59 │ <div role="alert" @click="() => { }"></div>
+    60 │ <div role="alertdialog" @click="() => { }"></div>
+  > 61 │ <div role="application" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ <div role="banner" @click="() => { }"></div>
+    63 │ <div role="cell" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1089,12 +1075,12 @@ invalid.vue:62:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    60 │ <div role="application" @click="() => { }"></div>
-    61 │ <div role="banner" @click="() => { }"></div>
-  > 62 │ <div role="cell" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    63 │ <div role="complementary" @click="() => { }"></div>
-    64 │ <div role="contentinfo" @click="() => { }"></div>
+    60 │ <div role="alertdialog" @click="() => { }"></div>
+    61 │ <div role="application" @click="() => { }"></div>
+  > 62 │ <div role="banner" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ <div role="cell" @click="() => { }"></div>
+    64 │ <div role="complementary" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1106,12 +1092,12 @@ invalid.vue:63:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    61 │ <div role="banner" @click="() => { }"></div>
-    62 │ <div role="cell" @click="() => { }"></div>
-  > 63 │ <div role="complementary" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    64 │ <div role="contentinfo" @click="() => { }"></div>
-    65 │ <div role="definition" @click="() => { }"></div>
+    61 │ <div role="application" @click="() => { }"></div>
+    62 │ <div role="banner" @click="() => { }"></div>
+  > 63 │ <div role="cell" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ <div role="complementary" @click="() => { }"></div>
+    65 │ <div role="contentinfo" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1123,12 +1109,12 @@ invalid.vue:64:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    62 │ <div role="cell" @click="() => { }"></div>
-    63 │ <div role="complementary" @click="() => { }"></div>
-  > 64 │ <div role="contentinfo" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    65 │ <div role="definition" @click="() => { }"></div>
-    66 │ <div role="dialog" @click="() => { }"></div>
+    62 │ <div role="banner" @click="() => { }"></div>
+    63 │ <div role="cell" @click="() => { }"></div>
+  > 64 │ <div role="complementary" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ <div role="contentinfo" @click="() => { }"></div>
+    66 │ <div role="definition" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1140,12 +1126,12 @@ invalid.vue:65:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    63 │ <div role="complementary" @click="() => { }"></div>
-    64 │ <div role="contentinfo" @click="() => { }"></div>
-  > 65 │ <div role="definition" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    66 │ <div role="dialog" @click="() => { }"></div>
-    67 │ <div role="directory" @click="() => { }"></div>
+    63 │ <div role="cell" @click="() => { }"></div>
+    64 │ <div role="complementary" @click="() => { }"></div>
+  > 65 │ <div role="contentinfo" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ <div role="definition" @click="() => { }"></div>
+    67 │ <div role="dialog" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1157,12 +1143,12 @@ invalid.vue:66:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    64 │ <div role="contentinfo" @click="() => { }"></div>
-    65 │ <div role="definition" @click="() => { }"></div>
-  > 66 │ <div role="dialog" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    67 │ <div role="directory" @click="() => { }"></div>
-    68 │ <div role="document" @click="() => { }"></div>
+    64 │ <div role="complementary" @click="() => { }"></div>
+    65 │ <div role="contentinfo" @click="() => { }"></div>
+  > 66 │ <div role="definition" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ <div role="dialog" @click="() => { }"></div>
+    68 │ <div role="directory" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1174,12 +1160,12 @@ invalid.vue:67:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    65 │ <div role="definition" @click="() => { }"></div>
-    66 │ <div role="dialog" @click="() => { }"></div>
-  > 67 │ <div role="directory" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    68 │ <div role="document" @click="() => { }"></div>
-    69 │ <div role="feed" @click="() => { }"></div>
+    65 │ <div role="contentinfo" @click="() => { }"></div>
+    66 │ <div role="definition" @click="() => { }"></div>
+  > 67 │ <div role="dialog" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ <div role="directory" @click="() => { }"></div>
+    69 │ <div role="document" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1191,12 +1177,12 @@ invalid.vue:68:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    66 │ <div role="dialog" @click="() => { }"></div>
-    67 │ <div role="directory" @click="() => { }"></div>
-  > 68 │ <div role="document" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    69 │ <div role="feed" @click="() => { }"></div>
-    70 │ <div role="figure" @click="() => { }"></div>
+    66 │ <div role="definition" @click="() => { }"></div>
+    67 │ <div role="dialog" @click="() => { }"></div>
+  > 68 │ <div role="directory" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ <div role="document" @click="() => { }"></div>
+    70 │ <div role="feed" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1208,12 +1194,12 @@ invalid.vue:69:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    67 │ <div role="directory" @click="() => { }"></div>
-    68 │ <div role="document" @click="() => { }"></div>
-  > 69 │ <div role="feed" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    70 │ <div role="figure" @click="() => { }"></div>
-    71 │ <div role="form" @click="() => { }"></div>
+    67 │ <div role="dialog" @click="() => { }"></div>
+    68 │ <div role="directory" @click="() => { }"></div>
+  > 69 │ <div role="document" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ <div role="feed" @click="() => { }"></div>
+    71 │ <div role="figure" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1225,12 +1211,12 @@ invalid.vue:70:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    68 │ <div role="document" @click="() => { }"></div>
-    69 │ <div role="feed" @click="() => { }"></div>
-  > 70 │ <div role="figure" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    71 │ <div role="form" @click="() => { }"></div>
-    72 │ <div role="group" @click="() => { }"></div>
+    68 │ <div role="directory" @click="() => { }"></div>
+    69 │ <div role="document" @click="() => { }"></div>
+  > 70 │ <div role="feed" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ <div role="figure" @click="() => { }"></div>
+    72 │ <div role="form" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1242,12 +1228,12 @@ invalid.vue:71:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    69 │ <div role="feed" @click="() => { }"></div>
-    70 │ <div role="figure" @click="() => { }"></div>
-  > 71 │ <div role="form" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    72 │ <div role="group" @click="() => { }"></div>
-    73 │ <div role="heading" @click="() => { }"></div>
+    69 │ <div role="document" @click="() => { }"></div>
+    70 │ <div role="feed" @click="() => { }"></div>
+  > 71 │ <div role="figure" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ <div role="form" @click="() => { }"></div>
+    73 │ <div role="group" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1259,12 +1245,12 @@ invalid.vue:72:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    70 │ <div role="figure" @click="() => { }"></div>
-    71 │ <div role="form" @click="() => { }"></div>
-  > 72 │ <div role="group" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    73 │ <div role="heading" @click="() => { }"></div>
-    74 │ <div role="img" @click="() => { }"></div>
+    70 │ <div role="feed" @click="() => { }"></div>
+    71 │ <div role="figure" @click="() => { }"></div>
+  > 72 │ <div role="form" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ <div role="group" @click="() => { }"></div>
+    74 │ <div role="heading" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1276,12 +1262,12 @@ invalid.vue:73:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    71 │ <div role="form" @click="() => { }"></div>
-    72 │ <div role="group" @click="() => { }"></div>
-  > 73 │ <div role="heading" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    74 │ <div role="img" @click="() => { }"></div>
-    75 │ <div role="list" @click="() => { }"></div>
+    71 │ <div role="figure" @click="() => { }"></div>
+    72 │ <div role="form" @click="() => { }"></div>
+  > 73 │ <div role="group" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ <div role="heading" @click="() => { }"></div>
+    75 │ <div role="img" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1293,12 +1279,12 @@ invalid.vue:74:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    72 │ <div role="group" @click="() => { }"></div>
-    73 │ <div role="heading" @click="() => { }"></div>
-  > 74 │ <div role="img" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    75 │ <div role="list" @click="() => { }"></div>
-    76 │ <div role="listitem" @click="() => { }"></div>
+    72 │ <div role="form" @click="() => { }"></div>
+    73 │ <div role="group" @click="() => { }"></div>
+  > 74 │ <div role="heading" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ <div role="img" @click="() => { }"></div>
+    76 │ <div role="list" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1310,12 +1296,12 @@ invalid.vue:75:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    73 │ <div role="heading" @click="() => { }"></div>
-    74 │ <div role="img" @click="() => { }"></div>
-  > 75 │ <div role="list" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    76 │ <div role="listitem" @click="() => { }"></div>
-    77 │ <div role="log" @click="() => { }"></div>
+    73 │ <div role="group" @click="() => { }"></div>
+    74 │ <div role="heading" @click="() => { }"></div>
+  > 75 │ <div role="img" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ <div role="list" @click="() => { }"></div>
+    77 │ <div role="listitem" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1327,12 +1313,12 @@ invalid.vue:76:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    74 │ <div role="img" @click="() => { }"></div>
-    75 │ <div role="list" @click="() => { }"></div>
-  > 76 │ <div role="listitem" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    77 │ <div role="log" @click="() => { }"></div>
-    78 │ <div role="main" @click="() => { }"></div>
+    74 │ <div role="heading" @click="() => { }"></div>
+    75 │ <div role="img" @click="() => { }"></div>
+  > 76 │ <div role="list" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ <div role="listitem" @click="() => { }"></div>
+    78 │ <div role="log" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1344,12 +1330,12 @@ invalid.vue:77:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    75 │ <div role="list" @click="() => { }"></div>
-    76 │ <div role="listitem" @click="() => { }"></div>
-  > 77 │ <div role="log" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    78 │ <div role="main" @click="() => { }"></div>
-    79 │ <div role="marquee" @click="() => { }"></div>
+    75 │ <div role="img" @click="() => { }"></div>
+    76 │ <div role="list" @click="() => { }"></div>
+  > 77 │ <div role="listitem" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    78 │ <div role="log" @click="() => { }"></div>
+    79 │ <div role="main" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1361,12 +1347,12 @@ invalid.vue:78:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    76 │ <div role="listitem" @click="() => { }"></div>
-    77 │ <div role="log" @click="() => { }"></div>
-  > 78 │ <div role="main" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    79 │ <div role="marquee" @click="() => { }"></div>
-    80 │ <div role="math" @click="() => { }"></div>
+    76 │ <div role="list" @click="() => { }"></div>
+    77 │ <div role="listitem" @click="() => { }"></div>
+  > 78 │ <div role="log" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ <div role="main" @click="() => { }"></div>
+    80 │ <div role="marquee" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1378,12 +1364,12 @@ invalid.vue:79:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    77 │ <div role="log" @click="() => { }"></div>
-    78 │ <div role="main" @click="() => { }"></div>
-  > 79 │ <div role="marquee" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    80 │ <div role="math" @click="() => { }"></div>
-    81 │ <div role="navigation" @click="() => { }"></div>
+    77 │ <div role="listitem" @click="() => { }"></div>
+    78 │ <div role="log" @click="() => { }"></div>
+  > 79 │ <div role="main" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ <div role="marquee" @click="() => { }"></div>
+    81 │ <div role="math" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1395,12 +1381,12 @@ invalid.vue:80:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    78 │ <div role="main" @click="() => { }"></div>
-    79 │ <div role="marquee" @click="() => { }"></div>
-  > 80 │ <div role="math" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    81 │ <div role="navigation" @click="() => { }"></div>
-    82 │ <div role="note" @click="() => { }"></div>
+    78 │ <div role="log" @click="() => { }"></div>
+    79 │ <div role="main" @click="() => { }"></div>
+  > 80 │ <div role="marquee" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ <div role="math" @click="() => { }"></div>
+    82 │ <div role="navigation" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1412,12 +1398,12 @@ invalid.vue:81:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    79 │ <div role="marquee" @click="() => { }"></div>
-    80 │ <div role="math" @click="() => { }"></div>
-  > 81 │ <div role="navigation" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    82 │ <div role="note" @click="() => { }"></div>
-    83 │ <div role="region" @click="() => { }"></div>
+    79 │ <div role="main" @click="() => { }"></div>
+    80 │ <div role="marquee" @click="() => { }"></div>
+  > 81 │ <div role="math" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ <div role="navigation" @click="() => { }"></div>
+    83 │ <div role="note" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1429,12 +1415,12 @@ invalid.vue:82:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    80 │ <div role="math" @click="() => { }"></div>
-    81 │ <div role="navigation" @click="() => { }"></div>
-  > 82 │ <div role="note" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    83 │ <div role="region" @click="() => { }"></div>
-    84 │ <div role="rowgroup" @click="() => { }"></div>
+    80 │ <div role="marquee" @click="() => { }"></div>
+    81 │ <div role="math" @click="() => { }"></div>
+  > 82 │ <div role="navigation" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ <div role="note" @click="() => { }"></div>
+    84 │ <div role="region" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1446,12 +1432,12 @@ invalid.vue:83:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    81 │ <div role="navigation" @click="() => { }"></div>
-    82 │ <div role="note" @click="() => { }"></div>
-  > 83 │ <div role="region" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    84 │ <div role="rowgroup" @click="() => { }"></div>
-    85 │ <div role="search" @click="() => { }"></div>
+    81 │ <div role="math" @click="() => { }"></div>
+    82 │ <div role="navigation" @click="() => { }"></div>
+  > 83 │ <div role="note" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ <div role="region" @click="() => { }"></div>
+    85 │ <div role="rowgroup" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1463,12 +1449,12 @@ invalid.vue:84:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    82 │ <div role="note" @click="() => { }"></div>
-    83 │ <div role="region" @click="() => { }"></div>
-  > 84 │ <div role="rowgroup" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    85 │ <div role="search" @click="() => { }"></div>
-    86 │ <div role="status" @click="() => { }"></div>
+    82 │ <div role="navigation" @click="() => { }"></div>
+    83 │ <div role="note" @click="() => { }"></div>
+  > 84 │ <div role="region" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ <div role="rowgroup" @click="() => { }"></div>
+    86 │ <div role="search" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1480,12 +1466,12 @@ invalid.vue:85:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    83 │ <div role="region" @click="() => { }"></div>
-    84 │ <div role="rowgroup" @click="() => { }"></div>
-  > 85 │ <div role="search" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    86 │ <div role="status" @click="() => { }"></div>
-    87 │ <div role="table" @click="() => { }"></div>
+    83 │ <div role="note" @click="() => { }"></div>
+    84 │ <div role="region" @click="() => { }"></div>
+  > 85 │ <div role="rowgroup" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ <div role="search" @click="() => { }"></div>
+    87 │ <div role="status" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1497,12 +1483,12 @@ invalid.vue:86:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    84 │ <div role="rowgroup" @click="() => { }"></div>
-    85 │ <div role="search" @click="() => { }"></div>
-  > 86 │ <div role="status" @click="() => { }"></div>
+    84 │ <div role="region" @click="() => { }"></div>
+    85 │ <div role="rowgroup" @click="() => { }"></div>
+  > 86 │ <div role="search" @click="() => { }"></div>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    87 │ <div role="table" @click="() => { }"></div>
-    88 │ <div role="tabpanel" @click="() => { }"></div>
+    87 │ <div role="status" @click="() => { }"></div>
+    88 │ <div role="table" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1514,12 +1500,12 @@ invalid.vue:87:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    85 │ <div role="search" @click="() => { }"></div>
-    86 │ <div role="status" @click="() => { }"></div>
-  > 87 │ <div role="table" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    88 │ <div role="tabpanel" @click="() => { }"></div>
-    89 │ <div role="term" @click="() => { }"></div>
+    85 │ <div role="rowgroup" @click="() => { }"></div>
+    86 │ <div role="search" @click="() => { }"></div>
+  > 87 │ <div role="status" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ <div role="table" @click="() => { }"></div>
+    89 │ <div role="tabpanel" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1531,12 +1517,12 @@ invalid.vue:88:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    86 │ <div role="status" @click="() => { }"></div>
-    87 │ <div role="table" @click="() => { }"></div>
-  > 88 │ <div role="tabpanel" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    89 │ <div role="term" @click="() => { }"></div>
-    90 │ <div role="timer" @click="() => { }"></div>
+    86 │ <div role="search" @click="() => { }"></div>
+    87 │ <div role="status" @click="() => { }"></div>
+  > 88 │ <div role="table" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ <div role="tabpanel" @click="() => { }"></div>
+    90 │ <div role="term" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1548,12 +1534,12 @@ invalid.vue:89:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    87 │ <div role="table" @click="() => { }"></div>
-    88 │ <div role="tabpanel" @click="() => { }"></div>
-  > 89 │ <div role="term" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    90 │ <div role="timer" @click="() => { }"></div>
-    91 │ <div role="tooltip" @click="() => { }"></div>
+    87 │ <div role="status" @click="() => { }"></div>
+    88 │ <div role="table" @click="() => { }"></div>
+  > 89 │ <div role="tabpanel" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ <div role="term" @click="() => { }"></div>
+    91 │ <div role="timer" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1565,12 +1551,12 @@ invalid.vue:90:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    88 │ <div role="tabpanel" @click="() => { }"></div>
-    89 │ <div role="term" @click="() => { }"></div>
-  > 90 │ <div role="timer" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    91 │ <div role="tooltip" @click="() => { }"></div>
-    92 │ <div role="progressbar" @click="() => { }"></div>
+    88 │ <div role="table" @click="() => { }"></div>
+    89 │ <div role="tabpanel" @click="() => { }"></div>
+  > 90 │ <div role="term" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    91 │ <div role="timer" @click="() => { }"></div>
+    92 │ <div role="tooltip" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1582,12 +1568,12 @@ invalid.vue:91:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    89 │ <div role="term" @click="() => { }"></div>
-    90 │ <div role="timer" @click="() => { }"></div>
-  > 91 │ <div role="tooltip" @click="() => { }"></div>
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    92 │ <div role="progressbar" @click="() => { }"></div>
-    93 │ 
+    89 │ <div role="tabpanel" @click="() => { }"></div>
+    90 │ <div role="term" @click="() => { }"></div>
+  > 91 │ <div role="timer" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ <div role="tooltip" @click="() => { }"></div>
+    93 │ <div role="progressbar" @click="() => { }"></div>
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1599,11 +1585,29 @@ invalid.vue:92:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━�
 
   i Unexpected event handler on non-interactive element.
   
-    90 │ <div role="timer" @click="() => { }"></div>
-    91 │ <div role="tooltip" @click="() => { }"></div>
-  > 92 │ <div role="progressbar" @click="() => { }"></div>
+    90 │ <div role="term" @click="() => { }"></div>
+    91 │ <div role="timer" @click="() => { }"></div>
+  > 92 │ <div role="tooltip" @click="() => { }"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    93 │ <div role="progressbar" @click="() => { }"></div>
+    94 │ </template>
+  
+  i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+```
+
+```
+invalid.vue:93:1 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected event handler on non-interactive element.
+  
+    91 │ <div role="timer" @click="() => { }"></div>
+    92 │ <div role="tooltip" @click="() => { }"></div>
+  > 93 │ <div role="progressbar" @click="() => { }"></div>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    93 │ 
+    94 │ </template>
+    95 │ 
   
   i Non-interactive element should not have event handler. Consider replace semantically interactive element like <button/> or <a href/>.
   

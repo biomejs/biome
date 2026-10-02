@@ -324,6 +324,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssAtRootQuery" => lang::ScssAtRootQuery::KIND_SET.iter().next(),
         "ScssAtRootSelector" => lang::ScssAtRootSelector::KIND_SET.iter().next(),
         "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
+        "ScssContainerInterpolatedQuery" => {
+            lang::ScssContainerInterpolatedQuery::KIND_SET.iter().next()
+        }
         "ScssContentAtRule" => lang::ScssContentAtRule::KIND_SET.iter().next(),
         "ScssDebugAtRule" => lang::ScssDebugAtRule::KIND_SET.iter().next(),
         "ScssEachAtRule" => lang::ScssEachAtRule::KIND_SET.iter().next(),
@@ -391,6 +394,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .next()
         }
         "ScssInterpolatedString" => lang::ScssInterpolatedString::KIND_SET.iter().next(),
+        "ScssInterpolatedSubSelector" => lang::ScssInterpolatedSubSelector::KIND_SET.iter().next(),
         "ScssInterpolatedUrlValue" => lang::ScssInterpolatedUrlValue::KIND_SET.iter().next(),
         "ScssInterpolatedValue" => lang::ScssInterpolatedValue::KIND_SET.iter().next(),
         "ScssInterpolation" => lang::ScssInterpolation::KIND_SET.iter().next(),
@@ -661,6 +665,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssAtRootQuery" => &[("queries", 3)],
         "ScssAtRootSelector" => &[("selector", 0)],
         "ScssBinaryExpression" => &[("left", 0), ("right", 2)],
+        "ScssContainerInterpolatedQuery" => &[("query", 0)],
         "ScssContentAtRule" => &[("arguments", 1)],
         "ScssDebugAtRule" => &[("value", 1)],
         "ScssEachAtRule" => &[("header", 1), ("block", 2)],
@@ -705,6 +710,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssInterpolatedPseudoElementSelectorArguments" => &[("selectors", 0)],
         "ScssInterpolatedPseudoElementValueArguments" => &[("values", 0)],
         "ScssInterpolatedString" => &[("parts", 1)],
+        "ScssInterpolatedSubSelector" => &[("name", 0)],
         "ScssInterpolatedUrlValue" => &[("parts", 0)],
         "ScssInterpolatedValue" => &[("items", 0)],
         "ScssInterpolation" => &[("value", 2)],

@@ -1,0 +1,27 @@
+<!-- should generate diagnostics -->
+
+<div
+    set:html={html}
+    set:text={text}
+></div>
+
+<Component
+    set:html={html}
+    set:text={text}
+/>
+
+<div
+    set:html={html}
+>child content</div>
+
+<div
+    set:text={text}
+><span>child content</span></div>
+
+<div set:html={html} set:text={text}></div>
+
+<Component set:html={html} set:text={text} />
+
+<div set:html={html}>child content</div>
+
+<div set:text={text}><span>child content</span></div>

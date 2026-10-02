@@ -137,7 +137,9 @@ impl FormatRule<AnyJsExpression> for FormatAnyJsExpressionWithoutComments {
             AnyJsExpression::JsThisExpression(node) => FormatJsThisExpression.fmt_node(node, f),
             AnyJsExpression::JsUnaryExpression(node) => FormatJsUnaryExpression.fmt_node(node, f),
             AnyJsExpression::JsYieldExpression(node) => FormatJsYieldExpression.fmt_node(node, f),
-            AnyJsExpression::JsxTagExpression(node) => FormatJsxTagExpression.fmt_node(node, f),
+            AnyJsExpression::JsxTagExpression(node) => {
+                FormatJsxTagExpression::default().fmt_node(node, f)
+            }
             AnyJsExpression::TsAsExpression(node) => FormatTsAsExpression.fmt_node(node, f),
             AnyJsExpression::TsInstantiationExpression(node) => {
                 FormatTsInstantiationExpression.fmt_node(node, f)

@@ -12,14 +12,14 @@ set windows-powershell := true
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta wasm-opt cargo-deny
+	cargo binstall cargo-insta@1.48.0 wasm-opt cargo-deny
 	cargo binstall wasm-bindgen-cli --version 0.2.117
 	pnpm install
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta wasm-opt cargo-deny --force
+	cargo binstall cargo-insta@1.48.0 wasm-opt cargo-deny --force
 	cargo binstall wasm-bindgen-cli --version 0.2.117 --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
@@ -74,6 +74,10 @@ gen-configuration:
 # Generates code for eslint migration
 gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
+
+# Exports every lint rule and assist action as JSON, with the upstream rules they implement and the ones Biome deliberately doesn't support. Prints to stdout unless given `--out <path>`.
+export-rule-metadata *args='':
+  cargo run -p xtask_codegen --features rules_metadata -- rules-metadata {{args}}
 
 # Generates the initial files for all formatter crates
 gen-formatter *args='':

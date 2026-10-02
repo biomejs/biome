@@ -2,6 +2,8 @@
 
 Read only the sections matching the diff. Load the corresponding implementation skill for implementation contracts; this reference adds reviewer-specific checks.
 
+Apply checks to changed code and affected integrations; tie findings to contracts, not heuristics. Do not expand scope or run implementation workflows.
+
 ## Repository Map
 
 | Area | Source of truth | Common counterparts |
@@ -67,6 +69,7 @@ Load `type-inference`.
 - A Salsa query must track every input that can change its result.
 - Cross-module data must remain reference-based so edits cannot leave copied data stale.
 - Trace changed resolution paths from caller result through each query, reference, import, fallback, and owning module.
+- A new `ResolutionCtx` created mid-resolution starts with empty cycle and depth guards. Unless a tracked query, a spent import or step budget, or the shared declaration evaluator bounds it, mutually referencing declarations across an import cycle overflow the stack.
 - Require semantic tests for the type shapes actually traversed. Require query-event tests only for claims about dependency or inference scope.
 
 ## Code Generation and Registration
@@ -77,6 +80,8 @@ Load `type-inference`.
 - A lint-rule change requires generated rule registration and configuration.
 - Do not report bindings or other full analyzer outputs that `AGENTS.md` explicitly leaves to CI Autofix.
 - Search parallel registration, serialization, migration, preset, and documentation sites for new enum variants, options, and manifest fields.
+
+`AGENTS.md` and `testing-codegen` define required artifacts and CI exceptions. Flag missing or stale outputs, not merely an unchanged generated diff.
 
 ## Tests and Snapshots
 

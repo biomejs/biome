@@ -1,0 +1,3 @@
+.ordinary { font: italic (16px +); color: red; }
+.interpolated { font: #{"italic"} (16px +); color: blue; }
+.after { width: 1px; }

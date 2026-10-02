@@ -187,7 +187,9 @@ use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{
+    Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed, VecBuffer,
+};
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
@@ -201,6 +203,7 @@ use biome_rowan::{AstNode, SyntaxNode};
 use crate::comments::JsCommentStyle;
 use crate::context::{JsFormatContext, JsFormatOptions};
 use crate::cst::FormatJsSyntaxNode;
+use crate::js::expressions::unary_expression::FormatJsUnaryExpression;
 use crate::syntax_rewriter::transform;
 use crate::trivia::*;
 use crate::verbatim::{format_bogus_node, format_or_verbatim, format_suppressed_node};
@@ -372,7 +375,10 @@ where
 
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut JsFormatter) -> FormatResult<()> {
-        let needs_parentheses = self.needs_parentheses(node);
+        // The unary rule wraps commented arguments, including their leading comments.
+        // That wrapper also satisfies the argument's precedence requirements.
+        let needs_parentheses = self.needs_parentheses(node)
+            && !FormatJsUnaryExpression::can_omit_argument_parentheses(node.syntax(), f);
 
         let should_insert_space = needs_parentheses && f.options().delimiter_spacing().value();
 
@@ -384,15 +390,16 @@ where
         }
 
         if let Some(range) = self.embedded_node_range(node, f) {
-            // Tokens that belong to embedded nodes are formatted later on,
-            // so we track them, even though they aren't formatted now during this pass.
-            let state = f.state_mut();
-            for token in node.syntax().tokens() {
-                state.track_token(&token);
-            }
-
+            // The node's own formatting is printed unless the embedded formatter
+            // replaces it.
+            let content = {
+                let mut buffer = VecBuffer::new(f.state_mut());
+                write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
+                buffer.into_vec()
+            };
             f.write_elements(vec![
                 FormatElement::Tag(StartEmbedded(range)),
+                FormatElement::Interned(Interned::new(content)),
                 FormatElement::Tag(EndEmbedded),
             ])?;
         } else {

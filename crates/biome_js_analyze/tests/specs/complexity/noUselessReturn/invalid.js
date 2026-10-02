@@ -92,3 +92,65 @@ function k() {
 function l() {
     if (foo) { return; }
 }
+
+// unbraced if consequent: reported, but removing the return would leave `if (a)` without a body
+function m() {
+    if (a) return;
+}
+
+// unbraced if and else branches: both reported, neither can be removed
+function n() {
+    if (a) return; else return;
+}
+
+// unbraced else branch
+function o() {
+    if (a) foo(); else return;
+}
+
+// labeled statement body
+function p() {
+    label: return;
+}
+
+// nested unbraced ifs
+function q() {
+    if (a) if (b) return;
+}
+
+// braced consequent is fixed, unbraced alternate is only reported
+function r() {
+    if (a) { return; } else return;
+}
+
+// leading line comment is preserved
+function s() {
+    doSomething();
+    // best effort
+    return;
+}
+
+// trailing comment
+function t() {
+    doSomething();
+    return; // done
+}
+
+// comment before the first statement of a block
+function u() {
+    if (a) { // reason
+        return;
+    }
+}
+
+// comment inside the return statement: no fix
+function v() {
+    doSomething();
+    return/**/;
+}
+
+// trailing comments on both this statement and the previous one
+function w() {
+    doSomething(); // a
+    return; // done
+}

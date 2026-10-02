@@ -16,7 +16,7 @@ pub(crate) enum ClosingCommentSpacing {
 
 /// Returns `true` when an include argument node owns comments before `)`.
 pub(crate) fn owns_include_closing_comments(node: &CssSyntaxNode, f: &CssFormatter) -> bool {
-    is_in_scss_include_arguments(node) && f.comments().has_dangling_comments(node)
+    f.comments().has_dangling_comments(node) && is_in_scss_include_arguments(node)
 }
 
 /// Returns `true` when an include-owned map prints comments before `)`.

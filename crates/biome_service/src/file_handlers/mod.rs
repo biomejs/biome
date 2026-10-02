@@ -53,8 +53,9 @@ use crate::workspace::{
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
     ActionFilter, AnalyzerAction, AnalyzerDiagnostic, AnalyzerOptions, AnalyzerPluginVec,
-    AnalyzerSignal, ControlFlow, FixKind, GroupCategory, Never, PLUGIN_GROUP, Queryable,
-    RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError, RuleFilter, RuleGroup,
+    AnalyzerSignal, ControlFlow, EmbeddedSignalInspector, FixKind, GroupCategory, Never,
+    PLUGIN_GROUP, Queryable, RegistryVisitor, Rule, RuleCategories, RuleCategory, RuleError,
+    RuleFilter, RuleGroup, SnippetAnalyzer,
 };
 use biome_configuration::Rules;
 use biome_configuration::analyzer::assist::Actions;
@@ -246,6 +247,18 @@ impl ParsedSnippetOrigin {
 }
 
 impl ParsedOrigin {
+    pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
+        match self {
+            Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
+                SnippetsIterator::Workspace(source.snippets(db).iter())
+            }
+            Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
+                SnippetsIterator::Interned([].iter())
+            }
+            Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
+        }
+    }
+
     pub(crate) fn interned(parse: AnyParse, diagnostic_offset: Option<TextSize>) -> Self {
         Self::Interned {
             parse,
@@ -360,6 +373,29 @@ impl From<AnyParse> for ParsedOrigin {
 pub(crate) enum SnippetsIterator<'a> {
     Workspace(std::slice::Iter<'a, ParsedSnippet>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
+}
+
+impl<'a> SnippetsIterator<'a> {
+    /// Excludes host-owned template comments from guest analysis. The unfiltered
+    /// iterator remains available for formatting and host suppression extraction.
+    pub(crate) fn for_analysis(
+        self,
+        host: &'a ParsedOrigin,
+        source: DocumentFileSource,
+        db: &'a WorkspaceDb,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        self.filter(move |snippet| {
+            #[cfg(feature = "html_embeds")]
+            {
+                !html::is_astro_template_comment(host, source, snippet, db)
+            }
+            #[cfg(not(feature = "html_embeds"))]
+            {
+                let _ = (host, source, snippet, db);
+                true
+            }
+        })
+    }
 }
 
 impl Iterator for SnippetsIterator<'_> {
@@ -481,6 +517,39 @@ pub(crate) struct LintParams<'a> {
     pub(crate) enforce_assist: bool,
 }
 
+impl<'a> LintParams<'a> {
+    /// Builds lint parameters for a snippet using the containing file's settings.
+    pub(crate) fn for_snippet(
+        &self,
+        snippet: &ParsedSnippetOrigin,
+        language: DocumentFileSource,
+    ) -> Self {
+        Self {
+            parsed_source: snippet.parsed_origin(),
+            settings: self.settings,
+            language,
+            path: self.path,
+            only: self.only,
+            skip: self.skip,
+            categories: self.categories,
+            workspace_db: self.workspace_db.clone(),
+            #[cfg(feature = "html_embeds")]
+            embedded_data: self.embedded_data.clone(),
+            #[cfg(feature = "module_graph")]
+            module_db: self.module_db.clone(),
+            project_layout: self.project_layout.clone(),
+            suppression_reason: self.suppression_reason.clone(),
+            enabled_selectors: self.enabled_selectors,
+            plugins: self.plugins.clone(),
+            pull_code_actions: self.pull_code_actions,
+            working_directory: self.working_directory,
+            max_diagnostics: self.max_diagnostics,
+            diagnostic_level: self.diagnostic_level,
+            enforce_assist: self.enforce_assist,
+        }
+    }
+}
+
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
     pub(crate) parsed_source: AnyParsedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
@@ -504,6 +573,69 @@ pub(crate) struct LintResults {
     pub(crate) skipped_diagnostics: u32,
     pub(crate) infos: usize,
     pub(crate) warnings: usize,
+}
+
+impl LintResults {
+    pub(crate) fn extend(&mut self, other: Self) {
+        self.diagnostics.extend(other.diagnostics);
+        self.errors += other.errors;
+        self.skipped_diagnostics += other.skipped_diagnostics;
+        self.infos += other.infos;
+        self.warnings += other.warnings;
+    }
+}
+
+/// Runs a guest-language linter and retains its diagnostics for the containing file.
+pub(crate) struct LintSnippetAnalyzer<'a> {
+    params: LintParams<'a>,
+    offset: TextSize,
+    metadata: &'static biome_analyze::MetadataRegistry,
+    lint: for<'guest, 'registry> fn(
+        &LintParams<'_>,
+        Option<EmbeddedSignalInspector<'guest, 'registry>>,
+    ) -> LintResults,
+    result: LintResults,
+}
+
+impl<'a> LintSnippetAnalyzer<'a> {
+    pub(crate) fn new(
+        params: LintParams<'a>,
+        offset: TextSize,
+        metadata: &'static biome_analyze::MetadataRegistry,
+        lint: for<'guest, 'registry> fn(
+            &LintParams<'_>,
+            Option<EmbeddedSignalInspector<'guest, 'registry>>,
+        ) -> LintResults,
+    ) -> Self {
+        Self {
+            params,
+            offset,
+            metadata,
+            lint,
+            result: LintResults::default(),
+        }
+    }
+}
+
+impl SnippetAnalyzer<Never> for LintSnippetAnalyzer<'_> {
+    type Output = LintResults;
+
+    fn diagnostics_offset(&self) -> TextSize {
+        self.offset
+    }
+
+    fn metadata(&self) -> &'static biome_analyze::MetadataRegistry {
+        self.metadata
+    }
+
+    fn run(&mut self, inspector: EmbeddedSignalInspector<'_, '_>) -> ControlFlow<Never> {
+        self.result = (self.lint)(&self.params, Some(inspector));
+        ControlFlow::Continue(())
+    }
+
+    fn into_output(self: Box<Self>) -> Self::Output {
+        self.result
+    }
 }
 
 pub(crate) struct ProcessLint<'a> {
@@ -910,7 +1042,7 @@ impl<'a> ProcessFixAll<'a> {
         if new_text == current_text {
             return Ok(None);
         }
-        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "gritql")))?;
+        self.record_text_edit_fix(range, new_text.len() as u32, Some(("plugin", "anonymous")))?;
         Ok(Some(new_text))
     }
 
@@ -1343,6 +1475,8 @@ pub struct ParsedLangAndSetup {
     language: Language,
     variant: LanguageVariant,
     setup: bool,
+    /// Whether the Svelte `<script>` has the `module` attribute, or the legacy `context="module"`.
+    module: bool,
 }
 
 #[cfg(feature = "lang_js")]
@@ -1364,7 +1498,7 @@ fn get_attribute_value(attribute: &JsxAttribute) -> Option<TokenText> {
     Some(attribute_inner_string)
 }
 
-/// Parse the "lang" and "setup" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
+/// Parse the "lang", "setup", and "module" attributes from the opening tag of the "\<script\>" block in Svelte or Vue files.
 /// This function will return the language based on the existence or the value of the "lang" attribute.
 /// We use the JSX parser at the moment to parse the opening tag. So the opening tag should be first
 /// matched by regular expressions.
@@ -1394,6 +1528,14 @@ pub(crate) fn parse_lang_and_setup_from_script_opening_tag(
         };
         if attributes.find_by_name("setup").is_some() {
             lang_and_setup.setup = true;
+        }
+        if attributes.find_by_name("module").is_some()
+            || attributes
+                .find_by_name("context")
+                .and_then(|attribute| get_attribute_value(&attribute))
+                .is_some_and(|value| value.text() == "module")
+        {
+            lang_and_setup.module = true;
         }
         if let Some(lang_attribute) = attributes.find_by_name("lang")
             && let Some(lang_value) = get_attribute_value(&lang_attribute)
@@ -1567,7 +1709,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     ///
     /// Global recommended presets exclude rules with domains. A matching domain
     /// set to `all` enables the rule, `recommended` enables it only when the rule
-    /// is recommended, and `none` disables it.
+    /// is recommended, and `none` disables it unless another matching domain
+    /// enables it.
     fn record_rule_from_domains<R, L>(&mut self, rule_filter: RuleFilter<'static>)
     where
         L: biome_rowan::Language,
@@ -1583,6 +1726,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             return;
         }
 
+        let mut enabled = false;
+        let mut disabled = false;
         for rule_domain in R::METADATA.domains {
             if let Some((configured_domain, configured_domain_value)) = self
                 .domains
@@ -1590,16 +1735,16 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             {
                 match configured_domain_value {
                     RuleDomainValue::All => {
-                        self.enabled_rules.insert(rule_filter);
+                        enabled = true;
                         self.globals
                             .extend(configured_domain.globals().iter().copied().map(Into::into));
                     }
                     RuleDomainValue::None => {
-                        self.disabled_rules.insert(rule_filter);
+                        disabled = true;
                     }
                     RuleDomainValue::Recommended => {
                         if R::METADATA.recommended {
-                            self.enabled_rules.insert(rule_filter);
+                            enabled = true;
                             self.globals.extend(
                                 configured_domain.globals().iter().copied().map(Into::into),
                             );
@@ -1607,6 +1752,14 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
                     }
                 }
             }
+        }
+
+        // A rule that belongs to several domains stays enabled as long as at least one
+        // of them enables it, even if another one is set to `none`.
+        if enabled {
+            self.enabled_rules.insert(rule_filter);
+        } else if disabled {
+            self.disabled_rules.insert(rule_filter);
         }
     }
 
@@ -1618,6 +1771,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         FxHashSet<RuleFilter<'a>>,
     ) {
         let rules = self.rules.cloned().unwrap_or_default();
+        // A rule enabled explicitly in the configuration stays enabled even if
+        // one of its domains is disabled.
+        for rule_filter in rules.as_explicitly_enabled_rules() {
+            self.disabled_rules.remove(&rule_filter);
+        }
         self.enabled_rules.extend(rules.as_enabled_rules());
         self.disabled_rules.extend(rules.as_disabled_rules());
         (self.enabled_rules, self.disabled_rules, self.rules_with_fix)
@@ -2180,23 +2338,18 @@ struct AnalyzerVisitorComputedResult {
 
 #[salsa::interned]
 struct AnalyzerInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
 }
 
 #[salsa::interned]
 struct ManifestAnalyzerInput {
-    #[returns(ref)]
     settings: SettingsIdentity,
-    #[returns(ref)]
     override_indices: Box<[usize]>,
-    #[returns(ref)]
     manifest: ManifestDependencies,
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 fn resolved_analyzer_visitor<'db>(
     db: &'db dyn salsa::Database,
     input: AnalyzerInput<'db>,
@@ -2212,7 +2365,7 @@ pub(crate) fn analyzer_input_count_for_test(db: &WorkspaceDb) -> usize {
         .count()
 }
 
-#[salsa::tracked(returns(ref))]
+#[salsa::tracked]
 fn resolved_manifest_visitor<'db>(
     db: &'db dyn salsa::Database,
     input: ManifestAnalyzerInput<'db>,

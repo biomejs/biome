@@ -17,9 +17,13 @@ impl FormatNodeRule<MdCodeContent> for FormatMdCodeContent {
         // line. The fenced code block formatter writes that line break and
         // normalizes the optional fence indentation separately.
         let replacement = format_with(|f| {
-            let text = value_token.text();
+            // Trivia is excluded on both sides: the opening fence line's trimmed
+            // info-string whitespace is attached to this token as leading
+            // whitespace trivia, and printing it would insert it as an extra
+            // content line.
+            let text = value_token.text_trimmed();
             let bytes = text.as_bytes();
-            let token_start = value_token.text_range().start();
+            let token_start = value_token.text_trimmed_range().start();
             let format_slice = |start: usize, end: usize, f: &mut MarkdownFormatter| {
                 syntax_token_cow_slice(
                     Cow::Borrowed(&text[start..end]),

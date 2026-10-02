@@ -1,0 +1,26 @@
+---
+// should not generate diagnostics
+// biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette.
+const classes = clsx("bg-pink-500");
+---
+
+<!-- biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette. -->
+<div class="bg-pink-500"></div>
+
+<div class={/* biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette. */
+clsx("bg-pink-500", active && "text-red-500")}></div>
+
+<div class:list={/* biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette. */
+["bg-pink-500", { "text-red-500": active }]}></div>
+
+{/* biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette. */}
+<div class="bg-pink-500"></div>
+
+{hidden && (
+  // biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette.
+  <div class={clsx("bg-pink-500", active && "text-red-500")}></div>
+)}
+{items.map(item => (
+  // biome-ignore lint/nursery/noTailwindRawColors: This component displays the palette.
+  <div class={{ "bg-pink-500": item.active }} />
+))}

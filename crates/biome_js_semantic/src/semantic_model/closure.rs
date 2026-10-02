@@ -379,6 +379,7 @@ mod test {
     use biome_js_syntax::{JsArrowFunctionExpression, JsSyntaxKind};
     use biome_languages::JsFileSource;
     use biome_rowan::SyntaxNodeCast;
+    use std::collections::BTreeSet;
 
     fn assert_closure(code: &str, name: &str, captures: &[&str]) {
         let r = biome_js_parser::parse(code, JsFileSource::tsx(), JsParserOptions::default());

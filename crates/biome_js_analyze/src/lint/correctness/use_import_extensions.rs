@@ -1,5 +1,5 @@
 use biome_diagnostics::Severity;
-use biome_module_graph::JsImportPath;
+use biome_resolver::ResolutionKind;
 use camino::{Utf8Component, Utf8Path};
 use serde::{Deserialize, Serialize};
 
@@ -11,6 +11,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
+use biome_module_graph::ModuleInfoKind;
 use biome_rowan::BatchMutationExt;
 use biome_rule_options::use_import_extensions::UseImportExtensionsOptions;
 
@@ -158,15 +159,24 @@ impl Rule for UseImportExtensions {
     type Options = UseImportExtensionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module_info = ctx.js_module_info_for_path(ctx.file_path())?;
+        let owner = ctx.module_info_for_path(ctx.file_path())?;
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
+            return None;
+        };
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();
-        let resolved_path = module_info
-            .get_import_path_by_js_node(node)
-            .and_then(JsImportPath::as_path)?;
+        let import_path = module_info.get_import_path_by_js_node(node)?;
+        let resolved = import_path.resolve_js(ctx.db(), owner);
+        let resolved_path = resolved.path().as_path()?;
 
-        get_extensionless_import(node, resolved_path, ctx, force_js_extensions)
+        get_extensionless_import(
+            node,
+            resolved_path,
+            resolved.kind(),
+            ctx,
+            force_js_extensions,
+        )
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -219,6 +229,7 @@ pub struct UseImportExtensionsState {
 fn get_extensionless_import(
     node: &AnyJsImportLike,
     resolved_path: &Utf8Path,
+    resolution_kind: ResolutionKind,
     ctx: &RuleContext<UseImportExtensions>,
     force_js_extensions: bool,
 ) -> Option<UseImportExtensionsState> {
@@ -231,18 +242,12 @@ fn get_extensionless_import(
     if !matches!(
         first_component,
         Utf8Component::CurDir | Utf8Component::ParentDir
-    ) {
-        // TypeScript path aliases should still be considered.
-        // The same does *not* apply for `package.json` aliases, because
-        // extensions are not automatically applied to those.
-        let matches_path_alias = ctx
-            .project_layout()
-            .query_tsconfig_for_path(ctx.file_path(), |tsconfig| {
-                tsconfig.matches_path_alias(path.as_str())
-            })?;
-        if !matches_path_alias {
-            return None;
-        }
+    ) && resolution_kind
+        != (ResolutionKind::TsConfigPathMapping {
+            can_add_extension: true,
+        })
+    {
+        return None;
     }
 
     let resolved_stem = resolved_path.file_stem();
@@ -253,8 +258,9 @@ fn get_extensionless_import(
     let mut existing_extension = path.extension();
 
     match (resolved_path_sub_extension, existing_extension) {
-        (Some("d"), Some("js")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
-            return None; // We resolved a `.d.ts` file, but imported the `.js` file: OK.
+        (Some("d"), Some("js" | "jsx")) if resolved_extension.is_some_and(|ext| ext == "ts") => {
+            // Declaration files provide types without changing the runtime import extension.
+            return None;
         }
         (Some(_), _) if path.file_name()?.starts_with(resolved_path.file_name()?) => {
             return None; // For cases like `./foo.css` -> `./foo.css.ts`

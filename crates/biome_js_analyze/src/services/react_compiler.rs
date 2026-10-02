@@ -1,3 +1,4 @@
+use super::semantic::SemanticModelBuilderVisitor;
 use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, RuleKey, RuleMetadata,
     ServiceBag, ServicesDiagnostic, Visitor, VisitorContext, VisitorFinishContext,
@@ -54,6 +55,7 @@ impl Queryable for ReactCompilerServices {
     type Services = Self;
 
     fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, root: &AnyJsRoot) {
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
         analyzer.add_visitor(Phases::Syntax, || ReactCompilerVisitor::new(root.clone()));
         analyzer.add_visitor(Phases::Semantic, ReactCompilerQueryVisitor::default);
     }

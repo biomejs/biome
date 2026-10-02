@@ -9,68 +9,96 @@ use std::io;
 /// implementing [biome_console::fmt::Write].
 pub struct PrintGitHubDiagnostic<'fmt, D: ?Sized>(pub &'fmt D);
 
+impl<'fmt, D: AsDiagnostic + ?Sized> PrintGitHubDiagnostic<'fmt, D> {
+    /// Prints the diagnostic using `file_path` instead of its file resource.
+    pub fn with_file_path(self, file_path: &'fmt str) -> impl fmt::Display + 'fmt {
+        PrintGitHubDiagnosticWithFilePath {
+            diagnostic: self.0,
+            file_path,
+        }
+    }
+}
+
 impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnostic<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let diagnostic = self.0.as_diagnostic();
-        let location = diagnostic.location();
-
-        // Docs:
-        // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
-        let span = location
-            .span
-            // We fall back to 1:1. This usually covers diagnostics that belong to the formatter or organize imports
-            .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
-
-        let Some(source_code) = location.source_code else {
-            return Ok(());
-        };
-
-        let file_name_unescaped = match &location.resource {
-            Some(Resource::File(file)) => file,
-            _ => return Ok(()),
-        };
-
-        let source = SourceFile::new(source_code);
-        let start = source.location(span.start())?;
-        let end = source.location(span.end())?;
-
-        let command = match diagnostic.severity() {
-            Severity::Error | Severity::Fatal => "error",
-            Severity::Warning => "warning",
-            Severity::Hint | Severity::Information => "notice",
-        };
-
-        let message = {
-            let mut message = MarkupBuf::default();
-            let mut fmt = fmt::Formatter::new(&mut message);
-            fmt.write_markup(markup!({ PrintDiagnosticMessage(diagnostic) }))?;
-            markup_to_string(&message)
-        };
-
-        let title = {
-            diagnostic
-                .category()
-                .map(|category| category.name())
-                .unwrap_or_default()
-        };
-
-        fmt.write_str(
-            format! {
-                "::{} title={},file={},line={},endLine={},col={},endColumn={}::{}",
-                command, // constant, doesn't need escaping
-                title, // the diagnostic category
-                escape_property(file_name_unescaped),
-                start.line_number, // integer, doesn't need escaping
-                end.line_number, // integer, doesn't need escaping
-                start.column_number, // integer, doesn't need escaping
-                end.column_number, // integer, doesn't need escaping
-                message.map_or_else(String::new, escape_data),
-            }
-            .as_str(),
-        )?;
-
-        Ok(())
+        fmt_diagnostic(self.0.as_diagnostic(), None, fmt)
     }
+}
+
+struct PrintGitHubDiagnosticWithFilePath<'fmt, D: ?Sized> {
+    diagnostic: &'fmt D,
+    file_path: &'fmt str,
+}
+
+impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintGitHubDiagnosticWithFilePath<'_, D> {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
+        fmt_diagnostic(self.diagnostic.as_diagnostic(), Some(self.file_path), fmt)
+    }
+}
+
+fn fmt_diagnostic<D: Diagnostic + ?Sized>(
+    diagnostic: &D,
+    file_path: Option<&str>,
+    fmt: &mut fmt::Formatter<'_>,
+) -> io::Result<()> {
+    let location = diagnostic.location();
+
+    // Docs:
+    // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
+    let span = location
+        .span
+        // We fall back to 1:1. This usually covers diagnostics that belong to the formatter or organize imports
+        .unwrap_or(TextRange::new(TextSize::from(1), TextSize::from(1)));
+
+    let Some(source_code) = location.source_code else {
+        return Ok(());
+    };
+
+    let file_name_unescaped = match &location.resource {
+        Some(Resource::File(file)) => file_path.unwrap_or(file),
+        _ => return Ok(()),
+    };
+
+    let source = SourceFile::new(source_code);
+    let start = source.location(span.start())?;
+    let end = source.location(span.end())?;
+
+    let command = match diagnostic.severity() {
+        Severity::Error | Severity::Fatal => "error",
+        Severity::Warning => "warning",
+        Severity::Hint | Severity::Information => "notice",
+    };
+
+    let message = {
+        let mut message = MarkupBuf::default();
+        let mut fmt = fmt::Formatter::new(&mut message);
+        fmt.write_markup(markup!({ PrintDiagnosticMessage(diagnostic) }))?;
+        markup_to_string(&message)
+    };
+
+    let title = {
+        diagnostic
+            .category()
+            .map(|category| category.name())
+            .unwrap_or_default()
+    };
+
+    fmt.write_str(
+        format! {
+            "::{} title={},file={},line={},endLine={},col={},endColumn={}::{}",
+            command, // constant, doesn't need escaping
+            title, // the diagnostic category
+            escape_property(file_name_unescaped),
+            start.line_number, // integer, doesn't need escaping
+            end.line_number, // integer, doesn't need escaping
+            start.column_number, // integer, doesn't need escaping
+            end.column_number, // integer, doesn't need escaping
+            message.map_or_else(String::new, escape_data),
+        }
+        .as_str(),
+    )?;
+
+    Ok(())
 }
 
 struct PrintDiagnosticMessage<'fmt, D: ?Sized>(&'fmt D);

@@ -1,7 +1,9 @@
 mod utils;
 
 use biome_js_semantic::ScopeId;
+use biome_js_syntax::{JsArrowFunctionExpression, JsFormalParameter, TsTypeAliasDeclaration};
 use biome_js_type_info::{RawTypeCollector, ReturnType, TypeData, TypeReference};
+use biome_rowan::AstNode;
 
 use utils::{
     TestTypeCollector, assert_type_data_snapshot, assert_typed_bindings_snapshot, get_expression,
@@ -17,6 +19,28 @@ fn infer_type_of_identifier() {
     let mut resolver = TestTypeCollector::default();
     let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
     assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_identifier");
+}
+
+#[test]
+fn infer_type_of_indexed_access_preserves_operands() {
+    const CODE: &str = "type Element = (typeof values)[Index];";
+    let root = parse_ts(CODE);
+    let declaration = root
+        .syntax()
+        .descendants()
+        .find_map(TsTypeAliasDeclaration::cast)
+        .unwrap();
+    let mut collector = TestTypeCollector::default();
+    let ty =
+        TypeData::from_ts_type_alias_declaration(&mut collector, ScopeId::GLOBAL, &declaration)
+            .unwrap();
+    assert!(matches!(ty, TypeData::IndexedAccess(_)));
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &collector,
+        "infer_type_of_indexed_access_preserves_operands",
+    );
 }
 
 #[test]
@@ -398,4 +422,88 @@ fn infer_type_of_dynamic_import() {
         &decl,
     );
     assert_typed_bindings_snapshot(CODE, &bindings, &resolver, "infer_type_of_dynamic_import");
+}
+
+#[test]
+fn infer_type_of_call_expression_with_type_arguments() {
+    const CODE: &str = r#"first<string>([])"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_call_expression_with_type_arguments",
+    );
+}
+
+#[test]
+fn infer_type_of_contextual_callback_parameter() {
+    const CODE: &str = r#"run<Context>("kind", (first, second) => second)"#;
+
+    let root = parse_ts(CODE);
+    let param = root
+        .syntax()
+        .descendants()
+        .filter_map(JsFormalParameter::cast)
+        .nth(1)
+        .expect("second parameter must exist");
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_contextual_js_formal_parameter(&mut resolver, ScopeId::GLOBAL, &param)
+        .expect("callback parameter must be contextually typed");
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_contextual_callback_parameter",
+    );
+}
+
+#[test]
+fn infer_type_of_contextual_arrow_function_binding() {
+    const CODE: &str = r#"new Job(value => value)"#;
+
+    let root = parse_ts(CODE);
+    let arrow = root
+        .syntax()
+        .descendants()
+        .find_map(JsArrowFunctionExpression::cast)
+        .expect("arrow function must exist");
+    let mut resolver = TestTypeCollector::default();
+    let ty =
+        TypeData::from_contextual_js_arrow_function_binding(&mut resolver, ScopeId::GLOBAL, &arrow)
+            .expect("arrow function binding must be contextually typed");
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_contextual_arrow_function_binding",
+    );
+}
+
+#[test]
+fn contextual_callback_parameter_requires_direct_call_argument() {
+    const CODE: &str = r#"
+        function declared(value) {}
+        const assigned = (value: string, annotated) => annotated;
+        run([(inArray) => inArray]);
+        run(...[(spread) => spread]);
+    "#;
+
+    let root = parse_ts(CODE);
+    let mut resolver = TestTypeCollector::default();
+    for param in root
+        .syntax()
+        .descendants()
+        .filter_map(JsFormalParameter::cast)
+    {
+        assert!(
+            TypeData::from_contextual_js_formal_parameter(&mut resolver, ScopeId::GLOBAL, &param)
+                .is_none(),
+            "{param:?} must not be contextually typed"
+        );
+    }
 }

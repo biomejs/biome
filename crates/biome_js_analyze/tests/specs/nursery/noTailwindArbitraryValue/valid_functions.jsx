@@ -6,3 +6,6 @@ cn({ "hover:px-2": isActive });
 tw`w-4 text-red-500`;
 tw.div`hover:px-2 sm:text-lg`;
 tw.div`[&:nth-child(3)]:px-2`;
+classnames("w-[400px]");
+<div classList="w-[400px]" />;
+<div title="w-[400px]" />;

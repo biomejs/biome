@@ -143,7 +143,7 @@ impl Rule for NoUndeclaredClasses {
 
             // Only build the import tree for diagnostic display when the class is missing.
             if !found_class && let Some(module) = db.module_for_path(file_path) {
-                let import_tree = build_import_tree_for_html(db, module);
+                let import_tree = build_import_tree_for_html(db, module).clone();
                 let start = TextSize::from(class_data.inner_file_start + class_offset);
                 let end = start + TextSize::from(class_name.len() as u32);
                 signals.push(UndeclaredClass {

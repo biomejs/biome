@@ -34,7 +34,7 @@ fn inferred_tuple_type<'db>(
     db: &'db dyn ModuleDb,
     elements: Vec<InferredTupleElementType<'db>>,
 ) -> InferredTypeData<'db> {
-    InferredTypeData::Tuple(InferredTuple::new(db, elements.into_boxed_slice()))
+    InferredTypeData::Tuple(InferredTuple::new(db, elements.into_boxed_slice(), false))
 }
 
 fn inferred_tuple_element(ty: InferredTypeData<'_>, is_rest: bool) -> InferredTupleElementType<'_> {

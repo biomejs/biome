@@ -227,16 +227,13 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
             return AnalyzerActionIter::new(vec![]);
         };
 
-        let text_edit =
-            TextEdit::from_unicode_words(&action_data.original_text, &action_data.rewritten_text);
-
         AnalyzerActionIter::new(vec![AnalyzerAction {
             rule_name: None,
             category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
             applicability: action_data.applicability,
             message: markup!({ action_data.message }).to_owned(),
             mutation: BatchMutation::new(root.clone()),
-            text_edit: Some((action_data.source_range, text_edit)),
+            text_edit: Some((action_data.source_range, action_data.text_edit.clone())),
         }])
     }
 

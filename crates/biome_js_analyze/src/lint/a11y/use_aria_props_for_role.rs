@@ -78,10 +78,15 @@ impl Rule for UseAriaPropsForRole {
                 .as_jsx_string()?
                 .inner_string_text()
                 .ok()?;
-            let role = AriaRole::from_roles(name.text());
+            let role = AriaRole::from_roles(name.text())?;
+            if role == AriaRole::Separator
+                && node.find_attribute_by_name("tabIndex").is_none()
+            {
+                return None;
+            }
             let missing_aria_props: Vec<_> = role
-                .into_iter()
-                .flat_map(|role| role.required_attributes().iter())
+                .required_attributes()
+                .iter()
                 .filter_map(|attribute| {
                     let attribute_name = attribute.as_str();
                     node.find_attribute_by_name(attribute_name)

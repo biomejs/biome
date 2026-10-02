@@ -1,0 +1,43 @@
+{
+  "private": true,
+  "name": "@biomejs/runtime",
+  "version": "0.0.0",
+  "description": "JavaScript APIs for Biome JS plugins",
+  "scripts": {
+    "test:types": "tsc --project tsconfig.json"
+  },
+  "files": [
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "diagnostics.d.ts",
+    "plugin.d.ts",
+    "plugin.js",
+    "js_ast.d.ts",
+    "semantic.d.ts"
+  ],
+  "exports": {
+    "./plugin": {
+      "types": "./plugin.d.ts",
+      "default": "./plugin.js"
+    }
+  },
+  "license": "MIT OR Apache-2.0",
+  "homepage": "https://biomejs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/biomejs/biome.git",
+    "directory": "packages/@biomejs/runtime"
+  },
+  "author": "Biome Developers and Contributors",
+  "bugs": "https://github.com/biomejs/biome/issues",
+  "devDependencies": {
+    "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "@biomejs/biome": "*"
+  },
+  "publishConfig": {
+    "provenance": true
+  }
+}

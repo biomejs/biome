@@ -1,8 +1,13 @@
 ---
 source: crates/biome_cli/tests/commands/rage.rs
-assertion_line: 384
 expression: content
 ---
+## Command
+
+```shell
+biome rage --config-path=missing/biome.json
+```
+
 # Emitted Messages
 
 ```block

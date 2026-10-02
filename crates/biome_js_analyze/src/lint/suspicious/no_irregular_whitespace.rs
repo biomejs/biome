@@ -37,7 +37,10 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noIrregularWhitespace",
         language: "js",
-        sources: &[RuleSource::Eslint("no-irregular-whitespace").same()],
+        sources: &[
+            RuleSource::Eslint("no-irregular-whitespace").same(),
+            RuleSource::EslintVueJs("no-irregular-whitespace").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
     }

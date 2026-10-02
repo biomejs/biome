@@ -545,6 +545,14 @@ impl Binding {
         self.data.binding(self.id).declaration_kind
     }
 
+    /// Returns the trimmed text range of the binding's identifier.
+    ///
+    /// This equals `self.syntax().text_trimmed_range()`, but reads the stored
+    /// range instead of locating the syntax node in the tree.
+    pub fn range(&self) -> TextRange {
+        self.data.binding(self.id).range
+    }
+
     /// Returns the syntax node associated with this binding.
     pub fn syntax(&self) -> JsSyntaxNode {
         let binding = self.data.binding(self.id);
@@ -615,12 +623,13 @@ impl Binding {
         })
     }
 
+    /// Includes regular imports, type-only imports, and TypeScript `import =` declarations.
     pub fn is_imported(&self) -> bool {
-        super::is_imported(&self.syntax())
+        self.declaration_kind().is_import_declaration()
     }
 
     pub fn is_exported(&self) -> bool {
-        self.data.is_exported(self.syntax().text_trimmed_range())
+        self.data.is_exported(self.range())
     }
 
     /// Returns the JSDoc comment associated with this binding, if any.

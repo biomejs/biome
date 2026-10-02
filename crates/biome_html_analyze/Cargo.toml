@@ -10,6 +10,7 @@ license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
 include              = ["!**/*_tests.*", "build.rs", "src/**/*"]
+publish              = false
 
 [[bench]]
 harness = false
@@ -27,6 +28,7 @@ biome_css_syntax         = { workspace = true }
 biome_deserialize        = { workspace = true }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_embeds             = { workspace = true }
 biome_html_factory       = { workspace = true }
 biome_html_syntax        = { workspace = true }
 biome_languages          = { workspace = true, features = ["lang_html"] }

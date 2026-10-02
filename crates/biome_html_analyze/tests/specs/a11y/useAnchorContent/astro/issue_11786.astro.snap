@@ -1,0 +1,121 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: issue_11786.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+<a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+    <svg aria-hidden="true">
+        <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+    </svg>
+</a>
+
+{
+    <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+        <svg aria-hidden="true">
+            <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+        </svg>
+    </a>
+}
+
+{mylinks.map((link) => {
+    const label =
+        link.title ||
+        (link.type === 'email' ? link.url.replace('mailto:', '') : `${person.name} | ${link.type}`);
+    return (
+        <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+            <svg aria-hidden="true">
+                <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+            </svg>
+        </a>
+    );
+})}
+
+```
+
+# Diagnostics
+```
+issue_11786.astro:2:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │     <svg aria-hidden="true">
+  > 4 │         <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+  > 5 │     </svg>
+  > 6 │ </a>
+      │ ^^^^
+    7 │ 
+    8 │ {
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+issue_11786.astro:8:2 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+     6 │ </a>
+     7 │ 
+   > 8 │ {
+       │  
+   > 9 │     <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+  > 10 │         <svg aria-hidden="true">
+  > 11 │             <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+  > 12 │         </svg>
+  > 13 │     </a>
+       │     ^^^^
+    14 │ }
+    15 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+issue_11786.astro:20:13 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using `a` elements.
+  
+    18 │         link.title ||
+    19 │         (link.type === 'email' ? link.url.replace('mailto:', '') : `${person.name} | ${link.type}`);
+  > 20 │     return (
+       │             
+  > 21 │         <a href={link.url} target="_blank" rel="noopener" title={label} aria-label={label}>
+  > 22 │             <svg aria-hidden="true">
+  > 23 │                 <use href={`/assets/icons/icon-${link.type}.svg#icon-${link.type}`} />
+  > 24 │             </svg>
+  > 25 │         </a>
+       │         ^^^^
+    26 │     );
+    27 │ })}
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```

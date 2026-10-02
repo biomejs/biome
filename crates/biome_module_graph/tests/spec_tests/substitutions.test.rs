@@ -456,3 +456,118 @@ fn test_infer_call_expression_type_substitutes_generic_inside_intersection_retur
         &fs,
     );
 }
+
+#[test]
+fn test_member_lookup_reuses_recursive_generic_instantiations() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Recursive<T, Recurse extends boolean = true> = Recurse extends true
+                ? Recursive<T, false> | { value: T }
+                : { value: T };
+            export declare function read(): Recursive<string> | Recursive<number>;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let ty = inferred_function_return_ty_by_name(&db, module, inferred, "read").unwrap();
+    let value = inferred.find_member_type(&db, ty, "value").unwrap();
+    assert!(contains_inferred_string(&db, value), "got {value:?}");
+    assert!(contains_inferred_number(&db, value), "got {value:?}");
+    assert_ne!(value, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_member_lookup_preserves_recursive_argument_swaps() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Recursive<T, U> = T extends string
+                ? { value: T } | Recursive<U, T>
+                : { value: T };
+            export declare function read(): Recursive<string, number>;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let ty = inferred_function_return_ty_by_name(&db, module, inferred, "read").unwrap();
+    let value = inferred.find_member_type(&db, ty, "value").unwrap();
+    assert!(contains_inferred_string(&db, value), "got {value:?}");
+    assert!(contains_inferred_number(&db, value), "got {value:?}");
+    assert_ne!(value, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_member_lookup_applies_inherited_bindings_once() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Base<V> { value: V }
+            interface Outer<T, U> extends Base<T> {}
+            export declare function read<U>(): Outer<U, string>;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let function = inferred_binding_ty_by_name(&db, module, inferred, "read").unwrap();
+    let InferredTypeData::Function(function) = inferred.resolve_type(&db, function) else {
+        panic!("expected a function");
+    };
+    let ty = inferred_function_return_ty_by_name(&db, module, inferred, "read").unwrap();
+    let value = inferred.find_member_type(&db, ty, "value").unwrap();
+    assert_eq!(
+        normalize_type(&db, module, value),
+        InferredTypeData::instance_of(&db, function.type_parameters(&db)[0], Box::default(),)
+    );
+}
+
+#[test]
+fn test_member_lookup_substitutes_before_evaluating_indexed_access() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Box<T extends unknown[]> = { value: T[number] } | { value: number };
+            declare const box: Box<string[]>;
+            export const value = box.value;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let value = inferred_binding_ty_by_name(&db, module, inferred, "value").unwrap();
+    let value = normalize_type(&db, module, value);
+    assert!(contains_inferred_string(&db, value), "got {value:?}");
+    assert!(contains_inferred_number(&db, value), "got {value:?}");
+}
+
+#[test]
+fn test_member_lookup_rebinds_same_named_inherited_parameters() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            interface Base<T> { value: T }
+            interface Derived<T> extends Base<null> { own: T }
+            declare const derived: Derived<number>;
+            export const inherited = derived.value;
+            export const own = derived.own;
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let inferred = infer_module_types(&db, module).unwrap();
+    let inherited = inferred_binding_ty_by_name(&db, module, inferred, "inherited").unwrap();
+    assert_eq!(
+        normalize_type(&db, module, inherited),
+        InferredTypeData::Null
+    );
+    let own = inferred_binding_ty_by_name(&db, module, inferred, "own").unwrap();
+    assert_eq!(normalize_type(&db, module, own), InferredTypeData::Number);
+}

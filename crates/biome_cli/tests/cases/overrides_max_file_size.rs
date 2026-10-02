@@ -1,9 +1,8 @@
-use crate::run_cli;
+use crate::TestArgs as Args;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
-use biome_cli::CliDiagnostic;
+use crate::{CliRunResult, run_cli};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 use camino::Utf8Path;
 
 const FORMATTED: &str = "statement();\n";
@@ -16,7 +15,7 @@ fn setup_test(
     max_size: u64,
     cli_command: &str,
     file_content: Option<&str>,
-) -> (MemoryFileSystem, BufferConsole, Result<(), CliDiagnostic>) {
+) -> (MemoryFileSystem, BufferConsole, CliRunResult) {
     assert!(
         CLI_COMMANDS.contains(&cli_command),
         "Command must be one of {:?}",
@@ -69,7 +68,7 @@ fn overrides_files_max_size_option_pass() {
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
-            "overrides_files_max_size_option_pass",
+            format!("overrides_files_max_size_option_pass_{cli_command}").as_str(),
             fs,
             console,
             result,
@@ -86,7 +85,7 @@ fn overrides_files_max_size_option_invalid_value() {
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
-            "overrides_files_max_size_option_invalid_value",
+            format!("overrides_files_max_size_option_invalid_value_{cli_command}").as_str(),
             fs,
             console,
             result,
@@ -120,7 +119,10 @@ fn overrides_files_max_size_ignored_includes_does_not_match_filename() {
 
         assert_cli_snapshot(SnapshotPayload::new(
             module_path!(),
-            "overrides_files_max_size_ignored_includes_does_not_match_filename",
+            format!(
+                "overrides_files_max_size_ignored_includes_does_not_match_filename_{cli_command}"
+            )
+            .as_str(),
             fs,
             console,
             result,

@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::ValueParsingContext;
+use crate::syntax::declaration::is_at_declaration_important;
 use crate::syntax::parse_error::expected_declaration_item;
 use crate::syntax::scss::parse_scss_expression_in_args_until;
 use biome_css_syntax::CssSyntaxKind::*;
@@ -79,7 +80,8 @@ impl ParseSeparatedList for ParameterList {
 
 #[inline]
 fn is_at_parameter_with_context(p: &mut CssParser, context: ValueParsingContext) -> bool {
-    is_at_any_expression_with_context(p, context)
+    (context.is_full_scss_parsing_allowed() && is_at_declaration_important(p))
+        || is_at_any_expression_with_context(p, context)
 }
 
 #[inline]

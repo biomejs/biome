@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueBaseImport {
-        version: "next",
+        version: "2.5.13",
         name: "useVueBaseImport",
         language: "js",
         sources: &[RuleSource::EslintVueJs("prefer-import-from-vue").same()],

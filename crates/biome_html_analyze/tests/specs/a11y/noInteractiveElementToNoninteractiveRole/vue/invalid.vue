@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <a href="http://x.y.z" role="img" />
 <a href="http://x.y.z" tabIndex="0" role="img" />
 
@@ -67,3 +68,4 @@
 <!-- static Vue role bindings assigning non-interactive roles to interactive elements should also be flagged -->
 <a href="http://x.y.z" :role="'img'" />
 <button v-bind:role="'none'" />
+</template>

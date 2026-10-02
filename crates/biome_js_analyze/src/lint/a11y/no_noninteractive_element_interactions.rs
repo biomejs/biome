@@ -3,6 +3,7 @@ use crate::{
     services::aria::Aria,
 };
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
@@ -103,6 +104,7 @@ impl Rule for NoNoninteractiveElementInteractions {
             || aria_roles.is_presentation_role(element)
             || is_hidden_from_screen_reader(element)
             || has_interactive_role
+            || aria_roles.get_implicit_role(element) == Some(AriaRole::Dialog)
         {
             return None;
         }

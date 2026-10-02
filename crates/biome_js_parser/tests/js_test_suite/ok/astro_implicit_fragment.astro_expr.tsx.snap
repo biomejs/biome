@@ -17,7 +17,7 @@ expression: snapshot
 JsExpressionTemplateRoot {
     expression: JsxTagExpression {
         tag: AstroImplicitFragment {
-            children: JsxChildList [
+            elements: JsxChildList [
                 JsxElement {
                     opening_element: JsxOpeningElement {
                         l_angle_token: L_ANGLE@0..1 "<" [] [],
@@ -28,7 +28,7 @@ JsExpressionTemplateRoot {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@2..3 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@3..4 "a" [] [],
                         },

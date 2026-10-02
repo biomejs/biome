@@ -1,0 +1,60 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<style>
+	.card {
+		width: 100%;
+		margin-left: 1rem;
+	}
+</style>
+<div class="card"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:4:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    2 │ <style>
+    3 │ 	.card {
+  > 4 │ 		width: 100%;
+      │ 		^^^^^
+    5 │ 		margin-left: 1rem;
+    6 │ 	}
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace width with inline-size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:5:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    3 │ 	.card {
+    4 │ 		width: 100%;
+  > 5 │ 		margin-left: 1rem;
+      │ 		^^^^^^^^^^^
+    6 │ 	}
+    7 │ </style>
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace margin-left with margin-inline-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

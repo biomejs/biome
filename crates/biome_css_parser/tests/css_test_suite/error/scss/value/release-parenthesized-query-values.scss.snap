@@ -1,0 +1,314 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$device: 768px;
+
+@media (max-width: ($device -)) {
+  .card { display: block; }
+}
+.after { width: 1px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..7 "device" [] [],
+                },
+            },
+            colon_token: COLON@7..9 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssRegularDimension {
+                        value_token: CSS_NUMBER_LITERAL@9..12 "768" [] [],
+                        unit_token: IDENT@12..14 "px" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        CssAtRule {
+            at_token: AT@15..18 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@18..24 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@24..25 "(" [] [],
+                                feature: CssQueryFeaturePlain {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@25..34 "max-width" [] [],
+                                    },
+                                    colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            ScssParenthesizedExpression {
+                                                l_paren_token: L_PAREN@36..37 "(" [] [],
+                                                expression: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssBinaryExpression {
+                                                            left: ScssVariable {
+                                                                dollar_token: DOLLAR@37..38 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@38..45 "device" [] [Whitespace(" ")],
+                                                                },
+                                                            },
+                                                            operator: MINUS@45..46 "-" [] [],
+                                                            right: missing (required),
+                                                        },
+                                                    ],
+                                                },
+                                                r_paren_token: R_PAREN@46..47 ")" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@47..49 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@49..50 "{" [] [],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@50..54 "." [Newline("\n"), Whitespace("  ")] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@54..59 "card" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@59..61 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@61..68 "display" [] [],
+                                                },
+                                                colon_token: COLON@68..70 ":" [] [Whitespace(" ")],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@70..75 "block" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@75..77 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@77..78 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@78..80 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@80..82 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@82..88 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@88..90 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@90..95 "width" [] [],
+                                },
+                                colon_token: COLON@95..97 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@97..98 "1" [] [],
+                                            unit_token: IDENT@98..100 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@100..102 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@102..103 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@103..104 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..104
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..103
+    0: SCSS_VARIABLE_DECLARATION@0..15
+      0: SCSS_VARIABLE@0..7
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..7
+          0: IDENT@1..7 "device" [] []
+      1: COLON@7..9 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@9..14
+        0: SCSS_EXPRESSION_ITEM_LIST@9..14
+          0: CSS_REGULAR_DIMENSION@9..14
+            0: CSS_NUMBER_LITERAL@9..12 "768" [] []
+            1: IDENT@12..14 "px" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@14..14
+      4: SEMICOLON@14..15 ";" [] []
+    1: CSS_AT_RULE@15..80
+      0: AT@15..18 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@18..80
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@18..49
+          0: MEDIA_KW@18..24 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@24..49
+            0: CSS_MEDIA_CONDITION_QUERY@24..49
+              0: CSS_MEDIA_FEATURE_IN_PARENS@24..49
+                0: L_PAREN@24..25 "(" [] []
+                1: CSS_QUERY_FEATURE_PLAIN@25..47
+                  0: CSS_IDENTIFIER@25..34
+                    0: IDENT@25..34 "max-width" [] []
+                  1: COLON@34..36 ":" [] [Whitespace(" ")]
+                  2: SCSS_EXPRESSION@36..47
+                    0: SCSS_EXPRESSION_ITEM_LIST@36..47
+                      0: SCSS_PARENTHESIZED_EXPRESSION@36..47
+                        0: L_PAREN@36..37 "(" [] []
+                        1: SCSS_EXPRESSION@37..46
+                          0: SCSS_EXPRESSION_ITEM_LIST@37..46
+                            0: SCSS_BINARY_EXPRESSION@37..46
+                              0: SCSS_VARIABLE@37..45
+                                0: DOLLAR@37..38 "$" [] []
+                                1: CSS_IDENTIFIER@38..45
+                                  0: IDENT@38..45 "device" [] [Whitespace(" ")]
+                              1: MINUS@45..46 "-" [] []
+                              2: (empty)
+                        2: R_PAREN@46..47 ")" [] []
+                2: R_PAREN@47..49 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@49..80
+          0: L_CURLY@49..50 "{" [] []
+          1: CSS_RULE_LIST@50..78
+            0: CSS_QUALIFIED_RULE@50..78
+              0: CSS_SELECTOR_LIST@50..59
+                0: CSS_COMPOUND_SELECTOR@50..59
+                  0: CSS_NESTED_SELECTOR_LIST@50..50
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@50..59
+                    0: CSS_CLASS_SELECTOR@50..59
+                      0: DOT@50..54 "." [Newline("\n"), Whitespace("  ")] []
+                      1: CSS_CUSTOM_IDENTIFIER@54..59
+                        0: IDENT@54..59 "card" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@59..78
+                0: L_CURLY@59..61 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@61..77
+                  0: CSS_DECLARATION_WITH_SEMICOLON@61..77
+                    0: CSS_DECLARATION@61..75
+                      0: CSS_GENERIC_PROPERTY@61..75
+                        0: CSS_IDENTIFIER@61..68
+                          0: IDENT@61..68 "display" [] []
+                        1: COLON@68..70 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@70..75
+                          0: SCSS_EXPRESSION_ITEM_LIST@70..75
+                            0: CSS_IDENTIFIER@70..75
+                              0: IDENT@70..75 "block" [] []
+                      1: (empty)
+                    1: SEMICOLON@75..77 ";" [] [Whitespace(" ")]
+                2: R_CURLY@77..78 "}" [] []
+          2: R_CURLY@78..80 "}" [Newline("\n")] []
+    2: CSS_QUALIFIED_RULE@80..103
+      0: CSS_SELECTOR_LIST@80..88
+        0: CSS_COMPOUND_SELECTOR@80..88
+          0: CSS_NESTED_SELECTOR_LIST@80..80
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@80..88
+            0: CSS_CLASS_SELECTOR@80..88
+              0: DOT@80..82 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@82..88
+                0: IDENT@82..88 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@88..103
+        0: L_CURLY@88..90 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@90..102
+          0: CSS_DECLARATION_WITH_SEMICOLON@90..102
+            0: CSS_DECLARATION@90..100
+              0: CSS_GENERIC_PROPERTY@90..100
+                0: CSS_IDENTIFIER@90..95
+                  0: IDENT@90..95 "width" [] []
+                1: COLON@95..97 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@97..100
+                  0: SCSS_EXPRESSION_ITEM_LIST@97..100
+                    0: CSS_REGULAR_DIMENSION@97..100
+                      0: CSS_NUMBER_LITERAL@97..98 "1" [] []
+                      1: IDENT@98..100 "px" [] []
+              1: (empty)
+            1: SEMICOLON@100..102 ";" [] [Whitespace(" ")]
+        2: R_CURLY@102..103 "}" [] []
+  2: EOF@103..104 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+release-parenthesized-query-values.scss:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ $device: 768px;
+    2 │ 
+  > 3 │ @media (max-width: ($device -)) {
+      │                              ^
+    4 │   .card { display: block; }
+    5 │ }
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+```

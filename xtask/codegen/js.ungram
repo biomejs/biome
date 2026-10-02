@@ -57,6 +57,7 @@ AnyJsRoot =
 	| JsExpressionTemplateRoot
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
+	| JsVueSlotPropsRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -93,6 +94,12 @@ JsExpressionTemplateRoot =
 JsSvelteSnippetRoot =
 		name: AnyJsBinding
 		parameters: JsParameters
+		eof: 'EOF'
+
+// Special root created for the props of Vue slot directives: `v-slot="{ item }: Props"`
+// Vue compiles the value as the parameters of an arrow function, without parentheses.
+JsVueSlotPropsRoot =
+		parameters: JsParameterList
 		eof: 'EOF'
 
 // Special root created for Svelte declaration tags
@@ -2062,7 +2069,8 @@ TsTypeList = (TsReferenceType (',' TsReferenceType)*)
 TsTypeMemberList = AnyTsTypeMember*
 
 AnyTsTypeMember =
-	TsCallSignatureTypeMember
+	JsMetavariable
+	| TsCallSignatureTypeMember
 	| TsPropertySignatureTypeMember
 	| TsConstructSignatureTypeMember
 	| TsMethodSignatureTypeMember
@@ -2333,7 +2341,7 @@ AnyJsxTag =
 // {cond && <a /> <b />}
 //           ^^^^^^^^^^
 AstroImplicitFragment =
-	children: JsxChildList
+	elements: JsxChildList
 
 // <a />, or <br> in Astro
 // ^^^^^      ^^^^
@@ -2347,7 +2355,7 @@ JsxSelfClosingElement =
 
 JsxElement =
 	opening_element: JsxOpeningElement
-	children: JsxChildList
+	elements: JsxChildList
 	closing_element: JsxClosingElement
 
 JsxOpeningElement =
@@ -2366,7 +2374,7 @@ JsxClosingElement =
 // <>content</>
 JsxFragment =
 	opening_fragment: JsxOpeningFragment
-	children: JsxChildList
+	elements: JsxChildList
 	closing_fragment: JsxClosingFragment
 
 JsxOpeningFragment =

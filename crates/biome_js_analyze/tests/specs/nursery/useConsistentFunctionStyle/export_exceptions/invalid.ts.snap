@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+export const untyped = function(): void {};
+const local = function() {};
+
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:14 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+  > 2 │ export const untyped = function(): void {};
+      │              ^^^^^^^
+    3 │ const local = function() {};
+    4 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:7 lint/nursery/useConsistentFunctionStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Function declarations are required here, but this is an expression.
+  
+    1 │ // should generate diagnostics
+    2 │ export const untyped = function(): void {};
+  > 3 │ const local = function() {};
+      │       ^^^^^
+    4 │ 
+  
+  i Using a consistent function style makes function definitions easier to recognize.
+  
+  i Use a function declaration.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

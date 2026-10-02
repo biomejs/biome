@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <TestComponent @click="myFunction()" />
 <Button @click="myFunction()" />
 <div></div>
@@ -175,3 +176,4 @@
 <div role="separator" @click="() => {}"></div>
 <div role="scrollbar" @click="() => {}"></div>
 <td @click="() => {}"></td>
+</template>

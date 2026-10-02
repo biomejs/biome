@@ -1,13 +1,15 @@
 [package]
 name                 = "biome_languages"
-version              = "0.1.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
+description          = "Shared language definitions for Biome"
 homepage.workspace   = true
 repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+publish              = true
 
 [dependencies]
 biome_console.workspace = true

@@ -61,6 +61,15 @@ expression: invalid.html
 <!-- Hidden input is not accessible -->
 <a><input type="hidden" /></a>
 
+<!-- Labels alone do not provide anchor content -->
+<a aria-label="Navigate to home page"></a>
+<a title="Go to homepage"></a>
+<a aria-label="Home" title="Navigate home"></a>
+<a aria-labelledby="home-label"></a>
+<a aria-label="Home" />
+<a title="Home">    </a>
+<a aria-label="Home"><span aria-hidden="true">Home</span></a>
+
 ```
 
 # Diagnostics
@@ -453,6 +462,166 @@ invalid.html:56:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
   > 56 │ <a><input type="hidden" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     57 │ 
+    58 │ <!-- Labels alone do not provide anchor content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:59:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    58 │ <!-- Labels alone do not provide anchor content -->
+  > 59 │ <a aria-label="Navigate to home page"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ <a title="Go to homepage"></a>
+    61 │ <a aria-label="Home" title="Navigate home"></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:60:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    58 │ <!-- Labels alone do not provide anchor content -->
+    59 │ <a aria-label="Navigate to home page"></a>
+  > 60 │ <a title="Go to homepage"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ <a aria-label="Home" title="Navigate home"></a>
+    62 │ <a aria-labelledby="home-label"></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:61:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    59 │ <a aria-label="Navigate to home page"></a>
+    60 │ <a title="Go to homepage"></a>
+  > 61 │ <a aria-label="Home" title="Navigate home"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ <a aria-labelledby="home-label"></a>
+    63 │ <a aria-label="Home" />
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:62:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    60 │ <a title="Go to homepage"></a>
+    61 │ <a aria-label="Home" title="Navigate home"></a>
+  > 62 │ <a aria-labelledby="home-label"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ <a aria-label="Home" />
+    64 │ <a title="Home">    </a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:63:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    61 │ <a aria-label="Home" title="Navigate home"></a>
+    62 │ <a aria-labelledby="home-label"></a>
+  > 63 │ <a aria-label="Home" />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ <a title="Home">    </a>
+    65 │ <a aria-label="Home"><span aria-hidden="true">Home</span></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:64:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    62 │ <a aria-labelledby="home-label"></a>
+    63 │ <a aria-label="Home" />
+  > 64 │ <a title="Home">    </a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ <a aria-label="Home"><span aria-hidden="true">Home</span></a>
+    66 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.html:65:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    63 │ <a aria-label="Home" />
+    64 │ <a title="Home">    </a>
+  > 65 │ <a aria-label="Home"><span aria-hidden="true">Home</span></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

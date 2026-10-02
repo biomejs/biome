@@ -4,7 +4,6 @@ use biome_analyze::{
 };
 use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css};
-use biome_css_semantic::semantic_model;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
@@ -118,7 +117,13 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 );
             }
         } else {
-            let Ok(mut source_type): Result<CssFileSource, _> = input_file.try_into() else {
+            // TODO: use `try_from` for `.scss` once SCSS is enabled for users
+            let source_type = if extension == "scss" {
+                Ok(CssFileSource::scss())
+            } else {
+                CssFileSource::try_from(input_file)
+            };
+            let Ok(mut source_type) = source_type else {
                 return;
             };
 
@@ -171,14 +176,12 @@ pub(crate) fn analyze_and_snap(
     let root = parsed.tree();
 
     let mut code_fixes = Vec::new();
-    let semantic_model = semantic_model(&root);
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
     let project_layout = project_layout_for_test_file(input_file, &mut diagnostics);
 
     let mut services = CssAnalyzerServices::default()
         .with_file_source(source_type)
-        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout);
     if needs_module_graph {
         let module_db =

@@ -1,0 +1,270 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_multiline.astro
+---
+# Input
+```astro
+<!-- should generate diagnostics -->
+
+<div
+    set:html={html}
+    set:text={text}
+></div>
+
+<Component
+    set:html={html}
+    set:text={text}
+/>
+
+<div
+    set:html={html}
+>child content</div>
+
+<div
+    set:text={text}
+><span>child content</span></div>
+
+<div set:html={html} set:text={text}></div>
+
+<Component set:html={html} set:text={text} />
+
+<div set:html={html}>child content</div>
+
+<div set:text={text}><span>child content</span></div>
+
+```
+
+# Diagnostics
+```
+invalid_multiline.astro:4:5 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    3 │ <div
+  > 4 │     set:html={html}
+      │     ^^^^^^^^^^^^^^^
+    5 │     set:text={text}
+    6 │ ></div>
+  
+  i The set:text directive defines the element content here.
+  
+    3 │ <div
+    4 │     set:html={html}
+  > 5 │     set:text={text}
+      │     ^^^^^^^^^^^^^^^
+    6 │ ></div>
+    7 │ 
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:9:5 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+     8 │ <Component
+   > 9 │     set:html={html}
+       │     ^^^^^^^^^^^^^^^
+    10 │     set:text={text}
+    11 │ />
+  
+  i The set:text directive defines the element content here.
+  
+     8 │ <Component
+     9 │     set:html={html}
+  > 10 │     set:text={text}
+       │     ^^^^^^^^^^^^^^^
+    11 │ />
+    12 │ 
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:14:5 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    13 │ <div
+  > 14 │     set:html={html}
+       │     ^^^^^^^^^^^^^^^
+    15 │ >child content</div>
+    16 │ 
+  
+  i Child content defines the element content here.
+  
+    13 │ <div
+    14 │     set:html={html}
+  > 15 │ >child content</div>
+       │  ^^^^^^^^^^^^^
+    16 │ 
+    17 │ <div
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:18:5 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+    17 │ <div
+  > 18 │     set:text={text}
+       │     ^^^^^^^^^^^^^^^
+    19 │ ><span>child content</span></div>
+    20 │ 
+  
+  i Child content defines the element content here.
+  
+    17 │ <div
+    18 │     set:text={text}
+  > 19 │ ><span>child content</span></div>
+       │  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ <div set:html={html} set:text={text}></div>
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:21:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    19 │ ><span>child content</span></div>
+    20 │ 
+  > 21 │ <div set:html={html} set:text={text}></div>
+       │      ^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ <Component set:html={html} set:text={text} />
+  
+  i The set:text directive defines the element content here.
+  
+    19 │ ><span>child content</span></div>
+    20 │ 
+  > 21 │ <div set:html={html} set:text={text}></div>
+       │                      ^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ <Component set:html={html} set:text={text} />
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:23:12 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    21 │ <div set:html={html} set:text={text}></div>
+    22 │ 
+  > 23 │ <Component set:html={html} set:text={text} />
+       │            ^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <div set:html={html}>child content</div>
+  
+  i The set:text directive defines the element content here.
+  
+    21 │ <div set:html={html} set:text={text}></div>
+    22 │ 
+  > 23 │ <Component set:html={html} set:text={text} />
+       │                            ^^^^^^^^^^^^^^^
+    24 │ 
+    25 │ <div set:html={html}>child content</div>
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:25:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:html directive conflicts with another content source.
+  
+    23 │ <Component set:html={html} set:text={text} />
+    24 │ 
+  > 25 │ <div set:html={html}>child content</div>
+       │      ^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ <div set:text={text}><span>child content</span></div>
+  
+  i Child content defines the element content here.
+  
+    23 │ <Component set:html={html} set:text={text} />
+    24 │ 
+  > 25 │ <div set:html={html}>child content</div>
+       │                      ^^^^^^^^^^^^^
+    26 │ 
+    27 │ <div set:text={text}><span>child content</span></div>
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_multiline.astro:27:6 lint/nursery/noAstroConflictingSetDirectives ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The set:text directive conflicts with another content source.
+  
+    25 │ <div set:html={html}>child content</div>
+    26 │ 
+  > 27 │ <div set:text={text}><span>child content</span></div>
+       │      ^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i Child content defines the element content here.
+  
+    25 │ <div set:html={html}>child content</div>
+    26 │ 
+  > 27 │ <div set:text={text}><span>child content</span></div>
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+  
+  i The set:html and set:text directives replace child content, so conflicting content sources may be ignored.
+  
+  i Choose only one content source for this element.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

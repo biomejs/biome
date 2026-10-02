@@ -101,16 +101,18 @@ fn bench_analyzer(criterion: &mut Criterion) {
 
                         b.iter(|| {
                             let mut db = TestDb::default();
-                            db.parsed = Some(ParsedSource::new(
+                            let parsed_source = ParsedSource::new(
                                 &db,
                                 test_case.path().to_path_buf(),
                                 parse.tree().syntax().as_send().unwrap().into(),
                                 0,
                                 vec![],
-                            ));
+                            );
+                            db.parsed = Some(parsed_source);
                             db.js_source = Some(file_source);
-                            let services =
-                                JsAnalyzerServices::default().with_language_db(Rc::new(db));
+                            let services = JsAnalyzerServices::default()
+                                .with_language_db(Rc::new(db))
+                                .with_parsed_source(parsed_source.into());
                             biome_js_analyze::analyze(
                                 &parse.tree(),
                                 filter,

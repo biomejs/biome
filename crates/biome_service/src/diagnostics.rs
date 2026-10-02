@@ -8,7 +8,7 @@ use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Severity, Visit, category,
+    Resource, Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -692,9 +692,15 @@ impl Diagnostic for PluginErrors {
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
-        fmt.write_markup(markup!("Error(s) during loading of plugins:\n"))?;
+        fmt.write_markup(markup!("Error(s) during loading of plugins:"))?;
 
         for diagnostic in &self.diagnostics {
+            fmt.write_str("\n")?;
+
+            if let Some(Resource::File(path)) = diagnostic.location().resource {
+                fmt.write_markup(markup!(<Emphasis>{path}</Emphasis>": "))?;
+            }
+
             diagnostic.message(fmt)?;
         }
 

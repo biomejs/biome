@@ -18,7 +18,7 @@ use biome_console::markup;
 use biome_css_parser::CssParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
-#[cfg(all(feature = "module_graph", feature = "lang_css"))]
+#[cfg(feature = "module_graph")]
 use biome_db::ParsedSource;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
@@ -32,12 +32,14 @@ use biome_js_parser::{AnyJsRoot, JsParserOptions};
 #[cfg(feature = "type_inference")]
 use biome_js_type_info::TypeData;
 use biome_languages::DocumentFileSource;
+#[cfg(feature = "module_graph")]
+use biome_languages::JsonFileSource;
+#[cfg(feature = "module_graph")]
+use biome_module_graph::ModuleInfoKind;
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_module_graph::resolve_css_module;
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 use biome_module_graph::resolve_js_module;
-#[cfg(feature = "module_graph")]
-use biome_module_graph::{ModuleInfoKind, PathInfoCache};
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_project_layout::ProjectLayout;
@@ -264,36 +266,55 @@ where
     }
 }
 
+/// Indexes the manifests of `input_file` as parsed sources in its directory.
+///
+/// A test declares its manifests next to the test file, such as
+/// `test.package.json` for `test.ts`. The resolver reads them as the
+/// `package.json` and `tsconfig.json` of the test directory.
+#[cfg(feature = "module_graph")]
+fn insert_test_manifests(db: &mut WorkspaceDb, input_file: &Utf8Path) {
+    let Some(directory) = input_file.parent() else {
+        return;
+    };
+    for manifest_name in ["package.json", "tsconfig.json"] {
+        let Ok(content) = std::fs::read_to_string(input_file.with_extension(manifest_name)) else {
+            continue;
+        };
+        let parse = biome_json_parser::parse_json(
+            &content,
+            biome_json_parser::JsonParserOptions::default()
+                .with_allow_comments()
+                .with_allow_trailing_commas(),
+        );
+        let path = directory.join(manifest_name);
+        let source_index = db.insert_source(DocumentFileSource::Json(JsonFileSource::json()));
+        let parsed = ParsedSource::new(db, path.clone(), parse.into(), source_index, Vec::new());
+        db.insert_file(&path, parsed);
+    }
+}
+
 /// Creates a module graph that is initialized for the given `input_file`.
 ///
 /// It uses an [OsFileSystem] initialized for the directory in which the test
 /// file resides and inserts all files from that directory, so that files
 /// importing each other within that directory will be picked up correctly.
 ///
-/// The `project_layout` should be initialized in advance if you want any
-/// manifest files to be discovered.
+/// The manifests of the test are indexed as the manifests of its directory.
+/// See [insert_test_manifests].
 #[cfg(all(feature = "module_graph", feature = "lang_js"))]
 pub fn module_graph_for_test_file(
     input_file: &Utf8Path,
-    project_layout: &ProjectLayout,
+    _project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let mut db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
+    let mut db = WorkspaceDb::new(Arc::new(OsFileSystem::new(dir.clone())));
+    insert_test_manifests(&mut db, input_file);
 
     let js_paths = get_js_like_paths_in_dir(&dir);
     let js_roots = get_added_js_paths(&fs, &js_paths);
     for (path, root, semantic_model) in js_roots {
-        let (module_info, _, _) = resolve_js_module(
-            root,
-            path,
-            &fs,
-            project_layout,
-            semantic_model,
-            &path_info_cache,
-            true,
-        );
+        let (module_info, _, _) = resolve_js_module(&db, root, path, semantic_model, true);
         let md = biome_module_graph::ModuleInfo::new(
             &db,
             path.as_path().to_path_buf(),
@@ -328,8 +349,7 @@ pub fn module_graph_for_test_file(
                 Vec::new(),
             );
             db.insert_file(path.as_path(), parsed_source);
-            let (module_info, _, _) =
-                resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+            let (module_info, _, _) = resolve_css_module(&db, root, path);
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -352,12 +372,12 @@ pub fn module_graph_for_test_file(
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 pub fn module_graph_for_css_test_file(
     input_file: &Utf8Path,
-    project_layout: &ProjectLayout,
+    _project_layout: &ProjectLayout,
 ) -> WorkspaceDb {
-    let mut db = WorkspaceDb::default();
-    let path_info_cache = PathInfoCache::default();
     let dir = input_file.parent().unwrap().to_path_buf();
     let fs = OsFileSystem::new(dir.clone());
+    let mut db = WorkspaceDb::new(Arc::new(OsFileSystem::new(dir.clone())));
+    insert_test_manifests(&mut db, input_file);
 
     let css_paths = get_css_like_paths_in_dir(Utf8Path::new(&dir));
     let css_roots = get_css_added_paths(&fs, &css_paths);
@@ -383,8 +403,7 @@ pub fn module_graph_for_css_test_file(
             Vec::new(),
         );
         db.insert_file(path.as_path(), parsed_source);
-        let (module_info, _, _) =
-            resolve_css_module(root, path, &fs, project_layout, &path_info_cache);
+        let (module_info, _, _) = resolve_css_module(&db, root, path);
         let md = biome_module_graph::ModuleInfo::new(
             &db,
             path.as_path().to_path_buf(),
@@ -406,15 +425,7 @@ pub fn module_graph_for_css_test_file(
             .collect::<Vec<_>>();
         let js_roots = get_added_js_paths(&fs, &js_paths);
         for (path, root, semantic_model) in js_roots {
-            let (module_info, _, _) = resolve_js_module(
-                root,
-                path,
-                &fs,
-                project_layout,
-                semantic_model,
-                &path_info_cache,
-                false,
-            );
+            let (module_info, _, _) = resolve_js_module(&db, root, path, semantic_model, false);
             let md = biome_module_graph::ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),

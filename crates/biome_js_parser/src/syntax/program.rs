@@ -7,7 +7,9 @@ use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
 use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{ExpressionContext, parse_expression};
-use crate::syntax::function::{ParameterContext, parse_parameter_list};
+use crate::syntax::function::{
+    ParameterContext, parse_parameter_list, parse_vue_slot_parameters_list,
+};
 use crate::syntax::js_parse_error;
 use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
@@ -42,6 +44,10 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
 
     if p.source_type().is_svelte_declaration() {
         return parse_svelte_declaration(p, m);
+    }
+
+    if p.source_type().is_vue_slot_props() {
+        return parse_vue_slot_props(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -222,6 +228,14 @@ fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SCRIPT)
+}
+
+/// Parses the value of a Vue slot directive: `v-slot="{ item }: { item: Item }"`.
+/// Vue compiles the value as the parameters of an arrow function, so the
+/// value is a parameter list without the surrounding parentheses.
+fn parse_vue_slot_props(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    parse_vue_slot_parameters_list(p);
+    m.complete(p, JS_VUE_SLOT_PROPS_ROOT)
 }
 
 /// Parses a Svelte snippet declaration: `add(a: any, b: float)`.

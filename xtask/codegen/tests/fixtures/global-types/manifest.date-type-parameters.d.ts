@@ -1,1 +1,1 @@
-interface Date<T> {}
+interface Date<T> { value: T; }

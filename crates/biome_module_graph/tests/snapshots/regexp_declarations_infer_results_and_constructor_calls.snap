@@ -1,0 +1,261 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const annotated: RegExpExecArray;
+export const annotatedIndex = annotated.index;
+export const annotatedInput = annotated.input;
+export const first = annotated["0"];
+export const length = annotated.length;
+export const execute = /ab/.exec;
+export const result = /ab/.exec("abc");
+export const resultIndex = result?.index;
+export const resultInput = result?.input;
+export const constructed = new RegExp("ab", "g").exec("abc");
+export const called = RegExp("ab", "g").exec("abc");
+export const constructedIndex = constructed?.index;
+export const calledIndex = called?.index;
+export const copied = new RegExp(/ab/).source;
+export const calledCopy = RegExp(/ab/).source;
+const create = RegExp;
+export const aliased = create("ab").test("abc");
+export const constructedAlias = new create("ab").lastIndex;
+```
+
+## Inferred types
+
+```
+Binding annotated "annotated" => instanceof RegExpExecArray
+
+Binding annotatedIndex "annotatedIndex" => number
+
+Expression "annotated" => instanceof RegExpExecArray
+
+Expression "annotated.index" => number
+
+Binding annotatedInput "annotatedInput" => string
+
+Expression "annotated" => instanceof RegExpExecArray
+
+Expression "annotated.input" => string
+
+Binding first "first" => string
+
+Expression "annotated" => instanceof RegExpExecArray
+
+Expression "annotated[\"0\"]" => string
+
+Expression "\"0\"" => string: 0
+
+Binding length "length" => number
+
+Expression "annotated" => instanceof RegExpExecArray
+
+Expression "annotated.length" => number
+
+Binding execute "execute" => sync Function "exec" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExpExecArray | null
+}
+
+Expression "/ab/" => regex: /ab/
+
+Expression "/ab/.exec" => sync Function "exec" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExpExecArray | null
+}
+
+Binding result "result" => instanceof RegExpExecArray | null
+
+Expression "/ab/" => regex: /ab/
+
+Expression "/ab/.exec" => sync Function "exec" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExpExecArray | null
+}
+
+Expression "/ab/.exec(\"abc\")" => instanceof RegExpExecArray | null
+
+Expression "\"abc\"" => string: abc
+
+Binding resultIndex "resultIndex" => number | undefined
+
+Expression "result" => instanceof RegExpExecArray | null
+
+Expression "result?.index" => number | undefined
+
+Binding resultInput "resultInput" => string | undefined
+
+Expression "result" => instanceof RegExpExecArray | null
+
+Expression "result?.input" => string | undefined
+
+Binding constructed "constructed" => instanceof RegExpExecArray | null
+
+Expression "new RegExp(\"ab\", \"g\")" => instanceof RegExp
+
+Expression "new RegExp(\"ab\", \"g\").exec" => sync Function "exec" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExpExecArray | null
+}
+
+Expression "new RegExp(\"ab\", \"g\").exec(\"abc\")" => instanceof RegExpExecArray | null
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"ab\"" => string: ab
+
+Expression "\"g\"" => string: g
+
+Expression "\"abc\"" => string: abc
+
+Binding called "called" => instanceof RegExpExecArray | null
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "RegExp(\"ab\", \"g\")" => instanceof RegExp
+
+Expression "RegExp(\"ab\", \"g\").exec" => sync Function "exec" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: instanceof RegExpExecArray | null
+}
+
+Expression "RegExp(\"ab\", \"g\").exec(\"abc\")" => instanceof RegExpExecArray | null
+
+Expression "\"ab\"" => string: ab
+
+Expression "\"g\"" => string: g
+
+Expression "\"abc\"" => string: abc
+
+Binding constructedIndex "constructedIndex" => number | undefined
+
+Expression "constructed" => instanceof RegExpExecArray | null
+
+Expression "constructed?.index" => number | undefined
+
+Binding calledIndex "calledIndex" => number | undefined
+
+Expression "called" => instanceof RegExpExecArray | null
+
+Expression "called?.index" => number | undefined
+
+Binding copied "copied" => string
+
+Expression "new RegExp(/ab/)" => instanceof RegExp
+
+Expression "new RegExp(/ab/).source" => string
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "/ab/" => regex: /ab/
+
+Binding calledCopy "calledCopy" => string
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "RegExp(/ab/)" => instanceof RegExp
+
+Expression "RegExp(/ab/).source" => string
+
+Expression "/ab/" => regex: /ab/
+
+Binding create "create" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "RegExp" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Binding aliased "aliased" => boolean
+
+Expression "create" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "create(\"ab\")" => instanceof RegExp
+
+Expression "create(\"ab\").test" => sync Function "test" {
+  accepts: {
+    params: [
+      required string: string
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Expression "create(\"ab\").test(\"abc\")" => boolean
+
+Expression "\"ab\"" => string: ab
+
+Expression "\"abc\"" => string: abc
+
+Binding constructedAlias "constructedAlias" => number
+
+Expression "new create(\"ab\")" => instanceof RegExp
+
+Expression "new create(\"ab\").lastIndex" => number
+
+Expression "create" => class "RegExp" {
+  extends: none
+  implements: []
+  type_args: []
+}
+
+Expression "\"ab\"" => string: ab
+```

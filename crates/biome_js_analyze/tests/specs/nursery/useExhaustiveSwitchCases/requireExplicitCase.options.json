@@ -1,0 +1,12 @@
+{
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useExhaustiveSwitchCases": {
+					"level": "error",
+					"options": { "requireExplicitCase": true }
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,196 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<div maskType="alpha" />
+	<svg maskType="alpha" />
+	<div credentialless />
+	<iframe Credentialless />
+	<svg>
+		<mask masktype="alpha" />
+	</svg>
+	<div
+		onfullscreenchange={handleFullscreenChange}
+		onfullscreenchangecapture={handleFullscreenChangeCapture}
+		onfullscreenerror={handleFullscreenError}
+		onfullscreenerrorcapture={handleFullscreenErrorCapture}
+	/>
+</>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:7 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'maskType' is not valid on a <div> element.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<div maskType="alpha" />
+      │ 	     ^^^^^^^^^^^^^^^^
+    4 │ 	<svg maskType="alpha" />
+    5 │ 	<div credentialless />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: mask
+  
+
+```
+
+```
+invalid.jsx:4:7 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'maskType' is not valid on a <svg> element.
+  
+    2 │ <>
+    3 │ 	<div maskType="alpha" />
+  > 4 │ 	<svg maskType="alpha" />
+      │ 	     ^^^^^^^^^^^^^^^^
+    5 │ 	<div credentialless />
+    6 │ 	<iframe Credentialless />
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: mask
+  
+
+```
+
+```
+invalid.jsx:5:7 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'credentialless' is not valid on a <div> element.
+  
+    3 │ 	<div maskType="alpha" />
+    4 │ 	<svg maskType="alpha" />
+  > 5 │ 	<div credentialless />
+      │ 	     ^^^^^^^^^^^^^^
+    6 │ 	<iframe Credentialless />
+    7 │ 	<svg>
+  
+  i This attribute is restricted and cannot be used on this HTML element
+  
+  i This attribute is only allowed on: iframe
+  
+
+```
+
+```
+invalid.jsx:6:10 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'Credentialless' is not a valid React prop name.
+  
+    4 │ 	<svg maskType="alpha" />
+    5 │ 	<div credentialless />
+  > 6 │ 	<iframe Credentialless />
+      │ 	        ^^^^^^^^^^^^^^
+    7 │ 	<svg>
+    8 │ 		<mask masktype="alpha" />
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'credentialless' instead of 'Credentialless' for React components.
+  
+
+```
+
+```
+invalid.jsx:8:9 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'masktype' is not a valid React prop name.
+  
+     6 │ 	<iframe Credentialless />
+     7 │ 	<svg>
+   > 8 │ 		<mask masktype="alpha" />
+       │ 		      ^^^^^^^^^^^^^^^^
+     9 │ 	</svg>
+    10 │ 	<div
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'maskType' instead of 'masktype' for React components.
+  
+
+```
+
+```
+invalid.jsx:11:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'onfullscreenchange' is not a valid React prop name.
+  
+     9 │ 	</svg>
+    10 │ 	<div
+  > 11 │ 		onfullscreenchange={handleFullscreenChange}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 		onfullscreenchangecapture={handleFullscreenChangeCapture}
+    13 │ 		onfullscreenerror={handleFullscreenError}
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onFullscreenChange' instead of 'onfullscreenchange' for React components.
+  
+
+```
+
+```
+invalid.jsx:12:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'onfullscreenchangecapture' is not a valid React prop name.
+  
+    10 │ 	<div
+    11 │ 		onfullscreenchange={handleFullscreenChange}
+  > 12 │ 		onfullscreenchangecapture={handleFullscreenChangeCapture}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 		onfullscreenerror={handleFullscreenError}
+    14 │ 		onfullscreenerrorcapture={handleFullscreenErrorCapture}
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onFullscreenChangeCapture' instead of 'onfullscreenchangecapture' for React components.
+  
+
+```
+
+```
+invalid.jsx:13:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'onfullscreenerror' is not a valid React prop name.
+  
+    11 │ 		onfullscreenchange={handleFullscreenChange}
+    12 │ 		onfullscreenchangecapture={handleFullscreenChangeCapture}
+  > 13 │ 		onfullscreenerror={handleFullscreenError}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 		onfullscreenerrorcapture={handleFullscreenErrorCapture}
+    15 │ 	/>
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onFullscreenError' instead of 'onfullscreenerror' for React components.
+  
+
+```
+
+```
+invalid.jsx:14:3 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'onfullscreenerrorcapture' is not a valid React prop name.
+  
+    12 │ 		onfullscreenchangecapture={handleFullscreenChangeCapture}
+    13 │ 		onfullscreenerror={handleFullscreenError}
+  > 14 │ 		onfullscreenerrorcapture={handleFullscreenErrorCapture}
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	/>
+    16 │ </>;
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onFullscreenErrorCapture' instead of 'onfullscreenerrorcapture' for React components.
+  
+
+```

@@ -19,7 +19,7 @@ interface SymbolConstructor {
 }
 
 interface SymbolConstructor {
-    readonly [Symbol.iterator]: unique symbol;
+    readonly iterator: unique symbol;
     readonly dispose: unique symbol;
     readonly asyncDispose: unique symbol;
 }
@@ -41,6 +41,31 @@ interface Array<T> {
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[];
 }
 
+interface Promise<T> {
+    catch(): Promise<T>;
+    then(): Promise<T>;
+}
+
+interface Promise<T> {
+    finally(): Promise<T>;
+}
+
+interface PromiseConstructor {
+    new <T>(executor: () => void): Promise<T>;
+    all<T>(): Promise<T>;
+    race<T>(): Promise<T>;
+    reject<T>(): Promise<T>;
+    resolve<T>(): Promise<T>;
+}
+
+interface PromiseConstructor {
+    allSettled<T>(): Promise<T>;
+    any<T>(): Promise<T>;
+    try<T>(): Promise<T>;
+}
+
+declare var Promise: PromiseConstructor;
+
 interface RegExpExecArray {}
 
 interface RegExp {
@@ -58,5 +83,12 @@ interface Date {
 interface Map<K, V> {}
 
 interface Set<T> {}
+
+interface Math {
+    readonly PI: number;
+    floor(x: number): number;
+}
+
+declare var Math: Math;
 
 interface WeakMap<K, V> {}

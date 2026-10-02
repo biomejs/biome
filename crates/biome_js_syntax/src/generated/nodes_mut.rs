@@ -4,7 +4,7 @@ use crate::{JsSyntaxToken as SyntaxToken, generated::nodes::*};
 use biome_rowan::AstNode;
 use std::iter::once;
 impl AstroImplicitFragment {
-    pub fn with_children(self, element: JsxChildList) -> Self {
+    pub fn with_elements(self, element: JsxChildList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
@@ -3404,6 +3404,20 @@ impl JsVariableStatement {
         )
     }
 }
+impl JsVueSlotPropsRoot {
+    pub fn with_parameters(self, element: JsParameterList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+}
 impl JsWhileStatement {
     pub fn with_while_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -3577,7 +3591,7 @@ impl JsxElement {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_children(self, element: JsxChildList) -> Self {
+    pub fn with_elements(self, element: JsxChildList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -3637,7 +3651,7 @@ impl JsxFragment {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_children(self, element: JsxChildList) -> Self {
+    pub fn with_elements(self, element: JsxChildList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

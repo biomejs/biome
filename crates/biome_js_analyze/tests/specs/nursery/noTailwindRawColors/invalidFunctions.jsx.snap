@@ -1,0 +1,487 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidFunctions.jsx
+---
+# Input
+```jsx
+// should generate diagnostics
+const button = cn("hover:text-red-500/80");
+
+const card = tw.div`bg-blue-500`;
+
+cva('', {
+    variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+    compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+});
+tv({
+    base: 'bg-pink-500',
+    slots: { icon: 'hover:text-red-500/80' },
+    variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+    compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+    compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+});
+cva('', { ...{ variants: { size: { large: 'bg-pink-500' } } } });
+tv({ ...{ base: 'bg-pink-500' } });
+tv({ ...(enabled && { base: 'bg-pink-500' }) });
+tv(enabled ? { base: 'bg-pink-500' } : {});
+tv(config = { ['base']: 'bg-pink-500' });
+tv((config, { base: 'bg-pink-500' }));
+cva('', enabled ? { variants: { size: { large: 'bg-pink-500' } } } : {});
+
+```
+
+# Diagnostics
+```
+invalidFunctions.jsx:2:26 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    1 │ // should generate diagnostics
+  > 2 │ const button = cn("hover:text-red-500/80");
+      │                          ^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const card = tw.div`bg-blue-500`;
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:4:21 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    2 │ const button = cn("hover:text-red-500/80");
+    3 │ 
+  > 4 │ const card = tw.div`bg-blue-500`;
+      │                     ^^^^^^^^^^^
+    5 │ 
+    6 │ cva('', {
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:7:33 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    6 │ cva('', {
+  > 7 │     variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+      │                                 ^^^^^^^^^^^
+    8 │     compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+    9 │ });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:7:62 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    6 │ cva('', {
+  > 7 │     variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+      │                                                              ^^^^^^^^^^^^^^^
+    8 │     compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+    9 │ });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:7:92 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    6 │ cva('', {
+  > 7 │     variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+      │                                                                                            ^^^^^^^^^^^^^^^^
+    8 │     compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+    9 │ });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:8:55 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │ cva('', {
+     7 │     variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+   > 8 │     compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+       │                                                       ^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ tv({
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:8:104 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     6 │ cva('', {
+     7 │     variants: { size: { large: 'bg-pink-500', small: ['hover:text-red-500/80'], medium: { 'border-slate-950': active } } },
+   > 8 │     compoundVariants: [{ size: 'large', class: 'hover:text-red-500/80' }, { size: 'small', className: 'border-slate-950' }],
+       │                                                                                                        ^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ tv({
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:11:12 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+     9 │ });
+    10 │ tv({
+  > 11 │     base: 'bg-pink-500',
+       │            ^^^^^^^^^^^
+    12 │     slots: { icon: 'hover:text-red-500/80' },
+    13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:12:27 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    10 │ tv({
+    11 │     base: 'bg-pink-500',
+  > 12 │     slots: { icon: 'hover:text-red-500/80' },
+       │                           ^^^^^^^^^^^^^^^
+    13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+    14 │     compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:13:33 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    11 │     base: 'bg-pink-500',
+    12 │     slots: { icon: 'hover:text-red-500/80' },
+  > 13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+       │                                 ^^^^^^^^^^^
+    14 │     compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+    15 │     compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:13:63 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    11 │     base: 'bg-pink-500',
+    12 │     slots: { icon: 'hover:text-red-500/80' },
+  > 13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+       │                                                               ^^^^^^^^^^^^^^^^
+    14 │     compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+    15 │     compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:14:63 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    12 │     slots: { icon: 'hover:text-red-500/80' },
+    13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+  > 14 │     compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+       │                                                               ^^^^^^^^^^^^^^^
+    15 │     compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+    16 │ });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:15:48 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    13 │     variants: { size: { large: 'bg-pink-500', small: { icon: 'border-slate-950' } } },
+    14 │     compoundVariants: [{ size: 'large', class: { icon: 'hover:text-red-500/80' } }],
+  > 15 │     compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+       │                                                ^^^^^^^^^^^^^^^^
+    16 │ });
+    17 │ cva('', { ...{ variants: { size: { large: 'bg-pink-500' } } } });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:17:44 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    15 │     compoundSlots: [{ slots: ['icon'], class: 'border-slate-950' }],
+    16 │ });
+  > 17 │ cva('', { ...{ variants: { size: { large: 'bg-pink-500' } } } });
+       │                                            ^^^^^^^^^^^
+    18 │ tv({ ...{ base: 'bg-pink-500' } });
+    19 │ tv({ ...(enabled && { base: 'bg-pink-500' }) });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:18:18 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    16 │ });
+    17 │ cva('', { ...{ variants: { size: { large: 'bg-pink-500' } } } });
+  > 18 │ tv({ ...{ base: 'bg-pink-500' } });
+       │                  ^^^^^^^^^^^
+    19 │ tv({ ...(enabled && { base: 'bg-pink-500' }) });
+    20 │ tv(enabled ? { base: 'bg-pink-500' } : {});
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:19:30 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    17 │ cva('', { ...{ variants: { size: { large: 'bg-pink-500' } } } });
+    18 │ tv({ ...{ base: 'bg-pink-500' } });
+  > 19 │ tv({ ...(enabled && { base: 'bg-pink-500' }) });
+       │                              ^^^^^^^^^^^
+    20 │ tv(enabled ? { base: 'bg-pink-500' } : {});
+    21 │ tv(config = { ['base']: 'bg-pink-500' });
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:20:23 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    18 │ tv({ ...{ base: 'bg-pink-500' } });
+    19 │ tv({ ...(enabled && { base: 'bg-pink-500' }) });
+  > 20 │ tv(enabled ? { base: 'bg-pink-500' } : {});
+       │                       ^^^^^^^^^^^
+    21 │ tv(config = { ['base']: 'bg-pink-500' });
+    22 │ tv((config, { base: 'bg-pink-500' }));
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:21:26 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    19 │ tv({ ...(enabled && { base: 'bg-pink-500' }) });
+    20 │ tv(enabled ? { base: 'bg-pink-500' } : {});
+  > 21 │ tv(config = { ['base']: 'bg-pink-500' });
+       │                          ^^^^^^^^^^^
+    22 │ tv((config, { base: 'bg-pink-500' }));
+    23 │ cva('', enabled ? { variants: { size: { large: 'bg-pink-500' } } } : {});
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:22:22 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    20 │ tv(enabled ? { base: 'bg-pink-500' } : {});
+    21 │ tv(config = { ['base']: 'bg-pink-500' });
+  > 22 │ tv((config, { base: 'bg-pink-500' }));
+       │                      ^^^^^^^^^^^
+    23 │ cva('', enabled ? { variants: { size: { large: 'bg-pink-500' } } } : {});
+    24 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidFunctions.jsx:23:49 lint/nursery/noTailwindRawColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS class uses a raw palette color.
+  
+    21 │ tv(config = { ['base']: 'bg-pink-500' });
+    22 │ tv((config, { base: 'bg-pink-500' }));
+  > 23 │ cva('', enabled ? { variants: { size: { large: 'bg-pink-500' } } } : {});
+       │                                                 ^^^^^^^^^^^
+    24 │ 
+  
+  i Raw palette colors couple components to specific colors, making design-system changes harder.
+  
+  i Use a color from your design system. Check your Tailwind config for the available colors.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

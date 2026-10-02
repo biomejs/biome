@@ -27,6 +27,7 @@ static GLOBAL: std::alloc::System = std::alloc::System;
 fn bench_css_formatter(criterion: &mut Criterion) {
     let mut all_suites = HashMap::new();
     all_suites.insert("css", include_str!("libs-css.txt"));
+    all_suites.insert("scss", include_str!("libs-scss.txt"));
     let mut libs = vec![];
     libs.extend(all_suites.values().flat_map(|suite| suite.lines()));
 
@@ -38,7 +39,12 @@ fn bench_css_formatter(criterion: &mut Criterion) {
         match test_case {
             Ok(test_case) => {
                 let code = test_case.code();
-                let parsed = parse_css(code, CssFileSource::css(), CssParserOptions::default());
+                let file_source = if test_case.extension() == "scss" {
+                    CssFileSource::scss()
+                } else {
+                    CssFileSource::css()
+                };
+                let parsed = parse_css(code, file_source, CssParserOptions::default());
                 group.throughput(Throughput::Bytes(code.len() as u64));
                 group.bench_with_input(
                     BenchmarkId::from_parameter(test_case.filename()),

@@ -46,7 +46,7 @@ pub mod trivia;
 
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
-use crate::prelude::{Tag, TagKind};
+use crate::prelude::TagKind;
 use std::fmt;
 use std::fmt::{Debug, Display};
 
@@ -56,7 +56,6 @@ pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, Pri
 #[cfg(debug_assertions)]
 use crate::format_audit::FormatAudit;
 use crate::format_element::document::Document;
-use crate::format_element::{Interned, LineMode};
 pub use crate::format_extensions::{
     FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
 };
@@ -1134,37 +1133,16 @@ impl<Context> Formatted<Context> {
         &self.context
     }
 
-    /// Visits each embedded element and replaces it with elements contained inside the [Document]
-    /// emitted by `fn_format_embedded`
+    /// Replaces the content of each embedded element with the [Document] returned by
+    /// `fn_format_embedded` for the element's range.
+    ///
+    /// When `fn_format_embedded` returns `None`, the element keeps the content the host
+    /// formatter wrote for it.
     pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
         F: FnMut(TextRange) -> Option<Document>,
     {
-        let mut last_start_resolved = false;
-        self.document.transform(move |element| match element {
-            FormatElement::Tag(Tag::StartEmbedded(range)) => match fn_format_embedded(*range) {
-                Some(document) => {
-                    last_start_resolved = true;
-                    Some(FormatElement::Interned(Interned::new(
-                        document.into_elements(),
-                    )))
-                }
-                None => {
-                    // Keep the StartEmbedded tag so it stays paired with EndEmbedded.
-                    last_start_resolved = false;
-                    None
-                }
-            },
-            FormatElement::Tag(Tag::EndEmbedded) => {
-                if last_start_resolved {
-                    Some(FormatElement::Line(LineMode::Hard))
-                } else {
-                    // Keep EndEmbedded paired with the unresolved StartEmbedded.
-                    None
-                }
-            }
-            _ => None,
-        });
+        self.document.replace_embedded(&mut fn_format_embedded);
     }
 
     /// Propagates the expand flags through the document.
@@ -2507,7 +2485,7 @@ mod tests {
     use std::borrow::Cow;
 
     use super::{
-        Document, FormatElement, FormatState, Formatted, LineEnding, LineMode, LineWidth, Printed,
+        Document, FormatElement, FormatState, Formatted, LineEnding, LineWidth, Printed,
         SimpleFormatContext, SimpleFormatOptions, SourceMapGeneration, SourceMarker, VecBuffer,
     };
     use crate::prelude::*;

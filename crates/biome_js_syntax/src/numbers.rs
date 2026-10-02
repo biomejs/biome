@@ -47,6 +47,37 @@ pub fn parse_js_number(num: &str) -> Option<f64> {
     }
 }
 
+/// Parses a numeric literal without rounding intermediate digit prefixes.
+///
+/// Decimal literals are converted directly to `f64`. Hexadecimal, binary, and
+/// octal literals are first read as exact integers, then converted to `f64` once.
+/// This matters for large numbers: rounding each prefix while reading its digits
+/// can produce a different value from the JavaScript literal.
+///
+/// For example, these two spellings must produce the same value:
+///
+/// ```ts
+/// 0x1000000000000081 === 1152921504606847232; // true
+/// ```
+///
+/// The input must be numeric literal text already checked by the parser, with
+/// any unary sign removed. Numeric separators and legacy octal notation are
+/// supported. This function does not validate JavaScript syntax.
+///
+/// Returns `None` if conversion fails or a non-decimal integer exceeds
+/// [`u128::MAX`]. Decimal overflow can return infinity; callers that require a
+/// finite value must check the result.
+pub fn parse_js_number_with_single_rounding(num: &str) -> Option<f64> {
+    let (radix, digits) = split_into_radix_and_number(num);
+    if radix == 10 {
+        digits.parse::<f64>().ok()
+    } else {
+        u128::from_str_radix(&digits, u32::from(radix))
+            .ok()
+            .map(|value| value as f64)
+    }
+}
+
 const BIGINT_LIMB_BASE: u64 = 1_000_000_000;
 
 fn bigint_digit_value(byte: u8) -> Option<u32> {
@@ -197,7 +228,10 @@ pub fn canonicalize_js_bigint_literal(input: &str) -> Option<Cow<'_, str>> {
 mod tests {
     use std::borrow::Cow;
 
-    use super::{canonicalize_js_bigint_literal, split_into_radix_and_number};
+    use super::{
+        canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+        split_into_radix_and_number,
+    };
     use biome_js_factory::JsSyntaxTreeBuilder;
     use biome_js_factory::syntax::{JsNumberLiteralExpression, JsSyntaxKind::*};
     use biome_rowan::AstNode;
@@ -211,6 +245,49 @@ mod tests {
         let node = tree_builder.finish();
         let number_literal = JsNumberLiteralExpression::cast(node).unwrap();
         assert_eq!(number_literal.as_number(), Some(value))
+    }
+
+    #[test]
+    fn single_rounding_preserves_numeric_values() {
+        for (literal, expected) in [
+            ("1", 1.0),
+            ("1_000", 1000.0),
+            ("0.5", 0.5),
+            (".5", 0.5),
+            ("1e3", 1000.0),
+            ("0b101", 5.0),
+            ("0o77", 63.0),
+            ("077", 63.0),
+            ("0xFF", 255.0),
+            ("0x20000000000001", 9_007_199_254_740_992.0),
+            ("0x1000000000000081", ((1_u64 << 60) + 256) as f64),
+        ] {
+            assert_eq!(
+                parse_js_number_with_single_rounding(literal),
+                Some(expected),
+                "{literal}"
+            );
+        }
+    }
+
+    #[test]
+    fn single_rounding_preserves_conversion_limits() {
+        assert_eq!(
+            parse_js_number_with_single_rounding("0xffffffffffffffffffffffffffffffff"),
+            Some(u128::MAX as f64)
+        );
+        for literal in [
+            format!("0x1{}", "0".repeat(32)),
+            format!("0b1{}", "0".repeat(128)),
+            format!("0o4{}", "0".repeat(42)),
+        ] {
+            assert_eq!(parse_js_number_with_single_rounding(&literal), None);
+        }
+        assert_eq!(
+            parse_js_number_with_single_rounding("1e400"),
+            Some(f64::INFINITY)
+        );
+        assert_eq!(parse_js_number_with_single_rounding(""), None);
     }
 
     #[test]

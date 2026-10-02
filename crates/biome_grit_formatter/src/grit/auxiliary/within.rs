@@ -12,15 +12,12 @@ impl FormatNodeRule<GritWithin> for FormatGritWithin {
             until_clause,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                within_token.format(),
-                space(),
-                pattern.format(),
-                space(),
-                until_clause.format()
-            ]
-        )
+        write!(f, [within_token.format(), space(), pattern.format()])?;
+
+        if let Some(until_clause) = until_clause {
+            write!(f, [space(), until_clause.format()])?;
+        }
+
+        Ok(())
     }
 }

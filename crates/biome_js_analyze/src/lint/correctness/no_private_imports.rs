@@ -8,7 +8,7 @@ use biome_fs::BiomePath;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
 use biome_jsdoc_comment::JsdocComment;
 use biome_module_graph::{
-    JsImportPath, ModuleDb, ModuleInfo, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
+    ModuleDb, ModuleInfo, ModuleInfoKind, SymbolFromModuleInfo, find_jsdoc_for_exported_symbol,
 };
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_rule_options::no_private_imports::{NoPrivateImportsOptions, Visibility};
@@ -165,17 +165,26 @@ impl Rule for NoPrivateImports {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let self_path = ctx.file_path();
-        let Some(module_info) = ctx.js_module_info_for_path(ctx.file_path()) else {
+        let Some(owner) = ctx.module_info_for_path(self_path) else {
+            return Vec::new();
+        };
+        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
             return Vec::new();
         };
 
         let node = ctx.query();
-        let Some(target_path) = node
+        let Some(import_path) = node
             .is_static_import()
             .then(|| node.inner_string_text())
             .flatten()
             .and_then(|specifier| module_info.import_paths.get(specifier.text()))
-            .and_then(JsImportPath::as_path)
+        else {
+            return Vec::new();
+        };
+        let resolved = import_path.resolve_js(ctx.db(), owner);
+        let Some(target_path) = resolved
+            .path()
+            .as_path()
             .filter(|path| !BiomePath::new(path).is_dependency())
         else {
             return Vec::new();

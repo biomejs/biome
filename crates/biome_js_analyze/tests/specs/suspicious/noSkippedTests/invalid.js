@@ -31,3 +31,10 @@ test["skip"]("bracket notation", async () => {});
 test("bare skip", async () => {
     test.skip();
 });
+
+xsuite('foo', () => {});
+suite.skip("test", () => {});
+suite.fixme("fixme suite", () => {});
+suite["skip"]("bracket notation", async () => {});
+test.suite.skip("skipped suite", () => {});
+

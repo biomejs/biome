@@ -1,0 +1,84 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+  <!-- foo -->
+
+    <!-- foo -->
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHtmlBlock {
+            indent: MdIndentTokenList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@0..2 "  " [] [],
+                },
+            ],
+            content: MdHtmlContent {
+                value_token: MD_HTML_LITERAL@2..14 "" [Comments("<!-- foo -->")] [],
+            },
+        },
+        MdNewline {
+            value_token: NEWLINE@14..15 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@15..16 "\n" [] [],
+        },
+        MdIndentCodeBlock {
+            content: MdInlineItemList [
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@16..20 "    " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@20..32 "<!-- foo -->" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@32..33 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@33..33 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..33
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..33
+    0: MD_HTML_BLOCK@0..14
+      0: MD_INDENT_TOKEN_LIST@0..2
+        0: MD_INDENT_TOKEN@0..2
+          0: MD_INDENT_CHAR@0..2 "  " [] []
+      1: MD_HTML_CONTENT@2..14
+        0: MD_HTML_LITERAL@2..14 "" [Comments("<!-- foo -->")] []
+    1: MD_NEWLINE@14..15
+      0: NEWLINE@14..15 "\n" [] []
+    2: MD_NEWLINE@15..16
+      0: NEWLINE@15..16 "\n" [] []
+    3: MD_INDENT_CODE_BLOCK@16..33
+      0: MD_INLINE_ITEM_LIST@16..33
+        0: MD_INDENT_TOKEN@16..20
+          0: MD_INDENT_CHAR@16..20 "    " [] []
+        1: MD_TEXTUAL@20..32
+          0: MD_TEXTUAL_LITERAL@20..32 "<!-- foo -->" [] []
+        2: MD_TEXTUAL@32..33
+          0: MD_TEXTUAL_LITERAL@32..33 "\n" [] []
+  3: EOF@33..33 "" [] []
+
+```

@@ -6,7 +6,7 @@ use crate::syntax::scss::{
     parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::value::function::is_nth_at_source_tight_l_paren;
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
 use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -258,7 +258,7 @@ fn parse_custom_property_component(
 /// Returns whether a source-tight raw function such as `url(` starts here.
 #[inline]
 fn is_at_custom_property_function(p: &mut CssParser) -> bool {
-    is_at_identifier(p) && is_nth_at_source_tight_l_paren(p, 1)
+    is_at_identifier(p) && is_nth_at_adjacent_l_paren(p, 1)
 }
 
 /// Parses a source-tight function with a preserved raw body.

@@ -8,20 +8,25 @@
 mod implementation;
 
 pub(in crate::db) use implementation::{
-    ResolvedCallArgument, infer_call_expression_return_type_from_args, resolve_callable_function,
+    ResolvedCallArgument, infer_call_expression_return_type_from_args,
 };
 
 use self::implementation::{
     infer_call_expression_return_type,
     infer_constructor_argument_type as infer_constructor_argument_type_impl,
-    infer_function_argument_type, resolved_call_arguments,
+    infer_function_argument_type, resolve_callable_function_impl, resolved_call_arguments,
 };
-use super::{CallArgumentTypeInput, CallExpressionTypeInput, NormalizeTypeInput, normalize_type};
+use super::{
+    CallArgumentTypeInput, CallExpressionTypeInput, CallableFunctionInput, NormalizeTypeInput,
+    normalize_type,
+};
 use crate::ModuleDb;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
-use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeData};
+use biome_js_type_info::interned_types::{
+    InternedFunction as InferredFunction, TypeData as InferredTypeData,
+};
 
 // #region CALL INFERENCE QUERIES
 
@@ -29,9 +34,9 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 ///
 /// The callee and final return type are normalized in `input.module`. The
 /// query accepts plain positional arguments and supports functions, callable
-/// interfaces and objects, and unions of callable types. Overloads are tested
-/// in declaration order. If no supported signature matches, the result is
-/// `Unknown`.
+/// interfaces, classes, objects, and unions of callable types. Overloads are
+/// tested in declaration order. If no supported signature matches, the result
+/// is `Unknown`.
 ///
 /// In this example, the inferred type of `result` is `number`.
 ///
@@ -39,7 +44,7 @@ use biome_js_type_info::{global_types, interned_types::TypeData as InferredTypeD
 /// declare function parse(value: string): number;
 /// const result = parse("1");
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 pub fn infer_call_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallExpressionTypeInput<'db>,
@@ -73,7 +78,7 @@ pub fn infer_call_expression_type<'db>(
 /// declare function consume(value: string, callback: () => void): void;
 /// consume("value", async () => {});
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(returns(copy), cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_call_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,
@@ -105,7 +110,7 @@ pub fn infer_call_argument_type<'db>(
 /// }
 /// new Job(async () => {});
 /// ```
-#[salsa::tracked]
+#[salsa::tracked(returns(copy), cycle_result=infer_argument_type_cycle_result)]
 pub fn infer_constructor_argument_type<'db>(
     db: &'db dyn ModuleDb,
     input: CallArgumentTypeInput<'db>,
@@ -119,12 +124,65 @@ pub fn infer_constructor_argument_type<'db>(
                 resolved_call_arguments(db, input.args(db), input.argument_index(db));
             let ty =
                 infer_constructor_argument_type_impl(db, input.callee(db), &args, argument_index)?;
-            Some(match ty {
-                InferredTypeData::GlobalType(id) => global_types(db).get(id),
-                ty => ty,
-            })
+            Some(ty.expand_canonical_global(db))
         },
     )
+}
+
+/// Finds the function a value of type `input.ty` can be called as.
+///
+/// A class instance contributes its type arguments, so a callable reached
+/// through `InstanceOf` describes its parameters and return type in terms of
+/// the arguments the instance was built with. Every other wrapper, and the
+/// shapes that are too ambiguous to resolve, are described on
+/// [`super::resolve_callable_type`]. Returns `None` for those shapes and when
+/// resolving the callee re-enters this query for the same type.
+///
+/// In this example, calling `format` uses the signature
+/// `(value: number) => string`:
+///
+/// ```ts
+/// interface Formatter<T> {
+///     (value: T): string;
+/// }
+/// declare const format: Formatter<number>;
+/// ```
+#[salsa::tracked(returns(copy), cycle_result=resolve_callable_function_cycle_result)]
+pub(in crate::db) fn resolve_callable_function<'db>(
+    db: &'db dyn ModuleDb,
+    input: CallableFunctionInput<'db>,
+) -> Option<InferredFunction<'db>> {
+    execute_query(
+        TypeInferenceQueryKind::Calls,
+        TypeInferenceProfileOrigin::Inherited,
+        "resolve_callable_function",
+        || resolve_callable_function_impl(db, input.ty(db)),
+    )
+}
+
+// #endregion
+
+// #region CYCLE RESULTS
+
+/// A callee whose resolution depends on its own call signature has no
+/// resolvable signature.
+fn resolve_callable_function_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: CallableFunctionInput<'db>,
+) -> Option<InferredFunction<'db>> {
+    None
+}
+
+/// A callback parameter typed from its call re-enters argument inference when
+/// a sibling argument depends on that parameter; the expected type is then
+/// unknown.
+fn infer_argument_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: CallArgumentTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    None
 }
 
 // #endregion

@@ -1,0 +1,37 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: newlineTrivia.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$color: red; /* theme
+color */
+
+.a { color: $color; }
+
+/* footer */
+
+
+```
+
+# Diagnostics
+```
+newlineTrivia.scss:2:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file has too many lines (4). Maximum allowed is 2.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ $color: red; /* theme
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  > 3 │ color */
+  > 4 │ 
+  > 5 │ .a { color: $color; }
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ /* footer */
+  
+  i Consider splitting this file into smaller files.
+  
+
+```

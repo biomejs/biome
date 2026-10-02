@@ -1,3 +1,9 @@
 /* should not generate diagnostics */
 .foo #{$test} {}
 .foo.bar #{$test} {}
+.foo[hidden]#{$test}.bar {}
+.foo:not(.bar)#{$test} {}
+.foo *#{$test}.bar {}
+#root {
+  &[hidden]#{$test}.bar {}
+}
