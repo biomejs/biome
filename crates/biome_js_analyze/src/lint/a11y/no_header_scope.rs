@@ -42,7 +42,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noHeaderScope",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("scope").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("scope").same(),
+            RuleSource::EslintAstro("jsx-a11y/scope").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

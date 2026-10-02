@@ -50,7 +50,10 @@ declare_lint_rule! {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-interactive-element-to-noninteractive-role").same(),
+            RuleSource::EslintAstro("jsx-a11y/no-interactive-element-to-noninteractive-role").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

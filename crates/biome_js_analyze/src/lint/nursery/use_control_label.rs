@@ -75,7 +75,10 @@ declare_lint_rule! {
         name: "useControlLabel",
         language: "jsx",
         recommended: false,
-        sources: &[RuleSource::EslintJsxA11y("control-has-associated-label").inspired()],
+        sources: &[
+            RuleSource::EslintJsxA11y("control-has-associated-label").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/control-has-associated-label").inspired(),
+        ],
         severity: Severity::Error,
     }
 }

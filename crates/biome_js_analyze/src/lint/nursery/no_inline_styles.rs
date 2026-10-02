@@ -3,7 +3,7 @@ use crate::react::ReactCreateElementCall;
 use crate::services::semantic::Semantic;
 use crate::utils::batch::JsBatchMutation;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, declare_lint_rule};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
@@ -53,6 +53,10 @@ declare_lint_rule! {
         version: "2.4.9",
         name: "noInlineStyles",
         language: "js",
+        sources: &[
+            RuleSource::EslintReactNativeIntellicode("no-inline-styles").same(),
+            RuleSource::EslintShadcn("no-inline-styles").same(),
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }

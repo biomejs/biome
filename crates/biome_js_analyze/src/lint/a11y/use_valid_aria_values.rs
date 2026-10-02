@@ -53,7 +53,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidAriaValues",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("aria-proptypes").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("aria-proptypes").same(),
+            RuleSource::EslintAstro("jsx-a11y/aria-proptypes").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

@@ -5,7 +5,7 @@ expression: redactor(content)
 ## Command
 
 ```shell
-biome migrate eslint --write
+biome migrate eslint --include-inspired --include-nursery --write
 ```
 
 ## `biome.json`
@@ -57,7 +57,16 @@ biome migrate eslint --write
         "noPrecisionLoss": "error",
         "noUnusedVariables": "error"
       },
+      "nursery": {
+        "noInlineStyles": "error",
+        "noSvelteLegacyConst": "error",
+        "useControlLabel": "error",
+        "useIframeSandbox": "error",
+        "usePromiseRejectErrors": "error"
+      },
       "style": {
+        "noVueOptionsApi": "error",
+        "useConsistentCurlyBraces": "error",
         "useConsistentObjectDefinitions": "error",
         "useForOf": "error",
         "useNodejsImportProtocol": "error"
@@ -86,15 +95,17 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 93 ESLint rules found
     - 9 are obsolete because of Biome's formatter
-    - 46 have been migrated to Biome's rules
+    - 56 have been migrated to Biome's rules
     - 69% (65) of your ESLint rules are fully covered by Biome
-      - 49% (46) via direct migration to Biome rules
+      - 60% (56) via direct migration to Biome rules
   
   
   i Migrated rules:
   
   - no-catch-shadow
   - @mysticatea/prefer-for-of
+  - @stylistic/jsx-curly-brace-presence
+  - @typescript-eslint/prefer-promise-reject-errors
   - astro/jsx-a11y/alt-text
   - astro/jsx-a11y/anchor-ambiguous-text
   - astro/jsx-a11y/anchor-has-content
@@ -106,6 +117,7 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - astro/jsx-a11y/aria-unsupported-elements
   - astro/jsx-a11y/autocomplete-valid
   - astro/jsx-a11y/click-events-have-key-events
+  - astro/jsx-a11y/control-has-associated-label
   - astro/jsx-a11y/heading-has-content
   - astro/jsx-a11y/html-has-lang
   - astro/jsx-a11y/iframe-has-title
@@ -130,8 +142,15 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - astro/jsx-a11y/role-supports-aria-props
   - astro/jsx-a11y/scope
   - astro/jsx-a11y/tabindex-no-positive
+  - jsx-a11y/label-has-for
   - n/prefer-node-protocol
+  - react/iframe-missing-sandbox
+  - react-native/no-inline-styles
+  - shadcn/no-inline-styles
   - svelte/button-has-type
+  - svelte/no-at-const-tags
+  - svelte/no-inline-styles
+  - vue/component-api-style
   - vue/eqeqeq
   - vue/html-button-has-type
   - vue/no-console
@@ -139,22 +158,6 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - vue/no-loss-of-precision
   - vue/no-unused-vars
   - vue/object-shorthand
-  
-  i Rules that can be migrated to an inspired rule using --include-inspired:
-  
-  - @stylistic/jsx-curly-brace-presence
-  - astro/jsx-a11y/control-has-associated-label
-  - jsx-a11y/label-has-for
-  - vue/component-api-style
-  
-  i Rules that can be migrated to a nursery rule using --include-nursery:
-  
-  - @typescript-eslint/prefer-promise-reject-errors
-  - react/iframe-missing-sandbox
-  - react-native/no-inline-styles
-  - shadcn/no-inline-styles
-  - svelte/no-at-const-tags
-  - svelte/no-inline-styles
   
   i Unsupported rules (20 incompatible with formatter, 6 made obsolete by the formatter, 3 covered by a formatter option, 1 not yet implemented, 0 unknown source):
   
