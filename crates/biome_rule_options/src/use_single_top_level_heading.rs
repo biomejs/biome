@@ -31,9 +31,9 @@ impl UseSingleTopLevelHeadingOptions {
 }
 
 impl DeserializableValidator for UseSingleTopLevelHeadingOptions {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {

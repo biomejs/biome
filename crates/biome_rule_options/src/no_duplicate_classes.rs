@@ -68,9 +68,9 @@ const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for NoDuplicateClassesOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         value.deserialize(ctx, NoDuplicateClassesOptionsVisitor, name)

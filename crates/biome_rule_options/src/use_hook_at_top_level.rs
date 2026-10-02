@@ -19,9 +19,9 @@ pub struct UseHookAtTopLevelOptions {
 }
 
 impl Deserializable for UseHookAtTopLevelOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
@@ -30,15 +30,15 @@ impl Deserializable for UseHookAtTopLevelOptions {
 
 // TODO: remove in Biome 2.0
 struct DeprecatedHooksOptionsVisitor;
-impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
+impl<S> DeserializationVisitor<S> for DeprecatedHooksOptionsVisitor {
     type Output = UseHookAtTopLevelOptions;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext,
-        members: &mut MapMembers<'_>,
+        ctx: &mut dyn DeserializationContext<State = S>,
+        members: &mut MapMembers<'_, S>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

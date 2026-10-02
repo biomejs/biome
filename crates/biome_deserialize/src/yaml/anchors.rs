@@ -1,63 +1,62 @@
 //! The resolution of [aliases](https://yaml.org/spec/1.2.2/#71-alias-nodes) to the nodes of
 //! their anchors.
-use super::value::YamlNode;
-use crate::{DeserializationContext, DeserializationDiagnostic};
+use super::value::AnyYamlValueNode;
+use crate::DeserializationDiagnostic;
 use biome_console::markup;
-use biome_rowan::{AstNode, AstNodeList, TextRange, TextSize, TokenText};
+use biome_rowan::{AstNode, AstNodeList, TextSize, TokenText};
 use biome_yaml_syntax::{
-    AnyYamlBlockNode, AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlAnchorProperty,
-    YamlBlockInBlockNode, YamlPropertyList, YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlBlockNode, AnyYamlMappingImplicitKey, YamlAliasNode, YamlAnchorProperty,
+    YamlBlockInBlockNode, YamlDocument, YamlPropertyList,
 };
-use std::cell::{Cell, OnceCell};
 
 /// Bounds the source text that aliases expand to, as a factor of the size of the document,
 /// so that documents such as the [billion laughs](https://en.wikipedia.org/wiki/Billion_laughs_attack)
 /// can't expand to an unbounded size.
 const MAX_ALIAS_EXPANSION_FACTOR: usize = 100;
 
-/// The anchors of a document, which its aliases refer to.
+/// The anchors of a document, which its aliases refer to. It's the
+/// [state](crate::DeserializableValue::State) of the YAML values.
 pub(super) struct Anchors {
-    /// The document, or the stream when it has no document.
-    scope: YamlSyntaxNode,
+    /// `None` when the stream has no document, and so no anchors.
+    document: Option<YamlDocument>,
     /// The anchors in source order, collected when resolving the first alias.
-    anchors: OnceCell<Box<[Anchor]>>,
+    anchors: Option<Box<[Anchor]>>,
     /// The size of the source text that aliases can still expand to, or `None` once exceeded.
-    expansion_budget: Cell<Option<usize>>,
+    expansion_budget: Option<usize>,
 }
 
 struct Anchor {
     /// The name of the anchor, without `&`.
     name: TokenText,
-    /// The offset of the anchor in the source.
+    /// The offset of the anchor in the source. Only the aliases after it can refer to it.
     offset: TextSize,
     /// The node that the anchor is attached to.
-    node: YamlNode,
+    node: AnyYamlValueNode,
 }
 
 impl Anchors {
-    pub(super) fn new(scope: YamlSyntaxNode) -> Self {
-        let budget = usize::from(scope.text_range_with_trivia().len())
-            .saturating_mul(MAX_ALIAS_EXPANSION_FACTOR);
+    pub(super) fn new(document: Option<YamlDocument>) -> Self {
+        let document_len = document.as_ref().map_or(0, |document| {
+            usize::from(document.syntax().text_range_with_trivia().len())
+        });
         Self {
-            scope,
-            anchors: OnceCell::new(),
-            expansion_budget: Cell::new(Some(budget)),
+            document,
+            anchors: None,
+            expansion_budget: Some(document_len.saturating_mul(MAX_ALIAS_EXPANSION_FACTOR)),
         }
     }
 
-    fn anchors(&self) -> &[Anchor] {
-        self.anchors.get_or_init(|| {
-            self.scope
-                .descendants()
+    fn anchors(&mut self) -> &[Anchor] {
+        let document = &self.document;
+        self.anchors.get_or_insert_with(|| {
+            document
+                .iter()
+                .flat_map(|document| document.syntax().descendants())
                 .filter_map(YamlAnchorProperty::cast)
                 .filter_map(|anchor| {
-                    let token = anchor.value_token().ok()?;
-                    let name = token.token_text_trimmed();
-                    let name_range = TextRange::new(TextSize::from(1), name.len());
                     Some(Anchor {
-                        // Removes the `&`
-                        name: name.slice(name_range),
-                        offset: token.text_trimmed_range().start(),
+                        name: anchor.name().ok()?,
+                        offset: anchor.range().start(),
                         node: anchored_node(&anchor)?,
                     })
                 })
@@ -67,77 +66,81 @@ impl Anchors {
 
     /// Returns the node that `alias` refers to: the node of the last anchor that precedes it,
     /// with the same name.
+    ///
+    /// Returns `Err(None)` when the alias has no name, which the parser reports.
     pub(super) fn resolve(
-        &self,
-        alias: &YamlSyntaxToken,
-    ) -> Result<&YamlNode, DeserializationDiagnostic> {
-        let range = alias.text_trimmed_range();
-        let name = alias.text_trimmed().trim_start_matches('*');
+        &mut self,
+        alias: &YamlAliasNode,
+    ) -> Result<AnyYamlValueNode, Option<DeserializationDiagnostic>> {
+        let name = alias.name().map_err(|_| None)?;
+        let range = alias.range();
         let Some(anchor) = self
             .anchors()
             .iter()
             .rev()
-            .find(|anchor| anchor.offset < range.start() && anchor.name.text() == name)
+            .find(|anchor| anchor.offset < range.start() && anchor.name == name)
         else {
-            return Err(DeserializationDiagnostic::new(markup! {
-                "The anchor "<Emphasis>{name}</Emphasis>" isn't defined."
-            })
-            .with_range(range)
-            .with_note("An alias can only refer to an anchor that precedes it."));
+            return Err(Some(
+                DeserializationDiagnostic::new(markup! {
+                    "The anchor "<Emphasis>{name.text()}</Emphasis>" isn't defined."
+                })
+                .with_range(range)
+                .with_note("An alias can only refer to an anchor that precedes it."),
+            ));
         };
         if anchor.node.range().contains(range.start()) {
-            return Err(DeserializationDiagnostic::new(markup! {
-                "The alias "<Emphasis>"*"{name}</Emphasis>" refers to a node that contains it."
-            })
-            .with_range(range)
-            .with_note("Recursive structures can't be deserialized."));
+            return Err(Some(
+                DeserializationDiagnostic::new(markup! {
+                    "The alias "<Emphasis>"*"{name.text()}</Emphasis>" refers to a node that contains it."
+                })
+                .with_range(range)
+                .with_note("Recursive structures can't be deserialized."),
+            ));
         }
-        Ok(&anchor.node)
+        Ok(anchor.node.clone())
     }
 
-    /// Charges the expansion of an alias to `node` to the budget of the document.
+    /// Returns the node that `alias` refers to, and charges its expansion to the budget of the
+    /// document.
     ///
-    /// Returns `false` if the budget is exceeded, and reports it the first time.
+    /// Returns the diagnostic of the exceeded budget the first time, and `Err(None)` afterwards.
     pub(super) fn expand(
-        &self,
-        ctx: &mut dyn DeserializationContext,
-        node: &YamlNode,
-        alias_range: TextRange,
-    ) -> bool {
-        let Some(budget) = self.expansion_budget.get() else {
-            return false;
+        &mut self,
+        alias: &YamlAliasNode,
+    ) -> Result<AnyYamlValueNode, Option<DeserializationDiagnostic>> {
+        let node = self.resolve(alias)?;
+        let Some(budget) = self.expansion_budget else {
+            return Err(None);
         };
-        let budget = budget.checked_sub(usize::from(node.range().len()));
-        self.expansion_budget.set(budget);
-        if budget.is_none() {
-            ctx.report(
+        self.expansion_budget = budget.checked_sub(usize::from(node.range().len()));
+        if self.expansion_budget.is_none() {
+            return Err(Some(
                 DeserializationDiagnostic::new("Aliases expand to too much content.")
-                    .with_range(alias_range)
+                    .with_range(alias.range())
                     .with_note(markup! {
                         "Aliases can expand to at most "{MAX_ALIAS_EXPANSION_FACTOR}" times the size of the document."
                     }),
-            );
+            ));
         }
-        budget.is_some()
+        Ok(node)
     }
 }
 
-/// Returns the node that `anchor` is attached to.
-fn anchored_node(anchor: &YamlAnchorProperty) -> Option<YamlNode> {
-    let properties = YamlPropertyList::cast(anchor.syntax().parent()?)?;
-    let owner = properties.syntax().parent()?;
-    if let Some(key) = AnyYamlMappingImplicitKey::cast_ref(&owner) {
-        // The parser attaches the properties of a block mapping to its first key
+fn anchored_node(anchor: &YamlAnchorProperty) -> Option<AnyYamlValueNode> {
+    let properties = anchor.parent::<YamlPropertyList>()?;
+    if let Some(key) = properties.parent::<AnyYamlMappingImplicitKey>() {
+        // In `a: &anchor\n  b: c`, `&anchor` belongs to the mapping that `b` starts, but the
+        // parser puts it in the property list of `b`, before the properties of `b` itself
         let index = properties
             .iter()
-            .position(|property| property.syntax() == anchor.syntax())?;
+            .position(|property| property.as_yaml_anchor_property() == Some(anchor))?;
         if index < key.enclosing_mapping_property_count() {
-            let mapping = owner.ancestors().find_map(YamlBlockInBlockNode::cast)?;
-            return Some(YamlNode::Block(mapping.into()));
+            let mapping = key
+                .syntax()
+                .ancestors()
+                .find_map(YamlBlockInBlockNode::cast)?;
+            return Some(AnyYamlBlockNode::from(mapping).into());
         }
     }
-    match AnyYamlFlowNode::cast_ref(&owner) {
-        Some(node) => Some(YamlNode::Flow(node)),
-        None => AnyYamlBlockNode::cast(owner).map(YamlNode::Block),
-    }
+    properties.parent::<AnyYamlValueNode>()
 }
