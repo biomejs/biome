@@ -1,0 +1,12 @@
+{
+    "linter": {
+        "rules": {
+            "nursery": {
+                "useTypedIterableCallbackReturn": {
+                    "level": "error",
+                    "options": { "allowImplicit": true }
+                }
+            }
+        }
+    }
+}

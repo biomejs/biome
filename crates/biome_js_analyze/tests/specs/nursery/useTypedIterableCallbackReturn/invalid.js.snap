@@ -1,0 +1,578 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+[1].every(() => {});
+[1].filter(() => {});
+[1].find(() => {});
+[1].findIndex(() => {});
+[1].findLast(() => {});
+[1].findLastIndex(() => {});
+[1].flatMap(() => {});
+[1].map(() => {});
+[1].reduce(() => {});
+[1].reduceRight(() => {});
+[1].some(() => {});
+[1].sort(() => {});
+[1].toSorted(() => {});
+Array.from([1], () => {});
+globalThis.Array.from([1], () => {});
+[1].forEach(() => 42);
+[1].forEach(function() { return 42; });
+[1].forEach(() => { if (condition) return 42; });
+[1].map(() => { if (condition) return 42; });
+[1].map(() => { if (condition) return; return 42; });
+[1].map(() => void 0);
+[1].map(() => { return void 0; });
+[1].map(() => { try { return 42; } catch (error) {} });
+[1].map(() => { function nested() { return 42; } });
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to every() iterable method does not return a value on every path.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ [1].every(() => {});
+      │     ^^^^^
+    3 │ [1].filter(() => {});
+    4 │ [1].find(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to filter() iterable method does not return a value on every path.
+  
+    1 │ /* should generate diagnostics */
+    2 │ [1].every(() => {});
+  > 3 │ [1].filter(() => {});
+      │     ^^^^^^
+    4 │ [1].find(() => {});
+    5 │ [1].findIndex(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to find() iterable method does not return a value on every path.
+  
+    2 │ [1].every(() => {});
+    3 │ [1].filter(() => {});
+  > 4 │ [1].find(() => {});
+      │     ^^^^
+    5 │ [1].findIndex(() => {});
+    6 │ [1].findLast(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findIndex() iterable method does not return a value on every path.
+  
+    3 │ [1].filter(() => {});
+    4 │ [1].find(() => {});
+  > 5 │ [1].findIndex(() => {});
+      │     ^^^^^^^^^
+    6 │ [1].findLast(() => {});
+    7 │ [1].findLastIndex(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findLast() iterable method does not return a value on every path.
+  
+    4 │ [1].find(() => {});
+    5 │ [1].findIndex(() => {});
+  > 6 │ [1].findLast(() => {});
+      │     ^^^^^^^^
+    7 │ [1].findLastIndex(() => {});
+    8 │ [1].flatMap(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to findLastIndex() iterable method does not return a value on every path.
+  
+    5 │ [1].findIndex(() => {});
+    6 │ [1].findLast(() => {});
+  > 7 │ [1].findLastIndex(() => {});
+      │     ^^^^^^^^^^^^^
+    8 │ [1].flatMap(() => {});
+    9 │ [1].map(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to flatMap() iterable method does not return a value on every path.
+  
+     6 │ [1].findLast(() => {});
+     7 │ [1].findLastIndex(() => {});
+   > 8 │ [1].flatMap(() => {});
+       │     ^^^^^^^
+     9 │ [1].map(() => {});
+    10 │ [1].reduce(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+     7 │ [1].findLastIndex(() => {});
+     8 │ [1].flatMap(() => {});
+   > 9 │ [1].map(() => {});
+       │     ^^^
+    10 │ [1].reduce(() => {});
+    11 │ [1].reduceRight(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to reduce() iterable method does not return a value on every path.
+  
+     8 │ [1].flatMap(() => {});
+     9 │ [1].map(() => {});
+  > 10 │ [1].reduce(() => {});
+       │     ^^^^^^
+    11 │ [1].reduceRight(() => {});
+    12 │ [1].some(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to reduceRight() iterable method does not return a value on every path.
+  
+     9 │ [1].map(() => {});
+    10 │ [1].reduce(() => {});
+  > 11 │ [1].reduceRight(() => {});
+       │     ^^^^^^^^^^^
+    12 │ [1].some(() => {});
+    13 │ [1].sort(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to some() iterable method does not return a value on every path.
+  
+    10 │ [1].reduce(() => {});
+    11 │ [1].reduceRight(() => {});
+  > 12 │ [1].some(() => {});
+       │     ^^^^
+    13 │ [1].sort(() => {});
+    14 │ [1].toSorted(() => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to sort() iterable method does not return a value on every path.
+  
+    11 │ [1].reduceRight(() => {});
+    12 │ [1].some(() => {});
+  > 13 │ [1].sort(() => {});
+       │     ^^^^
+    14 │ [1].toSorted(() => {});
+    15 │ Array.from([1], () => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to toSorted() iterable method does not return a value on every path.
+  
+    12 │ [1].some(() => {});
+    13 │ [1].sort(() => {});
+  > 14 │ [1].toSorted(() => {});
+       │     ^^^^^^^^
+    15 │ Array.from([1], () => {});
+    16 │ globalThis.Array.from([1], () => {});
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:7 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to Array.from() method does not return a value on every path.
+  
+    13 │ [1].sort(() => {});
+    14 │ [1].toSorted(() => {});
+  > 15 │ Array.from([1], () => {});
+       │       ^^^^
+    16 │ globalThis.Array.from([1], () => {});
+    17 │ [1].forEach(() => 42);
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:18 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to Array.from() method does not return a value on every path.
+  
+    14 │ [1].toSorted(() => {});
+    15 │ Array.from([1], () => {});
+  > 16 │ globalThis.Array.from([1], () => {});
+       │                  ^^^^
+    17 │ [1].forEach(() => 42);
+    18 │ [1].forEach(function() { return 42; });
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    15 │ Array.from([1], () => {});
+    16 │ globalThis.Array.from([1], () => {});
+  > 17 │ [1].forEach(() => 42);
+       │     ^^^^^^^
+    18 │ [1].forEach(function() { return 42; });
+    19 │ [1].forEach(() => { if (condition) return 42; });
+  
+  i This returned value is not used.
+  
+    15 │ Array.from([1], () => {});
+    16 │ globalThis.Array.from([1], () => {});
+  > 17 │ [1].forEach(() => 42);
+       │                   ^^
+    18 │ [1].forEach(function() { return 42; });
+    19 │ [1].forEach(() => { if (condition) return 42; });
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    16 │ globalThis.Array.from([1], () => {});
+    17 │ [1].forEach(() => 42);
+  > 18 │ [1].forEach(function() { return 42; });
+       │     ^^^^^^^
+    19 │ [1].forEach(() => { if (condition) return 42; });
+    20 │ [1].map(() => { if (condition) return 42; });
+  
+  i This returned value is not used.
+  
+    16 │ globalThis.Array.from([1], () => {});
+    17 │ [1].forEach(() => 42);
+  > 18 │ [1].forEach(function() { return 42; });
+       │                          ^^^^^^^^^^
+    19 │ [1].forEach(() => { if (condition) return 42; });
+    20 │ [1].map(() => { if (condition) return 42; });
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    17 │ [1].forEach(() => 42);
+    18 │ [1].forEach(function() { return 42; });
+  > 19 │ [1].forEach(() => { if (condition) return 42; });
+       │     ^^^^^^^
+    20 │ [1].map(() => { if (condition) return 42; });
+    21 │ [1].map(() => { if (condition) return; return 42; });
+  
+  i This returned value is not used.
+  
+    17 │ [1].forEach(() => 42);
+    18 │ [1].forEach(function() { return 42; });
+  > 19 │ [1].forEach(() => { if (condition) return 42; });
+       │                                    ^^^^^^^^^^
+    20 │ [1].map(() => { if (condition) return 42; });
+    21 │ [1].map(() => { if (condition) return; return 42; });
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    18 │ [1].forEach(function() { return 42; });
+    19 │ [1].forEach(() => { if (condition) return 42; });
+  > 20 │ [1].map(() => { if (condition) return 42; });
+       │     ^^^
+    21 │ [1].map(() => { if (condition) return; return 42; });
+    22 │ [1].map(() => void 0);
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    19 │ [1].forEach(() => { if (condition) return 42; });
+    20 │ [1].map(() => { if (condition) return 42; });
+  > 21 │ [1].map(() => { if (condition) return; return 42; });
+       │     ^^^
+    22 │ [1].map(() => void 0);
+    23 │ [1].map(() => { return void 0; });
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    19 │ [1].forEach(() => { if (condition) return 42; });
+    20 │ [1].map(() => { if (condition) return 42; });
+  > 21 │ [1].map(() => { if (condition) return; return 42; });
+       │                                ^^^^^^^
+    22 │ [1].map(() => void 0);
+    23 │ [1].map(() => { return void 0; });
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    20 │ [1].map(() => { if (condition) return 42; });
+    21 │ [1].map(() => { if (condition) return; return 42; });
+  > 22 │ [1].map(() => void 0);
+       │     ^^^
+    23 │ [1].map(() => { return void 0; });
+    24 │ [1].map(() => { try { return 42; } catch (error) {} });
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    20 │ [1].map(() => { if (condition) return 42; });
+    21 │ [1].map(() => { if (condition) return; return 42; });
+  > 22 │ [1].map(() => void 0);
+       │               ^^^^^^
+    23 │ [1].map(() => { return void 0; });
+    24 │ [1].map(() => { try { return 42; } catch (error) {} });
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    21 │ [1].map(() => { if (condition) return; return 42; });
+    22 │ [1].map(() => void 0);
+  > 23 │ [1].map(() => { return void 0; });
+       │     ^^^
+    24 │ [1].map(() => { try { return 42; } catch (error) {} });
+    25 │ [1].map(() => { function nested() { return 42; } });
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    21 │ [1].map(() => { if (condition) return; return 42; });
+    22 │ [1].map(() => void 0);
+  > 23 │ [1].map(() => { return void 0; });
+       │                 ^^^^^^^^^^^^^^
+    24 │ [1].map(() => { try { return 42; } catch (error) {} });
+    25 │ [1].map(() => { function nested() { return 42; } });
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    22 │ [1].map(() => void 0);
+    23 │ [1].map(() => { return void 0; });
+  > 24 │ [1].map(() => { try { return 42; } catch (error) {} });
+       │     ^^^
+    25 │ [1].map(() => { function nested() { return 42; } });
+    26 │ 
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    23 │ [1].map(() => { return void 0; });
+    24 │ [1].map(() => { try { return 42; } catch (error) {} });
+  > 25 │ [1].map(() => { function nested() { return 42; } });
+       │     ^^^
+    26 │ 
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i The callback can reach its end without returning.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

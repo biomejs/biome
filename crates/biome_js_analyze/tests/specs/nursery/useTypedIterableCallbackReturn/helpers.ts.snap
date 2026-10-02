@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: helpers.ts
+---
+# Input
+```ts
+export function log(value: number): void { console.log(value); }
+export function value(): number { return 42; }
+
+```

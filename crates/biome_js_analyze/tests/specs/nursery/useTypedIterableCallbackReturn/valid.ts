@@ -1,0 +1,61 @@
+/* should not generate diagnostics */
+function foo(x: number): void {
+    console.log(x);
+}
+[1, 2, 3].forEach(x => foo(x));
+[1, 2, 3].forEach(x => { return foo(x); });
+[1, 2, 3].forEach(function(x) { return foo(x); });
+[1, 2, 3].forEach((x => foo(x)));
+
+type NoResult = void;
+declare function alias(): NoResult;
+declare function nothing(): undefined;
+declare function stop(): never;
+declare function anyResult(): any;
+declare function unknownResult(): unknown;
+[1].forEach(() => alias());
+[1].forEach(() => nothing());
+[1].forEach(() => stop());
+[1].map(() => stop());
+[1].map(() => nothing());
+[1].forEach(() => anyResult());
+[1].forEach(() => unknownResult());
+[1].map(() => anyResult());
+[1].map(() => unknownResult());
+
+declare function overloaded(value: string): void;
+declare function overloaded(value: number): number;
+[1].forEach(() => overloaded("text"));
+declare function identity<T>(value: T): T;
+[1].forEach(() => identity(foo(1)));
+
+declare const dataTable: { every(callback: () => void): void };
+dataTable.every(() => {});
+declare const unknownReceiver: any;
+unknownReceiver.map(() => {});
+unknownReceiver.forEach(() => 42);
+
+function shadowed(Array: { from(input: number[], callback: () => void): void }) {
+    Array.from([1], () => {});
+}
+function shadowedGlobal(globalThis: { Array: { from(input: number[], callback: () => void): void } }) {
+    globalThis.Array.from([1], () => {});
+}
+
+declare const numbers: number[];
+declare const tuple: [number, string];
+declare const map: Map<string, number>;
+declare const set: Set<number>;
+numbers.forEach(() => foo(1));
+tuple.forEach(() => foo(1));
+map.forEach(() => foo(1));
+set.forEach(() => foo(1));
+[1].map(() => { if (condition) throw new Error(); return 42; });
+[1].map(() => { try { return 42; } finally {} });
+[1].forEach(() => { return; return 42; });
+
+declare function optional(): number | undefined;
+[1].map(() => optional());
+
+// biome-ignore lint/nursery/useTypedIterableCallbackReturn: intentional side effect
+[1].forEach(() => 42);

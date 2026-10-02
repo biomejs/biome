@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: imports.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+import { log, value } from "./helpers";
+[1].forEach(x => log(x));
+[1].map(x => log(x));
+[1].forEach(() => value());
+
+```
+
+# Diagnostics
+```
+imports.ts:4:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to map() iterable method does not return a value on every path.
+  
+    2 │ import { log, value } from "./helpers";
+    3 │ [1].forEach(x => log(x));
+  > 4 │ [1].map(x => log(x));
+      │     ^^^
+    5 │ [1].forEach(() => value());
+    6 │ 
+  
+  i Return a value instead of an empty or void-valued result.
+  
+    2 │ import { log, value } from "./helpers";
+    3 │ [1].forEach(x => log(x));
+  > 4 │ [1].map(x => log(x));
+      │              ^^^^^^
+    5 │ [1].forEach(() => value());
+    6 │ 
+  
+  i This method uses the callback's result. Return a value on each non-throwing path.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+imports.ts:5:5 lint/nursery/useTypedIterableCallbackReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This callback passed to forEach() iterable method returns a value that is discarded.
+  
+    3 │ [1].forEach(x => log(x));
+    4 │ [1].map(x => log(x));
+  > 5 │ [1].forEach(() => value());
+      │     ^^^^^^^
+    6 │ 
+  
+  i This returned value is not used.
+  
+    3 │ [1].forEach(x => log(x));
+    4 │ [1].map(x => log(x));
+  > 5 │ [1].forEach(() => value());
+      │                   ^^^^^^^
+    6 │ 
+  
+  i Use a block body without returning the value, or choose a method that uses the callback's result.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
