@@ -14,7 +14,7 @@ use biome_js_syntax::{
     JsObjectExpression, JsPropertyObjectMember, JsReferenceIdentifier,
     JsShorthandNamedImportSpecifier, JsStringLiteralExpression, JsSyntaxKind, JsSyntaxNode,
     JsVariableDeclarator, TsIdentifierBinding, TsInterfaceDeclaration,
-    TsPropertySignatureTypeMember, TsTypeAliasDeclaration,
+    TsPropertySignatureTypeMember, TsTypeAliasDeclaration, TsTypeMemberList,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -488,6 +488,11 @@ impl VueDefinePropsCall {
             with_defaults,
             destructuring,
         })
+    }
+
+    /// Returns the `defineProps()` call itself, even when it is wrapped in `withDefaults()`.
+    pub fn define_props_call(&self) -> &JsCallExpression {
+        &self.call
     }
 
     /// Returns the props declared by this call.
@@ -1033,52 +1038,43 @@ fn collect_props_declarations_from_type(
     any_type: &AnyTsType,
     model: &SemanticModel,
 ) -> Vec<VueDeclaration> {
+    resolve_props_type_members(any_type, model)
+        .into_iter()
+        .flatten()
+        .filter_map(|member| match member {
+            AnyTsTypeMember::TsPropertySignatureTypeMember(property) => Some(VueDeclaration::Prop(
+                AnyVuePropDeclaration::TsPropertySignatureTypeMember(property),
+            )),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Resolves the members of the type passed to `defineProps<T>()`.
+///
+/// Supports object types, and references to type aliases and interfaces declared in the same file.
+pub fn resolve_props_type_members(
+    any_type: &AnyTsType,
+    model: &SemanticModel,
+) -> Option<TsTypeMemberList> {
     match any_type {
-        AnyTsType::TsObjectType(object_type) => {
-            let mut result = vec![];
-            for member in object_type.members() {
-                if let AnyTsTypeMember::TsPropertySignatureTypeMember(property) = member {
-                    result.push(VueDeclaration::Prop(
-                        AnyVuePropDeclaration::TsPropertySignatureTypeMember(property.clone()),
-                    ));
-                }
-            }
-            result
+        AnyTsType::TsObjectType(object_type) => Some(object_type.members()),
+        AnyTsType::TsParenthesizedType(parenthesized_type) => {
+            resolve_props_type_members(&parenthesized_type.ty().ok()?, model)
         }
-        AnyTsType::TsParenthesizedType(parenthesized_type) => parenthesized_type
-            .ty()
-            .map(|ty| collect_props_declarations_from_type(&ty, model))
-            .unwrap_or_default(),
-        AnyTsType::TsReferenceType(reference_type) => reference_type
-            .name()
-            .ok()
-            .and_then(|name| {
-                let reference_identifier = name.as_js_reference_identifier()?;
-                let binding_syntax = reference_identifier.binding(model)?;
-                if let Some(identifier_binding) = TsIdentifierBinding::cast_ref(&binding_syntax) {
-                    if let Some(type_alias) = identifier_binding.parent::<TsTypeAliasDeclaration>()
-                    {
-                        let ty = type_alias.ty().ok()?;
-                        return Some(collect_props_declarations_from_type(&ty, model));
-                    } else if let Some(interface) =
-                        identifier_binding.parent::<TsInterfaceDeclaration>()
-                    {
-                        let mut result = vec![];
-                        for member in interface.members() {
-                            if let AnyTsTypeMember::TsPropertySignatureTypeMember(property) = member
-                            {
-                                result.push(VueDeclaration::Prop(
-                                    AnyVuePropDeclaration::TsPropertySignatureTypeMember(property),
-                                ))
-                            }
-                        }
-                        return Some(result);
-                    }
-                }
-                None
-            })
-            .unwrap_or_default(),
-        _ => vec![],
+        AnyTsType::TsReferenceType(reference_type) => {
+            let name = reference_type.name().ok()?;
+            let binding_syntax = name.as_js_reference_identifier()?.binding(model)?;
+            let identifier_binding = TsIdentifierBinding::cast(binding_syntax)?;
+            if let Some(type_alias) = identifier_binding.parent::<TsTypeAliasDeclaration>() {
+                resolve_props_type_members(&type_alias.ty().ok()?, model)
+            } else {
+                identifier_binding
+                    .parent::<TsInterfaceDeclaration>()
+                    .map(|interface| interface.members())
+            }
+        }
+        _ => None,
     }
 }
 
