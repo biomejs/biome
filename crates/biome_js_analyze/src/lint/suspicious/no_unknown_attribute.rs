@@ -20,6 +20,9 @@ declare_lint_rule! {
     /// This can be a possible source of error if you are used to writing plain HTML.
     /// Only `data-*` and `aria-*` attributes are allowed to use hyphens and lowercase letters in JSX.
     ///
+    /// Transition event handlers (`onTransitionCancel`, `onTransitionRun`, `onTransitionStart`, and their capture variants)
+    /// require a React dependency range in `package.json` that allows React 19 or later.
+    ///
     /// Fullscreen event handlers (`onFullscreenChange`, `onFullscreenError`, and their capture variants),
     /// `credentialless`, and `maskType` require a React dependency range in `package.json` that allows React 19.3 or later.
     /// Without that dependency, these properties are reported as unknown.
@@ -281,6 +284,15 @@ const POPOVER_API_PROPS_LOWERCASE: &[&str] = &[
     "popover",
     "popovertarget",
     "popovertargetaction",
+];
+
+const REACT_19_TRANSITION_PROPS: &[&str] = &[
+    "onTransitionCancel",
+    "onTransitionCancelCapture",
+    "onTransitionRun",
+    "onTransitionRunCapture",
+    "onTransitionStart",
+    "onTransitionStartCapture",
 ];
 
 const REACT_19_3_PROPS: &[&str] = &[
@@ -1208,6 +1220,7 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
     if is_react_19_or_later {
         if let Some(&prop) = POPOVER_API_PROPS
             .iter()
+            .chain(REACT_19_TRANSITION_PROPS)
             .find(|&&element| element.eq_ignore_ascii_case(name))
         {
             return Some(prop);
