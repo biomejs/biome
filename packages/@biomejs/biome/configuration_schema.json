@@ -6836,6 +6836,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRootVIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRootVIfOptions" }
+			]
+		},
+		"NoVueRootVIfOptions": { "type": "object", "additionalProperties": false },
 		"NoVueSetupPropsReactivityLossConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7463,6 +7470,13 @@
 					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRootVIf": {
+					"description": "Disallow v-if on the root element of a Vue component template.\nSee https://biomejs.dev/linter/rules/no-vue-root-v-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRootVIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11761,6 +11775,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRootVIfOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRootVIfOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

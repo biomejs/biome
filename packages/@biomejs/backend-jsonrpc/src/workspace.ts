@@ -2715,6 +2715,11 @@ See https://biomejs.dev/linter/rules/no-vue-ref-as-operand
 	 */
 	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
 	/**
+	* Disallow v-if on the root element of a Vue component template.
+See https://biomejs.dev/linter/rules/no-vue-root-v-if 
+	 */
+	noVueRootVIf?: NoVueRootVIfConfiguration;
+	/**
 	* Disallow custom Vue directives that are not declared.
 See https://biomejs.dev/linter/rules/no-vue-undeclared-directives 
 	 */
@@ -5084,6 +5089,9 @@ export type NoVueImportCompilerMacrosConfiguration =
 export type NoVueRefAsOperandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRefAsOperandOptions;
+export type NoVueRootVIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRootVIfOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -7150,6 +7158,10 @@ export interface RuleWithNoVueRefAsOperandOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRefAsOperandOptions;
 }
+export interface RuleWithNoVueRootVIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRootVIfOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -9011,6 +9023,7 @@ export type NoUselessTypeConversionOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
+export type NoVueRootVIfOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	* Names of directives registered globally with `app.directive(...)`,
@@ -10511,6 +10524,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noXorAsExponentiation"
