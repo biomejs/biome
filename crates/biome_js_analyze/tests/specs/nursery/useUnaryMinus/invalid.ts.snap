@@ -1,0 +1,146 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(x as number) * -1;
+-1 * (x as number);
+x! * -1;
+(<number>x) * -1;
+(x satisfies number) / -1;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (x as number) * -1;
+      │ ^^^^^^^^^^^^^^^^^^
+    3 │ -1 * (x as number);
+    4 │ x! * -1;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - (x·as·number)·*·-1;
+      2 │ + -(x·as·number);
+    3 3 │   -1 * (x as number);
+    4 4 │   x! * -1;
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (x as number) * -1;
+  > 3 │ -1 * (x as number);
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ x! * -1;
+    5 │ (<number>x) * -1;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+    3 │ -1·*·(x·as·number);
+      │  ----              
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    2 │ (x as number) * -1;
+    3 │ -1 * (x as number);
+  > 4 │ x! * -1;
+      │ ^^^^^^^
+    5 │ (<number>x) * -1;
+    6 │ (x satisfies number) / -1;
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+    2 2 │   (x as number) * -1;
+    3 3 │   -1 * (x as number);
+    4   │ - x!·*·-1;
+      4 │ + -x!;
+    5 5 │   (<number>x) * -1;
+    6 6 │   (x satisfies number) / -1;
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Multiplying by -1 is a roundabout way to negate a value.
+  
+    3 │ -1 * (x as number);
+    4 │ x! * -1;
+  > 5 │ (<number>x) * -1;
+      │ ^^^^^^^^^^^^^^^^
+    6 │ (x satisfies number) / -1;
+    7 │ 
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+    3 3 │   -1 * (x as number);
+    4 4 │   x! * -1;
+    5   │ - (<number>x)·*·-1;
+      5 │ + -<number>x;
+    6 6 │   (x satisfies number) / -1;
+    7 7 │   
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/useUnaryMinus  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Dividing by -1 is a roundabout way to negate a value.
+  
+    4 │ x! * -1;
+    5 │ (<number>x) * -1;
+  > 6 │ (x satisfies number) / -1;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i The unary minus operator is shorter and states the intent directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the unary minus operator.
+  
+    4 4 │   x! * -1;
+    5 5 │   (<number>x) * -1;
+    6   │ - (x·satisfies·number)·/·-1;
+      6 │ + -(x·satisfies·number);
+    7 7 │   
+  
+
+```

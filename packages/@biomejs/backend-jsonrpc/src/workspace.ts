@@ -3161,6 +3161,11 @@ export interface Nursery {
 	 */
 	useThisInClassMethods?: UseThisInClassMethodsConfiguration;
 	/**
+	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
+	 * See https://biomejs.dev/linter/rules/use-unary-minus
+	 */
+	useUnaryMinus?: UseUnaryMinusConfiguration;
+	/**
 	 * Enforce the use of the u or v flag for regular expressions.
 	 * See https://biomejs.dev/linter/rules/use-unicode-regex
 	 */
@@ -5451,6 +5456,9 @@ export type UseTestHooksOnTopConfiguration =
 export type UseThisInClassMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseThisInClassMethodsOptions;
+export type UseUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnaryMinusOptions;
 export type UseUnicodeRegexConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseUnicodeRegexOptions;
@@ -7955,6 +7963,14 @@ export interface RuleWithUseThisInClassMethodsOptions {
 	level: RulePlainConfiguration;
 	options?: UseThisInClassMethodsOptions;
 }
+export interface RuleWithUseUnaryMinusOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnaryMinusOptions;
+}
 export interface RuleWithUseUnicodeRegexOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10127,6 +10143,7 @@ export interface UseThisInClassMethodsOptions {
 	 */
 	ignoreOverrideMethods?: boolean;
 }
+export type UseUnaryMinusOptions = {};
 export type UseUnicodeRegexOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
@@ -11446,6 +11463,7 @@ export type Category =
 	| "lint/nursery/useTestHooksOnTop"
 	| "lint/nursery/useThisInClassMethods"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUnicodeRegex"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
