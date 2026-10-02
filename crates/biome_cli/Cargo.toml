@@ -62,6 +62,7 @@ biome_yaml_syntax        = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
+indexmap                 = { workspace = true }
 notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
