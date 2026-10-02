@@ -298,8 +298,7 @@ fn needs_parentheses(node: &JsNumberLiteralExpression, formatted: &str) -> bool 
     match parent {
         AnyJsMemberExpression::JsStaticMemberExpression(parent) => parent
             .object()
-            .ok()
-            .is_some_and(|object| object.syntax() == node.syntax()),
+            .is_ok_and(|object| object.syntax() == node.syntax()),
         AnyJsMemberExpression::JsComputedMemberExpression(_) => false,
     }
 }
