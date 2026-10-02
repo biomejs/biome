@@ -43,6 +43,8 @@
 	justify-content: left;
 	justify-items: right;
 	justify-items: left;
+	justify-items: legacy left;
+	justify-items: right legacy;
 	justify-self: right;
 	justify-self: left;
 }

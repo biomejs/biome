@@ -49,6 +49,8 @@ expression: invalidRtl.css
 	justify-content: left;
 	justify-items: right;
 	justify-items: left;
+	justify-items: legacy left;
+	justify-items: right legacy;
 	justify-self: right;
 	justify-self: left;
 }
@@ -828,7 +830,7 @@ invalidRtl.css:44:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   > 44 │ 	justify-items: right;
        │ 	               ^^^^^
     45 │ 	justify-items: left;
-    46 │ 	justify-self: right;
+    46 │ 	justify-items: legacy left;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -843,7 +845,7 @@ invalidRtl.css:44:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
     44    │ - → justify-items:·right;
        44 │ + → justify-items:·start;
     45 45 │     justify-items: left;
-    46 46 │     justify-self: right;
+    46 46 │     justify-items: legacy left;
   
 
 ```
@@ -857,8 +859,8 @@ invalidRtl.css:45:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
     44 │ 	justify-items: right;
   > 45 │ 	justify-items: left;
        │ 	               ^^^^
-    46 │ 	justify-self: right;
-    47 │ 	justify-self: left;
+    46 │ 	justify-items: legacy left;
+    47 │ 	justify-items: right legacy;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -872,23 +874,65 @@ invalidRtl.css:45:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
     44 44 │     justify-items: right;
     45    │ - → justify-items:·left;
        45 │ + → justify-items:·end;
-    46 46 │     justify-self: right;
-    47 47 │     justify-self: left;
+    46 46 │     justify-items: legacy left;
+    47 47 │     justify-items: right legacy;
   
 
 ```
 
 ```
-invalidRtl.css:46:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:46:24 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
     44 │ 	justify-items: right;
     45 │ 	justify-items: left;
-  > 46 │ 	justify-self: right;
+  > 46 │ 	justify-items: legacy left;
+       │ 	                      ^^^^
+    47 │ 	justify-items: right legacy;
+    48 │ 	justify-self: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The legacy keyword only allows left, right, or center.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:47:17 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    45 │ 	justify-items: left;
+    46 │ 	justify-items: legacy left;
+  > 47 │ 	justify-items: right legacy;
+       │ 	               ^^^^^
+    48 │ 	justify-self: right;
+    49 │ 	justify-self: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The legacy keyword only allows left, right, or center.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidRtl.css:48:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    46 │ 	justify-items: legacy left;
+    47 │ 	justify-items: right legacy;
+  > 48 │ 	justify-self: right;
        │ 	              ^^^^^
-    47 │ 	justify-self: left;
-    48 │ }
+    49 │ 	justify-self: left;
+    50 │ }
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -898,27 +942,27 @@ invalidRtl.css:46:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    44 44 │     justify-items: right;
-    45 45 │     justify-items: left;
-    46    │ - → justify-self:·right;
-       46 │ + → justify-self:·start;
-    47 47 │     justify-self: left;
-    48 48 │   }
+    46 46 │     justify-items: legacy left;
+    47 47 │     justify-items: right legacy;
+    48    │ - → justify-self:·right;
+       48 │ + → justify-self:·start;
+    49 49 │     justify-self: left;
+    50 50 │   }
   
 
 ```
 
 ```
-invalidRtl.css:47:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:49:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
-    45 │ 	justify-items: left;
-    46 │ 	justify-self: right;
-  > 47 │ 	justify-self: left;
+    47 │ 	justify-items: right legacy;
+    48 │ 	justify-self: right;
+  > 49 │ 	justify-self: left;
        │ 	              ^^^^
-    48 │ }
-    49 │ 
+    50 │ }
+    51 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -928,26 +972,26 @@ invalidRtl.css:47:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    45 45 │     justify-items: left;
-    46 46 │     justify-self: right;
-    47    │ - → justify-self:·left;
-       47 │ + → justify-self:·end;
-    48 48 │   }
-    49 49 │   
+    47 47 │     justify-items: right legacy;
+    48 48 │     justify-self: right;
+    49    │ - → justify-self:·left;
+       49 │ + → justify-self:·end;
+    50 50 │   }
+    51 51 │   
   
 
 ```
 
 ```
-invalidRtl.css:51:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:53:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
-    50 │ .anchor-functions {
-  > 51 │ 	right: anchor(left);
+    52 │ .anchor-functions {
+  > 53 │ 	right: anchor(left);
        │ 	^^^^^
-    52 │ 	left: anchor(right);
-    53 │ }
+    54 │ 	left: anchor(right);
+    55 │ }
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -957,26 +1001,26 @@ invalidRtl.css:51:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i Safe fix: Use the logical CSS replacement.
   
-    49 49 │   
-    50 50 │   .anchor-functions {
-    51    │ - → right:·anchor(left);
-       51 │ + → inset-inline-start:·anchor(left);
-    52 52 │     left: anchor(right);
-    53 53 │   }
+    51 51 │   
+    52 52 │   .anchor-functions {
+    53    │ - → right:·anchor(left);
+       53 │ + → inset-inline-start:·anchor(left);
+    54 54 │     left: anchor(right);
+    55 55 │   }
   
 
 ```
 
 ```
-invalidRtl.css:51:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:53:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a logical side in anchor().
   
-    50 │ .anchor-functions {
-  > 51 │ 	right: anchor(left);
+    52 │ .anchor-functions {
+  > 53 │ 	right: anchor(left);
        │ 	              ^^^^
-    52 │ 	left: anchor(right);
-    53 │ }
+    54 │ 	left: anchor(right);
+    55 │ }
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -986,27 +1030,27 @@ invalidRtl.css:51:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    49 49 │   
-    50 50 │   .anchor-functions {
-    51    │ - → right:·anchor(left);
-       51 │ + → right:·anchor(end);
-    52 52 │     left: anchor(right);
-    53 53 │   }
+    51 51 │   
+    52 52 │   .anchor-functions {
+    53    │ - → right:·anchor(left);
+       53 │ + → right:·anchor(end);
+    54 54 │     left: anchor(right);
+    55 55 │   }
   
 
 ```
 
 ```
-invalidRtl.css:52:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:54:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS properties over physical ones.
   
-    50 │ .anchor-functions {
-    51 │ 	right: anchor(left);
-  > 52 │ 	left: anchor(right);
+    52 │ .anchor-functions {
+    53 │ 	right: anchor(left);
+  > 54 │ 	left: anchor(right);
        │ 	^^^^
-    53 │ }
-    54 │ 
+    55 │ }
+    56 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1016,27 +1060,27 @@ invalidRtl.css:52:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i Safe fix: Use the logical CSS replacement.
   
-    50 50 │   .anchor-functions {
-    51 51 │     right: anchor(left);
-    52    │ - → left:·anchor(right);
-       52 │ + → inset-inline-end:·anchor(right);
-    53 53 │   }
-    54 54 │   
+    52 52 │   .anchor-functions {
+    53 53 │     right: anchor(left);
+    54    │ - → left:·anchor(right);
+       54 │ + → inset-inline-end:·anchor(right);
+    55 55 │   }
+    56 56 │   
   
 
 ```
 
 ```
-invalidRtl.css:52:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRtl.css:54:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a logical side in anchor().
   
-    50 │ .anchor-functions {
-    51 │ 	right: anchor(left);
-  > 52 │ 	left: anchor(right);
+    52 │ .anchor-functions {
+    53 │ 	right: anchor(left);
+  > 54 │ 	left: anchor(right);
        │ 	             ^^^^^
-    53 │ }
-    54 │ 
+    55 │ }
+    56 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1046,12 +1090,12 @@ invalidRtl.css:52:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    50 50 │   .anchor-functions {
-    51 51 │     right: anchor(left);
-    52    │ - → left:·anchor(right);
-       52 │ + → left:·anchor(start);
-    53 53 │   }
-    54 54 │   
+    52 52 │   .anchor-functions {
+    53 53 │     right: anchor(left);
+    54    │ - → left:·anchor(right);
+       54 │ + → left:·anchor(start);
+    55 55 │   }
+    56 56 │   
   
 
 ```

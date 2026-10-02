@@ -74,6 +74,8 @@ expression: invalid.css
 	justify-content: right;
 	justify-items: left;
 	justify-items: right;
+	justify-items: legacy left;
+	justify-items: right legacy;
 	justify-self: left;
 	justify-self: right;
 }
@@ -1522,7 +1524,7 @@ invalid.css:69:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   > 69 │ 	justify-items: left;
        │ 	               ^^^^
     70 │ 	justify-items: right;
-    71 │ 	justify-self: left;
+    71 │ 	justify-items: legacy left;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1537,7 +1539,7 @@ invalid.css:69:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     69    │ - → justify-items:·left;
        69 │ + → justify-items:·start;
     70 70 │     justify-items: right;
-    71 71 │     justify-self: left;
+    71 71 │     justify-items: legacy left;
   
 
 ```
@@ -1551,8 +1553,8 @@ invalid.css:70:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     69 │ 	justify-items: left;
   > 70 │ 	justify-items: right;
        │ 	               ^^^^^
-    71 │ 	justify-self: left;
-    72 │ 	justify-self: right;
+    71 │ 	justify-items: legacy left;
+    72 │ 	justify-items: right legacy;
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1566,23 +1568,65 @@ invalid.css:70:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
     69 69 │     justify-items: left;
     70    │ - → justify-items:·right;
        70 │ + → justify-items:·end;
-    71 71 │     justify-self: left;
-    72 72 │     justify-self: right;
+    71 71 │     justify-items: legacy left;
+    72 72 │     justify-items: right legacy;
   
 
 ```
 
 ```
-invalid.css:71:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:71:24 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
     69 │ 	justify-items: left;
     70 │ 	justify-items: right;
-  > 71 │ 	justify-self: left;
+  > 71 │ 	justify-items: legacy left;
+       │ 	                      ^^^^
+    72 │ 	justify-items: right legacy;
+    73 │ 	justify-self: left;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The legacy keyword only allows left, right, or center.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:72:17 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    70 │ 	justify-items: right;
+    71 │ 	justify-items: legacy left;
+  > 72 │ 	justify-items: right legacy;
+       │ 	               ^^^^^
+    73 │ 	justify-self: left;
+    74 │ 	justify-self: right;
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i The legacy keyword only allows left, right, or center.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:73:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS values over physical ones.
+  
+    71 │ 	justify-items: legacy left;
+    72 │ 	justify-items: right legacy;
+  > 73 │ 	justify-self: left;
        │ 	              ^^^^
-    72 │ 	justify-self: right;
-    73 │ }
+    74 │ 	justify-self: right;
+    75 │ }
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1592,27 +1636,27 @@ invalid.css:71:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    69 69 │     justify-items: left;
-    70 70 │     justify-items: right;
-    71    │ - → justify-self:·left;
-       71 │ + → justify-self:·start;
-    72 72 │     justify-self: right;
-    73 73 │   }
+    71 71 │     justify-items: legacy left;
+    72 72 │     justify-items: right legacy;
+    73    │ - → justify-self:·left;
+       73 │ + → justify-self:·start;
+    74 74 │     justify-self: right;
+    75 75 │   }
   
 
 ```
 
 ```
-invalid.css:72:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:74:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
-    70 │ 	justify-items: right;
-    71 │ 	justify-self: left;
-  > 72 │ 	justify-self: right;
+    72 │ 	justify-items: right legacy;
+    73 │ 	justify-self: left;
+  > 74 │ 	justify-self: right;
        │ 	              ^^^^^
-    73 │ }
-    74 │ 
+    75 │ }
+    76 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1622,130 +1666,12 @@ invalid.css:72:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    70 70 │     justify-items: right;
-    71 71 │     justify-self: left;
-    72    │ - → justify-self:·right;
-       72 │ + → justify-self:·end;
-    73 73 │   }
-    74 74 │   
-  
-
-```
-
-```
-invalid.css:76:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use logical CSS properties over physical ones.
-  
-    75 │ .anchor-functions {
-  > 76 │ 	width: anchor-size(width);
-       │ 	^^^^^
-    77 │ 	height: anchor-size(height);
-    78 │ 	width: var(--size, anchor-size(width));
-  
-  i Logical properties adapt better to different writing modes and layout directions.
-  
-  i Replace width with inline-size.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    74 74 │   
-    75 75 │   .anchor-functions {
-    76    │ - → width:·anchor-size(width);
-       76 │ + → inline-size:·anchor-size(width);
-    77 77 │     height: anchor-size(height);
-    78 78 │     width: var(--size, anchor-size(width));
-  
-
-```
-
-```
-invalid.css:76:21 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use a logical size in anchor-size().
-  
-    75 │ .anchor-functions {
-  > 76 │ 	width: anchor-size(width);
-       │ 	                   ^^^^^
-    77 │ 	height: anchor-size(height);
-    78 │ 	width: var(--size, anchor-size(width));
-  
-  i Logical properties adapt better to different writing modes and layout directions.
-  
-  i Replace width with inline.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    74 74 │   
-    75 75 │   .anchor-functions {
-    76    │ - → width:·anchor-size(width);
-       76 │ + → width:·anchor-size(inline);
-    77 77 │     height: anchor-size(height);
-    78 78 │     width: var(--size, anchor-size(width));
-  
-
-```
-
-```
-invalid.css:77:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use logical CSS properties over physical ones.
-  
-    75 │ .anchor-functions {
-    76 │ 	width: anchor-size(width);
-  > 77 │ 	height: anchor-size(height);
-       │ 	^^^^^^
-    78 │ 	width: var(--size, anchor-size(width));
-    79 │ 	top: anchor(bottom);
-  
-  i Logical properties adapt better to different writing modes and layout directions.
-  
-  i Replace height with block-size.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    75 75 │   .anchor-functions {
-    76 76 │     width: anchor-size(width);
-    77    │ - → height:·anchor-size(height);
-       77 │ + → block-size:·anchor-size(height);
-    78 78 │     width: var(--size, anchor-size(width));
-    79 79 │     top: anchor(bottom);
-  
-
-```
-
-```
-invalid.css:77:22 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Use a logical size in anchor-size().
-  
-    75 │ .anchor-functions {
-    76 │ 	width: anchor-size(width);
-  > 77 │ 	height: anchor-size(height);
-       │ 	                    ^^^^^^
-    78 │ 	width: var(--size, anchor-size(width));
-    79 │ 	top: anchor(bottom);
-  
-  i Logical properties adapt better to different writing modes and layout directions.
-  
-  i Replace height with block.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use the logical CSS replacement.
-  
-    75 75 │   .anchor-functions {
-    76 76 │     width: anchor-size(width);
-    77    │ - → height:·anchor-size(height);
-       77 │ + → height:·anchor-size(block);
-    78 78 │     width: var(--size, anchor-size(width));
-    79 79 │     top: anchor(bottom);
+    72 72 │     justify-items: right legacy;
+    73 73 │     justify-self: left;
+    74    │ - → justify-self:·right;
+       74 │ + → justify-self:·end;
+    75 75 │   }
+    76 76 │   
   
 
 ```
@@ -1755,12 +1681,11 @@ invalid.css:78:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
 
   ! Use logical CSS properties over physical ones.
   
-    76 │ 	width: anchor-size(width);
-    77 │ 	height: anchor-size(height);
-  > 78 │ 	width: var(--size, anchor-size(width));
+    77 │ .anchor-functions {
+  > 78 │ 	width: anchor-size(width);
        │ 	^^^^^
-    79 │ 	top: anchor(bottom);
-    80 │ 	left: anchor(right);
+    79 │ 	height: anchor-size(height);
+    80 │ 	width: var(--size, anchor-size(width));
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1770,27 +1695,26 @@ invalid.css:78:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
   i Safe fix: Use the logical CSS replacement.
   
-    76 76 │     width: anchor-size(width);
-    77 77 │     height: anchor-size(height);
-    78    │ - → width:·var(--size,·anchor-size(width));
-       78 │ + → inline-size:·var(--size,·anchor-size(width));
-    79 79 │     top: anchor(bottom);
-    80 80 │     left: anchor(right);
+    76 76 │   
+    77 77 │   .anchor-functions {
+    78    │ - → width:·anchor-size(width);
+       78 │ + → inline-size:·anchor-size(width);
+    79 79 │     height: anchor-size(height);
+    80 80 │     width: var(--size, anchor-size(width));
   
 
 ```
 
 ```
-invalid.css:78:33 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:78:21 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a logical size in anchor-size().
   
-    76 │ 	width: anchor-size(width);
-    77 │ 	height: anchor-size(height);
-  > 78 │ 	width: var(--size, anchor-size(width));
-       │ 	                               ^^^^^
-    79 │ 	top: anchor(bottom);
-    80 │ 	left: anchor(right);
+    77 │ .anchor-functions {
+  > 78 │ 	width: anchor-size(width);
+       │ 	                   ^^^^^
+    79 │ 	height: anchor-size(height);
+    80 │ 	width: var(--size, anchor-size(width));
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1800,12 +1724,12 @@ invalid.css:78:33 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    76 76 │     width: anchor-size(width);
-    77 77 │     height: anchor-size(height);
-    78    │ - → width:·var(--size,·anchor-size(width));
-       78 │ + → width:·var(--size,·anchor-size(inline));
-    79 79 │     top: anchor(bottom);
-    80 80 │     left: anchor(right);
+    76 76 │   
+    77 77 │   .anchor-functions {
+    78    │ - → width:·anchor-size(width);
+       78 │ + → width:·anchor-size(inline);
+    79 79 │     height: anchor-size(height);
+    80 80 │     width: var(--size, anchor-size(width));
   
 
 ```
@@ -1815,57 +1739,57 @@ invalid.css:79:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
 
   ! Use logical CSS properties over physical ones.
   
-    77 │ 	height: anchor-size(height);
-    78 │ 	width: var(--size, anchor-size(width));
-  > 79 │ 	top: anchor(bottom);
-       │ 	^^^
-    80 │ 	left: anchor(right);
-    81 │ }
+    77 │ .anchor-functions {
+    78 │ 	width: anchor-size(width);
+  > 79 │ 	height: anchor-size(height);
+       │ 	^^^^^^
+    80 │ 	width: var(--size, anchor-size(width));
+    81 │ 	top: anchor(bottom);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace top with inset-block-start.
+  i Replace height with block-size.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Use the logical CSS replacement.
   
-    77 77 │     height: anchor-size(height);
-    78 78 │     width: var(--size, anchor-size(width));
-    79    │ - → top:·anchor(bottom);
-       79 │ + → inset-block-start:·anchor(bottom);
-    80 80 │     left: anchor(right);
-    81 81 │   }
+    77 77 │   .anchor-functions {
+    78 78 │     width: anchor-size(width);
+    79    │ - → height:·anchor-size(height);
+       79 │ + → block-size:·anchor-size(height);
+    80 80 │     width: var(--size, anchor-size(width));
+    81 81 │     top: anchor(bottom);
   
 
 ```
 
 ```
-invalid.css:79:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:79:22 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use a logical side in anchor().
+  ! Use a logical size in anchor-size().
   
-    77 │ 	height: anchor-size(height);
-    78 │ 	width: var(--size, anchor-size(width));
-  > 79 │ 	top: anchor(bottom);
-       │ 	            ^^^^^^
-    80 │ 	left: anchor(right);
-    81 │ }
+    77 │ .anchor-functions {
+    78 │ 	width: anchor-size(width);
+  > 79 │ 	height: anchor-size(height);
+       │ 	                    ^^^^^^
+    80 │ 	width: var(--size, anchor-size(width));
+    81 │ 	top: anchor(bottom);
   
   i Logical properties adapt better to different writing modes and layout directions.
   
-  i Replace bottom with end.
+  i Replace height with block.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
   i Safe fix: Use the logical CSS replacement.
   
-    77 77 │     height: anchor-size(height);
-    78 78 │     width: var(--size, anchor-size(width));
-    79    │ - → top:·anchor(bottom);
-       79 │ + → top:·anchor(end);
-    80 80 │     left: anchor(right);
-    81 81 │   }
+    77 77 │   .anchor-functions {
+    78 78 │     width: anchor-size(width);
+    79    │ - → height:·anchor-size(height);
+       79 │ + → height:·anchor-size(block);
+    80 80 │     width: var(--size, anchor-size(width));
+    81 81 │     top: anchor(bottom);
   
 
 ```
@@ -1875,12 +1799,132 @@ invalid.css:80:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
 
   ! Use logical CSS properties over physical ones.
   
-    78 │ 	width: var(--size, anchor-size(width));
-    79 │ 	top: anchor(bottom);
-  > 80 │ 	left: anchor(right);
+    78 │ 	width: anchor-size(width);
+    79 │ 	height: anchor-size(height);
+  > 80 │ 	width: var(--size, anchor-size(width));
+       │ 	^^^^^
+    81 │ 	top: anchor(bottom);
+    82 │ 	left: anchor(right);
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace width with inline-size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    78 78 │     width: anchor-size(width);
+    79 79 │     height: anchor-size(height);
+    80    │ - → width:·var(--size,·anchor-size(width));
+       80 │ + → inline-size:·var(--size,·anchor-size(width));
+    81 81 │     top: anchor(bottom);
+    82 82 │     left: anchor(right);
+  
+
+```
+
+```
+invalid.css:80:33 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a logical size in anchor-size().
+  
+    78 │ 	width: anchor-size(width);
+    79 │ 	height: anchor-size(height);
+  > 80 │ 	width: var(--size, anchor-size(width));
+       │ 	                               ^^^^^
+    81 │ 	top: anchor(bottom);
+    82 │ 	left: anchor(right);
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace width with inline.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    78 78 │     width: anchor-size(width);
+    79 79 │     height: anchor-size(height);
+    80    │ - → width:·var(--size,·anchor-size(width));
+       80 │ + → width:·var(--size,·anchor-size(inline));
+    81 81 │     top: anchor(bottom);
+    82 82 │     left: anchor(right);
+  
+
+```
+
+```
+invalid.css:81:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    79 │ 	height: anchor-size(height);
+    80 │ 	width: var(--size, anchor-size(width));
+  > 81 │ 	top: anchor(bottom);
+       │ 	^^^
+    82 │ 	left: anchor(right);
+    83 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace top with inset-block-start.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    79 79 │     height: anchor-size(height);
+    80 80 │     width: var(--size, anchor-size(width));
+    81    │ - → top:·anchor(bottom);
+       81 │ + → inset-block-start:·anchor(bottom);
+    82 82 │     left: anchor(right);
+    83 83 │   }
+  
+
+```
+
+```
+invalid.css:81:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use a logical side in anchor().
+  
+    79 │ 	height: anchor-size(height);
+    80 │ 	width: var(--size, anchor-size(width));
+  > 81 │ 	top: anchor(bottom);
+       │ 	            ^^^^^^
+    82 │ 	left: anchor(right);
+    83 │ }
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace bottom with end.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the logical CSS replacement.
+  
+    79 79 │     height: anchor-size(height);
+    80 80 │     width: var(--size, anchor-size(width));
+    81    │ - → top:·anchor(bottom);
+       81 │ + → top:·anchor(end);
+    82 82 │     left: anchor(right);
+    83 83 │   }
+  
+
+```
+
+```
+invalid.css:82:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    80 │ 	width: var(--size, anchor-size(width));
+    81 │ 	top: anchor(bottom);
+  > 82 │ 	left: anchor(right);
        │ 	^^^^
-    81 │ }
-    82 │ 
+    83 │ }
+    84 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1890,27 +1934,27 @@ invalid.css:80:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━�
   
   i Safe fix: Use the logical CSS replacement.
   
-    78 78 │     width: var(--size, anchor-size(width));
-    79 79 │     top: anchor(bottom);
-    80    │ - → left:·anchor(right);
-       80 │ + → inset-inline-start:·anchor(right);
-    81 81 │   }
-    82 82 │   
+    80 80 │     width: var(--size, anchor-size(width));
+    81 81 │     top: anchor(bottom);
+    82    │ - → left:·anchor(right);
+       82 │ + → inset-inline-start:·anchor(right);
+    83 83 │   }
+    84 84 │   
   
 
 ```
 
 ```
-invalid.css:80:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:82:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use a logical side in anchor().
   
-    78 │ 	width: var(--size, anchor-size(width));
-    79 │ 	top: anchor(bottom);
-  > 80 │ 	left: anchor(right);
+    80 │ 	width: var(--size, anchor-size(width));
+    81 │ 	top: anchor(bottom);
+  > 82 │ 	left: anchor(right);
        │ 	             ^^^^^
-    81 │ }
-    82 │ 
+    83 │ }
+    84 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1920,27 +1964,27 @@ invalid.css:80:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━━
   
   i Safe fix: Use the logical CSS replacement.
   
-    78 78 │     width: var(--size, anchor-size(width));
-    79 79 │     top: anchor(bottom);
-    80    │ - → left:·anchor(right);
-       80 │ + → left:·anchor(end);
-    81 81 │   }
-    82 82 │   
+    80 80 │     width: var(--size, anchor-size(width));
+    81 81 │     top: anchor(bottom);
+    82    │ - → left:·anchor(right);
+       82 │ + → left:·anchor(end);
+    83 83 │   }
+    84 84 │   
   
 
 ```
 
 ```
-invalid.css:86:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:88:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
-    84 │ 	display: flex;
-    85 │ 	flex-direction: column;
-  > 86 │ 	justify-content: right;
+    86 │ 	display: flex;
+    87 │ 	flex-direction: column;
+  > 88 │ 	justify-content: right;
        │ 	                 ^^^^^
-    87 │ 	justify-content: left;
-    88 │ }
+    89 │ 	justify-content: left;
+    90 │ }
   
   i Logical properties adapt better to different writing modes and layout directions.
   
@@ -1952,16 +1996,16 @@ invalid.css:86:19 lint/nursery/useLogicalProperties ━━━━━━━━━�
 ```
 
 ```
-invalid.css:87:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:89:19 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use logical CSS values over physical ones.
   
-    85 │ 	flex-direction: column;
-    86 │ 	justify-content: right;
-  > 87 │ 	justify-content: left;
+    87 │ 	flex-direction: column;
+    88 │ 	justify-content: right;
+  > 89 │ 	justify-content: left;
        │ 	                 ^^^^
-    88 │ }
-    89 │ 
+    90 │ }
+    91 │ 
   
   i Logical properties adapt better to different writing modes and layout directions.
   

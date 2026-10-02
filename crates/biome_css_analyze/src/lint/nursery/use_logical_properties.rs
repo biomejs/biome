@@ -180,6 +180,15 @@ impl Rule for UseLogicalProperties {
             },
         );
 
+        if matches!(
+            &state.violation,
+            LogicalPropertiesViolation::LegacyAlignmentValue
+        ) {
+            return Some(diagnostic.note(markup! {
+                "The legacy keyword only allows left, right, or center."
+            }));
+        }
+
         Some(if let Some(replacement) = state.replacement() {
             let decoded = decode_css_identifier(state.token.text_trimmed());
             let physical = decoded.to_ascii_lowercase_cow();
@@ -224,6 +233,7 @@ enum LogicalPropertiesViolation {
         replacement: &'static str,
     },
     JustifyContentValue,
+    LegacyAlignmentValue,
     AnchorSizeValue {
         replacement: &'static str,
     },
@@ -244,6 +254,9 @@ impl UseLogicalPropertiesState {
             LogicalPropertiesViolation::JustifyContentValue => {
                 "Use logical CSS values over physical ones."
             }
+            LogicalPropertiesViolation::LegacyAlignmentValue => {
+                "Use logical CSS values over physical ones."
+            }
             LogicalPropertiesViolation::AnchorSizeValue { .. } => {
                 "Use a logical size in anchor-size()."
             }
@@ -257,7 +270,8 @@ impl UseLogicalPropertiesState {
             | LogicalPropertiesViolation::PropertyValue { replacement }
             | LogicalPropertiesViolation::AnchorSizeValue { replacement }
             | LogicalPropertiesViolation::AnchorValue { replacement } => Some(replacement),
-            LogicalPropertiesViolation::JustifyContentValue => None,
+            LogicalPropertiesViolation::JustifyContentValue
+            | LogicalPropertiesViolation::LegacyAlignmentValue => None,
         }
     }
 }
@@ -336,6 +350,15 @@ fn collect_value_violations(
         return;
     };
 
+    let has_legacy = property_name == "justify-items"
+        && values
+            .iter()
+            .filter_map(|component| component.as_any_css_value().cloned())
+            .filter_map(|value| value_identifier_token(&value))
+            .any(|token| {
+                decode_css_identifier(token.text_trimmed()).eq_ignore_ascii_case("legacy")
+            });
+
     for value in values
         .iter()
         .filter_map(|component| component.as_any_css_value().cloned())
@@ -347,6 +370,8 @@ fn collect_value_violations(
                 && matches!(physical.as_ref(), "left" | "right")
             {
                 Some(LogicalPropertiesViolation::JustifyContentValue)
+            } else if has_legacy && matches!(physical.as_ref(), "left" | "right") {
+                Some(LogicalPropertiesViolation::LegacyAlignmentValue)
             } else {
                 physical_to_logical_value(property_name, physical.as_ref(), direction).map(
                     |replacement| LogicalPropertiesViolation::PropertyValue { replacement },
