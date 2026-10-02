@@ -246,6 +246,7 @@ dependencies = [
  "camino",
  "crossbeam",
  "directories",
+ "indexmap",
  "insta",
  "libc",
  "mimalloc",

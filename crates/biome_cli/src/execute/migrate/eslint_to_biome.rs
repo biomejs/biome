@@ -6,8 +6,8 @@ use super::migration::{
     MigrationOptions, RuleMigrationResult, UnsupportedRuleReason, to_biome_includes,
 };
 use super::{
-    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
-    eslint_typescript,
+    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest, eslint_svelte,
+    eslint_typescript, eslint_vue,
 };
 use biome_analyze::RuleSource;
 use biome_configuration::analyzer::SeverityOrGroup;
@@ -17,7 +17,8 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
 use biome_rule_options::{no_js_restricted_properties, no_restricted_globals};
-use rustc_hash::FxHashMap;
+use indexmap::IndexMap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
 ///
@@ -564,9 +565,17 @@ impl eslint_eslint::Rules {
         results: &mut EslintMigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
+        let mut restricted_elements = RestrictedElementsMigration::default();
         for eslint_rule in self.0 {
-            migrate_eslint_rule(&mut rules, eslint_rule, options, results);
+            migrate_eslint_rule(
+                &mut rules,
+                &mut restricted_elements,
+                eslint_rule,
+                options,
+                results,
+            );
         }
+        restricted_elements.apply(&mut rules);
         rules
     }
 }
@@ -576,6 +585,7 @@ impl eslint_eslint::Rules {
 /// Also, takes care of Biome's rules with options.
 fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
+    restricted_elements: &mut RestrictedElementsMigration,
     rule: eslint_eslint::Rule,
     opts: &MigrationOptions,
     results: &mut EslintMigrationResults,
@@ -705,7 +715,7 @@ fn migrate_eslint_rule(
                         g.name().to_string().into_boxed_str(),
                         g.message()
                             .map_or_else(
-                                || "TODO: Add a custom message here.".to_string(),
+                                || MISSING_MESSAGE_PLACEHOLDER.to_string(),
                                 |m| m.to_string(),
                             )
                             .into_boxed_str(),
@@ -726,6 +736,31 @@ fn migrate_eslint_rule(
                             },
                         ));
                 }
+            }
+        }
+        eslint_eslint::Rule::ReactForbidElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(conf.option_or_default().into_restricted_elements());
+            }
+        }
+        eslint_eslint::Rule::VueNoRestrictedHtmlElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(
+                    eslint_vue::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
+                );
+            }
+        }
+        eslint_eslint::Rule::SvelteNoRestrictedHtmlElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(
+                    eslint_svelte::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
+                );
             }
         }
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
@@ -925,6 +960,69 @@ fn migrate_eslint_rule(
                         ));
                 }
             }
+        }
+    }
+}
+
+/// Elements restricted by an ESLint rule, mapped to their optional messages.
+pub(crate) type RestrictedElements = IndexMap<Box<str>, Option<Box<str>>, FxBuildHasher>;
+
+/// The message of a migrated entry that ESLint configured without one, because Biome requires one.
+const MISSING_MESSAGE_PLACEHOLDER: &str = "TODO: Add a custom message here.";
+
+/// Elements restricted by the ESLint rules that migrate to `noRestrictedElements`.
+///
+/// `react/forbid-elements`, `svelte/no-restricted-html-elements`, and
+/// `vue/no-restricted-html-elements` all migrate to `noRestrictedElements`, so their elements
+/// are collected across rules and merged into one list.
+#[derive(Debug, Default)]
+struct RestrictedElementsMigration(IndexMap<Box<str>, BTreeSet<Box<str>>, FxBuildHasher>);
+impl RestrictedElementsMigration {
+    fn add(&mut self, elements: RestrictedElements) {
+        for (element, message) in elements {
+            let messages = self.0.entry(element).or_default();
+            messages.extend(message);
+        }
+    }
+
+    /// Adds the collected elements to the options of `noRestrictedElements`.
+    ///
+    /// When several rules restrict the same element, their distinct messages are sorted and
+    /// joined, so the result doesn't depend on the order of the ESLint rules.
+    ///
+    /// The level must already be set by [migrate_eslint_any_rule].
+    fn apply(self, rules: &mut biome_config::Rules) {
+        if self.0.is_empty() {
+            return;
+        }
+        let group = rules.correctness.get_or_insert_with(Default::default);
+        let SeverityOrGroup::Group(group) = group else {
+            return;
+        };
+        let Some(rule) = &mut group.no_restricted_elements else {
+            return;
+        };
+        if let biome_config::RuleConfiguration::Plain(level) = rule {
+            *rule = biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
+                level: *level,
+                options: Default::default(),
+            });
+        }
+        let biome_config::RuleConfiguration::WithOptions(rule) = rule else {
+            return;
+        };
+        let configured = rule.options.elements.get_or_insert_with(Default::default);
+        for (element, messages) in self.0 {
+            let message = if messages.is_empty() {
+                MISSING_MESSAGE_PLACEHOLDER.into()
+            } else {
+                messages
+                    .into_iter()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .into_boxed_str()
+            };
+            configured.insert(element, message);
         }
     }
 }
