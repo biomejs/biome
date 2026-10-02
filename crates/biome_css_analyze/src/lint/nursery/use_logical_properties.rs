@@ -209,7 +209,9 @@ impl Rule for UseLogicalProperties {
 }
 
 pub struct UseLogicalPropertiesState {
+    /// Range of the physical property name or value highlighted by the diagnostic.
     span: TextRange,
+    /// Syntax token containing the flagged text; a fix replaces this token when available.
     token: CssSyntaxToken,
     violation: LogicalPropertiesViolation,
 }
