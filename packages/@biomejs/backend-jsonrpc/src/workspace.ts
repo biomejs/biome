@@ -2446,8 +2446,8 @@ export interface Correctness {
 	 */
 	useSingleJsDocAsterisk?: UseSingleJsDocAsteriskConfiguration;
 	/**
-	* Prevent the usage of static string literal id attribute on elements outside SVG contexts.
-See https://biomejs.dev/linter/rules/use-unique-element-ids 
+	 * Prevent the usage of static string literal id attribute on elements outside SVG contexts.
+	 * See https://biomejs.dev/linter/rules/use-unique-element-ids
 	 */
 	useUniqueElementIds?: UseUniqueElementIdsConfiguration;
 	/**
@@ -2531,13 +2531,13 @@ See https://biomejs.dev/linter/rules/use-unique-element-ids
  */
 export interface Nursery {
 	/**
-	* Disallow conflicting content sources on Astro elements.
-See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives 
+	 * Disallow conflicting content sources on Astro elements.
+	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
 	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
 	/**
-	* Disallow the use of Astro's set:html directive.
-See https://biomejs.dev/linter/rules/no-astro-set-html-directive 
+	 * Disallow the use of Astro's set:html directive.
+	 * See https://biomejs.dev/linter/rules/no-astro-set-html-directive
 	 */
 	noAstroSetHtmlDirective?: NoAstroSetHtmlDirectiveConfiguration;
 	/**
@@ -2636,13 +2636,13 @@ See https://biomejs.dev/linter/rules/no-astro-set-html-directive
 	 */
 	noJsRestrictedProperties?: NoJsRestrictedPropertiesConfiguration;
 	/**
-	* Disallow unsafe JSON values that may cause interoperability issues.
-See https://biomejs.dev/linter/rules/no-json-unsafe-values 
+	 * Disallow unsafe JSON values that may cause interoperability issues.
+	 * See https://biomejs.dev/linter/rules/no-json-unsafe-values
 	 */
 	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
 	/**
-	* Flags text nodes with a trailing $ before a JSX expression.
-See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar 
+	 * Flags text nodes with a trailing $ before a JSX expression.
+	 * See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar
 	 */
 	noJsxLeakedDollar?: NoJsxLeakedDollarConfiguration;
 	/**
@@ -2656,23 +2656,23 @@ See https://biomejs.dev/linter/rules/no-jsx-leaked-dollar
 	 */
 	noLoopFunc?: NoLoopFuncConfiguration;
 	/**
-	* Disallow void when it does not discard a call's return value or a thenable.
-See https://biomejs.dev/linter/rules/no-meaningless-void-operator 
+	 * Disallow void when it does not discard a call's return value or a thenable.
+	 * See https://biomejs.dev/linter/rules/no-meaningless-void-operator
 	 */
 	noMeaninglessVoidOperator?: NoMeaninglessVoidOperatorConfiguration;
 	/**
-	* Detect return type annotations that are misleadingly wider than what the implementation actually returns.
-See https://biomejs.dev/linter/rules/no-misleading-return-type 
+	 * Detect return type annotations that are misleadingly wider than what the implementation actually returns.
+	 * See https://biomejs.dev/linter/rules/no-misleading-return-type
 	 */
 	noMisleadingReturnType?: NoMisleadingReturnTypeConfiguration;
 	/**
-	* Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
-See https://biomejs.dev/linter/rules/no-misplaced-list-elements 
+	 * Require \<li> elements with an HTML element parent to be children of \<ul>, \<ol>, or \<menu>.
+	 * See https://biomejs.dev/linter/rules/no-misplaced-list-elements
 	 */
 	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
 	/**
-	* Disallow Promises to be used in places where they are almost certainly a mistake.
-See https://biomejs.dev/linter/rules/no-misused-promises 
+	 * Disallow Promises to be used in places where they are almost certainly a mistake.
+	 * See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
 	noMisusedPromises?: NoMisusedPromisesConfiguration;
 	/**
@@ -2686,13 +2686,13 @@ See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
-	* Disallow obsolete HTML elements.
-See https://biomejs.dev/linter/rules/no-obsolete-tags 
+	 * Disallow obsolete HTML elements.
+	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
 	noObsoleteTags?: NoObsoleteTagsConfiguration;
 	/**
-	* Disallow usage of element handles (page.$() and page.$$()).
-See https://biomejs.dev/linter/rules/no-playwright-element-handle 
+	 * Disallow usage of element handles (page.$() and page.$$()).
+	 * See https://biomejs.dev/linter/rules/no-playwright-element-handle
 	 */
 	noPlaywrightElementHandle?: NoPlaywrightElementHandleConfiguration;
 	/**
@@ -2756,13 +2756,13 @@ See https://biomejs.dev/linter/rules/no-playwright-element-handle
 	 */
 	noReactNativeRawText?: NoReactNativeRawTextConfiguration;
 	/**
-	* Disallow array, object, and function values as default props in React components.
-See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop 
+	 * Disallow array, object, and function values as default props in React components.
+	 * See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop
 	 */
 	noReactObjectTypeAsDefaultProp?: NoReactObjectTypeAsDefaultPropConfiguration;
 	/**
-	* Disallow string refs in React components.
-See https://biomejs.dev/linter/rules/no-react-string-refs 
+	 * Disallow string refs in React components.
+	 * See https://biomejs.dev/linter/rules/no-react-string-refs
 	 */
 	noReactStringRefs?: NoReactStringRefsConfiguration;
 	/**
@@ -2771,33 +2771,33 @@ See https://biomejs.dev/linter/rules/no-react-string-refs
 	 */
 	noRestrictedDependencies?: NoRestrictedDependenciesConfiguration;
 	/**
-	* Disallow return statements in Promise.prototype.finally() callbacks.
-See https://biomejs.dev/linter/rules/no-return-in-finally 
+	 * Disallow return statements in Promise.prototype.finally() callbacks.
+	 * See https://biomejs.dev/linter/rules/no-return-in-finally
 	 */
 	noReturnInFinally?: NoReturnInFinallyConfiguration;
 	/**
-	* Forbid a module from importing itself.
-See https://biomejs.dev/linter/rules/no-self-import 
+	 * Forbid a module from importing itself.
+	 * See https://biomejs.dev/linter/rules/no-self-import
 	 */
 	noSelfImport?: NoSelfImportConfiguration;
 	/**
-	* Disallow the use of Svelte's {@debug} tag.
-See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags 
+	 * Disallow the use of Svelte's {@debug} tag.
+	 * See https://biomejs.dev/linter/rules/no-svelte-at-debug-tags
 	 */
 	noSvelteAtDebugTags?: NoSvelteAtDebugTagsConfiguration;
 	/**
-	* Disallow the use of Svelte's {@html} tag.
-See https://biomejs.dev/linter/rules/no-svelte-at-html-tags 
+	 * Disallow the use of Svelte's {@html} tag.
+	 * See https://biomejs.dev/linter/rules/no-svelte-at-html-tags
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
 	/**
-	* Disallow declaring Svelte component props with export let.
-See https://biomejs.dev/linter/rules/no-svelte-export-let 
+	 * Disallow declaring Svelte component props with export let.
+	 * See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
 	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
-	* Disallow legacy Svelte {@const} tags.
-See https://biomejs.dev/linter/rules/no-svelte-legacy-const 
+	 * Disallow legacy Svelte {@const} tags.
+	 * See https://biomejs.dev/linter/rules/no-svelte-legacy-const
 	 */
 	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
 	/**
@@ -2811,13 +2811,13 @@ See https://biomejs.dev/linter/rules/no-svelte-legacy-const
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
-	* Disallow Tailwind CSS utility classes that use raw palette colors.
-See https://biomejs.dev/linter/rules/no-tailwind-raw-colors 
+	 * Disallow Tailwind CSS utility classes that use raw palette colors.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-raw-colors
 	 */
 	noTailwindRawColors?: NoTailwindRawColorsConfiguration;
 	/**
-	* Disallow this outside of classes.
-See https://biomejs.dev/linter/rules/no-this-outside-of-class 
+	 * Disallow this outside of classes.
+	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
 	noThisOutsideOfClass?: NoThisOutsideOfClassConfiguration;
 	/**
@@ -2846,13 +2846,13 @@ See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
 	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
-	* Disallow an unsafe combination of the sandbox attribute.
-See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox 
+	 * Disallow an unsafe combination of the sandbox attribute.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox
 	 */
 	noUnsafeIframeSandbox?: NoUnsafeIframeSandboxConfiguration;
 	/**
-	* Disallow + operations with operands that are known to be unsafe.
-See https://biomejs.dev/linter/rules/no-unsafe-plus-operands 
+	 * Disallow + operations with operands that are known to be unsafe.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
@@ -2891,13 +2891,13 @@ See https://biomejs.dev/linter/rules/no-unsafe-plus-operands
 	 */
 	noVueRefAsOperand?: NoVueRefAsOperandConfiguration;
 	/**
-	* Disallow custom Vue directives that are not declared.
-See https://biomejs.dev/linter/rules/no-vue-undeclared-directives 
+	 * Disallow custom Vue directives that are not declared.
+	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
 	/**
-	* Disallow deprecated number modifiers on Vue v-on directives.
-See https://biomejs.dev/linter/rules/no-vue-v-on-number-values 
+	 * Disallow deprecated number modifiers on Vue v-on directives.
+	 * See https://biomejs.dev/linter/rules/no-vue-v-on-number-values
 	 */
 	noVueVOnNumberValues?: NoVueVOnNumberValuesConfiguration;
 	/**
@@ -2926,23 +2926,23 @@ See https://biomejs.dev/linter/rules/no-vue-v-on-number-values
 	 */
 	useBaseline?: UseBaselineConfiguration;
 	/**
-	* Prefer modern DOM traversal APIs over positional indexes and chained walks.
-See https://biomejs.dev/linter/rules/use-better-dom-traversing 
+	 * Prefer modern DOM traversal APIs over positional indexes and chained walks.
+	 * See https://biomejs.dev/linter/rules/use-better-dom-traversing
 	 */
 	useBetterDomTraversing?: UseBetterDomTraversingConfiguration;
 	/**
-	* Enforce consistent use of function declarations or expressions assigned to variables.
-See https://biomejs.dev/linter/rules/use-consistent-function-style 
+	 * Enforce consistent use of function declarations or expressions assigned to variables.
+	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
 	useConsistentFunctionStyle?: UseConsistentFunctionStyleConfiguration;
 	/**
-	* Enforce JSON keys with consistent Unicode representation.
-See https://biomejs.dev/linter/rules/use-consistent-object-keys 
+	 * Enforce JSON keys with consistent Unicode representation.
+	 * See https://biomejs.dev/linter/rules/use-consistent-object-keys
 	 */
 	useConsistentObjectKeys?: UseConsistentObjectKeysConfiguration;
 	/**
-	* Enforce consistent use of it or test for test functions.
-See https://biomejs.dev/linter/rules/use-consistent-test-it 
+	 * Enforce consistent use of it or test for test functions.
+	 * See https://biomejs.dev/linter/rules/use-consistent-test-it
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
 	/**
@@ -3001,23 +3001,23 @@ See https://biomejs.dev/linter/rules/use-consistent-test-it
 	 */
 	useImportsFirst?: UseImportsFirstConfiguration;
 	/**
-	* Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.
-See https://biomejs.dev/linter/rules/use-includes 
+	 * Prefer Array#includes() over Array#indexOf(), Array#lastIndexOf(), and Array#some() when checking for existence or non-existence.
+	 * See https://biomejs.dev/linter/rules/use-includes
 	 */
 	useIncludes?: UseIncludesConfiguration;
 	/**
-	* Enforce style rules to be defined within a cascade layer.
-See https://biomejs.dev/linter/rules/use-layered-styles 
+	 * Enforce style rules to be defined within a cascade layer.
+	 * See https://biomejs.dev/linter/rules/use-layered-styles
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
-	* Enforce logical properties over physical properties.
-See https://biomejs.dev/linter/rules/use-logical-properties 
+	 * Enforce logical properties over physical properties.
+	 * See https://biomejs.dev/linter/rules/use-logical-properties
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
-	* Prefer Math.min() and Math.max() over ternaries for simple comparisons.
-See https://biomejs.dev/linter/rules/use-math-min-max 
+	 * Prefer Math.min() and Math.max() over ternaries for simple comparisons.
+	 * See https://biomejs.dev/linter/rules/use-math-min-max
 	 */
 	useMathMinMax?: UseMathMinMaxConfiguration;
 	/**
@@ -3046,13 +3046,13 @@ See https://biomejs.dev/linter/rules/use-math-min-max
 	 */
 	usePlaywrightValidDescribeCallback?: UsePlaywrightValidDescribeCallbackConfiguration;
 	/**
-	* Require Error objects as Promise rejection reasons.
-See https://biomejs.dev/linter/rules/use-promise-reject-errors 
+	 * Require Error objects as Promise rejection reasons.
+	 * See https://biomejs.dev/linter/rules/use-promise-reject-errors
 	 */
 	usePromiseRejectErrors?: UsePromiseRejectErrorsConfiguration;
 	/**
-	* Enforce that Qwik loader functions are declared in the correct location.
-See https://biomejs.dev/linter/rules/use-qwik-loader-location 
+	 * Enforce that Qwik loader functions are declared in the correct location.
+	 * See https://biomejs.dev/linter/rules/use-qwik-loader-location
 	 */
 	useQwikLoaderLocation?: UseQwikLoaderLocationConfiguration;
 	/**
@@ -3106,23 +3106,23 @@ See https://biomejs.dev/linter/rules/use-qwik-loader-location
 	 */
 	useSortedClasses?: UseSortedClassesConfiguration;
 	/**
-	* Require unambiguous boolean expressions in conditions.
-See https://biomejs.dev/linter/rules/use-strict-boolean-expressions 
+	 * Require unambiguous boolean expressions in conditions.
+	 * See https://biomejs.dev/linter/rules/use-strict-boolean-expressions
 	 */
 	useStrictBooleanExpressions?: UseStrictBooleanExpressionsConfiguration;
 	/**
-	* Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
-See https://biomejs.dev/linter/rules/use-string-starts-ends-with 
+	 * Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.
+	 * See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
-	* Require importing SvelteKit's app state from $app/state instead of $app/stores.
-See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports 
+	 * Require importing SvelteKit's app state from $app/state instead of $app/stores.
+	 * See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports
 	 */
 	useSvelteKitRuneImports?: UseSvelteKitRuneImportsConfiguration;
 	/**
-	* Require keyed {#each} blocks in Svelte templates.
-See https://biomejs.dev/linter/rules/use-svelte-require-each-key 
+	 * Require keyed {#each} blocks in Svelte templates.
+	 * See https://biomejs.dev/linter/rules/use-svelte-require-each-key
 	 */
 	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
@@ -3151,13 +3151,13 @@ See https://biomejs.dev/linter/rules/use-svelte-require-each-key
 	 */
 	useUnicodeRegex?: UseUnicodeRegexConfiguration;
 	/**
-	* Enforce valid titles for unit test cases and test suites.
-See https://biomejs.dev/linter/rules/use-valid-test-title 
+	 * Enforce valid titles for unit test cases and test suites.
+	 * See https://biomejs.dev/linter/rules/use-valid-test-title
 	 */
 	useValidTestTitle?: UseValidTestTitleConfiguration;
 	/**
-	* Require var declarations to appear at the top of their containing scope.
-See https://biomejs.dev/linter/rules/use-vars-on-top 
+	 * Require var declarations to appear at the top of their containing scope.
+	 * See https://biomejs.dev/linter/rules/use-vars-on-top
 	 */
 	useVarsOnTop?: UseVarsOnTopConfiguration;
 	/**
@@ -3747,8 +3747,8 @@ export interface Style {
 	 */
 	useReactFunctionComponents?: UseReactFunctionComponentsConfiguration;
 	/**
-	* Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.
-See https://biomejs.dev/linter/rules/use-readonly-class-properties 
+	 * Enforce marking instance properties as readonly if they are never modified outside the constructor, and static properties as readonly if they are never reassigned.
+	 * See https://biomejs.dev/linter/rules/use-readonly-class-properties
 	 */
 	useReadonlyClassProperties?: UseReadonlyClassPropertiesConfiguration;
 	/**
@@ -7388,6 +7388,9 @@ export interface RuleWithNoLoopFuncOptions {
 	options?: NoLoopFuncOptions;
 }
 export interface RuleWithNoMeaninglessVoidOperatorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoMeaninglessVoidOperatorOptions;
@@ -7513,6 +7516,9 @@ export interface RuleWithNoSelfImportOptions {
 	options?: NoSelfImportOptions;
 }
 export interface RuleWithNoSvelteAtDebugTagsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtDebugTagsOptions;
@@ -7650,6 +7656,9 @@ export interface RuleWithUseBaselineOptions {
 	options?: UseBaselineOptions;
 }
 export interface RuleWithUseBetterDomTraversingOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseBetterDomTraversingOptions;
@@ -7659,6 +7668,9 @@ export interface RuleWithUseConsistentFunctionStyleOptions {
 	options?: UseConsistentFunctionStyleOptions;
 }
 export interface RuleWithUseConsistentObjectKeysOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseConsistentObjectKeysOptions;
@@ -7908,6 +7920,9 @@ export interface RuleWithUseUnicodeRegexOptions {
 	options?: UseUnicodeRegexOptions;
 }
 export interface RuleWithUseValidTestTitleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseValidTestTitleOptions;
@@ -9818,9 +9833,9 @@ export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
-	* Names of directives registered globally with `app.directive(...)`,
-written in kebab-case without the `v-` prefix, such as
-`click-outside` for `v-click-outside`. 
+	 * Names of directives registered globally with `app.directive(...)`,
+	 * written in kebab-case without the `v-` prefix, such as
+	 * `click-outside` for `v-click-outside`.
 	 */
 	globals?: string[];
 }
@@ -9913,8 +9928,8 @@ export interface UseDomQuerySelectorOptions {
 }
 export interface UseExhaustiveSwitchCasesOptions {
 	/**
-	* Require a `case` for each value in the union, even when the switch has a `default` clause.
-Default: `false`. 
+	 * Require a `case` for each value in the union, even when the switch has a `default` clause.
+	 * Default: `false`.
 	 */
 	requireExplicitCase?: boolean;
 }
@@ -11955,9 +11970,9 @@ export type JsEmbeddingKind =
 				 */
 				event_handler: boolean;
 				/**
-	* Whether this snippet is from a class-related attribute
-(e.g. :class="...") 
-	 */
+				 * Whether this snippet is from a class-related attribute
+				 * (e.g. :class="...")
+				 */
 				is_class_attribute: boolean;
 				/**
 				 * Where the bindings are defined
@@ -11968,9 +11983,9 @@ export type JsEmbeddingKind =
 				 */
 				setup: boolean;
 				/**
-	* Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
-which is parsed as the parameters of an arrow function. 
-	 */
+				 * Whether this is the value of a slot directive (e.g. `v-slot="{ item }: Props"`),
+				 * which is parsed as the parameters of an arrow function.
+				 */
 				slot_props: boolean;
 			};
 	  }
@@ -11985,14 +12000,14 @@ which is parsed as the parameters of an arrow function.
 				 */
 				file_kind: SvelteFileKind;
 				/**
-	* Whether this snippet is from a class attribute
-(e.g. class={...}) 
-	 */
+				 * Whether this snippet is from a class attribute
+				 * (e.g. class={...})
+				 */
 				is_class_attribute: boolean;
 				/**
-	* Whether this snippet is from a `<script module>` block, or the legacy
-`<script context="module">` block. 
-	 */
+				 * Whether this snippet is from a `<script module>` block, or the legacy
+				 * `<script context="module">` block.
+				 */
 				is_module_script: boolean;
 			};
 	  };
@@ -12209,9 +12224,9 @@ export interface SerializedJsModuleInfo {
 	 */
 	staticImportPaths: Record<string, string>;
 	/**
-	* Map of all static imports found in the module.
-
-Maps each local imported name to its source module specifier. 
+	 * Map of all static imports found in the module.
+	 *
+	 * Maps each local imported name to its source module specifier.
 	 */
 	staticImports: Record<string, string>;
 }
@@ -12221,9 +12236,9 @@ export interface SerializedCssModuleInfo {
 	 */
 	classes: string[];
 	/**
-	* Map of all static imports found in the module.
-
-Contains the import specifiers as they appeared in source text. 
+	 * Map of all static imports found in the module.
+	 *
+	 * Contains the import specifiers as they appeared in source text.
 	 */
 	imports: string[];
 }
