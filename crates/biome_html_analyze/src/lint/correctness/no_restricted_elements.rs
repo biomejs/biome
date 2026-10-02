@@ -66,7 +66,10 @@ declare_lint_rule! {
         name: "noRestrictedElements",
         language: "html",
         recommended: false,
-        sources: &[RuleSource::EslintVueJs("no-restricted-html-elements").inspired()],
+        sources: &[
+            RuleSource::EslintVueJs("no-restricted-html-elements").inspired(),
+            RuleSource::EslintSvelte("no-restricted-html-elements").inspired(),
+        ],
     }
 }
 
