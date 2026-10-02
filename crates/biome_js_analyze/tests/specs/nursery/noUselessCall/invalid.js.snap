@@ -1,0 +1,700 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// `this` is null or undefined
+foo.call(undefined, 1, 2);
+foo.call(void 0, 1, 2);
+foo.call(null, 1, 2);
+foo.call((null), 1, 2);
+foo.call(undefined);
+
+// `this` is the object of the member expression
+obj.foo.call(obj, 1, 2);
+a.b.c.foo.call(a.b.c, 1, 2);
+a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+a[0].call(a, 1, 2);
+this.foo.call(this, 1, 2);
+class C { #foo() {} bar() { this.#foo.call(this); } }
+
+// apply with an array literal
+foo.apply(undefined, [1, 2]);
+foo.apply(void 0, [1, 2]);
+foo.apply(null, [1, 2]);
+foo.apply(null, ([1, 2]));
+obj.foo.apply(obj, [1, 2]);
+a.b.c.foo.apply(a.b.c, [1, 2]);
+a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+[].concat.apply([ ], [1, 2]);
+[].concat.apply([
+/*empty*/
+], [1, 2]);
+abc.get("foo", 0).concat.apply(abc . get("foo",  0 ), [1, 2]);
+
+// optional chaining and parentheses
+foo.call?.(undefined, 1, 2);
+foo?.call(undefined, 1, 2);
+(foo?.call)(undefined, 1, 2);
+obj.foo.call?.(obj, 1, 2);
+obj?.foo.call(obj, 1, 2);
+(obj?.foo).call(obj, 1, 2);
+(obj?.foo.call)(obj, 1, 2);
+obj?.foo.bar.call(obj?.foo, 1, 2);
+(obj?.foo).bar.call(obj?.foo, 1, 2);
+obj.foo?.bar.call(obj.foo, 1, 2);
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    3 │ // `this` is null or undefined
+  > 4 │ foo.call(undefined, 1, 2);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ foo.call(void 0, 1, 2);
+    6 │ foo.call(null, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    3 │ // `this` is null or undefined
+    4 │ foo.call(undefined, 1, 2);
+  > 5 │ foo.call(void 0, 1, 2);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ foo.call(null, 1, 2);
+    7 │ foo.call((null), 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    4 │ foo.call(undefined, 1, 2);
+    5 │ foo.call(void 0, 1, 2);
+  > 6 │ foo.call(null, 1, 2);
+      │ ^^^^^^^^^^^^^^^^^^^^
+    7 │ foo.call((null), 1, 2);
+    8 │ foo.call(undefined);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    5 │ foo.call(void 0, 1, 2);
+    6 │ foo.call(null, 1, 2);
+  > 7 │ foo.call((null), 1, 2);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ foo.call(undefined);
+    9 │ 
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+     6 │ foo.call(null, 1, 2);
+     7 │ foo.call((null), 1, 2);
+   > 8 │ foo.call(undefined);
+       │ ^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ // `this` is the object of the member expression
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    10 │ // `this` is the object of the member expression
+  > 11 │ obj.foo.call(obj, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ a.b.c.foo.call(a.b.c, 1, 2);
+    13 │ a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    10 │ // `this` is the object of the member expression
+    11 │ obj.foo.call(obj, 1, 2);
+  > 12 │ a.b.c.foo.call(a.b.c, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+    14 │ a[0].call(a, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    11 │ obj.foo.call(obj, 1, 2);
+    12 │ a.b.c.foo.call(a.b.c, 1, 2);
+  > 13 │ a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ a[0].call(a, 1, 2);
+    15 │ this.foo.call(this, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    12 │ a.b.c.foo.call(a.b.c, 1, 2);
+    13 │ a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+  > 14 │ a[0].call(a, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^
+    15 │ this.foo.call(this, 1, 2);
+    16 │ class C { #foo() {} bar() { this.#foo.call(this); } }
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    13 │ a.b(x, y).c.foo.call(a.b(x, y).c, 1, 2);
+    14 │ a[0].call(a, 1, 2);
+  > 15 │ this.foo.call(this, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ class C { #foo() {} bar() { this.#foo.call(this); } }
+    17 │ 
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:29 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    14 │ a[0].call(a, 1, 2);
+    15 │ this.foo.call(this, 1, 2);
+  > 16 │ class C { #foo() {} bar() { this.#foo.call(this); } }
+       │                             ^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ // apply with an array literal
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    18 │ // apply with an array literal
+  > 19 │ foo.apply(undefined, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ foo.apply(void 0, [1, 2]);
+    21 │ foo.apply(null, [1, 2]);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    18 │ // apply with an array literal
+    19 │ foo.apply(undefined, [1, 2]);
+  > 20 │ foo.apply(void 0, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ foo.apply(null, [1, 2]);
+    22 │ foo.apply(null, ([1, 2]));
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    19 │ foo.apply(undefined, [1, 2]);
+    20 │ foo.apply(void 0, [1, 2]);
+  > 21 │ foo.apply(null, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ foo.apply(null, ([1, 2]));
+    23 │ obj.foo.apply(obj, [1, 2]);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    20 │ foo.apply(void 0, [1, 2]);
+    21 │ foo.apply(null, [1, 2]);
+  > 22 │ foo.apply(null, ([1, 2]));
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ obj.foo.apply(obj, [1, 2]);
+    24 │ a.b.c.foo.apply(a.b.c, [1, 2]);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    21 │ foo.apply(null, [1, 2]);
+    22 │ foo.apply(null, ([1, 2]));
+  > 23 │ obj.foo.apply(obj, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ a.b.c.foo.apply(a.b.c, [1, 2]);
+    25 │ a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    22 │ foo.apply(null, ([1, 2]));
+    23 │ obj.foo.apply(obj, [1, 2]);
+  > 24 │ a.b.c.foo.apply(a.b.c, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+    26 │ [].concat.apply([ ], [1, 2]);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:25:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    23 │ obj.foo.apply(obj, [1, 2]);
+    24 │ a.b.c.foo.apply(a.b.c, [1, 2]);
+  > 25 │ a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ [].concat.apply([ ], [1, 2]);
+    27 │ [].concat.apply([
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    24 │ a.b.c.foo.apply(a.b.c, [1, 2]);
+    25 │ a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+  > 26 │ [].concat.apply([ ], [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ [].concat.apply([
+    28 │ /*empty*/
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    25 │ a.b(x, y).c.foo.apply(a.b(x, y).c, [1, 2]);
+    26 │ [].concat.apply([ ], [1, 2]);
+  > 27 │ [].concat.apply([
+       │ ^^^^^^^^^^^^^^^^^
+  > 28 │ /*empty*/
+  > 29 │ ], [1, 2]);
+       │ ^^^^^^^^^^
+    30 │ abc.get("foo", 0).concat.apply(abc . get("foo",  0 ), [1, 2]);
+    31 │ 
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:30:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .apply() is unnecessary.
+  
+    28 │ /*empty*/
+    29 │ ], [1, 2]);
+  > 30 │ abc.get("foo", 0).concat.apply(abc . get("foo",  0 ), [1, 2]);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ // optional chaining and parentheses
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly and pass the items of the array as arguments instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    32 │ // optional chaining and parentheses
+  > 33 │ foo.call?.(undefined, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ foo?.call(undefined, 1, 2);
+    35 │ (foo?.call)(undefined, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    32 │ // optional chaining and parentheses
+    33 │ foo.call?.(undefined, 1, 2);
+  > 34 │ foo?.call(undefined, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ (foo?.call)(undefined, 1, 2);
+    36 │ obj.foo.call?.(obj, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    33 │ foo.call?.(undefined, 1, 2);
+    34 │ foo?.call(undefined, 1, 2);
+  > 35 │ (foo?.call)(undefined, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ obj.foo.call?.(obj, 1, 2);
+    37 │ obj?.foo.call(obj, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:36:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    34 │ foo?.call(undefined, 1, 2);
+    35 │ (foo?.call)(undefined, 1, 2);
+  > 36 │ obj.foo.call?.(obj, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ obj?.foo.call(obj, 1, 2);
+    38 │ (obj?.foo).call(obj, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    35 │ (foo?.call)(undefined, 1, 2);
+    36 │ obj.foo.call?.(obj, 1, 2);
+  > 37 │ obj?.foo.call(obj, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    38 │ (obj?.foo).call(obj, 1, 2);
+    39 │ (obj?.foo.call)(obj, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    36 │ obj.foo.call?.(obj, 1, 2);
+    37 │ obj?.foo.call(obj, 1, 2);
+  > 38 │ (obj?.foo).call(obj, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ (obj?.foo.call)(obj, 1, 2);
+    40 │ obj?.foo.bar.call(obj?.foo, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    37 │ obj?.foo.call(obj, 1, 2);
+    38 │ (obj?.foo).call(obj, 1, 2);
+  > 39 │ (obj?.foo.call)(obj, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ obj?.foo.bar.call(obj?.foo, 1, 2);
+    41 │ (obj?.foo).bar.call(obj?.foo, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:40:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    38 │ (obj?.foo).call(obj, 1, 2);
+    39 │ (obj?.foo.call)(obj, 1, 2);
+  > 40 │ obj?.foo.bar.call(obj?.foo, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ (obj?.foo).bar.call(obj?.foo, 1, 2);
+    42 │ obj.foo?.bar.call(obj.foo, 1, 2);
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    39 │ (obj?.foo.call)(obj, 1, 2);
+    40 │ obj?.foo.bar.call(obj?.foo, 1, 2);
+  > 41 │ (obj?.foo).bar.call(obj?.foo, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ obj.foo?.bar.call(obj.foo, 1, 2);
+    43 │ 
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:42:1 lint/nursery/noUselessCall ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This .call() is unnecessary.
+  
+    40 │ obj?.foo.bar.call(obj?.foo, 1, 2);
+    41 │ (obj?.foo).bar.call(obj?.foo, 1, 2);
+  > 42 │ obj.foo?.bar.call(obj.foo, 1, 2);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+  
+  i The function gets the same this value as it would if you called it directly.
+  
+  i Call the function directly instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -299,6 +299,7 @@ define_categories! {
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessAssignment": "https://biomejs.dev/linter/rules/no-useless-assignment",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
+    "lint/nursery/noUselessCall": "https://biomejs.dev/linter/rules/no-useless-call",
     "lint/nursery/noUselessDateGetTime": "https://biomejs.dev/linter/rules/no-useless-date-get-time",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
