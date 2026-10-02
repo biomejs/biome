@@ -3,15 +3,17 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierReference, JsClassDeclaration,
-    JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsVariableDeclarationClause, TsDeclareStatement,
-    TsModuleDeclaration, TsPropertySignatureTypeMember,
+    AnyJsClassMemberName, AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierReference,
+    AnyJsPropertyModifier,
+    JsClassDeclaration, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember,
+    JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModule, JsPropertyClassMember, JsScript,
+    JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsVariableDeclarationClause,
+    TsDeclareStatement, TsModuleDeclaration, TsPropertySignatureTypeMember,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, SyntaxNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
@@ -136,8 +138,21 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
         let binding = model.as_binding(id);
         for reference in binding.all_references() {
-            if reference.range_start() < declaration_end {
-                let reference_syntax = reference.syntax();
+            let reference_syntax = reference.syntax();
+            // A class definition evaluates its heritage clause, its computed member
+            // names, its static field initializers and its static blocks before it
+            // initializes the class binding, so a reference to a binding declared
+            // later in the enclosing scope is a use before the declaration even when
+            // it follows the class name. A reference to the class being defined is
+            // already covered by `declaration_end`.
+            let is_eager_class_position = matches!(declaration_kind, DeclarationKind::Class)
+                && AnyJsIdentifierReference::cast_ref(&reference_syntax).is_some_and(|reference| {
+                    reference_syntax
+                        .ancestors()
+                        .skip(1)
+                        .any(|ancestor| is_class_eager_position(&reference, &ancestor, id))
+                });
+            if reference.range_start() < declaration_end || is_eager_class_position {
                 // References that are exports, such as `export { a }` are always valid,
                 // even when they appear before the declaration.
                 // For example:
@@ -156,11 +171,18 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                         // function f() { X; }
                         // const X = 0;
                         // ```
-                        && declaration_scope == reference_syntax
+                        //
+                        // A class body is a control flow root, so an instance field
+                        // initializer or a member body keeps the exemption even when it
+                        // refers to a binding declared later.
+                        && (declaration_scope
+                            == reference_syntax
                                 .ancestors()
                                 .skip(1)
-                                .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind())
-                        )
+                                .find(|ancestor| {
+                                    AnyJsVariableScope::can_cast(ancestor.kind())
+                                })
+                            || is_eager_class_position)
                         // ignore when used as a type.
                         // For example:
                         //
@@ -213,6 +235,101 @@ impl Rule for NoInvalidUseBeforeDeclaration {
             }),
         )
     }
+}
+
+/// Reports whether `reference` sits in a position that a class definition
+/// evaluates eagerly, before it initializes the binding of the class.
+///
+/// The heritage clause and every computed member name are evaluated while the
+/// class definition is created, and a static field initializer or static block
+/// is evaluated before the class binding becomes available. A reference in one
+/// of these positions runs in the scope that contains the class, so a use of a
+/// binding declared later in that scope throws a `ReferenceError`.
+///
+/// Instance field initializers and the bodies of methods, accessors and
+/// constructors are deferred, so a reference there does not depend on the class
+/// definition order and keeps the control flow root exemption.
+fn is_class_eager_position(
+    reference: &AnyJsIdentifierReference,
+    scope: &SyntaxNode<JsLanguage>,
+    declared_id: &AnyJsIdentifierBinding,
+) -> bool {
+    let reference_range = reference.syntax().text_trimmed_range();
+
+    // A reference to the class being defined does not depend on the declaration
+    // order: `class Class { static SINGLETON = new Class(); }` runs after the class
+    // binding is initialized. The range check in the caller already covers the
+    // references that appear before the class name.
+    if !is_reference_to_class_member(reference, declared_id) {
+        // A static block runs while the class definition is being created.
+        if JsStaticInitializationBlockClassMember::cast_ref(scope)
+            .is_some_and(|block| contains_range(block.syntax(), reference_range))
+        {
+            return true;
+        }
+
+        // A static field initializer runs while the class definition is being
+        // created, while an instance field initializer runs when an instance is
+        // constructed.
+        if let Some(property) = JsPropertyClassMember::cast_ref(scope)
+            && is_static_property(&property)
+            && let Some(value) = property.value()
+            && contains_range(value.syntax(), reference_range)
+        {
+            return true;
+        }
+    }
+
+    let Some(class) = JsClassDeclaration::cast_ref(scope) else {
+        return false;
+    };
+
+    // The heritage clause runs before the class body is evaluated.
+    if class
+        .extends_clause()
+        .is_some_and(|heritage| contains_range(heritage.syntax(), reference_range))
+    {
+        return true;
+    }
+
+    // A computed member name runs while the class definition is created.
+    class
+        .members()
+        .iter()
+        .filter_map(|member| member.name().ok().flatten())
+        .filter_map(|name| match name {
+            AnyJsClassMemberName::JsComputedMemberName(computed) => Some(computed),
+            _ => None,
+        })
+        .filter_map(|computed| computed.expression().ok())
+        .any(|expression| contains_range(expression.syntax(), reference_range))
+}
+
+/// Returns whether `reference` belongs to the class declared by `declared_id`.
+fn is_reference_to_class_member(
+    reference: &AnyJsIdentifierReference,
+    declared_id: &AnyJsIdentifierBinding,
+) -> bool {
+    reference
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(|ancestor| JsClassDeclaration::cast_ref(&ancestor))
+        .and_then(|class| class.id().ok())
+        .is_some_and(|id| id.syntax() == declared_id.syntax())
+}
+
+/// Returns whether `property` is declared with the `static` modifier.
+fn is_static_property(property: &JsPropertyClassMember) -> bool {
+    property
+        .modifiers()
+        .iter()
+        .any(|modifier| matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_)))
+}
+
+/// Returns whether `outer` contains all of `inner`.
+fn contains_range(outer: &SyntaxNode<JsLanguage>, inner: TextRange) -> bool {
+    outer.text_trimmed_range().contains_range(inner)
 }
 
 #[derive(Debug)]
@@ -315,7 +432,6 @@ declare_node_union! {
         | JsMethodObjectMember
         | JsSetterClassMember
         | JsSetterObjectMember
-        | JsStaticInitializationBlockClassMember
         | TsModuleDeclaration
         | TsPropertySignatureTypeMember
 }

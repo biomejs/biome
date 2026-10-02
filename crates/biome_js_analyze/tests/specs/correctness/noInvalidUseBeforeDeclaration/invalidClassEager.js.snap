@@ -1,0 +1,170 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidClassEager.js
+---
+# Input
+```js
+/** should generate diagnostics */
+
+export function run() {
+	// `extends` is evaluated while the class definition runs.
+	class A extends B {}
+
+	// A computed member name is evaluated while the class definition runs.
+	class C {
+		[B.name]() {}
+	}
+
+	// A static field initializer is evaluated while the class definition runs.
+	class D {
+		static p = B;
+	}
+
+	// A static block is evaluated while the class definition runs.
+	class E {
+		static {
+			B;
+		}
+	}
+
+	const e = new B();
+	class B {}
+	return [A, C, D, E, e];
+}
+```
+
+# Diagnostics
+```
+invalidClassEager.js:5:18 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    3 │ export function run() {
+    4 │ 	// `extends` is evaluated while the class definition runs.
+  > 5 │ 	class A extends B {}
+      │ 	                ^
+    6 │ 
+    7 │ 	// A computed member name is evaluated while the class definition runs.
+  
+  i The class is declared here:
+  
+    24 │ 	const e = new B();
+  > 25 │ 	class B {}
+       │ 	      ^
+    26 │ 	return [A, C, D, E, e];
+    27 │ }
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalidClassEager.js:9:4 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+     7 │ 	// A computed member name is evaluated while the class definition runs.
+     8 │ 	class C {
+   > 9 │ 		[B.name]() {}
+       │ 		 ^
+    10 │ 	}
+    11 │ 
+  
+  i The class is declared here:
+  
+    24 │ 	const e = new B();
+  > 25 │ 	class B {}
+       │ 	      ^
+    26 │ 	return [A, C, D, E, e];
+    27 │ }
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalidClassEager.js:14:14 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    12 │ 	// A static field initializer is evaluated while the class definition runs.
+    13 │ 	class D {
+  > 14 │ 		static p = B;
+       │ 		           ^
+    15 │ 	}
+    16 │ 
+  
+  i The class is declared here:
+  
+    24 │ 	const e = new B();
+  > 25 │ 	class B {}
+       │ 	      ^
+    26 │ 	return [A, C, D, E, e];
+    27 │ }
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalidClassEager.js:20:4 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    18 │ 	class E {
+    19 │ 		static {
+  > 20 │ 			B;
+       │ 			^
+    21 │ 		}
+    22 │ 	}
+  
+  i The class is declared here:
+  
+    24 │ 	const e = new B();
+  > 25 │ 	class B {}
+       │ 	      ^
+    26 │ 	return [A, C, D, E, e];
+    27 │ }
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```
+
+```
+invalidClassEager.js:24:16 lint/correctness/noInvalidUseBeforeDeclaration ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This class is used before its declaration.
+  
+    22 │ 	}
+    23 │ 
+  > 24 │ 	const e = new B();
+       │ 	              ^
+    25 │ 	class B {}
+    26 │ 	return [A, C, D, E, e];
+  
+  i The class is declared here:
+  
+    24 │ 	const e = new B();
+  > 25 │ 	class B {}
+       │ 	      ^
+    26 │ 	return [A, C, D, E, e];
+    27 │ }
+  
+  i Using a class before it is declared makes the code depend on declaration order and hoisting behavior.
+  
+  i Move this use after the declaration, or move the declaration earlier.
+  
+
+```

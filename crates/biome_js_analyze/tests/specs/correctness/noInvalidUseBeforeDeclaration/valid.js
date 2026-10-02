@@ -24,3 +24,23 @@ class classA {
 }
 class classB {}
 const C = 0;
+
+// A member body and an instance field initializer run after the class
+// definition, so a reference to a binding declared later does not depend on
+// the declaration order.
+class BodyRef {
+	m() { return Later; }
+	get v() { return Later; }
+	constructor(x = Later) {}
+	instance = Later;
+}
+class Later {}
+
+// A static field initializer and a static block run after the class binding is
+// initialized, so referring to the class being defined is valid.
+class SelfStatic {
+	static single = new SelfStatic();
+	static {
+		SelfStatic;
+	}
+}
