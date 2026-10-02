@@ -1804,6 +1804,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_button_type::UseButtonTypeOptions>(),
     ));
     result.push((
+        "nursery",
+        "useCapitalizedConstructors",
+        TypeId::of::<
+            biome_rule_options::use_capitalized_constructors::UseCapitalizedConstructorsOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useCollapsedElseIf",
         TypeId::of::<biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions>(),

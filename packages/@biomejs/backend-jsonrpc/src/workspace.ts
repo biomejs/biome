@@ -2946,6 +2946,11 @@ export interface Nursery {
 	 */
 	useBigintLiterals?: UseBigintLiteralsConfiguration;
 	/**
+	 * Require constructor names to begin with a capital letter.
+	 * See https://biomejs.dev/linter/rules/use-capitalized-constructors
+	 */
+	useCapitalizedConstructors?: UseCapitalizedConstructorsConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -5322,6 +5327,9 @@ export type UseBetterDomTraversingConfiguration =
 export type UseBigintLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBigintLiteralsOptions;
+export type UseCapitalizedConstructorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCapitalizedConstructorsOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
@@ -7707,6 +7715,10 @@ export interface RuleWithUseBigintLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: UseBigintLiteralsOptions;
 }
+export interface RuleWithUseCapitalizedConstructorsOptions {
+	level: RulePlainConfiguration;
+	options?: UseCapitalizedConstructorsOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -9925,6 +9937,7 @@ export interface UseBaselineOptions {
 }
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
+export type UseCapitalizedConstructorsOptions = {};
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -11390,6 +11403,7 @@ export type Category =
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"
