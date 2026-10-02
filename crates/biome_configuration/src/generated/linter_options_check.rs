@@ -1232,6 +1232,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noSvelteUnnecessaryStateWrap", TypeId::of::<biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions>()));
     result.push((
+        "nursery",
+        "noSvelteUselessDerivedBy",
+        TypeId::of::<
+            biome_rule_options::no_svelte_useless_derived_by::NoSvelteUselessDerivedByOptions,
+        >(),
+    ));
+    result.push((
         "a11y",
         "noSvgWithoutTitle",
         TypeId::of::<biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions>(),
