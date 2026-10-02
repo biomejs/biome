@@ -1230,6 +1230,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noSvelteLegacyConst",
         TypeId::of::<biome_rule_options::no_svelte_legacy_const::NoSvelteLegacyConstOptions>(),
     ));
+    result.push(("nursery", "noSvelteObjectInTextMustaches", TypeId::of::<biome_rule_options::no_svelte_object_in_text_mustaches::NoSvelteObjectInTextMustachesOptions>()));
     result.push(("nursery", "noSvelteUnnecessaryStateWrap", TypeId::of::<biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions>()));
     result.push((
         "a11y",

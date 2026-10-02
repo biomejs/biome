@@ -592,10 +592,15 @@ fn extract_html_embedded_js<'a>(
                     is_class_attribute,
                 })
             } else if host_file_source.is_svelte() {
+                let embedding_kind = if expr.is_svelte_text_interpolation() {
+                    SvelteEmbeddingKind::TextInterpolation
+                } else {
+                    SvelteEmbeddingKind::Expression
+                };
                 JsFileSource::tsx().with_embedding_kind(JsEmbeddingKind::Svelte {
                     is_module_script: false,
                     file_kind: SvelteFileKind::Component,
-                    embedding_kind: SvelteEmbeddingKind::Expression,
+                    embedding_kind,
                     is_class_attribute,
                 })
             } else if host_file_source.is_vue() {

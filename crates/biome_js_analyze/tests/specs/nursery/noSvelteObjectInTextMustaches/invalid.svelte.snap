@@ -1,0 +1,304 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	let a = 'hello!';
+</script>
+
+{{ a }}
+{[a]}
+{() => a}
+{function () {
+	return a;
+}}
+{class A {}}
+{({ a })}
+<p>text {{ a: true }}</p>
+{#if a}{{ a }}{/if}
+<input class="{{ a }} a" />
+<input class="{[a]} a" />
+<input class="{() => a} a" />
+<input class="{class B {}} a" />
+<input class="a {{ a }}" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:6:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    4 │ </script>
+    5 │ 
+  > 6 │ {{ a }}
+      │  ^^^^^
+    7 │ {[a]}
+    8 │ {() => a}
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected array in a text mustache.
+  
+    6 │ {{ a }}
+  > 7 │ {[a]}
+      │  ^^^
+    8 │ {() => a}
+    9 │ {function () {
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the array itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected function in a text mustache.
+  
+     6 │ {{ a }}
+     7 │ {[a]}
+   > 8 │ {() => a}
+       │  ^^^^^^^
+     9 │ {function () {
+    10 │ 	return a;
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the function itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected function in a text mustache.
+  
+     7 │ {[a]}
+     8 │ {() => a}
+   > 9 │ {function () {
+       │  ^^^^^^^^^^^^^
+  > 10 │ 	return a;
+  > 11 │ }}
+       │ ^
+    12 │ {class A {}}
+    13 │ {({ a })}
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the function itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected class in a text mustache.
+  
+    10 │ 	return a;
+    11 │ }}
+  > 12 │ {class A {}}
+       │  ^^^^^^^^^^
+    13 │ {({ a })}
+    14 │ <p>text {{ a: true }}</p>
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the class itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:13:2 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    11 │ }}
+    12 │ {class A {}}
+  > 13 │ {({ a })}
+       │  ^^^^^^^
+    14 │ <p>text {{ a: true }}</p>
+    15 │ {#if a}{{ a }}{/if}
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:14:10 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    12 │ {class A {}}
+    13 │ {({ a })}
+  > 14 │ <p>text {{ a: true }}</p>
+       │          ^^^^^^^^^^^
+    15 │ {#if a}{{ a }}{/if}
+    16 │ <input class="{{ a }} a" />
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:9 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    13 │ {({ a })}
+    14 │ <p>text {{ a: true }}</p>
+  > 15 │ {#if a}{{ a }}{/if}
+       │         ^^^^^
+    16 │ <input class="{{ a }} a" />
+    17 │ <input class="{[a]} a" />
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:16:16 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    14 │ <p>text {{ a: true }}</p>
+    15 │ {#if a}{{ a }}{/if}
+  > 16 │ <input class="{{ a }} a" />
+       │                ^^^^^
+    17 │ <input class="{[a]} a" />
+    18 │ <input class="{() => a} a" />
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:16 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected array in a text mustache.
+  
+    15 │ {#if a}{{ a }}{/if}
+    16 │ <input class="{{ a }} a" />
+  > 17 │ <input class="{[a]} a" />
+       │                ^^^
+    18 │ <input class="{() => a} a" />
+    19 │ <input class="{class B {}} a" />
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the array itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:18:16 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected function in a text mustache.
+  
+    16 │ <input class="{{ a }} a" />
+    17 │ <input class="{[a]} a" />
+  > 18 │ <input class="{() => a} a" />
+       │                ^^^^^^^
+    19 │ <input class="{class B {}} a" />
+    20 │ <input class="a {{ a }}" />
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the function itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:19:16 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected class in a text mustache.
+  
+    17 │ <input class="{[a]} a" />
+    18 │ <input class="{() => a} a" />
+  > 19 │ <input class="{class B {}} a" />
+       │                ^^^^^^^^^^
+    20 │ <input class="a {{ a }}" />
+    21 │ 
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the class itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:18 lint/nursery/noSvelteObjectInTextMustaches ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected object in a text mustache.
+  
+    18 │ <input class="{() => a} a" />
+    19 │ <input class="{class B {}} a" />
+  > 20 │ <input class="a {{ a }}" />
+       │                  ^^^^^
+    21 │ 
+  
+  i Svelte converts this value to a string when rendering it, which produces output such as [object Object] or the source code of a function.
+  
+  i Render a property of the value, or the result of calling a function, instead of the object itself.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -148,6 +148,14 @@ pub enum SvelteEmbeddingKind {
     Source,
     /// A template interpolation or directive payload parsed as a single expression.
     Expression,
+    /// A template interpolation whose value Svelte converts to a string, parsed as a
+    /// single expression.
+    ///
+    /// This covers mustaches in element content, such as `<p>{value}</p>`, and
+    /// mustaches inside quoted attribute values that contain other text, such as
+    /// `class="item {value}"`. A mustache that forms an entire attribute value, such
+    /// as `prop={value}`, passes the value through unchanged and uses [Self::Expression].
+    TextInterpolation,
     /// The name and parameters from a `{#snippet ...}` block parsed as a Svelte snippet root.
     SnippetSignature,
     /// The payload of a `{@const ...}` block parsed as an assignment expression.
@@ -314,6 +322,17 @@ impl JsEmbeddingKind {
                 file_kind: SvelteFileKind::Component,
                 embedding_kind: SvelteEmbeddingKind::Source,
                 is_module_script: false,
+                ..
+            }
+        )
+    }
+    /// Returns `true` if the code is a Svelte template interpolation whose value is
+    /// rendered as text. See [SvelteEmbeddingKind::TextInterpolation].
+    pub const fn is_svelte_text_interpolation(&self) -> bool {
+        matches!(
+            self,
+            Self::Svelte {
+                embedding_kind: SvelteEmbeddingKind::TextInterpolation,
                 ..
             }
         )
@@ -536,6 +555,7 @@ impl JsFileSource {
             self.embedding_kind,
             JsEmbeddingKind::Svelte {
                 embedding_kind: SvelteEmbeddingKind::Expression
+                    | SvelteEmbeddingKind::TextInterpolation
                     | SvelteEmbeddingKind::SnippetSignature
                     | SvelteEmbeddingKind::LegacyConst,
                 ..
@@ -818,6 +838,19 @@ mod tests {
         ] {
             assert!(!source.as_embedding_kind().is_class_attribute());
         }
+    }
+
+    #[test]
+    fn svelte_text_interpolation_is_template_expression() {
+        let source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+            is_module_script: false,
+            is_class_attribute: false,
+            file_kind: SvelteFileKind::Component,
+            embedding_kind: SvelteEmbeddingKind::TextInterpolation,
+        });
+        assert!(source.is_template_expression());
+        assert!(source.as_embedding_kind().is_svelte_text_interpolation());
+        assert!(!source.is_embedded_source());
     }
 
     #[test]
