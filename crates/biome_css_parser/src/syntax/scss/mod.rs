@@ -78,13 +78,14 @@ pub(crate) use token_sets::{
     SCSS_STATEMENT_START_SET, SCSS_VARIABLE_MODIFIER_LIST_END_SET,
 };
 pub(crate) use value::{
-    is_at_any_scss_value, is_at_scss_function, is_at_scss_interpolated_function_or_value,
-    is_at_scss_interpolated_string, is_at_scss_interpolated_value_head,
-    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value,
-    is_nth_at_scss_function, parse_any_scss_value_with_context,
-    parse_scss_bracketed_value_expression_item, parse_scss_function,
-    parse_scss_function_call_from_name, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_function_or_value_until, parse_scss_interpolated_string,
-    parse_scss_interpolated_url_value, parse_scss_interpolated_value,
-    parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
+    SCSS_BRACKETED_VALUE_EXPRESSION_END_SET, is_at_any_scss_value, is_at_scss_function,
+    is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_string,
+    is_at_scss_interpolated_value_head, is_at_scss_parent_selector_value,
+    is_at_scss_suffixed_interpolated_value, is_nth_at_scss_function,
+    parse_any_scss_value_with_context, parse_scss_bracketed_value_expression_item,
+    parse_scss_function, parse_scss_function_call_from_name,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
+    parse_scss_interpolated_string, parse_scss_interpolated_url_value,
+    parse_scss_interpolated_value, parse_scss_parent_selector_value,
+    parse_scss_suffixed_interpolated_value_until,
 };
