@@ -19,6 +19,7 @@ mod tests;
 mod value;
 
 use crate::{DefaultDeserializationContext, Deserializable, Deserialized};
+use anchors::Anchors;
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_yaml_parser::parse_yaml;
 use biome_yaml_syntax::YamlRoot;
@@ -78,9 +79,12 @@ pub fn deserialize_from_yaml_ast<Output: Deserializable>(
     root: &YamlRoot,
     id: &str,
 ) -> Deserialized<Output> {
-    let mut ctx = DefaultDeserializationContext::new(id);
-    let deserialized =
-        YamlValue::root(root).and_then(|value| Output::deserialize(&mut ctx, &value, ""));
+    let Some((value, document)) = YamlValue::root(root) else {
+        // The parser already reported the bogus document
+        return Deserialized::new(None, Vec::new());
+    };
+    let mut ctx = DefaultDeserializationContext::with_state(id, Anchors::new(document));
+    let deserialized = Output::deserialize(&mut ctx, &value, "");
     Deserialized {
         diagnostics: ctx.diagnostics,
         deserialized,

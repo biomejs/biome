@@ -27,12 +27,12 @@ pub enum RuleConfiguration<T: Default + Merge> {
     WithOptions(RuleWithOptions<T>),
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
@@ -136,12 +136,12 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
     }
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
@@ -304,12 +304,12 @@ pub enum RuleAssistConfiguration<T: Default> {
     WithOptions(RuleAssistWithOptions<T>),
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(|rule| Self::WithOptions(rule))
@@ -1199,12 +1199,12 @@ where
 }
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::Plain)
         } else {
             Deserializable::deserialize(ctx, value, name).map(SeverityOrGroup::<G>::Group)

@@ -102,9 +102,9 @@ impl OverrideGlobs {
     }
 }
 impl biome_deserialize::Deserializable for OverrideGlobs {
-    fn deserialize(
-        ctx: &mut dyn biome_deserialize::DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         biome_deserialize::Deserializable::deserialize(ctx, value, name).map(OverrideGlobs::Globs)

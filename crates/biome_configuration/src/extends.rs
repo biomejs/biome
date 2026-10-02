@@ -35,12 +35,12 @@ impl Default for Extends {
 }
 
 impl Deserializable for Extends {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Str {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Str {
             let deserialized_value: String = Deserializable::deserialize(ctx, value, name)?;
             if &deserialized_value == "//" {
                 Self::ExtendsRoot

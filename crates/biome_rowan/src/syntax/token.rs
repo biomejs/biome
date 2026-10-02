@@ -445,6 +445,55 @@ impl<L: Language> SyntaxToken<L> {
         self.leading_trivia().pieces().skip(skip_count)
     }
 
+    /// Returns the column at which the token starts: the length, in bytes, of the text that
+    /// precedes it on its line, including trivia and preceding tokens.
+    ///
+    /// Lines end with `\n`, `\r\n`, or `\r`.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token(RawLanguageKind::LET_TOKEN, "let");
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::STRING_TOKEN,
+    ///         "\n  a ",
+    ///         &[TriviaPiece::newline(1), TriviaPiece::whitespace(2)],
+    ///         &[TriviaPiece::whitespace(1)],
+    ///     );
+    ///     builder.token(RawLanguageKind::EQUAL_TOKEN, "=");
+    /// });
+    /// let tokens: Vec<_> = node.descendants_tokens(Direction::Next).collect();
+    /// // `a` starts its line after two spaces
+    /// assert_eq!(tokens[1].column(), TextSize::from(2));
+    /// // `=` follows `a` and its trailing space on the same line
+    /// assert_eq!(tokens[2].column(), TextSize::from(4));
+    /// ```
+    pub fn column(&self) -> TextSize {
+        /// Returns the length of `text` after its last line break, or `Err` with the length of
+        /// `text` if it has none.
+        fn len_after_line_break(text: &str) -> Result<TextSize, TextSize> {
+            match text.rfind(['\n', '\r']) {
+                Some(index) => Ok(TextSize::of(&text[index + 1..])),
+                None => Err(TextSize::of(text)),
+            }
+        }
+
+        let mut column = match len_after_line_break(self.leading_trivia().text()) {
+            Ok(len) => return len,
+            Err(len) => len,
+        };
+        let mut previous = self.prev_token();
+        while let Some(token) = previous {
+            match len_after_line_break(token.text()) {
+                Ok(len) => return column + len,
+                Err(len) => column += len,
+            }
+            previous = token.prev_token();
+        }
+        column
+    }
+
     /// Returns the token's leading trivia.
     ///
     /// Looking backward in the text, a token owns all of its preceding trivia up to and including the first newline character.

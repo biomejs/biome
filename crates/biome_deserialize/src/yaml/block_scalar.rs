@@ -1,9 +1,9 @@
 //! The content of [block scalars](https://yaml.org/spec/1.2.2/#81-block-scalar-styles): literal
 //! (`|`) and folded (`>`).
-use biome_rowan::{AstNode, Direction};
+use biome_rowan::{AstNode, Direction, declare_node_union};
 use biome_yaml_syntax::{
-    AnyYamlBlockHeader, AnyYamlBlockScalar, YamlBlockMapImplicitEntry, YamlSyntaxKind,
-    YamlSyntaxNode, YamlSyntaxToken,
+    AnyYamlBlockHeader, AnyYamlBlockScalar, YamlBlockMapExplicitEntry, YamlBlockMapImplicitEntry,
+    YamlBlockSequenceEntry, YamlSyntaxToken,
 };
 use std::iter::repeat_n;
 
@@ -58,7 +58,7 @@ pub(super) fn block_scalar_value(scalar: &AnyYamlBlockScalar) -> Option<String> 
         next_token.as_ref().map_or("", leading_blank_lines),
     );
     let indent = match indentation_indicator {
-        Some(indicator) => parent_indentation(scalar.syntax()) + indicator,
+        Some(indicator) => parent_indentation(scalar) + indicator,
         None => lines.detect_indentation(),
     };
 
@@ -165,7 +165,6 @@ impl<'a> BlockScalarLines<'a> {
     }
 }
 
-/// Returns `text` without its leading line break.
 fn without_line_break(text: &str) -> &str {
     text.strip_prefix("\r\n")
         .or_else(|| text.strip_prefix(['\n', '\r']))
@@ -183,7 +182,9 @@ fn leading_blank_lines(token: &YamlSyntaxToken) -> &str {
     &blank_lines[..blank_lines.rfind(['\n', '\r']).map_or(0, |index| index + 1)]
 }
 
-/// Splits `text` at its line breaks.
+/// Splits `text` at its line breaks: `\n`, `\r\n`, or `\r`.
+///
+/// The text after the last line break is the last line, even when it's empty.
 fn split_lines(text: &str) -> impl Iterator<Item = &str> {
     let mut rest = Some(text);
     std::iter::from_fn(move || {
@@ -206,53 +207,34 @@ fn split_lines(text: &str) -> impl Iterator<Item = &str> {
     })
 }
 
-/// Returns the indentation of the block mapping or sequence that contains `node`,
-/// which is 0 at the top level.
-fn parent_indentation(node: &YamlSyntaxNode) -> usize {
-    let Some(entry) = node.ancestors().find(|ancestor| {
-        matches!(
-            ancestor.kind(),
-            YamlSyntaxKind::YAML_BLOCK_MAP_IMPLICIT_ENTRY
-                | YamlSyntaxKind::YAML_BLOCK_MAP_EXPLICIT_ENTRY
-                | YamlSyntaxKind::YAML_BLOCK_SEQUENCE_ENTRY
-        )
-    }) else {
+declare_node_union! {
+    AnyYamlBlockEntry = YamlBlockMapImplicitEntry | YamlBlockMapExplicitEntry | YamlBlockSequenceEntry
+}
+
+/// Returns the indentation of the block mapping or sequence that contains `scalar`, which is 0
+/// at the top level.
+fn parent_indentation(scalar: &AnyYamlBlockScalar) -> usize {
+    let Some(entry) = scalar
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyYamlBlockEntry::cast)
+    else {
         return 0;
     };
-    let first_token =
-        match YamlBlockMapImplicitEntry::cast_ref(&entry).and_then(|entry| entry.key()) {
-            // The parser attaches the properties of a block mapping, which can be on previous lines,
-            // to its first key. Each property is a single token.
+    let first_token = match entry {
+        AnyYamlBlockEntry::YamlBlockMapImplicitEntry(entry) => match entry.key() {
+            // In `a: &anchor\n  b: |2`, `&anchor` belongs to the mapping that `b` starts, but
+            // the parser puts it in the property list of `b`, before the properties of `b`
+            // itself. The entry starts after these properties, which are single tokens.
             Some(key) => key
                 .syntax()
                 .descendants_tokens(Direction::Next)
                 .nth(key.enclosing_mapping_property_count()),
-            None => entry.first_token(),
-        };
-    first_token.map_or(0, |token| column(&token))
-}
-
-/// Returns the column, in bytes, at which `token` starts.
-fn column(token: &YamlSyntaxToken) -> usize {
-    /// Returns the length of `text` after its last line break, or `Err` with the length of
-    /// `text` if it has none.
-    fn len_after_line_break(text: &str) -> Result<usize, usize> {
-        text.rfind(['\n', '\r'])
-            .map(|index| text.len() - index - 1)
-            .ok_or(text.len())
-    }
-
-    let mut column = match len_after_line_break(token.leading_trivia().text()) {
-        Ok(len) => return len,
-        Err(len) => len,
+            None => entry.colon_token().ok(),
+        },
+        AnyYamlBlockEntry::YamlBlockMapExplicitEntry(entry) => entry.question_mark_token().ok(),
+        AnyYamlBlockEntry::YamlBlockSequenceEntry(entry) => entry.minus_token().ok(),
     };
-    let mut previous = token.prev_token();
-    while let Some(token) = previous {
-        match len_after_line_break(token.text()) {
-            Ok(len) => return column + len,
-            Err(len) => column += len,
-        }
-        previous = token.prev_token();
-    }
-    column
+    first_token.map_or(0, |token| usize::from(token.column()))
 }

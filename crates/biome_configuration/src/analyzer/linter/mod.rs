@@ -46,9 +46,9 @@ pub struct LinterConfiguration {
 }
 
 impl DeserializableValidator for LinterConfiguration {
-    fn validate(
+    fn validate<S>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         _name: &str,
         range: TextRange,
     ) -> bool {

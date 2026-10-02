@@ -1,9 +1,8 @@
 //! The type of scalars: null, boolean, number, or string, resolved with the
 //! [core schema](https://yaml.org/spec/1.2.2/#103-core-schema) and its tags.
-use super::flow_scalar::FlowStyle;
 use crate::TextNumber;
 use biome_rowan::{AstNodeList, SyntaxKind, Text, TextRange, TextSize, TokenText};
-use biome_yaml_syntax::{YamlPropertyList, YamlSyntaxKind};
+use biome_yaml_syntax::{AnyYamlFlowScalar, YamlPropertyList, YamlSyntaxKind};
 
 /// The value of a flow scalar.
 pub(super) enum Scalar {
@@ -16,21 +15,23 @@ pub(super) enum Scalar {
     Invalid(CoreTag),
 }
 
-/// Resolves the value of a flow scalar from its `text`. A tag of the core schema in its
+/// Resolves the value of `scalar`, whose content is `text`. A tag of the core schema in its
 /// `properties` sets its type, otherwise plain scalars are resolved with the core schema, and
 /// quoted scalars are strings.
 pub(super) fn resolve_flow_scalar(
+    scalar: &AnyYamlFlowScalar,
     text: TokenText,
-    style: FlowStyle,
     properties: &YamlPropertyList,
 ) -> Scalar {
     match CoreTag::from_properties(properties) {
-        None if style == FlowStyle::Plain => resolve_plain_scalar(text),
+        None if matches!(scalar, AnyYamlFlowScalar::YamlPlainScalar(_)) => {
+            resolve_plain_scalar(text)
+        }
         None | Some(CoreTag::Str) => Scalar::Str(text.into()),
         Some(tag) => {
-            let scalar = resolve_plain_scalar(text);
-            if tag.accepts(&scalar) {
-                scalar
+            let resolved = resolve_plain_scalar(text);
+            if tag.accepts(&resolved) {
+                resolved
             } else {
                 Scalar::Invalid(tag)
             }
@@ -132,7 +133,7 @@ fn owned_number(text: &str) -> TextNumber {
     ))
 }
 
-/// Removes the leading `+` of a number, which serde doesn't support.
+/// Removes the leading `+` of a number, which `serde_json` doesn't parse.
 fn without_plus_sign(text: TokenText) -> TokenText {
     if text.starts_with('+') {
         let len = text.len();

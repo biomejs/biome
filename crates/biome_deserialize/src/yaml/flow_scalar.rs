@@ -1,55 +1,31 @@
 //! The content of [flow scalars](https://yaml.org/spec/1.2.2/#73-flow-scalar-styles): plain,
 //! single-quoted, and double-quoted.
-use biome_rowan::{SyntaxKind, TextLen, TextRange, TextSize, TokenText};
-use biome_yaml_syntax::YamlSyntaxToken;
+use biome_rowan::{SyntaxKind, TokenText};
+use biome_yaml_syntax::AnyYamlFlowScalar;
 use std::iter::{Peekable, repeat_n};
 use std::str::CharIndices;
 
-#[derive(Clone, Copy, Eq, PartialEq)]
-pub(super) enum FlowStyle {
-    Plain,
-    SingleQuoted,
-    DoubleQuoted,
-}
-
 /// Returns the content of a flow scalar: without quotes, with escape sequences processed, and
-/// with lines folded.
+/// with lines folded. Returns `None` if the scalar has no token.
 ///
 /// If the scalar has a single line without escape sequences, its text is returned without any
 /// allocation.
-pub(super) fn flow_scalar_text(token: &YamlSyntaxToken, style: FlowStyle) -> TokenText {
-    let text = token.token_text_trimmed();
-    let len = text.len();
-    let range = match style {
-        // The lexer includes the blanks that precede a line break
-        FlowStyle::Plain => TextRange::up_to(text.trim_end_matches([' ', '\t']).text_len()),
-        FlowStyle::SingleQuoted | FlowStyle::DoubleQuoted => {
-            let quote = if style == FlowStyle::SingleQuoted {
-                '\''
-            } else {
-                '"'
-            };
-            // An unterminated scalar doesn't have a closing quote
-            let end = if len > TextSize::from(1) && text.ends_with(quote) {
-                len - TextSize::from(1)
-            } else {
-                len
-            };
-            TextRange::new(TextSize::from(1), end)
-        }
-    };
-    let text = text.slice(range);
+pub(super) fn flow_scalar_text(scalar: &AnyYamlFlowScalar) -> Option<TokenText> {
+    let text = scalar.inner_string_text().ok()?;
     let needs_processing = text.contains(['\n', '\r'])
-        || match style {
-            FlowStyle::Plain => false,
-            FlowStyle::SingleQuoted => text.contains("''"),
-            FlowStyle::DoubleQuoted => text.contains('\\'),
+        || match scalar {
+            AnyYamlFlowScalar::YamlPlainScalar(_) => false,
+            AnyYamlFlowScalar::YamlSingleQuotedScalar(_) => text.contains("''"),
+            AnyYamlFlowScalar::YamlDoubleQuotedScalar(_) => text.contains('\\'),
         };
-    if needs_processing {
-        TokenText::new_raw(token.kind().to_raw(), &fold_flow_scalar(&text, style))
-    } else {
-        text
+    if !needs_processing {
+        return Some(text);
     }
+    let kind = scalar.value_token().ok()?.kind();
+    Some(TokenText::new_raw(
+        kind.to_raw(),
+        &fold_flow_scalar(&text, scalar),
+    ))
 }
 
 /// Folds the lines of a flow scalar, and processes its escape sequences.
@@ -57,7 +33,7 @@ pub(super) fn flow_scalar_text(token: &YamlSyntaxToken, style: FlowStyle) -> Tok
 /// A line break between two lines becomes a space, unless empty lines follow it, which become
 /// line feeds. The blanks around line breaks aren't part of the content.
 /// See <https://yaml.org/spec/1.2.2/#73-flow-scalar-styles>.
-fn fold_flow_scalar(text: &str, style: FlowStyle) -> String {
+fn fold_flow_scalar(text: &str, scalar: &AnyYamlFlowScalar) -> String {
     let mut result = String::with_capacity(text.len());
     let mut chars = text.char_indices().peekable();
     // The start of the last blanks, which are only part of the content when a non-blank
@@ -86,8 +62,10 @@ fn fold_flow_scalar(text: &str, style: FlowStyle) -> String {
             result.push_str(&text[start..index]);
         }
         match c {
-            '\\' if style == FlowStyle::DoubleQuoted => unescape(&mut chars, &mut result),
-            '\'' if style == FlowStyle::SingleQuoted => {
+            '\\' if matches!(scalar, AnyYamlFlowScalar::YamlDoubleQuotedScalar(_)) => {
+                unescape(&mut chars, &mut result);
+            }
+            '\'' if matches!(scalar, AnyYamlFlowScalar::YamlSingleQuotedScalar(_)) => {
                 // `''` is an escaped quote
                 chars.next_if(|&(_, c)| c == '\'');
                 result.push('\'');
@@ -96,7 +74,7 @@ fn fold_flow_scalar(text: &str, style: FlowStyle) -> String {
         }
     }
     // The blanks that precede the closing quote are part of the content
-    if style != FlowStyle::Plain
+    if !matches!(scalar, AnyYamlFlowScalar::YamlPlainScalar(_))
         && let Some(start) = blanks_start
     {
         result.push_str(&text[start..]);

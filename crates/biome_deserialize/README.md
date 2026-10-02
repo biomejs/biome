@@ -212,9 +212,9 @@ impl FromStr for Day {
 }
 
 impl Deserializable for Day {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         // We deserialize the value into a number represented as a string.
@@ -267,12 +267,12 @@ enum Union {
 }
 
 impl Deserializable for Union {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Bool {
+        if value.visitable_type(ctx)? == DeserializableType::Bool {
             biome_deserialize::Deserializable::deserialize(ctx, value, name)
                 .map(Self::Bool)
         } else {
@@ -315,9 +315,9 @@ The full example:
 
 ```rust
 impl Deserializable for Union {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         // Delegate deserialization to `UnionVisitor`
@@ -326,7 +326,7 @@ impl Deserializable for Union {
 }
 
 struct UnionVisitor;
-impl DeserializationVisitor for UnionVisitor {
+impl<S> DeserializationVisitor<S> for UnionVisitor {
     type Output = Union;
 
     // We expect a `bool` or a `str` as data type.
@@ -335,7 +335,7 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_bool`.
     fn visit_bool(
         self,
-        _ctx: &mut dyn DeserializationContext,
+        _ctx: &mut dyn DeserializationContext<State = S>,
         value: bool,
         range: TextRange,
         _name: &str,
@@ -346,7 +346,7 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_str`.
     fn visit_str(
         self,
-        _ctx: &mut dyn DeserializationContext,
+        _ctx: &mut dyn DeserializationContext<State = S>,
         value: Text,
         range: TextRange,
         _name: &str,
@@ -374,9 +374,9 @@ use biome_deserialize::{Deserializable, DeserializationContext, DeserializableVa
 pub enum Variant { A, B }
 
 impl Deserializable for Variant {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         match String::deserialize(ctx, value, name)? {
@@ -419,9 +419,9 @@ use biome_deserialize::{Deserializable, DeserializationContext, DeserializableVa
 pub enum Variant { A, B }
 
 impl Deserializable for Variant {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         match Text::deserialize(ctx, value, name)?.text() {
@@ -472,16 +472,16 @@ Note that if you use _Serde_ in tandem with `biome_deserialize`, you have to dis
 Thus, instead of using `String::deserialize` and `u8::deserialize`, you should use `Deserialize::deserialize`.
 
 ```rust
-use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializationContext, DeserializableValue, DeserializationVisitor, MapMembers, Text, DeserializableTypes};
 use biome_rowan::TextRange;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
 pub struct Person { name: String, age: u8 }
 
 impl Deserializable for Person {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut dyn DeserializationContext<State = V::State>,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         // Delegate the deserialization to `PersonVisitor`.
@@ -491,7 +491,7 @@ impl Deserializable for Person {
 }
 
 struct PersonVisitor;
-impl DeserializationVisitor for PersonVisitor {
+impl<S> DeserializationVisitor<S> for PersonVisitor {
     // The visitor deserialize a [Person].
     type Output = Person;
 
@@ -501,9 +501,9 @@ impl DeserializationVisitor for PersonVisitor {
     // Because we expect a `map`, we have to implement the associated method `visit_map`.
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut dyn DeserializationContext<State = S>,
         // Iterator of key-value pairs.
-        members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
+        members: &mut MapMembers<'_, S>,
         // range of the map in the source text.
         range: TextRange,
         _name: &str,
