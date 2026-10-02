@@ -17,17 +17,17 @@ use std::{
 
 impl Deserializable for Text {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<S> DeserializationVisitor<S> for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = Text;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
             fn visit_str(
                 self,
-                _ctx: &mut dyn DeserializationContext<State = S>,
+                _ctx: &mut C,
                 value: Text,
                 _range: TextRange,
                 _name: &str,
@@ -61,17 +61,17 @@ impl std::fmt::Display for TextNumber {
 }
 impl Deserializable for TextNumber {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<S> DeserializationVisitor<S> for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = TextNumber;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
             fn visit_number(
                 self,
-                _ctx: &mut dyn DeserializationContext<State = S>,
+                _ctx: &mut C,
                 value: TextNumber,
                 _range: TextRange,
                 _name: &str,
@@ -85,12 +85,12 @@ impl Deserializable for TextNumber {
 
 impl Deserializable for () {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<S> DeserializationVisitor<S> for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = ();
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::empty();
         }
@@ -100,17 +100,17 @@ impl Deserializable for () {
 
 impl Deserializable for bool {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<S> DeserializationVisitor<S> for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = bool;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL;
             fn visit_bool(
                 self,
-                _ctx: &mut dyn DeserializationContext<State = S>,
+                _ctx: &mut C,
                 value: bool,
                 _range: TextRange,
                 _name: &str,
@@ -124,7 +124,7 @@ impl Deserializable for bool {
 
 impl Deserializable for f32 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -142,7 +142,7 @@ impl Deserializable for f32 {
 
 impl Deserializable for f64 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -160,7 +160,7 @@ impl Deserializable for f64 {
 
 impl Deserializable for i8 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -179,7 +179,7 @@ impl Deserializable for i8 {
 
 impl Deserializable for i16 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -198,7 +198,7 @@ impl Deserializable for i16 {
 
 impl Deserializable for i32 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -217,7 +217,7 @@ impl Deserializable for i32 {
 
 impl Deserializable for isize {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -236,7 +236,7 @@ impl Deserializable for isize {
 
 impl Deserializable for i64 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -255,7 +255,7 @@ impl Deserializable for i64 {
 
 impl Deserializable for u8 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -274,7 +274,7 @@ impl Deserializable for u8 {
 
 impl Deserializable for u16 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -293,7 +293,7 @@ impl Deserializable for u16 {
 
 impl Deserializable for u32 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -312,7 +312,7 @@ impl Deserializable for u32 {
 
 impl Deserializable for usize {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -331,7 +331,7 @@ impl Deserializable for usize {
 
 impl Deserializable for u64 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -350,7 +350,7 @@ impl Deserializable for u64 {
 
 impl Deserializable for NonZeroU8 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -369,7 +369,7 @@ impl Deserializable for NonZeroU8 {
 
 impl Deserializable for NonZeroU16 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -388,7 +388,7 @@ impl Deserializable for NonZeroU16 {
 
 impl Deserializable for NonZeroU32 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -407,7 +407,7 @@ impl Deserializable for NonZeroU32 {
 
 impl Deserializable for NonZeroUsize {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -426,7 +426,7 @@ impl Deserializable for NonZeroUsize {
 
 impl Deserializable for NonZeroU64 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -445,7 +445,7 @@ impl Deserializable for NonZeroU64 {
 
 impl Deserializable for String {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -455,7 +455,7 @@ impl Deserializable for String {
 
 impl Deserializable for Box<str> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -465,7 +465,7 @@ impl Deserializable for Box<str> {
 
 impl Deserializable for PathBuf {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -475,7 +475,7 @@ impl Deserializable for PathBuf {
 
 impl<T: Deserializable> Deserializable for Box<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -485,7 +485,7 @@ impl<T: Deserializable> Deserializable for Box<T> {
 
 impl<T: Deserializable> Deserializable for Option<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -499,19 +499,19 @@ impl<T: Deserializable> Deserializable for Option<T> {
 
 impl<T: Deserializable> Deserializable for Vec<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
-        impl<S, T: Deserializable> DeserializationVisitor<S> for Visitor<T> {
+        impl<C: DeserializationContext, T: Deserializable> DeserializationVisitor<C> for Visitor<T> {
             type Output = Vec<T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -529,7 +529,7 @@ impl<T: Deserializable> Deserializable for Vec<T> {
 
 impl<T: Deserializable> Deserializable for Box<[T]> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -540,19 +540,21 @@ impl<T: Deserializable> Deserializable for Box<[T]> {
 #[cfg(feature = "smallvec")]
 impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T; L]> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T, const L: usize>(PhantomData<T>);
-        impl<S, T: Deserializable, const L: usize> DeserializationVisitor<S> for Visitor<T, L> {
+        impl<C: DeserializationContext, T: Deserializable, const L: usize> DeserializationVisitor<C>
+            for Visitor<T, L>
+        {
             type Output = smallvec::SmallVec<[T; L]>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -570,21 +572,21 @@ impl<T: Deserializable, const L: usize> Deserializable for smallvec::SmallVec<[T
 
 impl<T: Deserializable + Eq + Hash, H: BuildHasher + Default> Deserializable for HashSet<T, H> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T, H>(PhantomData<(T, H)>);
-        impl<S, T: Deserializable + Eq + Hash, H: BuildHasher + Default> DeserializationVisitor<S>
-            for Visitor<T, H>
+        impl<C: DeserializationContext, T: Deserializable + Eq + Hash, H: BuildHasher + Default>
+            DeserializationVisitor<C> for Visitor<T, H>
         {
             type Output = HashSet<T, H>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -602,19 +604,19 @@ impl<T: Deserializable + Eq + Hash, H: BuildHasher + Default> Deserializable for
 
 impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
-        impl<S, T: Ord + Deserializable> DeserializationVisitor<S> for Visitor<T> {
+        impl<C: DeserializationContext, T: Ord + Deserializable> DeserializationVisitor<C> for Visitor<T> {
             type Output = BTreeSet<T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -633,19 +635,21 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
 #[cfg(feature = "indexmap")]
 impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
-        impl<S, T: Hash + Eq + Deserializable> DeserializationVisitor<S> for Visitor<T> {
+        impl<C: DeserializationContext, T: Hash + Eq + Deserializable> DeserializationVisitor<C>
+            for Visitor<T>
+        {
             type Output = indexmap::IndexSet<T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 _range: TextRange,
                 _name: &str,
@@ -665,20 +669,24 @@ impl<K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
     for HashMap<K, T, H>
 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<K, T, H>(PhantomData<(K, T, H)>);
-        impl<S, K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
-            DeserializationVisitor<S> for Visitor<K, T, H>
+        impl<
+            C: DeserializationContext,
+            K: Hash + Eq + Deserializable,
+            T: Deserializable,
+            H: Default + BuildHasher,
+        > DeserializationVisitor<C> for Visitor<K, T, H>
         {
             type Output = HashMap<K, T, H>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
-                members: &mut MapMembers<'_, S>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -700,18 +708,20 @@ impl<K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
 
 impl<K: Ord + Deserializable, T: Deserializable> Deserializable for BTreeMap<K, T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<K, T>(PhantomData<(K, T)>);
-        impl<S, K: Ord + Deserializable, T: Deserializable> DeserializationVisitor<S> for Visitor<K, T> {
+        impl<C: DeserializationContext, K: Ord + Deserializable, T: Deserializable>
+            DeserializationVisitor<C> for Visitor<K, T>
+        {
             type Output = BTreeMap<K, T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
-                members: &mut MapMembers<'_, S>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -735,20 +745,24 @@ impl<K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
     for indexmap::IndexMap<K, T, H>
 {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<K, T, H>(PhantomData<(K, T, H)>);
-        impl<S, K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
-            DeserializationVisitor<S> for Visitor<K, T, H>
+        impl<
+            C: DeserializationContext,
+            K: Hash + Eq + Deserializable,
+            T: Deserializable,
+            H: Default + BuildHasher,
+        > DeserializationVisitor<C> for Visitor<K, T, H>
         {
             type Output = indexmap::IndexMap<K, T, H>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
-                members: &mut MapMembers<'_, S>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -771,7 +785,7 @@ impl<K: Hash + Eq + Deserializable, T: Deserializable, H: Default + BuildHasher>
 #[cfg(feature = "camino")]
 impl Deserializable for camino::Utf8PathBuf {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {

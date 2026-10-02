@@ -114,9 +114,9 @@ impl Default for FilenameCases {
 }
 
 impl biome_deserialize::DeserializableValidator for FilenameCases {
-    fn validate<S>(
+    fn validate(
         &mut self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut dyn DeserializationContext,
         name: &str,
         range: TextRange,
     ) -> bool {

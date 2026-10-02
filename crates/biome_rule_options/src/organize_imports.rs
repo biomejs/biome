@@ -28,9 +28,9 @@ pub struct OrganizeImportsOptions {
 }
 
 impl DeserializableValidator for OrganizeImportsOptions {
-    fn validate<S>(
+    fn validate(
         &mut self,
-        ctx: &mut dyn biome_deserialize::DeserializationContext<State = S>,
+        ctx: &mut dyn biome_deserialize::DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {

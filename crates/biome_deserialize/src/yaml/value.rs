@@ -1,5 +1,5 @@
 //! The traversal of YAML documents: the [DeserializableValue] of their nodes.
-use super::anchors::Anchors;
+use super::YamlDeserializationContext;
 use super::block_scalar::block_scalar_value;
 use super::flow_scalar::flow_scalar_text;
 use super::schema::{Scalar, resolve_flow_scalar};
@@ -105,11 +105,11 @@ enum Content {
 }
 
 type Member = (
-    Box<dyn DeserializableValue<State = Anchors>>,
-    Box<dyn DeserializableValue<State = Anchors>>,
+    Box<dyn DeserializableValue<Context = YamlDeserializationContext>>,
+    Box<dyn DeserializableValue<Context = YamlDeserializationContext>>,
 );
 
-/// A node to deserialize. Its aliases are resolved with the [Anchors] of the context.
+/// A node to deserialize. Its aliases are resolved with the anchors of the context.
 pub(super) struct YamlValue {
     /// `None` when the node is missing, which is null, such as the value of `a:`.
     node: Option<AnyYamlValueNode>,
@@ -218,7 +218,7 @@ impl YamlValue {
 }
 
 impl DeserializableValue for YamlValue {
-    type State = Anchors;
+    type Context = YamlDeserializationContext;
 
     fn range(&self) -> TextRange {
         self.range
@@ -226,8 +226,8 @@ impl DeserializableValue for YamlValue {
 
     fn deserialize_erased(
         &self,
-        ctx: &mut dyn DeserializationContext<State = Anchors>,
-        visitor: &mut dyn ErasedDeserializationVisitor<Anchors>,
+        ctx: &mut YamlDeserializationContext,
+        visitor: &mut dyn ErasedDeserializationVisitor<YamlDeserializationContext>,
         name: &str,
     ) {
         // The parser already reported the bogus node
@@ -278,7 +278,10 @@ impl DeserializableValue for YamlValue {
                     let value = entry
                         .value()
                         .map_or_else(|| Self::missing(entry.range()), Self::new);
-                    Some(Box::new(value) as Box<dyn DeserializableValue<State = Anchors>>)
+                    Some(Box::new(value)
+                        as Box<
+                            dyn DeserializableValue<Context = YamlDeserializationContext>,
+                        >)
                 });
                 visitor.visit_array(ctx, &mut items, range, name)
             }
@@ -295,7 +298,10 @@ impl DeserializableValue for YamlValue {
                         AnyYamlFlowSequenceEntry::AnyYamlFlowNode(node) => Self::new(node),
                         AnyYamlFlowSequenceEntry::AnyYamlFlowMapEntry(entry) => Self::new(entry),
                     };
-                    Some(Box::new(value) as Box<dyn DeserializableValue<State = Anchors>>)
+                    Some(Box::new(value)
+                        as Box<
+                            dyn DeserializableValue<Context = YamlDeserializationContext>,
+                        >)
                 });
                 visitor.visit_array(ctx, &mut items, range, name)
             }
@@ -304,7 +310,7 @@ impl DeserializableValue for YamlValue {
                 visitor.visit_map(ctx, &mut members, range, name)
             }
             Content::Alias(alias) => {
-                match ctx.state_mut().expand(&alias) {
+                match ctx.anchors.expand(&alias) {
                     Ok(node) => self.aliased(node).deserialize_erased(ctx, visitor, name),
                     Err(Some(diagnostic)) => ctx.report(diagnostic),
                     // The exceeded budget was already reported
@@ -314,10 +320,7 @@ impl DeserializableValue for YamlValue {
         }
     }
 
-    fn visitable_type(
-        &self,
-        ctx: &mut dyn DeserializationContext<State = Anchors>,
-    ) -> Option<DeserializableType> {
+    fn visitable_type(&self, ctx: &mut YamlDeserializationContext) -> Option<DeserializableType> {
         let visitable_type = match self.content()? {
             Content::Null => DeserializableType::Null,
             Content::Scalar { scalar, properties } => match self.scalar(&scalar, &properties)? {
@@ -333,7 +336,7 @@ impl DeserializableValue for YamlValue {
             }
             Content::BlockSequence(_) | Content::FlowSequence(_) => DeserializableType::Array,
             Content::Alias(alias) => {
-                let node = ctx.state_mut().resolve(&alias).ok()?;
+                let node = ctx.anchors.resolve(&alias).ok()?;
                 return self.aliased(node).visitable_type(ctx);
             }
         };

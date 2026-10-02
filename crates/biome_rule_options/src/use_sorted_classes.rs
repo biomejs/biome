@@ -65,7 +65,7 @@ const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for UseSortedClassesOptions {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -74,15 +74,15 @@ impl Deserializable for UseSortedClassesOptions {
 }
 
 struct UtilityClassSortingOptionsVisitor;
-impl<S> DeserializationVisitor<S> for UtilityClassSortingOptionsVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for UtilityClassSortingOptionsVisitor {
     type Output = UseSortedClassesOptions;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
-        members: &mut MapMembers<'_, S>,
+        ctx: &mut C,
+        members: &mut MapMembers<'_, C>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

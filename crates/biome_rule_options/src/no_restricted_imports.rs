@@ -1,9 +1,7 @@
 use crate::organize_imports::import_groups::{ImportSourceCandidate, SourcesMatcher};
 use crate::organize_imports::import_source::ImportSource;
 use crate::restricted_regex::RestrictedRegex;
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext, TextRange,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue, TextRange};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsExpression,
@@ -70,7 +68,7 @@ impl From<Paths> for PathOptions {
 
 impl Deserializable for Paths {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -180,7 +178,7 @@ impl From<Patterns> for PatternOptions {
 
 impl Deserializable for Patterns {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {

@@ -358,7 +358,7 @@ impl TryFrom<String> for Glob {
 #[cfg(feature = "biome_deserialize")]
 impl biome_deserialize::Deserializable for Glob {
     fn deserialize<V: biome_deserialize::DeserializableValue>(
-        ctx: &mut dyn biome_deserialize::DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -373,7 +373,8 @@ impl biome_deserialize::Deserializable for Glob {
                         1u32.into(),
                     )
                 });
-                ctx.report(
+                biome_deserialize::DeserializationContext::report(
+                    ctx,
                     biome_deserialize::DeserializationDiagnostic::new(format_args!("{error}"))
                         .with_range(range),
                 );

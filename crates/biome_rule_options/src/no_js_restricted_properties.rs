@@ -69,9 +69,9 @@ pub struct RestrictedPropertyEntry {
 }
 
 impl DeserializableValidator for RestrictedPropertyEntry {
-    fn validate<S>(
+    fn validate(
         &mut self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {

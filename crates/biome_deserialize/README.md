@@ -213,7 +213,7 @@ impl FromStr for Day {
 
 impl Deserializable for Day {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -268,7 +268,7 @@ enum Union {
 
 impl Deserializable for Union {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -316,7 +316,7 @@ The full example:
 ```rust
 impl Deserializable for Union {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -326,7 +326,7 @@ impl Deserializable for Union {
 }
 
 struct UnionVisitor;
-impl<S> DeserializationVisitor<S> for UnionVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for UnionVisitor {
     type Output = Union;
 
     // We expect a `bool` or a `str` as data type.
@@ -335,7 +335,7 @@ impl<S> DeserializationVisitor<S> for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_bool`.
     fn visit_bool(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         value: bool,
         range: TextRange,
         _name: &str,
@@ -346,7 +346,7 @@ impl<S> DeserializationVisitor<S> for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_str`.
     fn visit_str(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         value: Text,
         range: TextRange,
         _name: &str,
@@ -375,7 +375,7 @@ pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -420,7 +420,7 @@ pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -480,7 +480,7 @@ pub struct Person { name: String, age: u8 }
 
 impl Deserializable for Person {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -491,7 +491,7 @@ impl Deserializable for Person {
 }
 
 struct PersonVisitor;
-impl<S> DeserializationVisitor<S> for PersonVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for PersonVisitor {
     // The visitor deserialize a [Person].
     type Output = Person;
 
@@ -501,9 +501,9 @@ impl<S> DeserializationVisitor<S> for PersonVisitor {
     // Because we expect a `map`, we have to implement the associated method `visit_map`.
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut C,
         // Iterator of key-value pairs.
-        members: &mut MapMembers<'_, S>,
+        members: &mut MapMembers<'_, C>,
         // range of the map in the source text.
         range: TextRange,
         _name: &str,

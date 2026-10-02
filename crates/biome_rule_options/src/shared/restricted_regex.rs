@@ -77,7 +77,7 @@ impl TryFrom<String> for RestrictedRegex {
 // We use a custom impl to precisely report the location of the error.
 impl biome_deserialize::Deserializable for RestrictedRegex {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
