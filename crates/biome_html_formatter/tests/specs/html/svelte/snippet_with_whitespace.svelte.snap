@@ -16,9 +16,7 @@ info: svelte/snippet_with_whitespace.svelte
 # Formatted
 
 ```svelte
-{#snippet greeting(
-	name,
-)}
+{#snippet greeting(name)}
 	<p>Hello, {name}!</p>
 {/snippet}
 
