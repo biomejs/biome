@@ -7577,6 +7577,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBigintLiterals": {
+					"description": "Enforce the use of bigint literals over the BigInt() constructor.\nSee https://biomejs.dev/linter/rules/use-bigint-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBigintLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFunctionStyle": {
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
@@ -12459,6 +12466,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseBigintLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseBigintLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseBiomeIgnoreFolderOptions": {
 			"type": "object",
 			"properties": {
@@ -16601,6 +16621,16 @@
 			]
 		},
 		"UseBetterDomTraversingOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseBigintLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseBigintLiteralsOptions" }
+			]
+		},
+		"UseBigintLiteralsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

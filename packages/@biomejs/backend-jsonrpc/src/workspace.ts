@@ -2936,6 +2936,11 @@ export interface Nursery {
 	 */
 	useBetterDomTraversing?: UseBetterDomTraversingConfiguration;
 	/**
+	 * Enforce the use of bigint literals over the BigInt() constructor.
+	 * See https://biomejs.dev/linter/rules/use-bigint-literals
+	 */
+	useBigintLiterals?: UseBigintLiteralsConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -5306,6 +5311,9 @@ export type UseBaselineConfiguration =
 export type UseBetterDomTraversingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBetterDomTraversingOptions;
+export type UseBigintLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBigintLiteralsOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
@@ -7675,6 +7683,14 @@ export interface RuleWithUseBetterDomTraversingOptions {
 	level: RulePlainConfiguration;
 	options?: UseBetterDomTraversingOptions;
 }
+export interface RuleWithUseBigintLiteralsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBigintLiteralsOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -9891,6 +9907,7 @@ export interface UseBaselineOptions {
 	available?: AvailabilityTarget;
 }
 export type UseBetterDomTraversingOptions = {};
+export type UseBigintLiteralsOptions = {};
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -11353,6 +11370,7 @@ export type Category =
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBaseline"
 	| "lint/nursery/useBetterDomTraversing"
+	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
