@@ -1620,6 +1620,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noVueBooleanDefault",
+        TypeId::of::<biome_rule_options::no_vue_boolean_default::NoVueBooleanDefaultOptions>(),
+    ));
+    result.push((
         "correctness",
         "noVueDataObjectDeclaration",
         TypeId::of::<

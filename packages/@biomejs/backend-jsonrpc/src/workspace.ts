@@ -2876,6 +2876,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Disallow default values for Boolean props in Vue components.
+	 * See https://biomejs.dev/linter/rules/no-vue-boolean-default
+	 */
+	noVueBooleanDefault?: NoVueBooleanDefaultConfiguration;
+	/**
 	 * Disallow the deprecated Vue $scopedSlots API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots
 	 */
@@ -5265,6 +5270,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueBooleanDefaultConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueBooleanDefaultOptions;
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
@@ -7603,6 +7611,10 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoVueBooleanDefaultOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueBooleanDefaultOptions;
+}
 export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9828,6 +9840,7 @@ export interface NoUntrustedLicensesOptions {
 }
 export type NoUnusedClassesOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueImportCompilerMacrosOptions = {};
 export type NoVueRefAsOperandOptions = {};
@@ -11328,6 +11341,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"

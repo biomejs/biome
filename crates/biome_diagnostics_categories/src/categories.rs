@@ -274,6 +274,7 @@ define_categories! {
     "lint/nursery/noUnwantedPolyfillio": "https://biomejs.dev/linter/rules/no-unwanted-polyfillio",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
+    "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",

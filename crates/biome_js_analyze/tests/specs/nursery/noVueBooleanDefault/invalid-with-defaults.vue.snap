@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+interface Props {
+  foo?: boolean;
+  bar?: true | false;
+  baz?: (boolean);
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  foo: true,
+  bar: false,
+  baz() {
+    return true;
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:10:8 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+     9 │ const props = withDefaults(defineProps<Props>(), {
+  > 10 │   foo: true,
+       │        ^^^^
+    11 │   bar: false,
+    12 │   baz() {
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:11:8 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+     9 │ const props = withDefaults(defineProps<Props>(), {
+    10 │   foo: true,
+  > 11 │   bar: false,
+       │        ^^^^^
+    12 │   baz() {
+    13 │     return true;
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-with-defaults.vue:12:3 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+    10 │   foo: true,
+    11 │   bar: false,
+  > 12 │   baz() {
+       │   ^^^^^^^
+  > 13 │     return true;
+  > 14 │   },
+       │   ^
+    15 │ });
+    16 │ </script>
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
