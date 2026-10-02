@@ -26,8 +26,8 @@ pub struct UseExhaustiveDependenciesOptions {
     pub hooks: Option<Box<[Hook]>>,
 }
 
-fn non_empty_optional<T: IsEmpty, S>(
-    ctx: &mut dyn DeserializationContext<State = S>,
+fn non_empty_optional<T: IsEmpty>(
+    ctx: &mut dyn DeserializationContext,
     value: &Option<T>,
     name: &str,
     range: TextRange,
@@ -101,9 +101,9 @@ pub struct Hook {
 }
 
 impl DeserializableValidator for Hook {
-    fn validate<S>(
+    fn validate(
         &mut self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -192,7 +192,7 @@ impl schemars::JsonSchema for StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -201,7 +201,7 @@ impl biome_deserialize::Deserializable for StableHookResult {
 }
 
 struct StableResultVisitor;
-impl<S> DeserializationVisitor<S> for StableResultVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for StableResultVisitor {
     type Output = StableHookResult;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY
@@ -210,8 +210,8 @@ impl<S> DeserializationVisitor<S> for StableResultVisitor {
 
     fn visit_array(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
-        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
+        ctx: &mut C,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<Context = C>>>>,
         range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
@@ -250,7 +250,7 @@ impl<S> DeserializationVisitor<S> for StableResultVisitor {
 
     fn visit_bool(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut C,
         value: bool,
         range: TextRange,
         _name: &str,
@@ -272,7 +272,7 @@ impl<S> DeserializationVisitor<S> for StableResultVisitor {
 
     fn visit_number(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut C,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
@@ -288,14 +288,14 @@ enum StableResultItem {
 }
 
 struct StableResultArrayVisitor;
-impl<S> DeserializationVisitor<S> for StableResultArrayVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for StableResultArrayVisitor {
     type Output = StableResultItem;
     const EXPECTED_TYPE: DeserializableTypes =
         DeserializableTypes::STR.union(DeserializableTypes::NUMBER);
 
     fn visit_str(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         value: Text,
         _range: TextRange,
         _name: &str,
@@ -305,7 +305,7 @@ impl<S> DeserializationVisitor<S> for StableResultArrayVisitor {
 
     fn visit_number(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut C,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
@@ -316,14 +316,14 @@ impl<S> DeserializationVisitor<S> for StableResultArrayVisitor {
 }
 
 struct StableResultIndexVisitor;
-impl<S> DeserializationVisitor<S> for StableResultIndexVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for StableResultIndexVisitor {
     type Output = u8;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::NUMBER;
 
     fn visit_number(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut C,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         _name: &str,

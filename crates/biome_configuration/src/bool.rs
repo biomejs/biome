@@ -1,5 +1,5 @@
 use biome_console::fmt::Formatter;
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext, Merge};
+use biome_deserialize::{Deserializable, DeserializableValue, Merge};
 use std::{
     fmt,
     str::{FromStr, ParseBoolError},
@@ -44,7 +44,7 @@ impl<const D: bool> FromStr for Bool<D> {
 
 impl<const D: bool> Deserializable for Bool<D> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {

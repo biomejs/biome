@@ -32,7 +32,7 @@ struct VisitableType(Option<DeserializableType>);
 
 impl Deserializable for VisitableType {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         _name: &str,
     ) -> Option<Self> {
@@ -326,7 +326,7 @@ struct ScalarCount(usize);
 
 impl Deserializable for ScalarCount {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -336,22 +336,17 @@ impl Deserializable for ScalarCount {
 
 struct ScalarCountVisitor;
 
-impl<S> DeserializationVisitor<S> for ScalarCountVisitor {
+impl<C: DeserializationContext> DeserializationVisitor<C> for ScalarCountVisitor {
     type Output = ScalarCount;
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::all();
 
-    fn visit_null(
-        self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
-        _range: TextRange,
-        _name: &str,
-    ) -> Option<Self::Output> {
+    fn visit_null(self, _ctx: &mut C, _range: TextRange, _name: &str) -> Option<Self::Output> {
         Some(ScalarCount(1))
     }
 
     fn visit_bool(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         _value: bool,
         _range: TextRange,
         _name: &str,
@@ -361,7 +356,7 @@ impl<S> DeserializationVisitor<S> for ScalarCountVisitor {
 
     fn visit_number(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         _value: TextNumber,
         _range: TextRange,
         _name: &str,
@@ -371,7 +366,7 @@ impl<S> DeserializationVisitor<S> for ScalarCountVisitor {
 
     fn visit_str(
         self,
-        _ctx: &mut dyn DeserializationContext<State = S>,
+        _ctx: &mut C,
         _value: Text,
         _range: TextRange,
         _name: &str,
@@ -381,8 +376,8 @@ impl<S> DeserializationVisitor<S> for ScalarCountVisitor {
 
     fn visit_array(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
-        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
+        ctx: &mut C,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<Context = C>>>>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
@@ -396,8 +391,8 @@ impl<S> DeserializationVisitor<S> for ScalarCountVisitor {
 
     fn visit_map(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
-        members: &mut MapMembers<'_, S>,
+        ctx: &mut C,
+        members: &mut MapMembers<'_, C>,
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {

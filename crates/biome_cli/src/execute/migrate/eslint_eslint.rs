@@ -135,7 +135,7 @@ impl AsRef<str> for IgnorePattern {
 }
 impl biome_deserialize::Deserializable for IgnorePattern {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -188,7 +188,7 @@ impl GlobalConf {
 }
 impl Deserializable for GlobalConf {
     fn deserialize<V: biome_deserialize::DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -253,7 +253,7 @@ impl<T> IntoIterator for ShorthandVec<T> {
 }
 impl<T: Deserializable> Deserializable for ShorthandVec<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -294,7 +294,7 @@ impl<T> From<Vec<T>> for NestableVec<T> {
 }
 impl<T: Deserializable> Deserializable for NestableVec<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -312,13 +312,15 @@ impl<T> NestableVecVisitor<T> {
         Self { _ty: PhantomData }
     }
 }
-impl<S, T: Deserializable> DeserializationVisitor<S> for NestableVecVisitor<T> {
+impl<C: DeserializationContext, T: Deserializable> DeserializationVisitor<C>
+    for NestableVecVisitor<T>
+{
     type Output = Vec<T>;
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
     fn visit_array(
         self,
-        ctx: &mut dyn DeserializationContext<State = S>,
-        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<State = S>>>>,
+        ctx: &mut C,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue<Context = C>>>>,
         _range: TextRange,
         name: &str,
     ) -> Option<Self::Output> {
@@ -375,21 +377,21 @@ impl<T: Default, U: Default> RuleConf<T, U> {
 }
 impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable for RuleConf<T, U> {
     fn deserialize<V: biome_deserialize::DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor<T, U>(PhantomData<(T, U)>);
-        impl<S, T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor<S>
-            for Visitor<T, U>
+        impl<C: DeserializationContext, T: Deserializable + 'static, U: Deserializable + 'static>
+            DeserializationVisitor<C> for Visitor<T, U>
         {
             type Output = RuleConf<T, U>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
+                ctx: &mut C,
                 values: &mut dyn ExactSizeIterator<
-                    Item = Option<Box<dyn DeserializableValue<State = S>>>,
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
                 >,
                 range: TextRange,
                 _name: &str,
@@ -488,7 +490,7 @@ enum NumberOrString {
 }
 impl Deserializable for NumberOrString {
     fn deserialize<V: biome_deserialize::DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -515,18 +517,18 @@ impl Deref for Rules {
 }
 impl Deserializable for Rules {
     fn deserialize<V: biome_deserialize::DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl<S> DeserializationVisitor<S> for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = Rules;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext<State = S>,
-                members: &mut MapMembers<'_, S>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: biome_rowan::TextRange,
                 name: &str,
             ) -> Option<Self::Output> {
@@ -958,7 +960,7 @@ impl MaxNestedCallbacksOptions {
 
 impl Deserializable for MaxNestedCallbacksOptions {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -1146,7 +1148,7 @@ impl NoRestrictedGlobal {
 }
 impl Deserializable for NoRestrictedGlobal {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {

@@ -21,9 +21,9 @@ pub struct UseConsistentArrowReturnOptions {
 }
 
 impl DeserializableValidator for UseConsistentArrowReturnOptions {
-    fn validate<S>(
+    fn validate(
         &mut self,
-        ctx: &mut dyn DeserializationContext<State = S>,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
     ) -> bool {

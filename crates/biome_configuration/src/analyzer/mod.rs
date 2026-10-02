@@ -8,9 +8,7 @@ use crate::analyzer::presets::PresetConfig;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, PLUGIN_GROUP, Rule, RuleCategory, RuleDomain, RuleFilter};
 use biome_console::markup;
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext, Merge,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue, Merge};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
 use biome_string_case::Case;
@@ -30,7 +28,7 @@ pub enum RuleConfiguration<T: Default + Merge> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         rule_name: &str,
     ) -> Option<Self> {
@@ -139,7 +137,7 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         rule_name: &str,
     ) -> Option<Self> {
@@ -308,7 +306,7 @@ pub enum RuleAssistConfiguration<T: Default> {
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {
@@ -1250,7 +1248,7 @@ where
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
     fn deserialize<V: DeserializableValue>(
-        ctx: &mut dyn DeserializationContext<State = V::State>,
+        ctx: &mut V::Context,
         value: &V,
         name: &str,
     ) -> Option<Self> {

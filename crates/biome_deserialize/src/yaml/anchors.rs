@@ -14,8 +14,7 @@ use biome_yaml_syntax::{
 /// can't expand to an unbounded size.
 const MAX_ALIAS_EXPANSION_FACTOR: usize = 100;
 
-/// The anchors of a document, which its aliases refer to. It's the
-/// [state](crate::DeserializableValue::State) of the YAML values.
+/// The anchors and alias expansion budget shared by the values of a document.
 pub(super) struct Anchors {
     /// `None` when the stream has no document, and so no anchors.
     document: Option<YamlDocument>,
