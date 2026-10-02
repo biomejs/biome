@@ -14,6 +14,7 @@ const leadingDot = .0;
 const exponentFromLeadingDot = .00e20;
 const member = 1.0.toString();
 const alreadyParenthesized = (2.0).toString();
+1.0.toString();
 
 ```
 
@@ -226,7 +227,7 @@ invalid.js:9:16 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━�
    > 9 │ const member = 1.0.toString();
        │                ^^^
     10 │ const alreadyParenthesized = (2.0).toString();
-    11 │ 
+    11 │ 1.0.toString();
   
   i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
   
@@ -241,7 +242,7 @@ invalid.js:9:16 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━�
      9    │ - const·member·=·1.0.toString();
         9 │ + const·member·=·(1).toString();
     10 10 │   const alreadyParenthesized = (2.0).toString();
-    11 11 │   
+    11 11 │   1.0.toString();
   
 
 ```
@@ -255,7 +256,8 @@ invalid.js:10:31 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━
      9 │ const member = 1.0.toString();
   > 10 │ const alreadyParenthesized = (2.0).toString();
        │                               ^^^
-    11 │ 
+    11 │ 1.0.toString();
+    12 │ 
   
   i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
   
@@ -269,7 +271,36 @@ invalid.js:10:31 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━
      9  9 │   const member = 1.0.toString();
     10    │ - const·alreadyParenthesized·=·(2.0).toString();
        10 │ + const·alreadyParenthesized·=·(2).toString();
-    11 11 │   
+    11 11 │   1.0.toString();
+    12 12 │   
+  
+
+```
+
+```
+invalid.js:11:1 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+     9 │ const member = 1.0.toString();
+    10 │ const alreadyParenthesized = (2.0).toString();
+  > 11 │ 1.0.toString();
+       │ ^^^
+    12 │ 
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     9  9 │   const member = 1.0.toString();
+    10 10 │   const alreadyParenthesized = (2.0).toString();
+    11    │ - 1.0.toString();
+       11 │ + (1).toString();
+    12 12 │   
   
 
 ```

@@ -1,0 +1,234 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAsi.js
+---
+# Input
+```js
+// should generate diagnostics
+1.0.toString()
+
+foo
+2.0.toString()
+
+bar;
+3.0.toString()
+
+baz
+// comment
+4.0.toFixed().length
+
+if (cond) 5.0.toString()
+
+function f() {
+	6.0.toString()
+	qux
+	7.0.toString()
+}
+
+```
+
+# Diagnostics
+```
+invalidAsi.js:2:1 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    1 │ // should generate diagnostics
+  > 2 │ 1.0.toString()
+      │ ^^^
+    3 │ 
+    4 │ foo
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     1  1 │   // should generate diagnostics
+     2    │ - 1.0.toString()
+        2 │ + (1).toString()
+     3  3 │   
+     4  4 │   foo
+  
+
+```
+
+```
+invalidAsi.js:5:1 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    4 │ foo
+  > 5 │ 2.0.toString()
+      │ ^^^
+    6 │ 
+    7 │ bar;
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     3  3 │   
+     4  4 │   foo
+     5    │ - 2.0.toString()
+        5 │ + ;(2).toString()
+     6  6 │   
+     7  7 │   bar;
+  
+
+```
+
+```
+invalidAsi.js:8:1 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+     7 │ bar;
+   > 8 │ 3.0.toString()
+       │ ^^^
+     9 │ 
+    10 │ baz
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+     6  6 │   
+     7  7 │   bar;
+     8    │ - 3.0.toString()
+        8 │ + (3).toString()
+     9  9 │   
+    10 10 │   baz
+  
+
+```
+
+```
+invalidAsi.js:12:1 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    10 │ baz
+    11 │ // comment
+  > 12 │ 4.0.toFixed().length
+       │ ^^^
+    13 │ 
+    14 │ if (cond) 5.0.toString()
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+    10 10 │   baz
+    11 11 │   // comment
+    12    │ - 4.0.toFixed().length
+       12 │ + ;(4).toFixed().length
+    13 13 │   
+    14 14 │   if (cond) 5.0.toString()
+  
+
+```
+
+```
+invalidAsi.js:14:11 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    12 │ 4.0.toFixed().length
+    13 │ 
+  > 14 │ if (cond) 5.0.toString()
+       │           ^^^
+    15 │ 
+    16 │ function f() {
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+    12 12 │   4.0.toFixed().length
+    13 13 │   
+    14    │ - if·(cond)·5.0.toString()
+       14 │ + if·(cond)·(5).toString()
+    15 15 │   
+    16 16 │   function f() {
+  
+
+```
+
+```
+invalidAsi.js:17:2 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    16 │ function f() {
+  > 17 │ 	6.0.toString()
+       │ 	^^^
+    18 │ 	qux
+    19 │ 	7.0.toString()
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+    15 15 │   
+    16 16 │   function f() {
+    17    │ - → 6.0.toString()
+       17 │ + → (6).toString()
+    18 18 │     qux
+    19 19 │     7.0.toString()
+  
+
+```
+
+```
+invalidAsi.js:19:2 lint/nursery/noZeroFractions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This number literal has a zero fraction.
+  
+    17 │ 	6.0.toString()
+    18 │ 	qux
+  > 19 │ 	7.0.toString()
+       │ 	^^^
+    20 │ }
+    21 │ 
+  
+  i The fractional part is redundant. It has the same runtime value and makes the literal longer than it needs to be.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9829 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the redundant zero fraction.
+  
+    17 17 │     6.0.toString()
+    18 18 │     qux
+    19    │ - → 7.0.toString()
+       19 │ + → ;(7).toString()
+    20 20 │   }
+    21 21 │   
+  
+
+```

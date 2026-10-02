@@ -8,3 +8,4 @@ const leadingDot = .0;
 const exponentFromLeadingDot = .00e20;
 const member = 1.0.toString();
 const alreadyParenthesized = (2.0).toString();
+1.0.toString();

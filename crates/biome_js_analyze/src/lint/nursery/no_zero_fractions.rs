@@ -5,18 +5,17 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsModuleItem,
-    AnyJsStatement, JsExpressionStatement, JsModuleItemList, JsNumberLiteralExpression,
-    JsStatementList, T,
+    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsExpressionStatement,
+    JsLanguage, JsModuleItemList, JsNumberLiteralExpression, JsStatementList, T,
 };
-use biome_rowan::{AstNode, AstNodeList, AstNodeListExt, BatchMutationExt, SyntaxTriviaPiece};
+use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, SyntaxTriviaPiece};
 use biome_rule_options::no_zero_fractions::NoZeroFractionsOptions;
 
 declare_lint_rule! {
     /// Disallow number literals with zero fractions or dangling dots.
     ///
     /// There is no difference in JavaScript between, for example, `1`, `1.0`, and `1.`.
-    /// This rule suggests using the shorter form for consistency and brevity.
+    /// This rule suggests the shorter form for consistency and brevity.
     ///
     /// ## Examples
     ///
@@ -61,8 +60,7 @@ impl Rule for NoZeroFractions {
     type Options = NoZeroFractionsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let token = ctx.query().value_token().ok()?;
-        diagnostic_kind(token.text_trimmed())
+        State::from_query(ctx.query())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -86,36 +84,31 @@ impl Rule for NoZeroFractions {
         let node = ctx.query();
         let token = node.value_token().ok()?;
         let formatted = state.parts.format(token.text_trimmed())?;
-        let replacement = make_replacement_expression(&formatted);
 
         let mut mutation = ctx.root().begin();
         if needs_parentheses(node, &formatted) {
             let replacement = AnyJsExpression::from(make::js_parenthesized_expression(
                 make::token(T!['(']),
-                replacement,
+                make_replacement_expression(&formatted),
                 make::token(T![')']),
             ))
             .append_trivia_pieces(node.syntax().last_trailing_trivia()?.pieces())?;
+            let leading_trivia = node.syntax().first_leading_trivia()?;
 
-            if let Some(statement) = node.parent::<JsExpressionStatement>() {
-                replace_expression_statement(
+            if let Some(statement) = statement_merged_by_asi(node) {
+                insert_semicolon_before(
                     &mut mutation,
+                    node,
                     &statement,
                     replacement,
-                    node.syntax().first_leading_trivia()?.pieces().collect(),
+                    leading_trivia.pieces().collect(),
                 )?;
             } else {
-                let replacement = replacement
-                    .prepend_trivia_pieces(node.syntax().first_leading_trivia()?.pieces())?;
+                let replacement = replacement.prepend_trivia_pieces(leading_trivia.pieces())?;
                 mutation.replace_node_discard_trivia(old_expression(node), replacement);
             }
         } else {
-            let replacement = replacement
-                .as_any_js_literal_expression()?
-                .as_js_number_literal_expression()?
-                .value_token()
-                .ok()?;
-            mutation.replace_token_transfer_trivia(token, replacement);
+            mutation.replace_token_transfer_trivia(token, make::js_number_literal(&formatted));
         }
 
         Some(JsRuleAction::new(
@@ -144,17 +137,21 @@ pub struct State {
     parts: NumberLiteralParts,
 }
 
-fn diagnostic_kind(raw: &str) -> Option<State> {
-    let parts = split_number_literal(raw)?;
-    let kind = if parts.fraction(raw).is_empty() {
-        DiagnosticKind::DanglingDot
-    } else if parts.trimmed_fraction(raw) != parts.fraction(raw) {
-        DiagnosticKind::ZeroFraction
-    } else {
-        return None;
-    };
+impl State {
+    fn from_query(node: &JsNumberLiteralExpression) -> Option<Self> {
+        let token = node.value_token().ok()?;
+        let raw = token.text_trimmed();
+        let parts = split_number_literal(raw)?;
+        let kind = if parts.fraction(raw).is_empty() {
+            DiagnosticKind::DanglingDot
+        } else if parts.trimmed_fraction(raw) != parts.fraction(raw) {
+            DiagnosticKind::ZeroFraction
+        } else {
+            return None;
+        };
 
-    Some(State { kind, parts })
+        Some(Self { kind, parts })
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -234,65 +231,55 @@ fn old_expression(node: &JsNumberLiteralExpression) -> AnyJsExpression {
     ))
 }
 
-fn replace_expression_statement(
-    mutation: &mut biome_rowan::BatchMutation<biome_js_syntax::JsLanguage>,
+/// Returns the expression statement that starts with `node` if wrapping `node` in parentheses
+/// would make ASI merge the statement into the previous one, e.g. `foo\n(1).toString()` is
+/// parsed as `foo(1).toString()`.
+fn statement_merged_by_asi(node: &JsNumberLiteralExpression) -> Option<JsExpressionStatement> {
+    let statement = node
+        .syntax()
+        .ancestors()
+        .find_map(JsExpressionStatement::cast)?;
+    let first_token = statement.syntax().first_token()?;
+    if first_token != node.value_token().ok()? {
+        return None;
+    }
+
+    let parent = statement.syntax().parent()?;
+    if !JsStatementList::can_cast(parent.kind()) && !JsModuleItemList::can_cast(parent.kind()) {
+        return None;
+    }
+    statement.syntax().prev_sibling()?;
+
+    let previous_token = first_token.prev_token()?;
+    (previous_token.kind() != T![;]).then_some(statement)
+}
+
+/// Replaces `node` with `replacement` and inserts an empty statement before `statement`, so the
+/// parenthesized literal can't be merged into the previous statement.
+fn insert_semicolon_before(
+    mutation: &mut BatchMutation<JsLanguage>,
+    node: &JsNumberLiteralExpression,
     statement: &JsExpressionStatement,
     replacement: AnyJsExpression,
-    leading_trivia: Vec<SyntaxTriviaPiece<biome_js_syntax::JsLanguage>>,
+    leading_trivia: Vec<SyntaxTriviaPiece<JsLanguage>>,
 ) -> Option<()> {
-    let mut new_statement = make::js_expression_statement(replacement);
-    if let Some(semicolon_token) = statement.semicolon_token() {
-        new_statement = new_statement.with_semicolon_token(semicolon_token);
-    }
-    let new_statement = new_statement.build();
+    let new_statement = statement.syntax().clone().replace_child(
+        node.syntax().clone().into(),
+        replacement.into_syntax().into(),
+    )?;
+    let semicolon =
+        make::js_empty_statement(make::token(T![;]).with_leading_trivia_pieces(leading_trivia));
 
-    if let Some(parent) = statement.parent::<JsStatementList>() {
-        let index = parent
-            .iter()
-            .position(|item: AnyJsStatement| item.syntax() == statement.syntax())?;
-
-        let replacement_items: Vec<AnyJsStatement> = if index > 0 {
-            vec![
-                make::js_empty_statement(
-                    make::token(T![;]).with_leading_trivia_pieces(leading_trivia.clone()),
-                )
-                .into(),
-                new_statement.into(),
-            ]
-        } else {
-            vec![new_statement.into()]
-        };
-
-        mutation.replace_node(
-            parent.clone(),
-            parent.splice(index..=index, replacement_items),
-        );
-        return Some(());
-    }
-
-    let parent = statement.parent::<JsModuleItemList>()?;
-    let index = parent
-        .iter()
-        .position(|item: AnyJsModuleItem| item.syntax() == statement.syntax())?;
-
-    let replacement_items: Vec<AnyJsModuleItem> = if index > 0 {
-        vec![
-            AnyJsModuleItem::AnyJsStatement(
-                make::js_empty_statement(
-                    make::token(T![;]).with_leading_trivia_pieces(leading_trivia),
-                )
-                .into(),
-            ),
-            AnyJsModuleItem::AnyJsStatement(new_statement.into()),
-        ]
-    } else {
-        vec![AnyJsModuleItem::AnyJsStatement(new_statement.into())]
-    };
-
-    mutation.replace_node(
-        parent.clone(),
-        parent.splice(index..=index, replacement_items),
+    let list = statement.syntax().parent()?;
+    let index = statement.syntax().index();
+    let new_list = list.clone().splice_slots(
+        index..=index,
+        [
+            Some(semicolon.into_syntax().into()),
+            Some(new_statement.into()),
+        ],
     );
+    mutation.replace_element_discard_trivia(list.into(), new_list.into());
     Some(())
 }
 
