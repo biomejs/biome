@@ -281,6 +281,7 @@ define_categories! {
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
     "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
+    "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
     "lint/nursery/useArraySome": "https://biomejs.dev/linter/rules/use-array-some",
     "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",

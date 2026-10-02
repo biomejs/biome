@@ -2911,6 +2911,11 @@ export interface Nursery {
 	 */
 	noXorAsExponentiation?: NoXorAsExponentiationConfiguration;
 	/**
+	 * Disallow number literals with zero fractions or dangling dots.
+	 * See https://biomejs.dev/linter/rules/no-zero-fractions
+	 */
+	noZeroFractions?: NoZeroFractionsConfiguration;
+	/**
 	 * Prefer Array.prototype.some() over verbose existence checks.
 	 * See https://biomejs.dev/linter/rules/use-array-some
 	 */
@@ -5296,6 +5301,9 @@ export type NoVueVOnNumberValuesConfiguration =
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
+export type NoZeroFractionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoZeroFractionsOptions;
 export type UseArraySomeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseArraySomeOptions;
@@ -7655,6 +7663,14 @@ export interface RuleWithNoXorAsExponentiationOptions {
 	level: RulePlainConfiguration;
 	options?: NoXorAsExponentiationOptions;
 }
+export interface RuleWithNoZeroFractionsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoZeroFractionsOptions;
+}
 export interface RuleWithUseArraySomeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9870,6 +9886,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 }
 export type NoVueVOnNumberValuesOptions = {};
 export type NoXorAsExponentiationOptions = {};
+export type NoZeroFractionsOptions = {};
 export type UseArraySomeOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
@@ -11365,6 +11382,7 @@ export type Category =
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noXorAsExponentiation"
+	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/useArraySome"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
