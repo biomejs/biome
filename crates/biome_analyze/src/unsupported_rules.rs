@@ -1,9 +1,72 @@
-//! Metadata about unsupported lint rules.
+//! Metadata about upstream lint rules that Biome deliberately doesn't implement.
 
-use biome_analyze::RuleSource::*;
+use biome_console::fmt::Display;
+use biome_console::markup;
 
-use crate::execute::migrate::eslint_to_biome::UnsupportedRule;
-use crate::execute::migrate::eslint_to_biome::UnsupportedRuleReason::*;
+use crate::RuleSource;
+use crate::RuleSource::*;
+use UnsupportedRuleReason::*;
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub enum UnsupportedRuleReason {
+    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
+    ///
+    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
+    Stylistic,
+    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
+    ///
+    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
+    FormatterCovers,
+    /// The functionality is covered by a Biome formatter option.
+    FormatterOption(&'static str),
+    /// The rule belongs to a known source, but it is not yet implemented in Biome.
+    KnownSourceNotImplemented,
+    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
+    UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
+    /// The rule doesn't make sense to implement in Biome, e.g. because it relies on
+    /// infrastructure specific to the upstream tool, or it overwhelmingly applies to ESLint
+    /// itself (like `svelte/comment-directive`).
+    NotApplicable,
+    /// The rule has been deprecated upstream.
+    ///
+    /// This doesn't include rules that were deprecated because they moved to another package,
+    /// or because they were folded into or superseded by another rule.
+    Deprecated,
+}
+
+impl Display for UnsupportedRuleReason {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Stylistic => {
+                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
+            }
+            Self::FormatterCovers => {
+                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
+            }
+            Self::FormatterOption(option) => fmt.write_markup(
+                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
+            ),
+            Self::KnownSourceNotImplemented => {
+                fmt.write_markup(markup! { "Known source, not yet implemented." })
+            }
+            Self::UnknownSource => fmt.write_markup(markup! {
+                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
+            }),
+            Self::NotApplicable => {
+                fmt.write_markup(markup! { "Not applicable to Biome." })
+            }
+            Self::Deprecated => fmt.write_markup(markup! { "Deprecated upstream." }),
+        }
+    }
+}
 
 // Sorted ESLint unsupported rules.
 /// The array is sorted to allow binary search.
@@ -144,6 +207,20 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
     UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSvelte("comment-directive"), NotApplicable),
+    UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-spacing"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-quotes"), Stylistic),
+    UnsupportedRule(EslintSvelte("indent"), Stylistic),
+    UnsupportedRule(EslintSvelte("mustache-spacing"), Stylistic),
+    UnsupportedRule(
+        EslintSvelte("no-spaces-around-equal-signs-in-attribute"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(EslintSvelte("system"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-compile"), NotApplicable),
     UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
         EslintStylistic("array-bracket-spacing"),
@@ -359,6 +436,12 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(
         EslintVueJs("operator-linebreak"),
         FormatterOption("operatorLinebreak"),
+    ),
+    UnsupportedRule(EslintVueJs("padding-line-between-blocks"), Stylistic),
+    UnsupportedRule(EslintVueJs("padding-line-between-tags"), Stylistic),
+    UnsupportedRule(
+        EslintVueJs("padding-lines-in-component-definition"),
+        Stylistic,
     ),
     UnsupportedRule(EslintVueJs("quote-props"), Stylistic),
     UnsupportedRule(EslintVueJs("quotes"), FormatterOption("quoteStyle")),

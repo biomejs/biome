@@ -6,6 +6,7 @@ mod init;
 mod lint;
 mod migrate;
 mod migrate_eslint;
+mod migrate_eslint_scope;
 mod migrate_prettier;
 mod rage;
 mod search;

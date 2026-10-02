@@ -50,7 +50,10 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noConsole",
         language: "js",
-        sources: &[RuleSource::Eslint("no-console").same()],
+        sources: &[
+            RuleSource::Eslint("no-console").same(),
+            RuleSource::EslintVueJs("no-console").same(),
+        ],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,

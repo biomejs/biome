@@ -1,0 +1,98 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate eslint --include-nursery --write
+```
+
+## `biome.json`
+
+```json
+{
+  "linter": {
+    "rules": {
+      "preset": "none",
+      "a11y": { "useButtonType": "error" },
+      "correctness": { "noUnusedVariables": "error" },
+      "nursery": {
+        "noSvelteLegacyConst": "error",
+        "usePromiseRejectErrors": "error"
+      },
+      "style": { "useConsistentObjectDefinitions": "error" },
+      "suspicious": {
+        "noConsole": "error",
+        "noDoubleEquals": "error",
+        "noIrregularWhitespace": "error",
+        "noShadow": "error"
+      }
+    }
+  }
+}
+```
+
+## `.eslintrc.json`
+
+```json
+{"rules":{"@typescript-eslint/prefer-promise-reject-errors":"error","no-catch-shadow":"error","svelte/button-has-type":"warn","svelte/first-attribute-linebreak":"error","svelte/html-closing-bracket-new-line":"error","svelte/html-closing-bracket-spacing":"error","svelte/html-quotes":"error","svelte/indent":"error","svelte/mustache-spacing":"error","svelte/no-at-const-tags":"error","svelte/no-spaces-around-equal-signs-in-attribute":"error","svelte/no-trailing-spaces":"error","vue/eqeqeq":"error","vue/html-button-has-type":"error","vue/no-console":"error","vue/no-irregular-whitespace":"error","vue/no-restricted-v-on":"error","vue/no-unused-vars":"error","vue/object-shorthand":"error","vue/padding-line-between-blocks":"error","vue/padding-line-between-tags":"error","vue/padding-lines-in-component-definition":"error"}}
+```
+
+# Emitted Messages
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 22 ESLint rules found
+    - 2 are obsolete because of Biome's formatter
+    - 11 have been migrated to Biome's rules
+    - 59% (13) of your ESLint rules are fully covered by Biome
+      - 50% (11) via direct migration to Biome rules
+  
+  
+  i Migrated rules:
+  
+  - no-catch-shadow
+  - @typescript-eslint/prefer-promise-reject-errors
+  - svelte/button-has-type
+  - svelte/no-at-const-tags
+  - vue/eqeqeq
+  - vue/html-button-has-type
+  - vue/no-console
+  - vue/no-irregular-whitespace
+  - vue/no-restricted-v-on
+  - vue/no-unused-vars
+  - vue/object-shorthand
+  
+  i Unsupported rules (9 incompatible with formatter, 2 made obsolete by the formatter, 0 covered by a formatter option, 0 not yet implemented, 0 unknown source):
+  
+  i These rules enforce code styles that are incompatible with the formatter in some way:
+  
+  - svelte/first-attribute-linebreak
+  - svelte/html-closing-bracket-new-line
+  - svelte/html-closing-bracket-spacing
+  - svelte/html-quotes
+  - svelte/indent
+  - svelte/mustache-spacing
+  - vue/padding-line-between-blocks
+  - vue/padding-line-between-tags
+  - vue/padding-lines-in-component-definition
+  
+  i These rules enforce behavior completely covered by the formatter (so you don't lose the functionality):
+  
+  - svelte/no-spaces-around-equal-signs-in-attribute
+  - svelte/no-trailing-spaces
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration successfully migrated.
+  
+
+```
