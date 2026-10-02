@@ -614,9 +614,19 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
                             }
                         }
+                        "svelte/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteBlockLang(conf));
+                            }
+                        }
                         "svelte/no-unnecessary-state-wrap" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
+                            }
+                        }
+                        "vue/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueBlockLang(conf));
                             }
                         }
                         "unicorn/filename-case" => {
@@ -888,7 +898,9 @@ pub(crate) enum Rule {
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
+    SvelteBlockLang(RuleConf<SvelteBlockLangOptions>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
+    VueBlockLang(RuleConf<VueBlockLangOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -923,9 +935,11 @@ impl Rule {
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
+            Self::SvelteBlockLang(_) => Cow::Borrowed("svelte/block-lang"),
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }
+            Self::VueBlockLang(_) => Cow::Borrowed("vue/block-lang"),
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
@@ -962,5 +976,155 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
                 .then_some(value.additional_reactive_classes),
             allow_reassign: value.allow_reassign,
         }
+    }
+}
+
+/// A value that is either a single item or an array of items.
+#[derive(Debug)]
+pub(crate) struct OneOrMany<T>(Vec<T>);
+impl<T: Deserializable> Deserializable for OneOrMany<T> {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Array {
+            Vec::deserialize(ctx, value, name).map(Self)
+        } else {
+            T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
+        }
+    }
+}
+
+/// A string that can be `null`.
+///
+/// `Option<Box<str>>` fails to deserialize `null`, which would silently drop
+/// `null` items from an array such as `["ts", null]`.
+#[derive(Debug)]
+pub(crate) struct NullableString(Option<Box<str>>);
+impl Deserializable for NullableString {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Null {
+            Some(Self(None))
+        } else {
+            Deserializable::deserialize(ctx, value, name).map(|text| Self(Some(text)))
+        }
+    }
+}
+
+/// Options of [`svelte/block-lang`](https://sveltejs.github.io/eslint-plugin-svelte/rules/block-lang/).
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct SvelteBlockLangOptions {
+    enforce_script_present: bool,
+    enforce_style_present: bool,
+    /// Allowed languages, where `null` allows omitting `lang`. Defaults to `null`.
+    script: Option<OneOrMany<NullableString>>,
+    /// Allowed languages, where `null` allows omitting `lang`. Defaults to `null`.
+    style: Option<OneOrMany<NullableString>>,
+}
+impl SvelteBlockLangOptions {
+    /// Returns `None` when no block allows a language or is required to be
+    /// present, because Biome doesn't enforce omitting `lang`.
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions> {
+        fn to_block(
+            langs: Option<OneOrMany<NullableString>>,
+            required: bool,
+        ) -> Option<biome_rule_options::use_consistent_block_lang::BlockLangOptions> {
+            let langs = langs.map_or_else(|| vec![NullableString(None)], |langs| langs.0);
+            let allow_no_lang = langs.iter().any(|lang| lang.0.is_none());
+            let langs: Box<[Box<str>]> = langs.into_iter().filter_map(|lang| lang.0).collect();
+            // Biome doesn't enforce omitting `lang`, so a block that only allows
+            // omitting it keeps just its presence check.
+            let lang = (!langs.is_empty()).then_some(langs);
+            (lang.is_some() || required).then(|| {
+                biome_rule_options::use_consistent_block_lang::BlockLangOptions {
+                    allow_no_lang: (allow_no_lang && lang.is_some()).then_some(true),
+                    lang,
+                    required: required.then_some(true),
+                }
+            })
+        }
+        let blocks: biome_rule_options::use_consistent_block_lang::BlockLangMap = [
+            ("script", to_block(self.script, self.enforce_script_present)),
+            ("style", to_block(self.style, self.enforce_style_present)),
+        ]
+        .into_iter()
+        .filter_map(|(name, block)| Some((name.into(), block?)))
+        .collect();
+        (!blocks.is_empty()).then_some(
+            biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions {
+                blocks: Some(blocks),
+            },
+        )
+    }
+}
+
+/// Options of [`vue/block-lang`](https://eslint.vuejs.org/rules/block-lang), keyed by block name.
+#[derive(Debug, Deserializable)]
+pub(crate) struct VueBlockLangOptions(std::collections::BTreeMap<Box<str>, VueBlockOptions>);
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct VueBlockOptions {
+    lang: Option<OneOrMany<Box<str>>>,
+    allow_no_lang: Option<bool>,
+}
+impl VueBlockLangOptions {
+    /// Returns `None` when every block only allows omitting `lang`, which
+    /// Biome doesn't enforce.
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions> {
+        let blocks: biome_rule_options::use_consistent_block_lang::BlockLangMap = self
+            .0
+            .into_iter()
+            .filter_map(|(name, block)| {
+                let default_langs: &[&str] = match name.as_ref() {
+                    "template" => &["html"],
+                    "style" => &["css"],
+                    "script" => &["js", "javascript"],
+                    _ => &[],
+                };
+                // eslint-plugin-vue reads a block's default language, such as
+                // `js` for `<script>`, as "omit `lang`", and reports it when it's
+                // written explicitly.
+                let (defaults, langs): (Vec<_>, Vec<_>) = block
+                    .lang
+                    .map(|langs| langs.0)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .partition(|lang| default_langs.contains(&lang.as_ref()));
+                let options = if !langs.is_empty() {
+                    let allow_no_lang = !defaults.is_empty() || block.allow_no_lang == Some(true);
+                    biome_rule_options::use_consistent_block_lang::BlockLangOptions {
+                        lang: Some(langs.into()),
+                        allow_no_lang: allow_no_lang.then_some(true),
+                        required: None,
+                    }
+                } else if !defaults.is_empty() {
+                    // Only default languages are listed. Biome can't enforce omitting
+                    // `lang`, so it allows the default languages as well as no `lang`,
+                    // which stops reporting an explicit `lang="js"`.
+                    biome_rule_options::use_consistent_block_lang::BlockLangOptions {
+                        lang: Some(defaults.into()),
+                        allow_no_lang: Some(true),
+                        required: None,
+                    }
+                } else {
+                    // Biome doesn't enforce omitting `lang`, so the block isn't migrated.
+                    return None;
+                };
+                Some((name, options))
+            })
+            .collect();
+        (!blocks.is_empty()).then_some(
+            biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions {
+                blocks: Some(blocks),
+            },
+        )
     }
 }

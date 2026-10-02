@@ -289,6 +289,7 @@ define_categories! {
     "lint/nursery/useBetterDomTraversing": "https://biomejs.dev/linter/rules/use-better-dom-traversing",
     "lint/nursery/useBigintLiterals": "https://biomejs.dev/linter/rules/use-bigint-literals",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
+    "lint/nursery/useConsistentBlockLang": "https://biomejs.dev/linter/rules/use-consistent-block-lang",
     "lint/nursery/useConsistentFunctionStyle": "https://biomejs.dev/linter/rules/use-consistent-function-style",
     "lint/nursery/useConsistentHeadingLevel": "https://biomejs.dev/linter/rules/use-consistent-heading-level",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
