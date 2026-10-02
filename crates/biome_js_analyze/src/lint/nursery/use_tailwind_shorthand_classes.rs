@@ -41,26 +41,10 @@ declare_lint_rule! {
     /// <div className="size-4" />;
     /// ```
     ///
-    /// ### Where Tailwind is Recognized
+    /// ## Recognized class strings
     ///
-    /// The rule checks string arguments and tagged template literals passed to known helper functions.
-    /// This is useful for libraries like [`clsx`](https://github.com/lukeed/clsx),
-    /// [`cva`](https://cva.style/), or CSS-in-JS helpers such as `tw`.
-    ///
-    /// The full list of helper functions is:
-    ///
-    /// - `clsx`
-    /// - `tw`
-    /// - `twMerge`
-    /// - `twJoin`
-    /// - `cva`
-    /// - `tv`
-    /// - `cn`
-    /// - `cc`
-    /// - `cnb`
-    /// - `ctl`
-    ///
-    /// Tagged template members like `tw.div` are also checked when their base function name is recognized.
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     /// ## Known limitations
     ///

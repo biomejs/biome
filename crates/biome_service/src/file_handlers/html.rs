@@ -431,7 +431,8 @@ impl ServiceLanguage for HtmlLanguage {
         _file_source: &super::DocumentFileSource,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
-            .with_rules(to_analyzer_rules_by_indices(global, override_indices));
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
+            .with_tailwind(global.tailwind.clone());
 
         AnalyzerOptions::default().with_configuration(configuration)
     }

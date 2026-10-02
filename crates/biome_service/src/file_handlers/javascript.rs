@@ -478,6 +478,7 @@ impl ServiceLanguage for JsLanguage {
         let configuration = configuration
             .with_rules(to_analyzer_rules_by_indices(global, override_indices))
             .with_globals(globals)
+            .with_tailwind(global.tailwind.clone())
             .with_preferred_quote(preferred_quote)
             .with_preferred_jsx_quote(preferred_jsx_quote)
             .with_preferred_indentation(preferred_indentation);

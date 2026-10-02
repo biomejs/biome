@@ -82,6 +82,10 @@ project. By default, this is `true`.
 	 */
 	root?: Bool;
 	/**
+	 * Configures how Biome recognizes Tailwind class strings.
+	 */
+	tailwind?: TailwindConfiguration;
+	/**
 	 * The version control integration configuration.
 	 */
 	vcs?: VcsConfiguration;
@@ -401,6 +405,44 @@ export interface MarkdownConfiguration {
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
 export type Bool = boolean;
+/**
+ * Configures how Biome recognizes Tailwind class strings.
+ */
+export interface TailwindConfiguration {
+	/**
+	* Attribute names whose values contain Tailwind classes.
+
+Defaults to `class` and `className`. HTML attribute names are matched
+case-insensitively. 
+	 */
+	attributes?: string[];
+	/**
+	* Functions and tagged templates whose arguments contain Tailwind classes,
+such as `clsx` and `cn`.
+
+String arguments are class strings. In object arguments, the keys are
+class strings, as in `clsx({ "px-2": isActive })`. Member expressions
+rooted at a listed name are also recognized, so `tw` covers
+`` tw.div`...` `` and `tw.div("...")`.
+
+Defaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cn`, `cc`, `cnb`, and
+`ctl`. 
+	 */
+	mergeFunctions?: string[];
+	/**
+	* Functions whose object arguments contain Tailwind classes as values,
+such as `cva` and `tv`.
+
+String arguments are class strings. Object arguments are read as variant
+configurations: classes are read from `base`, `slots`, `class`,
+`className`, and `variants`, and from the `class` and `className` of
+each `compoundVariants` and `compoundSlots` entry. Other keys, such as
+`defaultVariants`, are ignored.
+
+Defaults to `cva` and `tv`. 
+	 */
+	variantFunctions?: string[];
+}
 /**
  * Settings for integrating Biome with version control.
  */

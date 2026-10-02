@@ -17,6 +17,8 @@ declare_lint_rule! {
     /// This rule checks color utilities, including variants and opacity modifiers.
     /// It allows custom color names, `black`, `white`, `transparent`, `current`, and `inherit`.
     /// This rule does not check arbitrary values such as `bg-[#ff00aa]`.
+    /// It does not read your Tailwind CSS theme, so redefining a default palette name
+    /// does not exempt it.
     ///
     /// ## Examples
     ///
@@ -40,16 +42,10 @@ declare_lint_rule! {
     /// <div className="bg-white text-black border-transparent fill-current stroke-inherit" />;
     /// ```
     ///
-    /// ## Supported class strings
+    /// ## Recognized class strings
     ///
-    /// The rule checks `class` and `className` JSX attributes and string arguments
-    /// to `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`, `cnb`, and `ctl`.
-    /// Tagged templates using these names, including members such as `tw.div`,
-    /// are also checked. Static template chunks and class expressions in JSX,
-    /// Svelte, Vue, and Astro attributes are checked. Dynamically constructed
-    /// class names are not resolved.
-    /// The rule does not read your Tailwind configuration; redefining a default
-    /// palette name does not exempt it.
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     /// ## Options
     ///
