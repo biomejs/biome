@@ -2,7 +2,7 @@ use biome_deserialize_macros::Deserializable;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -39,6 +39,12 @@ impl Deref for CustomRestrictedElements {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for CustomRestrictedElements {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 

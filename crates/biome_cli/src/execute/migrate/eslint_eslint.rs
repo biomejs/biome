@@ -1,5 +1,8 @@
 use super::migration::{IgnorePattern, ShorthandVec};
-use super::{eslint_jest, eslint_jsxa11y, eslint_typescript, eslint_unicorn};
+use super::{
+    eslint_jest, eslint_jsxa11y, eslint_react, eslint_svelte, eslint_typescript, eslint_unicorn,
+    eslint_vue,
+};
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
     DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Merge,
@@ -504,6 +507,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::JestConsistentTestIt(conf));
                             }
                         }
+                        "react/forbid-elements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::ReactForbidElements(conf));
+                            }
+                        }
                         "jsx-a11y/aria-role" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::Jsxa11yArioaRoles(conf));
@@ -544,9 +552,19 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
                             }
                         }
+                        "svelte/no-restricted-html-elements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteNoRestrictedHtmlElements(conf));
+                            }
+                        }
                         "svelte/no-unnecessary-state-wrap" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
+                            }
+                        }
+                        "vue/no-restricted-html-elements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueNoRestrictedHtmlElements(conf));
                             }
                         }
                         "unicorn/filename-case" => {
@@ -807,6 +825,7 @@ pub(crate) enum Rule {
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
+    ReactForbidElements(RuleConf<eslint_react::ForbidElementsOptions>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
     TypeScriptConsistentTypeImports(RuleConf<eslint_typescript::ConsistentTypeImportsOptions>),
     TypeScriptExplicitMemberAccessibility(
@@ -818,9 +837,11 @@ pub(crate) enum Rule {
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
+    SvelteNoRestrictedHtmlElements(RuleConf<eslint_svelte::RestrictedHtmlElement>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
+    VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
 impl Rule {
@@ -836,6 +857,7 @@ impl Rule {
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
+            Self::ReactForbidElements(_) => Cow::Borrowed("react/forbid-elements"),
             Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
             Self::TypeScriptConsistentTypeImports(_) => {
                 Cow::Borrowed("@typescript-eslint/consistent-type-imports")
@@ -853,12 +875,18 @@ impl Rule {
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
+            Self::SvelteNoRestrictedHtmlElements(_) => {
+                Cow::Borrowed("svelte/no-restricted-html-elements")
+            }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
+            }
+            Self::VueNoRestrictedHtmlElements(_) => {
+                Cow::Borrowed("vue/no-restricted-html-elements")
             }
         }
     }
