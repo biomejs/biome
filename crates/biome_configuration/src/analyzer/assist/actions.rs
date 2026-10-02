@@ -135,12 +135,17 @@ impl std::fmt::Display for ActionName {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Actions {
-    #[doc = r" It enables the assist actions recommended by Biome. `true` by default."]
+    #[doc = r" Enables or disables Biome's recommended assist actions across all action groups."]
+    #[doc = r" Defaults to `true`."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" The actions preset to use."]
+    #[doc = r" Selects the baseline set of assist actions. `recommended` enables Biome's"]
+    #[doc = r" recommended actions, `all` enables all actions, and `none` starts with no actions"]
+    #[doc = r" enabled. Group presets and explicit action settings override this preset."]
+    #[doc = r" Defaults to `recommended`."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preset: Option<PresetConfig>,
+    #[doc = "Configures source-level actions such as organizing imports and sorting declarations. These actions are exposed through editor source actions and through CLI checking and application."]
     #[deserializable(rename = "source")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source: Option<Source>,

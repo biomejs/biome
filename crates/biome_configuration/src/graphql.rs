@@ -8,6 +8,9 @@ use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
 /// Options applied to GraphQL files.
+///
+/// Language-specific settings take precedence over corresponding global settings. Global settings
+/// apply when their language-specific counterparts are omitted, unless stated otherwise.
 #[derive(Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -46,7 +49,7 @@ pub type GraphqlFormatterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GraphqlFormatterConfiguration {
-    /// Controls the formatter for GraphQL files.
+    /// Enables or disables the formatter for GraphQL.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("graphql-formatter-enabled"), argument("true|false"))
@@ -75,14 +78,16 @@ pub struct GraphqlFormatterConfiguration {
     )]
     pub line_ending: Option<LineEnding>,
 
-    /// The maximum line width for GraphQL files. If unset, inherits the global line width.
+    /// The preferred maximum line width for GraphQL files. If unset, inherits the global line
+    /// width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("graphql-formatter-line-width"), argument("NUMBER"))
     )]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in GraphQL code. Defaults to `double`.
+    /// Reserved for future formatter support. The current formatter preserves standard
+    /// double-quoted GraphQL strings and does not use this setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("graphql-formatter-quote-style"), argument("double|single"))
@@ -90,8 +95,9 @@ pub struct GraphqlFormatterConfiguration {
     pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
-    /// Whether to insert spaces inside braces in object literals. If unset, inherits the global
-    /// bracket spacing setting.
+    /// Controls spaces inside the braces of single-line GraphQL object values. Biome formats
+    /// `{name: "Biome"}` when disabled and `{ name: "Biome" }` when enabled. If unset, inherits the
+    /// global bracket spacing setting.
     #[cfg_attr(feature = "cli", bpaf(long("bracket-spacing"), argument("true|false")))]
     pub bracket_spacing: Option<BracketSpacing>,
 
@@ -123,7 +129,7 @@ pub type GraphqlLinterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GraphqlLinterConfiguration {
-    /// Controls the linter for GraphQL files.
+    /// Enables or disables the linter for GraphQL.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("graphql-linter-enabled"), argument("true|false"))
@@ -139,7 +145,7 @@ pub type GraphqlAssistEnabled = Bool<false>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct GraphqlAssistConfiguration {
-    /// Controls assist actions for GraphQL files.
+    /// Enables or disables assist actions for GraphQL. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("graphql-assist-enabled"), argument("true|false"))
