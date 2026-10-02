@@ -30,3 +30,4 @@ const middleErrors = 1 +
   "longStringThatGoesOverLimit" +
   3
 const plusplusone = +1 + "ddd"
+const a = "a" + -0;

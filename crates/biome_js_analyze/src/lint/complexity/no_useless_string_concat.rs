@@ -337,9 +337,10 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
 
         Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal_expression),
-        )) => number_literal_expression
-            .as_number()
-            .map(|number_value| number_value.to_string()),
+        )) => {
+            let value = number_literal_expression.as_number()?;
+            Some(f64_to_js_string(value))
+        }
 
         Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
             match (
@@ -387,6 +388,40 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
         }
 
         _ => None,
+    }
+}
+
+/// Converts an `f64` to a string matching JavaScript's `Number.prototype.toString()`.
+///
+/// Rust's `f64::to_string()` expands numbers like `1e21` into full decimal form
+/// (`"1000000000000000000000"`), while JavaScript uses exponent notation (`"1e+21"`).
+/// This function handles `-0`, and the exponent notation threshold (|x| >= 1e21 or
+/// |x| < 1e-6) to produce an output consistent with JS semantics.
+fn f64_to_js_string(value: f64) -> String {
+    if value.is_nan() {
+        return "NaN".to_string();
+    }
+    if value.is_infinite() {
+        return if value.is_sign_negative() {
+            "-Infinity".to_string()
+        } else {
+            "Infinity".to_string()
+        };
+    }
+
+    let abs = value.abs();
+    if abs >= 1e21 {
+        let mut s = format!("{value:e}");
+        if let Some(e_idx) = s.find('e') {
+            s.insert(e_idx + 1, '+');
+        }
+        s
+    } else if value != 0.0 && abs < 1e-6 {
+        format!("{value:e}")
+    } else if value == 0.0 {
+        "0".to_string()
+    } else {
+        value.to_string()
     }
 }
 
