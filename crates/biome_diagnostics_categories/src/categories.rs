@@ -270,6 +270,7 @@ define_categories! {
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
     "lint/nursery/noVueDeprecatedScopedSlots": "https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
+    "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
