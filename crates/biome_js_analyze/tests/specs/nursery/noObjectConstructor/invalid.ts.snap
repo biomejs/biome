@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const a: Record<string, unknown> = new Object();
+const b = Object() as Record<string, unknown>;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:36 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a: Record<string, unknown> = new Object();
+      │                                    ^^^^^^^^^^^^
+    3 │ const b = Object() as Record<string, unknown>;
+    4 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·a:·Record<string,·unknown>·=·new·Object();
+      2 │ + const·a:·Record<string,·unknown>·=·{};
+    3 3 │   const b = Object() as Record<string, unknown>;
+    4 4 │   
+  
+
+```
+
+```
+invalid.ts:3:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a: Record<string, unknown> = new Object();
+  > 3 │ const b = Object() as Record<string, unknown>;
+      │           ^^^^^^^^
+    4 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const a: Record<string, unknown> = new Object();
+    3   │ - const·b·=·Object()·as·Record<string,·unknown>;
+      3 │ + const·b·=·{}·as·Record<string,·unknown>;
+    4 4 │   
+  
+
+```

@@ -2686,6 +2686,11 @@ export interface Nursery {
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	 * Disallow calling Object without arguments to create an empty object.
+	 * See https://biomejs.dev/linter/rules/no-object-constructor
+	 */
+	noObjectConstructor?: NoObjectConstructorConfiguration;
+	/**
 	 * Disallow obsolete HTML elements.
 	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
@@ -5166,6 +5171,9 @@ export type NoNegationInEqualityCheckConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoObjectConstructorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObjectConstructorOptions;
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
@@ -7446,6 +7454,14 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
+}
+export interface RuleWithNoObjectConstructorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoObjectConstructorOptions;
 }
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
@@ -9779,6 +9795,7 @@ export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoObjectConstructorOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
@@ -11335,6 +11352,7 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
