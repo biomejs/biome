@@ -1,0 +1,7 @@
+// should not generate diagnostics
+[
+  "",
+  "query { field }",
+  "# header\nquery { field }",
+  "query { field(arg: \"\ufeff\") }"
+]
