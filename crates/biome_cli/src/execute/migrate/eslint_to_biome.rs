@@ -605,7 +605,7 @@ fn migrate_eslint_rule(
                 if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
                     && let Some(rule_options) = rule_options.into_biome_options()
                 {
-                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    let group = rules.style.get_or_insert_with(Default::default);
                     if let SeverityOrGroup::Group(group) = group {
                         group.use_this_in_class_methods =
                             Some(biome_config::RuleConfiguration::WithOptions(
@@ -644,7 +644,7 @@ fn migrate_eslint_rule(
         }
         eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.complexity.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     group.no_excessive_nested_callbacks =
                         Some(biome_config::RuleConfiguration::WithOptions(
@@ -731,7 +731,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.style.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     let rule_options =
                         if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {

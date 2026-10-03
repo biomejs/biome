@@ -1,0 +1,24 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: number.json
+---
+# Input
+```json
+42
+
+```
+
+# Diagnostics
+```
+number.json:1:1 lint/style/noTopLevelLiterals ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected the top-level value to be an array or object.
+  
+  > 1 │ 42
+      │ ^^
+    2 │ 
+  
+  i Some JSON parsers only support objects or arrays as the root element. Wrap your value in an array or object to ensure compatibility.
+  
+
+```

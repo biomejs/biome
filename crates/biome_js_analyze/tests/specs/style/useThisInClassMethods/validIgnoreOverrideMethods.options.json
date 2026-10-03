@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "style": {
+        "useThisInClassMethods": {
+          "level": "error",
+          "options": {
+            "ignoreOverrideMethods": true
+          }
+        }
+      }
+    }
+  }
+}

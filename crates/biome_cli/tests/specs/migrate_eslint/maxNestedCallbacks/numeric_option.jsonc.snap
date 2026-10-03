@@ -23,7 +23,7 @@ expression: numeric_option.jsonc
 	"linter": {
 		"rules": {
 			"preset": "none",
-			"nursery": {
+			"complexity": {
 				"noExcessiveNestedCallbacks": {
 					"level": "error",
 					"options": { "max": 4 }

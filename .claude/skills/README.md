@@ -16,6 +16,7 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 | --- | --- |
 | biome-code-review | Reviewing completed changes before committing or opening a PR |
 | lint-rule-development | Creating and implementing lint rules and assists, code actions, rule options |
+| promote-lint-rules | Promoting nursery lint rules in batches from requirements or GitHub issues |
 | formatter-development | Implementing formatters, IR primitives, comment handling, Prettier comparison |
 | parser-development | Grammars (`.ungram`), lexers, parse rules, error recovery |
 | type-inference | JavaScript/TypeScript inference and module-graph type queries |

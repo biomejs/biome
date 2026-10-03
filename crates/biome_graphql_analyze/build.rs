@@ -15,7 +15,6 @@ use std::time::SystemTime;
 fn main() -> io::Result<()> {
     watch_group("assist", "source")?;
     watch_group("lint", "correctness")?;
-    watch_group("lint", "nursery")?;
     watch_group("lint", "style")?;
     watch_group("lint", "suspicious")?;
     Ok(())

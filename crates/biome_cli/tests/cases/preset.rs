@@ -197,9 +197,9 @@ fn preset_all_does_not_enable_nursery_rules() {
         .as_bytes(),
     );
 
-    // noLoopFunc is a nursery rule — should NOT be triggered by top-level preset: "all"
+    // noThisOutsideOfClass is a nursery rule and isn't enabled by the top-level preset.
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_RULE_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -493,12 +493,9 @@ fn preset_recommended_same_as_recommended_true() {
 
 // --- nursery rules and presets ---
 
-const NURSERY_LOOP_FUNC_CODE: &str = r#"const queue = [];
-let shared = 0;
-for (let i = 0; i < 10; i += 1) {
-    queue.push(() => shared);
+const NURSERY_RULE_CODE: &str = r#"export function getContext() {
+    return this;
 }
-shared = 100;
 "#;
 
 #[test]
@@ -522,7 +519,7 @@ fn nursery_preset_all_does_not_enable_rules() {
     );
 
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_RULE_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -530,7 +527,7 @@ fn nursery_preset_all_does_not_enable_rules() {
         Args::from(["lint", test.as_str()].as_slice()),
     );
 
-    // nursery preset "all" should NOT enable rules — nursery rules must be enabled individually
+    // Nursery rules must be enabled individually.
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
@@ -554,7 +551,7 @@ fn nursery_rule_enabled_individually() {
     "linter": {
         "rules": {
             "nursery": {
-                "noLoopFunc": "error"
+                "noThisOutsideOfClass": "error"
             }
         }
     }
@@ -563,7 +560,7 @@ fn nursery_rule_enabled_individually() {
     );
 
     let test = Utf8Path::new("test.js");
-    fs.insert(test.into(), NURSERY_LOOP_FUNC_CODE.as_bytes());
+    fs.insert(test.into(), NURSERY_RULE_CODE.as_bytes());
 
     let (fs, result) = run_cli(
         fs,
@@ -571,7 +568,7 @@ fn nursery_rule_enabled_individually() {
         Args::from(["lint", test.as_str()].as_slice()),
     );
 
-    // noLoopFunc explicitly enabled → should see diagnostic
+    // The explicitly enabled nursery rule emits a diagnostic.
     assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
