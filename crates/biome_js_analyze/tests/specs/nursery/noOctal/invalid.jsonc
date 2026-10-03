@@ -1,0 +1,21 @@
+// should generate diagnostics
+[
+  "/* should generate diagnostics */\nvar a = 01234;",
+  "/* should generate diagnostics */\na = 1 + 01234;",
+  "/* should generate diagnostics */\n00;",
+  "/* should generate diagnostics */\n08;",
+  "/* should generate diagnostics */\n09.1;",
+  "/* should generate diagnostics */\n09e1;",
+  "/* should generate diagnostics */\n09.1e1;",
+  "/* should generate diagnostics */\n018;",
+  "/* should generate diagnostics */\n019.1;",
+  "/* should generate diagnostics */\n019e1;",
+  "/* should generate diagnostics */\n019.1e1;",
+  "/* should generate diagnostics */\nconst number = 071; const result = 5 + 07;",
+  "/* should generate diagnostics */\nconst numbers = [-071, +007, 000, 0777, 0008, 09E1];",
+  "/* should generate diagnostics */\nconst object = { 071: true, 08: false, 007() {} };",
+  "/* should generate diagnostics */\nconst { 071: value } = object;",
+  "/* should generate diagnostics */\nconst object = { get 071() {}, set 007(value) {} };",
+  "/* should generate diagnostics */\nconst value = object[071];",
+  "/* should generate diagnostics */\nconst number = /* leading */ 071 /* trailing */;"
+]

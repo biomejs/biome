@@ -5341,6 +5341,12 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoOctalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoOctalOptions" }
+			]
+		},
 		"NoOctalEscapeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5348,6 +5354,7 @@
 			]
 		},
 		"NoOctalEscapeOptions": { "type": "object", "additionalProperties": false },
+		"NoOctalOptions": { "type": "object", "additionalProperties": false },
 		"NoParameterAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7461,6 +7468,13 @@
 					"description": "Disallow obsolete HTML elements.\nSee https://biomejs.dev/linter/rules/no-obsolete-tags",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoObsoleteTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noOctal": {
+					"description": "Disallow numbers written with an extra leading zero.\nSee https://biomejs.dev/linter/rules/no-octal",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoOctalConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10590,6 +10604,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoOctalEscapeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoOctalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoOctalOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
