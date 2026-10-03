@@ -9958,6 +9958,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssStringText {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssSupportsFeatureDeclaration>
+    for crate::scss::auxiliary::supports_feature_declaration::FormatScssSupportsFeatureDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssSupportsFeatureDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssSupportsFeatureDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssSupportsFeatureDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssSupportsFeatureDeclaration,
+        crate::scss::auxiliary::supports_feature_declaration::FormatScssSupportsFeatureDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: auxiliary :: supports_feature_declaration :: FormatScssSupportsFeatureDeclaration :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssSupportsFeatureDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssSupportsFeatureDeclaration,
+        crate::scss::auxiliary::supports_feature_declaration::FormatScssSupportsFeatureDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: auxiliary :: supports_feature_declaration :: FormatScssSupportsFeatureDeclaration :: default ())
+    }
+}
 impl FormatRule < biome_css_syntax :: ScssSupportsInterpolatedCondition > for crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: ScssSupportsInterpolatedCondition , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: ScssSupportsInterpolatedCondition > :: fmt (self , node , f) } }
 impl AsFormat<CssFormatContext> for biome_css_syntax::ScssSupportsInterpolatedCondition {
     type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: ScssSupportsInterpolatedCondition , crate :: scss :: auxiliary :: supports_interpolated_condition :: FormatScssSupportsInterpolatedCondition > ;

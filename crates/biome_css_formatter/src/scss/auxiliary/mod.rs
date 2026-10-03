@@ -43,6 +43,7 @@ pub(crate) mod parenthesized_expression;
 pub(crate) mod plain_import;
 pub(crate) mod show_clause;
 pub(crate) mod string_text;
+pub(crate) mod supports_feature_declaration;
 pub(crate) mod supports_interpolated_condition;
 pub(crate) mod unary_expression;
 pub(crate) mod url_text;
