@@ -2524,6 +2524,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useUnaryMinus",
+        TypeId::of::<biome_rule_options::use_unary_minus::UseUnaryMinusOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useUnicodeRegex",
         TypeId::of::<biome_rule_options::use_unicode_regex::UseUnicodeRegexOptions>(),
     ));

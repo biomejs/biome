@@ -7906,6 +7906,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnaryMinus": {
+					"description": "Enforce the use of the unary minus operator over multiplying or dividing by -1.\nSee https://biomejs.dev/linter/rules/use-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnaryMinusConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnicodeRegex": {
 					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
 					"anyOf": [
@@ -14147,6 +14154,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUnaryMinusOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUnicodeRegexOptions": {
 			"type": "object",
 			"properties": {
@@ -18640,6 +18660,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUnaryMinusOptions" }
+			]
+		},
+		"UseUnaryMinusOptions": { "type": "object", "additionalProperties": false },
 		"UseUnicodeRegexConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
