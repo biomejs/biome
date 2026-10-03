@@ -55,3 +55,28 @@
 	border-end-start-radius: 12px;
 	border-end-end-radius: 16px;
 }
+
+.values {
+	frame-sizing: content-inline-size;
+	frame-sizing: content-block-size;
+	float: inline-start;
+	float: inline-end;
+	clear: inline-start;
+	clear: inline-end;
+	text-align: start;
+	text-align: end;
+	justify-content: start;
+	justify-content: end;
+	justify-items: start;
+	justify-items: end;
+	justify-self: start;
+	justify-self: end;
+}
+
+.anchor-functions {
+	inline-size: anchor-size(inline);
+	block-size: anchor-size(block);
+	inline-size: var(--size, anchor-size(inline));
+	inset-block-start: anchor(end);
+	inset-inline-start: anchor(end);
+}
