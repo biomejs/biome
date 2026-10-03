@@ -1,5 +1,9 @@
 # @biomejs/wasm-nodejs
 
+## 2.5.16
+
+No changes in this release.
+
 ## 2.5.15
 
 No changes in this release.

@@ -1,5 +1,84 @@
 # @biomejs/biome
 
+## 2.5.16
+
+### Patch Changes
+
+- [#9817](https://github.com/biomejs/biome/pull/9817) [`241b861`](https://github.com/biomejs/biome/commit/241b86197fb26d230edf37febcfb1de3f2dfb1e0) Thanks [@dyc3](https://github.com/dyc3)! - Added the new nursery rule [`noZeroFractions`](https://biomejs.dev/linter/rules/no-zero-fractions/), which disallows numeric literals with redundant zero fractions or dangling dots such as `1.0` and `1.`. Biome can now simplify these literals to shorter equivalents.
+
+- [#12075](https://github.com/biomejs/biome/pull/12075) [`de453c0`](https://github.com/biomejs/biome/commit/de453c0fc8a73f8e875c2f5ad3c8f3fec3e01ed6) Thanks [@tionway](https://github.com/tionway)! - Fixed [#11902](https://github.com/biomejs/biome/issues/11902): `biome migrate --write` now successfully migrates empty nested configuration files without introducing an invalid trailing comma.
+
+- [#12066](https://github.com/biomejs/biome/pull/12066) [`d13d1ba`](https://github.com/biomejs/biome/commit/d13d1ba6c82da9593856bc69e35d7af5ae92c209) Thanks [@dyc3](https://github.com/dyc3)! - Updated rule source metadata.
+
+- [#12052](https://github.com/biomejs/biome/pull/12052) [`1a6fb41`](https://github.com/biomejs/biome/commit/1a6fb418c47708524fe85293ce2a0350f72b3160) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noVueBooleanDefault`](https://biomejs.dev/linter/rules/no-vue-boolean-default/), which disallows default values for Boolean props in Vue components. Vue already defaults an absent Boolean prop to `false`.
+  
+  ```vue
+  <script setup lang="ts">
+  withDefaults(defineProps<{ disabled?: boolean }>(), {
+    disabled: true,
+  });
+  </script>
+  ```
+
+- [#11563](https://github.com/biomejs/biome/pull/11563) [`a4e6528`](https://github.com/biomejs/biome/commit/a4e6528a4a0ff0405d159b5ada0e30f8f2c759e2) Thanks [@santichausis](https://github.com/santichausis)! - Fixed [#11419](https://github.com/biomejs/biome/issues/11419): [`noAdjacentSpacesInRegex`](https://biomejs.dev/linter/rules/no-adjacent-spaces-in-regex/) no longer applies its fix inside a regex character class (`[...]`), where it was changing what the class matches instead of just clarifying the spacing.
+  
+  For example, Biome used to "fix" this regex into matching different characters:
+  
+  ```js
+  const before = /[\s   ]/;
+  // Biome used to rewrite this to /[\s {3}]/, which is a different regex:
+  // {3} isn't a quantifier inside a character class, it's three more
+  // characters to match — the fixed regex now also matches "1", "2", "{", "}".
+  ```
+  
+  Adjacent spaces outside a character class are still merged into a quantifier as before.
+
+- [#12104](https://github.com/biomejs/biome/pull/12104) [`2bb4838`](https://github.com/biomejs/biome/commit/2bb4838a6823cc05283adc3d125ccc6d75938a23) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#12098](https://github.com/biomejs/biome/issues/12098): [`useImportExtensions`](https://biomejs.dev/linter/rules/use-import-extensions/) now reports relative imports without extensions in Vue, Svelte, and Astro files when `html.experimentalFullSupportEnabled` is enabled.
+
+- [#12047](https://github.com/biomejs/biome/pull/12047) [`4db3f58`](https://github.com/biomejs/biome/commit/4db3f58ce3146b44a61a133fc85a21d289601996) Thanks [@denbezrukov](https://github.com/denbezrukov)! - Fixed parsing of bare `if` identifiers in CSS `if()` branch values, such as `if(style(--enabled: true): if; else: serif)`.
+
+- [#11854](https://github.com/biomejs/biome/pull/11854) [`2917939`](https://github.com/biomejs/biome/commit/2917939943c2983536f2d317816a62a81efc0b52) Thanks [@dyc3](https://github.com/dyc3)! - Added support for mapped types such as `{ [K in keyof T]: T[K] }` to type inference. Type-aware rules now resolve the properties of mapped types, including generic aliases instantiated with concrete type arguments:
+  
+  ```ts
+  type Optional<T> = { [K in keyof T]?: T[K] };
+  declare const config: Optional<{ retries: number }>;
+  // `config.retries` is now inferred as `number | undefined`.
+  ```
+  
+  Mapped types that remap keys with an `as` clause remain unsupported.
+
+- [#12063](https://github.com/biomejs/biome/pull/12063) [`8724a5d`](https://github.com/biomejs/biome/commit/8724a5dda6b444f8e6a56f8344e5ab9e7f6ebaa9) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#9749](https://github.com/biomejs/biome/issues/9749): in GritQL plugins and `biome search`, a `contains` followed by further conditions now tries every node it matches, instead of failing when the first match doesn't satisfy the remaining conditions.
+
+- [#12068](https://github.com/biomejs/biome/pull/12068) [`dd96b11`](https://github.com/biomejs/biome/commit/dd96b119a5011ebf8c952aeb001a836e700db614) Thanks [@GreedyC](https://github.com/GreedyC)! - Fixed [#12004](https://github.com/biomejs/biome/issues/12004): [`noDuplicateFontNames`](https://biomejs.dev/linter/rules/no-duplicate-font-names/) allows `font-family: monospace, monospace`, which preserves the inherited font size in browsers.
+
+- [#12083](https://github.com/biomejs/biome/pull/12083) [`9db579b`](https://github.com/biomejs/biome/commit/9db579bcdaa236fcb106ac82b8b6af03fee8ad96) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`noIteratorProperty`](https://biomejs.dev/linter/rules/no-iterator-property/), which disallows the obsolete, non-standard `__iterator__` property. The rule reports code such as `Foo.prototype.__iterator__ = function () {};`.
+
+- [#12089](https://github.com/biomejs/biome/pull/12089) [`dba2a37`](https://github.com/biomejs/biome/commit/dba2a3786c2932e0a2e47c853927f0eacaafff46) Thanks [@ternaus](https://github.com/ternaus)! - Fixed [#12088](https://github.com/biomejs/biome/issues/12088): false positives in [`noUnknownAttribute`](https://biomejs.dev/linter/rules/no-unknown-attribute/) for React 19 transition event handlers. `onTransitionCancel`, `onTransitionRun`, `onTransitionStart`, and their capture variants are recognized when the React dependency range allows React 19 or later.
+
+- [#12052](https://github.com/biomejs/biome/pull/12052) [`1a6fb41`](https://github.com/biomejs/biome/commit/1a6fb418c47708524fe85293ce2a0350f72b3160) Thanks [@dyc3](https://github.com/dyc3)! - Vue rules that check props, such as [`noVueReservedProps`](https://biomejs.dev/linter/rules/no-vue-reserved-props/), now detect props declared inside `withDefaults()`, for example `withDefaults(defineProps<{ key?: string }>(), {})`.
+
+- [#12080](https://github.com/biomejs/biome/pull/12080) [`6e2ee70`](https://github.com/biomejs/biome/commit/6e2ee706c846cf221c30acfd18557fdab920f8e9) Thanks [@dyc3](https://github.com/dyc3)! - Fixed [#12079](https://github.com/biomejs/biome/issues/12079): the formatter no longer puts the parameters of a Svelte `{#snippet}` block on separate lines when they fit on one line.
+  
+  ```diff
+  -{#snippet children(
+  -	item,
+  -)}
+  +{#snippet children(item)}
+  ```
+
+- [#11967](https://github.com/biomejs/biome/pull/11967) [`4c1612b`](https://github.com/biomejs/biome/commit/4c1612b3370095b013c0c935f20b7d93fbe0d7e3) Thanks [@dyc3](https://github.com/dyc3)! - Added the nursery rule [`useBigintLiterals`](https://biomejs.dev/linter/rules/use-bigint-literals/), which enforces bigint literals over `BigInt()` calls with a literal argument.
+  
+  ```js
+  // Invalid
+  const bigint = BigInt(1);
+  const hex = BigInt("0xFF");
+  
+  // Valid
+  const bigint = 1n;
+  const hex = 0xFFn;
+  const computed = BigInt(getSomeNumber());
+  ```
+
 ## 2.5.15
 
 ### Patch Changes

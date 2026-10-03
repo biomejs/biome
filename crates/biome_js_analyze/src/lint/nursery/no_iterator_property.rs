@@ -59,7 +59,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIteratorProperty {
-        version: "next",
+        version: "2.5.16",
         name: "noIteratorProperty",
         language: "js",
         sources: &[RuleSource::Eslint("no-iterator").same()],
