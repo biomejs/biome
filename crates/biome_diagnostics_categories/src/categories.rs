@@ -253,6 +253,7 @@ define_categories! {
     "lint/nursery/noNestedSwitch": "https://biomejs.dev/linter/rules/no-nested-switch",
     "lint/nursery/noNestedTemplateLiterals": "https://biomejs.dev/linter/rules/no-nested-template-literals",
     "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
+    "lint/nursery/noObjectConstructor": "https://biomejs.dev/linter/rules/no-object-constructor",
     "lint/nursery/noObsoleteTags": "https://biomejs.dev/linter/rules/no-obsolete-tags",
     "lint/nursery/noOctal": "https://biomejs.dev/linter/rules/no-octal",
     "lint/nursery/noProcessExit": "https://biomejs.dev/linter/rules/no-process-exit",
