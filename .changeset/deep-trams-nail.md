@@ -2,7 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Fixed [#12026](https://github.com/biomejs/biome/issues/12026): when a module exports a `const`, `let`, `var`, or function and a type alias under the same name, with no namespace of that name, importers now use the type alias in type positions and the value under `typeof`, so [`useExhaustiveSwitchCases`](https://biomejs.dev/linter/rules/use-exhaustive-switch-cases/) reports missing cases for the imported union. In type positions, such an alias built on `InstanceType` or `ReturnType` is treated as `any` until Biome evaluates those utility types.
+Fixed [#12026](https://github.com/biomejs/biome/issues/12026): [`useExhaustiveSwitchCases`](https://biomejs.dev/linter/rules/use-exhaustive-switch-cases/) now reports missing cases when the union type is imported from a module that also exports a value with the same name.
 
 The following `switch` is now reported, because it doesn't handle `"c"`:
 

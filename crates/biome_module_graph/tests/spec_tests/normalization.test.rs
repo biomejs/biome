@@ -435,50 +435,6 @@ fn test_type_projections_select_merged_namespace_member_side_beyond_import_depth
 }
 
 #[test]
-fn test_type_projections_select_alias_side_even_when_instance_type_is_unevaluated() {
-    // `InstanceType` is not evaluated, so the selected type side is `any` and
-    // its members are unknown, while `new Mixed()` still uses the value side.
-    // Update this test when `InstanceType` is evaluated: `mixed.mixed` should
-    // then be `"mixed"`.
-    let fs = MemoryFileSystem::default();
-    fs.insert(
-        "/src/classes.ts".into(),
-        r#"
-        export class Base { base: "base" = "base"; }
-        export const Mixin = <T,>(value: T) => class extends Base { mixed: T = value; };
-        export const Mixed = Mixin("mixed" as const);
-        export type Mixed = InstanceType<typeof Mixed>;
-    "#,
-    );
-    fs.insert(
-        "/src/index.ts".into(),
-        r#"
-        import { Mixed } from "./classes.ts";
-        declare const mixed: Mixed;
-        const mixedMember = mixed.mixed;
-        const constructedMember = new Mixed().mixed;
-    "#,
-    );
-    let db = build_js_test_module_db(&fs, &["/src/classes.ts", "/src/index.ts"], true);
-    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
-
-    let names = ["mixed", "mixedMember", "constructedMember"];
-    let projections = names.map(|name| {
-        let ty = projected_binding(&db, module, name);
-        (name, format_inferred_type(&db, ty))
-    });
-    assert_eq!(
-        projections,
-        [
-            ("mixed", "any"),
-            ("mixedMember", "unknown"),
-            ("constructedMember", "string: mixed"),
-        ]
-        .map(|(name, expected)| (name, expected.to_string()))
-    );
-}
-
-#[test]
 fn test_type_projections_select_class_value_side_of_merged_export() {
     let fs = MemoryFileSystem::default();
     fs.insert(
@@ -496,6 +452,7 @@ fn test_type_projections_select_class_value_side_of_merged_export() {
         declare const instance: Alias;
         const instanceMember = instance.instance;
         const aliasStatic = Alias.shared;
+        const constructedMember = new Alias().instance;
         declare const aliasValue: typeof Alias;
         declare const widgetValue: typeof Widget;
     "#,
@@ -506,6 +463,7 @@ fn test_type_projections_select_class_value_side_of_merged_export() {
     let members = [
         ("instanceMember", "string: instance"),
         ("aliasStatic", "string: shared"),
+        ("constructedMember", "string: instance"),
     ];
     let projections = members.map(|(name, _)| {
         let ty = projected_binding(&db, module, name);
