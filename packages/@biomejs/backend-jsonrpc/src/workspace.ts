@@ -2871,6 +2871,11 @@ export interface Nursery {
 	 */
 	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
+	 * Disallow assignments whose value is never read.
+	 * See https://biomejs.dev/linter/rules/no-useless-assignment
+	 */
+	noUselessAssignment?: NoUselessAssignmentConfiguration;
+	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
@@ -5277,6 +5282,9 @@ export type NoUntrustedLicensesConfiguration =
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
+export type NoUselessAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessAssignmentOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -7623,6 +7631,10 @@ export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
 }
+export interface RuleWithNoUselessAssignmentOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessAssignmentOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -9871,6 +9883,7 @@ export interface NoUntrustedLicensesOptions {
 	requireOsiApproved?: boolean;
 }
 export type NoUnusedClassesOptions = {};
+export type NoUselessAssignmentOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
@@ -11373,6 +11386,7 @@ export type Category =
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
