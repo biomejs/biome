@@ -7520,6 +7520,7 @@ dependencies = [
  "ascii_table",
  "backtrace",
  "biome_console",
+ "biome_css_parser",
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_semantic",

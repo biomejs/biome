@@ -6,6 +6,9 @@ on:
     branches:
       - main
     paths:
+      - 'crates/biome_css_factory/**'
+      - 'crates/biome_css_parser/**'
+      - 'crates/biome_css_syntax/**'
       - 'crates/biome_js_syntax/**'
       - 'crates/biome_js_factory/**'
       - 'crates/biome_js_semantic/**'
