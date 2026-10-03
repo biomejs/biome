@@ -3129,6 +3129,11 @@ export interface Nursery {
 	 */
 	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
+	 * Require the operand of unary - to be a number or a bigint.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-unary-minus
+	 */
+	noUnsafeUnaryMinus?: NoUnsafeUnaryMinusConfiguration;
+	/**
 	 * Reports CSS class selectors that are never referenced in any JSX or HTML file.
 	 * See https://biomejs.dev/linter/rules/no-unused-classes
 	 */
@@ -5629,6 +5634,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
+export type NoUnsafeUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeUnaryMinusOptions;
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
@@ -8047,6 +8055,10 @@ export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeTypeAssertionOptions;
 }
+export interface RuleWithNoUnsafeUnaryMinusOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeUnaryMinusOptions;
+}
 export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
@@ -10374,6 +10386,7 @@ export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
+export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
@@ -12007,6 +12020,7 @@ export type Category =
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
+	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"

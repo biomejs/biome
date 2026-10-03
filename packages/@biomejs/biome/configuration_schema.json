@@ -6679,6 +6679,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeUnaryMinusOptions" }
+			]
+		},
+		"NoUnsafeUnaryMinusOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUntrustedLicensesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7700,6 +7710,13 @@
 					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeUnaryMinus": {
+					"description": "Require the operand of unary - to be a number or a bigint.\nSee https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeUnaryMinusConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11860,6 +11877,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeUnaryMinusOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
