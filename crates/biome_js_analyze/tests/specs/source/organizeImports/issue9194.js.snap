@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue9194.js
+---
+# Input
+```js
+  import { Content, List, Tabs, Trigger } from "@/shadcn-svelte/tabs";
+  import { tabs } from "slidytabs";
+
+```
+
+# Diagnostics
+```
+issue9194.js:1:3 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Sort these imports.
+  
+  > 1 │   import { Content, List, Tabs, Trigger } from "@/shadcn-svelte/tabs";
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │   import { tabs } from "slidytabs";
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+    1   │ - ··import·{·Content,·List,·Tabs,·Trigger·}·from·"@/shadcn-svelte/tabs";
+    2   │ - ··import·{·tabs·}·from·"slidytabs";
+      1 │ + ··import·{·tabs·}·from·"slidytabs";
+      2 │ + ··import·{·Content,·List,·Tabs,·Trigger·}·from·"@/shadcn-svelte/tabs";
+    3 3 │   
+  
+
+```

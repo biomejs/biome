@@ -1312,27 +1312,54 @@ impl Rule for OrganizeImports {
                                     new_item = new_item.prepend_trivia_pieces(detached)?;
                                 }
                             } else if index == 0 && leading_newlines(&old_item).count() == 0 {
-                                // We are at the top of the file.
-                                // Keep header (possibly Copyright notice)
+                                // We are at the top of the file, or of a chunk that doesn't
+                                // start with a newline (e.g. the first line of an embedded
+                                // script block, such as Vue or Svelte's `<script>` content).
                                 let header_trivia = old_item.first_leading_trivia()?;
                                 if header_trivia.is_empty() {
                                     new_item = new_item.trim_leading_trivia()?;
-                                } else {
+                                } else if header_trivia.pieces().any(|piece| piece.is_comments()) {
+                                    // Keep header (possibly Copyright notice)
                                     new_item =
                                         new_item.prepend_trivia_pieces(header_trivia.pieces())?;
+                                } else {
+                                    // The trivia is only whitespace, e.g. the base indentation
+                                    // of an embedded script block. Reuse it in place of the new
+                                    // item's own trivia instead of prepending it, which would
+                                    // duplicate the indentation.
+                                    new_item =
+                                        new_item.with_leading_trivia_pieces(header_trivia.pieces())?;
                                 }
                             }
                         } else if let Some(attached) = attached_trivia(&new_item) {
                             // Transfer attached comment
                             new_item = new_item.with_leading_trivia_pieces(attached)?;
                         } else if key.slot_index == 0 && leading_newlines(&new_item).count() == 0 {
-                            // Don't copy the header trivia
-                            let first_token = new_item.first_token()?;
-                            let new_first_token = first_token
-                                .clone()
-                                .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]);
-                            new_item = new_item
-                                .replace_child(first_token.into(), new_first_token.into())?;
+                            // This item used to start the chunk. Don't copy its former header
+                            // trivia (e.g. a copyright comment, now transferred to whatever item
+                            // took its place). If this position previously held an import with
+                            // its own newline-based indentation (e.g. the base indentation of an
+                            // embedded script block), reuse it instead of collapsing it to a bare
+                            // newline; otherwise (e.g. one-liners with no newline at all) fall
+                            // back to inserting a plain newline, as before.
+                            let old_header_trivia = old_item.first_leading_trivia();
+                            let reuse_old_trivia = old_header_trivia.as_ref().is_some_and(
+                                |trivia| {
+                                    trivia.pieces().any(|piece| piece.is_newline())
+                                        && !trivia.pieces().any(|piece| piece.is_comments())
+                                },
+                            );
+                            new_item = if reuse_old_trivia {
+                                new_item.with_leading_trivia_pieces(
+                                    old_header_trivia.unwrap().pieces(),
+                                )?
+                            } else {
+                                let first_token = new_item.first_token()?;
+                                let new_first_token = first_token
+                                    .clone()
+                                    .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]);
+                                new_item.replace_child(first_token.into(), new_first_token.into())?
+                            };
                         }
                         // Add newline for group separation
                         if index != 0
