@@ -2536,6 +2536,11 @@ export interface Nursery {
 	 */
 	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
 	/**
+	 * Disallow importing the deprecated getEntryBySlug() function from astro:content.
+	 * See https://biomejs.dev/linter/rules/no-astro-deprecated-get-entry-by-slug
+	 */
+	noAstroDeprecatedGetEntryBySlug?: NoAstroDeprecatedGetEntryBySlugConfiguration;
+	/**
 	 * Disallow the use of Astro's set:html directive.
 	 * See https://biomejs.dev/linter/rules/no-astro-set-html-directive
 	 */
@@ -5076,6 +5081,9 @@ export type UseYieldConfiguration =
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
+export type NoAstroDeprecatedGetEntryBySlugConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroDeprecatedGetEntryBySlugOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
@@ -7298,6 +7306,10 @@ export interface RuleWithUseYieldOptions {
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroConflictingSetDirectivesOptions;
+}
+export interface RuleWithNoAstroDeprecatedGetEntryBySlugOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroDeprecatedGetEntryBySlugOptions;
 }
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
@@ -9701,6 +9713,7 @@ export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
+export type NoAstroDeprecatedGetEntryBySlugOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -11302,6 +11315,7 @@ export type Category =
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAstroConflictingSetDirectives"
+	| "lint/nursery/noAstroDeprecatedGetEntryBySlug"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
