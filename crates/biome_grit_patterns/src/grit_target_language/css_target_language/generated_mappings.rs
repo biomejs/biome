@@ -404,6 +404,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
+        "ScssLegacyIfFunction" => lang::ScssLegacyIfFunction::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
         "ScssMediaQuery" => lang::ScssMediaQuery::KIND_SET.iter().next(),
@@ -718,6 +719,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssKeyframesSelector" => &[("selector", 0)],
         "ScssKeyframesVariableDeclaration" => &[("declaration", 0)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
+        "ScssLegacyIfFunction" => &[("items", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
         "ScssMediaQuery" => &[("head", 0), ("tail", 1)],

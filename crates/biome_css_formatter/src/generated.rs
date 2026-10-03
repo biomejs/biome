@@ -8966,6 +8966,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssKeywordArgument {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssLegacyIfFunction>
+    for crate::scss::auxiliary::legacy_if_function::FormatScssLegacyIfFunction
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssLegacyIfFunction,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssLegacyIfFunction>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssLegacyIfFunction {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssLegacyIfFunction,
+        crate::scss::auxiliary::legacy_if_function::FormatScssLegacyIfFunction,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::legacy_if_function::FormatScssLegacyIfFunction::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssLegacyIfFunction {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssLegacyIfFunction,
+        crate::scss::auxiliary::legacy_if_function::FormatScssLegacyIfFunction,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::legacy_if_function::FormatScssLegacyIfFunction::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssListExpression>
     for crate::scss::auxiliary::list_expression::FormatScssListExpression
 {

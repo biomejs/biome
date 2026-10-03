@@ -2342,6 +2342,7 @@ AnyCssFunction =
 	| CssUrlFunction
 	| CssIfFunction
 	| CssAttrFunction
+	| ScssLegacyIfFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -2378,6 +2379,7 @@ CssUrlModifierList = AnyCssUrlModifier*
 AnyCssUrlModifier =
 	CssIdentifier
 	| CssFunction
+	| ScssLegacyIfFunction
 	| CssBogusUrlModifier
 
 AnyCssUrlValue =
@@ -2426,6 +2428,13 @@ CssIfFunction =
 	'if'
 	'('
 	CssIfBranchList
+	')'
+
+// if($condition, $if-true, $if-false)
+ScssLegacyIfFunction =
+	'if'
+	'('
+	items: CssParameterList
 	')'
 
 // if(style(--theme: dark): red; else: blue)

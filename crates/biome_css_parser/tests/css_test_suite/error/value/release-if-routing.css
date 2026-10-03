@@ -1,0 +1,3 @@
+.a { color: if(not false, red, blue); width: 1px; }
+.a { color: if((true), red, blue); width: 1px; }
+.a { color: if(sass(true): red; else: blue); width: 1px; }
