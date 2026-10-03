@@ -2951,6 +2951,11 @@ export interface Nursery {
 	 */
 	useConsistentFunctionStyle?: UseConsistentFunctionStyleConfiguration;
 	/**
+	 * Enforce a consistent way of reading JSON files before passing them to JSON.parse().
+	 * See https://biomejs.dev/linter/rules/use-consistent-json-file-read
+	 */
+	useConsistentJsonFileRead?: UseConsistentJsonFileReadConfiguration;
+	/**
 	 * Enforce JSON keys with consistent Unicode representation.
 	 * See https://biomejs.dev/linter/rules/use-consistent-object-keys
 	 */
@@ -5325,6 +5330,9 @@ export type UseBigintLiteralsConfiguration =
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
+export type UseConsistentJsonFileReadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentJsonFileReadOptions;
 export type UseConsistentObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentObjectKeysOptions;
@@ -7711,6 +7719,14 @@ export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
 }
+export interface RuleWithUseConsistentJsonFileReadOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentJsonFileReadOptions;
+}
 export interface RuleWithUseConsistentObjectKeysOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9938,6 +9954,14 @@ export interface UseConsistentFunctionStyleOptions {
 	 */
 	style?: FunctionStyle;
 }
+export interface UseConsistentJsonFileReadOptions {
+	/**
+	 * Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.
+	 *
+	 * Default: `"string"`
+	 */
+	readAs?: JsonFileReadAs;
+}
 export interface UseConsistentObjectKeysOptions {
 	/**
 	 * The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.
@@ -10841,6 +10865,7 @@ export type AvailabilityTarget = AvailabilityNamed | number;
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
+export type JsonFileReadAs = "string" | "buffer";
 export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 /**
  * The function to use for tests
@@ -11392,6 +11417,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
+	| "lint/nursery/useConsistentJsonFileRead"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
