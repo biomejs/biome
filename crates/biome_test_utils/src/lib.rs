@@ -311,7 +311,12 @@ pub fn module_graph_for_test_file(
     let mut db = WorkspaceDb::new(Arc::new(OsFileSystem::new(dir.clone())));
     insert_test_manifests(&mut db, input_file);
 
-    let js_paths = get_js_like_paths_in_dir(&dir);
+    // Vue, Svelte and Astro files can't be parsed as plain JS. HTML-ish test
+    // files get their module graph from the workspace instead.
+    let js_paths = get_js_like_paths_in_dir(&dir)
+        .into_iter()
+        .filter(|path| !matches!(path.extension(), Some("vue" | "svelte" | "astro")))
+        .collect::<Vec<_>>();
     let js_roots = get_added_js_paths(&fs, &js_paths);
     for (path, root, semantic_model) in js_roots {
         let (module_info, _, _) = resolve_js_module(&db, root, path, semantic_model, true);
