@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_semantic/src/format_semantic_model.rs
+expression: model.to_string()
+---
+.card: (0, 1, 0)  @ 0..5
+:root[data-theme="dark"] .card: (0, 3, 0)  @ 10..36
+.card code: (0, 1, 1)  @ 42..46
+html body .card code: (0, 1, 3)  @ 53..64
+.card code .card code > span: (0, 2, 3)  @ 72..82
+:root[data-theme="auto"] .card: (0, 3, 0)  @ 134..160
+.card > p: (0, 1, 1)  @ 204..209
+.card:hover: (0, 2, 0)  @ 241..248
