@@ -1,65 +1,112 @@
 ---
 name: doc-comments
-description: Use this skill whenever writing or editing Rust `//`, `///`, or `//!` comments in Biome, including comments added incidentally and end-user rustdoc inside lint/assist declarations. For lint/assist rustdoc, also load lint-rule-development for content requirements. Do not use for formatter handling of comments in user code.
+description: Use this skill whenever writing or editing Rust `//`, `///`, or `//!` comments in Biome, including contributor documentation and rustdoc exposed to users through configuration schemas, CLI help, workspace or daemon APIs, and lint or assist declarations. For lint or assist rustdoc, also load lint-rule-development. Do not use for formatter handling of comments in user code.
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
 ## Purpose
 
-Developer-facing comments and doc comments in this repository are read by
-contributors, months or years after they were written, with none of the context
-you have right now. This skill defines who that reader is, what each kind of
-comment is for, and which patterns are banned.
+Rust syntax does not determine a comment's audience. Some comments explain the
+implementation to Biome contributors. Others are published for Biome users or
+client authors. Before editing a comment, trace where it is consumed by checking
+nearby derives, attributes, macros, generators, generated artifacts, and help
+snapshots.
 
-**Scope boundary:** rustdoc inside `declare_lint_rule!` / `declare_assist_rule!`
-blocks is end-user documentation generated into the website. Load this skill for
-comment hygiene, but use
-[lint-rule-development](../lint-rule-development/SKILL.md) for the audience,
-content structure, examples, and option documentation. Its content rules take
-precedence for those blocks.
+## Identify the Audience
 
-## The Reader
+| Source context | Reader and destination |
+| --- | --- |
+| Ordinary implementation `//`, internal item rustdoc, and most module docs | Biome contributors reading the Rust source or rustdoc |
+| Rustdoc on configuration types or fields that derive `JsonSchema` | Biome users reading configuration descriptions from the JSON Schema |
+| Rustdoc consumed by `Bpaf`, including command variants, arguments, and configuration fields | Biome users reading CLI help |
+| Daemon-facing `Workspace` methods and their serialized request and response types | Authors of daemon clients and users of generated backend bindings |
+| Rustdoc inside `declare_lint_rule!` or the assist macro `declare_source_rule!` | Biome users reading rule or assist documentation on the website |
 
-For developer-facing comments, write for a Biome contributor who is competent in Rust but has **no access to
-your current context**: not this conversation, not the pull request, not the
-issue, not the diff. They see only the repository at HEAD.
+A file can mix audiences. For example,
+[`workspace.rs`](../../../crates/biome_service/src/workspace.rs) contains
+contributor-facing module docs and user-facing daemon contracts, while
+[`FormatterConfiguration`](../../../crates/biome_configuration/src/formatter.rs)
+has user-facing field docs and contributor-facing methods.
 
-Two consequences follow directly:
+A comment can also feed multiple destinations. Write for the least specialized
+reader, use only formatting supported by every destination, and inspect the
+rendered output. Neither `///` nor `pub` proves who the reader is; follow the
+text to its destination.
 
-1. **Never narrate change history.** Words like "now", "previously",
-   "no longer", "the new approach" are meaningless at HEAD, where only one
-   approach exists. State how the code works, not how it came to be.
-2. **Never address the reviewer.** A comment that argues your change is
-   correct ("this properly handles X") belongs in the PR description, not in
-   the source. The comment must justify the code as it stands, permanently.
+### Contributor reader
 
-## Three Kinds of Documentation, Three Different Jobs
+Write for a contributor who knows Rust but has no access to this conversation,
+the pull request, the issue, or the diff. Describe the code at HEAD. Never
+narrate change history or address a reviewer.
 
-| Kind | Job | Contains |
-| ---- | --- | -------- |
-| `//!` module docs | Explanation | Why the module exists, core concepts and terminology, how the pieces relate, design rationale |
-| `///` item docs | Reference | The contract: behavior, inputs and outputs, invariants, panics, errors. Neutral and factual |
-| `//` inline comments | Rationale | Only what the code cannot say: constraints, workarounds (with issue links), non-obvious coupling, why the obvious alternative is wrong |
+### End-user reader
 
-Do not mix the jobs. Implementation details do not belong in `///` docs — put
-them as `//` comments inside the body. The contract does not belong scattered
-across inline comments — put it on the item.
+Write for an intelligent adult who may be using Biome or the documented feature
+for the first time. Do not require knowledge of Rust, Biome internals, advanced
+knowledge of the target language's idioms or terminology, or unstated ecosystem
+concepts.
 
-## The Deletion Test
+Use an ELI18 register: beginner-friendly, technically complete, and never
+childish. Prefer the most familiar accurate term. In JavaScript documentation,
+for example, prefer `variable` to `binding` when both are correct. If the
+distinction matters, define it on first use: "a binding (a name introduced by
+code, such as a variable, parameter, or import)." Do not assume client authors
+know Biome's Rust implementation.
 
-Before writing any comment, ask: **does this state something the reader cannot
-recover from the code itself?**
+Follow the [Biome philosophy](https://biomejs.dev/internals/philosophy/):
 
-- If the information is already carried by names, types, or structure, do not
-  write the comment. If the name fails to carry it, improve the name.
-- Information that legitimately needs a comment: an invariant, a rationale, a
-  coupling to code elsewhere, a workaround with a link, surprising behavior of
-  a dependency, a term of art the module defines.
+- reduce jargon, including target-language idioms, and define necessary terms;
+- set clear expectations by stating relevant defaults, prerequisites, effects,
+  limitations, fallback behavior, and error recovery;
+- be specific, inclusive, and neutral; avoid vague phrases, idioms, and
+  assumptions about the reader;
+- keep CLI text understandable without color or other visual styling.
 
-When editing later, the same test applies in reverse: a comment that no longer
-passes it should be deleted, not left to rot.
+Use public names, such as `files.includes`, `--write`, or `openFile`, with the
+spelling shown in the destination. Do not leak a Rust identifier merely because
+it is convenient for the implementation.
 
-## Behavior Documentation
+## Comment Kinds and Value
+
+| Kind | Job |
+| --- | --- |
+| `//!` module docs | Explain why a module exists, its core concepts, how its pieces relate, and durable design rationale. |
+| `///` item docs | Describe the item's contract for its actual audience. Contributor contracts cover behavior, inputs and outputs, invariants, panics, and errors; end-user contracts describe public behavior. |
+| `//` inline comments | Explain constraints, workarounds, non-obvious coupling, or why the obvious implementation is wrong. These normally target contributors. |
+
+Ask what the intended reader can recover from the surface they see. Contributors
+can inspect names, types, and control flow; improve the code or delete comments
+that only restate them. End users may see only a help entry, editor hover,
+generated API, or rule page, so retain the self-contained behavior summary even
+when the Rust name appears descriptive. Keep item contracts in `///`; put
+implementation rationale beside the code as `//`, not in user-facing docs.
+
+## Writing End-User Documentation
+
+Start with a short, plain-language sentence that says what the item does. Add
+only relevant details: when to use it, prerequisites, accepted values and units,
+default or omission behavior, interactions, side effects, persistence, results,
+limitations, failures, and recovery. Use an example when prose leaves the result
+ambiguous.
+
+Write in the present tense and active voice, with one main idea per sentence.
+Use familiar, concrete words; explain necessary terms in the same paragraph.
+Avoid vague pronouns, unexplained acronyms, idioms, and dismissive words such as
+"obviously", "simply", or "just". Proofread grammar and terminology.
+
+Use the reader's interface in examples: configuration snippets, shell commands,
+or the public binding or wire format, not Rust for a non-Rust surface. Introduce
+what each example demonstrates and its expected result.
+
+| Surface | Include |
+| --- | --- |
+| Configuration | The setting's effect, public key, default or omission behavior, accepted range or units, and relevant interactions. |
+| CLI help | The action and scope, prerequisites, implications or conflicts, output, and exit behavior. Keep the first sentence useful on its own. |
+| Shared configuration and CLI rustdoc | A first paragraph complete in both contexts, using only links or formatting verified in every renderer. |
+| Workspace and daemon APIs | The public client contract: required prior state, state changes and persistence, interpretation of fields such as versions and positions, result meaning, and recoverable failures. Use public API concepts rather than Rust concepts such as borrowing, `Option`, or implementation structs. |
+| Lint rules and assist actions | End-user website content. Also load [lint-rule-development](../lint-rule-development/SKILL.md) for required structure, examples, and option documentation; its content requirements take precedence. |
+
+## Writing Contributor Documentation
 
 Write documentation for a human reader, not as a translation of the
 implementation.
@@ -75,24 +122,14 @@ implementation.
 - Do not describe implementation details unless callers need them to understand
   the behavior.
 
-Add an example when the behavior depends on relationships that the function
-signature cannot show clearly. Common cases include:
+Add an example when the signature cannot clearly show a relationship such as
+overload selection, argument mapping, import traversal, fallback behavior, or
+an otherwise ambiguous result. Introduce what the example demonstrates and its
+expected result. Keep it minimal and self-contained.
 
-- overload selection;
-- mapping arguments to optional or rest parameters;
-- following imports or re-exports across files;
-- fallback behavior for ambiguous or incomplete information;
-- a result whose meaning is not obvious from its type.
-
-Introduce the example before the code block. State what the example demonstrates
-and what result is expected.
-
-Keep snippets minimal and self-contained.
-
-Module documentation should describe a durable concept or design reason. Do not
-list individual functions or queries merely to summarize the file. Such lists
-become stale as items are added or renamed. If the module has no durable concept
-to explain, use a brief one-line description.
+Module docs should describe a durable concept or design reason, not list items
+that will become stale. If there is no durable concept to explain, use a brief
+one-line description.
 
 ## Banned Patterns
 
@@ -110,7 +147,7 @@ generation += 1;
 // GOOD: Interning avoids cloning these types on every lookup.
 ```
 
-**Reviewer-addressed justification.** Move the argument to the PR:
+**Reviewer-addressed justification.** Move the argument to the pull request:
 
 ```rust
 // BAD: This correctly handles the overload case from the bug report.
@@ -118,24 +155,41 @@ generation += 1;
 //       partial-arity call cannot select the wrong candidate.
 ```
 
-**Restated rustdoc.** A `///` doc that rewords the item name says nothing:
+**Restated contributor rustdoc.** A doc comment that only rewords the item name
+adds nothing for a contributor:
 
 ```rust
 // BAD:
-/// Handles the type inference.
+/// Handles type inference.
 fn infer_types(...)
 
 // GOOD:
-/// Infers the type of `expr` in the scope of `module`, returning
-/// `TypeData::Unknown` when the expression references an unresolved import.
+/// Infers the type of `expr` in `module`, returning `TypeData::Unknown`
+/// when the expression references an unresolved import.
 fn infer_types(...)
 ```
 
-**Vague hedging.** "Some cases", "various reasons", "handles edge cases",
-"etc." — either name them or drop the sentence.
+A self-contained summary can still be necessary in CLI help or an editor hover.
+
+**Implementation language in end-user documentation.** Describe public behavior,
+not its Rust representation:
+
+```rust
+// BAD:
+/// Stores an `Option<IndentStyle>` consumed by the formatter.
+
+// GOOD:
+/// Uses tabs or spaces for indentation. Defaults to tabs.
+```
+
+Replace phrases such as "returns `Some`", "sets this enum variant", or "the
+struct contains" with the result the user observes.
+
+**Vague hedging.** Name the cases and reasons or remove the sentence. Avoid
+"some cases", "various reasons", "handles edge cases", and "etc."
 
 **Ad-hoc section banners** (`// ----- helpers -----`, `// ==== TYPES ====`).
-For grouping in long files, use the region comment pattern below instead.
+Use the region comment pattern below instead.
 
 ## Region Comments
 
@@ -150,59 +204,44 @@ Long files group related items with paired region markers:
 This is an established convention across the codebase (`biome_service`,
 `biome_module_graph`, `biome_rowan`, the parsers). The `Workspace` trait in
 [`crates/biome_service/src/workspace.rs`](../../../crates/biome_service/src/workspace.rs)
-uses it to group its methods (`PROJECT-LEVEL METHODS`, `FILE-LEVEL METHODS`,
-`SEARCH-RELATED METHODS`). Editors fold on these markers, which is the point:
-they exist for navigation, not documentation.
+uses it to group its methods. Editors fold on these markers; they exist for
+navigation, not documentation.
 
-Rules:
-
-- Every `// #region` has a matching `// #endregion`. An unpaired marker breaks
-  editor folding silently.
-- The name states what the group contains. It can be a plain label
-  (`Shared helpers`) or anchored to a function (`#region parse_thematic_break_parts`)
-  when the region holds one entry point and its private support code.
-- Use regions only where they earn their keep: files or `impl`/`trait` blocks
-  long enough that folding helps. A file that fits on two screens does not
-  need them.
-- A region name is organization, not documentation. It never substitutes for
-  rustdoc on the items inside it.
+- Pair every `// #region` with `// #endregion`.
+- Name what the group contains. Use a plain label, or anchor the name to a
+  function when the region holds one entry point and its private support code.
+- Use regions only when folding helps in a long file, `impl`, or `trait` block.
+- Never use a region name instead of rustdoc on its items.
 
 ## Editing Existing Code
 
-- Preserve existing doc comments. If your change alters behavior, extend or
-  correct the specific prose — never replace it with generic text. Deleting
-  hard-won context is worse than leaving a comment slightly stale.
-- Match the surrounding density. A heavily documented module deserves the same
-  level on new items; do not blanket a sparse module with comments.
-
-## Exemplar
-
-The `//!` module docs at the top of
-[`crates/biome_service/src/workspace.rs`](../../../crates/biome_service/src/workspace.rs)
-show the target register. They define a term the rest of the module depends on
-("open documents") and give its meaning in both the LSP and CLI contexts; they
-explain a design decision the signatures alone would make confusing (the
-workspace is stateful, yet every method takes `&self`, because the trait must
-be thread-safe and caching happens internally); and they state the error
-philosophy once, at the top, instead of repeating it on every method.
-Everything is present tense; nothing mentions how the design evolved or
-defends a change.
+- Edit the source comment, not a generated schema, binding, or help snapshot.
+- Preserve accurate details. If behavior changes, correct the specific prose
+  instead of replacing it with generic text.
+- Match nearby density and terminology only for the same audience and
+  destination.
+- Keep the change focused; do not rewrite unrelated comments to impose a voice.
 
 ## Self-Check Before Finishing
 
-After completing any task that touched comments, re-read **only the comments
-in your diff**, in isolation from the code changes:
+Read only the comments in the diff, without the implementation:
 
-1. Does each one pass the deletion test?
-2. Does any reference the conversation, the change itself, or the reviewer?
-3. Would a reader without access to the diff understand each one?
+1. Identify the reader and every destination.
+2. Make each comment understandable without the conversation, change history,
+   reviewer, issue, or diff. Keep issue links only as supplemental context for
+   constraints or tracked workarounds.
+3. Delete contributor comments recoverable from the code.
+4. Ensure end-user comments stand alone without Rust, Biome-internal, or
+   advanced target-language knowledge and state the details needed to predict
+   behavior.
+5. Check public names, examples, terminology, inclusivity, and grammar.
+6. Inspect generated or rendered output when applicable.
 
-Fix or delete what fails. Deletion is the default; a missing comment is
-cheaper than a misleading one.
+Delete redundant contributor comments, but retain descriptions required by a
+user-facing surface.
 
 ## References
 
-- [Diátaxis](https://diataxis.fr/) — the framework behind the
-  explanation / reference / rationale split above.
-- [lint-rule-development](../lint-rule-development/SKILL.md) — for rule
-  rustdoc, which is end-user documentation.
+- [Biome philosophy](https://biomejs.dev/internals/philosophy/) — principles for user communication.
+- [Diátaxis](https://diataxis.fr/) — explanation, reference, and rationale.
+- [lint-rule-development](../lint-rule-development/SKILL.md) — lint and assist documentation requirements.
