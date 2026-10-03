@@ -17,7 +17,11 @@ use biome_string_case::StrLikeExtension;
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
+    /// Disallow ARIA attributes on elements that cannot use them.
+    ///
+    /// ARIA (Accessible Rich Internet Applications) attributes communicate an element's role and
+    /// state to assistive technologies. The `html`, `meta`, `script`, and `style` elements do not
+    /// support ARIA roles or `aria-*` attributes, so those attributes provide no usable information.
     ///
     /// ## Examples
     ///

@@ -10,12 +10,11 @@ use biome_rule_options::no_access_key::NoAccessKeyOptions;
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Enforce that the `accesskey` attribute is not used on any HTML element.
+    /// Disallow the `accesskey` attribute.
     ///
-    /// The `accesskey` assigns a keyboard shortcut to the current element. However, the `accesskey` value
-    /// can conflict with keyboard commands used by screen readers and keyboard-only users, which leads to
-    /// inconsistent keyboard actions across applications. To avoid accessibility complications,
-    /// this rule suggests users remove the `accesskey` attribute on elements.
+    /// `accesskey` assigns a keyboard shortcut to an element. The shortcut can conflict with browser,
+    /// operating-system, or screen-reader commands, and the activation keys differ between browsers.
+    /// Remove the attribute and provide keyboard access through standard interactive elements.
     ///
     /// ## Examples
     ///
@@ -31,6 +30,12 @@ declare_lint_rule! {
     ///
     /// ```html,expect_diagnostic
     /// <button accesskey="n">Next</button>
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```html
+    /// <button>Next</button>
     /// ```
     ///
     /// ## Resources
