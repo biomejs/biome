@@ -1,0 +1,317 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidShadowed.cjs
+---
+# Input
+```cjs
+// should generate diagnostics
+
+function parameter(arguments) {
+    arguments.callee;
+    arguments?.caller;
+    arguments.callee = value;
+}
+
+function local() {
+    const arguments = {};
+    arguments.caller;
+    (arguments).callee;
+    arguments.caller++;
+}
+
+function nested() {
+    const arguments = {};
+    return () => arguments.callee;
+}
+
+function destructured({ arguments }) {
+    arguments.callee;
+    ({ value: arguments.caller } = source);
+}
+
+function hoisted() {
+    arguments.callee;
+    var arguments = {};
+}
+
+function escapedParameter(\u0061rguments) {
+    arguments.callee;
+    \u{61}rguments.c\u0061ller = value;
+}
+
+function escapedLocal() {
+    const arguments = {};
+    \u0061rguments.c\u{61}llee;
+}
+
+```
+
+# Diagnostics
+```
+invalidShadowed.cjs:4:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    3 │ function parameter(arguments) {
+  > 4 │     arguments.callee;
+      │     ^^^^^^^^^^^^^^^^
+    5 │     arguments?.caller;
+    6 │     arguments.callee = value;
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:5:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+    3 │ function parameter(arguments) {
+    4 │     arguments.callee;
+  > 5 │     arguments?.caller;
+      │     ^^^^^^^^^^^^^^^^^
+    6 │     arguments.callee = value;
+    7 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:6:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    4 │     arguments.callee;
+    5 │     arguments?.caller;
+  > 6 │     arguments.callee = value;
+      │     ^^^^^^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:11:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+     9 │ function local() {
+    10 │     const arguments = {};
+  > 11 │     arguments.caller;
+       │     ^^^^^^^^^^^^^^^^
+    12 │     (arguments).callee;
+    13 │     arguments.caller++;
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:12:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    10 │     const arguments = {};
+    11 │     arguments.caller;
+  > 12 │     (arguments).callee;
+       │     ^^^^^^^^^^^^^^^^^^
+    13 │     arguments.caller++;
+    14 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:13:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+    11 │     arguments.caller;
+    12 │     (arguments).callee;
+  > 13 │     arguments.caller++;
+       │     ^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:18:18 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    16 │ function nested() {
+    17 │     const arguments = {};
+  > 18 │     return () => arguments.callee;
+       │                  ^^^^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:22:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    21 │ function destructured({ arguments }) {
+  > 22 │     arguments.callee;
+       │     ^^^^^^^^^^^^^^^^
+    23 │     ({ value: arguments.caller } = source);
+    24 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:23:15 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+    21 │ function destructured({ arguments }) {
+    22 │     arguments.callee;
+  > 23 │     ({ value: arguments.caller } = source);
+       │               ^^^^^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:27:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    26 │ function hoisted() {
+  > 27 │     arguments.callee;
+       │     ^^^^^^^^^^^^^^^^
+    28 │     var arguments = {};
+    29 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:32:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    31 │ function escapedParameter(\u0061rguments) {
+  > 32 │     arguments.callee;
+       │     ^^^^^^^^^^^^^^^^
+    33 │     \u{61}rguments.c\u0061ller = value;
+    34 │ }
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:33:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.caller.
+  
+    31 │ function escapedParameter(\u0061rguments) {
+    32 │     arguments.callee;
+  > 33 │     \u{61}rguments.c\u0061ller = value;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ }
+    35 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidShadowed.cjs:38:5 lint/nursery/noArgumentsCallerOrCallee ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use arguments.callee.
+  
+    36 │ function escapedLocal() {
+    37 │     const arguments = {};
+  > 38 │     \u0061rguments.c\u{61}llee;
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ }
+    40 │ 
+  
+  i These deprecated properties are forbidden in strict mode and prevent JavaScript optimizations.
+  
+  i Refer to the function by name for recursion, and pass the caller explicitly if you need to access it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
