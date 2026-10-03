@@ -62,7 +62,7 @@ pub(crate) use module_types::{
     inference_module_sccs,
 };
 pub use normalization::normalize_type;
-pub(crate) use normalization::substitute_types;
+pub(crate) use normalization::{substitute_types, substitute_types_in_root_body};
 pub use promises::{
     function_returns_promise, infer_expression_function_returns_promise,
     infer_expression_is_array_of_promises, infer_expression_is_promise, is_array_of_promise_type,

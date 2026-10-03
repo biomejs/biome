@@ -17,7 +17,7 @@ use crate::db::type_inference::{
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
-use biome_js_type_info::interned_types::TypeData as InferredTypeData;
+use biome_js_type_info::interned_types::{TypeData as InferredTypeData, TypeTransformResult};
 
 // #region NORMALIZATION QUERIES
 
@@ -74,6 +74,41 @@ pub(crate) fn substitute_types<'db>(
     )
 }
 
+/// Replaces generic references inside the root declaration of `input.ty`,
+/// applying `input.substitutions` one after another.
+///
+/// Unlike [`substitute_types`], the root's own type parameters are kept, as
+/// described on [`InferredTypeData::substitute_type_in_root_body`]. Each
+/// substitution also applies inside the replacements of the ones before it. An
+/// exhausted substitution budget or an invalid structural rebuild returns
+/// [`InferredTypeData::Unknown`].
+///
+/// Call inference instantiates the same generic signature with the same type
+/// arguments for repeated calls, so this query shares one result across them.
+#[salsa::tracked(returns(copy))]
+pub(crate) fn substitute_types_in_root_body<'db>(
+    db: &'db dyn ModuleDb,
+    input: TypeSubstitutionInput<'db>,
+) -> InferredTypeData<'db> {
+    execute_query(
+        TypeInferenceQueryKind::Normalization,
+        TypeInferenceProfileOrigin::Inherited,
+        "substitute_types_in_root_body",
+        || {
+            let mut ty = input.ty(db);
+            for substitution in input.substitutions(db) {
+                match ty.substitute_type_in_root_body(db, *substitution) {
+                    TypeTransformResult::Transformed(substituted) => ty = substituted,
+                    TypeTransformResult::LimitExceeded | TypeTransformResult::InvalidRebuild => {
+                        return InferredTypeData::Unknown;
+                    }
+                }
+            }
+            ty
+        },
+    )
+}
+
 // #endregion
 
 // #region QUERY HELPER FUNCTIONS
@@ -84,6 +119,7 @@ fn type_needs_normalization(ty: InferredTypeData<'_>) -> bool {
         InferredTypeData::InstanceOf(_)
             | InferredTypeData::IndexedAccess(_)
             | InferredTypeData::MappedType(_)
+            | InferredTypeData::Extends(_)
             | InferredTypeData::TypeOperator(_)
             | InferredTypeData::Intersection(_)
             | InferredTypeData::Local(_)

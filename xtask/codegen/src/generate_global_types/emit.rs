@@ -232,6 +232,21 @@ fn render_type_data(data: &LoweredTypeData) -> String {
             render_type_reference(object),
             render_type_reference(index),
         ),
+        LoweredTypeData::Extends {
+            check_type,
+            extends_type,
+            true_type,
+            false_type,
+            infer_types,
+            distributive,
+        } => format!(
+            "crate::TypeData::Extends(Box::new(crate::ExtendsType {{ check_type: {}, extends_type: {}, true_type: {}, false_type: {}, infer_types: {}, distributive: {distributive} }}))",
+            render_type_reference(check_type),
+            render_type_reference(extends_type),
+            render_type_reference(true_type),
+            render_type_reference(false_type),
+            render_type_references(infer_types),
+        ),
         LoweredTypeData::Undefined => "crate::TypeData::Undefined".to_string(),
         LoweredTypeData::InstanceOf {
             ty,
