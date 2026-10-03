@@ -1,0 +1,36 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```cjs
+﻿var value = 1;
+```
+
+# Input
+```cjs
+﻿
+```
+
+# Input
+```cjs
+﻿  var value = 1;
+```
+
+# Input
+```cjs
+﻿
+var value = 1;
+```
+
+# Input
+```cjs
+﻿// header
+var value = 1;
+```
+
+# Input
+```cjs
+﻿#! /usr/bin/env node
+var value = 1;
+```

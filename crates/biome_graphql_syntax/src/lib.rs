@@ -90,6 +90,10 @@ impl biome_rowan::SyntaxKind for GraphqlSyntaxKind {
         )
     }
 
+    fn is_allowed_before_suppressions(&self) -> bool {
+        *self == Self::UNICODE_BOM
+    }
+
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
     }
