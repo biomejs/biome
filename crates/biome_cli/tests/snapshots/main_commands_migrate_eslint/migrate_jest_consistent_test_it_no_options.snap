@@ -16,7 +16,7 @@ biome lint
   "linter": {
     "rules": {
       "preset": "none",
-      "nursery": {
+      "style": {
         "useConsistentTestIt": {
           "level": "error",
           "options": { "function": "test", "withinDescribe": "it" }

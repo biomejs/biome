@@ -14,7 +14,6 @@ mod generate_migrate_eslint;
 mod generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 mod generate_module_replacements;
-mod move_rule;
 use xtask_glue::{Result, project_root, pushd};
 
 #[cfg(feature = "schema")]
@@ -35,13 +34,13 @@ use crate::generate_migrate_eslint::generate_migrate_eslint;
 use crate::generate_migrate_stylelint::generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 use crate::generate_module_replacements::generate_module_replacements;
-use crate::move_rule::move_rule;
 
 #[cfg(feature = "global_types")]
 use xtask_codegen::generate_global_types;
 use xtask_codegen::{
     TaskCommand, generate_analyzer, generate_analyzer_rule_options, generate_ast,
-    generate_formatters, generate_new_analyzer_rule, generate_tables, task_command,
+    generate_formatters, generate_new_analyzer_rule, generate_tables, move_rule::move_rule,
+    promote_rules::promote_rules, task_command,
 };
 use xtask_glue::Mode::Overwrite;
 
@@ -116,7 +115,10 @@ fn main() -> Result<()> {
             generate_analyzer_rule_options(&name, Overwrite, true)?;
         }
         TaskCommand::MoveRule { name, group } => {
-            move_rule(&name, &group);
+            move_rule(&name, &group)?;
+        }
+        TaskCommand::PromoteRules { manifest } => {
+            promote_rules(&manifest)?;
         }
         TaskCommand::All => {
             generate_tables()?;

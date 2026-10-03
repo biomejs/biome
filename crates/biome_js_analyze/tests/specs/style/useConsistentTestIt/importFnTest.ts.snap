@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importFnTest.ts
+---
+# Input
+```ts
+import { it } from "vitest";
+it("first", () => {});
+describe("suite", () => { it("second", () => {}); });
+
+```
+
+# Diagnostics
+```
+importFnTest.ts:2:1 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function it is inconsistent with the configured preferred function test.
+  
+    1 │ import { it } from "vitest";
+  > 2 │ it("first", () => {});
+      │ ^^
+    3 │ describe("suite", () => { it("second", () => {}); });
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use test instead.
+  
+    1   │ - import·{·it·}·from·"vitest";
+    2   │ - it("first",·()·=>·{});
+      1 │ + import·{·it·,·it·as·test·}·from·"vitest";
+      2 │ + test("first",·()·=>·{});
+    3 3 │   describe("suite", () => { it("second", () => {}); });
+    4 4 │   
+  
+
+```

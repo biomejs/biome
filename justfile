@@ -240,6 +240,10 @@ move-rule rulename group:
   cargo run -p xtask_codegen -- move-rule --group={{group}} --name={{rulename}}
   cargo run -p xtask_codegen -- analyzer
 
+# Promotes nursery lint rules described by a JSON manifest
+promote-rules manifest:
+  cargo run -p xtask_codegen -- promote-rules --manifest={{manifest}}
+
 # Format Rust files and TOML files
 format:
 	cargo format

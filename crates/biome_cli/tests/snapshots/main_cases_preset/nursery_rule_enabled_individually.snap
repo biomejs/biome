@@ -15,7 +15,7 @@ biome lint test.js
   "linter": {
     "rules": {
       "nursery": {
-        "noLoopFunc": "error"
+        "noThisOutsideOfClass": "error"
       }
     }
   }
@@ -25,12 +25,9 @@ biome lint test.js
 ## `test.js`
 
 ```js
-const queue = [];
-let shared = 0;
-for (let i = 0; i < 10; i += 1) {
-    queue.push(() => shared);
+export function getContext() {
+    return this;
 }
-shared = 100;
 
 ```
 
@@ -48,22 +45,19 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test.js:4:16 lint/nursery/noLoopFunc ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test.js:2:12 lint/nursery/noThisOutsideOfClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × This function declared in a loop contains unsafe references to outer variables.
+  × Do not use this outside of a class.
   
-    2 │ let shared = 0;
-    3 │ for (let i = 0; i < 10; i += 1) {
-  > 4 │     queue.push(() => shared);
-      │                ^^^^^^^^^^^^
-    5 │ }
-    6 │ shared = 100;
+    1 │ export function getContext() {
+  > 2 │     return this;
+      │            ^^^^
+    3 │ }
+    4 │ 
   
-  i Loop-created functions often run after the loop continues, but captured outer bindings like var variables are reused instead of copied per iteration.
+  i this depends on how a function is called and may refer to an unexpected object.
   
-  i The following variables were detected: shared
-  
-  i Move the function outside the loop, capture only per-iteration bindings, or avoid mutating the captured variable across iterations.
+  i Use a class member, or declare an explicit this parameter in a TypeScript function.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
