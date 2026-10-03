@@ -10,4 +10,5 @@ mod migrate_eslint_scope;
 mod migrate_prettier;
 mod rage;
 mod search;
+mod stdin;
 mod version;
