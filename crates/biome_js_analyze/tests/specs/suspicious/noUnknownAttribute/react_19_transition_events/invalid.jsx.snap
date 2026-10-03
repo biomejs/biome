@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div
+	ontransitioncancel={handleTransition}
+	ontransitioncanclecapture={handleTransition}
+	onTransitionCancle={handleTransition}
+	onAnimationCancel={handleAnimation}
+	onAnimationCancelCapture={handleAnimation}
+/>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Property 'ontransitioncancel' is not a valid React prop name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div
+  > 3 │ 	ontransitioncancel={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	ontransitioncanclecapture={handleTransition}
+    5 │ 	onTransitionCancle={handleTransition}
+  
+  i React uses camelCased props, while HTML uses kebab-cased attributes.
+  
+  i Use 'onTransitionCancel' instead of 'ontransitioncancel' for React components.
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'ontransitioncanclecapture' is not a valid DOM attribute.
+  
+    2 │ <div
+    3 │ 	ontransitioncancel={handleTransition}
+  > 4 │ 	ontransitioncanclecapture={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	onTransitionCancle={handleTransition}
+    6 │ 	onAnimationCancel={handleAnimation}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:5:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionCancle' is not a valid DOM attribute.
+  
+    3 │ 	ontransitioncancel={handleTransition}
+    4 │ 	ontransitioncanclecapture={handleTransition}
+  > 5 │ 	onTransitionCancle={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	onAnimationCancel={handleAnimation}
+    7 │ 	onAnimationCancelCapture={handleAnimation}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:6:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onAnimationCancel' is not a valid DOM attribute.
+  
+    4 │ 	ontransitioncanclecapture={handleTransition}
+    5 │ 	onTransitionCancle={handleTransition}
+  > 6 │ 	onAnimationCancel={handleAnimation}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	onAnimationCancelCapture={handleAnimation}
+    8 │ />;
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:7:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onAnimationCancelCapture' is not a valid DOM attribute.
+  
+    5 │ 	onTransitionCancle={handleTransition}
+    6 │ 	onAnimationCancel={handleAnimation}
+  > 7 │ 	onAnimationCancelCapture={handleAnimation}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ />;
+    9 │ 
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```

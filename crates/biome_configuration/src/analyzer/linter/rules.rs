@@ -430,6 +430,7 @@ pub enum RuleName {
     NoVoidElementsWithChildren,
     NoVoidTypeReturn,
     NoVueArrowFuncInWatch,
+    NoVueBooleanDefault,
     NoVueDataObjectDeclaration,
     NoVueDeprecatedScopedSlots,
     NoVueDuplicateKeys,
@@ -445,6 +446,7 @@ pub enum RuleName {
     NoWith,
     NoXorAsExponentiation,
     NoYodaExpression,
+    NoZeroFractions,
     UseAdjacentOverloadSignatures,
     UseAltText,
     UseAnchorContent,
@@ -463,6 +465,7 @@ pub enum RuleName {
     UseAwaitThenable,
     UseBaseline,
     UseBetterDomTraversing,
+    UseBigintLiterals,
     UseBiomeIgnoreFolder,
     UseBlockStatements,
     UseButtonType,
@@ -1001,6 +1004,7 @@ impl RuleName {
             Self::NoVoidElementsWithChildren => "noVoidElementsWithChildren",
             Self::NoVoidTypeReturn => "noVoidTypeReturn",
             Self::NoVueArrowFuncInWatch => "noVueArrowFuncInWatch",
+            Self::NoVueBooleanDefault => "noVueBooleanDefault",
             Self::NoVueDataObjectDeclaration => "noVueDataObjectDeclaration",
             Self::NoVueDeprecatedScopedSlots => "noVueDeprecatedScopedSlots",
             Self::NoVueDuplicateKeys => "noVueDuplicateKeys",
@@ -1016,6 +1020,7 @@ impl RuleName {
             Self::NoWith => "noWith",
             Self::NoXorAsExponentiation => "noXorAsExponentiation",
             Self::NoYodaExpression => "noYodaExpression",
+            Self::NoZeroFractions => "noZeroFractions",
             Self::UseAdjacentOverloadSignatures => "useAdjacentOverloadSignatures",
             Self::UseAltText => "useAltText",
             Self::UseAnchorContent => "useAnchorContent",
@@ -1034,6 +1039,7 @@ impl RuleName {
             Self::UseAwaitThenable => "useAwaitThenable",
             Self::UseBaseline => "useBaseline",
             Self::UseBetterDomTraversing => "useBetterDomTraversing",
+            Self::UseBigintLiterals => "useBigintLiterals",
             Self::UseBiomeIgnoreFolder => "useBiomeIgnoreFolder",
             Self::UseBlockStatements => "useBlockStatements",
             Self::UseButtonType => "useButtonType",
@@ -1568,6 +1574,7 @@ impl RuleName {
             Self::NoVoidElementsWithChildren => RuleGroup::Correctness,
             Self::NoVoidTypeReturn => RuleGroup::Correctness,
             Self::NoVueArrowFuncInWatch => RuleGroup::Suspicious,
+            Self::NoVueBooleanDefault => RuleGroup::Nursery,
             Self::NoVueDataObjectDeclaration => RuleGroup::Correctness,
             Self::NoVueDeprecatedScopedSlots => RuleGroup::Nursery,
             Self::NoVueDuplicateKeys => RuleGroup::Correctness,
@@ -1583,6 +1590,7 @@ impl RuleName {
             Self::NoWith => RuleGroup::Suspicious,
             Self::NoXorAsExponentiation => RuleGroup::Nursery,
             Self::NoYodaExpression => RuleGroup::Style,
+            Self::NoZeroFractions => RuleGroup::Nursery,
             Self::UseAdjacentOverloadSignatures => RuleGroup::Suspicious,
             Self::UseAltText => RuleGroup::A11y,
             Self::UseAnchorContent => RuleGroup::A11y,
@@ -1601,6 +1609,7 @@ impl RuleName {
             Self::UseAwaitThenable => RuleGroup::Nursery,
             Self::UseBaseline => RuleGroup::Nursery,
             Self::UseBetterDomTraversing => RuleGroup::Nursery,
+            Self::UseBigintLiterals => RuleGroup::Nursery,
             Self::UseBiomeIgnoreFolder => RuleGroup::Suspicious,
             Self::UseBlockStatements => RuleGroup::Style,
             Self::UseButtonType => RuleGroup::A11y,
@@ -2144,6 +2153,7 @@ impl std::str::FromStr for RuleName {
             "noVoidElementsWithChildren" => Ok(Self::NoVoidElementsWithChildren),
             "noVoidTypeReturn" => Ok(Self::NoVoidTypeReturn),
             "noVueArrowFuncInWatch" => Ok(Self::NoVueArrowFuncInWatch),
+            "noVueBooleanDefault" => Ok(Self::NoVueBooleanDefault),
             "noVueDataObjectDeclaration" => Ok(Self::NoVueDataObjectDeclaration),
             "noVueDeprecatedScopedSlots" => Ok(Self::NoVueDeprecatedScopedSlots),
             "noVueDuplicateKeys" => Ok(Self::NoVueDuplicateKeys),
@@ -2159,6 +2169,7 @@ impl std::str::FromStr for RuleName {
             "noWith" => Ok(Self::NoWith),
             "noXorAsExponentiation" => Ok(Self::NoXorAsExponentiation),
             "noYodaExpression" => Ok(Self::NoYodaExpression),
+            "noZeroFractions" => Ok(Self::NoZeroFractions),
             "useAdjacentOverloadSignatures" => Ok(Self::UseAdjacentOverloadSignatures),
             "useAltText" => Ok(Self::UseAltText),
             "useAnchorContent" => Ok(Self::UseAnchorContent),
@@ -2177,6 +2188,7 @@ impl std::str::FromStr for RuleName {
             "useAwaitThenable" => Ok(Self::UseAwaitThenable),
             "useBaseline" => Ok(Self::UseBaseline),
             "useBetterDomTraversing" => Ok(Self::UseBetterDomTraversing),
+            "useBigintLiterals" => Ok(Self::UseBigintLiterals),
             "useBiomeIgnoreFolder" => Ok(Self::UseBiomeIgnoreFolder),
             "useBlockStatements" => Ok(Self::UseBlockStatements),
             "useButtonType" => Ok(Self::UseButtonType),
@@ -2381,10 +2393,16 @@ impl std::fmt::Display for RuleName {
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Rules {
-    #[doc = r" It enables the lint rules recommended by Biome. `true` by default."]
+    #[doc = r" Enables or disables Biome's recommended non-nursery rules. Defaults to `true`."]
+    #[doc = r""]
+    #[doc = r" **Deprecated:** This option will be removed in the next major version. Use"]
+    #[doc = r" `linter.rules.preset` instead, or run `biome migrate` to update the configuration."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub recommended: Option<bool>,
-    #[doc = r" The rule presets to use."]
+    #[doc = r" Selects the baseline set of lint rules. `recommended` enables Biome's recommended"]
+    #[doc = r" non-nursery rules, `all` enables all non-nursery rules, and `none` starts with no"]
+    #[doc = r" rules enabled. Group-level settings and explicit rule settings override this"]
+    #[doc = r" preset. Defaults to `recommended`."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preset: Option<PresetConfig>,
     #[deserializable(rename = "a11y")]

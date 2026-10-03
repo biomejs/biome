@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+a { font-family: monospace, monospace; }
+b { font-family: MONOSPACE, MONOSPACE; }
+c { font-family: monospace, MONOSPACE; }
+d { FONT-FAMILY: monospace, monospace !important; }
+e { font-family: monospace /* preserve inherited font size */, monospace; }
+f { font-family: "monospace"; }
+g { font: 16px monospace, monospace; }
+h { font-family: \6d onospace, \6d onospace; }
+i { font-family: \6D ONOSPACE, m\6fnospace; }
+j { font-family: m\onospace, m\onospace; }
