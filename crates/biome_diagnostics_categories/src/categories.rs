@@ -201,6 +201,7 @@ define_categories! {
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
     "lint/nursery/noAstroConflictingSetDirectives": "https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
+    "lint/nursery/noAstroDeprecatedGetEntryBySlug": "https://biomejs.dev/linter/rules/no-astro-deprecated-get-entry-by-slug",
     "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",

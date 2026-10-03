@@ -1,0 +1,7 @@
+---
+// should generate diagnostics
+import { getEntryBySlug } from "astro:content";
+
+const entry = await getEntryBySlug("blog", "post-1");
+---
+<h1>{entry.data.title}</h1>
