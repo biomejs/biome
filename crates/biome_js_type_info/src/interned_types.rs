@@ -1195,6 +1195,7 @@ impl<'db> TypeData<'db> {
                     reference.ty.as_ref().map(&mut *resolve_reference),
                     reference.value_ty.as_ref().map(&mut *resolve_reference),
                     reference.namespace_ty.as_ref().map(&mut *resolve_reference),
+                    reference.separable,
                 ))
             }
             raw::TypeData::TypeofExpression(expression) => {
@@ -1711,6 +1712,7 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     self.take_optional_type(reference.ty(db))?,
                     self.take_optional_type(reference.value_ty(db))?,
                     self.take_optional_type(reference.namespace_ty(db))?,
+                    reference.separable(db),
                 ))
             }
             TypeData::TypeofExpression(expression) => {
@@ -2666,6 +2668,8 @@ pub struct InternedMergedReference<'db> {
     pub value_ty: Option<TypeData<'db>>,
     #[returns(copy)]
     pub namespace_ty: Option<TypeData<'db>>,
+    /// See [`raw::MergedReference::separable`].
+    pub separable: bool,
 }
 
 impl<'db> InternedMergedReference<'db> {
@@ -3786,6 +3790,7 @@ mod tests {
                 Some(s.next()),
                 Some(s.next()),
                 Some(s.next()),
+                false,
             ))
         });
 

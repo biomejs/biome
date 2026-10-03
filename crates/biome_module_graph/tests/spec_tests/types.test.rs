@@ -1167,6 +1167,7 @@ fn test_normalize_type_collapses_equal_merged_reference_targets() {
         Some(target),
         Some(target),
         None,
+        false,
     ));
     let normalized_ty = normalize_type(&db, index_module, duplicated_target_ty);
     assert_eq!(normalized_ty, expected_ty);
