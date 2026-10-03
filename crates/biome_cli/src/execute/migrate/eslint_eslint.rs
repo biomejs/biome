@@ -636,6 +636,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::VueNoRestrictedHtmlElements(conf));
                             }
                         }
+                        "unicorn/consistent-json-file-read" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornConsistentJsonFileRead(conf));
+                            }
+                        }
                         "unicorn/filename-case" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
@@ -908,6 +913,7 @@ pub(crate) enum Rule {
     ),
     SvelteNoRestrictedHtmlElements(RuleConf<eslint_svelte::RestrictedHtmlElement>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
+    UnicornConsistentJsonFileRead(RuleConf<eslint_unicorn::ConsistentJsonFileReadOption>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
@@ -949,6 +955,9 @@ impl Rule {
             }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
+            }
+            Self::UnicornConsistentJsonFileRead(_) => {
+                Cow::Borrowed("unicorn/consistent-json-file-read")
             }
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {

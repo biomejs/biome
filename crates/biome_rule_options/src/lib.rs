@@ -404,6 +404,7 @@ pub mod use_consistent_enum_value_type;
 pub mod use_consistent_function_style;
 pub mod use_consistent_graphql_descriptions;
 pub mod use_consistent_heading_level;
+pub mod use_consistent_json_file_read;
 pub mod use_consistent_member_accessibility;
 pub mod use_consistent_method_signatures;
 pub mod use_consistent_object_definitions;

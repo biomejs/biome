@@ -1,0 +1,551 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { readFile } from "node:fs/promises";
+import { readFileSync as readSync } from "node:fs";
+import { readFileSync } from "fs";
+
+async function direct() {
+	JSON.parse(await fs.readFile("./package.json"));
+	JSON.parse(fs.readFileSync("./package.json"));
+	JSON.parse(await fs.promises.readFile("./package.json"));
+	JSON.parse(await fs["readFile"]("./package.json"));
+	JSON.parse(await (fs.readFile("./package.json")));
+	JSON.parse(await readFile("./package.json"));
+	JSON.parse(readSync("./package.json"));
+	JSON.parse(readFileSync("./package.json"));
+	globalThis.JSON.parse(fs.readFileSync("./package.json"));
+}
+
+async function trailingComma() {
+	JSON.parse(
+		await fs.readFile(
+			"./package.json",
+		),
+	);
+}
+
+async function throughVariables() {
+	const promise = fs.readFile("./package.json");
+	const packageJson = JSON.parse(await promise);
+
+	const buffer = await fs.readFile("./package.json");
+	JSON.parse(buffer);
+
+	const first = fs.readFile("./package.json");
+	const second = first;
+	JSON.parse(await second);
+}
+
+async function nullEncoding() {
+	JSON.parse(await fs.readFile("./package.json", null));
+	JSON.parse(await fs.readFile("./package.json", undefined));
+	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+	JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+	JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+	// No fix: the comment would be lost.
+	JSON.parse(await fs.readFile("./package.json", { /* buffer */ encoding: null }));
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:7:19 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    6 │ async function direct() {
+  > 7 │ 	JSON.parse(await fs.readFile("./package.json"));
+      │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	JSON.parse(fs.readFileSync("./package.json"));
+    9 │ 	JSON.parse(await fs.promises.readFile("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    7 │ → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+      │                                                ++++++++   
+
+```
+
+```
+invalid.js:8:13 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+     6 │ async function direct() {
+     7 │ 	JSON.parse(await fs.readFile("./package.json"));
+   > 8 │ 	JSON.parse(fs.readFileSync("./package.json"));
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	JSON.parse(await fs.promises.readFile("./package.json"));
+    10 │ 	JSON.parse(await fs["readFile"]("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    8 │ → JSON.parse(fs.readFileSync("./package.json",·"utf8"));
+      │                                              ++++++++   
+
+```
+
+```
+invalid.js:9:19 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+     7 │ 	JSON.parse(await fs.readFile("./package.json"));
+     8 │ 	JSON.parse(fs.readFileSync("./package.json"));
+   > 9 │ 	JSON.parse(await fs.promises.readFile("./package.json"));
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	JSON.parse(await fs["readFile"]("./package.json"));
+    11 │ 	JSON.parse(await (fs.readFile("./package.json")));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    9 │ → JSON.parse(await·fs.promises.readFile("./package.json",·"utf8"));
+      │                                                         ++++++++   
+
+```
+
+```
+invalid.js:10:19 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+     8 │ 	JSON.parse(fs.readFileSync("./package.json"));
+     9 │ 	JSON.parse(await fs.promises.readFile("./package.json"));
+  > 10 │ 	JSON.parse(await fs["readFile"]("./package.json"));
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	JSON.parse(await (fs.readFile("./package.json")));
+    12 │ 	JSON.parse(await readFile("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    10 │ → JSON.parse(await·fs["readFile"]("./package.json",·"utf8"));
+       │                                                   ++++++++   
+
+```
+
+```
+invalid.js:11:20 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+     9 │ 	JSON.parse(await fs.promises.readFile("./package.json"));
+    10 │ 	JSON.parse(await fs["readFile"]("./package.json"));
+  > 11 │ 	JSON.parse(await (fs.readFile("./package.json")));
+       │ 	                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	JSON.parse(await readFile("./package.json"));
+    13 │ 	JSON.parse(readSync("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    11 │ → JSON.parse(await·(fs.readFile("./package.json",·"utf8")));
+       │                                                 ++++++++    
+
+```
+
+```
+invalid.js:12:19 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    10 │ 	JSON.parse(await fs["readFile"]("./package.json"));
+    11 │ 	JSON.parse(await (fs.readFile("./package.json")));
+  > 12 │ 	JSON.parse(await readFile("./package.json"));
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	JSON.parse(readSync("./package.json"));
+    14 │ 	JSON.parse(readFileSync("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    12 │ → JSON.parse(await·readFile("./package.json",·"utf8"));
+       │                                             ++++++++   
+
+```
+
+```
+invalid.js:13:13 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    11 │ 	JSON.parse(await (fs.readFile("./package.json")));
+    12 │ 	JSON.parse(await readFile("./package.json"));
+  > 13 │ 	JSON.parse(readSync("./package.json"));
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 	JSON.parse(readFileSync("./package.json"));
+    15 │ 	globalThis.JSON.parse(fs.readFileSync("./package.json"));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    13 │ → JSON.parse(readSync("./package.json",·"utf8"));
+       │                                       ++++++++   
+
+```
+
+```
+invalid.js:14:13 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    12 │ 	JSON.parse(await readFile("./package.json"));
+    13 │ 	JSON.parse(readSync("./package.json"));
+  > 14 │ 	JSON.parse(readFileSync("./package.json"));
+       │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 	globalThis.JSON.parse(fs.readFileSync("./package.json"));
+    16 │ }
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    14 │ → JSON.parse(readFileSync("./package.json",·"utf8"));
+       │                                           ++++++++   
+
+```
+
+```
+invalid.js:15:24 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    13 │ 	JSON.parse(readSync("./package.json"));
+    14 │ 	JSON.parse(readFileSync("./package.json"));
+  > 15 │ 	globalThis.JSON.parse(fs.readFileSync("./package.json"));
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ }
+    17 │ 
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    15 │ → globalThis.JSON.parse(fs.readFileSync("./package.json",·"utf8"));
+       │                                                         ++++++++   
+
+```
+
+```
+invalid.js:20:9 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    18 │ async function trailingComma() {
+    19 │ 	JSON.parse(
+  > 20 │ 		await fs.readFile(
+       │ 		      ^^^^^^^^^^^^
+  > 21 │ 			"./package.json",
+  > 22 │ 		),
+       │ 		^
+    23 │ 	);
+    24 │ }
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    21 │ → → → "./package.json",·"utf8",
+       │                        ++++++++
+
+```
+
+```
+invalid.js:27:18 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    26 │ async function throughVariables() {
+  > 27 │ 	const promise = fs.readFile("./package.json");
+       │ 	                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 	const packageJson = JSON.parse(await promise);
+    29 │ 
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    27 │ → const·promise·=·fs.readFile("./package.json",·"utf8");
+       │                                               ++++++++  
+
+```
+
+```
+invalid.js:30:23 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    28 │ 	const packageJson = JSON.parse(await promise);
+    29 │ 
+  > 30 │ 	const buffer = await fs.readFile("./package.json");
+       │ 	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	JSON.parse(buffer);
+    32 │ 
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    30 │ → const·buffer·=·await·fs.readFile("./package.json",·"utf8");
+       │                                                    ++++++++  
+
+```
+
+```
+invalid.js:33:16 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    31 │ 	JSON.parse(buffer);
+    32 │ 
+  > 33 │ 	const first = fs.readFile("./package.json");
+       │ 	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ 	const second = first;
+    35 │ 	JSON.parse(await second);
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    33 │ → const·first·=·fs.readFile("./package.json",·"utf8");
+       │                                             ++++++++  
+
+```
+
+```
+invalid.js:39:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    38 │ async function nullEncoding() {
+  > 39 │ 	JSON.parse(await fs.readFile("./package.json", null));
+       │ 	                                               ^^^^
+    40 │ 	JSON.parse(await fs.readFile("./package.json", undefined));
+    41 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    37 37 │   
+    38 38 │   async function nullEncoding() {
+    39    │ - → JSON.parse(await·fs.readFile("./package.json",·null));
+       39 │ + → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+    40 40 │     JSON.parse(await fs.readFile("./package.json", undefined));
+    41 41 │     JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+  
+
+```
+
+```
+invalid.js:40:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    38 │ async function nullEncoding() {
+    39 │ 	JSON.parse(await fs.readFile("./package.json", null));
+  > 40 │ 	JSON.parse(await fs.readFile("./package.json", undefined));
+       │ 	                                               ^^^^^^^^^
+    41 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+    42 │ 	JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    38 38 │   async function nullEncoding() {
+    39 39 │     JSON.parse(await fs.readFile("./package.json", null));
+    40    │ - → JSON.parse(await·fs.readFile("./package.json",·undefined));
+       40 │ + → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+    41 41 │     JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+    42 42 │     JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+  
+
+```
+
+```
+invalid.js:41:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    39 │ 	JSON.parse(await fs.readFile("./package.json", null));
+    40 │ 	JSON.parse(await fs.readFile("./package.json", undefined));
+  > 41 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+       │ 	                                               ^^^^^^^^^^^^^^^^^^
+    42 │ 	JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+    43 │ 	JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    39 39 │     JSON.parse(await fs.readFile("./package.json", null));
+    40 40 │     JSON.parse(await fs.readFile("./package.json", undefined));
+    41    │ - → JSON.parse(await·fs.readFile("./package.json",·{·encoding:·null·}));
+       41 │ + → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+    42 42 │     JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+    43 43 │     JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+  
+
+```
+
+```
+invalid.js:42:49 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    40 │ 	JSON.parse(await fs.readFile("./package.json", undefined));
+    41 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+  > 42 │ 	JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+       │ 	                                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 	JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+    44 │ 	// No fix: the comment would be lost.
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    40 40 │     JSON.parse(await fs.readFile("./package.json", undefined));
+    41 41 │     JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+    42    │ - → JSON.parse(await·fs.readFile("./package.json",·{·"encoding":·undefined·}));
+       42 │ + → JSON.parse(await·fs.readFile("./package.json",·"utf8"));
+    43 43 │     JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+    44 44 │     // No fix: the comment would be lost.
+  
+
+```
+
+```
+invalid.js:43:62 lint/nursery/useConsistentJsonFileRead  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    41 │ 	JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+    42 │ 	JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+  > 43 │ 	JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+       │ 	                                                            ^^^^
+    44 │ 	// No fix: the comment would be lost.
+    45 │ 	JSON.parse(await fs.readFile("./package.json", { /* buffer */ encoding: null }));
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Read the file with the 'utf8' encoding.
+  
+    41 41 │     JSON.parse(await fs.readFile("./package.json", { encoding: null }));
+    42 42 │     JSON.parse(await fs.readFile("./package.json", { "encoding": undefined }));
+    43    │ - → JSON.parse(await·fs.readFile("./package.json",·/*·buffer·*/·null));
+       43 │ + → JSON.parse(await·fs.readFile("./package.json",·/*·buffer·*/·"utf8"));
+    44 44 │     // No fix: the comment would be lost.
+    45 45 │     JSON.parse(await fs.readFile("./package.json", { /* buffer */ encoding: null }));
+  
+
+```
+
+```
+invalid.js:45:49 lint/nursery/useConsistentJsonFileRead ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This JSON file is read as a Buffer before being passed to JSON.parse().
+  
+    43 │ 	JSON.parse(await fs.readFile("./package.json", /* buffer */ null));
+    44 │ 	// No fix: the comment would be lost.
+  > 45 │ 	JSON.parse(await fs.readFile("./package.json", { /* buffer */ encoding: null }));
+       │ 	                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ }
+    47 │ 
+  
+  i JSON.parse() expects a string. A Buffer only works because JavaScript turns it into a string automatically, and TypeScript reports it as an error.
+  
+  i Read the file with the 'utf8' encoding instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
