@@ -20,16 +20,17 @@ use crate::syntax::parse_error::{
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::scss::{
-    add_scss_variable_member_function_name_diagnostic, is_at_any_scss_value, is_at_scss_function,
+    SCSS_BRACKETED_VALUE_EXPRESSION_END_SET, add_scss_variable_member_function_name_diagnostic,
+    is_at_any_scss_value, is_at_scss_binary_operator, is_at_scss_function,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
     is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
     is_at_scss_variable_declaration, parse_scss_bracketed_value_expression_item,
-    parse_scss_function, parse_scss_interpolated_dashed_identifier,
-    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
-    parse_scss_module_member_access, parse_scss_parent_selector_value,
-    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
-    parse_scss_variable_declaration,
+    parse_scss_expression_from_head, parse_scss_function,
+    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
+    parse_scss_interpolated_string, parse_scss_module_member_access,
+    parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
+    parse_scss_variable, parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -959,7 +960,16 @@ impl ParseNodeList for BracketedValueList {
             return Present(expression);
         }
 
-        parse_custom_identifier(p, CssLexContext::Regular)
+        parse_custom_identifier(p, CssLexContext::Regular).and_then(|head| {
+            if CssSyntaxFeatures::Scss.is_supported(p)
+                && !p.at(T![/])
+                && is_at_scss_binary_operator(p)
+            {
+                parse_scss_expression_from_head(p, head, SCSS_BRACKETED_VALUE_EXPRESSION_END_SET)
+            } else {
+                Present(head)
+            }
+        })
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
