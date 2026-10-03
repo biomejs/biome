@@ -211,6 +211,7 @@ pub mod no_precision_loss;
 pub mod no_private_imports;
 pub mod no_process_env;
 pub mod no_process_global;
+pub mod no_promise_executor_return;
 pub mod no_proto;
 pub mod no_prototype_builtins;
 pub mod no_quickfix_biome;

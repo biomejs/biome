@@ -988,6 +988,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noProcessGlobal",
         TypeId::of::<biome_rule_options::no_process_global::NoProcessGlobalOptions>(),
     ));
+    result.push(("nursery", "noPromiseExecutorReturn", TypeId::of::<biome_rule_options::no_promise_executor_return::NoPromiseExecutorReturnOptions>()));
     result.push((
         "suspicious",
         "noProto",
