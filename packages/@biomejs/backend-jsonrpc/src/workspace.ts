@@ -2946,6 +2946,11 @@ export interface Nursery {
 	 */
 	useBigintLiterals?: UseBigintLiteralsConfiguration;
 	/**
+	 * Enforce which languages the top-level blocks of Vue and Svelte components use.
+	 * See https://biomejs.dev/linter/rules/use-consistent-block-lang
+	 */
+	useConsistentBlockLang?: UseConsistentBlockLangConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -5322,6 +5327,9 @@ export type UseBetterDomTraversingConfiguration =
 export type UseBigintLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBigintLiteralsOptions;
+export type UseConsistentBlockLangConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBlockLangOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
@@ -7707,6 +7715,14 @@ export interface RuleWithUseBigintLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: UseBigintLiteralsOptions;
 }
+export interface RuleWithUseConsistentBlockLangOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBlockLangOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -9925,6 +9941,17 @@ export interface UseBaselineOptions {
 }
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
+export interface UseConsistentBlockLangOptions {
+	/**
+	 * The top-level blocks to check in Vue and Svelte components.
+	 *
+	 * Each key is the tag name of a block, without angle brackets, such as
+	 * `script`, `style`, or a Vue custom block like `i18n`. Blocks that aren't
+	 * listed aren't checked. When this option is omitted, the rule doesn't
+	 * check anything.
+	 */
+	blocks?: Record<string, BlockLangOptions>;
+}
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -10838,6 +10865,32 @@ export interface RestrictedPropertyEntry {
  */
 export type AvailabilityTarget = AvailabilityNamed | number;
 /**
+ * The checks for one top-level block.
+ */
+export interface BlockLangOptions {
+	/**
+	 * When `true`, the block may also omit the `lang` attribute.
+	 *
+	 * Only applies when `lang` is set. Defaults to `false`.
+	 */
+	allowNoLang?: boolean;
+	/**
+	 * The values allowed for the `lang` attribute of the block, such as `["ts"]`.
+	 *
+	 * When set, it must contain at least one value. Values must match exactly,
+	 * so `"ts"` doesn't allow `lang="TS"`. When omitted, the `lang` attribute
+	 * of the block isn't checked.
+	 */
+	lang?: string[];
+	/**
+	 * When `true`, every component must contain at least one block with this
+	 * tag name.
+	 *
+	 * Works with or without `lang`. Defaults to `false`.
+	 */
+	required?: boolean;
+}
+/**
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
@@ -11390,6 +11443,7 @@ export type Category =
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentObjectDefinition"

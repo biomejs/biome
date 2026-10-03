@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: validUnconfigured.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+</script>
+
+<style lang="scss">
+</style>
+
+```
