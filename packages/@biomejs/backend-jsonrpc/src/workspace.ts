@@ -2691,6 +2691,11 @@ export interface Nursery {
 	 */
 	noObsoleteTags?: NoObsoleteTagsConfiguration;
 	/**
+	 * Disallow numbers written with an extra leading zero.
+	 * See https://biomejs.dev/linter/rules/no-octal
+	 */
+	noOctal?: NoOctalConfiguration;
+	/**
 	 * Disallow usage of element handles (page.$() and page.$$()).
 	 * See https://biomejs.dev/linter/rules/no-playwright-element-handle
 	 */
@@ -5169,6 +5174,9 @@ export type NoNonScalableViewportConfiguration =
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
+export type NoOctalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoOctalOptions;
 export type NoPlaywrightElementHandleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightElementHandleOptions;
@@ -7450,6 +7458,10 @@ export interface RuleWithNoNonScalableViewportOptions {
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoObsoleteTagsOptions;
+}
+export interface RuleWithNoOctalOptions {
+	level: RulePlainConfiguration;
+	options?: NoOctalOptions;
 }
 export interface RuleWithNoPlaywrightElementHandleOptions {
 	/**
@@ -9780,6 +9792,7 @@ export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
+export type NoOctalOptions = {};
 export type NoPlaywrightElementHandleOptions = {};
 export type NoPlaywrightEvalOptions = {};
 export type NoPlaywrightForceOptionOptions = {};
@@ -11336,6 +11349,7 @@ export type Category =
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
+	| "lint/nursery/noOctal"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
