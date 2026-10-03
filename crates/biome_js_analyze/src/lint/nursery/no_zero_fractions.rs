@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoZeroFractions {
-        version: "next",
+        version: "2.5.16",
         name: "noZeroFractions",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-zero-fractions").same()],
