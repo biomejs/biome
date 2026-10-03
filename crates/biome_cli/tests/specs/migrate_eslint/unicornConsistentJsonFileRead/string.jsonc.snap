@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: string.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "unicorn/consistent-json-file-read": ["error", "string"] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useConsistentJsonFileRead": {
+					"level": "error",
+					"options": { "readAs": "string" }
+				}
+			}
+		}
+	}
+}
+
+```
