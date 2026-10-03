@@ -39,16 +39,16 @@ fn is_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool
 }
 
 declare_lint_rule! {
-    /// Disallow unknown type selectors.
+    /// Disallow unrecognized element names in type selectors.
     ///
-    /// This rule considers tags defined in the HTML, SVG, and MathML specifications to be known.
-    /// For details on known CSS type selectors, see the following links
-    /// - https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors
-    /// - https://developer.mozilla.org/ja/docs/Web/HTML/Element
-    /// - https://developer.mozilla.org/ja/docs/Web/SVG/Element
-    /// - https://developer.mozilla.org/ja/docs/Web/MathML/Element
+    /// A type selector targets elements by tag name, as in `button {}`. Names from the HTML, SVG,
+    /// and MathML specifications are recognized. Valid custom-element names such as `x-button` are
+    /// also allowed.
     ///
-    /// This rule allows custom elements.
+    /// See the [MDN type-selector reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)
+    /// and the element references for [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML/Element),
+    /// [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element), and
+    /// [MathML](https://developer.mozilla.org/en-US/docs/Web/MathML/Element).
     ///
     /// ## Examples
     ///

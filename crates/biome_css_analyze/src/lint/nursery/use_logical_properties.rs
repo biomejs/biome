@@ -11,13 +11,11 @@ use biome_rule_options::use_logical_properties::{
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Enforce logical properties over physical properties.
+    /// Prefer logical CSS properties over physical properties.
     ///
-    /// Physical properties such as `width`, `height`, `top`, `left`, `margin-top`, `padding-left`,
-    /// `border-top`, `border-left-color`, etc. are tied to writing direction. Logical properties such
-    /// as `inline-size`, `block-size`, `inset-block-start`, `margin-block-start`,
-    /// `padding-inline-end`, `border-block-start`, `border-inline-start-color`, etc. adapt more
-    /// consistently across different writing modes.
+    /// Physical properties such as `left`, `margin-left`, and `width` describe fixed directions or
+    /// dimensions. Logical properties such as `inset-inline-start`, `margin-inline-start`, and
+    /// `inline-size` adapt when text runs right to left or uses a vertical writing mode.
     ///
     /// ## Examples
     ///
@@ -62,8 +60,8 @@ declare_lint_rule! {
     ///
     /// ### `direction`
     ///
-    /// The text direction used to map physical inline properties. It can be either `"ltr"` or
-    /// `"rtl"`. Defaults to `"ltr"`.
+    /// Sets the text direction used to replace left and right properties. Use `"ltr"` for
+    /// left-to-right text or `"rtl"` for right-to-left text. Defaults to `"ltr"`.
     ///
     /// ```json,options
     /// {

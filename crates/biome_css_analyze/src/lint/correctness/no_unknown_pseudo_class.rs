@@ -27,11 +27,11 @@ use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Disallow unknown pseudo-class selectors.
+    /// Disallow unrecognized pseudo-class selectors.
     ///
-    /// For details on known pseudo-class, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
-    ///
-    /// This rule ignores vendor-prefixed pseudo-class selectors.
+    /// A pseudo-class begins with `:` and selects an element in a particular state or position, as
+    /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
+    /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
     /// ## Examples
     ///
@@ -71,7 +71,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown pseudo-class names to ignore (case-insensitive).
+    /// Lists additional pseudo-class names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {
