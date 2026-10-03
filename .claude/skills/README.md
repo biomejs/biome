@@ -23,7 +23,7 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 | eslint-migrate-options | ESLint-to-Biome rule option migrators |
 | testing-codegen | Tests, `insta` snapshots, code generation commands |
 | changeset | Writing changesets for the CHANGELOG |
-| doc-comments | Rust comment hygiene; lint/assist rustdoc also loads lint-rule-development |
+| doc-comments | Rust comments for contributors and user-facing documentation |
 | syntax-text-handling | Syntax tokens, `TokenText`, ranges, string extraction, and embedded-language value shapes |
 
 ## Adding a skill
