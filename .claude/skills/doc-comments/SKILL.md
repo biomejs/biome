@@ -17,7 +17,7 @@ snapshots.
 | Source context | Reader and destination |
 | --- | --- |
 | Ordinary implementation `//`, internal item rustdoc, and most module docs | Biome contributors reading the Rust source or rustdoc |
-| Rustdoc on configuration types or fields that derive `JsonSchema` | Biome users reading configuration descriptions from the JSON Schema |
+| Rustdoc on configuration types that derive `JsonSchema`, including their fields | Biome users reading configuration descriptions from the JSON Schema |
 | Rustdoc consumed by `Bpaf`, including command variants, arguments, and configuration fields | Biome users reading CLI help |
 | Daemon-facing `Workspace` methods and their serialized request and response types | Authors of daemon clients and users of generated backend bindings |
 | Rustdoc inside `declare_lint_rule!` or the assist macro `declare_source_rule!` | Biome users reading rule or assist documentation on the website |
