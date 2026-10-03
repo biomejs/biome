@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+if (a) {
+    with (b) {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.cjs:3:5 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    1 │ /* should generate diagnostics */
+    2 │ if (a) {
+  > 3 │     with (b) {}
+      │     ^^^^
+    4 │ }
+    5 │ 
+  
+  i Blocks nested 2 levels deep are hard to read and maintain. The configured maximum is 1.
+  
+  i Return early or extract the nested code into a separate function to reduce nesting.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

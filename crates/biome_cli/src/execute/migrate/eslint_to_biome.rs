@@ -684,6 +684,27 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::MaxDepth(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf
+            {
+                let options: biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions =
+                    rule_options.into();
+                // An empty ESLint options object keeps the default maximum.
+                if options.max.is_some() {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_excessive_nested_blocks =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options,
+                                },
+                            ));
+                    }
+                }
+            }
+        }
         eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.nursery.get_or_insert_with(Default::default);

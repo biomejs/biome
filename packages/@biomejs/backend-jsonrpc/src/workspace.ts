@@ -2586,6 +2586,11 @@ export interface Nursery {
 	 */
 	noEmptyObjectKeys?: NoEmptyObjectKeysConfiguration;
 	/**
+	 * Enforce a maximum depth that blocks can be nested.
+	 * See https://biomejs.dev/linter/rules/no-excessive-nested-blocks
+	 */
+	noExcessiveNestedBlocks?: NoExcessiveNestedBlocksConfiguration;
+	/**
 	 * Enforce a maximum depth that callbacks can be nested.
 	 * See https://biomejs.dev/linter/rules/no-excessive-nested-callbacks
 	 */
@@ -5106,6 +5111,9 @@ export type NoDuplicateSelectorsConfiguration =
 export type NoEmptyObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEmptyObjectKeysOptions;
+export type NoExcessiveNestedBlocksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestedBlocksOptions;
 export type NoExcessiveNestedCallbacksConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveNestedCallbacksOptions;
@@ -7338,6 +7346,10 @@ export interface RuleWithNoDuplicateSelectorsOptions {
 export interface RuleWithNoEmptyObjectKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoEmptyObjectKeysOptions;
+}
+export interface RuleWithNoExcessiveNestedBlocksOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestedBlocksOptions;
 }
 export interface RuleWithNoExcessiveNestedCallbacksOptions {
 	level: RulePlainConfiguration;
@@ -9723,6 +9735,12 @@ export interface NoDrizzleUpdateWithoutWhereOptions {
 export type NoDuplicateFieldDefinitionNamesOptions = {};
 export type NoDuplicateSelectorsOptions = {};
 export type NoEmptyObjectKeysOptions = {};
+export interface NoExcessiveNestedBlocksOptions {
+	/**
+	 * Maximum block nesting depth allowed (default: 4)
+	 */
+	max?: number;
+}
 export interface NoExcessiveNestedCallbacksOptions {
 	/**
 	 * Maximum callback nesting depth allowed (default: 5)
@@ -11313,6 +11331,7 @@ export type Category =
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noExcessiveNestedBlocks"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noExtendNative"
