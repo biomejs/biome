@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-destructure-runtime.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const { name = "World" } = defineProps({
+  name: {
+    required: true,
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-destructure-runtime.vue:5:5 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    3 │ const { name = "World" } = defineProps({
+    4 │   name: {
+  > 5 │     required: true,
+      │     ^^^^^^^^^^^^^^
+    6 │   },
+    7 │ });
+  
+  i The default value is declared here.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ const { name = "World" } = defineProps({
+      │         ^^^^^^^^^^^^^^
+    4 │   name: {
+    5 │     required: true,
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    2 2 │   const { name = "World" } = defineProps({
+    3 3 │     name: {
+    4   │ - ····required:·true,
+      4 │ + ····required:·false,
+    5 5 │     },
+    6 6 │   });
+  
+
+```

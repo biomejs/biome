@@ -1,0 +1,153 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+interface Props {
+  name: string;
+  "na::me": string | number;
+  readonly title: string;
+  foo(): void;
+  age?: number;
+}
+const props = withDefaults(defineProps<Props>(), {
+  name: "World",
+  "na::me": "World",
+  title: "Title",
+  foo() {},
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults.vue:4:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    2 │ <script setup lang="ts">
+    3 │ interface Props {
+  > 4 │   name: string;
+      │   ^^^^^^^^^^^^^
+    5 │   "na::me": string | number;
+    6 │   readonly title: string;
+  
+  i The default value is declared here.
+  
+     9 │ }
+    10 │ const props = withDefaults(defineProps<Props>(), {
+  > 11 │   name: "World",
+       │   ^^^^^^^^^^^^^
+    12 │   "na::me": "World",
+    13 │   title: "Title",
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    3 │ ··name?:·string;
+      │       +         
+
+```
+
+```
+invalid-with-defaults.vue:5:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The prop na::me is required, but it also has a default value.
+  
+    3 │ interface Props {
+    4 │   name: string;
+  > 5 │   "na::me": string | number;
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │   readonly title: string;
+    7 │   foo(): void;
+  
+  i The default value is declared here.
+  
+    10 │ const props = withDefaults(defineProps<Props>(), {
+    11 │   name: "World",
+  > 12 │   "na::me": "World",
+       │   ^^^^^^^^^^^^^^^^^
+    13 │   title: "Title",
+    14 │   foo() {},
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    4 │ ··"na::me"?:·string·|·number;
+      │           +                  
+
+```
+
+```
+invalid-with-defaults.vue:6:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The prop title is required, but it also has a default value.
+  
+    4 │   name: string;
+    5 │   "na::me": string | number;
+  > 6 │   readonly title: string;
+      │   ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   foo(): void;
+    8 │   age?: number;
+  
+  i The default value is declared here.
+  
+    11 │   name: "World",
+    12 │   "na::me": "World",
+  > 13 │   title: "Title",
+       │   ^^^^^^^^^^^^^^
+    14 │   foo() {},
+    15 │ });
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    5 │ ··readonly·title?:·string;
+      │                 +         
+
+```
+
+```
+invalid-with-defaults.vue:7:3 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The prop foo is required, but it also has a default value.
+  
+    5 │   "na::me": string | number;
+    6 │   readonly title: string;
+  > 7 │   foo(): void;
+      │   ^^^^^^^^^^^^
+    8 │   age?: number;
+    9 │ }
+  
+  i The default value is declared here.
+  
+    12 │   "na::me": "World",
+    13 │   title: "Title",
+  > 14 │   foo() {},
+       │   ^^^^^^^^
+    15 │ });
+    16 │ </script>
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    6 │ ··foo?():·void;
+      │      +         
+
+```
