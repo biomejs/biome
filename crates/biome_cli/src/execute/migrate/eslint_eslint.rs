@@ -556,6 +556,18 @@ impl Deserializable for Rules {
                                 result.insert(Rule::FuncStyle(conf));
                             }
                         }
+                        "max-depth" => {
+                            // Migrating a limit that Biome can't represent with the default
+                            // maximum would change the behavior, so the rule isn't migrated.
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name)
+                                && !matches!(
+                                    conf,
+                                    RuleConf::Option(_, MaxDepthOptions::Unsupported)
+                                )
+                            {
+                                result.insert(Rule::MaxDepth(conf));
+                            }
+                        }
                         "max-nested-callbacks" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
@@ -945,6 +957,66 @@ impl FuncStyleOptions {
     }
 }
 
+#[derive(Debug)]
+pub(crate) enum MaxDepthOptions {
+    /// The configured maximum, or `None` when ESLint uses its default.
+    Max(Option<u8>),
+    /// The options set a maximum that Biome can't represent.
+    ///
+    /// Deserialization reports a diagnostic for the invalid value.
+    Unsupported,
+}
+
+impl Deserializable for MaxDepthOptions {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        // Returning `None` would make `RuleConf` fall back to the severity alone,
+        // which migrates the rule with the default maximum.
+        let max = if value.visitable_type()? == DeserializableType::Number {
+            Deserializable::deserialize(ctx, value, name).map(Some)
+        } else {
+            MaxDepthObjectOptions::deserialize(ctx, value, name).map(MaxDepthObjectOptions::max)
+        };
+        Some(max.map_or(Self::Unsupported, Self::Max))
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxDepthObjectOptions {
+    #[deserializable(bail_on_error)]
+    max: Option<u8>,
+    #[deserializable(bail_on_error)]
+    maximum: Option<u8>,
+}
+
+impl MaxDepthObjectOptions {
+    fn max(self) -> Option<u8> {
+        // ESLint reads `maximum || max`: the deprecated `maximum` wins unless it is zero.
+        self.maximum.filter(|maximum| *maximum != 0).or(self.max)
+    }
+}
+
+impl MaxDepthOptions {
+    /// Returns the Biome options, or `None` if Biome can't represent the ESLint options.
+    pub(crate) fn into_biome_options(
+        self,
+    ) -> Option<biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions>
+    {
+        match self {
+            // ESLint and Biome share the same default maximum, so an omitted value is kept omitted.
+            Self::Max(max) => Some(
+                biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions {
+                    max,
+                },
+            ),
+            Self::Unsupported => None,
+        }
+    }
+}
+
 #[derive(Debug, Default)]
 pub(crate) struct MaxNestedCallbacksOptions {
     max: Option<u8>,
@@ -1194,6 +1266,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     Eqeqeq(RuleConf<EqeqeqMode, EqeqeqNullOptions>),
     FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
+    MaxDepth(RuleConf<MaxDepthOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     MaxStatements(RuleConf<MaxStatementsOptions, MaxStatementsTopLevelOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
@@ -1236,6 +1309,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::Eqeqeq(_) => Cow::Borrowed("eqeqeq"),
             Self::FuncStyle(_) => Cow::Borrowed("func-style"),
+            Self::MaxDepth(_) => Cow::Borrowed("max-depth"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::MaxStatements(_) => Cow::Borrowed("max-statements"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),

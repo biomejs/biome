@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.five-rules {
+    .b {
+        .c {
+            .d {
+                .e {
+                    color: red;
+                }
+            }
+        }
+    }
+}
+
+/* A top-level at-rule doesn't add a level. */
+@media print {
+    .a {
+        .b {
+            .c {
+                .d {
+                    .e {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@layer components {
+    @media print {
+        .a {
+            .b {
+                .c {
+                    .d {
+                        color: red;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.nested-at-rules {
+    .b {
+        @media print {
+            .c {
+                @supports (display: grid) {
+                    color: red;
+                }
+            }
+        }
+    }
+}
+
+```
