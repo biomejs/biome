@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validSuppressed.js
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+// biome-ignore lint/nursery/noArgumentsCallerOrCallee: Legacy recursion.
+arguments.callee();
+// biome-ignore lint/nursery/noArgumentsCallerOrCallee: Legacy caller access.
+arguments.caller;
+
+```
