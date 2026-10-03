@@ -1,0 +1,23 @@
+@supports (display: grid) {
+  .declaration {
+    display: grid;
+  }
+}
+
+@supports (display: grid) and (not (color: red)) {
+  .logical {
+    display: grid;
+  }
+}
+
+@supports selector(.selector-control) {
+  .selector-control {
+    display: grid;
+  }
+}
+
+@supports func(10, 20, 40) {
+  .general-enclosed-function {
+    display: grid;
+  }
+}
