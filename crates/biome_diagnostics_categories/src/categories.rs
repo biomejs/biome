@@ -212,6 +212,7 @@ define_categories! {
     "lint/nursery/noDuplicateFieldDefinitionNames": "https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
     "lint/nursery/noDuplicateSelectors": "https://biomejs.dev/linter/rules/no-duplicate-selectors",
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
+    "lint/nursery/noExcessiveNestedBlocks": "https://biomejs.dev/linter/rules/no-excessive-nested-blocks",
     "lint/nursery/noExcessiveNestedCallbacks": "https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
     "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
     "lint/nursery/noExtendNative": "https://biomejs.dev/linter/rules/no-extend-native",

@@ -548,6 +548,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::FuncStyle(conf));
                             }
                         }
+                        "max-depth" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxDepth(conf));
+                            }
+                        }
                         "max-nested-callbacks" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
@@ -675,6 +680,51 @@ impl FuncStyleOptions {
             style: Some(style),
             allow_arrow_functions: self.allow_arrow_functions,
         }
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct MaxDepthOptions {
+    max: Option<u8>,
+}
+
+impl Deserializable for MaxDepthOptions {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxDepthObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxDepthObjectOptions {
+    max: Option<u8>,
+    maximum: Option<u8>,
+}
+
+impl From<MaxDepthObjectOptions> for MaxDepthOptions {
+    fn from(value: MaxDepthObjectOptions) -> Self {
+        // ESLint gives the deprecated `maximum` precedence over `max`.
+        Self {
+            max: value.maximum.or(value.max),
+        }
+    }
+}
+
+impl From<MaxDepthOptions>
+    for biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions
+{
+    fn from(value: MaxDepthOptions) -> Self {
+        // ESLint and Biome share the same default maximum, so an omitted value is kept omitted.
+        Self { max: value.max }
     }
 }
 
@@ -870,6 +920,7 @@ pub(crate) enum Rule {
     ArrayCallbackReturn(RuleConf<ArrayCallbackReturnOptions>),
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
+    MaxDepth(RuleConf<MaxDepthOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
@@ -900,6 +951,7 @@ impl Rule {
             Self::ArrayCallbackReturn(_) => Cow::Borrowed("array-callback-return"),
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::FuncStyle(_) => Cow::Borrowed("func-style"),
+            Self::MaxDepth(_) => Cow::Borrowed("max-depth"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
