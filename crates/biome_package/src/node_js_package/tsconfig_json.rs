@@ -2,7 +2,7 @@ use std::hash::BuildHasherDefault;
 
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationContext,
+    Deserializable, DeserializableValue,
     json::{deserialize_from_json_ast, deserialize_from_json_str},
 };
 use biome_deserialize::{DeserializableType, Deserialized};
@@ -172,12 +172,12 @@ pub enum ExtendsField {
 }
 
 impl Deserializable for ExtendsField {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Array {
+        if value.visitable_type(ctx)? == DeserializableType::Array {
             Vec::<String>::deserialize(ctx, value, name).map(Self::Multiple)
         } else {
             String::deserialize(ctx, value, name).map(Self::Single)
@@ -214,9 +214,9 @@ impl std::ops::Deref for JsxFactoryIdentifier {
 }
 
 impl Deserializable for JsxFactoryIdentifier {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let full_name = String::deserialize(ctx, value, name)?;

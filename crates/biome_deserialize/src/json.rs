@@ -1,7 +1,7 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
-    DefaultDeserializationContext, Deserializable, DeserializableValue, DeserializationContext,
-    Deserialized, ErasedDeserializationVisitor, TextNumber, diagnostics::DeserializableType,
+    DefaultDeserializationContext, Deserializable, DeserializableValue, Deserialized,
+    ErasedDeserializationVisitor, TextNumber, diagnostics::DeserializableType,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{JsonParserOptions, parse_json};
@@ -9,7 +9,7 @@ use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TokenText};
 
 #[cfg(feature = "serde")]
-use crate::{DeserializationVisitor, MapMembers};
+use crate::{DeserializationContext, DeserializationVisitor, MapMembers};
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.
@@ -83,22 +83,26 @@ pub fn deserialize_from_json_ast<Output: Deserializable>(
 }
 
 impl DeserializableValue for AnyJsonValue {
+    type Context = DefaultDeserializationContext;
+
     fn range(&self) -> biome_rowan::TextRange {
         AstNode::range(self)
     }
 
     fn deserialize_erased(
         &self,
-        ctx: &mut dyn DeserializationContext,
-        visitor: &mut dyn ErasedDeserializationVisitor,
+        ctx: &mut DefaultDeserializationContext,
+        visitor: &mut dyn ErasedDeserializationVisitor<DefaultDeserializationContext>,
         name: &str,
     ) {
         let range = AstNode::range(self);
         match self {
             Self::JsonArrayValue(array) => {
                 let mut items = array.elements().iter().map(|x| {
-                    x.ok()
-                        .map(|item| Box::new(item) as Box<dyn DeserializableValue>)
+                    x.ok().map(|item| {
+                        Box::new(item)
+                            as Box<dyn DeserializableValue<Context = DefaultDeserializationContext>>
+                    })
                 });
                 visitor.visit_array(ctx, &mut items, range, name)
             }
@@ -134,8 +138,14 @@ impl DeserializableValue for AnyJsonValue {
                         _ => return None,
                     };
                     Some((
-                        Box::new(name) as Box<dyn DeserializableValue>,
-                        Box::new(member.value().ok()?) as Box<dyn DeserializableValue>,
+                        Box::new(name)
+                            as Box<
+                                dyn DeserializableValue<Context = DefaultDeserializationContext>,
+                            >,
+                        Box::new(member.value().ok()?)
+                            as Box<
+                                dyn DeserializableValue<Context = DefaultDeserializationContext>,
+                            >,
                     ))
                 });
                 visitor.visit_map(ctx, &mut members, range, name)
@@ -149,7 +159,10 @@ impl DeserializableValue for AnyJsonValue {
         }
     }
 
-    fn visitable_type(&self) -> Option<DeserializableType> {
+    fn visitable_type(
+        &self,
+        _ctx: &mut DefaultDeserializationContext,
+    ) -> Option<DeserializableType> {
         match self {
             Self::JsonArrayValue(_) => Some(DeserializableType::Array),
             Self::JsonBogusValue(_) => None,
@@ -165,18 +178,18 @@ impl DeserializableValue for AnyJsonValue {
 
 #[cfg(feature = "serde")]
 impl Deserializable for serde_json::Value {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = serde_json::Value;
             const EXPECTED_TYPE: crate::DeserializableTypes = crate::DeserializableTypes::all();
             fn visit_null(
                 self,
-                _ctx: &mut dyn DeserializationContext,
+                _ctx: &mut C,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -185,7 +198,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_bool(
                 self,
-                _ctx: &mut dyn DeserializationContext,
+                _ctx: &mut C,
                 value: bool,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -195,7 +208,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_number(
                 self,
-                ctx: &mut dyn DeserializationContext,
+                ctx: &mut C,
                 value: TextNumber,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -211,7 +224,7 @@ impl Deserializable for serde_json::Value {
 
             fn visit_str(
                 self,
-                _ctx: &mut dyn DeserializationContext,
+                _ctx: &mut C,
                 value: Text,
                 _range: biome_rowan::TextRange,
                 _name: &str,
@@ -221,8 +234,10 @@ impl Deserializable for serde_json::Value {
 
             fn visit_array(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                values: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
+                ctx: &mut C,
+                values: &mut dyn ExactSizeIterator<
+                    Item = Option<Box<dyn DeserializableValue<Context = C>>>,
+                >,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -235,8 +250,8 @@ impl Deserializable for serde_json::Value {
 
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: biome_rowan::TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {
@@ -258,14 +273,16 @@ impl Deserializable for serde_json::Value {
 }
 
 impl DeserializableValue for JsonMemberName {
+    type Context = DefaultDeserializationContext;
+
     fn range(&self) -> biome_rowan::TextRange {
         AstNode::range(self)
     }
 
     fn deserialize_erased(
         &self,
-        ctx: &mut dyn DeserializationContext,
-        visitor: &mut dyn ErasedDeserializationVisitor,
+        ctx: &mut DefaultDeserializationContext,
+        visitor: &mut dyn ErasedDeserializationVisitor<DefaultDeserializationContext>,
         name: &str,
     ) {
         let Ok(text) = self.inner_string_text() else {
@@ -274,7 +291,10 @@ impl DeserializableValue for JsonMemberName {
         visitor.visit_str(ctx, unescape_json_string(text), AstNode::range(self), name)
     }
 
-    fn visitable_type(&self) -> Option<DeserializableType> {
+    fn visitable_type(
+        &self,
+        _ctx: &mut DefaultDeserializationContext,
+    ) -> Option<DeserializableType> {
         Some(DeserializableType::Str)
     }
 }
@@ -362,6 +382,7 @@ mod tests {
     };
 
     use super::*;
+    use crate::DeserializationContext;
     use biome_json_parser::JsonParserOptions;
 
     #[test]
@@ -382,9 +403,9 @@ mod tests {
             name: String,
         }
         impl Deserializable for Name {
-            fn deserialize(
-                ctx: &mut dyn DeserializationContext,
-                _value: &impl DeserializableValue,
+            fn deserialize<V: DeserializableValue>(
+                ctx: &mut V::Context,
+                _value: &V,
                 name: &str,
             ) -> Option<Self> {
                 Some(Self {
