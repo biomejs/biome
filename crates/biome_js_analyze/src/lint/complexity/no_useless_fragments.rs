@@ -19,9 +19,12 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutation, BatchMutationExt, declare
 use biome_rule_options::no_useless_fragments::NoUselessFragmentsOptions;
 
 declare_lint_rule! {
-    /// Disallow unnecessary fragments
+    /// Disallow unnecessary JSX fragments.
     ///
-    /// In Astro templates, fragments with props are allowed, for example `<Fragment slot="name">`.
+    /// A fragment groups JSX children without adding an HTML element. An empty fragment or a
+    /// fragment around a single child usually adds nesting without changing the rendered output.
+    /// In Astro templates, fragments with properties are allowed, for example
+    /// `<Fragment slot="name">`.
     ///
     /// ## Examples
     ///
@@ -42,7 +45,8 @@ declare_lint_rule! {
     /// <Component prop={<><div /></>} />
     /// ```
     ///
-    /// The rule doesn't emit a code fix if the a fragment inside an attribute doesn't have any value:
+    /// Biome cannot safely fix an empty fragment used as an attribute value, because removing the
+    /// fragment would leave the attribute without a value:
     ///
     /// ```jsx,expect_diagnostic
     /// <Component prop={<>{}</>} />

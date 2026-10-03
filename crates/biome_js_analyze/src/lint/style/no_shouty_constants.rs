@@ -14,7 +14,11 @@ use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
 use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of constants which its value is the upper-case version of its name.
+    /// Disallow constants whose string value is the same as their uppercase name.
+    ///
+    /// A declaration such as `const FOO = "FOO"` adds an unnecessary name without providing
+    /// additional meaning. Use the string directly instead. The rule ignores exported constants
+    /// and constants referenced more than once.
     ///
     /// ## Examples
     ///

@@ -17,9 +17,13 @@ use biome_rowan::{AstNode, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_positive_tabindex::NoPositiveTabindexOptions;
 
 declare_lint_rule! {
-    /// Prevent the usage of positive integers on `tabIndex` property
+    /// Disallow positive values for the `tabIndex` property.
     ///
-    /// Avoid positive `tabIndex` property values to synchronize the flow of the page with keyboard tab order.
+    /// Keyboard focus determines which element receives keyboard input. A positive `tabIndex`
+    /// overrides the page's natural focus order and can make keyboard navigation unpredictable.
+    /// Use `0` to include an element in the natural order, or `-1` to exclude it from keyboard
+    /// navigation while keeping it focusable through code.
+    ///
     /// ## Accessibility guidelines
     ///
     /// [WCAG 2.4.3](https://www.w3.org/WAI/WCAG21/Understanding/focus-order)

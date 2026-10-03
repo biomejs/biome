@@ -12,7 +12,11 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 
 declare_lint_rule! {
-    /// Ensures that ARIA properties `aria-*` are all valid.
+    /// Disallow unknown `aria-*` attributes.
+    ///
+    /// ARIA (Accessible Rich Internet Applications) attributes describe an element to assistive
+    /// technologies. Browsers ignore misspelled or unknown ARIA attributes, so users may not
+    /// receive the element's intended name, state, or other accessibility information.
     ///
     /// ## Examples
     ///
@@ -24,6 +28,12 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// <div aria-lorem="foobar" />;
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <input aria-label="Search" />
     /// ```
     ///
     /// ## Accessibility guidelines
