@@ -1,0 +1,3 @@
+@at-root ($query) { .whole { color: red; } }
+@at-root (without: media supports) { .clause { color: blue; } }
+@at-root (#{$mode}: media) { .interpolation-shaped { color: green; } }

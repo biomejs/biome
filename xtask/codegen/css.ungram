@@ -3122,16 +3122,27 @@ ScssAtRootAtRule =
 	selector: ScssAtRootSelector?
 	block: CssDeclarationOrRuleBlock
 
-// (without: media supports)
-// ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root ($query) {}
+//          ^^^^^^^^
 ScssAtRootQuery =
 	'('
-	modifier: ('with' | 'without')
-	':'
-	queries: ScssAtRootQueryList
+	query: AnyScssAtRootQuery
 	')'
 
-ScssAtRootQueryList = AnyCssCustomIdentifier*
+// @at-root ($query) {}
+//           ^^^^^^
+// @at-root (without: media) {}
+//           ^^^^^^^^^^^^^^
+AnyScssAtRootQuery =
+	ScssExpression
+	| ScssAtRootQueryClause
+
+// @at-root (without: $rules) {}
+//           ^^^^^^^^^^^^^^^
+ScssAtRootQueryClause =
+	modifier: ScssExpression
+	':'
+	rules: ScssExpression
 
 // .root-only, .another-root
 // ^^^^^^^^^^^^^^^^^^^^^^^^^
