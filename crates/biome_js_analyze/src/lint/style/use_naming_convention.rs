@@ -1471,8 +1471,17 @@ fn scope_from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
     match control_flow_root.kind() {
         JsSyntaxKind::JS_MODULE
         | JsSyntaxKind::JS_SCRIPT
-        | JsSyntaxKind::TS_DECLARATION_MODULE
-        | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
+        | JsSyntaxKind::TS_DECLARATION_MODULE => Some(Scope::Global),
+        JsSyntaxKind::TS_MODULE_DECLARATION => {
+            // A module declaration is itself a control flow root, so the search above
+            // stops at the innermost enclosing one and never sees the ambient
+            // declaration that may wrap it.
+            let is_ambient = control_flow_root.ancestors().skip(1).any(|x| {
+                x.kind() == JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION
+                    || x.kind() == JsSyntaxKind::TS_GLOBAL_DECLARATION
+            });
+            (!is_ambient).then_some(Scope::Global)
+        }
         // Ignore declarations in external module declaration and global declarations.
         JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION | JsSyntaxKind::TS_GLOBAL_DECLARATION => None,
         _ => Some(Scope::Any),

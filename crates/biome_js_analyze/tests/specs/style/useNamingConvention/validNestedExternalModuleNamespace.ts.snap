@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNestedExternalModuleNamespace.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare module "myExternalModule" {
+    namespace Outer {
+        namespace my_NAMESPACE {}
+        interface my_INTERFACE {}
+    }
+}
+
+```
