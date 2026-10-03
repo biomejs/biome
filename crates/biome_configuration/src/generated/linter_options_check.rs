@@ -508,6 +508,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_excessive_selector_classes::NoExcessiveSelectorClassesOptions,
         >(),
     ));
+    result.push(("nursery", "noExcessiveStatementsPerFunction", TypeId::of::<biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions>()));
     result.push((
         "suspicious",
         "noExplicitAny",
