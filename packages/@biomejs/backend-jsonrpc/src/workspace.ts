@@ -2861,6 +2861,11 @@ export interface Nursery {
 	 */
 	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-unary-minus
+	 */
+	noUnsafeUnaryMinus?: NoUnsafeUnaryMinusConfiguration;
+	/**
 	 * Disallow dependencies with untrusted licenses.
 	 * See https://biomejs.dev/linter/rules/no-untrusted-licenses
 	 */
@@ -5271,6 +5276,9 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
+export type NoUnsafeUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeUnaryMinusOptions;
 export type NoUntrustedLicensesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUntrustedLicensesOptions;
@@ -7615,6 +7623,10 @@ export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeTypeAssertionOptions;
 }
+export interface RuleWithNoUnsafeUnaryMinusOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeUnaryMinusOptions;
+}
 export interface RuleWithNoUntrustedLicensesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUntrustedLicensesOptions;
@@ -9836,6 +9848,7 @@ export type NoUnnecessaryTemplateExpressionOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
+export type NoUnsafeUnaryMinusOptions = {};
 export interface NoUntrustedLicensesOptions {
 	/**
 	 * Additional license identifiers to trust, beyond valid SPDX identifiers.
@@ -11370,6 +11383,7 @@ export type Category =
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
+	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUntrustedLicenses"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUnwantedPolyfillio"

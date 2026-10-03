@@ -96,6 +96,49 @@ impl<'db> InferredType<'db> {
             )
     }
 
+    pub fn is_bigint_or_bigint_literal(self) -> bool {
+        matches!(self.data, TypeData::BigInt)
+            || matches!(
+                self.data,
+                TypeData::Literal(literal)
+                    if matches!(literal.literal(self.db), Literal::BigInt(_))
+            )
+    }
+
+    /// Returns whether this type is the explicit `unknown` keyword.
+    ///
+    /// Types that inference couldn't resolve don't match.
+    pub fn is_unknown_keyword(self) -> bool {
+        matches!(self.data, TypeData::UnknownKeyword)
+    }
+
+    /// Returns whether every value of this type is a primitive: a string,
+    /// number, bigint, boolean, symbol, `null`, or `undefined`, including
+    /// literals of those types and `void`.
+    pub fn is_primitive(self) -> bool {
+        matches!(self.data, TypeData::VoidKeyword) || self.data.is_primitive(self.db)
+    }
+
+    /// Returns whether every value of this type is an object, including
+    /// functions, arrays, class instances, and object or regular expression
+    /// literals.
+    ///
+    /// An intersection is object-like when all of its members are.
+    pub fn is_object_like(self) -> bool {
+        let data = self.data.expand_canonical_global(self.db);
+        match data {
+            TypeData::Literal(literal) => matches!(
+                literal.literal(self.db),
+                Literal::Object(_) | Literal::RegExp(_)
+            ),
+            TypeData::Intersection(intersection) => intersection
+                .types(self.db)
+                .iter()
+                .all(|ty| Self::new(self.db, *ty).is_object_like()),
+            data => data.is_object_like(self.db),
+        }
+    }
+
     pub fn is_bigint_literal(self, value: i64) -> bool {
         let expected = format!("{value}n");
         matches!(
@@ -1203,6 +1246,40 @@ impl<'db> InferredType<'db> {
 
     pub fn plus_operand_description(self) -> &'static str {
         self.data.type_description(self.db)
+    }
+
+    /// Returns a short category name for this type, such as `string`,
+    /// `object`, or `function`, suitable for diagnostics.
+    pub fn type_description(self) -> &'static str {
+        self.data.type_description(self.db)
+    }
+
+    /// Returns the first variant of this type that matches `predicate`.
+    ///
+    /// Variants are the members of unions, the constraints of generics, and
+    /// the targets of instance and `typeof` types, visited recursively.
+    /// `predicate` receives an intersection itself, and then each of its
+    /// primitive members, so `string & { brand: "id" }` is checked both as a
+    /// whole and as `string`. Global types such as `Array` are expanded before
+    /// they're passed to `predicate`.
+    ///
+    /// Returns `Ok(None)` when no variant matches. Without a match, returns an
+    /// error when a variant is unresolved, `any`, or `unknown`, when the type
+    /// is recursive, or when traversal exceeds its limit.
+    pub fn try_find_variant(
+        self,
+        mut predicate: impl FnMut(Self) -> bool,
+    ) -> Result<Option<Self>, TypeTraversalError> {
+        let mut found = None;
+        let matched = self.try_any_variant_matches(|data| {
+            let variant = Self::new(self.db, data.expand_canonical_global(self.db));
+            let is_match = predicate(variant);
+            if is_match {
+                found = Some(variant);
+            }
+            is_match
+        })?;
+        Ok(found.filter(|_| matched))
     }
 
     /// Returns the deduplicated switch-case variants represented by this type.
