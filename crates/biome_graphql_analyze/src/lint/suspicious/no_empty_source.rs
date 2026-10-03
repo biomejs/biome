@@ -8,9 +8,8 @@ use biome_rule_options::no_empty_source::NoEmptySourceOptions;
 declare_lint_rule! {
     /// Disallow empty sources.
     ///
-    /// A source containing only the following is considered empty:
-    ///   - Whitespace (spaces, tabs or newlines)
-    ///   - Comments
+    /// A file is empty when it contains no GraphQL definitions. By default, whitespace and
+    /// comments do not count as content.
     ///
     /// ## Examples
     ///
@@ -38,11 +37,8 @@ declare_lint_rule! {
     ///
     /// ### `allowComments`
     ///
-    /// Whether the comments should be marked as meaningful.
-    /// When this option has been set to `true`, a file with only comments is considered valid.
-    ///
-    /// Default `false`
-    ///
+    /// Treats comments as meaningful content when set to `true`, so a comments-only file is valid.
+    /// An entirely empty file remains invalid. Defaults to `false`.
     ///
     /// ```json,options
     /// {
