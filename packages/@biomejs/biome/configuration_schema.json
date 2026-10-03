@@ -3159,6 +3159,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoAstroDeprecatedResolveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAstroDeprecatedResolveOptions" }
+			]
+		},
+		"NoAstroDeprecatedResolveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAstroSetHtmlDirectiveConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7027,6 +7037,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noAstroDeprecatedResolve": {
+					"description": "Disallow the deprecated Astro.resolve() API.\nSee https://biomejs.dev/linter/rules/no-astro-deprecated-resolve",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAstroDeprecatedResolveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroSetHtmlDirective": {
 					"description": "Disallow the use of Astro's set:html directive.\nSee https://biomejs.dev/linter/rules/no-astro-set-html-directive",
 					"anyOf": [
@@ -8762,6 +8779,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAstroConflictingSetDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAstroDeprecatedResolveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAstroDeprecatedResolveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

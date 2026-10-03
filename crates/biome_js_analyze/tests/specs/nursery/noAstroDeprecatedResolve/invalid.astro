@@ -1,0 +1,13 @@
+---
+// should generate diagnostics
+const { animal } = Astro.props;
+const logo = Astro.resolve("../images/logo.png");
+const resolve = Astro.resolve;
+const computed = Astro["resolve"]("../images/logo.png");
+const optional = Astro?.resolve("../images/logo.png");
+const parenthesized = (Astro).resolve("../images/logo.png");
+const viaGlobalThis = globalThis.Astro.resolve("../images/logo.png");
+---
+
+<img src={Astro.resolve(`../images/${animal}.png`)} />
+<link rel="stylesheet" href={Astro.resolve("../styles/main.css")} />
