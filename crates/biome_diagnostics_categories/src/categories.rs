@@ -235,6 +235,7 @@ define_categories! {
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
     "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
     "lint/nursery/noObsoleteTags": "https://biomejs.dev/linter/rules/no-obsolete-tags",
+    "lint/nursery/noOctal": "https://biomejs.dev/linter/rules/no-octal",
     "lint/nursery/noPlaywrightElementHandle": "https://biomejs.dev/linter/rules/no-playwright-element-handle",
     "lint/nursery/noPlaywrightEval": "https://biomejs.dev/linter/rules/no-playwright-eval",
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",
