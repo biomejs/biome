@@ -1,0 +1,18 @@
+---
+// should not generate diagnostics
+import penguin from "../images/penguin.png";
+const { animal } = Astro.props;
+const url = Astro.url;
+const other = Astro.resolveSomething("../images/logo.png");
+const unrelated = path.resolve("../images/logo.png");
+const unrelatedComputed = foo["resolve"]("../images/logo.png");
+const dynamicKey = Astro[key]("../images/logo.png");
+
+function shadowed(Astro) {
+	return Astro.resolve("../images/logo.png");
+}
+---
+
+<img src={penguin.src} />
+<img src={await import(`../images/${animal}.png`)} />
+<img src="/images/penguin.png" />
