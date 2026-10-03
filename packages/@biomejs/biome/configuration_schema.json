@@ -6515,6 +6515,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessAssignmentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessAssignmentOptions" }
+			]
+		},
+		"NoUselessAssignmentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessCatchBindingConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7493,6 +7503,13 @@
 					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessAssignment": {
+					"description": "Disallow assignments whose value is never read.\nSee https://biomejs.dev/linter/rules/no-useless-assignment",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessAssignmentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11774,6 +11791,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnwantedPolyfillioOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessAssignmentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessAssignmentOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
