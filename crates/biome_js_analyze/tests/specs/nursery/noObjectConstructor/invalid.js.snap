@@ -1,0 +1,483 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = Object();
+const b = new Object();
+const c = new Object;
+const d = Object?.();
+const e = (Object)();
+const f = new (Object)();
+const g = () => Object();
+const h = () => new Object().toString();
+const i = Object() instanceof Object;
+(new Object() instanceof Object);
+foo(Object(), new Object);
+function inner() {
+	return Object();
+}
+const j = Object( );
+const k = /* leading */ Object() /* trailing */;
+const l = Object(/* inner */);
+const m = new /* inner */ Object();
+
+```
+
+# Diagnostics
+```
+invalid.js:2:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = Object();
+      │           ^^^^^^^^
+    3 │ const b = new Object();
+    4 │ const c = new Object;
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·Object();
+        2 │ + const·a·=·{};
+     3  3 │   const b = new Object();
+     4  4 │   const c = new Object;
+  
+
+```
+
+```
+invalid.js:3:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = Object();
+  > 3 │ const b = new Object();
+      │           ^^^^^^^^^^^^
+    4 │ const c = new Object;
+    5 │ const d = Object?.();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = Object();
+     3    │ - const·b·=·new·Object();
+        3 │ + const·b·=·{};
+     4  4 │   const c = new Object;
+     5  5 │   const d = Object?.();
+  
+
+```
+
+```
+invalid.js:4:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ const a = Object();
+    3 │ const b = new Object();
+  > 4 │ const c = new Object;
+      │           ^^^^^^^^^^
+    5 │ const d = Object?.();
+    6 │ const e = (Object)();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     2  2 │   const a = Object();
+     3  3 │   const b = new Object();
+     4    │ - const·c·=·new·Object;
+        4 │ + const·c·=·{};
+     5  5 │   const d = Object?.();
+     6  6 │   const e = (Object)();
+  
+
+```
+
+```
+invalid.js:5:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    3 │ const b = new Object();
+    4 │ const c = new Object;
+  > 5 │ const d = Object?.();
+      │           ^^^^^^^^^^
+    6 │ const e = (Object)();
+    7 │ const f = new (Object)();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     3  3 │   const b = new Object();
+     4  4 │   const c = new Object;
+     5    │ - const·d·=·Object?.();
+        5 │ + const·d·=·{};
+     6  6 │   const e = (Object)();
+     7  7 │   const f = new (Object)();
+  
+
+```
+
+```
+invalid.js:6:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    4 │ const c = new Object;
+    5 │ const d = Object?.();
+  > 6 │ const e = (Object)();
+      │           ^^^^^^^^^^
+    7 │ const f = new (Object)();
+    8 │ const g = () => Object();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     4  4 │   const c = new Object;
+     5  5 │   const d = Object?.();
+     6    │ - const·e·=·(Object)();
+        6 │ + const·e·=·{};
+     7  7 │   const f = new (Object)();
+     8  8 │   const g = () => Object();
+  
+
+```
+
+```
+invalid.js:7:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    5 │ const d = Object?.();
+    6 │ const e = (Object)();
+  > 7 │ const f = new (Object)();
+      │           ^^^^^^^^^^^^^^
+    8 │ const g = () => Object();
+    9 │ const h = () => new Object().toString();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     5  5 │   const d = Object?.();
+     6  6 │   const e = (Object)();
+     7    │ - const·f·=·new·(Object)();
+        7 │ + const·f·=·{};
+     8  8 │   const g = () => Object();
+     9  9 │   const h = () => new Object().toString();
+  
+
+```
+
+```
+invalid.js:8:17 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     6 │ const e = (Object)();
+     7 │ const f = new (Object)();
+   > 8 │ const g = () => Object();
+       │                 ^^^^^^^^
+     9 │ const h = () => new Object().toString();
+    10 │ const i = Object() instanceof Object;
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     6  6 │   const e = (Object)();
+     7  7 │   const f = new (Object)();
+     8    │ - const·g·=·()·=>·Object();
+        8 │ + const·g·=·()·=>·({});
+     9  9 │   const h = () => new Object().toString();
+    10 10 │   const i = Object() instanceof Object;
+  
+
+```
+
+```
+invalid.js:9:17 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     7 │ const f = new (Object)();
+     8 │ const g = () => Object();
+   > 9 │ const h = () => new Object().toString();
+       │                 ^^^^^^^^^^^^
+    10 │ const i = Object() instanceof Object;
+    11 │ (new Object() instanceof Object);
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     7  7 │   const f = new (Object)();
+     8  8 │   const g = () => Object();
+     9    │ - const·h·=·()·=>·new·Object().toString();
+        9 │ + const·h·=·()·=>·({}).toString();
+    10 10 │   const i = Object() instanceof Object;
+    11 11 │   (new Object() instanceof Object);
+  
+
+```
+
+```
+invalid.js:10:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     8 │ const g = () => Object();
+     9 │ const h = () => new Object().toString();
+  > 10 │ const i = Object() instanceof Object;
+       │           ^^^^^^^^
+    11 │ (new Object() instanceof Object);
+    12 │ foo(Object(), new Object);
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     8  8 │   const g = () => Object();
+     9  9 │   const h = () => new Object().toString();
+    10    │ - const·i·=·Object()·instanceof·Object;
+       10 │ + const·i·=·{}·instanceof·Object;
+    11 11 │   (new Object() instanceof Object);
+    12 12 │   foo(Object(), new Object);
+  
+
+```
+
+```
+invalid.js:11:2 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     9 │ const h = () => new Object().toString();
+    10 │ const i = Object() instanceof Object;
+  > 11 │ (new Object() instanceof Object);
+       │  ^^^^^^^^^^^^
+    12 │ foo(Object(), new Object);
+    13 │ function inner() {
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     9  9 │   const h = () => new Object().toString();
+    10 10 │   const i = Object() instanceof Object;
+    11    │ - (new·Object()·instanceof·Object);
+       11 │ + ({}·instanceof·Object);
+    12 12 │   foo(Object(), new Object);
+    13 13 │   function inner() {
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    10 │ const i = Object() instanceof Object;
+    11 │ (new Object() instanceof Object);
+  > 12 │ foo(Object(), new Object);
+       │     ^^^^^^^^
+    13 │ function inner() {
+    14 │ 	return Object();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    10 10 │   const i = Object() instanceof Object;
+    11 11 │   (new Object() instanceof Object);
+    12    │ - foo(Object(),·new·Object);
+       12 │ + foo({},·new·Object);
+    13 13 │   function inner() {
+    14 14 │   	return Object();
+  
+
+```
+
+```
+invalid.js:12:15 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    10 │ const i = Object() instanceof Object;
+    11 │ (new Object() instanceof Object);
+  > 12 │ foo(Object(), new Object);
+       │               ^^^^^^^^^^
+    13 │ function inner() {
+    14 │ 	return Object();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    10 10 │   const i = Object() instanceof Object;
+    11 11 │   (new Object() instanceof Object);
+    12    │ - foo(Object(),·new·Object);
+       12 │ + foo(Object(),·{});
+    13 13 │   function inner() {
+    14 14 │   	return Object();
+  
+
+```
+
+```
+invalid.js:14:9 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    12 │ foo(Object(), new Object);
+    13 │ function inner() {
+  > 14 │ 	return Object();
+       │ 	       ^^^^^^^^
+    15 │ }
+    16 │ const j = Object( );
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    12 12 │   foo(Object(), new Object);
+    13 13 │   function inner() {
+    14    │ - → return·Object();
+       14 │ + → return·{};
+    15 15 │   }
+    16 16 │   const j = Object( );
+  
+
+```
+
+```
+invalid.js:16:11 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    14 │ 	return Object();
+    15 │ }
+  > 16 │ const j = Object( );
+       │           ^^^^^^^^^
+    17 │ const k = /* leading */ Object() /* trailing */;
+    18 │ const l = Object(/* inner */);
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    14 14 │   	return Object();
+    15 15 │   }
+    16    │ - const·j·=·Object(·);
+       16 │ + const·j·=·{};
+    17 17 │   const k = /* leading */ Object() /* trailing */;
+    18 18 │   const l = Object(/* inner */);
+  
+
+```
+
+```
+invalid.js:17:25 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    15 │ }
+    16 │ const j = Object( );
+  > 17 │ const k = /* leading */ Object() /* trailing */;
+       │                         ^^^^^^^^
+    18 │ const l = Object(/* inner */);
+    19 │ const m = new /* inner */ Object();
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+    15 15 │   }
+    16 16 │   const j = Object( );
+    17    │ - const·k·=·/*·leading·*/·Object()·/*·trailing·*/;
+       17 │ + const·k·=·/*·leading·*/·{}·/*·trailing·*/;
+    18 18 │   const l = Object(/* inner */);
+    19 19 │   const m = new /* inner */ Object();
+  
+
+```
+
+```
+invalid.js:18:11 lint/nursery/noObjectConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    16 │ const j = Object( );
+    17 │ const k = /* leading */ Object() /* trailing */;
+  > 18 │ const l = Object(/* inner */);
+       │           ^^^^^^^^^^^^^^^^^^^
+    19 │ const m = new /* inner */ Object();
+    20 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:11 lint/nursery/noObjectConstructor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    17 │ const k = /* leading */ Object() /* trailing */;
+    18 │ const l = Object(/* inner */);
+  > 19 │ const m = new /* inner */ Object();
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

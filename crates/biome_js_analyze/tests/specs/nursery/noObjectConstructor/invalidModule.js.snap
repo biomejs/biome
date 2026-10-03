@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidModule.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const foo = bar
+export { foo }
+Object()
+export { baz } from 'bar'
+Object()
+export * as qux from 'bar'
+Object()
+import quux from 'bar'
+Object()
+export default Object()
+
+```
+
+# Diagnostics
+```
+invalidModule.js:4:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    2 │ const foo = bar
+    3 │ export { foo }
+  > 4 │ Object()
+      │ ^^^^^^^^
+    5 │ export { baz } from 'bar'
+    6 │ Object()
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     2  2 │   const foo = bar
+     3  3 │   export { foo }
+     4    │ - Object()
+        4 │ + ({})
+     5  5 │   export { baz } from 'bar'
+     6  6 │   Object()
+  
+
+```
+
+```
+invalidModule.js:6:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+    4 │ Object()
+    5 │ export { baz } from 'bar'
+  > 6 │ Object()
+      │ ^^^^^^^^
+    7 │ export * as qux from 'bar'
+    8 │ Object()
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     4  4 │   Object()
+     5  5 │   export { baz } from 'bar'
+     6    │ - Object()
+        6 │ + ({})
+     7  7 │   export * as qux from 'bar'
+     8  8 │   Object()
+  
+
+```
+
+```
+invalidModule.js:8:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     6 │ Object()
+     7 │ export * as qux from 'bar'
+   > 8 │ Object()
+       │ ^^^^^^^^
+     9 │ import quux from 'bar'
+    10 │ Object()
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     6  6 │   Object()
+     7  7 │   export * as qux from 'bar'
+     8    │ - Object()
+        8 │ + ({})
+     9  9 │   import quux from 'bar'
+    10 10 │   Object()
+  
+
+```
+
+```
+invalidModule.js:10:1 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     8 │ Object()
+     9 │ import quux from 'bar'
+  > 10 │ Object()
+       │ ^^^^^^^^
+    11 │ export default Object()
+    12 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     8  8 │   Object()
+     9  9 │   import quux from 'bar'
+    10    │ - Object()
+       10 │ + ({})
+    11 11 │   export default Object()
+    12 12 │   
+  
+
+```
+
+```
+invalidModule.js:11:16 lint/nursery/noObjectConstructor  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Calling Object without arguments creates an empty object.
+  
+     9 │ import quux from 'bar'
+    10 │ Object()
+  > 11 │ export default Object()
+       │                ^^^^^^^^
+    12 │ 
+  
+  i Writing {} is shorter, and it always creates a plain object, even if other code replaces the global Object.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use an object literal.
+  
+     9  9 │   import quux from 'bar'
+    10 10 │   Object()
+    11    │ - export·default·Object()
+       11 │ + export·default·{}
+    12 12 │   
+  
+
+```
