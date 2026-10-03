@@ -7622,6 +7622,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentUnicodeBom": {
+					"description": "Require or disallow a Unicode byte order mark at the beginning of a file.\nSee https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentUnicodeBomConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useControlLabel": {
 					"description": "Enforce that interactive control elements have an accessible label.\nSee https://biomejs.dev/linter/rules/use-control-label",
 					"anyOf": [
@@ -12734,6 +12741,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentUnicodeBomOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentUnicodeBomOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConstOptions": {
 			"type": "object",
 			"properties": {
@@ -16449,6 +16469,20 @@
 			]
 		},
 		"TrailingNewline": { "type": "boolean" },
+		"UnicodeBom": {
+			"oneOf": [
+				{
+					"description": "Require a Unicode byte order mark at the start of every file.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Disallow a Unicode byte order mark at the start of every file.",
+					"type": "string",
+					"const": "never"
+				}
+			]
+		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -16976,6 +17010,22 @@
 						{ "$ref": "#/$defs/ConsistentTypeDefinition" },
 						{ "type": "null" }
 					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentUnicodeBomConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentUnicodeBomOptions" }
+			]
+		},
+		"UseConsistentUnicodeBomOptions": {
+			"type": "object",
+			"properties": {
+				"bom": {
+					"description": "Whether files must start with a Unicode byte order mark. Defaults to `\"never\"`.",
+					"anyOf": [{ "$ref": "#/$defs/UnicodeBom" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
