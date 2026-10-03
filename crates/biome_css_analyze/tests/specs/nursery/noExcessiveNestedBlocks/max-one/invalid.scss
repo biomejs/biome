@@ -1,0 +1,71 @@
+/* should generate diagnostics */
+.a {
+    .b {
+        @if $enabled {
+            color: red;
+        }
+    }
+}
+
+// An `@else` block belongs to its `@if`, so the whole chain is reported once.
+.a {
+    .b {
+        @if $theme == dark {
+            color: white;
+        } @else if $theme == light {
+            color: black;
+        } @else {
+            color: gray;
+        }
+    }
+}
+
+.a {
+    .b {
+        @each $name in $names {
+            color: $name;
+        }
+    }
+}
+
+.a {
+    .b {
+        @for $i from 1 through 3 {
+            width: $i * 1px;
+        }
+    }
+}
+
+.a {
+    .b {
+        @while $i > 0 {
+            width: $i * 1px;
+        }
+    }
+}
+
+.a {
+    .b {
+        @include breakpoint(md) {
+            color: red;
+        }
+    }
+}
+
+.a {
+    .b {
+        font: {
+            family: sans-serif;
+        }
+    }
+}
+
+@mixin theme {
+    .a {
+        .b {
+            .c {
+                color: red;
+            }
+        }
+    }
+}
