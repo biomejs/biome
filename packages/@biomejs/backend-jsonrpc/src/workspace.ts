@@ -2934,6 +2934,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Enforce a maximum depth that blocks can be nested.
+	 * See https://biomejs.dev/linter/rules/no-excessive-nested-blocks
+	 */
+	noExcessiveNestedBlocks?: NoExcessiveNestedBlocksConfiguration;
+	/**
 	 * Disallow extending the prototype of built-in objects.
 	 * See https://biomejs.dev/linter/rules/no-extend-native
 	 */
@@ -5547,6 +5552,9 @@ export type NoBunModulesConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoExcessiveNestedBlocksConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveNestedBlocksOptions;
 export type NoExtendNativeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtendNativeOptions;
@@ -7914,6 +7922,10 @@ export interface RuleWithNoBunModulesOptions {
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
+}
+export interface RuleWithNoExcessiveNestedBlocksOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveNestedBlocksOptions;
 }
 export interface RuleWithNoExtendNativeOptions {
 	level: RulePlainConfiguration;
@@ -10373,6 +10385,12 @@ export interface NoBaseToStringOptions {
 }
 export type NoBunModulesOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export interface NoExcessiveNestedBlocksOptions {
+	/**
+	 * Maximum block nesting depth allowed (default: 4)
+	 */
+	max?: number;
+}
 /**
  * Options for the `noExtendNative` rule.
  */
@@ -12060,6 +12078,16 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateMapKeys"
+	| "lint/nursery/noComponentHookFactories"
+	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noExcessiveNestedBlocks"
+	| "lint/nursery/noExcessiveNestedCallbacks"
+	| "lint/nursery/noExcessiveSelectorClasses"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
