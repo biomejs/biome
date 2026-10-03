@@ -2966,6 +2966,11 @@ export interface Nursery {
 	 */
 	useConsistentTestIt?: UseConsistentTestItConfiguration;
 	/**
+	 * Require or disallow a Unicode byte order mark at the beginning of a file.
+	 * See https://biomejs.dev/linter/rules/use-consistent-unicode-bom
+	 */
+	useConsistentUnicodeBom?: UseConsistentUnicodeBomConfiguration;
+	/**
 	 * Enforce that interactive control elements have an accessible label.
 	 * See https://biomejs.dev/linter/rules/use-control-label
 	 */
@@ -5339,6 +5344,9 @@ export type UseConsistentObjectKeysConfiguration =
 export type UseConsistentTestItConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentTestItOptions;
+export type UseConsistentUnicodeBomConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentUnicodeBomOptions;
 export type UseControlLabelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseControlLabelOptions;
@@ -7739,6 +7747,14 @@ export interface RuleWithUseConsistentTestItOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentTestItOptions;
 }
+export interface RuleWithUseConsistentUnicodeBomOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentUnicodeBomOptions;
+}
 export interface RuleWithUseControlLabelOptions {
 	level: RulePlainConfiguration;
 	options?: UseControlLabelOptions;
@@ -9972,6 +9988,12 @@ export interface UseConsistentTestItOptions {
 	 */
 	withinDescribe?: TestFunctionKind;
 }
+export interface UseConsistentUnicodeBomOptions {
+	/**
+	 * Whether files must start with a Unicode byte order mark. Defaults to `"never"`.
+	 */
+	bom?: UnicodeBom;
+}
 /**
  * Configuration for the `useControlLabel` lint rule.
  */
@@ -10859,6 +10881,7 @@ export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
  * The function to use for tests
  */
 export type TestFunctionKind = "it" | "test";
+export type UnicodeBom = "always" | "never";
 export type UseLogicalPropertiesDirection = "ltr" | "rtl";
 export type IgnorePrimitives =
 	| boolean
@@ -11409,6 +11432,7 @@ export type Category =
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentTestIt"
+	| "lint/nursery/useConsistentUnicodeBom"
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useDomNodeTextContent"

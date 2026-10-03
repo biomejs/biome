@@ -1,0 +1,79 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: basic.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{ "files": ["always.js"], "rules": { "unicode-bom": ["warn", "always"] } },
+		{ "files": ["never.js"], "rules": { "unicode-bom": ["error", "never"] } },
+		{ "files": ["off.js"], "rules": { "unicode-bom": ["off", "always"] } }
+	],
+	"rules": { "unicode-bom": "error" }
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": { "useConsistentUnicodeBom": "error" }
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["always.js"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useConsistentUnicodeBom": {
+							"level": "warn",
+							"options": { "bom": "always" }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["never.js"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useConsistentUnicodeBom": {
+							"level": "error",
+							"options": { "bom": "never" }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["off.js"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useConsistentUnicodeBom": {
+							"level": "off",
+							"options": { "bom": "always" }
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```
