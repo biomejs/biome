@@ -1,0 +1,43 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {
+    @media (width >= 600px) {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @MEDIA print {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @media print {
+        @supports (display: grid) {
+            .b {
+                color: red;
+            }
+        }
+    }
+}
+
+.a {
+    .b {
+        @media print {
+            color: red;
+        }
+    }
+}
+
+```

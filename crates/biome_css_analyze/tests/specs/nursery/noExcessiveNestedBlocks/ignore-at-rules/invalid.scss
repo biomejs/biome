@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+.a {
+    @if $theme == dark {
+        .b {
+            color: white;
+        }
+    } @else {
+        color: black;
+    }
+}

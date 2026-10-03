@@ -1,0 +1,219 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 148
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+    .b {
+        .c {
+            color: red;
+        }
+    }
+}
+
+.a {
+    .b {
+        @media print {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @media print {
+        .b {
+            color: red;
+        }
+    }
+}
+
+.a {
+    @keyframes fade {
+        from {
+            opacity: 0;
+        }
+    }
+}
+
+@media print {
+    .a {
+        .b {
+            .c {
+                color: red;
+            }
+        }
+    }
+}
+
+@layer base {
+    @layer theme {
+        .a {
+            .b {
+                color: red;
+            }
+        }
+    }
+}
+
+@page :first {
+    @top-left {
+        @media print {
+            @supports (display: grid) {
+                color: red;
+            }
+        }
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:4:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    2 │ .a {
+    3 │     .b {
+  > 4 │         .c {
+      │         ^^
+    5 │             color: red;
+    6 │         }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:12:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    10 │ .a {
+    11 │     .b {
+  > 12 │         @media print {
+       │         ^^^^^^^^^^^^
+    13 │             color: red;
+    14 │         }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:20:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    18 │ .a {
+    19 │     @media print {
+  > 20 │         .b {
+       │         ^^
+    21 │             color: red;
+    22 │         }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:9 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    26 │ .a {
+    27 │     @keyframes fade {
+  > 28 │         from {
+       │         ^^^^
+    29 │             opacity: 0;
+    30 │         }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:37:13 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    35 │     .a {
+    36 │         .b {
+  > 37 │             .c {
+       │             ^^
+    38 │                 color: red;
+    39 │             }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:47:13 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    45 │     @layer theme {
+    46 │         .a {
+  > 47 │             .b {
+       │             ^^
+    48 │                 color: red;
+    49 │             }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:57:13 lint/nursery/noExcessiveNestedBlocks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This block is nested too deeply.
+  
+    55 │     @top-left {
+    56 │         @media print {
+  > 57 │             @supports (display: grid) {
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │                 color: red;
+    59 │             }
+  
+  i Blocks nested 2 levels deep are hard to read and produce long selectors that are hard to override. The configured maximum is 1.
+  
+  i Move the nested styles closer to the top level, or use a single class name instead of a chain of nested selectors.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

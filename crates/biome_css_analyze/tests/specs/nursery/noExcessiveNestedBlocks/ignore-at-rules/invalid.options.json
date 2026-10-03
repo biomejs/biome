@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "nursery": {
+        "noExcessiveNestedBlocks": {
+          "level": "error",
+          "options": {
+            "max": 1,
+            "ignoreAtRules": ["media", "supports", "else", "include"]
+          }
+        }
+      }
+    }
+  }
+}

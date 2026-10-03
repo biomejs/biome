@@ -1,0 +1,108 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 712
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate stylelint --include-nursery
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "rules": {
+            "max-nesting-depth": [
+                2,
+                {
+                    "ignore": ["blockless-at-rules"],
+                    "ignoreAtRules": ["media", "/^my-/", "/^your-/i"]
+                }
+            ]
+        },
+        "overrides": [
+            {
+                "files": ["*.scss"],
+                "rules": {
+                    "max-nesting-depth": [3, { "ignoreAtRules": "include", "severity": "warning" }]
+                }
+            }
+        ]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "nursery":·{
+       7 │ + → → → → "noExcessiveNestedBlocks":·{
+       8 │ + → → → → → "level":·"error",
+       9 │ + → → → → → "options":·{·"max":·2,·"ignoreAtRules":·["media"]·}
+      10 │ + → → → → }
+      11 │ + → → → }
+      12 │ + → → }
+      13 │ + → },
+      14 │ + → "overrides":·[
+      15 │ + → → {
+      16 │ + → → → "includes":·["*.scss"],
+      17 │ + → → → "linter":·{
+      18 │ + → → → → "rules":·{
+      19 │ + → → → → → "nursery":·{
+      20 │ + → → → → → → "noExcessiveNestedBlocks":·{
+      21 │ + → → → → → → → "level":·"warn",
+      22 │ + → → → → → → → "options":·{·"max":·3,·"ignoreAtRules":·["include"]·}
+      23 │ + → → → → → → }
+      24 │ + → → → → → }
+      25 │ + → → → → }
+      26 │ + → → → }
+      27 │ + → → }
+      28 │ + → ]
+      29 │ + }
+      30 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 Stylelint rules found
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (1) of your Stylelint rules are fully covered by Biome
+      - 100% (1) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

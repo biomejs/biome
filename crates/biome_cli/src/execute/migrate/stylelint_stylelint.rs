@@ -164,6 +164,10 @@ pub(crate) struct RuleData {
     pub(crate) severity: Option<Severity>,
     /// The primary option, for rules whose Biome equivalent has a matching option.
     pub(crate) primary_option: Option<PrimaryOption>,
+    /// The at-rule names of the `ignoreAtRules` secondary option.
+    ///
+    /// Regular expressions are left out because Biome only matches plain names.
+    pub(crate) ignore_at_rules: Box<[Box<str>]>,
 }
 impl Deserializable for RuleData {
     fn deserialize<V: DeserializableValue>(
@@ -176,6 +180,7 @@ impl Deserializable for RuleData {
                 enabled: false,
                 severity: None,
                 primary_option: None,
+                ignore_at_rules: Box::default(),
             }),
             DeserializableType::Bool => {
                 let enabled = bool::deserialize(ctx, value, name)?;
@@ -183,6 +188,7 @@ impl Deserializable for RuleData {
                     enabled,
                     severity: None,
                     primary_option: None,
+                    ignore_at_rules: Box::default(),
                 })
             }
             DeserializableType::Array => {
@@ -215,16 +221,21 @@ impl Deserializable for RuleData {
                             },
                             None => true,
                         };
-                        let severity = items
+                        let secondary_options = items
                             .next()
                             .and_then(|secondary| {
                                 SecondaryOptions::deserialize(ctx, &secondary, name)
                             })
-                            .and_then(|options| options.severity);
+                            .unwrap_or_default();
                         Some(RuleData {
                             enabled,
-                            severity,
+                            severity: secondary_options.severity,
                             primary_option,
+                            ignore_at_rules: secondary_options
+                                .ignore_at_rules
+                                .into_iter()
+                                .filter(|name| !is_regex(name))
+                                .collect(),
                         })
                     }
                 }
@@ -235,6 +246,7 @@ impl Deserializable for RuleData {
                 enabled: true,
                 severity: None,
                 primary_option: PrimaryOption::from_rule_value(ctx, value, name),
+                ignore_at_rules: Box::default(),
             }),
         }
     }
@@ -244,6 +256,12 @@ impl Deserializable for RuleData {
 #[derive(Debug)]
 pub(crate) enum PrimaryOption {
     LightnessNotation(LightnessNotation),
+    MaxNestingDepth(u8),
+    /// A primary option that Biome can't represent.
+    ///
+    /// Deserialization reports a diagnostic for the invalid value, and the rule isn't migrated
+    /// because migrating it with Biome's default would change its behavior.
+    Unsupported,
 }
 impl PrimaryOption {
     /// Deserializes the primary option of the Stylelint rule named `rule_name`.
@@ -258,6 +276,10 @@ impl PrimaryOption {
             "lightness-notation" => {
                 LightnessNotation::deserialize(ctx, value, rule_name).map(Self::LightnessNotation)
             }
+            "max-nesting-depth" => Some(
+                u8::deserialize(ctx, value, rule_name)
+                    .map_or(Self::Unsupported, Self::MaxNestingDepth),
+            ),
             _ => None,
         }
     }
@@ -289,6 +311,15 @@ impl From<LightnessNotation>
 #[deserializable(unknown_fields = "allow")]
 struct SecondaryOptions {
     severity: Option<Severity>,
+    ignore_at_rules: ShorthandVec<Box<str>>,
+}
+
+/// Returns `true` if Stylelint interprets the option value as a regular expression,
+/// such as `/^my-/` or `/^my-/i`.
+///
+/// See <https://github.com/stylelint/stylelint/blob/main/lib/utils/matchesStringOrRegExp.mjs>
+fn is_regex(value: &str) -> bool {
+    value.starts_with('/') && (value.ends_with('/') || value.ends_with("/i"))
 }
 
 #[cfg(test)]
@@ -300,6 +331,7 @@ mod tests {
             enabled,
             severity: None,
             primary_option: None,
+            ignore_at_rules: Box::default(),
         }
     }
 
