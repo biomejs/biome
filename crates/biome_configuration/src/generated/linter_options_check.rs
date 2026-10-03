@@ -41,6 +41,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noArguments",
         TypeId::of::<biome_rule_options::no_arguments::NoArgumentsOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noArgumentsCallerOrCallee",
+        TypeId::of::<
+            biome_rule_options::no_arguments_caller_or_callee::NoArgumentsCallerOrCalleeOptions,
+        >(),
+    ));
     result.push(("a11y", "noAriaHiddenOnFocusable", TypeId::of::<biome_rule_options::no_aria_hidden_on_focusable::NoAriaHiddenOnFocusableOptions>()));
     result.push((
         "a11y",

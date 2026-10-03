@@ -9,6 +9,7 @@ pub mod no_alert;
 pub mod no_ambiguous_anchor_text;
 pub mod no_approximative_numeric_constant;
 pub mod no_arguments;
+pub mod no_arguments_caller_or_callee;
 pub mod no_aria_hidden_on_focusable;
 pub mod no_aria_unsupported_elements;
 pub mod no_array_index_key;
