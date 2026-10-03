@@ -7601,6 +7601,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCapitalizedConstructors": {
+					"description": "Require constructor names to begin with a capital letter.\nSee https://biomejs.dev/linter/rules/use-capitalized-constructors",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseCapitalizedConstructorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFunctionStyle": {
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
@@ -12544,6 +12551,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseCapitalizedConstructorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"properties": {
@@ -16691,6 +16707,16 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseCapitalizedConstructorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseCapitalizedConstructorsOptions" }
+			]
+		},
+		"UseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseCollapsedElseIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
