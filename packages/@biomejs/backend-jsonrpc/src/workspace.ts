@@ -2741,6 +2741,11 @@ export interface Nursery {
 	 */
 	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
 	/**
+	 * Disallow returning values from the function passed to new Promise().
+	 * See https://biomejs.dev/linter/rules/no-promise-executor-return
+	 */
+	noPromiseExecutorReturn?: NoPromiseExecutorReturnConfiguration;
+	/**
 	 * Disallow deep imports from the react-native package.
 	 * See https://biomejs.dev/linter/rules/no-react-native-deep-imports
 	 */
@@ -5199,6 +5204,9 @@ export type NoPlaywrightWaitForSelectorConfiguration =
 export type NoPlaywrightWaitForTimeoutConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightWaitForTimeoutOptions;
+export type NoPromiseExecutorReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPromiseExecutorReturnOptions;
 export type NoReactNativeDeepImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeDeepImportsOptions;
@@ -7507,6 +7515,14 @@ export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightWaitForTimeoutOptions;
 }
+export interface RuleWithNoPromiseExecutorReturnOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPromiseExecutorReturnOptions;
+}
 export interface RuleWithNoReactNativeDeepImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeDeepImportsOptions;
@@ -9790,6 +9806,7 @@ export type NoPlaywrightUselessAwaitOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
+export type NoPromiseExecutorReturnOptions = {};
 export type NoReactNativeDeepImportsOptions = {};
 export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
@@ -11346,6 +11363,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
