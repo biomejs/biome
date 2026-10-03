@@ -7493,7 +7493,7 @@
 					]
 				},
 				"noUnsafeUnaryMinus": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
+					"description": "Require the operand of unary - to be a number or a bigint.\nSee https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeUnaryMinusConfiguration" },
 						{ "type": "null" }

@@ -2861,7 +2861,7 @@ export interface Nursery {
 	 */
 	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Require the operand of unary - to be a number or a bigint.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-unary-minus
 	 */
 	noUnsafeUnaryMinus?: NoUnsafeUnaryMinusConfiguration;
