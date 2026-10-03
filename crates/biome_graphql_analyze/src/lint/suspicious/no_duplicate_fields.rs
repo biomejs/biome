@@ -13,9 +13,10 @@ use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
-    /// No duplicated fields in GraphQL operations.
+    /// Disallow duplicate names inside GraphQL operations.
     ///
-    /// Checks for duplicate fields in selection set, variables in operation definition, or in arguments set of a field.
+    /// The rule checks selected fields within each selection set, variables declared by an
+    /// operation, and arguments passed to a field. Each name must appear only once in its list.
     ///
     /// ## Examples
     ///

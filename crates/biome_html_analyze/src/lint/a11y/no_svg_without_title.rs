@@ -9,12 +9,14 @@ use crate::Aria;
 use crate::a11y::is_aria_hidden_true;
 
 declare_lint_rule! {
-    /// Enforces the usage of the `title` element for the `svg` element.
+    /// Require a supported labeling pattern for non-decorative SVG elements.
     ///
-    /// It is not possible to specify the `alt` attribute for the `svg` as for the `img`.
-    /// To make svg accessible, the following methods are available:
-    /// - provide the `title` element as the first child to `svg`
-    /// - provide `role="img"` and `aria-label` or `aria-labelledby` to `svg`
+    /// An `<svg>` cannot use the `alt` attribute available to `<img>`. The rule accepts a non-empty
+    /// `<title>` as the first child. An SVG with an image role may instead have an `aria-label`
+    /// attribute, or an `aria-labelledby` value that matches a child element's `id`. The rule checks
+    /// that `aria-label` exists but does not check whether its value is empty.
+    ///
+    /// Decorative SVGs marked with `aria-hidden="true"` or `role="presentation"` are ignored.
     ///
     /// ## Examples
     ///

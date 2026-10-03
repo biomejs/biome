@@ -8,7 +8,10 @@ use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_duplicate_jsx_props::NoDuplicateJsxPropsOptions;
 
 declare_lint_rule! {
-    /// Prevents JSX properties to be assigned multiple times.
+    /// Disallow duplicate JSX properties.
+    ///
+    /// Each property should appear only once on an element. Repeating a property makes the intended
+    /// value unclear and is usually a mistake.
     ///
     /// ## Examples
     ///

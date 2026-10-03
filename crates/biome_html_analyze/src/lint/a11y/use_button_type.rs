@@ -9,7 +9,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
 declare_lint_rule! {
-    /// Enforces the usage and validity of the attribute `type` for the element `button`
+    /// Require an explicit, valid `type` on every `<button>`.
+    ///
+    /// A button without a type defaults to `submit`, which can submit a surrounding form
+    /// unexpectedly. Use `button`, `submit`, or `reset` to state the intended behavior.
     ///
     /// ## Examples
     ///

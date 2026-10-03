@@ -15,16 +15,14 @@ use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
 
 declare_lint_rule! {
-    /// Disallow duplicate names within font families.
+    /// Disallow duplicate names in font-family lists.
     ///
-    /// This rule checks the `font` and `font-family` properties for duplicate font names.
+    /// The rule checks the `font` and `font-family` properties. It skips values supplied through
+    /// `var()` because their contents are not known during analysis.
     ///
-    /// This rule ignores var(--custom-property) variable syntaxes now.
-    ///
-    /// The unquoted `font-family: monospace, monospace` pair is allowed because
-    /// it preserves the inherited font size instead of using the browser's monospace size preference.
-    /// See [MDN's monospace font size explanation](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/font-family#monospace_font_size).
-    ///
+    /// The unquoted pair `font-family: monospace, monospace` is allowed. This pattern preserves an
+    /// inherited font size instead of using the browser's preferred monospace size. See
+    /// [MDN's explanation](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/font-family#monospace_font_size).
     ///
     /// ## Examples
     ///

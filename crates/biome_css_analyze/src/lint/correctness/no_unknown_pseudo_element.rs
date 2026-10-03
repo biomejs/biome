@@ -14,11 +14,11 @@ use biome_string_case::StrLikeExtension;
 use crate::utils::{is_pseudo_elements, vender_prefix};
 
 declare_lint_rule! {
-    /// Disallow unknown pseudo-element selectors.
+    /// Disallow unrecognized pseudo-element selectors.
     ///
-    /// For details on known CSS pseudo-elements, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
-    ///
-    /// This rule ignores vendor-prefixed pseudo-element selectors.
+    /// A pseudo-element selects a specific part of an element, such as `::before` or `::selection`.
+    /// Vendor-prefixed pseudo-elements are allowed. See
+    /// [MDN's pseudo-element reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
     ///
     /// ## Examples
     ///
@@ -58,7 +58,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown pseudo-element names to ignore (case-insensitive).
+    /// Lists additional pseudo-element names to allow, without regard to letter case. Defaults to
+    /// an empty list.
     ///
     /// ```json,options
     /// {

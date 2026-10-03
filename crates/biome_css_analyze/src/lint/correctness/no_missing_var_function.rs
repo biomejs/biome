@@ -13,12 +13,16 @@ use biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow missing var function for css variables.
+    /// Require `var()` when using a declared CSS custom property.
     ///
-    /// This rule has the following limitations:
-    /// - It only reports custom properties that are defined and accessible within the same source.
-    /// - It does not check properties that can contain author-defined identifiers.
-    /// - It ignores the following properties:
+    /// Custom property names begin with `--`, but their values must be read with `var(--name)`.
+    /// Writing the name directly does not substitute the custom property's value.
+    ///
+    /// The rule has the following limits:
+    ///
+    /// - It reports only custom properties that are declared and visible in the same source.
+    /// - It skips properties where a name beginning with `--` can be an ordinary value.
+    /// - It skips the following properties:
     ///   - `animation`
     ///   - `animation-name`
     ///   - `container-name`
@@ -90,6 +94,9 @@ declare_lint_rule! {
     ///   color: var(--foo);
     /// }
     /// ```
+    ///
+    /// An undeclared name is not reported because the rule cannot determine whether it was meant
+    /// to refer to a custom property:
     ///
     /// ```css
     /// p {

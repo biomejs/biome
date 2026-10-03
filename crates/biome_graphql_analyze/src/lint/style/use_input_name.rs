@@ -11,9 +11,9 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_input_name::{CheckInputType, UseInputNameOptions};
 
 declare_lint_rule! {
-    /// Require mutation argument to be always called "input"
+    /// Require mutation arguments to be named `input`.
     ///
-    /// Using the same name for all input parameters will make your schemas easier to consume and more predictable.
+    /// A consistent argument name makes mutations predictable for schema users and client tools.
     ///
     /// ## Examples
     ///
@@ -37,11 +37,14 @@ declare_lint_rule! {
     ///
     /// ### `checkInputType`
     ///
-    /// With the option `checkInputType` on, the input type name requires to be called `<mutation name>Input`.
-    /// This can either be "loose" (case-insensitive) or "strict" (case-sensitive).
-    /// Using the name of the mutation in the input type name will make it easier to find the mutation that the input type belongs to.
+    /// Optionally requires the input type to be named `<mutation name>Input`, so schema readers can
+    /// identify its related mutation.
     ///
-    /// Default `"off"`
+    /// - `"off"` does not check the type name;
+    /// - `"loose"` checks the name without regard to letter case;
+    /// - `"strict"` requires matching letter case.
+    ///
+    /// Defaults to `"off"`.
     ///
     /// ```json,options
     /// {

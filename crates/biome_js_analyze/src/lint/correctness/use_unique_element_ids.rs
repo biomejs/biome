@@ -13,12 +13,15 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Prevent the usage of static string literal `id` attribute on elements outside SVG contexts.
+    /// Disallow static `id` values on elements outside SVG contexts.
     ///
-    /// In React, hardcoding IDs is discouraged because IDs have to be unique in the DOM.
-    /// You should use [`useId`](https://react.dev/reference/react/useId) to generate unique IDs for accessibility purposes.
+    /// IDs must be unique in the rendered page. A component with a hard-coded ID can create
+    /// duplicate IDs when it is rendered more than once, which can break links between labels and
+    /// controls or other accessibility features. Use React's
+    /// [`useId`](https://react.dev/reference/react/useId) to generate stable, unique IDs.
     ///
-    /// Please keep in mind this rule doesn't check whether ids are actually unique or not, and does check whether static literal id isn't passed to the elements or not. So you're encouraged to check by yourself if the ids are actually unique.
+    /// This rule reports static literal IDs. It does not compare IDs across elements or verify that
+    /// dynamically generated IDs are unique.
     ///
     /// ## Examples
     ///
@@ -57,7 +60,7 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The following option is available
+    /// The following option is available.
     ///
     /// ### `excludedComponents`
     ///

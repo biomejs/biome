@@ -9,12 +9,15 @@ use biome_rowan::TextRange;
 use biome_rule_options::no_unsafe_iframe_sandbox::NoUnsafeIframeSandboxOptions;
 
 declare_lint_rule! {
-    /// Disallow an unsafe combination of the `sandbox` attribute.
+    /// Disallow `allow-scripts` together with `allow-same-origin` in an iframe sandbox.
     ///
-    /// This rule reports cases where the attribute may contain `allow-scripts` and `allow-same-origin` at the same time,
-    /// as this combination allows the embedded document to remove the `sandbox` attribute and bypass the restrictions.
+    /// `allow-scripts` lets the embedded document run JavaScript, while `allow-same-origin` keeps
+    /// its original security origin. For same-origin content, combining both permissions can let the
+    /// embedded script remove the iframe's `sandbox` attribute and escape its restrictions. Remove
+    /// one of the two permissions.
     ///
-    /// See [Play safely in sandboxed IFrames](https://web.dev/articles/sandboxed-iframes) or [this Stack Overflow answer](https://stackoverflow.com/a/62431584) for more details.
+    /// See [Play safely in sandboxed iframes](https://web.dev/articles/sandboxed-iframes) for more
+    /// details.
     ///
     /// ## Examples
     ///

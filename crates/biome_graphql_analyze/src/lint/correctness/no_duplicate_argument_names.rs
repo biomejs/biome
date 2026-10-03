@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_duplicate_argument_names::NoDuplicateArgumentNamesOptions;
 
 declare_lint_rule! {
-    /// Require all argument names for fields & directives to be unique.
+    /// Require unique argument names for fields and directives.
     ///
     /// A GraphQL field or directive is only valid if all supplied arguments are uniquely named.
     ///

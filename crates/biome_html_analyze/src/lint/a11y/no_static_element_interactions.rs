@@ -11,13 +11,13 @@ use crate::{
 };
 
 declare_lint_rule! {
-    /// Enforce that static, visible elements (such as `<div>`) that have click handlers use the valid role attribute.
+    /// Require an appropriate role when a non-interactive element has event handlers.
     ///
-    /// Static HTML elements do not have semantic meaning. This is clear in the case of `<div>` and `<span>`.
-    /// It is less so clear in the case of elements that seem semantic, but that do not have a semantic mapping in the accessibility layer. For example `<a>` without href attribute, `<meta>`, `<script>`, `<picture>`, `<section>`, and `<colgroup>` -- to name a few -- have no semantic layer mapping. They are as void of meaning as `<div>`.
-    ///
-    /// The [WAI-ARIA role attribute](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) confers a semantic mapping to an element. The semantic value can then be expressed to a user via assistive technology.
-    /// In order to add interactivity such as a mouse or key event listener to a static element, that element must be given a role value as well.
+    /// Elements such as `<div>` and `<span>` have no built-in interactive meaning. Adding a mouse,
+    /// keyboard, or focus handler does not tell assistive technologies that the element behaves like
+    /// a control. Prefer a native interactive element such as `<button>`. When that is not possible,
+    /// add an appropriate [ARIA role](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) so the control's
+    /// purpose can be announced.
     ///
     /// ## Examples
     ///
@@ -31,7 +31,7 @@ declare_lint_rule! {
     /// <span onclick="myFunction()"></span>
     /// ```
     ///
-    /// When `<a>` does not have "href" attribute, that is non-interactive.
+    /// An `<a>` element without an `href` attribute is non-interactive.
     /// ```html,expect_diagnostic
     /// <a onclick="myFunction()"></a>
     /// ```

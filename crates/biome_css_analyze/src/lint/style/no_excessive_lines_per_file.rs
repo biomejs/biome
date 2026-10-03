@@ -9,14 +9,14 @@ use biome_rule_options::no_excessive_lines_per_file::NoExcessiveLinesPerFileOpti
 declare_lint_rule! {
     /// Restrict the number of lines in a file.
     ///
-    /// Large files tend to do many things and can make it hard to follow what's going on.
-    /// This rule can help enforce a limit on the number of lines in a file.
+    /// Large stylesheets are harder to navigate and maintain. A line limit can encourage splitting
+    /// unrelated styles into focused files.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// The following example will show a diagnostic when `maxLines` is set to 2:
+    /// This example reports a diagnostic when `maxLines` is `2`:
     ///
     /// ```json,options
     /// {
@@ -42,16 +42,9 @@ declare_lint_rule! {
     ///
     /// ### `maxLines`
     ///
-    /// This option sets the maximum number of lines allowed in a file.
-    /// If the file exceeds this limit, a diagnostic will be reported.
+    /// Sets the maximum number of lines allowed in a file. Defaults to `300`.
     ///
-    /// Default: `300`
-    ///
-    /// #### Examples
-    ///
-    /// The default value for `maxLines` is `300`. The following example shows how to set the
-    /// `maxLines` option to a smaller value. It reports a diagnostic because the file has more
-    /// than 4 lines:
+    /// This example lowers the limit to `4` and reports a five-line file:
     ///
     /// ```json,options
     /// {
@@ -70,14 +63,9 @@ declare_lint_rule! {
     ///
     /// ### `skipBlankLines`
     ///
-    /// When this option is set to `true`, blank lines are not counted towards the maximum line limit.
+    /// Excludes blank lines from the line count when set to `true`. Defaults to `false`.
     ///
-    /// Default: `false`
-    ///
-    /// #### Examples
-    ///
-    /// The following example shows how `skipBlankLines` can prevent a diagnostic by excluding blank
-    /// lines from the total count:
+    /// Here, the blank lines do not count toward the limit:
     ///
     /// ```json,options
     /// {

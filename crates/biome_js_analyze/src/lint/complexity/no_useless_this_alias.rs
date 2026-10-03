@@ -17,10 +17,10 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_this_alias::NoUselessThisAliasOptions;
 
 declare_lint_rule! {
-    /// Disallow useless `this` aliasing.
+    /// Disallow aliases for `this` when `this` can be used directly.
     ///
-    /// Arrow functions inherits `this` from their enclosing scope;
-    /// this makes `this` aliasing useless in this situation.
+    /// Arrow functions use `this` from their surrounding scope. In that situation, assigning
+    /// `this` to another variable adds an unnecessary name without changing which value is used.
     ///
     /// ## Examples
     ///
