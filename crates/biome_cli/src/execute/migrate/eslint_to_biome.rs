@@ -371,6 +371,8 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
         } = value;
         let constructor: fn(&'a str) -> RuleSource<'a> = match plugin_name.as_deref() {
             None => RuleSource::Eslint,
+            Some("astro") => RuleSource::EslintAstro,
+            Some("markdown") => RuleSource::EslintMarkdown,
             Some("barrel-files") => RuleSource::EslintBarrelFiles,
             Some("@graphql-eslint") => RuleSource::EslintGraphql,
             Some("import") => RuleSource::EslintImport,
@@ -1261,6 +1263,30 @@ mod tests {
                 biome_config::RulePlainConfiguration::Off
             ))
         );
+    }
+
+    #[test]
+    fn astro_and_markdown_unsupported_rule_lookup() {
+        for (name, reason) in [
+            (
+                "astro/no-omitted-end-tags",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "astro/semi",
+                UnsupportedRuleReason::FormatterOption("semicolons"),
+            ),
+            ("astro/valid-compile", UnsupportedRuleReason::NotApplicable),
+            (
+                "markdown/no-space-in-emphasis",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
     }
 
     #[test]

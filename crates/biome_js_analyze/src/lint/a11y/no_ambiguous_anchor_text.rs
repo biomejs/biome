@@ -61,7 +61,10 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJsxA11y("anchor-ambiguous-text").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("anchor-ambiguous-text").same(),
+            RuleSource::EslintAstro("jsx-a11y/anchor-ambiguous-text").same(),
+        ],
     }
 }
 

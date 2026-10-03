@@ -5,7 +5,7 @@ expression: redactor(content)
 ## Command
 
 ```shell
-biome migrate eslint --write
+biome migrate eslint --include-inspired --write
 ```
 
 ## `biome.json`
@@ -58,6 +58,8 @@ biome migrate eslint --write
         "noUnusedVariables": "error"
       },
       "style": {
+        "noVueOptionsApi": "error",
+        "useConsistentCurlyBraces": "error",
         "useConsistentObjectDefinitions": "error",
         "useForOf": "error",
         "useNodejsImportProtocol": "error"
@@ -86,15 +88,16 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 93 ESLint rules found
     - 9 are obsolete because of Biome's formatter
-    - 46 have been migrated to Biome's rules
+    - 49 have been migrated to Biome's rules
     - 69% (65) of your ESLint rules are fully covered by Biome
-      - 49% (46) via direct migration to Biome rules
+      - 52% (49) via direct migration to Biome rules
   
   
   i Migrated rules:
   
   - no-catch-shadow
   - @mysticatea/prefer-for-of
+  - @stylistic/jsx-curly-brace-presence
   - astro/jsx-a11y/alt-text
   - astro/jsx-a11y/anchor-ambiguous-text
   - astro/jsx-a11y/anchor-has-content
@@ -130,8 +133,10 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - astro/jsx-a11y/role-supports-aria-props
   - astro/jsx-a11y/scope
   - astro/jsx-a11y/tabindex-no-positive
+  - jsx-a11y/label-has-for
   - n/prefer-node-protocol
   - svelte/button-has-type
+  - vue/component-api-style
   - vue/eqeqeq
   - vue/html-button-has-type
   - vue/no-console
@@ -140,16 +145,10 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - vue/no-unused-vars
   - vue/object-shorthand
   
-  i Rules that can be migrated to an inspired rule using --include-inspired:
-  
-  - @stylistic/jsx-curly-brace-presence
-  - astro/jsx-a11y/control-has-associated-label
-  - jsx-a11y/label-has-for
-  - vue/component-api-style
-  
   i Rules that can be migrated to a nursery rule using --include-nursery:
   
   - @typescript-eslint/prefer-promise-reject-errors
+  - astro/jsx-a11y/control-has-associated-label
   - react/iframe-missing-sandbox
   - react-native/no-inline-styles
   - shadcn/no-inline-styles
