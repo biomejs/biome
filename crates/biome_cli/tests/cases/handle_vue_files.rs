@@ -1275,3 +1275,41 @@ const fallback: ItemType = "fallback";
         result,
     ));
 }
+
+#[test]
+fn script_setup_generic_is_parsed() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        "biome.json".into(),
+        r#"{ "html": { "linter": { "enabled": true }, "experimentalFullSupportEnabled": true } }"#
+            .as_bytes(),
+    );
+
+    let vue_file_path = Utf8Path::new("file.vue");
+    fs.insert(
+        vue_file_path.into(),
+        r#"<script setup lang="ts" generic="TData extends object, TRow">
+defineProps<{ rows: TData[]; selected: TRow }>();
+</script>
+"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", vue_file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "script_setup_generic_is_parsed",
+        fs,
+        console,
+        result,
+    ));
+}

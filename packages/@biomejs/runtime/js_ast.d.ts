@@ -2148,6 +2148,15 @@ export interface JsVariableStatement extends JsAstNode {
 	token(field: "semicolonToken"): JsAstToken | undefined;
 	token(field: string): JsAstToken | undefined;
 }
+export interface JsVueGenericRoot extends JsAstNode {
+	readonly kind: "JS_VUE_GENERIC_ROOT";
+	readonly items: AnyJsVueGenericTypeParameters | undefined;
+	withItems(value: AnyJsVueGenericTypeParameters): JsVueGenericRoot;
+	readonly eofToken: string | undefined;
+	withEofToken(value: JsAstToken): JsVueGenericRoot;
+	token(field: "eofToken"): JsAstToken | undefined;
+	token(field: string): JsAstToken | undefined;
+}
 export interface JsVueSlotPropsRoot extends JsAstNode {
 	readonly kind: "JS_VUE_SLOT_PROPS_ROOT";
 	readonly parameters: JsParameterList;
@@ -4186,6 +4195,7 @@ export type AnyJsRoot =
 	| JsScript
 	| JsSvelteDeclarationRoot
 	| JsSvelteSnippetRoot
+	| JsVueGenericRoot
 	| JsVueSlotPropsRoot
 	| TsDeclarationModule;
 export type AnyJsStatement =
@@ -4227,6 +4237,7 @@ export type AnyJsSvelteDeclaration =
 	| JsVariableDeclaration;
 export type AnyJsSwitchClause = JsCaseClause | JsDefaultClause;
 export type AnyJsTemplateElement = JsTemplateChunkElement | JsTemplateElement;
+export type AnyJsVueGenericTypeParameters = JsBogus | TsTypeParameterList;
 export type AnyJsxAttribute =
 	| JsMetavariable
 	| JsxAttribute
@@ -4520,6 +4531,7 @@ export interface JsNodeByKind {
 	readonly JS_VARIABLE_DECLARATION_CLAUSE: JsVariableDeclarationClause;
 	readonly JS_VARIABLE_DECLARATOR: JsVariableDeclarator;
 	readonly JS_VARIABLE_STATEMENT: JsVariableStatement;
+	readonly JS_VUE_GENERIC_ROOT: JsVueGenericRoot;
 	readonly JS_VUE_SLOT_PROPS_ROOT: JsVueSlotPropsRoot;
 	readonly JS_WHILE_STATEMENT: JsWhileStatement;
 	readonly JS_WITH_STATEMENT: JsWithStatement;

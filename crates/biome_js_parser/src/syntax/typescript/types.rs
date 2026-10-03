@@ -29,6 +29,7 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_const_modifier_cannot_appear_on_a_type_parameter,
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
+use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use enumflags2::{BitFlags, bitflags, make_bitflags};
 use smallvec::SmallVec;
@@ -245,6 +246,28 @@ pub(crate) fn parse_ts_type_parameters(p: &mut JsParser, context: TypeContext) -
     Present(m.complete(p, TS_TYPE_PARAMETERS))
 }
 
+/// Parses the value of the `generic` attribute of a Vue `<script setup>`, e.g. `T extends Item, U`.
+///
+/// Vue compiles the value as the type parameters of the component function, `<T extends Item, U>`,
+/// so the list is parsed without the surrounding angle brackets and ends at the end of the file.
+/// Any trailing code, such as a stray `>` that ends the list early, is wrapped together with
+/// the list in a bogus node.
+pub(crate) fn parse_vue_generic_type_parameters(p: &mut JsParser) -> CompletedMarker {
+    let list =
+        TsTypeParameterList(TypeContext::default().and_allow_const_modifier(true)).parse_list(p);
+
+    if p.at(EOF) {
+        return list;
+    }
+
+    p.error(expected_token(T![,]));
+    let bogus = list.precede(p);
+    while !p.at(EOF) {
+        p.bump_any();
+    }
+    bogus.complete(p, JS_BOGUS)
+}
+
 struct TsTypeParameterList(TypeContext);
 
 impl ParseSeparatedList for TsTypeParameterList {
@@ -258,7 +281,8 @@ impl ParseSeparatedList for TsTypeParameterList {
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
-        p.at(T![>])
+        // The end of the file also ends the list, because Vue's `generic` attribute has no `>`
+        p.at(T![>]) || p.at(EOF)
     }
 
     fn recover(&mut self, p: &mut JsParser, parsed_element: ParsedSyntax) -> RecoveryResult {

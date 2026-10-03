@@ -58,6 +58,7 @@ AnyJsRoot =
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
 	| JsVueSlotPropsRoot
+	| JsVueGenericRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -101,6 +102,16 @@ JsSvelteSnippetRoot =
 JsVueSlotPropsRoot =
 		parameters: JsParameterList
 		eof: 'EOF'
+
+// Special root created for the `generic` attribute of Vue `<script setup>`: `generic="T extends U, K"`
+// Vue compiles the value as the type parameters of the component function, without angle brackets.
+JsVueGenericRoot =
+		items: AnyJsVueGenericTypeParameters
+		eof: 'EOF'
+
+AnyJsVueGenericTypeParameters =
+	TsTypeParameterList
+	| JsBogus
 
 // Special root created for Svelte declaration tags
 JsSvelteDeclarationRoot =

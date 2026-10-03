@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+T, extends U
+
+```
+
+
+## AST
+
+```
+JsVueGenericRoot {
+    items: JsBogus {
+        items: [
+            TsTypeParameter {
+                modifiers: TsTypeParameterModifierList [],
+                name: TsTypeParameterName {
+                    ident_token: IDENT@0..1 "T" [] [],
+                },
+                constraint: missing (optional),
+                default: missing (optional),
+            },
+            COMMA@1..3 "," [] [Whitespace(" ")],
+            TsTypeParameterModifierList [],
+            TsTypeConstraintClause {
+                extends_token: EXTENDS_KW@3..11 "extends" [] [Whitespace(" ")],
+                ty: TsReferenceType {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@11..12 "U" [] [],
+                    },
+                    type_arguments: missing (optional),
+                },
+            },
+        ],
+    },
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_GENERIC_ROOT@0..13
+  0: JS_BOGUS@0..12
+    0: TS_TYPE_PARAMETER@0..1
+      0: TS_TYPE_PARAMETER_MODIFIER_LIST@0..0
+      1: TS_TYPE_PARAMETER_NAME@0..1
+        0: IDENT@0..1 "T" [] []
+      2: (empty)
+      3: (empty)
+    1: COMMA@1..3 "," [] [Whitespace(" ")]
+    2: TS_TYPE_PARAMETER_MODIFIER_LIST@3..3
+    3: TS_TYPE_CONSTRAINT_CLAUSE@3..12
+      0: EXTENDS_KW@3..11 "extends" [] [Whitespace(" ")]
+      1: TS_REFERENCE_TYPE@11..12
+        0: JS_REFERENCE_IDENTIFIER@11..12
+          0: IDENT@11..12 "U" [] []
+        1: (empty)
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_name.vue_generic.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found the end of the file.
+  
+    1 │ T, extends U
+  > 2 │ 
+      │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ T, extends U
+  > 2 │ 
+      │ 
+  
+```

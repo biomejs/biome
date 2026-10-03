@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+T extends Type1 & (Type2 | Type3), U extends string = "a"
+
+```
+
+
+## AST
+
+```
+JsVueGenericRoot {
+    items: TsTypeParameterList [
+        TsTypeParameter {
+            modifiers: TsTypeParameterModifierList [],
+            name: TsTypeParameterName {
+                ident_token: IDENT@0..2 "T" [] [Whitespace(" ")],
+            },
+            constraint: TsTypeConstraintClause {
+                extends_token: EXTENDS_KW@2..10 "extends" [] [Whitespace(" ")],
+                ty: TsIntersectionType {
+                    leading_separator_token: missing (optional),
+                    types: TsIntersectionTypeElementList [
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@10..16 "Type1" [] [Whitespace(" ")],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        AMP@16..18 "&" [] [Whitespace(" ")],
+                        TsParenthesizedType {
+                            l_paren_token: L_PAREN@18..19 "(" [] [],
+                            ty: TsUnionType {
+                                leading_separator_token: missing (optional),
+                                types: TsUnionTypeVariantList [
+                                    TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@19..25 "Type2" [] [Whitespace(" ")],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                    PIPE@25..27 "|" [] [Whitespace(" ")],
+                                    TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@27..32 "Type3" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                ],
+                            },
+                            r_paren_token: R_PAREN@32..33 ")" [] [],
+                        },
+                    ],
+                },
+            },
+            default: missing (optional),
+        },
+        COMMA@33..35 "," [] [Whitespace(" ")],
+        TsTypeParameter {
+            modifiers: TsTypeParameterModifierList [],
+            name: TsTypeParameterName {
+                ident_token: IDENT@35..37 "U" [] [Whitespace(" ")],
+            },
+            constraint: TsTypeConstraintClause {
+                extends_token: EXTENDS_KW@37..45 "extends" [] [Whitespace(" ")],
+                ty: TsStringType {
+                    string_token: STRING_KW@45..52 "string" [] [Whitespace(" ")],
+                },
+            },
+            default: TsDefaultTypeClause {
+                eq_token: EQ@52..54 "=" [] [Whitespace(" ")],
+                ty: TsStringLiteralType {
+                    literal_token: JS_STRING_LITERAL@54..57 "\"a\"" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_GENERIC_ROOT@0..58
+  0: TS_TYPE_PARAMETER_LIST@0..57
+    0: TS_TYPE_PARAMETER@0..33
+      0: TS_TYPE_PARAMETER_MODIFIER_LIST@0..0
+      1: TS_TYPE_PARAMETER_NAME@0..2
+        0: IDENT@0..2 "T" [] [Whitespace(" ")]
+      2: TS_TYPE_CONSTRAINT_CLAUSE@2..33
+        0: EXTENDS_KW@2..10 "extends" [] [Whitespace(" ")]
+        1: TS_INTERSECTION_TYPE@10..33
+          0: (empty)
+          1: TS_INTERSECTION_TYPE_ELEMENT_LIST@10..33
+            0: TS_REFERENCE_TYPE@10..16
+              0: JS_REFERENCE_IDENTIFIER@10..16
+                0: IDENT@10..16 "Type1" [] [Whitespace(" ")]
+              1: (empty)
+            1: AMP@16..18 "&" [] [Whitespace(" ")]
+            2: TS_PARENTHESIZED_TYPE@18..33
+              0: L_PAREN@18..19 "(" [] []
+              1: TS_UNION_TYPE@19..32
+                0: (empty)
+                1: TS_UNION_TYPE_VARIANT_LIST@19..32
+                  0: TS_REFERENCE_TYPE@19..25
+                    0: JS_REFERENCE_IDENTIFIER@19..25
+                      0: IDENT@19..25 "Type2" [] [Whitespace(" ")]
+                    1: (empty)
+                  1: PIPE@25..27 "|" [] [Whitespace(" ")]
+                  2: TS_REFERENCE_TYPE@27..32
+                    0: JS_REFERENCE_IDENTIFIER@27..32
+                      0: IDENT@27..32 "Type3" [] []
+                    1: (empty)
+              2: R_PAREN@32..33 ")" [] []
+      3: (empty)
+    1: COMMA@33..35 "," [] [Whitespace(" ")]
+    2: TS_TYPE_PARAMETER@35..57
+      0: TS_TYPE_PARAMETER_MODIFIER_LIST@35..35
+      1: TS_TYPE_PARAMETER_NAME@35..37
+        0: IDENT@35..37 "U" [] [Whitespace(" ")]
+      2: TS_TYPE_CONSTRAINT_CLAUSE@37..52
+        0: EXTENDS_KW@37..45 "extends" [] [Whitespace(" ")]
+        1: TS_STRING_TYPE@45..52
+          0: STRING_KW@45..52 "string" [] [Whitespace(" ")]
+      3: TS_DEFAULT_TYPE_CLAUSE@52..57
+        0: EQ@52..54 "=" [] [Whitespace(" ")]
+        1: TS_STRING_LITERAL_TYPE@54..57
+          0: JS_STRING_LITERAL@54..57 "\"a\"" [] []
+  1: EOF@57..58 "" [Newline("\n")] []
+
+```
