@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+.a {
+  color: IF(true, red, blue);
+  color: If(true, red, blue);
+  color: \49 F(true, red, blue);
+}

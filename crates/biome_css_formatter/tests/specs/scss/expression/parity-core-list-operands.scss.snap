@@ -1,0 +1,21 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/expression/parity-core-list-operands.scss
+---
+
+# Input
+
+```scss
+$gap:8px;
+$offsets:[-/* minus */$gap,+$gap,not false,];
+
+```
+
+
+# Formatted
+
+```scss
+$gap: 8px;
+$offsets: [-/* minus */ $gap, +$gap, not false,];
+
+```

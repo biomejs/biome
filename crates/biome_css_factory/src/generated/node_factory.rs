@@ -3277,19 +3277,29 @@ impl ScssAtRootAtRuleBuilder {
 }
 pub fn scss_at_root_query(
     l_paren_token: SyntaxToken,
-    modifier_token: SyntaxToken,
-    colon_token: SyntaxToken,
-    queries: ScssAtRootQueryList,
+    query: AnyScssAtRootQuery,
     r_paren_token: SyntaxToken,
 ) -> ScssAtRootQuery {
     ScssAtRootQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_AT_ROOT_QUERY,
         [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Token(modifier_token)),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(queries.into_syntax())),
+            Some(SyntaxElement::Node(query.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_at_root_query_clause(
+    modifier: ScssExpression,
+    colon_token: SyntaxToken,
+    rules: ScssExpression,
+) -> ScssAtRootQueryClause {
+    ScssAtRootQueryClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_AT_ROOT_QUERY_CLAUSE,
+        [
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(rules.into_syntax())),
         ],
     ))
 }
@@ -4069,6 +4079,22 @@ pub fn scss_keyword_argument(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_legacy_if_function(
+    if_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    items: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> ScssLegacyIfFunction {
+    ScssLegacyIfFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION,
+        [
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -5652,18 +5678,6 @@ where
                 Some(separators.next()?.into())
             }
         }),
-    ))
-}
-pub fn scss_at_root_query_list<I>(items: I) -> ScssAtRootQueryList
-where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
-    I::IntoIter: ExactSizeIterator,
-{
-    ScssAtRootQueryList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_AT_ROOT_QUERY_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList

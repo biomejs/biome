@@ -322,6 +322,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssArbitraryArgument" => lang::ScssArbitraryArgument::KIND_SET.iter().next(),
         "ScssAtRootAtRule" => lang::ScssAtRootAtRule::KIND_SET.iter().next(),
         "ScssAtRootQuery" => lang::ScssAtRootQuery::KIND_SET.iter().next(),
+        "ScssAtRootQueryClause" => lang::ScssAtRootQueryClause::KIND_SET.iter().next(),
         "ScssAtRootSelector" => lang::ScssAtRootSelector::KIND_SET.iter().next(),
         "ScssBinaryExpression" => lang::ScssBinaryExpression::KIND_SET.iter().next(),
         "ScssContainerInterpolatedQuery" => {
@@ -404,6 +405,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
             .iter()
             .next(),
         "ScssKeywordArgument" => lang::ScssKeywordArgument::KIND_SET.iter().next(),
+        "ScssLegacyIfFunction" => lang::ScssLegacyIfFunction::KIND_SET.iter().next(),
         "ScssMapExpression" => lang::ScssMapExpression::KIND_SET.iter().next(),
         "ScssMapExpressionPair" => lang::ScssMapExpressionPair::KIND_SET.iter().next(),
         "ScssMediaQuery" => lang::ScssMediaQuery::KIND_SET.iter().next(),
@@ -662,7 +664,8 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssViewTransitionAtRule" => &[("declarator", 0), ("block", 1)],
         "ScssArbitraryArgument" => &[("value", 0)],
         "ScssAtRootAtRule" => &[("query", 1), ("selector", 2), ("block", 3)],
-        "ScssAtRootQuery" => &[("queries", 3)],
+        "ScssAtRootQuery" => &[("query", 1)],
+        "ScssAtRootQueryClause" => &[("modifier", 0), ("rules", 2)],
         "ScssAtRootSelector" => &[("selector", 0)],
         "ScssBinaryExpression" => &[("left", 0), ("right", 2)],
         "ScssContainerInterpolatedQuery" => &[("query", 0)],
@@ -718,6 +721,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "ScssKeyframesSelector" => &[("selector", 0)],
         "ScssKeyframesVariableDeclaration" => &[("declaration", 0)],
         "ScssKeywordArgument" => &[("name", 0), ("value", 2)],
+        "ScssLegacyIfFunction" => &[("items", 2)],
         "ScssMapExpression" => &[("pairs", 1)],
         "ScssMapExpressionPair" => &[("key", 0), ("value", 2)],
         "ScssMediaQuery" => &[("head", 0), ("tail", 1)],
