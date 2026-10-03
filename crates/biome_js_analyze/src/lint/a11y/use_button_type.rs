@@ -14,6 +14,24 @@ use biome_rule_options::use_button_type::UseButtonTypeOptions;
 declare_lint_rule! {
     /// Enforces the usage of the attribute `type` for the element `button`
     ///
+    /// A `button` element without a `type` attribute behaves as `type="submit"`.
+    /// Inside a `form`, clicking it submits the form, which often reloads the page.
+    /// That is rarely the intent of a button that opens a menu, toggles a panel, or runs a click handler.
+    ///
+    /// This is easy to miss in component-based code, because a `button` rendered by one component
+    /// can end up inside a `form` rendered by another.
+    /// An explicit `type` makes the button behave the same wherever it's rendered.
+    ///
+    /// The HTML specification defines three values for `type`:
+    /// - `button`: the button has no default behavior. Use it for buttons handled by JavaScript.
+    /// - `submit`: the button submits its form.
+    /// - `reset`: the button resets the controls of its form to their initial values.
+    ///
+    /// Browsers treat any other value the same as a missing `type`, so the rule reports invalid values too.
+    ///
+    /// The rule ignores `type` values that aren't string literals, such as `type={buttonType}`,
+    /// and JSX elements with spread attributes, such as `{...props}`, because their value can't be known statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -26,6 +44,15 @@ declare_lint_rule! {
     /// <button type="incorrectType">Do something</button>
     /// ```
     ///
+    /// Clicking this button submits the form instead of only clearing the input:
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <form onSubmit={search}>
+    ///     <input name="query" />
+    ///     <button onClick={clearQuery}>Clear</button>
+    /// </form>
+    /// ```
+    ///
     /// ```js,expect_diagnostic
     /// React.createElement('button');
     /// ```
@@ -36,7 +63,16 @@ declare_lint_rule! {
     /// <>
     ///     <button type="button">Do something</button>
     ///     <button type={buttonType}>Do something</button>
+    ///     <button {...props}>Do something</button>
     /// </>
+    /// ```
+    ///
+    /// ```jsx
+    /// <form onSubmit={search}>
+    ///     <input name="query" />
+    ///     <button type="button" onClick={clearQuery}>Clear</button>
+    ///     <button type="submit">Search</button>
+    /// </form>
     /// ```
     pub UseButtonType {
         version: "1.0.0",
