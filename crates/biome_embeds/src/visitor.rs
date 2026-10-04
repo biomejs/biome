@@ -298,9 +298,6 @@ fn collect_embedded_references(
         if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
         } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
-            // The type parameters of `<script setup generic="T">` are declared in their own
-            // snippet, so the script's uses of them are collected here. Its other references
-            // are left to the script's own semantic model.
             builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);
         }
     }
@@ -529,7 +526,6 @@ impl EmbeddedBindingsBuilder {
             }
         }
 
-        // The type parameters of `<script setup generic="T">` are visible in the whole component.
         for token in vue_generic_parameter_names(snippets) {
             self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }

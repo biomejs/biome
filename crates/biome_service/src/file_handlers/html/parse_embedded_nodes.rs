@@ -186,7 +186,6 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     if let Some(js_fs) = js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
 
-                        // Vue only supports the `generic` attribute in TypeScript components
                         if js_fs.is_typescript()
                             && let Some(candidate) = build_vue_generic_candidate(&element)
                         {
