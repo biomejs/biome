@@ -606,11 +606,69 @@ impl eslint_eslint::Rules {
         results: &mut MigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
+        // Both rules migrate to the options of `useConsistentBlockLang`, which
+        // can't differ between Vue and Svelte files. Migrating both would keep
+        // whichever rule happens to be processed last, so both are reported for
+        // manual migration instead.
+        let has_block_lang_conflict = self
+            .0
+            .iter()
+            .filter(|rule| is_block_lang_rule(rule))
+            .count()
+            > 1;
         for eslint_rule in self.0 {
+            if has_block_lang_conflict && is_block_lang_rule(&eslint_rule) {
+                results.unsupported.insert(
+                    EslintRuleName::from_str(&eslint_rule.name()),
+                    UnsupportedRuleReason::CoveredByRule("useConsistentBlockLang"),
+                );
+                continue;
+            }
             migrate_eslint_rule(&mut rules, eslint_rule, options, results);
         }
         rules
     }
+}
+
+/// Migrates `vue/block-lang` or `svelte/block-lang` to `useConsistentBlockLang`.
+///
+/// When `options` is `None`, the ESLint rule only requires omitting `lang`,
+/// which `useConsistentBlockLang` doesn't enforce, so the rule isn't migrated
+/// and is reported as not applicable.
+fn migrate_block_lang(
+    rules: &mut biome_config::Rules,
+    name: &str,
+    severity: eslint_eslint::Severity,
+    options: Option<biome_rule_options::use_consistent_block_lang::UseConsistentBlockLangOptions>,
+    opts: &MigrationOptions,
+    results: &mut MigrationResults,
+) {
+    let Some(options) = options else {
+        results.unsupported.insert(
+            EslintRuleName::from_str(name),
+            UnsupportedRuleReason::NotApplicable,
+        );
+        return;
+    };
+    if migrate_eslint_any_rule(rules, name, severity, opts, results) {
+        let group = rules.nursery.get_or_insert_with(Default::default);
+        if let SeverityOrGroup::Group(group) = group {
+            group.use_consistent_block_lang = Some(
+                biome_config::RuleFixConfiguration::WithOptions(biome_config::RuleWithFixOptions {
+                    level: severity.into(),
+                    fix: None,
+                    options,
+                }),
+            );
+        }
+    }
+}
+
+fn is_block_lang_rule(rule: &eslint_eslint::Rule) -> bool {
+    matches!(
+        rule,
+        eslint_eslint::Rule::SvelteBlockLang(_) | eslint_eslint::Rule::VueBlockLang(_)
+    )
 }
 
 /// Look for an equivalent Biome rule for ESLint `rule`,
@@ -953,6 +1011,26 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::SvelteBlockLang(conf) => {
+            let severity = conf.severity();
+            migrate_block_lang(
+                rules,
+                &name,
+                severity,
+                conf.option_or_default().into_biome_options(),
+                opts,
+                results,
+            );
+        }
+        eslint_eslint::Rule::VueBlockLang(conf) => {
+            let severity = conf.severity();
+            // Without options, eslint-plugin-vue only allows omitting `lang`.
+            let options = match conf {
+                eslint_eslint::RuleConf::Option(_, options) => options.into_biome_options(),
+                _ => None,
+            };
+            migrate_block_lang(rules, &name, severity, options, opts, results);
+        }
         eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.nursery.get_or_insert_with(Default::default);
@@ -1287,6 +1365,59 @@ mod tests {
                 reason
             );
         }
+    }
+
+    #[test]
+    fn vue_and_svelte_block_lang_require_manual_migration() {
+        let rules = Rules(
+            [
+                Rule::VueBlockLang(RuleConf::Severity(Severity::Error)),
+                Rule::SvelteBlockLang(RuleConf::Severity(Severity::Error)),
+            ]
+            .into_iter()
+            .collect(),
+        );
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        let mut results = MigrationResults::default();
+        let rules = rules.into_biome_rules(&options, &mut results);
+
+        assert!(rules.nursery.is_none());
+        assert!(results.migrated.is_empty());
+        for name in ["vue/block-lang", "svelte/block-lang"] {
+            assert_eq!(
+                results.unsupported.get(&EslintRuleName::from_str(name)),
+                Some(&UnsupportedRuleReason::CoveredByRule(
+                    "useConsistentBlockLang"
+                )),
+            );
+        }
+    }
+
+    #[test]
+    fn block_lang_that_only_omits_lang_is_not_applicable() {
+        let rules = Rules(
+            [Rule::SvelteBlockLang(RuleConf::Severity(Severity::Error))]
+                .into_iter()
+                .collect(),
+        );
+        let options = MigrationOptions {
+            include_inspired: true,
+            include_nursery: true,
+        };
+        let mut results = MigrationResults::default();
+        let rules = rules.into_biome_rules(&options, &mut results);
+
+        assert!(rules.nursery.is_none());
+        assert!(results.migrated.is_empty());
+        assert_eq!(
+            results
+                .unsupported
+                .get(&EslintRuleName::from_str("svelte/block-lang")),
+            Some(&UnsupportedRuleReason::NotApplicable),
+        );
     }
 
     #[test]
