@@ -7768,6 +7768,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useMatchingFunctionName": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-matching-function-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMatchingFunctionNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMathMinMax": {
 					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
 					"anyOf": [
@@ -13494,6 +13501,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseMatchingFunctionNameOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseMatchingFunctionNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMathMinMaxOptions": {
 			"type": "object",
 			"properties": {
@@ -17841,6 +17857,16 @@
 			]
 		},
 		"UseLoneExecutableDefinitionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseMatchingFunctionNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseMatchingFunctionNameOptions" }
+			]
+		},
+		"UseMatchingFunctionNameOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
