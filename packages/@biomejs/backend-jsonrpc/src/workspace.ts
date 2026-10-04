@@ -2796,6 +2796,11 @@ export interface Nursery {
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
 	/**
+	 * Disallow direct DOM manipulation of elements bound with bind:this.
+	 * See https://biomejs.dev/linter/rules/no-svelte-dom-manipulating
+	 */
+	noSvelteDomManipulating?: NoSvelteDomManipulatingConfiguration;
+	/**
 	 * Disallow declaring Svelte component props with export let.
 	 * See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
@@ -5237,6 +5242,9 @@ export type NoSvelteAtDebugTagsConfiguration =
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteDomManipulatingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteDomManipulatingOptions;
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
@@ -7563,6 +7571,10 @@ export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
 }
+export interface RuleWithNoSvelteDomManipulatingOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteDomManipulatingOptions;
+}
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
@@ -9818,6 +9830,7 @@ export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteDomManipulatingOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
@@ -11370,6 +11383,7 @@ export type Category =
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteDomManipulating"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"

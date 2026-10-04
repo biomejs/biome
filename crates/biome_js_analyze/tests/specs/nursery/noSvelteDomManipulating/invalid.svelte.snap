@@ -1,0 +1,730 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	let foo, bar, baz, qux, el, dynamic, self, maybe;
+
+	const remove = () => foo.remove();
+	const update = () => (bar.textContent = "Update!");
+	baz.appendChild(document.createElement("span"));
+	baz.insertBefore(document.createElement("span"), null);
+	baz.normalize();
+	baz.removeChild(baz.firstChild);
+	baz.replaceChild(document.createElement("span"), baz.firstChild);
+	baz.after("text");
+	baz.append("text");
+	baz.before("text");
+	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+	baz.insertAdjacentText("beforebegin", "text");
+	baz.prepend("text");
+	baz.replaceChildren();
+	baz.replaceWith("text");
+	qux.innerHTML = "<span></span>";
+	qux.outerHTML = "<span></span>";
+	qux.innerText = "text";
+	qux.outerText = "text";
+	qux.textContent += "text";
+	qux["textContent"] = "text";
+	el["remove"]();
+	el?.remove();
+	(el).remove();
+	(el.remove)();
+	(el.textContent) = "text";
+	dynamic.remove();
+	self.remove();
+	function nested() {
+		maybe.remove();
+	}
+</script>
+
+{#if foo}
+	<div bind:this={foo}>Foo</div>
+{/if}
+<span bind:this={bar}></span>
+<div bind:this={ baz } />
+<p bind:this={qux}></p>
+<input bind:this={el} />
+<svelte:element this="div" bind:this={dynamic} />
+<my-element bind:this={self}></my-element>
+<div bind:this={maybe}></div>
+<button onclick={() => foo.remove()}>Remove</button>
+<button onclick={() => (bar.innerHTML = "")}>Clear</button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:5:23 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    3 │ 	let foo, bar, baz, qux, el, dynamic, self, maybe;
+    4 │ 
+  > 5 │ 	const remove = () => foo.remove();
+      │ 	                     ^^^^^^^^^^
+    6 │ 	const update = () => (bar.textContent = "Update!");
+    7 │ 	baz.appendChild(document.createElement("span"));
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:24 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    5 │ 	const remove = () => foo.remove();
+  > 6 │ 	const update = () => (bar.textContent = "Update!");
+      │ 	                      ^^^^^^^^^^^^^^^
+    7 │ 	baz.appendChild(document.createElement("span"));
+    8 │ 	baz.insertBefore(document.createElement("span"), null);
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    5 │ 	const remove = () => foo.remove();
+    6 │ 	const update = () => (bar.textContent = "Update!");
+  > 7 │ 	baz.appendChild(document.createElement("span"));
+      │ 	^^^^^^^^^^^^^^^
+    8 │ 	baz.insertBefore(document.createElement("span"), null);
+    9 │ 	baz.normalize();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+     6 │ 	const update = () => (bar.textContent = "Update!");
+     7 │ 	baz.appendChild(document.createElement("span"));
+   > 8 │ 	baz.insertBefore(document.createElement("span"), null);
+       │ 	^^^^^^^^^^^^^^^^
+     9 │ 	baz.normalize();
+    10 │ 	baz.removeChild(baz.firstChild);
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+     7 │ 	baz.appendChild(document.createElement("span"));
+     8 │ 	baz.insertBefore(document.createElement("span"), null);
+   > 9 │ 	baz.normalize();
+       │ 	^^^^^^^^^^^^^
+    10 │ 	baz.removeChild(baz.firstChild);
+    11 │ 	baz.replaceChild(document.createElement("span"), baz.firstChild);
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:10:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+     8 │ 	baz.insertBefore(document.createElement("span"), null);
+     9 │ 	baz.normalize();
+  > 10 │ 	baz.removeChild(baz.firstChild);
+       │ 	^^^^^^^^^^^^^^^
+    11 │ 	baz.replaceChild(document.createElement("span"), baz.firstChild);
+    12 │ 	baz.after("text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+     9 │ 	baz.normalize();
+    10 │ 	baz.removeChild(baz.firstChild);
+  > 11 │ 	baz.replaceChild(document.createElement("span"), baz.firstChild);
+       │ 	^^^^^^^^^^^^^^^^
+    12 │ 	baz.after("text");
+    13 │ 	baz.append("text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    10 │ 	baz.removeChild(baz.firstChild);
+    11 │ 	baz.replaceChild(document.createElement("span"), baz.firstChild);
+  > 12 │ 	baz.after("text");
+       │ 	^^^^^^^^^
+    13 │ 	baz.append("text");
+    14 │ 	baz.before("text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:13:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    11 │ 	baz.replaceChild(document.createElement("span"), baz.firstChild);
+    12 │ 	baz.after("text");
+  > 13 │ 	baz.append("text");
+       │ 	^^^^^^^^^^
+    14 │ 	baz.before("text");
+    15 │ 	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:14:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    12 │ 	baz.after("text");
+    13 │ 	baz.append("text");
+  > 14 │ 	baz.before("text");
+       │ 	^^^^^^^^^^
+    15 │ 	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+    16 │ 	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    13 │ 	baz.append("text");
+    14 │ 	baz.before("text");
+  > 15 │ 	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+    17 │ 	baz.insertAdjacentText("beforebegin", "text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:16:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    14 │ 	baz.before("text");
+    15 │ 	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+  > 16 │ 	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	baz.insertAdjacentText("beforebegin", "text");
+    18 │ 	baz.prepend("text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    15 │ 	baz.insertAdjacentElement("beforebegin", document.createElement("span"));
+    16 │ 	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+  > 17 │ 	baz.insertAdjacentText("beforebegin", "text");
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	baz.prepend("text");
+    19 │ 	baz.replaceChildren();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:18:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    16 │ 	baz.insertAdjacentHTML("beforebegin", "<span></span>");
+    17 │ 	baz.insertAdjacentText("beforebegin", "text");
+  > 18 │ 	baz.prepend("text");
+       │ 	^^^^^^^^^^^
+    19 │ 	baz.replaceChildren();
+    20 │ 	baz.replaceWith("text");
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:19:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    17 │ 	baz.insertAdjacentText("beforebegin", "text");
+    18 │ 	baz.prepend("text");
+  > 19 │ 	baz.replaceChildren();
+       │ 	^^^^^^^^^^^^^^^^^^^
+    20 │ 	baz.replaceWith("text");
+    21 │ 	qux.innerHTML = "<span></span>";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    18 │ 	baz.prepend("text");
+    19 │ 	baz.replaceChildren();
+  > 20 │ 	baz.replaceWith("text");
+       │ 	^^^^^^^^^^^^^^^
+    21 │ 	qux.innerHTML = "<span></span>";
+    22 │ 	qux.outerHTML = "<span></span>";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:21:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    19 │ 	baz.replaceChildren();
+    20 │ 	baz.replaceWith("text");
+  > 21 │ 	qux.innerHTML = "<span></span>";
+       │ 	^^^^^^^^^^^^^
+    22 │ 	qux.outerHTML = "<span></span>";
+    23 │ 	qux.innerText = "text";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:22:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    20 │ 	baz.replaceWith("text");
+    21 │ 	qux.innerHTML = "<span></span>";
+  > 22 │ 	qux.outerHTML = "<span></span>";
+       │ 	^^^^^^^^^^^^^
+    23 │ 	qux.innerText = "text";
+    24 │ 	qux.outerText = "text";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:23:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    21 │ 	qux.innerHTML = "<span></span>";
+    22 │ 	qux.outerHTML = "<span></span>";
+  > 23 │ 	qux.innerText = "text";
+       │ 	^^^^^^^^^^^^^
+    24 │ 	qux.outerText = "text";
+    25 │ 	qux.textContent += "text";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:24:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    22 │ 	qux.outerHTML = "<span></span>";
+    23 │ 	qux.innerText = "text";
+  > 24 │ 	qux.outerText = "text";
+       │ 	^^^^^^^^^^^^^
+    25 │ 	qux.textContent += "text";
+    26 │ 	qux["textContent"] = "text";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:25:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    23 │ 	qux.innerText = "text";
+    24 │ 	qux.outerText = "text";
+  > 25 │ 	qux.textContent += "text";
+       │ 	^^^^^^^^^^^^^^^
+    26 │ 	qux["textContent"] = "text";
+    27 │ 	el["remove"]();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:26:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    24 │ 	qux.outerText = "text";
+    25 │ 	qux.textContent += "text";
+  > 26 │ 	qux["textContent"] = "text";
+       │ 	^^^^^^^^^^^^^^^^^^
+    27 │ 	el["remove"]();
+    28 │ 	el?.remove();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:27:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    25 │ 	qux.textContent += "text";
+    26 │ 	qux["textContent"] = "text";
+  > 27 │ 	el["remove"]();
+       │ 	^^^^^^^^^^^^
+    28 │ 	el?.remove();
+    29 │ 	(el).remove();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:28:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    26 │ 	qux["textContent"] = "text";
+    27 │ 	el["remove"]();
+  > 28 │ 	el?.remove();
+       │ 	^^^^^^^^^^
+    29 │ 	(el).remove();
+    30 │ 	(el.remove)();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:29:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    27 │ 	el["remove"]();
+    28 │ 	el?.remove();
+  > 29 │ 	(el).remove();
+       │ 	^^^^^^^^^^^
+    30 │ 	(el.remove)();
+    31 │ 	(el.textContent) = "text";
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:30:3 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    28 │ 	el?.remove();
+    29 │ 	(el).remove();
+  > 30 │ 	(el.remove)();
+       │ 	 ^^^^^^^^^
+    31 │ 	(el.textContent) = "text";
+    32 │ 	dynamic.remove();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:31:3 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    29 │ 	(el).remove();
+    30 │ 	(el.remove)();
+  > 31 │ 	(el.textContent) = "text";
+       │ 	 ^^^^^^^^^^^^^^
+    32 │ 	dynamic.remove();
+    33 │ 	self.remove();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:32:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    30 │ 	(el.remove)();
+    31 │ 	(el.textContent) = "text";
+  > 32 │ 	dynamic.remove();
+       │ 	^^^^^^^^^^^^^^
+    33 │ 	self.remove();
+    34 │ 	function nested() {
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:33:2 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    31 │ 	(el.textContent) = "text";
+    32 │ 	dynamic.remove();
+  > 33 │ 	self.remove();
+       │ 	^^^^^^^^^^^
+    34 │ 	function nested() {
+    35 │ 		maybe.remove();
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:35:3 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    33 │ 	self.remove();
+    34 │ 	function nested() {
+  > 35 │ 		maybe.remove();
+       │ 		^^^^^^^^^^^^
+    36 │ 	}
+    37 │ </script>
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:49:24 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    47 │ <my-element bind:this={self}></my-element>
+    48 │ <div bind:this={maybe}></div>
+  > 49 │ <button onclick={() => foo.remove()}>Remove</button>
+       │                        ^^^^^^^^^^
+    50 │ <button onclick={() => (bar.innerHTML = "")}>Clear</button>
+    51 │ 
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:50:25 lint/nursery/noSvelteDomManipulating ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This code manipulates the DOM of an element that Svelte renders.
+  
+    48 │ <div bind:this={maybe}></div>
+    49 │ <button onclick={() => foo.remove()}>Remove</button>
+  > 50 │ <button onclick={() => (bar.innerHTML = "")}>Clear</button>
+       │                         ^^^^^^^^^^^^^
+    51 │ 
+  
+  i Svelte expects the DOM to match the template. When the DOM is changed directly, the Svelte runtime can lose track of the elements it renders and update them incorrectly.
+  
+  i Update the state that the template renders from instead, and let Svelte update the DOM.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

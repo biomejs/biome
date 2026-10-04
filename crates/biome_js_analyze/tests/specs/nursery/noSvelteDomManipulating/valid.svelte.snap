@@ -1,0 +1,65 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script>
+	import Component from "./Component.svelte";
+
+	let foo, bar, comp, win, other, item, shadowed, notBound, show;
+
+	// Not a manipulation
+	const toggle = () => (show = !show);
+	foo.focus();
+	foo.getBoundingClientRect();
+	const text = foo.textContent;
+	foo.classList.add("active");
+	foo.style.color = "red";
+	foo.remove;
+	const { textContent } = foo;
+	foo = null;
+
+	// Not the object of the member access
+	other.remove(foo);
+	other.textContent = foo;
+
+	// Not bound to a DOM element
+	comp.remove();
+	win.remove();
+	notBound.remove();
+	notBound.textContent = "text";
+
+	// The `bind:this` target is the `{#each}` block variable
+	item.remove();
+
+	// A local variable that shadows the bound one
+	function local(foo) {
+		foo.remove();
+		foo.textContent = "text";
+	}
+
+	// A method of the bound element that only shares the name
+	bar.removeAttribute("id");
+	bar.appendData;
+
+	// Using a non-manipulating method of a manipulating property
+	bar.textContent.replace("a", "b");
+</script>
+
+<div bind:this={foo}>{show}</div>
+<span bind:this={bar}></span>
+<Component bind:this={comp} />
+<svelte:window bind:this={win} />
+<div bind:this={other.element}></div>
+{#each [1, 2] as item}
+	<div bind:this={item}></div>
+{/each}
+{#each [1, 2] as { shadowed }}
+	<div bind:this={shadowed}></div>
+{/each}
+<button onclick={() => foo.focus()}>Focus</button>
+
+```

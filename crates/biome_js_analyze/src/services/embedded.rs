@@ -4,8 +4,9 @@ use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
 };
 use biome_embeds::references::{
-    InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
-    is_value_reference_used, is_vue_directive_reference_used,
+    InternedReference, is_reference_used, is_svelte_element_reference,
+    is_svelte_store_reference_used, is_type_reference_used, is_value_reference_used,
+    is_vue_directive_reference_used,
 };
 use biome_languages::LanguageDb;
 use biome_rowan::TokenText;
@@ -102,6 +103,20 @@ impl EmbeddedService {
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_svelte_store_used(identifier.text()),
+        }
+    }
+
+    /// Returns whether a Svelte `bind:this={identifier}` directive binds the
+    /// variable to a DOM element.
+    ///
+    /// See also: https://svelte.dev/docs/svelte/bind#bind:this
+    pub(crate) fn is_svelte_element_reference(&self, identifier: TokenText) -> bool {
+        match &self.source {
+            EmbeddedSource::Workspace { db, path } => is_svelte_element_reference(
+                db.as_ref(),
+                InternedReference::new(db.as_ref(), path.clone(), identifier),
+            ),
+            EmbeddedSource::Interned(data) => data.is_svelte_element_reference(identifier.text()),
         }
     }
 
