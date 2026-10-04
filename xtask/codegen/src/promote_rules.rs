@@ -1,3 +1,26 @@
+//! Batch-promotes nursery lint rules using a JSON manifest.
+//!
+//! The top-level object maps each current lower-camel-case rule name to its promotion:
+//!
+//! ```json
+//! {
+//!   "noCurrentRule": {
+//!     "group": "correctness",
+//!     "recommended": true,
+//!     "severity": "error",
+//!     "newName": "noRenamedRule"
+//!   }
+//! }
+//! ```
+//!
+//! `group` is required and accepts `a11y`, `complexity`, `correctness`, `performance`,
+//! `security`, `style`, or `suspicious`. The optional `recommended` boolean and
+//! `severity` (`info`, `warn`, or `error`) set final rule metadata. The optional `newName`
+//! renames the rule. Omitting an optional field preserves its current value.
+//!
+//! Run `just promote-rules <manifest-path>`, followed by `just gen-rules`,
+//! `just gen-configuration`, and `just gen-migrate`.
+
 use crate::move_rule::{
     RuleMove, apply_rule_moves, plan_rule_moves, update_rule_categories, validate_rule_categories,
 };
@@ -19,11 +42,10 @@ use std::{
 const RULE_OPTIONS_PATH: &str = "crates/biome_rule_options/src";
 const RULE_RENAMING_PATH: &str = "crates/biome_migrate/src/analyzers/rule_mover.rs";
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserializable, Eq, PartialEq)]
 enum RuleGroup {
     A11y,
     Complexity,
-    #[default]
     Correctness,
     Performance,
     Security,
@@ -64,8 +86,15 @@ impl RuleSeverity {
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
 #[deserializable(unknown_fields = "deny")]
+struct PromotionSpec {
+    group: Option<RuleGroup>,
+    recommended: Option<bool>,
+    severity: Option<RuleSeverity>,
+    new_name: Option<String>,
+}
+
+#[derive(Clone, Debug)]
 struct Promotion {
-    #[deserializable(required)]
     group: RuleGroup,
     recommended: Option<bool>,
     severity: Option<RuleSeverity>,
@@ -78,7 +107,7 @@ impl Promotion {
     }
 }
 
-type PromotionManifest = BTreeMap<String, Promotion>;
+type PromotionManifest = BTreeMap<String, PromotionSpec>;
 
 #[derive(Debug)]
 struct PlannedPromotion {
@@ -125,6 +154,14 @@ fn build_plan(root: &Path, manifest: PromotionManifest) -> Result<Vec<PlannedPro
 
     for (current_name, promotion) in manifest {
         validate_rule_name(&current_name)?;
+        let promotion = Promotion {
+            group: promotion
+                .group
+                .with_context(|| format!("the promotion for {current_name} is missing `group`"))?,
+            recommended: promotion.recommended,
+            severity: promotion.severity,
+            new_name: promotion.new_name,
+        };
         let new_name = promotion
             .new_name
             .clone()

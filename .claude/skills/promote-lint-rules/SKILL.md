@@ -1,6 +1,7 @@
 ---
 name: promote-lint-rules
-description: Use this skill when promoting one or more Biome lint rules from nursery to stable groups, including promotion plans from GitHub issues, metadata changes, rule renames, generated configuration, and promotion snapshots. Also load testing-codegen for snapshot and generator mechanics and changeset for the release entry.
+description: Use this skill when promoting one or more Biome lint rules from nursery to stable groups, including promotion plans from GitHub issues, metadata changes, rule renames, generated configuration, and promotion snapshots.
+disable-model-invocation: true
 compatibility: Designed for coding agents working on the Biome codebase (github.com/biomejs/biome).
 ---
 
