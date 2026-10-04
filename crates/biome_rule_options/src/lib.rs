@@ -367,6 +367,7 @@ pub mod no_vue_undeclared_directives;
 pub mod no_vue_v_html;
 pub mod no_vue_v_if_with_v_for;
 pub mod no_vue_v_on_number_values;
+pub mod no_vue_v_text;
 pub mod no_with;
 pub mod no_xor_as_exponentiation;
 pub mod no_yoda_expression;
