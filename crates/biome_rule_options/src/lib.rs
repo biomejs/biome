@@ -211,6 +211,7 @@ pub mod no_positive_tabindex;
 pub mod no_precision_loss;
 pub mod no_private_imports;
 pub mod no_process_env;
+pub mod no_process_exit;
 pub mod no_process_global;
 pub mod no_proto;
 pub mod no_prototype_builtins;

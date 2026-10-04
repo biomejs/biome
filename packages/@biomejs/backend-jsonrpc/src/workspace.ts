@@ -2746,6 +2746,11 @@ export interface Nursery {
 	 */
 	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
 	/**
+	 * Disallow the use of process.exit().
+	 * See https://biomejs.dev/linter/rules/no-process-exit
+	 */
+	noProcessExit?: NoProcessExitConfiguration;
+	/**
 	 * Disallow deep imports from the react-native package.
 	 * See https://biomejs.dev/linter/rules/no-react-native-deep-imports
 	 */
@@ -5212,6 +5217,9 @@ export type NoPlaywrightWaitForSelectorConfiguration =
 export type NoPlaywrightWaitForTimeoutConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightWaitForTimeoutOptions;
+export type NoProcessExitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProcessExitOptions;
 export type NoReactNativeDeepImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeDeepImportsOptions;
@@ -7527,6 +7535,10 @@ export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightWaitForTimeoutOptions;
 }
+export interface RuleWithNoProcessExitOptions {
+	level: RulePlainConfiguration;
+	options?: NoProcessExitOptions;
+}
 export interface RuleWithNoReactNativeDeepImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeDeepImportsOptions;
@@ -9815,6 +9827,7 @@ export type NoPlaywrightUselessAwaitOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
+export type NoProcessExitOptions = {};
 export type NoReactNativeDeepImportsOptions = {};
 export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
@@ -11373,6 +11386,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"

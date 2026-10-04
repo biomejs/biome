@@ -5277,6 +5277,13 @@
 			]
 		},
 		"NoProcessEnvOptions": { "type": "object", "additionalProperties": false },
+		"NoProcessExitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoProcessExitOptions" }
+			]
+		},
+		"NoProcessExitOptions": { "type": "object", "additionalProperties": false },
 		"NoProcessGlobalConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7338,6 +7345,13 @@
 					"description": "Disallow using page.waitForTimeout().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPlaywrightWaitForTimeoutConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noProcessExit": {
+					"description": "Disallow the use of process.exit().\nSee https://biomejs.dev/linter/rules/no-process-exit",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoProcessExitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10786,6 +10800,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoProcessEnvOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoProcessExitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoProcessExitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
