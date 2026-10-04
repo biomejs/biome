@@ -32,22 +32,18 @@ info: vue/multiparser/template-bind.vue
 +++ Biome
 @@ -1,13 +1,13 @@
  <template>
--  <div v-bind:id="'list-' + id"></div>
+   <div v-bind:id="'list-' + id"></div>
 -  <div v-bind:id="'list-' + id"></div>
 -  <div v-bind:id="'list-' + id"></div>
 -  <div v-bind:id="'&quot;' + id"></div>
--  <div v-bind:id="rawId | formatId"></div>
--  <div v-bind:id="ok ? 'YES' : 'NO'"></div>
-+  <div v-bind:id=" 'list-'   +  id "></div>
 +  <div v-bind:id=' "list-"   +  id '></div>
 +  <div v-bind:id=" 'list-'   +  id "></div>
 +  <div v-bind:id=" '&quot;'   +  id "></div>
-+  <div v-bind:id="  rawId | formatId "></div>
-+  <div v-bind:id=" ok ? 'YES' : 'NO' "></div>
+   <div v-bind:id="rawId | formatId"></div>
+   <div v-bind:id="ok ? 'YES' : 'NO'"></div>
  
--  <button :disabled="a && b"></button>
+   <button :disabled="a && b"></button>
 -  <button .disabled="a && b"></button>
-+  <button :disabled="   a &&b "></button>
 +  <button .disabled="   a &&b "></button>
  
 -  <button @click="foo(arg, 'string')"></button>
@@ -59,14 +55,14 @@ info: vue/multiparser/template-bind.vue
 
 ```vue
 <template>
-  <div v-bind:id=" 'list-'   +  id "></div>
+  <div v-bind:id="'list-' + id"></div>
   <div v-bind:id=' "list-"   +  id '></div>
   <div v-bind:id=" 'list-'   +  id "></div>
   <div v-bind:id=" '&quot;'   +  id "></div>
-  <div v-bind:id="  rawId | formatId "></div>
-  <div v-bind:id=" ok ? 'YES' : 'NO' "></div>
+  <div v-bind:id="rawId | formatId"></div>
+  <div v-bind:id="ok ? 'YES' : 'NO'"></div>
 
-  <button :disabled="   a &&b "></button>
+  <button :disabled="a && b"></button>
   <button .disabled="   a &&b "></button>
 
   <button @click=" foo ( arg, 'string' ) "></button>

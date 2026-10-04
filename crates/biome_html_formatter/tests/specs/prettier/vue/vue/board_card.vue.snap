@@ -125,6 +125,19 @@ export default {
            Store.detail.list = this.list;
          }
        }
+@@ -58,7 +58,11 @@
+ <template>
+   <li
+     class="card"
+-    :class="{ 'user-can-drag': !disabled && issue.id, 'is-disabled': disabled || !issue.id, 'is-active': issueDetailVisible }"
++    :class="{
++      'user-can-drag': !disabled && issue.id,
++      'is-disabled': disabled || !issue.id,
++      'is-active': issueDetailVisible,
++    }"
+     :index="index"
+     :data-issue-id="issue.id"
+     @mousedown="mouseDown"
 ```
 
 # Output
@@ -190,7 +203,11 @@ export default {
 <template>
   <li
     class="card"
-    :class="{ 'user-can-drag': !disabled && issue.id, 'is-disabled': disabled || !issue.id, 'is-active': issueDetailVisible }"
+    :class="{
+      'user-can-drag': !disabled && issue.id,
+      'is-disabled': disabled || !issue.id,
+      'is-active': issueDetailVisible,
+    }"
     :index="index"
     :data-issue-id="issue.id"
     @mousedown="mouseDown"
@@ -206,9 +223,4 @@ export default {
     />
   </li>
 </template>
-```
-
-# Lines exceeding max width of 80 characters
-```
-   61:     :class="{ 'user-can-drag': !disabled && issue.id, 'is-disabled': disabled || !issue.id, 'is-active': issueDetailVisible }"
 ```

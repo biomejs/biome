@@ -1,11 +1,19 @@
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_html_syntax::{HtmlString, HtmlStringFields};
+use biome_rowan::TextRange;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlString {
     compact: bool,
 }
 impl FormatNodeRule<HtmlString> for FormatHtmlString {
+    /// The code in a value, such as the expression of a Vue directive, is
+    /// written between the quotes. Its formatted code replaces the whole value,
+    /// quotes included.
+    fn embedded_range(&self, node: &HtmlString) -> TextRange {
+        node.inner_string_range().unwrap_or_else(|_| node.range())
+    }
+
     fn fmt_fields(&self, node: &HtmlString, f: &mut HtmlFormatter) -> FormatResult<()> {
         let HtmlStringFields { value_token } = node.as_fields();
 
