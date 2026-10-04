@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-type-alias.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+type Emits = { click: [] };
+interface OtherEmits {
+  (e: "keydown"): void;
+}
+defineEmits<Emits>();
+defineEmits<(OtherEmits)>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-type-alias.vue:3:16 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    1 │ <script setup lang="ts">
+    2 │ /* should generate diagnostics */
+  > 3 │ type Emits = { click: [] };
+      │                ^^^^^
+    4 │ interface OtherEmits {
+    5 │   (e: "keydown"): void;
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-type-alias.vue:5:7 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    3 │ type Emits = { click: [] };
+    4 │ interface OtherEmits {
+  > 5 │   (e: "keydown"): void;
+      │       ^^^^^^^^^
+    6 │ }
+    7 │ defineEmits<Emits>();
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

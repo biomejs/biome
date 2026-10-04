@@ -3238,6 +3238,11 @@ export interface Nursery {
 	 */
 	noVueRootVIf?: NoVueRootVIfConfiguration;
 	/**
+	 * Disallow Vue component events that use the name of a native DOM event.
+	 * See https://biomejs.dev/linter/rules/no-vue-shadow-native-events
+	 */
+	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -5810,6 +5815,9 @@ export type NoVueRequiredPropWithDefaultConfiguration =
 export type NoVueRootVIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRootVIfOptions;
+export type NoVueShadowNativeEventsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueShadowNativeEventsOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -8349,6 +8357,10 @@ export interface RuleWithNoVueRootVIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRootVIfOptions;
 }
+export interface RuleWithNoVueShadowNativeEventsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueShadowNativeEventsOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -10729,6 +10741,7 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
+export type NoVueShadowNativeEventsOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -12442,6 +12455,7 @@ export type Category =
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"

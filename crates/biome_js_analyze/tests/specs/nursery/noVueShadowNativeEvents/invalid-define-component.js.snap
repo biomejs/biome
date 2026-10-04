@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+export const Options = defineComponent({
+  emits: ["click"],
+  setup(props, { emit }) {
+    emit("keydown");
+  },
+  methods: {
+    onClick() {
+      this.$emit("change");
+    },
+  },
+});
+
+export const Functional = defineComponent(
+  (props, { emit }) => {
+    emit("input");
+  },
+  { emits: ["input"] },
+);
+
+createApp({
+  emits: ["submit"],
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:5:11 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    4 │ export const Options = defineComponent({
+  > 5 │   emits: ["click"],
+      │           ^^^^^^^
+    6 │   setup(props, { emit }) {
+    7 │     emit("keydown");
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:7:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    5 │   emits: ["click"],
+    6 │   setup(props, { emit }) {
+  > 7 │     emit("keydown");
+      │          ^^^^^^^^^
+    8 │   },
+    9 │   methods: {
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:11:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native change event.
+  
+     9 │   methods: {
+    10 │     onClick() {
+  > 11 │       this.$emit("change");
+       │                  ^^^^^^^^
+    12 │     },
+    13 │   },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:18:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native input event.
+  
+    16 │ export const Functional = defineComponent(
+    17 │   (props, { emit }) => {
+  > 18 │     emit("input");
+       │          ^^^^^^^
+    19 │   },
+    20 │   { emits: ["input"] },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native input event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:20:13 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native input event.
+  
+    18 │     emit("input");
+    19 │   },
+  > 20 │   { emits: ["input"] },
+       │             ^^^^^^^
+    21 │ );
+    22 │ 
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native input event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:24:11 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native submit event.
+  
+    23 │ createApp({
+  > 24 │   emits: ["submit"],
+       │           ^^^^^^^^
+    25 │ });
+    26 │ 
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native submit event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

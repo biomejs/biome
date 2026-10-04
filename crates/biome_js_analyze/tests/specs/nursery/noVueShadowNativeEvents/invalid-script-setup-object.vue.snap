@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-object.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+defineEmits({
+  click: null,
+  submit(payload) {
+    return true;
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-object.vue:4:3 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    2 │ /* should generate diagnostics */
+    3 │ defineEmits({
+  > 4 │   click: null,
+      │   ^^^^^
+    5 │   submit(payload) {
+    6 │     return true;
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-object.vue:5:3 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native submit event.
+  
+    3 │ defineEmits({
+    4 │   click: null,
+  > 5 │   submit(payload) {
+      │   ^^^^^^
+    6 │     return true;
+    7 │   },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native submit event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -7456,6 +7456,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueShadowNativeEventsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueShadowNativeEventsOptions" }
+			]
+		},
+		"NoVueShadowNativeEventsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8034,6 +8044,13 @@
 					"description": "Disallow v-if on the root element of a Vue component template.\nSee https://biomejs.dev/linter/rules/no-vue-root-v-if",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRootVIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueShadowNativeEvents": {
+					"description": "Disallow Vue component events that use the name of a native DOM event.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12956,6 +12973,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueShadowNativeEventsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueShadowNativeEventsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

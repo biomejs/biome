@@ -437,6 +437,82 @@ impl VueSetupComponent {
         }
         result
     }
+
+    /// Returns the top-level `defineEmits()` calls of the component.
+    pub fn define_emits_calls(&self) -> Vec<VueDefineEmitsCall> {
+        let model = &self.model;
+        let mut result = Vec::new();
+        for item in self.js_module.items() {
+            let AnyJsModuleItem::AnyJsStatement(statement) = item else {
+                continue;
+            };
+            match statement {
+                AnyJsStatement::JsExpressionStatement(expression_statement) => {
+                    if let Ok(expression) = expression_statement.expression() {
+                        result.extend(VueDefineEmitsCall::from_expression(
+                            &expression,
+                            model,
+                            None,
+                        ));
+                    }
+                }
+                AnyJsStatement::JsVariableStatement(variable_statement) => {
+                    let Ok(declaration) = variable_statement.declaration() else {
+                        continue;
+                    };
+                    for declarator in declaration.declarators().iter().flatten() {
+                        let Some(expression) = declarator
+                            .initializer()
+                            .and_then(|initializer| initializer.expression().ok())
+                        else {
+                            continue;
+                        };
+                        let binding = declarator.id().ok().and_then(|id| {
+                            id.as_any_js_binding()?.as_js_identifier_binding().cloned()
+                        });
+                        result.extend(VueDefineEmitsCall::from_expression(
+                            &expression,
+                            model,
+                            binding,
+                        ));
+                    }
+                }
+                _ => {}
+            }
+        }
+        result
+    }
+}
+
+/// A `defineEmits()` call in `<script setup>`, along with the variable it is assigned to.
+#[derive(Debug)]
+pub struct VueDefineEmitsCall {
+    call: JsCallExpression,
+    /// The variable holding the emit function, as in `const emit = defineEmits(['change'])`.
+    binding: Option<JsIdentifierBinding>,
+}
+
+impl VueDefineEmitsCall {
+    fn from_expression(
+        expression: &AnyJsExpression,
+        model: &SemanticModel,
+        binding: Option<JsIdentifierBinding>,
+    ) -> Option<Self> {
+        let call = expression.inner_expression()?;
+        let call = call.as_js_call_expression()?;
+        is_vue_compiler_macro_call(call, model, "defineEmits").then(|| Self {
+            call: call.clone(),
+            binding,
+        })
+    }
+
+    pub fn call(&self) -> &JsCallExpression {
+        &self.call
+    }
+
+    pub fn binding(&self) -> Option<&JsIdentifierBinding> {
+        self.binding.as_ref()
+    }
 }
 
 /// A `defineProps()` call in `<script setup>`, along with the sources of default values for its
