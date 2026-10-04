@@ -1,4 +1,4 @@
+<!-- should generate diagnostics -->
 <script setup lang="ts">
-/* should generate diagnostics */
-defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
+defineEmits<{ click: []; "focus": [value: string]; keyup(): void }>();
 </script>

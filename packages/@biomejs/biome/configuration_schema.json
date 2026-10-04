@@ -8048,7 +8048,7 @@
 					]
 				},
 				"noVueShadowNativeEvents": {
-					"description": "Disallow Vue component events that use the name of a native DOM event.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
+					"description": "Disallow Vue component events named after built-in browser events.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
 						{ "type": "null" }

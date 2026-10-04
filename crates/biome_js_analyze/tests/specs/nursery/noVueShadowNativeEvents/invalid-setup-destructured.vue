@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script>
-/* should generate diagnostics */
 export default {
   setup(props, { emit }) {
     emit("click");

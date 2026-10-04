@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script setup>
-/* should generate diagnostics */
 defineEmits({
   click: null,
   submit(payload) {

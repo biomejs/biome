@@ -4,8 +4,8 @@ expression: invalid-script-setup.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <script setup>
-/* should generate diagnostics */
 const emit = defineEmits([`click`, "change"]);
 emit(`click`);
 emit("keydown");
@@ -18,18 +18,18 @@ emit("keydown");
 ```
 invalid-script-setup.vue:3:27 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
-    1 │ <script setup>
-    2 │ /* should generate diagnostics */
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
   > 3 │ const emit = defineEmits([`click`, "change"]);
       │                           ^^^^^^^
     4 │ emit(`click`);
     5 │ emit("keydown");
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -39,18 +39,18 @@ invalid-script-setup.vue:3:27 lint/nursery/noVueShadowNativeEvents ━━━━�
 ```
 invalid-script-setup.vue:3:36 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native change event.
+  ! This component event has the same name as the browser event change.
   
-    1 │ <script setup>
-    2 │ /* should generate diagnostics */
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
   > 3 │ const emit = defineEmits([`click`, "change"]);
       │                                    ^^^^^^^^
     4 │ emit(`click`);
     5 │ emit("keydown");
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -60,18 +60,18 @@ invalid-script-setup.vue:3:36 lint/nursery/noVueShadowNativeEvents ━━━━�
 ```
 invalid-script-setup.vue:4:6 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
-    2 │ /* should generate diagnostics */
+    2 │ <script setup>
     3 │ const emit = defineEmits([`click`, "change"]);
   > 4 │ emit(`click`);
       │      ^^^^^^^
     5 │ emit("keydown");
     6 │ (emit)?.("CHANGE");
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -81,7 +81,7 @@ invalid-script-setup.vue:4:6 lint/nursery/noVueShadowNativeEvents ━━━━�
 ```
 invalid-script-setup.vue:5:6 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native keydown event.
+  ! This component event has the same name as the browser event keydown.
   
     3 │ const emit = defineEmits([`click`, "change"]);
     4 │ emit(`click`);
@@ -90,9 +90,9 @@ invalid-script-setup.vue:5:6 lint/nursery/noVueShadowNativeEvents ━━━━�
     6 │ (emit)?.("CHANGE");
     7 │ </script>
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -102,7 +102,7 @@ invalid-script-setup.vue:5:6 lint/nursery/noVueShadowNativeEvents ━━━━�
 ```
 invalid-script-setup.vue:6:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native change event.
+  ! This component event has the same name as the browser event change.
   
     4 │ emit(`click`);
     5 │ emit("keydown");
@@ -111,9 +111,9 @@ invalid-script-setup.vue:6:10 lint/nursery/noVueShadowNativeEvents ━━━━�
     7 │ </script>
     8 │ 
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

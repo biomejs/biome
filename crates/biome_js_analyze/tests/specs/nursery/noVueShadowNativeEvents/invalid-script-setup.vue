@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script setup>
-/* should generate diagnostics */
 const emit = defineEmits([`click`, "change"]);
 emit(`click`);
 emit("keydown");

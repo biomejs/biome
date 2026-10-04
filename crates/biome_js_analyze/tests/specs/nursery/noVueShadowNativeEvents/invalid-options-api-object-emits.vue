@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script>
-/* should generate diagnostics */
 const scroll = null;
 export default {
   "emits": {

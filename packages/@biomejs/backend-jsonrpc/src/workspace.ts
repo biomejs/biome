@@ -3238,7 +3238,7 @@ export interface Nursery {
 	 */
 	noVueRootVIf?: NoVueRootVIfConfiguration;
 	/**
-	 * Disallow Vue component events that use the name of a native DOM event.
+	 * Disallow Vue component events named after built-in browser events.
 	 * See https://biomejs.dev/linter/rules/no-vue-shadow-native-events
 	 */
 	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;

@@ -4,8 +4,8 @@ expression: valid-options-api-object-emits.vue
 ---
 # Input
 ```vue
+<!-- should not generate diagnostics -->
 <script>
-/* should not generate diagnostics */
 export default {
   emits: {
     welcome: null,
