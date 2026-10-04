@@ -7769,7 +7769,7 @@
 					]
 				},
 				"useMatchingFunctionName": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/use-matching-function-name",
+					"description": "Require function names to match the name of the variable or property they are assigned to.\nSee https://biomejs.dev/linter/rules/use-matching-function-name",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseMatchingFunctionNameConfiguration" },
 						{ "type": "null" }

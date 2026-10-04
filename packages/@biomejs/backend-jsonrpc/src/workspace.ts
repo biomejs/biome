@@ -3046,7 +3046,7 @@ export interface Nursery {
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Require function names to match the name of the variable or property they are assigned to.
 	 * See https://biomejs.dev/linter/rules/use-matching-function-name
 	 */
 	useMatchingFunctionName?: UseMatchingFunctionNameConfiguration;
