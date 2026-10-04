@@ -103,8 +103,8 @@ JsVueSlotPropsRoot =
 		parameters: JsParameterList
 		eof: 'EOF'
 
-// Special root created for the `generic` attribute of Vue setup script: `generic="T extends U"`
-// Vue compiles the value as the type parameters of the component function, without angle brackets.
+// <script setup lang="ts" generic="T extends U">
+//                                  ^^^^^^^^^^^
 JsVueGenericRoot =
 		items: AnyJsVueGenericTypeParameters
 		eof: 'EOF'
