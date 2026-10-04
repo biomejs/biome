@@ -1,0 +1,6 @@
+@mixin frames {
+  0%
+  .child { color: red; }
+  100% { opacity: 1; }
+}
+.after { color: red; }
