@@ -358,6 +358,7 @@ define_categories! {
     "lint/nursery/useVarsOnTop": "https://biomejs.dev/linter/rules/use-vars-on-top",
     "lint/nursery/useVueBaseImport": "https://biomejs.dev/linter/rules/use-vue-base-import",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
+    "lint/nursery/useVueMatchingComponentFileName": "https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVModel": "https://biomejs.dev/linter/rules/use-vue-valid-v-model",

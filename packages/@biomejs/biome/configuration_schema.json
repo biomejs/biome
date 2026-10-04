@@ -7991,6 +7991,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueMatchingComponentFileName": {
+					"description": "Enforce that the name of a Vue component matches its file name.\nSee https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueMatchingComponentFileNameConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueNextTickPromise": {
 					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
 					"anyOf": [
@@ -14439,6 +14446,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueMatchingComponentFileNameOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueMatchingComponentFileNameOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueMultiWordComponentNamesOptions": {
 			"type": "object",
 			"properties": {
@@ -18985,6 +19005,16 @@
 					"uniqueItems": true
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueMatchingComponentFileNameConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueMatchingComponentFileNameOptions" }
+			]
+		},
+		"UseVueMatchingComponentFileNameOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueMultiWordComponentNamesConfiguration": {

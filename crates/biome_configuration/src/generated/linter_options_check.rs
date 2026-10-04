@@ -2632,6 +2632,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_vue_hyphenated_attributes::UseVueHyphenatedAttributesOptions,
         >(),
     ));
+    result.push(("nursery", "useVueMatchingComponentFileName", TypeId::of::<biome_rule_options::use_vue_matching_component_file_name::UseVueMatchingComponentFileNameOptions>()));
     result.push(("style", "useVueMultiWordComponentNames", TypeId::of::<biome_rule_options::use_vue_multi_word_component_names::UseVueMultiWordComponentNamesOptions>()));
     result.push((
         "nursery",
