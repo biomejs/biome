@@ -192,6 +192,7 @@ pub mod no_nested_promises;
 pub mod no_nested_switch;
 pub mod no_nested_template_literals;
 pub mod no_nested_ternary;
+pub mod no_new_require;
 pub mod no_next_async_client_component;
 pub mod no_nodejs_modules;
 pub mod no_non_null_asserted_optional_chain;

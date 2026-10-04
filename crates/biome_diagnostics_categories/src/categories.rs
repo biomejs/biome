@@ -259,6 +259,7 @@ define_categories! {
     "lint/nursery/noNegationInEqualityCheck": "https://biomejs.dev/linter/rules/no-negation-in-equality-check",
     "lint/nursery/noNestedSwitch": "https://biomejs.dev/linter/rules/no-nested-switch",
     "lint/nursery/noNestedTemplateLiterals": "https://biomejs.dev/linter/rules/no-nested-template-literals",
+    "lint/nursery/noNewRequire": "https://biomejs.dev/linter/rules/no-new-require",
     "lint/nursery/noNonScalableViewport": "https://biomejs.dev/linter/rules/no-non-scalable-viewport",
     "lint/nursery/noObjectConstructor": "https://biomejs.dev/linter/rules/no-object-constructor",
     "lint/nursery/noObsoleteTags": "https://biomejs.dev/linter/rules/no-obsolete-tags",

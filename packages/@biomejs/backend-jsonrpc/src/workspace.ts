@@ -3078,6 +3078,11 @@ export interface Nursery {
 	 */
 	noNestedTemplateLiterals?: NoNestedTemplateLiteralsConfiguration;
 	/**
+	 * Disallow calling require with the new operator.
+	 * See https://biomejs.dev/linter/rules/no-new-require
+	 */
+	noNewRequire?: NoNewRequireConfiguration;
+	/**
 	 * Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
 	 * See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
@@ -5856,6 +5861,9 @@ export type NoNestedSwitchConfiguration =
 export type NoNestedTemplateLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNestedTemplateLiteralsOptions;
+export type NoNewRequireConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNewRequireOptions;
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
@@ -8392,6 +8400,10 @@ export interface RuleWithNoNestedSwitchOptions {
 export interface RuleWithNoNestedTemplateLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: NoNestedTemplateLiteralsOptions;
+}
+export interface RuleWithNoNewRequireOptions {
+	level: RulePlainConfiguration;
+	options?: NoNewRequireOptions;
 }
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
@@ -11025,6 +11037,7 @@ export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
+export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObjectConstructorOptions = {};
 export type NoObsoleteTagsOptions = {};
@@ -12794,6 +12807,7 @@ export type Category =
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
+	| "lint/nursery/noNewRequire"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteTags"
