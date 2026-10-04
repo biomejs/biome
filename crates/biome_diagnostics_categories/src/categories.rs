@@ -245,6 +245,8 @@ define_categories! {
     "lint/nursery/noImpliedEval": "https://biomejs.dev/linter/rules/no-implied-eval",
     "lint/nursery/noInvalidFileInputAccept": "https://biomejs.dev/linter/rules/no-invalid-file-input-accept",
     "lint/nursery/noInvalidPropertyInitValue": "https://biomejs.dev/linter/rules/no-invalid-property-init-value",
+    "lint/nursery/noInvalidThis": "https://biomejs.dev/linter/rules/no-invalid-this",
+    "lint/nursery/noIteratorProperty": "https://biomejs.dev/linter/rules/no-iterator-property",
     "lint/nursery/noJsRestrictedProperties": "https://biomejs.dev/linter/rules/no-js-restricted-properties",
     "lint/nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values",
     "lint/nursery/noMeaninglessVoidOperator": "https://biomejs.dev/linter/rules/no-meaningless-void-operator",

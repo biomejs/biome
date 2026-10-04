@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+interface SomeType {
+	prop: string;
+}
+function foo() {
+	this.prop;
+}
+function withParameters(a: string, b = this) {}
+const typed: Foo = function () {
+	this.a = 0;
+};
+
+```
+
+# Diagnostics
+```
+invalid.ts:6:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+    4 │ }
+    5 │ function foo() {
+  > 6 │ 	this.prop;
+      │ 	^^^^
+    7 │ }
+    8 │ function withParameters(a: string, b = this) {}
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:8:40 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+     6 │ 	this.prop;
+     7 │ }
+   > 8 │ function withParameters(a: string, b = this) {}
+       │                                        ^^^^
+     9 │ const typed: Foo = function () {
+    10 │ 	this.a = 0;
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:2 lint/nursery/noInvalidThis ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected this in a function that isn't a method or a constructor.
+  
+     8 │ function withParameters(a: string, b = this) {}
+     9 │ const typed: Foo = function () {
+  > 10 │ 	this.a = 0;
+       │ 	^^^^
+    11 │ };
+    12 │ 
+  
+  i When a function is called on its own instead of as a method, this is undefined, and reading its properties throws an error.
+  
+  i Pass the value as a parameter instead, or turn the function into a method. In TypeScript, if callers provide this, declare its type with a this parameter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
