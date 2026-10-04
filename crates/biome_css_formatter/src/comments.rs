@@ -11,9 +11,9 @@ use crate::utils::scss_include_comments::{
 };
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
-    CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
+    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyScssControlBlock,
+    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
+    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
     CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
     CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootQueryClause,
     ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
@@ -373,7 +373,7 @@ fn handle_scss_else_clause_comment(
 
     let Some(block) = comment
         .preceding_node()
-        .and_then(CssDeclarationOrRuleBlock::cast_ref)
+        .and_then(AnyScssControlBlock::cast_ref)
     else {
         return CommentPlacement::Default(comment);
     };
