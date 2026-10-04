@@ -3,7 +3,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity};
-use biome_css_syntax::{AnyCssRoot, AnyCssSelector, CssLayerAtRule};
+use biome_css_syntax::{AnyCssRoot, AnyCssSelector, CssLayerAtRule, CssSyntaxKind};
 use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
@@ -26,6 +26,13 @@ declare_lint_rule! {
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
     /// two selectors match the same element.
+    ///
+    /// ## Sass limitations
+    ///
+    /// This rule does not evaluate Sass. It compares statically written selectors within the same
+    /// Sass block, but not selectors across mixin or include boundaries, or across mutually exclusive
+    /// control-flow branches. Selectors containing interpolation or placeholders are ignored because
+    /// their emitted selector and specificity depend on Sass evaluation.
     ///
     /// ## Examples
     ///
@@ -162,6 +169,11 @@ impl Rule for NoDescendingSpecificity {
                         .ancestors()
                         .find_map(CssLayerAtRule::cast)
                         .map(|layer| layer.range()),
+                    scss: rule_node
+                        .syntax()
+                        .ancestors()
+                        .find(|ancestor| is_scss_selector_context(ancestor.kind()))
+                        .map(|ancestor| ancestor.text_trimmed_range()),
                 },
                 &mut visited_selectors,
                 &mut descending_selectors,
@@ -215,6 +227,23 @@ struct SelectorContext {
     at_rule: Option<RuleId>,
     /// The range of the nearest enclosing `@layer` block, or `None` for unlayered selectors.
     layer: Option<TextRange>,
+    /// The nearest enclosing Sass block whose emitted position requires evaluation.
+    scss: Option<TextRange>,
+}
+
+fn is_scss_selector_context(kind: CssSyntaxKind) -> bool {
+    matches!(
+        kind,
+        CssSyntaxKind::SCSS_AT_ROOT_AT_RULE
+            | CssSyntaxKind::SCSS_EACH_AT_RULE
+            | CssSyntaxKind::SCSS_ELSE_CLAUSE
+            | CssSyntaxKind::SCSS_FOR_AT_RULE
+            | CssSyntaxKind::SCSS_FUNCTION_AT_RULE
+            | CssSyntaxKind::SCSS_IF_AT_RULE
+            | CssSyntaxKind::SCSS_INCLUDE_AT_RULE
+            | CssSyntaxKind::SCSS_MIXIN_AT_RULE
+            | CssSyntaxKind::SCSS_WHILE_AT_RULE
+    )
 }
 
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
@@ -260,6 +289,11 @@ fn find_descending_selector(
     let visited_selectors = visited_selectors.entry(context).or_default();
 
     for selector in rule.selectors() {
+        let resolved_selector = selector.resolved().to_string();
+        // Sass placeholders may not emit CSS, and interpolation prevents static specificity.
+        if resolved_selector.contains('%') || resolved_selector.contains("#{") {
+            continue;
+        }
         let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };

@@ -9,6 +9,11 @@ use biome_rowan::AstNode;
 declare_syntax_rule! {
     /// Reports invalid `syntax` descriptors in CSS `@property` rules.
     ///
+    /// ## Sass limitations
+    ///
+    /// A `syntax` descriptor that requires Sass evaluation is not validated. This includes values
+    /// produced by variables, interpolation, arithmetic expressions, or function calls.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -58,7 +63,12 @@ impl Rule for NoInvalidPropertySyntax {
         model
             .global_custom_variables()
             .at_property_by_range(node.range())
-            .filter(|property| !property.syntax().is_valid())
+            .filter(|property| {
+                matches!(
+                    property.syntax(),
+                    PropertySyntaxResult::Missing | PropertySyntaxResult::Error(_)
+                )
+            })
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

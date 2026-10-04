@@ -2,7 +2,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    CssGenericComponentValueList, CssPropertyAtRule, decode_css_identifier,
+    AnyCssGenericPropertyValueOrExpression, CssPropertyAtRule, decode_css_identifier,
     property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{AstNode, TextRange};
@@ -25,6 +25,11 @@ declare_lint_rule! {
     /// - image functions such as `linear-gradient()` and `image-set()` used with `<image>`;
     /// - transform functions such as `rotate()` and `translateX()` used with
     ///   `<transform-function>` or `<transform-list>`.
+    ///
+    /// ## Sass limitations
+    ///
+    /// An `initial-value` that requires Sass evaluation is not validated. This includes values
+    /// produced by variables, interpolation, arithmetic expressions, or user-defined functions.
     ///
     /// ## Examples
     ///
@@ -108,11 +113,17 @@ impl Rule for NoInvalidPropertyInitValue {
         }
 
         let initial_value = find_initial_value(node)?;
-        if syntax.matches_value(&initial_value) {
-            None
-        } else {
-            Some(initial_value.range())
-        }
+        let matches = match &initial_value {
+            AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(value) => {
+                syntax.matches_value(value)
+            }
+            AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+                syntax.matches_scss_value(expression)?
+            }
+            AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_)
+            | AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => return None,
+        };
+        (!matches).then(|| initial_value.range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
@@ -132,7 +143,7 @@ impl Rule for NoInvalidPropertyInitValue {
     }
 }
 
-fn find_initial_value(node: &CssPropertyAtRule) -> Option<CssGenericComponentValueList> {
+fn find_initial_value(node: &CssPropertyAtRule) -> Option<AnyCssGenericPropertyValueOrExpression> {
     node.block()
         .ok()?
         .as_css_declaration_block()?
@@ -157,12 +168,6 @@ fn find_initial_value(node: &CssPropertyAtRule) -> Option<CssGenericComponentVal
                     decode_css_identifier(name.text()).eq_ignore_ascii_case("initial-value")
                 })
         })
-        .filter_map(|property| {
-            property
-                .value()
-                .ok()?
-                .as_css_generic_component_value_list()
-                .cloned()
-        })
+        .filter_map(|property| property.value().ok())
         .next_back()
 }

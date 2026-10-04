@@ -14,6 +14,12 @@ declare_lint_rule! {
     /// Rules outside of a cascade layer (excluding `!important`) always take precedence over
     /// layered rules, making the cascade more difficult to predict and override.
     ///
+    /// ## Sass limitations
+    ///
+    /// Layer membership is determined from the authored ancestors of a style rule. Sass mixins and
+    /// includes are not expanded, so a rule in a mixin is checked at its definition site rather than
+    /// at the layer where the mixin may be included.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

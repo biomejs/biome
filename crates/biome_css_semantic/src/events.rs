@@ -1,12 +1,13 @@
 use biome_css_syntax::{
-    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssFunction, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
-    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssString,
     CssSyntaxKind::*,
-    decode_css_identifier,
+    ScssExpression, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
+    single_expression_item,
 };
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
 use std::collections::VecDeque;
@@ -45,6 +46,7 @@ pub enum SemanticEvent {
         initial_value: Option<CssPropertyInitialValueKind>,
         syntax: PropertySyntaxResult,
         inherits: Option<bool>,
+        inherits_requires_evaluation: bool,
         range: TextRange,
     },
 }
@@ -75,7 +77,8 @@ impl SemanticEventExtractor {
                 || kind == CSS_MEDIA_AT_RULE
                 || kind == CSS_SCOPE_AT_RULE
                 || kind == CSS_STARTING_STYLE_AT_RULE
-                || kind == CSS_SUPPORTS_AT_RULE =>
+                || kind == CSS_SUPPORTS_AT_RULE
+                || kind == SCSS_AT_ROOT_AT_RULE =>
             {
                 if let Some(start) = AnyRuleStart::cast(node.clone()) {
                     self.stash.push_back(SemanticEvent::RuleStart(start));
@@ -84,7 +87,7 @@ impl SemanticEventExtractor {
             CSS_SELECTOR_LIST => {
                 if !matches!(
                     node.parent().kind(),
-                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
+                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | SCSS_AT_ROOT_SELECTOR)
                 ) {
                     return;
                 };
@@ -253,6 +256,7 @@ impl SemanticEventExtractor {
         let mut initial_value = None;
         let mut syntax = PropertySyntaxResult::Missing;
         let mut inherits = None;
+        let mut inherits_requires_evaluation = false;
 
         for declaration in decls.declarations().into_iter().filter_map(|d| {
             d.as_css_declaration_with_semicolon()
@@ -288,14 +292,18 @@ impl SemanticEventExtractor {
                     let Ok(value) = prop.value() else {
                         continue;
                     };
-                    let value = value.to_trimmed_string();
-                    inherits = if value.eq_ignore_ascii_case("true") {
+                    let value_text = value.to_trimmed_string();
+                    inherits = if value_text.eq_ignore_ascii_case("true") {
                         Some(true)
-                    } else if value.eq_ignore_ascii_case("false") {
+                    } else if value_text.eq_ignore_ascii_case("false") {
                         Some(false)
                     } else {
                         None
                     };
+                    inherits_requires_evaluation = inherits.is_none()
+                        && value
+                            .as_scss_expression()
+                            .is_some_and(scss_expression_requires_evaluation);
                 }
             }
         }
@@ -305,6 +313,7 @@ impl SemanticEventExtractor {
             initial_value,
             syntax,
             inherits,
+            inherits_requires_evaluation,
             range: node.range(),
         });
     }
@@ -324,6 +333,7 @@ impl SemanticEventExtractor {
                 | CSS_SCOPE_AT_RULE
                 | CSS_STARTING_STYLE_AT_RULE
                 | CSS_SUPPORTS_AT_RULE
+                | SCSS_AT_ROOT_AT_RULE
         ) {
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {
@@ -340,19 +350,48 @@ impl SemanticEventExtractor {
 
 fn parse_property_syntax(value: AnyCssGenericPropertyValueOrExpression) -> PropertySyntaxResult {
     let range = value.range();
-    let Some(list) = value.as_css_generic_component_value_list() else {
-        return invalid_property_syntax(range);
+    let string = match value {
+        AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => {
+            let mut components = list.iter();
+            let Some(AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssString(string))) =
+                components.next()
+            else {
+                return invalid_property_syntax(range);
+            };
+            if components.next().is_some() {
+                return invalid_property_syntax(range);
+            }
+            string
+        }
+        AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+            let Some(string) = scss_expression_string(&expression) else {
+                return if scss_expression_requires_evaluation(&expression) {
+                    PropertySyntaxResult::Dynamic
+                } else {
+                    invalid_property_syntax(range)
+                };
+            };
+            string
+        }
+        _ => return invalid_property_syntax(range),
     };
-    let mut components = list.iter();
-    let Some(AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssString(string))) =
-        components.next()
-    else {
-        return invalid_property_syntax(range);
-    };
-    if components.next().is_some() {
-        return invalid_property_syntax(range);
-    }
     encode(&string)
+}
+
+fn scss_expression_string(expression: &ScssExpression) -> Option<CssString> {
+    single_expression_item(expression)?
+        .as_any_css_value()?
+        .as_css_string()
+        .cloned()
+}
+
+fn scss_expression_requires_evaluation(expression: &ScssExpression) -> bool {
+    expression.syntax().descendants().any(|node| {
+        matches!(
+            node.kind(),
+            SCSS_VARIABLE | SCSS_INTERPOLATION | SCSS_BINARY_EXPRESSION | SCSS_UNARY_EXPRESSION
+        ) || AnyCssFunction::can_cast(node.kind())
+    })
 }
 
 fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {

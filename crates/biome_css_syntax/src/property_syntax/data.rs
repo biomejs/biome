@@ -15,6 +15,8 @@ use biome_rowan::TextRange;
 pub enum PropertySyntaxResult {
     /// The declaration has no `syntax` descriptor.
     Missing,
+    /// Sass evaluation is required to determine the descriptor value.
+    Dynamic,
     /// The descriptor value does not conform to the registered property syntax grammar.
     Error(PropertySyntaxParseDiagnostic),
     /// The parsed and normalized descriptor value.
@@ -25,7 +27,7 @@ impl PropertySyntaxResult {
     /// Compares parsed descriptor semantics without considering source ranges.
     pub fn semantic_eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Missing, Self::Missing) => true,
+            (Self::Missing, Self::Missing) | (Self::Dynamic, Self::Dynamic) => true,
             (Self::Error(left), Self::Error(right)) => left.kind() == right.kind(),
             (
                 Self::Value(PropertySyntax::Universal { .. }),

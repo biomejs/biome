@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.element .child {
+  color: red;
+}
+
+```
+
+_Note: The parser emitted 2 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.scss:2:9 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .element␠.child {
+      │         ^
+    3 │   color: red;
+    4 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```

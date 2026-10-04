@@ -33,6 +33,11 @@ declare_lint_rule! {
     /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
     /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
+    /// ## Sass limitations
+    ///
+    /// Pseudo-class names containing Sass interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

@@ -14,10 +14,11 @@ use biome_css_syntax::keywords::{
     SYSTEM_FAMILY_NAME_KEYWORDS,
 };
 use biome_css_syntax::{
-    AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList, CssIdentifier,
-    CssString,
+    AnyCssFunction, AnyCssGenericComponentValue, AnyCssGenericPropertyValueOrExpression,
+    AnyCssValue, AnyScssExpression, AnyScssExpressionItem, CssIdentifier, CssString,
+    ScssBinaryExpression, ScssExpression, ScssListExpression,
 };
-use biome_rowan::{AstNode, AstNodeList, SyntaxNodeCast, TextRange, TokenText, declare_node_union};
+use biome_rowan::{AstNode, TextRange, TokenText, declare_node_union};
 use biome_string_case::StrLikeExtension;
 use std::hash::Hash;
 
@@ -175,15 +176,184 @@ impl AnyCssFontValue {
     }
 }
 
+#[derive(Clone)]
+pub enum CssFontComponent {
+    Value(AnyCssValue),
+    Comma,
+    Slash,
+    OtherDelimiter,
+}
+
+impl CssFontComponent {
+    pub fn as_value(&self) -> Option<&AnyCssValue> {
+        match self {
+            Self::Value(value) => Some(value),
+            _ => None,
+        }
+    }
+
+    fn is_delimiter(&self) -> bool {
+        !matches!(self, Self::Value(_))
+    }
+}
+
+pub fn font_components(
+    value: AnyCssGenericPropertyValueOrExpression,
+) -> Option<Vec<CssFontComponent>> {
+    match value {
+        AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list
+            .into_iter()
+            .map(|component| match component {
+                AnyCssGenericComponentValue::AnyCssValue(value) => {
+                    Some(CssFontComponent::Value(value))
+                }
+                AnyCssGenericComponentValue::CssGenericDelimiter(delimiter) => {
+                    let token = delimiter.value().ok()?;
+                    Some(match token.text_trimmed() {
+                        "," => CssFontComponent::Comma,
+                        "/" => CssFontComponent::Slash,
+                        _ => CssFontComponent::OtherDelimiter,
+                    })
+                }
+            })
+            .collect(),
+        AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+            let mut components = Vec::new();
+            append_scss_expression_components(&expression, &mut components)?;
+            Some(components)
+        }
+        AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_)
+        | AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => None,
+    }
+}
+
+fn append_scss_expression_components(
+    expression: &ScssExpression,
+    components: &mut Vec<CssFontComponent>,
+) -> Option<()> {
+    for item in expression.items() {
+        match item {
+            AnyScssExpressionItem::AnyCssValue(value) => {
+                if is_dynamic_scss_value(&value) {
+                    return None;
+                }
+                components.push(CssFontComponent::Value(value));
+            }
+            AnyScssExpressionItem::CssGenericDelimiter(delimiter) => {
+                let token = delimiter.value().ok()?;
+                components.push(match token.text_trimmed() {
+                    "," => CssFontComponent::Comma,
+                    "/" => CssFontComponent::Slash,
+                    _ => CssFontComponent::OtherDelimiter,
+                });
+            }
+            AnyScssExpressionItem::ScssBinaryExpression(expression) => {
+                append_scss_binary_expression_components(&expression, components)?;
+            }
+            AnyScssExpressionItem::ScssListExpression(list) => {
+                append_scss_list_components(&list, components)?;
+            }
+            _ => return None,
+        }
+    }
+    Some(())
+}
+
+fn append_scss_list_components(
+    list: &ScssListExpression,
+    components: &mut Vec<CssFontComponent>,
+) -> Option<()> {
+    for (index, element) in list.elements().into_iter().enumerate() {
+        if index > 0 {
+            components.push(CssFontComponent::Comma);
+        }
+        append_any_scss_expression_components(&element.ok()?.value().ok()?, components)?;
+    }
+    Some(())
+}
+
+fn append_any_scss_expression_components(
+    expression: &AnyScssExpression,
+    components: &mut Vec<CssFontComponent>,
+) -> Option<()> {
+    match expression {
+        AnyScssExpression::AnyCssValue(value) => {
+            if is_dynamic_scss_value(value) {
+                None
+            } else {
+                components.push(CssFontComponent::Value(value.clone()));
+                Some(())
+            }
+        }
+        AnyScssExpression::ScssBinaryExpression(expression) => {
+            append_scss_binary_expression_components(expression, components)
+        }
+        AnyScssExpression::ScssExpression(expression) => {
+            append_scss_expression_components(expression, components)
+        }
+        AnyScssExpression::ScssListExpression(list) => {
+            append_scss_list_components(list, components)
+        }
+        _ => None,
+    }
+}
+
+fn append_scss_binary_expression_components(
+    expression: &ScssBinaryExpression,
+    components: &mut Vec<CssFontComponent>,
+) -> Option<()> {
+    if expression.operator().ok()?.text_trimmed() != "/" {
+        return None;
+    }
+    append_any_scss_expression_components(&expression.left().ok()?, components)?;
+    components.push(CssFontComponent::Slash);
+    append_any_scss_expression_components(&expression.right().ok()?, components)
+}
+
+fn is_dynamic_scss_value(value: &AnyCssValue) -> bool {
+    fn is_dynamic(value: &AnyCssValue) -> bool {
+        matches!(
+            value,
+            AnyCssValue::ScssInterpolatedIdentifier(_)
+                | AnyCssValue::ScssInterpolatedString(_)
+                | AnyCssValue::ScssInterpolatedValue(_)
+                | AnyCssValue::ScssModuleMemberAccess(_)
+                | AnyCssValue::ScssParentSelectorValue(_)
+                | AnyCssValue::ScssVariable(_)
+        ) || matches!(
+            value,
+            AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(_))
+        ) && !value.matches_function(FUNCTION_KEYWORDS)
+    }
+
+    is_dynamic(value)
+        || value
+            .syntax()
+            .descendants()
+            .filter_map(AnyCssValue::cast)
+            .any(|value| is_dynamic(&value))
+}
+
 /// Get the font-families within a `font` shorthand property value.
-pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<CssFontValue> {
+pub fn find_font_family(value: &[CssFontComponent]) -> Vec<CssFontValue> {
     let mut font_families: Vec<CssFontValue> = Vec::new();
     // Vector needed to collect identifiers that are next to each other, eventually separated by colon
     let mut identifiers_collector: Vec<CssIdentifier> = vec![];
-    let mut iter = value.iter().peekable();
-    while let Some(v) = iter.next() {
-        let value = v.to_trimmed_text();
-        let lower_case_value = value.text().to_ascii_lowercase_cow();
+    for (index, component) in value.iter().enumerate() {
+        let Some(css_value) = component.as_value() else {
+            if !identifiers_collector.is_empty() {
+                font_families.push(CssFontValue::MultipleValue(
+                    std::mem::take(&mut identifiers_collector)
+                        .into_iter()
+                        .map(AnyCssFontValue::from)
+                        .collect(),
+                ));
+            }
+            continue;
+        };
+
+        let text = css_value.to_trimmed_text();
+        let lower_case_value = text.text().to_ascii_lowercase_cow();
 
         // Ignore CSS variables
         if is_css_variable(&lower_case_value) {
@@ -198,90 +368,52 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<CssFontValue
         }
 
         // Ignore font-sizes
-        if matches!(
-            v,
-            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(_))
-        ) {
+        if matches!(css_value, AnyCssValue::AnyCssDimension(_)) {
             continue;
         }
 
         // Ignore anything come after a <font-size>/, because it's a line-height
-        if let Some(prev_node) = v.syntax().prev_sibling()
-            && let Some(prev_prev_node) = prev_node.prev_sibling()
-            && let Some(slash) = prev_node.cast::<AnyCssGenericComponentValue>()
-            && let Some(size) = prev_prev_node.cast::<AnyCssGenericComponentValue>()
+        if index >= 2
+            && matches!(value[index - 1], CssFontComponent::Slash)
             && matches!(
-                size,
-                AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::AnyCssDimension(_))
+                value[index - 2],
+                CssFontComponent::Value(AnyCssValue::AnyCssDimension(_))
             )
-            && matches!(slash, AnyCssGenericComponentValue::CssGenericDelimiter(_))
         {
-            continue;
-        };
-
-        // Ignore number values
-        if matches!(
-            v,
-            AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssNumber(_))
-        ) {
             continue;
         }
 
-        match v {
-            AnyCssGenericComponentValue::CssGenericDelimiter(_) => {
-                if !identifiers_collector.is_empty() {
+        // Ignore number values
+        if matches!(css_value, AnyCssValue::CssNumber(_)) {
+            continue;
+        }
+
+        match css_value {
+            AnyCssValue::CssIdentifier(node) => {
+                if value.get(index + 1).is_some_and(|next| next.is_delimiter()) {
+                    if identifiers_collector.is_empty() {
+                        font_families.push(CssFontValue::SingleValue(node.clone().into()));
+                    } else {
+                        identifiers_collector.push(node.clone());
+                    }
+                } else if index + 1 < value.len() {
+                    identifiers_collector.push(node.clone());
+                } else if identifiers_collector.is_empty() {
+                    font_families.push(CssFontValue::SingleValue(node.clone().into()));
+                } else {
+                    identifiers_collector.push(node.clone());
                     font_families.push(CssFontValue::MultipleValue(
                         std::mem::take(&mut identifiers_collector)
                             .into_iter()
                             .map(AnyCssFontValue::from)
                             .collect(),
                     ));
-                    identifiers_collector.clear();
                 }
             }
-            AnyCssGenericComponentValue::AnyCssValue(css_value) => match css_value {
-                AnyCssValue::CssIdentifier(node) => {
-                    // We query the next node first
-                    if let Some(next_node) = iter.peek() {
-                        if matches!(
-                            next_node,
-                            AnyCssGenericComponentValue::CssGenericDelimiter(_)
-                        ) {
-                            if identifiers_collector.is_empty() {
-                                font_families.push(CssFontValue::SingleValue(node.into()));
-                            } else {
-                                identifiers_collector.push(node);
-                            }
-                        } else {
-                            identifiers_collector.push(node);
-                        }
-                    }
-                    // If we're here, the list finished and we're computing the last node
-                    else {
-                        // If there aren't pending nodes, we add the current node
-                        if identifiers_collector.is_empty() {
-                            font_families.push(CssFontValue::SingleValue(node.into()));
-                        } else {
-                            // We push this node to the list
-                            identifiers_collector.push(node);
-
-                            // This is a multiple value
-                            font_families.push(CssFontValue::MultipleValue(
-                                std::mem::take(&mut identifiers_collector)
-                                    .into_iter()
-                                    .map(AnyCssFontValue::from)
-                                    .collect::<Vec<_>>(),
-                            ));
-
-                            identifiers_collector.clear();
-                        }
-                    }
-                }
-                AnyCssValue::CssString(node) => {
-                    font_families.push(CssFontValue::SingleValue(node.into()));
-                }
-                _ => {}
-            },
+            AnyCssValue::CssString(node) => {
+                font_families.push(CssFontValue::SingleValue(node.clone().into()));
+            }
+            _ => {}
         }
     }
     font_families

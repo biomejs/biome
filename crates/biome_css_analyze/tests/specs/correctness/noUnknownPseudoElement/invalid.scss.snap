@@ -1,0 +1,37 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a {
+  &::unknown {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:6 lint/correctness/noUnknownPseudoElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-elements: unknown
+  
+    1 │ /* should generate diagnostics */
+    2 │ a {
+  > 3 │   &::unknown {}
+      │      ^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i See MDN web docs for more details.
+  
+  i Use a known pseudo-elements instead, such as:
+  
+  - after
+  - backdrop
+  - before
+  - etc.
+  
+
+```

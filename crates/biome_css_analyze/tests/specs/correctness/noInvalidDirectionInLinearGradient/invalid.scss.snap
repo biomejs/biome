@@ -1,0 +1,32 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin gradient {
+  background: linear-gradient(bottom, #fff, #000);
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:31 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected nonstandard direction
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin gradient {
+  > 3 │   background: linear-gradient(bottom, #fff, #000);
+      │                               ^^^^^^
+    4 │ }
+    5 │ 
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```

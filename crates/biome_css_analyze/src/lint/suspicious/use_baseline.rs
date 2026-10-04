@@ -36,6 +36,12 @@ declare_lint_rule! {
     /// Code inside `@supports` blocks is exempt: if you feature-detect a capability before
     /// using it, the rule does not flag it.
     ///
+    /// ## Sass limitations
+    ///
+    /// This rule checks authored syntax without evaluating Sass. Features produced only through
+    /// interpolation or function evaluation may not be reported. Static syntax inside mixin
+    /// definitions is checked even when the mixin is not included.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

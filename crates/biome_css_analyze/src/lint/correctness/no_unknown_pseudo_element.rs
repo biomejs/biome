@@ -20,6 +20,11 @@ declare_lint_rule! {
     /// Vendor-prefixed pseudo-elements are allowed. See
     /// [MDN's pseudo-element reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements#list_of_pseudo-elements).
     ///
+    /// ## Sass limitations
+    ///
+    /// Pseudo-element names containing Sass interpolation are ignored because the emitted name
+    /// cannot be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

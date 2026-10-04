@@ -18,6 +18,12 @@ declare_lint_rule! {
     /// Classes inside `:global(.foo)` are excluded from this check, as they are
     /// intended to be used by external consumers without explicit imports.
     ///
+    /// ## Sass limitations
+    ///
+    /// This rule does not evaluate Sass. Interpolated class names are ignored, and `@extend`
+    /// references are not treated as class references. Statically named classes inside mixin bodies
+    /// are checked as authored even when the mixin is not included.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

@@ -1,0 +1,69 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-at-root-selector.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.outer {
+  @at-root .direct-parent .direct-target, .direct-target {}
+
+  @at-root .direct-root {
+    .nested-parent .nested-target {}
+    .nested-target {}
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-at-root-selector.invalid.scss:3:43 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    1 │ /* should generate diagnostics */
+    2 │ .outer {
+  > 3 │   @at-root .direct-parent .direct-target, .direct-target {}
+      │                                           ^^^^^^^^^^^^^^
+    4 │ 
+    5 │   @at-root .direct-root {
+  
+  i This selector specificity is (0, 2, 0)
+  
+    1 │ /* should generate diagnostics */
+    2 │ .outer {
+  > 3 │   @at-root .direct-parent .direct-target, .direct-target {}
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │   @at-root .direct-root {
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+scss-at-root-selector.invalid.scss:7:5 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    5 │   @at-root .direct-root {
+    6 │     .nested-parent .nested-target {}
+  > 7 │     .nested-target {}
+      │     ^^^^^^^^^^^^^^
+    8 │   }
+    9 │ }
+  
+  i This selector specificity is (0, 3, 0)
+  
+    5 │   @at-root .direct-root {
+  > 6 │     .nested-parent .nested-target {}
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │     .nested-target {}
+    8 │   }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

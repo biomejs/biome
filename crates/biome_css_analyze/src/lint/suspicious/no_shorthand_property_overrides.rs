@@ -18,6 +18,11 @@ declare_lint_rule! {
     ///
     /// See [MDN's shorthand property guide](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
     ///
+    /// ## Sass limitations
+    ///
+    /// Declarations are compared within each authored declaration block. The rule does not expand
+    /// mixins or includes, so overrides introduced only after Sass expansion are not reported.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

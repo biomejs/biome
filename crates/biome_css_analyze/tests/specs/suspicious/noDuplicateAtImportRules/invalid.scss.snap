@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@import "theme.css";
+@import "theme.css";
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:9 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Each @import should be unique unless differing by media queries.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @import "theme.css";
+  > 3 │ @import "theme.css";
+      │         ^^^^^^^^^^^
+    4 │ 
+  
+  i Consider removing one of the duplicated imports.
+  
+
+```

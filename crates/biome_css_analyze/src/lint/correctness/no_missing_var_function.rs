@@ -5,7 +5,9 @@
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
+use biome_css_syntax::{
+    AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssGenericProperty, CssSyntaxKind,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Text};
 use biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions;
@@ -238,7 +240,14 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
         match parent.kind() {
             // Ignore declarations of custom properties
             // e.g. `--custom-property: {}`
-            CssSyntaxKind::CSS_GENERIC_PROPERTY => return true,
+            CssSyntaxKind::CSS_GENERIC_PROPERTY => {
+                let Some(property) = CssGenericProperty::cast(parent) else {
+                    return false;
+                };
+                return property
+                    .name()
+                    .is_ok_and(|name| name.range() == node.range());
+            }
             // e.g `color: --custom-property;`
             //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
             CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,

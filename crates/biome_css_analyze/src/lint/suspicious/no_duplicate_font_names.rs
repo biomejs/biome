@@ -1,6 +1,9 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
 
-use crate::fonts::{AnyCssFontValue, CssFontValue, find_font_family, is_font_family_keyword};
+use crate::fonts::{AnyCssFontValue, CssFontValue, find_font_family, font_components, is_font_family_keyword};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -23,6 +26,13 @@ declare_lint_rule! {
     /// The unquoted pair `font-family: monospace, monospace` is allowed. This pattern preserves an
     /// inherited font size instead of using the browser's preferred monospace size. See
     /// [MDN's explanation](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/font-family#monospace_font_size).
+    ////
+    /// This rule ignores `var(--custom-property)` values.
+    ///
+    /// ## Sass limitations
+    ///
+    /// Font values that require Sass evaluation, including variables, interpolation, and
+    /// user-defined function results, are ignored because the emitted font names are unknown.
     ///
     /// ## Examples
     ///
@@ -78,22 +88,14 @@ impl Rule for NoDuplicateFontNames {
         }
 
         let mut family_names: HashSet<CssFontValue> = HashSet::new();
-        let value_list = match node.value() {
-            Ok(value) => match value {
-                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
-                AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => return None,
-                AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
-                AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
-            },
-            Err(_) => return None,
-        };
+        let components = font_components(node.value().ok()?)?;
         let is_comma_separated_pair = value_list.len() == 3
             && value_list
                 .iter()
                 .nth(1)
                 .and_then(|value| value.as_css_generic_delimiter()?.value().ok())
                 .is_some_and(|token| token.kind() == T![,]);
-        let font_families = find_font_family(value_list);
+        let font_families = find_font_family(&components);
 
         if is_font_family
             && is_comma_separated_pair

@@ -163,7 +163,8 @@ The configuration contained in `biome.json`.
         --json-assist-enabled=<true|false>  Controls assist actions for JSON and languages that
                               extend it.
         --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules-specific features.
-                              Enable this feature only when your files don't end in `.module.css`.
+                              Enable this feature only when your files don't end in `.module.css` or
+                              `.module.scss`.
         --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
                               and functions.
         --css-formatter-enabled=<true|false>  Controls the formatter for CSS and languages that

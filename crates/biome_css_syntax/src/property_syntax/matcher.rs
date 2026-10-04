@@ -3,11 +3,12 @@ use super::{
     PropertySyntaxType,
 };
 use crate::{
-    AnyCssFunction, AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList,
+    AnyCssFunction, AnyCssGenericComponentValue, AnyCssValue, AnyScssExpression,
+    AnyScssExpressionItem, CssGenericComponentValueList, ScssExpression, ScssListExpression,
     decode_css_identifier,
     keywords::{
         ANGLE_MATH_FUNCTIONS, ANGLE_UNITS, BASIC_KEYWORDS, COLOR_FUNCTIONS, COLOR_KEYWORDS,
-        IMAGE_FUNCTIONS, INTEGER_MATH_FUNCTIONS, LENGTH_ENVIRONMENT_VARIABLES,
+        FUNCTION_KEYWORDS, IMAGE_FUNCTIONS, INTEGER_MATH_FUNCTIONS, LENGTH_ENVIRONMENT_VARIABLES,
         NUMBER_ENVIRONMENT_VARIABLES, NUMBER_MATH_FUNCTIONS, TIME_UNITS, TRANSFORM_FUNCTIONS,
         TYPED_MATH_FUNCTIONS,
     },
@@ -51,6 +52,225 @@ impl PropertySyntax {
     pub fn matches_initial_value(&self, values: &CssGenericComponentValueList) -> bool {
         self.matches_value(values) && is_computationally_independent(values)
     }
+
+    /// Returns whether a static SCSS expression has a shape accepted by this syntax.
+    ///
+    /// Returns `None` when Sass evaluation is required to determine the resulting CSS value.
+    pub fn matches_scss_value(&self, expression: &ScssExpression) -> Option<bool> {
+        let values = static_scss_values(expression)?;
+        Some(self.matches_static_scss_values(&values))
+    }
+
+    /// Returns whether a static SCSS initial value matches this syntax and is computationally independent.
+    ///
+    /// Returns `None` when Sass evaluation is required to determine the resulting CSS value.
+    pub fn matches_scss_initial_value(&self, expression: &ScssExpression) -> Option<bool> {
+        let values = static_scss_values(expression)?;
+        Some(
+            self.matches_static_scss_values(&values)
+                && is_scss_computationally_independent(&values),
+        )
+    }
+
+    fn matches_static_scss_values(&self, values: &[StaticScssValue]) -> bool {
+        let Self::Components(components) = self else {
+            return true;
+        };
+
+        if values.len() == 1
+            && values[0].as_value().is_some_and(|value| {
+                value.identifier_text().is_some_and(|identifier| {
+                    let identifier = decode_css_identifier(identifier.text());
+                    BASIC_KEYWORDS
+                        .binary_search(&identifier.to_ascii_lowercase_cow().as_ref())
+                        .is_ok()
+                })
+            })
+        {
+            return true;
+        }
+
+        components
+            .iter()
+            .any(|component| matches_scss_component(component, values))
+    }
+}
+
+#[derive(Clone)]
+enum StaticScssValue {
+    Value(AnyCssValue),
+    Comma,
+    OtherDelimiter,
+}
+
+impl StaticScssValue {
+    fn as_value(&self) -> Option<&AnyCssValue> {
+        match self {
+            Self::Value(value) => Some(value),
+            Self::Comma | Self::OtherDelimiter => None,
+        }
+    }
+}
+
+fn static_scss_values(expression: &ScssExpression) -> Option<Vec<StaticScssValue>> {
+    let mut values = Vec::new();
+    append_scss_expression_values(expression, &mut values)?;
+    Some(values)
+}
+
+fn append_scss_expression_values(
+    expression: &ScssExpression,
+    values: &mut Vec<StaticScssValue>,
+) -> Option<()> {
+    for item in expression.items() {
+        match item {
+            AnyScssExpressionItem::AnyCssValue(value) => {
+                if is_dynamic_scss_value(&value) {
+                    return None;
+                }
+                values.push(StaticScssValue::Value(value));
+            }
+            AnyScssExpressionItem::CssGenericDelimiter(delimiter) => {
+                let delimiter = delimiter.value().ok()?;
+                values.push(if delimiter.text_trimmed() == "," {
+                    StaticScssValue::Comma
+                } else {
+                    StaticScssValue::OtherDelimiter
+                });
+            }
+            AnyScssExpressionItem::ScssListExpression(list) => {
+                append_scss_list_values(&list, values)?;
+            }
+            _ => return None,
+        }
+    }
+    Some(())
+}
+
+fn append_scss_list_values(
+    list: &ScssListExpression,
+    values: &mut Vec<StaticScssValue>,
+) -> Option<()> {
+    for (index, element) in list.elements().into_iter().enumerate() {
+        if index > 0 {
+            values.push(StaticScssValue::Comma);
+        }
+        append_any_scss_expression_values(&element.ok()?.value().ok()?, values)?;
+    }
+    Some(())
+}
+
+fn append_any_scss_expression_values(
+    expression: &AnyScssExpression,
+    values: &mut Vec<StaticScssValue>,
+) -> Option<()> {
+    match expression {
+        AnyScssExpression::AnyCssValue(value) => {
+            if is_dynamic_scss_value(value) {
+                None
+            } else {
+                values.push(StaticScssValue::Value(value.clone()));
+                Some(())
+            }
+        }
+        AnyScssExpression::ScssExpression(expression) => {
+            append_scss_expression_values(expression, values)
+        }
+        AnyScssExpression::ScssListExpression(list) => append_scss_list_values(list, values),
+        _ => None,
+    }
+}
+
+fn is_dynamic_scss_value(value: &AnyCssValue) -> bool {
+    fn is_dynamic(value: &AnyCssValue) -> bool {
+        matches!(
+            value,
+            AnyCssValue::ScssInterpolatedIdentifier(_)
+                | AnyCssValue::ScssInterpolatedString(_)
+                | AnyCssValue::ScssInterpolatedValue(_)
+                | AnyCssValue::ScssModuleMemberAccess(_)
+                | AnyCssValue::ScssParentSelectorValue(_)
+                | AnyCssValue::ScssVariable(_)
+        ) || matches!(
+            value,
+            AnyCssValue::AnyCssFunction(AnyCssFunction::CssFunction(_))
+        ) && !value.matches_function(FUNCTION_KEYWORDS)
+    }
+
+    is_dynamic(value)
+        || value
+            .syntax()
+            .descendants()
+            .filter_map(AnyCssValue::cast)
+            .any(|value| is_dynamic(&value))
+}
+
+fn matches_scss_component(component: &PropertySyntaxComponent, values: &[StaticScssValue]) -> bool {
+    match component.multiplier {
+        PropertySyntaxMultiplier::None => {
+            if matches!(
+                component.name,
+                PropertySyntaxComponentName::Type(PropertySyntaxType::TransformList)
+            ) {
+                return !values.is_empty()
+                    && values
+                        .iter()
+                        .all(|value| matches_scss_component_value(&component.name, value));
+            }
+            matches!(values, [value] if matches_scss_component_value(&component.name, value))
+        }
+        PropertySyntaxMultiplier::SpaceSeparated => {
+            !values.is_empty()
+                && values
+                    .iter()
+                    .all(|value| matches_scss_component_value(&component.name, value))
+        }
+        PropertySyntaxMultiplier::CommaSeparated => {
+            let mut expect_value = true;
+            let mut count = 0;
+            for value in values {
+                if expect_value {
+                    if !matches_scss_component_value(&component.name, value) {
+                        return false;
+                    }
+                    count += 1;
+                } else if !matches!(value, StaticScssValue::Comma) {
+                    return false;
+                }
+                expect_value = !expect_value;
+            }
+            count > 0 && !expect_value
+        }
+    }
+}
+
+fn matches_scss_component_value(
+    component: &PropertySyntaxComponentName,
+    value: &StaticScssValue,
+) -> bool {
+    let Some(value) = value.as_value() else {
+        return false;
+    };
+    match component {
+        PropertySyntaxComponentName::Type(syntax_type) => matches_type(*syntax_type, value),
+        PropertySyntaxComponentName::CustomIdentifier(identifier) => value
+            .identifier_text()
+            .is_some_and(|value| decode_css_identifier(value.text()) == identifier.as_ref()),
+    }
+}
+
+fn is_scss_computationally_independent(values: &[StaticScssValue]) -> bool {
+    values
+        .iter()
+        .filter_map(StaticScssValue::as_value)
+        .all(|value| {
+            is_computationally_independent_value(value)
+                && value
+                    .syntax()
+                    .descendants()
+                    .filter_map(AnyCssValue::cast)
+                    .all(|value| is_computationally_independent_value(&value))
+        })
 }
 
 /// Returns whether an initial value can be computed without external style or environment data.
@@ -64,30 +284,32 @@ fn is_computationally_independent(values: &CssGenericComponentValueList) -> bool
         .syntax()
         .descendants()
         .filter_map(AnyCssValue::cast)
-        .all(|value| {
-            if matches!(
-                value,
-                AnyCssValue::AnyCssFunction(
-                    AnyCssFunction::CssAttrFunction(_) | AnyCssFunction::CssIfFunction(_)
-                )
-            ) || value.matches_function(&["env", "var"])
-            {
-                return false;
-            }
-            if value.identifier_text().is_some_and(|identifier| {
-                let identifier = decode_css_identifier(identifier.text());
-                identifier.eq_ignore_ascii_case("currentcolor")
-                    || BASIC_KEYWORDS
-                        .binary_search(&identifier.to_ascii_lowercase_cow().as_ref())
-                        .is_ok()
-            }) {
-                return false;
-            }
-            !value.as_css_regular_dimension().is_some_and(|dimension| {
-                dimension.matches_unit(crate::keywords::LENGTH_UNITS)
-                    && !dimension.matches_unit(ABSOLUTE_LENGTH_UNITS)
-            })
-        })
+        .all(|value| is_computationally_independent_value(&value))
+}
+
+fn is_computationally_independent_value(value: &AnyCssValue) -> bool {
+    if matches!(
+        value,
+        AnyCssValue::AnyCssFunction(
+            AnyCssFunction::CssAttrFunction(_) | AnyCssFunction::CssIfFunction(_)
+        )
+    ) || value.matches_function(&["env", "var"])
+    {
+        return false;
+    }
+    if value.identifier_text().is_some_and(|identifier| {
+        let identifier = decode_css_identifier(identifier.text());
+        identifier.eq_ignore_ascii_case("currentcolor")
+            || BASIC_KEYWORDS
+                .binary_search(&identifier.to_ascii_lowercase_cow().as_ref())
+                .is_ok()
+    }) {
+        return false;
+    }
+    !value.as_css_regular_dimension().is_some_and(|dimension| {
+        dimension.matches_unit(crate::keywords::LENGTH_UNITS)
+            && !dimension.matches_unit(ABSOLUTE_LENGTH_UNITS)
+    })
 }
 
 /// Returns whether the complete value list satisfies a syntax component and its multiplier.

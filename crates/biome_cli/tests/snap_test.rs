@@ -75,10 +75,6 @@ impl CliRunResult {
         self.result.is_err()
     }
 
-    pub fn expect_err(self, message: &str) -> CliDiagnostic {
-        self.result.expect_err(message)
-    }
-
     pub fn followed_by(mut self, mut next: Self) -> Self {
         self.commands.append(&mut next.commands);
         next.commands = self.commands;

@@ -117,13 +117,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 );
             }
         } else {
-            // TODO: use `try_from` for `.scss` once SCSS is enabled for users
-            let source_type = if extension == "scss" {
-                Ok(CssFileSource::scss())
-            } else {
-                CssFileSource::try_from(input_file)
-            };
-            let Ok(mut source_type) = source_type else {
+            let Ok(mut source_type) = CssFileSource::try_from(input_file) else {
                 return;
             };
 

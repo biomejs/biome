@@ -10,10 +10,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssRootItem, AnyCssRule, CssImportAtRule, CssRootItemList,
+    AnyCssAtRule, AnyCssRootItem, AnyCssRule, AnyScssImportItem, CssMediaQueryList, CssRootItemList,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_duplicate_at_import_rules::NoDuplicateAtImportRulesOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -24,6 +24,7 @@ declare_lint_rule! {
     /// are duplicates when either import is unconditional or when their media lists share a
     /// condition. Two imports of the same URL remain valid only when both are conditional and their
     /// media conditions do not overlap.
+    /// Sass load imports are ignored because they don't emit CSS `@import` rules.
     ///
     /// ## Examples
     ///
@@ -68,66 +69,54 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateAtImportRules {
     type Query = Ast<CssRootItemList>;
-    type State = CssImportAtRule;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = NoDuplicateAtImportRulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let mut import_url_map: HashMap<String, HashSet<String>> = HashMap::new();
+        let mut imports_by_url: HashMap<String, HashSet<String>> = HashMap::new();
         for item in node {
             let AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) = item else {
                 continue;
             };
-            let AnyCssAtRule::CssImportAtRule(import_rule) = at_rule.rule().ok()? else {
-                continue;
-            };
-
-            let import_url = import_rule
-                .url()
-                .ok()?
-                .to_trimmed_text()
-                .to_lowercase_cow()
-                .replace("url(", "")
-                .replace(')', "")
-                .replace('"', "'");
-            if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
-                // if the current import_rule has no media queries or there are no queries saved in the
-                // media_query_set, this is always a duplicate
-                if import_rule.media().to_trimmed_text().is_empty() || media_query_set.is_empty() {
-                    return Some(import_rule);
-                }
-
-                for media in import_rule.media() {
-                    match media {
-                        Ok(media) => {
-                            if !media_query_set
-                                .insert(media.to_trimmed_text().to_lowercase_cow().into())
-                            {
-                                return Some(import_rule);
-                            }
-                        }
-                        _ => return None,
+            match at_rule.rule().ok()? {
+                AnyCssAtRule::CssImportAtRule(import_rule) => {
+                    let url = import_rule.url().ok()?.to_trimmed_text();
+                    let media = normalized_media_queries(import_rule.media())?;
+                    if is_duplicate_import(
+                        &mut imports_by_url,
+                        normalize_import_url(url.text()),
+                        media,
+                    ) {
+                        return Some(import_rule.range());
                     }
                 }
-            } else {
-                let mut media_set: HashSet<String> = HashSet::new();
-                for media in import_rule.media() {
-                    match media {
-                        Ok(media) => {
-                            media_set.insert(media.to_trimmed_text().to_lowercase_cow().into());
+                AnyCssAtRule::ScssImportAtRule(import_rule) => {
+                    for item in import_rule.imports() {
+                        let item = item.ok()?;
+                        let AnyScssImportItem::ScssPlainImport(import) = &item else {
+                            continue;
+                        };
+                        let url = import.url().ok()?.to_trimmed_text();
+                        let url = url.text().to_string();
+                        let media = normalized_media_queries(import.media())?;
+                        if is_duplicate_import(
+                            &mut imports_by_url,
+                            normalize_import_url(&url),
+                            media,
+                        ) {
+                            return Some(item.range());
                         }
-                        _ => return None,
                     }
                 }
-                import_url_map.insert(import_url, media_set);
+                _ => {}
             }
         }
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let span = node.range();
+    fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -141,4 +130,43 @@ impl Rule for NoDuplicateAtImportRules {
             }),
         )
     }
+}
+
+fn normalized_media_queries(media: CssMediaQueryList) -> Option<Vec<String>> {
+    media
+        .into_iter()
+        .map(|query| {
+            Some(
+                query
+                    .ok()?
+                    .to_trimmed_text()
+                    .to_lowercase_cow()
+                    .into_owned(),
+            )
+        })
+        .collect()
+}
+
+fn normalize_import_url(url: &str) -> String {
+    url.to_lowercase_cow()
+        .replace("url(", "")
+        .replace(')', "")
+        .replace('"', "'")
+}
+
+fn is_duplicate_import(
+    imports_by_url: &mut HashMap<String, HashSet<String>>,
+    url: String,
+    media: Vec<String>,
+) -> bool {
+    let Some(previous_media) = imports_by_url.get_mut(&url) else {
+        imports_by_url.insert(url, media.into_iter().collect());
+        return false;
+    };
+
+    if media.is_empty() || previous_media.is_empty() {
+        return true;
+    }
+
+    media.into_iter().any(|media| !previous_media.insert(media))
 }

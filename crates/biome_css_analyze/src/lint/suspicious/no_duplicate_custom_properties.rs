@@ -13,6 +13,11 @@ declare_lint_rule! {
     ///
     /// This rule checks the declaration blocks for duplicate custom properties.
     ///
+    /// ## Sass limitations
+    ///
+    /// Declarations are compared within each authored declaration block. The rule does not expand
+    /// mixins or includes, so duplicates introduced only after Sass expansion are not reported.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -59,7 +64,15 @@ impl Rule for NoDuplicateCustomProperties {
 
         let mut seen: FxHashMap<TokenText, TextRange> = FxHashMap::default();
 
-        for declaration in rule.declarations() {
+        for declaration in rule.declarations().iter().filter(|declaration| {
+            declaration
+                .declaration()
+                .syntax()
+                .parent()
+                .and_then(|parent| parent.parent())
+                .as_ref()
+                == Some(node.syntax())
+        }) {
             let prop = declaration.property();
             let prop_text = prop.value().ok()?;
             let prop_range = prop.range();

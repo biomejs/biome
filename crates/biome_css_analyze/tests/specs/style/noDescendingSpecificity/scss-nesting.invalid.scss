@@ -1,0 +1,35 @@
+/* should generate diagnostics */
+.parent {
+  .middle {
+    .nested-parent .nested-target {}
+  }
+}
+.nested-target {}
+
+.block {
+  &--active .suffix-target {}
+}
+.suffix-target {}
+
+.multi-parent {
+  & & .multi-target {}
+  & .multi-target {}
+}
+
+.sidebar > {
+  .partial-target {}
+}
+.partial-target {}
+
+.card {
+  + {
+    .adjacent-target {}
+  }
+}
+.adjacent-target {}
+
+.low,
+#high {
+  .list-target {}
+}
+.list-target {}

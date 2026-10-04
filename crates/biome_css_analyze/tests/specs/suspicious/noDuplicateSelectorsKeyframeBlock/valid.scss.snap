@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@keyframes fade {
+  $stop: 50%;
+  from {}
+  to {}
+}
+
+```

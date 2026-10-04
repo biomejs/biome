@@ -14,6 +14,11 @@ declare_lint_rule! {
     ///
     /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties and declarations inside `@keyframes` blocks.
     ///
+    /// ## Sass limitations
+    ///
+    /// Declarations are compared within each authored declaration block. The rule does not expand
+    /// mixins or includes, so duplicates introduced only after Sass expansion are not reported.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

@@ -25,6 +25,11 @@ declare_lint_rule! {
     /// and the W3C specifications for [Media Queries Level 4](https://www.w3.org/TR/mediaqueries-4/)
     /// and [Level 5](https://www.w3.org/TR/mediaqueries-5/).
     ///
+    /// ## Sass limitations
+    ///
+    /// Media feature names containing Sass interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
