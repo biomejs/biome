@@ -7178,7 +7178,7 @@
 					]
 				},
 				"noInvalidThis": {
-					"description": "Disallow this in contexts where it is undefined.\nSee https://biomejs.dev/linter/rules/no-invalid-this",
+					"description": "Disallow this in places where it is undefined.\nSee https://biomejs.dev/linter/rules/no-invalid-this",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidThisConfiguration" },
 						{ "type": "null" }

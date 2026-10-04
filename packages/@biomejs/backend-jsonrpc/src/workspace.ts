@@ -2631,7 +2631,7 @@ export interface Nursery {
 	 */
 	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
-	 * Disallow this in contexts where it is undefined.
+	 * Disallow this in places where it is undefined.
 	 * See https://biomejs.dev/linter/rules/no-invalid-this
 	 */
 	noInvalidThis?: NoInvalidThisConfiguration;
