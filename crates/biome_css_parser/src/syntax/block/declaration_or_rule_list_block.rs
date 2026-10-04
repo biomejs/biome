@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use crate::syntax::at_rule::keyframes::parse_scss_template_keyframes_item;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::declaration::parse_declaration_with_semicolon;
@@ -44,8 +45,9 @@ impl ParseBlockBody for DeclarationOrRuleListBlock {
 }
 
 #[inline]
-fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
-    is_at_at_rule(p)
+pub(crate) fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
+    p.at(CSS_PERCENTAGE_VALUE)
+        || is_at_at_rule(p)
         || is_at_top_level_qualified_rule(p)
         || is_at_nested_qualified_rule(p)
         || is_at_scss_nesting_declaration(p)
@@ -140,6 +142,18 @@ impl ParseNodeList for DeclarationOrRuleList {
     const LIST_KIND: Self::Kind = CSS_DECLARATION_OR_RULE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        if let ParsedSyntax::Present(item) = CssSyntaxFeatures::Scss
+            .parse_exclusive_syntax_with_kind(
+                p,
+                parse_scss_template_keyframes_item,
+                |p, marker| scss_only_syntax_error(p, "SCSS keyframe blocks", marker.range(p)),
+                // The default CSS_BOGUS_KEYFRAMES_ITEM is not allowed in this list.
+                Some(CSS_BOGUS),
+            )
+        {
+            return ParsedSyntax::Present(item);
+        }
+
         if is_at_at_rule(p) {
             parse_at_rule(p)
         } else if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_nesting_declaration(p) {

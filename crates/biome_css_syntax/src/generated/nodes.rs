@@ -15143,6 +15143,7 @@ pub enum AnyCssDeclarationOrRule {
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
+    CssKeyframesItem(CssKeyframesItem),
     CssMetavariable(CssMetavariable),
     ScssNestingDeclaration(ScssNestingDeclaration),
     ScssVariableDeclaration(ScssVariableDeclaration),
@@ -15169,6 +15170,12 @@ impl AnyCssDeclarationOrRule {
     pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
         match &self {
             Self::CssEmptyDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_keyframes_item(&self) -> Option<&CssKeyframesItem> {
+        match &self {
+            Self::CssKeyframesItem(item) => Some(item),
             _ => None,
         }
     }
@@ -38645,6 +38652,11 @@ impl From<CssEmptyDeclaration> for AnyCssDeclarationOrRule {
         Self::CssEmptyDeclaration(node)
     }
 }
+impl From<CssKeyframesItem> for AnyCssDeclarationOrRule {
+    fn from(node: CssKeyframesItem) -> Self {
+        Self::CssKeyframesItem(node)
+    }
+}
 impl From<CssMetavariable> for AnyCssDeclarationOrRule {
     fn from(node: CssMetavariable) -> Self {
         Self::CssMetavariable(node)
@@ -38666,6 +38678,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
+        .union(CssKeyframesItem::KIND_SET)
         .union(CssMetavariable::KIND_SET)
         .union(ScssNestingDeclaration::KIND_SET)
         .union(ScssVariableDeclaration::KIND_SET);
@@ -38674,6 +38687,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             CSS_BOGUS
             | CSS_DECLARATION_WITH_SEMICOLON
             | CSS_EMPTY_DECLARATION
+            | CSS_KEYFRAMES_ITEM
             | CSS_METAVARIABLE
             | SCSS_NESTING_DECLARATION
             | SCSS_VARIABLE_DECLARATION => true,
@@ -38688,6 +38702,7 @@ impl AstNode for AnyCssDeclarationOrRule {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             SCSS_NESTING_DECLARATION => {
                 Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
@@ -38709,6 +38724,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
+            Self::CssKeyframesItem(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
             Self::ScssNestingDeclaration(it) => it.syntax(),
             Self::ScssVariableDeclaration(it) => it.syntax(),
@@ -38720,6 +38736,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
+            Self::CssKeyframesItem(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
             Self::ScssNestingDeclaration(it) => it.into_syntax(),
             Self::ScssVariableDeclaration(it) => it.into_syntax(),
@@ -38734,6 +38751,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
@@ -38747,6 +38765,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::CssBogus(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssKeyframesItem(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssMetavariable(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::ScssNestingDeclaration(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::ScssVariableDeclaration(it) => it.into_syntax(),

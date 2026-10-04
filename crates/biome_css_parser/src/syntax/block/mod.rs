@@ -16,7 +16,7 @@ pub(crate) use conditional_block::parse_conditional_block;
 pub(crate) use declaration_block::parse_declaration_block;
 pub(crate) use declaration_or_at_rule_list_block::parse_declaration_or_at_rule_list_block;
 pub(crate) use declaration_or_rule_list_block::{
-    DeclarationOrRuleList, parse_declaration_or_rule_list_block,
+    DeclarationOrRuleList, is_at_declaration_or_rule_item, parse_declaration_or_rule_list_block,
 };
 pub(crate) use rule_block::parse_rule_block;
 

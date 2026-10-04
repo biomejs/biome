@@ -11,7 +11,7 @@ mod font_feature_values;
 mod font_palette_values;
 mod function;
 mod import;
-mod keyframes;
+pub(crate) mod keyframes;
 mod layer;
 pub(crate) mod media;
 mod namespace;
