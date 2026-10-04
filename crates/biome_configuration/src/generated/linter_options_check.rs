@@ -718,6 +718,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_invalid_property_init_value::NoInvalidPropertyInitValueOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "noInvalidThis",
+        TypeId::of::<biome_rule_options::no_invalid_this::NoInvalidThisOptions>(),
+    ));
     result.push(("correctness", "noInvalidUseBeforeDeclaration", TypeId::of::<biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions>()));
     result.push((
         "suspicious",
