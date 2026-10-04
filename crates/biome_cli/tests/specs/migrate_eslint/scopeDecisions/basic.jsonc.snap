@@ -7,6 +7,7 @@ expression: basic.jsonc
 ```json
 {
 	"rules": {
+		"@mysticatea/block-scoped-var": "error",
 		"@mysticatea/prefer-for-of": "error",
 		"@stylistic/curly-newline": "error",
 		"@stylistic/function-call-spacing": "error",
@@ -59,15 +60,31 @@ expression: basic.jsonc
 		"astro/no-omitted-end-tags": "error",
 		"astro/semi": "error",
 		"astro/valid-compile": "error",
+		"block-scoped-var": "error",
+		"camelcase": "error",
+		"init-declarations": "error",
 		"jsx-a11y/label-has-for": "error",
 		"jsx-a11y/no-onchange": "error",
 		"markdown/no-space-in-emphasis": "error",
 		"n/no-hide-core-modules": "error",
 		"n/prefer-node-protocol": "error",
 		"no-catch-shadow": "error",
+		"no-delete-var": "error",
+		"no-native-reassign": "error",
+		"no-negated-in-lhs": "error",
+		"no-new-symbol": "error",
+		"no-process-env": "error",
+		"no-return-await": "error",
+		"playwright/consistent-spacing-between-blocks": "error",
+		"playwright/no-focused-test": "error",
+		"playwright/no-identical-title": "error",
+		"prefer-reflect": "error",
+		"qwik/no-async-prevent-default": "error",
 		"react-native/no-inline-styles": "error",
+		"react-prefer-function-component/prefer-function-component": "error",
 		"react/iframe-missing-sandbox": "error",
 		"shadcn/no-inline-styles": "error",
+		"strict": "error",
 		"svelte/button-has-type": "warn",
 		"svelte/first-attribute-linebreak": "error",
 		"svelte/html-closing-bracket-new-line": "error",
@@ -79,7 +96,12 @@ expression: basic.jsonc
 		"svelte/no-at-const-tags": "error",
 		"svelte/no-inline-styles": "error",
 		"svelte/no-spaces-around-equal-signs-in-attribute": "error",
+		"svelte/no-target-blank": "error",
 		"svelte/no-trailing-spaces": "error",
+		"svelte/prefer-const": "error",
+		"svelte/valid-style-parse": "error",
+		"unicorn/comma-spacing": "error",
+		"unicorn/indent": "error",
 		"vitest/padding-around-after-all-blocks": "error",
 		"vitest/padding-around-after-each-blocks": "error",
 		"vitest/padding-around-all": "error",
@@ -88,6 +110,7 @@ expression: basic.jsonc
 		"vitest/padding-around-describe-blocks": "error",
 		"vitest/padding-around-expect-groups": "error",
 		"vitest/padding-around-test-blocks": "error",
+		"vue/camelcase": "error",
 		"vue/component-api-style": "error",
 		"vue/eqeqeq": "error",
 		"vue/html-button-has-type": "error",
@@ -99,7 +122,11 @@ expression: basic.jsonc
 		"vue/object-shorthand": "error",
 		"vue/padding-line-between-blocks": "error",
 		"vue/padding-line-between-tags": "error",
-		"vue/padding-lines-in-component-definition": "error"
+		"vue/padding-lines-in-component-definition": "error",
+		"yml/indent": "error",
+		"yml/no-tab-indent": "error",
+		"yml/no-trailing-spaces": "error",
+		"yml/quotes": "error"
 	}
 }
 
@@ -158,28 +185,41 @@ expression: basic.jsonc
 				"useValidLang": "error"
 			},
 			"correctness": {
+				"noInvalidBuiltinInstantiation": "error",
 				"noPrecisionLoss": "error",
 				"noUnusedVariables": "error"
 			},
 			"nursery": {
+				"noIdenticalTestTitle": "error",
 				"noInlineStyles": "error",
 				"noSvelteLegacyConst": "error",
 				"useControlLabel": "error",
 				"useIframeSandbox": "error",
 				"usePromiseRejectErrors": "error"
 			},
+			"performance": { "noDelete": "error" },
+			"security": { "noBlankTarget": "error" },
 			"style": {
+				"noProcessEnv": "error",
 				"noVueOptionsApi": "error",
 				"useConsistentCurlyBraces": "error",
 				"useConsistentObjectDefinitions": "error",
+				"useConst": "error",
 				"useForOf": "error",
-				"useNodejsImportProtocol": "error"
+				"useNamingConvention": "error",
+				"useNodejsImportProtocol": "error",
+				"useReactFunctionComponents": "error"
 			},
 			"suspicious": {
 				"noConsole": "error",
 				"noDoubleEquals": "error",
+				"noFocusedTests": "error",
+				"noGlobalAssign": "error",
 				"noIrregularWhitespace": "error",
-				"noShadow": "error"
+				"noShadow": "error",
+				"noUnassignedVariables": "error",
+				"noUnsafeNegation": "error",
+				"useStrictMode": "error"
 			}
 		}
 	}
