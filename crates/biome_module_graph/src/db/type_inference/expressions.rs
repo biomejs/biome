@@ -194,7 +194,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let subject = self.resolve(&expression.ty);
                 match &expression.destructure_field {
                     RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(subject, *index)
+                        self.resolve_element_type_at_index(subject, Some(*index))
                     }
                     RawDestructureField::Name(name) => {
                         self.resolve_static_member_expression(subject, name.text())
@@ -209,11 +209,11 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Index(expression) => {
                 let object = self.resolve(&expression.object);
-                self.resolve_element_type_at_index(object, expression.index)
+                self.resolve_element_type_at_index(object, Some(expression.index))
             }
             RawTypeofExpression::OptionalChainIndex(expression) => {
                 let object = self.resolve(&expression.object);
-                self.resolve_element_type_at_index(object, expression.index)
+                self.resolve_element_type_at_index(object, Some(expression.index))
                     .map(|result| self.optional_chain_result(object, result))
             }
             RawTypeofExpression::IterableValueOf(expression) => {
@@ -330,7 +330,7 @@ impl<'db> ResolutionCtx<'db, '_> {
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
                     RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(expression.ty, *index)
+                        self.resolve_element_type_at_index(expression.ty, Some(*index))
                     }
                     RawDestructureField::Name(name) => {
                         self.resolve_static_member_expression(expression.ty, name.text())
@@ -344,10 +344,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
             InferredTypeofExpression::Index(expression) => {
-                self.resolve_element_type_at_index(expression.object, expression.index)
+                self.resolve_element_type_at_index(expression.object, Some(expression.index))
             }
             InferredTypeofExpression::OptionalChainIndex(expression) => self
-                .resolve_element_type_at_index(expression.object, expression.index)
+                .resolve_element_type_at_index(expression.object, Some(expression.index))
                 .map(|result| self.optional_chain_result(expression.object, result)),
             InferredTypeofExpression::IterableValueOf(expression) => {
                 self.resolve_iterable_value_type(expression.ty)
@@ -1572,7 +1572,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                         .text()
                         .parse()
                         .ok()
-                        .and_then(|index| self.resolve_element_type_at_index(object, index));
+                        .and_then(|index| self.resolve_element_type_at_index(object, Some(index)));
                 }
                 InferredLiteral::BigInt(_)
                 | InferredLiteral::Boolean(_)
@@ -1580,6 +1580,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                 | InferredLiteral::RegExp(_)
                 | InferredLiteral::Template(_) => {}
             }
+        }
+        if matches!(member, InferredTypeData::Number) {
+            return self.resolve_element_type_at_index(object, None);
         }
         None
     }
@@ -1633,7 +1636,8 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
                 let mut target = self.resolve_inferred_type(instance_target);
                 target = target.expand_canonical_global(self.db);
-                if target.is_array_class(self.db) {
+                let is_array = target.is_array_class(self.db);
+                if is_array {
                     target = self.resolve_global_name("Array").unwrap_or(target);
                 }
                 if target.is_promise_class(self.db)
@@ -1646,14 +1650,26 @@ impl<'db> ResolutionCtx<'db, '_> {
                     );
                     return Some(self.member_type(ty, false));
                 }
-                let object = InferredTypeData::instance_of(
-                    self.db,
-                    target,
-                    instance
-                        .type_parameters(self.db)
-                        .to_vec()
-                        .into_boxed_slice(),
-                );
+                let type_parameters = instance
+                    .type_parameters(self.db)
+                    .to_vec()
+                    .into_boxed_slice();
+                if is_array && member_name == "entries" {
+                    let readonly_array = self.resolve_global_type_name("ReadonlyArray")?;
+                    let readonly_array = InferredTypeData::instance_of(
+                        self.db,
+                        readonly_array,
+                        type_parameters.clone(),
+                    );
+                    if let Some(member) = self.find_member_type_on_resolved_type(
+                        readonly_array,
+                        member_name,
+                        MemberLookupMode::Instance,
+                    ) {
+                        return Some(member);
+                    }
+                }
+                let object = InferredTypeData::instance_of(self.db, target, type_parameters);
                 self.find_member_type_on_resolved_type(
                     object,
                     member_name,
@@ -2105,6 +2121,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         .map(|id| super::globals::global_type(self.db, id))
     }
 
+    fn resolve_global_type_name(&mut self, name: &str) -> Option<InferredTypeData<'db>> {
+        global_type_id_for_qualifier(
+            &TypeReferenceQualifier::from_path(
+                ScopeId::GLOBAL,
+                Path::from(Text::new_owned(name.into())),
+            )
+            .with_type_only(),
+        )
+        .map(|id| super::globals::global_type(self.db, id))
+    }
+
     fn member_type(
         &mut self,
         ty: InferredTypeData<'db>,
@@ -2195,13 +2222,15 @@ impl<'db> ResolutionCtx<'db, '_> {
         false
     }
 
-    /// Resolves the type held at a fixed index of `subject`.
+    /// Resolves the element type selected by a fixed or unknown numeric index.
     ///
-    /// Each member of a union contributes the type it holds at that index, and
-    /// the contributions are collected into a union. A member that holds
-    /// nothing there, which includes `null` and `undefined`, contributes
-    /// nothing rather than discarding what the other members contributed. In
-    /// this example the result is `string | number`:
+    /// Each member of a union contributes the type it can hold at the selected
+    /// index, and the contributions are collected into a union. An unknown
+    /// index selects every tuple element. An array contributes its element
+    /// type and `undefined`, because an index may be out of range. A member
+    /// that holds nothing there, which includes `null` and `undefined`,
+    /// contributes nothing rather than discarding what the other members
+    /// contributed. In this example the result is `string | number`:
     ///
     /// ```ts
     /// declare const rows: string[] | number[] | null;
@@ -2214,7 +2243,7 @@ impl<'db> ResolutionCtx<'db, '_> {
     fn resolve_element_type_at_index(
         &mut self,
         subject: InferredTypeData<'db>,
-        index: usize,
+        index: Option<usize>,
     ) -> Option<InferredTypeData<'db>> {
         let mut seen = FxHashSet::default();
         let mut pending = Vec::from([subject]);
@@ -2237,12 +2266,23 @@ impl<'db> ResolutionCtx<'db, '_> {
 
             match subject {
                 InferredTypeData::Tuple(tuple) => {
-                    if let Some(element) = tuple.elements(self.db).get(index) {
-                        let element_ty = self.optional_element_type(
-                            element.ty,
-                            element.is_optional || element.is_rest,
-                        );
-                        types.push(element_ty);
+                    let elements = tuple.elements(self.db);
+                    if let Some(index) = index {
+                        if let Some(element) = elements.get(index) {
+                            let element_ty = self.optional_element_type(
+                                element.ty,
+                                element.is_optional || element.is_rest,
+                            );
+                            types.push(element_ty);
+                        }
+                    } else {
+                        for element in elements {
+                            let element_ty = self.optional_element_type(
+                                element.ty,
+                                element.is_optional || element.is_rest,
+                            );
+                            types.push(element_ty);
+                        }
                     }
                 }
                 InferredTypeData::InstanceOf(instance)
@@ -2558,8 +2598,14 @@ impl<'db> ResolutionCtx<'db, '_> {
         let InferredTypeData::InstanceOf(instance) = subject else {
             return None;
         };
-        self.resolve_inferred_type(instance.ty(self.db))
-            .is_array_class(self.db)
+        let instance_type = self
+            .resolve_inferred_type(instance.ty(self.db))
+            .expand_canonical_global(self.db);
+        let array_iterator = self.resolve_global_type_name("ArrayIterator");
+        let is_array_iterator =
+            array_iterator.is_some_and(|array_iterator| array_iterator == instance_type);
+
+        (instance_type.is_array_class(self.db) || is_array_iterator)
             .then(|| instance.type_parameters(self.db).first().copied())
             .flatten()
     }

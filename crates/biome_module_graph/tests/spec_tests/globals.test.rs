@@ -753,6 +753,30 @@ fn generated_computed_iterators_preserve_collection_arguments() {
 }
 
 #[test]
+fn generated_array_entries_infer_array_element_type() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        declare const players: string[];
+        declare const readonlyPlayers: ReadonlyArray<string>;
+        export const entries = players.entries();
+        export const entry = entries.next().value;
+        export const readonlyEntries = readonlyPlayers.entries();
+        function inspect(values: string[]) {
+            for (const [index, value] of values.entries()) {
+                const indexedValue = values[index];
+                value;
+                indexedValue;
+            }
+        }
+        "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    assert_inferred_type_snapshot("generated_array_entries_infer_array_element_type", &db, &fs);
+}
+
+#[test]
 fn generated_intl_namespace_infers_constructor_and_method_results() {
     let fs = MemoryFileSystem::default();
     fs.insert(

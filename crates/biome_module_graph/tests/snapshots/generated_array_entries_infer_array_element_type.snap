@@ -1,0 +1,130 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const players: string[];
+declare const readonlyPlayers: ReadonlyArray<string>;
+export const entries = players.entries();
+export const entry = entries.next().value;
+export const readonlyEntries = readonlyPlayers.entries();
+function inspect(values: string[]) {
+	for (const [index, value] of values.entries()) {
+		const indexedValue = values[index];
+		value;
+		indexedValue;
+	}
+}
+```
+
+## Inferred types
+
+```
+Binding players "players" => instanceof Array<string>
+
+Binding readonlyPlayers "readonlyPlayers" => instanceof ReadonlyArray<string>
+
+Binding entries "entries" => instanceof ArrayIterator<[number,
+string]>
+
+Expression "players" => instanceof Array<string>
+
+Expression "players.entries" => sync Function "entries" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof ArrayIterator<[number,
+  string]>
+}
+
+Expression "players.entries()" => instanceof ArrayIterator<[number,
+string]>
+
+Binding entry "entry" => [number,
+string] | undefined
+
+Expression "entries" => instanceof ArrayIterator<[number,
+string]>
+
+Expression "entries.next" => sync Function "next" {
+  accepts: {
+    params: [
+      ...: [] | [unknown]
+    ]
+    type_args: []
+  }
+  returns: instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><[number,
+  string], undefined>
+}
+
+Expression "entries.next()" => instanceof instanceof instanceof IteratorYieldResult<T> | instanceof IteratorReturnResult<TReturn = any><T, TReturn = any><[number,
+string], undefined>
+
+Expression "entries.next().value" => [number,
+string] | undefined
+
+Binding readonlyEntries "readonlyEntries" => instanceof ArrayIterator<[number,
+string]>
+
+Expression "readonlyPlayers" => instanceof ReadonlyArray<string>
+
+Expression "readonlyPlayers.entries" => sync Function "entries" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof ArrayIterator<[number,
+  string]>
+}
+
+Expression "readonlyPlayers.entries()" => instanceof ArrayIterator<[number,
+string]>
+
+Binding inspect "inspect" => sync Function "inspect" {
+  accepts: {
+    params: [
+      required values: instanceof Array<string>
+    ]
+    type_args: []
+  }
+  returns: void
+}
+
+Binding values "values" => instanceof Array<string>
+
+Binding index "index" => number
+
+Binding value "value" => string
+
+Expression "values" => instanceof Array<string>
+
+Expression "values.entries" => sync Function "entries" {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof ArrayIterator<[number,
+  string]>
+}
+
+Expression "values.entries()" => instanceof ArrayIterator<[number,
+string]>
+
+Binding indexedValue "indexedValue" => string | undefined
+
+Expression "values" => instanceof Array<string>
+
+Expression "values[index]" => string | undefined
+
+Expression "index" => number
+
+Expression "value" => string
+
+Expression "indexedValue" => string | undefined
+```
