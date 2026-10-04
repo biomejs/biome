@@ -5,7 +5,7 @@ pub(crate) fn migrate_stylelint_any_rule(
     rules: &mut biome_configuration::Rules,
     stylelint_name: &str,
     rule_level: biome_configuration::RulePlainConfiguration,
-    options: &migration::MigrationOptions,
+    _options: &migration::MigrationOptions,
     results: &mut stylelint_to_biome::StylelintMigrationResults,
 ) -> bool {
     match stylelint_name {
@@ -162,11 +162,7 @@ pub(crate) fn migrate_stylelint_any_rule(
             rule.set_level(rule.level().max(rule_level));
         }
         "no-duplicate-selectors" => {
-            if !options.include_nursery {
-                results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_duplicate_selectors
@@ -214,11 +210,7 @@ pub(crate) fn migrate_stylelint_any_rule(
             rule.set_level(rule.level().max(rule_level));
         }
         "selector-max-class" => {
-            if !options.include_nursery {
-                results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
                 .no_excessive_selector_classes

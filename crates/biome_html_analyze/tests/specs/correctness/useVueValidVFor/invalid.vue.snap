@@ -1,0 +1,273 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+<div v-for:arg="item in items"></div>
+
+<div v-for.mod="item in items"></div>
+
+<div v-for></div>
+
+<div v-for=""></div>
+
+<div v-for="(, index) in items"></div>
+
+<div v-for="(item, { key }) in items"></div>
+
+<MyItem v-for="item in items"></MyItem>
+
+<div is="MyItem" v-for="item in items"></div>
+
+<div v-for="item in items" :key="foo"></div>
+
+<template v-for="item in items">
+  <MyItem />
+</template>
+
+<template v-for="item in items">
+  <div v-for="child in other" :key="child.id"></div>
+</template>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a v-for binding but instead found '"'.
+  
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
+       │             ^
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
+  
+  i Expected a v-for binding here.
+  
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
+       │             ^
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
+  
+
+```
+
+```
+invalid.vue:11:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a v-for binding but instead found ','.
+  
+     9 │ <div v-for=""></div>
+    10 │ 
+  > 11 │ <div v-for="(, index) in items"></div>
+       │              ^
+    12 │ 
+    13 │ <div v-for="(item, { key }) in items"></div>
+  
+  i Expected a v-for binding here.
+  
+     9 │ <div v-for=""></div>
+    10 │ 
+  > 11 │ <div v-for="(, index) in items"></div>
+       │              ^
+    12 │ 
+    13 │ <div v-for="(item, { key }) in items"></div>
+  
+
+```
+
+```
+invalid.vue:3:11 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-for directive does not accept an argument.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <div v-for:arg="item in items"></div>
+      │           ^^^^
+    4 │ 
+    5 │ <div v-for.mod="item in items"></div>
+  
+  i v-for only accepts the special list-rendering syntax as its value.
+  
+  i Remove the argument and use a value such as v-for="item in items".
+  
+
+```
+
+```
+invalid.vue:5:11 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-for directive does not support modifiers.
+  
+    3 │ <div v-for:arg="item in items"></div>
+    4 │ 
+  > 5 │ <div v-for.mod="item in items"></div>
+      │           ^^^^
+    6 │ 
+    7 │ <div v-for></div>
+  
+  i Modifiers change the meaning of other Vue directives, but v-for has a fixed syntax.
+  
+  i Remove the modifier and keep only the iteration expression.
+  
+
+```
+
+```
+invalid.vue:7:6 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-for directive requires a value.
+  
+    5 │ <div v-for.mod="item in items"></div>
+    6 │ 
+  > 7 │ <div v-for></div>
+      │      ^^^^^
+    8 │ 
+    9 │ <div v-for=""></div>
+  
+  i Without an iteration expression, Vue cannot determine which items to render.
+  
+  i Provide a value such as v-for="item in items".
+  
+
+```
+
+```
+invalid.vue:9:6 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-for directive requires a value.
+  
+     7 │ <div v-for></div>
+     8 │ 
+   > 9 │ <div v-for=""></div>
+       │      ^^^^^^^^
+    10 │ 
+    11 │ <div v-for="(, index) in items"></div>
+  
+  i Without an iteration expression, Vue cannot determine which items to render.
+  
+  i Provide a value such as v-for="item in items".
+  
+
+```
+
+```
+invalid.vue:13:20 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The second and third v-for aliases must be identifiers.
+  
+    11 │ <div v-for="(, index) in items"></div>
+    12 │ 
+  > 13 │ <div v-for="(item, { key }) in items"></div>
+       │                    ^^^^^^^
+    14 │ 
+    15 │ <MyItem v-for="item in items"></MyItem>
+  
+  i Only the main item alias may use destructuring. The optional key and index aliases must be simple names.
+  
+  i Replace this alias with an identifier such as index.
+  
+
+```
+
+```
+invalid.vue:15:1 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Custom components rendered with v-for require a v-bind:key directive.
+  
+    13 │ <div v-for="(item, { key }) in items"></div>
+    14 │ 
+  > 15 │ <MyItem v-for="item in items"></MyItem>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 
+    17 │ <div is="MyItem" v-for="item in items"></div>
+  
+  i Vue relies on keys to keep component instances stable across list updates.
+  
+  i Add a key that uses one of the iteration variables, such as :key="item.id".
+  
+
+```
+
+```
+invalid.vue:17:1 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Custom components rendered with v-for require a v-bind:key directive.
+  
+    15 │ <MyItem v-for="item in items"></MyItem>
+    16 │ 
+  > 17 │ <div is="MyItem" v-for="item in items"></div>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ <div v-for="item in items" :key="foo"></div>
+  
+  i Vue relies on keys to keep component instances stable across list updates.
+  
+  i Add a key that uses one of the iteration variables, such as :key="item.id".
+  
+
+```
+
+```
+invalid.vue:19:28 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind:key directive does not use any variables from the v-for directive.
+  
+    17 │ <div is="MyItem" v-for="item in items"></div>
+    18 │ 
+  > 19 │ <div v-for="item in items" :key="foo"></div>
+       │                            ^^^^^^^^^^
+    20 │ 
+    21 │ <template v-for="item in items">
+  
+  i Keys that are unrelated to the current iteration can cause Vue to reuse the wrong element or component instance.
+  
+  i Reference one of the variables introduced by the v-for directive in the key expression.
+  
+
+```
+
+```
+invalid.vue:22:3 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Custom components rendered with v-for require a v-bind:key directive.
+  
+    21 │ <template v-for="item in items">
+  > 22 │   <MyItem />
+       │   ^^^^^^^^^^
+    23 │ </template>
+    24 │ 
+  
+  i Vue relies on keys to keep component instances stable across list updates.
+  
+  i Add a key that uses one of the iteration variables, such as :key="item.id".
+  
+
+```
+
+```
+invalid.vue:26:31 lint/correctness/useVueValidVFor ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This v-bind:key directive does not use any variables from the v-for directive.
+  
+    25 │ <template v-for="item in items">
+  > 26 │   <div v-for="child in other" :key="child.id"></div>
+       │                               ^^^^^^^^^^^^^^^
+    27 │ </template>
+    28 │ </template>
+  
+  i Keys that are unrelated to the current iteration can cause Vue to reuse the wrong element or component instance.
+  
+  i Reference one of the variables introduced by the v-for directive in the key expression.
+  
+
+```

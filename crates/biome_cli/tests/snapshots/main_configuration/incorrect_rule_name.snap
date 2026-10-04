@@ -57,6 +57,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - preset
   - noBeforeInteractiveScriptOutsideDocument
   - noChildrenProp
+  - noComponentHookFactories
   - noConstAssign
   - noConstantCondition
   - noConstantMathMinMaxClamp
@@ -64,6 +65,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noDuplicateArgumentNames
   - noDuplicateAttributes
   - noDuplicateEnumValueNames
+  - noDuplicateFieldDefinitionNames
   - noDuplicateInputFieldNames
   - noDuplicateVariableNames
   - noEmptyCharacterClassInRegex
@@ -77,15 +79,18 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noInvalidGridAreas
   - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
+  - noJsxNamespace
   - noMissingVarFunction
   - noNestedComponentDefinitions
   - noNextAsyncClientComponent
   - noNodejsModules
   - noNonoctalDecimalEscape
+  - noPlaywrightMissingAwait
   - noPrecisionLoss
   - noPrivateImports
   - noProcessGlobal
   - noQwikUseVisibleTask
+  - noReactNativeRawText
   - noReactPropAssignments
   - noRenderReturnValue
   - noRestrictedElements
@@ -119,10 +124,13 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noVoidTypeReturn
   - noVueDataObjectDeclaration
   - noVueDuplicateKeys
+  - noVueImportCompilerMacros
+  - noVueRefAsOperand
   - noVueReservedKeys
   - noVueReservedProps
   - noVueSetupPropsReactivityLoss
   - noVueVIfWithVFor
+  - noVueVOnNumberValues
   - useExhaustiveDependencies
   - useGraphqlNamedOperations
   - useHookAtTopLevel
@@ -134,9 +142,13 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useJsxKeyInIterable
   - useLoneAnonymousOperation
   - useParseIntRadix
+  - usePlaywrightValidDescribeCallback
   - useQwikClasslist
+  - useQwikLoaderLocation
   - useQwikMethodUsage
   - useQwikValidLexicalScope
+  - useReactAsyncServerFunction
+  - useReactNativePlatformComponents
   - useSingleJsDocAsterisk
   - useUniqueElementIds
   - useValidForDirection
@@ -147,6 +159,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useVueValidVCloak
   - useVueValidVElse
   - useVueValidVElseIf
+  - useVueValidVFor
   - useVueValidVHtml
   - useVueValidVIf
   - useVueValidVOn
@@ -188,6 +201,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noIncrementDecrement
   - noInferrableTypes
+  - noInlineStyles
   - noJsxLiterals
   - noMagicNumbers
   - noMultiAssign
@@ -198,7 +212,11 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noPlaywrightElementHandle
+  - noPlaywrightEval
+  - noPlaywrightWaitForSelector
   - noProcessEnv
+  - noReactNativeLiteralColors
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
@@ -206,6 +224,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noShoutyConstants
   - noSubstr
   - noTernary
+  - noTopLevelLiterals
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
@@ -227,12 +246,14 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentMemberAccessibility
   - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
+  - useConsistentTestIt
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
   - useDestructuring
+  - useDomQuerySelector
   - useEnumInitializers
   - useErrorCause
   - useExplicitLengthCheck
@@ -246,9 +267,11 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useImportsFirst
   - useInputName
   - useLiteralEnumMembers
   - useLoneExecutableDefinition
+  - useNamedCaptureGroup
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -257,6 +280,8 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useObjectSpread
   - useReactFunctionComponents
   - useReadonlyClassProperties
+  - useReduceTypeParameter
+  - useScopedStyles
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType
@@ -264,15 +289,22 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
+  - useTestHooksInOrder
+  - useTestHooksOnTop
+  - useThisInClassMethods
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
+  - useUnicodeRegex
   - useUnifiedTypeSignatures
+  - useVarsOnTop
+  - useVueConsistentDefinePropsDeclaration
   - useVueConsistentVBindStyle
   - useVueConsistentVOnStyle
   - useVueDefineMacrosOrder
   - useVueHyphenatedAttributes
   - useVueMultiWordComponentNames
+  - useVueNextTickPromise
   
 
 ```

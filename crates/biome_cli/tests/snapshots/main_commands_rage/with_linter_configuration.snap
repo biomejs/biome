@@ -113,6 +113,7 @@ Linter:
     complexity/useFlatMap
     complexity/useIndexOf
     complexity/useLiteralKeys
+    complexity/useMathMinMax
     complexity/useNumericLiterals
     complexity/useOptionalChain
     complexity/useRegexLiterals

@@ -75,6 +75,7 @@ Linter:
     correctness/useImageSize
     correctness/useJsxKeyInIterable
     correctness/useQwikClasslist
+    correctness/useQwikLoaderLocation
     correctness/useQwikMethodUsage
     correctness/useQwikValidLexicalScope
     suspicious/noReactSpecificProps

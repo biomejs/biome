@@ -1,0 +1,28 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<iframe></iframe>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:1 lint/security/useIframeSandbox ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Iframe doesn't have the sandbox attribute.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <iframe></iframe>
+      │ ^^^^^^^^
+    3 │ 
+  
+  i The sandbox attribute enables an extra set of restrictions for the content in the iframe, protecting against malicious scripts and other security threats.
+  
+  i Provide a sandbox attribute when using iframe elements.
+  
+
+```

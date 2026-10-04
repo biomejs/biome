@@ -1,3 +1,4 @@
+use crate::diagnostic_categories::insert_category_line;
 use biome_string_case::Case;
 use bpaf::Bpaf;
 use std::str::FromStr;
@@ -792,35 +793,25 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
 
     if !categories.contains(&rule_name_camel) {
         let kebab_case_rule = Case::Kebab.convert(&rule_name_camel);
-        // We sort rules to reduce conflicts between contributions made in parallel.
-        let rule_line = match category {
-            Category::Lint => format!(
-                r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+        let (category_name, rule_line) = match category {
+            Category::Lint => (
+                "lint",
+                format!(
+                    r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+                ),
             ),
-            Category::Assist => format!(
-                r#"    "assist/source/{rule_name_camel}": "https://biomejs.dev/assist/actions/{kebab_case_rule}","#
+            Category::Assist => (
+                "assist",
+                format!(
+                    r#"    "assist/source/{rule_name_camel}": "https://biomejs.dev/assist/actions/{kebab_case_rule}","#
+                ),
             ),
-            Category::Syntax => format!(r#"    "syntax/nursery/{rule_name_camel}","#),
+            Category::Syntax => (
+                "syntax",
+                format!(r#"    "syntax/nursery/{rule_name_camel}","#),
+            ),
         };
-        let lint_start = match category {
-            Category::Lint => "define_categories! {\n",
-            Category::Assist => "    // start assist actions\n",
-            Category::Syntax => "    // start syntax rules\n",
-        };
-        let lint_end = match category {
-            Category::Lint => "\n    // end lint rules\n",
-            Category::Assist => "\n    // end assist actions\n",
-            Category::Syntax => "\n  ;  // end syntax rules\n",
-        };
-        debug_assert!(categories.contains(lint_start), "{}", lint_start);
-        debug_assert!(categories.contains(lint_end), "{}", lint_end);
-        let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
-        let lint_end_index = categories.find(lint_end).unwrap();
-        let lint_rule_text = &categories[lint_start_index..lint_end_index];
-        let mut lint_rules: Vec<_> = lint_rule_text.lines().chain(Some(&rule_line[..])).collect();
-        lint_rules.sort_unstable();
-        let new_lint_rule_text = lint_rules.join("\n");
-        categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
+        insert_category_line(&mut categories, category_name, &rule_line).unwrap();
         std::fs::write(categories_path, categories).unwrap();
     }
 

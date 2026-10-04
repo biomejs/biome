@@ -50,7 +50,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
        5 │ + → → → "preset":·"none",
-       6 │ + → → → "nursery":·{
+       6 │ + → → → "style":·{
        7 │ + → → → → "useThisInClassMethods":·{
        8 │ + → → → → → "level":·"error",
        9 │ + → → → → → "options":·{
@@ -65,7 +65,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
       18 │ + → "overrides":·[
       19 │ + → → {
       20 │ + → → → "includes":·["severity-only.js"],
-      21 │ + → → → "linter":·{·"rules":·{·"nursery":·{·"useThisInClassMethods":·"warn"·}·}·}
+      21 │ + → → → "linter":·{·"rules":·{·"style":·{·"useThisInClassMethods":·"warn"·}·}·}
       22 │ + → → }
       23 │ + → ]
       24 │ + }

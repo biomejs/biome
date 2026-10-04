@@ -130,6 +130,16 @@ fn generate_single_mapping(
 pub(crate) fn generate_migrate_stylelint(mode: Mode) -> Result<()> {
     let mut visitor = StylelintLintRulesVisitor::default();
     biome_css_analyze::visit_registry(&mut visitor);
+    let uses_options = visitor
+        .0
+        .values()
+        .flatten()
+        .any(|mapping| mapping.source_kind.is_inspired() || mapping.group_name == "nursery");
+    let options_ident = if uses_options {
+        format_ident!("options")
+    } else {
+        format_ident!("_options")
+    };
     let mut lines = Vec::with_capacity(visitor.0.len());
     for (stylelint_name, mapped_rules) in visitor.0 {
         if mapped_rules.is_empty() {
@@ -148,7 +158,7 @@ pub(crate) fn generate_migrate_stylelint(mode: Mode) -> Result<()> {
             rules: &mut biome_configuration::Rules,
             stylelint_name: &str,
             rule_level: biome_configuration::RulePlainConfiguration,
-            options: &migration::MigrationOptions,
+            #options_ident: &migration::MigrationOptions,
             results: &mut stylelint_to_biome::StylelintMigrationResults,
         ) -> bool {
             match stylelint_name {
