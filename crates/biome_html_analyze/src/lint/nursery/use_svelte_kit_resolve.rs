@@ -22,8 +22,8 @@ declare_lint_rule! {
     /// sub-path, and lets typos in routes go unnoticed.
     ///
     /// Links are accepted when their `href` is an absolute URL, such as `https://svelte.dev`
-    /// or `mailto:hello@example.com`, a fragment such as `#top`, or when the `<a>` element has
-    /// `rel="external"`.
+    /// or `mailto:hello@example.com`, a protocol-relative URL such as `//cdn.example.com`, a
+    /// fragment such as `#top`, or when the `<a>` element has `rel="external"`.
     ///
     /// This rule only checks `href` values it can read statically. Expressions such as
     /// `href={url}` aren't checked.
@@ -196,9 +196,9 @@ fn is_internal_link_expression(expression: &HtmlTextExpression) -> bool {
     }
 }
 
-/// Returns `true` if `href` is neither a fragment nor an absolute URL.
+/// Returns `true` if `href` is neither a fragment, a protocol-relative URL, nor an absolute URL.
 fn is_internal_link(href: &str) -> bool {
-    !href.starts_with('#') && !has_url_scheme(href)
+    !href.starts_with('#') && !href.starts_with("//") && !has_url_scheme(href)
 }
 
 /// Returns `true` if `href` starts with a URL scheme, such as `https:` or `mailto:`.

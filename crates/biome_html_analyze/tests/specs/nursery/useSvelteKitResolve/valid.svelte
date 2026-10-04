@@ -8,6 +8,8 @@
 <a href="https://svelte.dev">Click me!</a>
 <a href="mailto:hello@example.com">Click me!</a>
 <a href="svn+ssh://example.com">Click me!</a>
+<a href="//cdn.example.com/file.pdf">Click me!</a>
+<a href={"//cdn.example.com/file.pdf"}>Click me!</a>
 <a href={"https://svelte.dev"}>Click me!</a>
 <a href="https://svelte.dev/{path}">Click me!</a>
 <a href="#top">Click me!</a>
