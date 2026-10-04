@@ -989,6 +989,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_process_env::NoProcessEnvOptions>(),
     ));
     result.push((
+        "nursery",
+        "noProcessExit",
+        TypeId::of::<biome_rule_options::no_process_exit::NoProcessExitOptions>(),
+    ));
+    result.push((
         "correctness",
         "noProcessGlobal",
         TypeId::of::<biome_rule_options::no_process_global::NoProcessGlobalOptions>(),
