@@ -868,6 +868,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_nested_ternary::NoNestedTernaryOptions>(),
     ));
     result.push((
+        "nursery",
+        "noNewRequire",
+        TypeId::of::<biome_rule_options::no_new_require::NoNewRequireOptions>(),
+    ));
+    result.push((
         "correctness",
         "noNextAsyncClientComponent",
         TypeId::of::<

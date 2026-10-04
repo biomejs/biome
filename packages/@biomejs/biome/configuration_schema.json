@@ -4986,6 +4986,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNewRequireConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNewRequireOptions" }
+			]
+		},
+		"NoNewRequireOptions": { "type": "object", "additionalProperties": false },
 		"NoNextAsyncClientComponentConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7244,6 +7251,13 @@
 					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNewRequire": {
+					"description": "Disallow calling require with the new operator.\nSee https://biomejs.dev/linter/rules/no-new-require",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNewRequireConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10469,6 +10483,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNestedTernaryOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNewRequireOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNewRequireOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
