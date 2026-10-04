@@ -2301,6 +2301,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useNamedFunction",
+        TypeId::of::<biome_rule_options::use_named_function::UseNamedFunctionOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useNamedLayer",
         TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
     ));

@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+Foo.prototype.bar = () => {};
+({ foo() { return 1; } });
+({ get bar() { return 1; }, set bar(value) {} });
+class A { constructor(){} foo(){} get bar(){} set baz(value){} static qux(){} }
+function foo() {}
+var a = function foo() {};
+var b = function bar() { bar(); };
+var c = async function baz() {};
+var d = function* qux() {};
+$("#foo").click(function handler() {});
+(function iife() {}());
+var arrow = async () => {};
+
+```

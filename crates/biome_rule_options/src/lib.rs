@@ -485,6 +485,7 @@ pub mod use_max_params;
 pub mod use_media_caption;
 pub mod use_modern_math_apis;
 pub mod use_named_capture_group;
+pub mod use_named_function;
 pub mod use_named_layer;
 pub mod use_namespace_keyword;
 pub mod use_naming_convention;
