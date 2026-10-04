@@ -28,7 +28,7 @@ Project-wide standards — no emojis, the evidence rule, dev-dependency rules, t
 
 ## Adding a skill
 
-1. Create `.claude/skills/<name>/SKILL.md` with `name` and `description` frontmatter.
+1. Create `.agents/skills/<name>/SKILL.md` with `name` and `description` frontmatter.
 2. Write a specific description that states when to use the skill, avoids accidental trigger overlap, and names any intentional co-loading.
 3. Put only trigger conditions and exclusions in the description; leave workflow details in the body.
 4. Keep the body focused and under 500 lines. Prefer a short workflow that links exact canonical sections over copying them.
