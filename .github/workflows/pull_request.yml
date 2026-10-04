@@ -7,17 +7,17 @@ on:
       - main
       - next
     paths: # Only run when changes are made to rust code or root Cargo
-      - "crates/**"
-      - "fuzz/**"
-      - "xtask/**"
-      - "Cargo.toml"
-      - "Cargo.lock"
-      - "rust-toolchain.toml"
-      - "rustfmt.toml"
-      - "deny.toml"
-      - "justfile"
-      - "scripts/update-crates-versions.ts"
-      - ".github/workflows/**"
+      - 'crates/**'
+      - 'fuzz/**'
+      - 'xtask/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'rust-toolchain.toml'
+      - 'rustfmt.toml'
+      - 'deny.toml'
+      - 'justfile'
+      - 'scripts/update-crates-versions.ts'
+      - '.github/workflows/**'
 
 # Cancel jobs when the PR is updated
 concurrency:
