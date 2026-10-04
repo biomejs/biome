@@ -4,8 +4,8 @@ expression: invalid-setup-destructured.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <script>
-/* should generate diagnostics */
 export default {
   setup(props, { emit }) {
     emit("click");
@@ -19,7 +19,7 @@ export default {
 ```
 invalid-setup-destructured.vue:5:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
     3 │ export default {
     4 │   setup(props, { emit }) {
@@ -28,9 +28,9 @@ invalid-setup-destructured.vue:5:10 lint/nursery/noVueShadowNativeEvents ━━�
     6 │   },
     7 │ };
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

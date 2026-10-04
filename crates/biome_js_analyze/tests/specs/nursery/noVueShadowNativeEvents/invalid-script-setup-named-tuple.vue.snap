@@ -4,9 +4,9 @@ expression: invalid-script-setup-named-tuple.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <script setup lang="ts">
-/* should generate diagnostics */
-defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
+defineEmits<{ click: []; "focus": [value: string]; keyup(): void }>();
 </script>
 
 ```
@@ -15,18 +15,18 @@ defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
 ```
 invalid-script-setup-named-tuple.vue:3:15 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
-    1 │ <script setup lang="ts">
-    2 │ /* should generate diagnostics */
-  > 3 │ defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineEmits<{ click: []; "focus": [value: string]; keyup(): void }>();
       │               ^^^^^
     4 │ </script>
     5 │ 
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -36,18 +36,18 @@ invalid-script-setup-named-tuple.vue:3:15 lint/nursery/noVueShadowNativeEvents �
 ```
 invalid-script-setup-named-tuple.vue:3:26 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native focus event.
+  ! This component event has the same name as the browser event focus.
   
-    1 │ <script setup lang="ts">
-    2 │ /* should generate diagnostics */
-  > 3 │ defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineEmits<{ click: []; "focus": [value: string]; keyup(): void }>();
       │                          ^^^^^^^
     4 │ </script>
     5 │ 
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native focus event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -55,20 +55,20 @@ invalid-script-setup-named-tuple.vue:3:26 lint/nursery/noVueShadowNativeEvents �
 ```
 
 ```
-invalid-script-setup-named-tuple.vue:3:62 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
+invalid-script-setup-named-tuple.vue:3:52 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native keyup event.
+  ! This component event has the same name as the browser event keyup.
   
-    1 │ <script setup lang="ts">
-    2 │ /* should generate diagnostics */
-  > 3 │ defineEmits<{ click: []; "focus": [value: string]; save: []; keyup(): void }>();
-      │                                                              ^^^^^
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts">
+  > 3 │ defineEmits<{ click: []; "focus": [value: string]; keyup(): void }>();
+      │                                                    ^^^^^
     4 │ </script>
     5 │ 
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keyup event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

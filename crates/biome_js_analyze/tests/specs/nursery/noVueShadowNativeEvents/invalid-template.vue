@@ -4,7 +4,3 @@
   <input @input="$emit(`input`, $event)" />
   <div @keydown="() => $emit('keydown')"></div>
 </template>
-
-<script setup>
-defineEmits(["save"]);
-</script>

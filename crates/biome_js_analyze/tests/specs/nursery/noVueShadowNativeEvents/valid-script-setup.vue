@@ -1,5 +1,5 @@
+<!-- should not generate diagnostics -->
 <script setup lang="ts">
-/* should not generate diagnostics */
 import type { ImportedEmits } from "./types";
 
 const emit = defineEmits<{ save: []; "update:modelValue": [value: string] }>();

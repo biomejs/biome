@@ -1,5 +1,5 @@
+<!-- should not generate diagnostics -->
 <script>
-/* should not generate diagnostics */
 function outside() {
   this.$emit("click");
 }

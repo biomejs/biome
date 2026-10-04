@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script setup lang="ts">
-/* should generate diagnostics */
 type Emits = { click: [] };
 interface OtherEmits {
   (e: "keydown"): void;

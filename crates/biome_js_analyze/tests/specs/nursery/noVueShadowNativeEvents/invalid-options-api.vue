@@ -1,5 +1,5 @@
+<!-- should generate diagnostics -->
 <script>
-/* should generate diagnostics */
 export default {
   emits: ["click", "Keydown", `input`],
   methods: {

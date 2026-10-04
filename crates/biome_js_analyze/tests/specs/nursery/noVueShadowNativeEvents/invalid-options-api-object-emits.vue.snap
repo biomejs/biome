@@ -4,8 +4,8 @@ expression: invalid-options-api-object-emits.vue
 ---
 # Input
 ```vue
+<!-- should generate diagnostics -->
 <script>
-/* should generate diagnostics */
 const scroll = null;
 export default {
   "emits": {
@@ -25,7 +25,7 @@ export default {
 ```
 invalid-options-api-object-emits.vue:6:5 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
     4 │ export default {
     5 │   "emits": {
@@ -34,9 +34,9 @@ invalid-options-api-object-emits.vue:6:5 lint/nursery/noVueShadowNativeEvents �
     7 │     keydown(key) {
     8 │       return typeof key === "string";
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -46,7 +46,7 @@ invalid-options-api-object-emits.vue:6:5 lint/nursery/noVueShadowNativeEvents �
 ```
 invalid-options-api-object-emits.vue:7:5 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native keydown event.
+  ! This component event has the same name as the browser event keydown.
   
     5 │   "emits": {
     6 │     click: null,
@@ -55,9 +55,9 @@ invalid-options-api-object-emits.vue:7:5 lint/nursery/noVueShadowNativeEvents �
     8 │       return typeof key === "string";
     9 │     },
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -67,7 +67,7 @@ invalid-options-api-object-emits.vue:7:5 lint/nursery/noVueShadowNativeEvents �
 ```
 invalid-options-api-object-emits.vue:10:5 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native mouseup event.
+  ! This component event has the same name as the browser event mouseup.
   
      8 │       return typeof key === "string";
      9 │     },
@@ -76,9 +76,9 @@ invalid-options-api-object-emits.vue:10:5 lint/nursery/noVueShadowNativeEvents �
     11 │     scroll,
     12 │   },
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native mouseup event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -88,7 +88,7 @@ invalid-options-api-object-emits.vue:10:5 lint/nursery/noVueShadowNativeEvents �
 ```
 invalid-options-api-object-emits.vue:11:5 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native scroll event.
+  ! This component event has the same name as the browser event scroll.
   
      9 │     },
     10 │     "mouseup": (event) => true,
@@ -97,9 +97,9 @@ invalid-options-api-object-emits.vue:11:5 lint/nursery/noVueShadowNativeEvents �
     12 │   },
     13 │ };
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native scroll event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

@@ -23,25 +23,26 @@ use biome_rule_options::no_vue_shadow_native_events::NoVueShadowNativeEventsOpti
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Disallow Vue component events that use the name of a native DOM event.
+    /// Disallow Vue component events named after built-in browser events.
     ///
-    /// A component event named like a native DOM event, such as `click` or `keydown`, is easy to
-    /// mistake for the native event, but it behaves differently:
+    /// A component can send its own events to its parent with `emit`. When such an event has the
+    /// same name as a browser event, like `click` or `keydown`, it looks like the browser event but
+    /// works differently:
     ///
-    /// - Its payload is whatever the component passes to `emit`, not an `Event` object.
-    /// - Component events don't bubble, while most native events do.
-    /// - Event modifiers such as `.stop` or `.prevent` only work on native events, or when the
-    ///   component re-emits the original `Event` as the payload.
-    /// - A re-emitted native event keeps its original `event.target`, which doesn't match the
-    ///   element the listener is attached to.
+    /// - The listener receives whatever value the component passes to `emit`, instead of the
+    ///   browser's `Event` object.
+    /// - The event only reaches the parent that listens to the component. Most browser events also
+    ///   reach every element that contains the element where they happened.
+    /// - Modifiers that act on the browser's `Event` object, such as `@click.stop` and
+    ///   `@click.prevent`, do nothing unless the component passes that object along.
     ///
-    /// Name component events after what happened in the component, for example `select` for a
-    /// list item, or `update:modelValue` for an input. This matters most for component libraries,
-    /// whose events are consumed by code that can't see how they are emitted.
+    /// Give the event a name that describes what happened in the component, such as `save` or
+    /// `update:modelValue`.
     ///
-    /// This rule checks event names in the `emits` option, in `defineEmits()`, and in calls to
-    /// `this.$emit()`, the `emit` function of the `setup()` context, the function returned by
-    /// `defineEmits()`, and `$emit()` in templates. Event names are compared case-insensitively.
+    /// This rule checks the event names listed in the `emits` option and in `defineEmits()`. It
+    /// also checks the event names passed to `this.$emit()`, to the `emit` function that `setup()`
+    /// receives, to the function returned by `defineEmits()`, and to `$emit()` in templates.
+    /// Uppercase and lowercase letters are treated the same, so `Click` is reported too.
     ///
     /// ## Examples
     ///
@@ -158,14 +159,14 @@ impl Rule for NoVueShadowNativeEvents {
                 rule_category!(),
                 state.range,
                 markup! {
-                    "This component event shadows the native "<Emphasis>{native_event}</Emphasis>" event."
+                    "This component event has the same name as the browser event "<Emphasis>{native_event}</Emphasis>"."
                 },
             )
             .note(markup! {
-                "Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native "<Emphasis>{native_event}</Emphasis>" event can misbehave."
+                "It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to "<Emphasis>"emit"</Emphasis>" instead of an "<Emphasis>"Event"</Emphasis>" object, the event doesn't reach the elements around the component, and modifiers such as "<Emphasis>".stop"</Emphasis>" don't work on it."
             })
             .note(markup! {
-                "Rename the event after what happened in the component."
+                "Rename the event to describe what happened in the component."
             }),
         )
     }

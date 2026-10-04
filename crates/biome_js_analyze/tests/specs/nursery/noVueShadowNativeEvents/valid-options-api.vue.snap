@@ -4,8 +4,8 @@ expression: valid-options-api.vue
 ---
 # Input
 ```vue
+<!-- should not generate diagnostics -->
 <script>
-/* should not generate diagnostics */
 function outside() {
   this.$emit("click");
 }

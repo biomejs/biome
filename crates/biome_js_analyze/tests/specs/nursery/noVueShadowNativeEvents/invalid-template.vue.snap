@@ -11,17 +11,13 @@ expression: invalid-template.vue
   <div @keydown="() => $emit('keydown')"></div>
 </template>
 
-<script setup>
-defineEmits(["save"]);
-</script>
-
 ```
 
 # Diagnostics
 ```
 invalid-template.vue:3:25 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native click event.
+  ! This component event has the same name as the browser event click.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <template>
@@ -30,9 +26,9 @@ invalid-template.vue:3:25 lint/nursery/noVueShadowNativeEvents ━━━━━�
     4 │   <input @input="$emit(`input`, $event)" />
     5 │   <div @keydown="() => $emit('keydown')"></div>
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -42,7 +38,7 @@ invalid-template.vue:3:25 lint/nursery/noVueShadowNativeEvents ━━━━━�
 ```
 invalid-template.vue:4:24 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native input event.
+  ! This component event has the same name as the browser event input.
   
     2 │ <template>
     3 │   <button @click="$emit('click')">Click</button>
@@ -51,9 +47,9 @@ invalid-template.vue:4:24 lint/nursery/noVueShadowNativeEvents ━━━━━�
     5 │   <div @keydown="() => $emit('keydown')"></div>
     6 │ </template>
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native input event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -63,7 +59,7 @@ invalid-template.vue:4:24 lint/nursery/noVueShadowNativeEvents ━━━━━�
 ```
 invalid-template.vue:5:30 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This component event shadows the native keydown event.
+  ! This component event has the same name as the browser event keydown.
   
     3 │   <button @click="$emit('click')">Click</button>
     4 │   <input @input="$emit(`input`, $event)" />
@@ -72,9 +68,9 @@ invalid-template.vue:5:30 lint/nursery/noVueShadowNativeEvents ━━━━━�
     6 │ </template>
     7 │ 
   
-  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
   
-  i Rename the event after what happened in the component.
+  i Rename the event to describe what happened in the component.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
