@@ -6998,7 +6998,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyScssControlBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7243,7 +7243,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyScssControlBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7429,7 +7429,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyScssControlBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -9227,7 +9227,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyScssControlBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

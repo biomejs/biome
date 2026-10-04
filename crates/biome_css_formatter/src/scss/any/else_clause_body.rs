@@ -9,6 +9,7 @@ impl FormatRule<AnyScssElseClauseBody> for FormatAnyScssElseClauseBody {
     fn fmt(&self, node: &AnyScssElseClauseBody, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyScssElseClauseBody::CssDeclarationOrRuleBlock(node) => node.format().fmt(f),
+            AnyScssElseClauseBody::CssKeyframesBlock(node) => node.format().fmt(f),
             AnyScssElseClauseBody::ScssIfAtRule(node) => node.format().fmt(f),
         }
     }

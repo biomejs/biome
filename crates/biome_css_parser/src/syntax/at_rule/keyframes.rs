@@ -5,7 +5,8 @@ use crate::syntax::at_rule::parse_error::{
     expected_percentage_after_timeline_range_name,
 };
 use crate::syntax::block::{
-    ParseBlockBody, is_at_declaration_or_rule_item, parse_declaration_or_statement_block,
+    ParseBlockBody, expected_block, is_at_declaration_or_rule_item,
+    parse_declaration_or_statement_block,
 };
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
@@ -14,8 +15,12 @@ use crate::syntax::parse_error::{
     expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
 };
 use crate::syntax::scss::{
-    is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_variable_declaration,
-    parse_scss_keyframes_name, parse_scss_keyframes_selector, parse_scss_variable_declaration,
+    ScssBlockParser, is_at_scss_keyframes_name, is_at_scss_keyframes_selector,
+    is_at_scss_variable_declaration, parse_scss_content_at_rule,
+    parse_scss_each_at_rule_with_block, parse_scss_for_at_rule_with_block,
+    parse_scss_if_at_rule_with_block, parse_scss_include_at_rule, parse_scss_keyframes_name,
+    parse_scss_keyframes_selector, parse_scss_variable_declaration,
+    parse_scss_while_at_rule_with_block,
 };
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
@@ -205,6 +210,23 @@ fn parse_keyframes_name(p: &mut CssParser) -> ParsedSyntax {
 
 struct KeyframesBlock;
 
+#[inline]
+fn parse_keyframes_block(p: &mut CssParser) -> CompletedMarker {
+    KeyframesBlock.parse_block_body(p)
+}
+
+#[inline]
+fn parse_keyframes_control_block(p: &mut CssParser) -> CompletedMarker {
+    if !p.at(T!['{']) {
+        let m = p.start();
+        p.error(expected_block(p, p.cur_range()));
+        p.eat(T![;]);
+        m.complete(p, CSS_BOGUS_BLOCK)
+    } else {
+        parse_keyframes_block(p)
+    }
+}
+
 impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
 
@@ -255,16 +277,65 @@ impl ParseNodeList for KeyframesItemList {
 
 #[inline]
 fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
-    is_at_scss_variable_declaration(p) || is_at_keyframes_item_selector(p)
+    is_at_scss_variable_declaration(p)
+        || is_at_scss_keyframes_statement(p)
+        || is_at_keyframes_item_selector(p)
 }
 
 #[inline]
 fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     if is_at_scss_variable_declaration(p) {
         parse_scss_keyframes_variable_declaration(p)
+    } else if is_at_scss_keyframes_statement(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            parse_scss_keyframes_statement,
+            |p, marker| scss_only_syntax_error(p, "SCSS statements in keyframes", marker.range(p)),
+            Some(CSS_BOGUS_KEYFRAMES_ITEM),
+        )
     } else {
         parse_keyframes_item(p)
     }
+}
+
+const SCSS_KEYFRAMES_STATEMENT_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![include],
+    T![content],
+    T![if],
+    T![for],
+    T![each],
+    T![while]
+);
+const SCSS_KEYFRAMES_CONTROL_HEADER_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
+
+#[inline]
+fn is_at_scss_keyframes_statement(p: &mut CssParser) -> bool {
+    p.at(T![@]) && p.nth_at_ts(1, SCSS_KEYFRAMES_STATEMENT_SET)
+}
+
+#[inline]
+fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_keyframes_statement(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+    p.bump(T![@]);
+    let parse_block = ScssBlockParser::new(parse_keyframes_control_block)
+        .with_additional_header_end_ts(SCSS_KEYFRAMES_CONTROL_HEADER_END_SET);
+
+    match p.cur() {
+        T![include] => parse_scss_include_at_rule(p),
+        T![content] => parse_scss_content_at_rule(p),
+        T![if] => parse_scss_if_at_rule_with_block(p, parse_block),
+        T![for] => parse_scss_for_at_rule_with_block(p, parse_block),
+        T![each] => parse_scss_each_at_rule_with_block(p, parse_block),
+        T![while] => parse_scss_while_at_rule_with_block(p, parse_block),
+        _ => unreachable!(),
+    }
+    .ok();
+
+    Present(m.complete(p, CSS_AT_RULE))
 }
 
 #[inline]

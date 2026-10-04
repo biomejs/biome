@@ -1448,6 +1448,7 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| CssAtRule
 	| ScssKeyframesVariableDeclaration
 	| CssBogusKeyframesItem
 
@@ -2984,7 +2985,11 @@ TwSlotAtRule =
 ScssEachAtRule =
 	'each'
 	header: ScssEachHeader
-	block: CssDeclarationOrRuleBlock
+	block: AnyScssControlBlock
+
+AnyScssControlBlock =
+	CssDeclarationOrRuleBlock
+	| CssKeyframesBlock
 
 // @each $item in $list { color: $item; }
 //       ^^^^^^^^^^^^^^
@@ -3010,7 +3015,7 @@ ScssForAtRule =
 	lower_bound: ScssExpression
 	operator: ('to' | 'through')
 	upper_bound: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyScssControlBlock
 
 // @mixin button($radius: 4px, $args...) { border-radius: $radius; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3305,7 +3310,7 @@ AnyScssInterpolatedValuePart =
 ScssIfAtRule =
 	'if'
 	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyScssControlBlock
 	else_clause: ScssElseClause?
 
 // @else if $theme == light { color: black; }
@@ -3320,13 +3325,14 @@ ScssElseClause =
 AnyScssElseClauseBody =
 	ScssIfAtRule
 	| CssDeclarationOrRuleBlock
+	| CssKeyframesBlock
 
 // @while $i > 0 { $i: $i - 1; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssWhileAtRule =
 	'while'
 	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyScssControlBlock
 
 // @content;
 // ^^^^^^^^^
