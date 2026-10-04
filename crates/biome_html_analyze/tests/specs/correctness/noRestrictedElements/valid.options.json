@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "noRestrictedElements": {
+          "level": "on",
+          "options": {
+            "elements": {
+              "marquee": "Use CSS animations instead.",
+              "button": "Use the Button component instead.",
+              "foreignObject": "Avoid embedding HTML inside SVG.",
+              "my-widget": "Use the new widget instead.",
+              "RouterLink": "Use NuxtLink instead.",
+              "Ui.Dialog": "Use the Modal component instead."
+            }
+          }
+        }
+      }
+    }
+  }
+}

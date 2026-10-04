@@ -1892,6 +1892,7 @@ dependencies = [
  "biome_unicode_table",
  "camino",
  "enumflags2",
+ "indexmap",
  "regex",
  "rustc-hash 2.1.3",
  "schemars",
