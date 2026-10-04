@@ -1719,6 +1719,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noVueVHtml",
+        TypeId::of::<biome_rule_options::no_vue_v_html::NoVueVHtmlOptions>(),
+    ));
+    result.push((
         "correctness",
         "noVueVIfWithVFor",
         TypeId::of::<biome_rule_options::no_vue_v_if_with_v_for::NoVueVIfWithVForOptions>(),

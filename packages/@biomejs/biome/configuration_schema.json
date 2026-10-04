@@ -7300,6 +7300,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueVHtmlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVHtmlOptions" }
+			]
+		},
+		"NoVueVHtmlOptions": { "type": "object", "additionalProperties": false },
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7763,6 +7770,13 @@
 					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVHtml": {
+					"description": "Disallow the use of Vue's v-html directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-html",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVHtmlConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12493,6 +12507,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUndeclaredDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVHtmlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVHtmlOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

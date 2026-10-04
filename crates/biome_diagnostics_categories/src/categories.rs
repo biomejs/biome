@@ -290,6 +290,8 @@ define_categories! {
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueRequiredPropWithDefault": "https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
+    "lint/nursery/noVueVHtml": "https://biomejs.dev/linter/rules/no-vue-v-html",
+    "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
     "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
