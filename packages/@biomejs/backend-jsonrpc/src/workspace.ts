@@ -3440,6 +3440,11 @@ export interface Nursery {
 	 */
 	noSvelteClassDirective?: NoSvelteClassDirectiveConfiguration;
 	/**
+	 * Disallow direct DOM manipulation of elements bound with bind:this.
+	 * See https://biomejs.dev/linter/rules/no-svelte-dom-manipulating
+	 */
+	noSvelteDomManipulating?: NoSvelteDomManipulatingConfiguration;
+	/**
 	 * Disallow declaring Svelte component props with export let.
 	 * See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
@@ -7184,6 +7189,9 @@ export type NoSvelteBindValueOnCheckableInputsConfiguration =
 export type NoSvelteClassDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteClassDirectiveOptions;
+export type NoSvelteDomManipulatingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteDomManipulatingOptions;
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
@@ -10562,6 +10570,10 @@ export interface RuleWithNoSvelteBindValueOnCheckableInputsOptions {
 export interface RuleWithNoSvelteClassDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteClassDirectiveOptions;
+}
+export interface RuleWithNoSvelteDomManipulatingOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteDomManipulatingOptions;
 }
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
@@ -14202,6 +14214,7 @@ export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteBindValueOnCheckableInputsOptions = {};
 export type NoSvelteClassDirectiveOptions = {};
+export type NoSvelteDomManipulatingOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteIgnoredUnsubscribeOptions = {};
 export type NoSvelteInspectOptions = {};
@@ -16624,6 +16637,7 @@ export type Category =
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteBindValueOnCheckableInputs"
 	| "lint/nursery/noSvelteClassDirective"
+	| "lint/nursery/noSvelteDomManipulating"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteIgnoredUnsubscribe"
 	| "lint/nursery/noSvelteInspect"

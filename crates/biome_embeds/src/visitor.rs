@@ -2,6 +2,7 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
+use crate::svelte_elements::collect_svelte_element_references;
 use biome_astro_semantic::{AstroSemanticModel, AstroSnippet, astro_model};
 use biome_db::Source;
 use biome_html_syntax::{
@@ -33,8 +34,8 @@ use std::collections::VecDeque;
 /// A parsed embedded-language snippet, its source language, and its location
 /// in the host document.
 pub struct EmbeddedSnippet<'a> {
-    parse: &'a AnyParse,
-    content_range: TextRange,
+    pub(crate) parse: &'a AnyParse,
+    pub(crate) content_range: TextRange,
     file_source: DocumentFileSource,
 }
 
@@ -72,6 +73,7 @@ pub fn collect_embedded_data<'a>(
             Vec::new(),
             VueDirectiveDeclarations::default(),
             collect_embedded_elements(host_source, host_parse),
+            Vec::new(),
         );
     }
 
@@ -89,6 +91,7 @@ pub fn collect_embedded_data<'a>(
             .map_or_else(Vec::new, build_type_references),
         collected_bindings.vue_directive_declarations,
         collect_embedded_elements(host_source, host_parse),
+        collect_svelte_element_references(host_source, host_parse, &snippets),
     )
 }
 

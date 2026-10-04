@@ -133,6 +133,8 @@ pub struct EmbeddedData {
     vue_directive_declarations: VueDirectiveDeclarations,
     /// Tags of the host document in source order
     elements: Vec<EmbeddedElement>,
+    /// Names that Svelte `bind:this` directives bind to DOM elements
+    svelte_element_references: Vec<TokenText>,
 }
 
 impl EmbeddedData {
@@ -143,6 +145,7 @@ impl EmbeddedData {
         type_references: Vec<EmbeddedTypeReference>,
         vue_directive_declarations: VueDirectiveDeclarations,
         elements: Vec<EmbeddedElement>,
+        svelte_element_references: Vec<TokenText>,
     ) -> Self {
         Self {
             astro_model,
@@ -151,6 +154,7 @@ impl EmbeddedData {
             type_references,
             vue_directive_declarations,
             elements,
+            svelte_element_references,
         }
     }
 
@@ -204,6 +208,14 @@ impl EmbeddedData {
             && self.value_references.iter().any(|reference| {
                 vue_directive_name_matches_reference_name(reference.text.text(), name)
             })
+    }
+
+    /// Returns whether a Svelte `bind:this={name}` directive binds the variable
+    /// `name` to a DOM element.
+    pub fn is_svelte_element_reference(&self, name: &str) -> bool {
+        self.svelte_element_references
+            .iter()
+            .any(|reference| reference.text() == name)
     }
 
     /// Resolves a Vue custom directive against declarations in the host component.
@@ -329,6 +341,7 @@ mod tests {
             }],
             Vec::new(),
             VueDirectiveDeclarations::default(),
+            Vec::new(),
             Vec::new(),
         );
 

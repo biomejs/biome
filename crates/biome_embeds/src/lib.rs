@@ -2,6 +2,7 @@ pub mod bindings;
 pub mod components;
 mod data;
 pub mod references;
+mod svelte_elements;
 #[cfg(test)]
 pub(crate) mod testing;
 pub(crate) mod visitor;
