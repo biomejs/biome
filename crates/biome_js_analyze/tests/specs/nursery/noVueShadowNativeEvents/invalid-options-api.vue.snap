@@ -1,0 +1,173 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  emits: ["click", "Keydown", `input`],
+  methods: {
+    onClick() {
+      this.$emit("change");
+      this?.$emit?.("focus");
+    },
+    onAlias() {
+      const vm = this;
+      vm.$emit("blur");
+      (vm?.$emit)?.("submit");
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:4:11 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   emits: ["click", "Keydown", `input`],
+      │           ^^^^^^^
+    5 │   methods: {
+    6 │     onClick() {
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:4:20 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   emits: ["click", "Keydown", `input`],
+      │                    ^^^^^^^^^
+    5 │   methods: {
+    6 │     onClick() {
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:4:31 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native input event.
+  
+    2 │ /* should generate diagnostics */
+    3 │ export default {
+  > 4 │   emits: ["click", "Keydown", `input`],
+      │                               ^^^^^^^
+    5 │   methods: {
+    6 │     onClick() {
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native input event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:7:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native change event.
+  
+    5 │   methods: {
+    6 │     onClick() {
+  > 7 │       this.$emit("change");
+      │                  ^^^^^^^^
+    8 │       this?.$emit?.("focus");
+    9 │     },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:8:21 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native focus event.
+  
+     6 │     onClick() {
+     7 │       this.$emit("change");
+   > 8 │       this?.$emit?.("focus");
+       │                     ^^^^^^^
+     9 │     },
+    10 │     onAlias() {
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native focus event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:12:16 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native blur event.
+  
+    10 │     onAlias() {
+    11 │       const vm = this;
+  > 12 │       vm.$emit("blur");
+       │                ^^^^^^
+    13 │       (vm?.$emit)?.("submit");
+    14 │     },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native blur event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:13:21 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native submit event.
+  
+    11 │       const vm = this;
+    12 │       vm.$emit("blur");
+  > 13 │       (vm?.$emit)?.("submit");
+       │                     ^^^^^^^^
+    14 │     },
+    15 │   },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native submit event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

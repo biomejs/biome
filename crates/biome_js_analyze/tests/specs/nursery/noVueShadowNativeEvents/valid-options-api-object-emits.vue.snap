@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api-object-emits.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  emits: {
+    welcome: null,
+    save() {
+      return true;
+    },
+    ...others,
+    [dynamic]: null,
+  },
+};
+</script>
+
+```

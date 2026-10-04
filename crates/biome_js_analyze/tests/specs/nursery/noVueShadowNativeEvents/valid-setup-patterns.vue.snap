@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-setup-patterns.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  setup(props, ...context) {
+    context.emit("click");
+  },
+};
+</script>
+
+```

@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-context.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  setup(props, context) {
+    context.emit("click");
+    context?.emit?.("keydown");
+    (context?.emit)?.("keyup");
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-context.vue:5:18 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    3 │ export default {
+    4 │   setup(props, context) {
+  > 5 │     context.emit("click");
+      │                  ^^^^^^^
+    6 │     context?.emit?.("keydown");
+    7 │     (context?.emit)?.("keyup");
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-context.vue:6:21 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    4 │   setup(props, context) {
+    5 │     context.emit("click");
+  > 6 │     context?.emit?.("keydown");
+      │                     ^^^^^^^^^
+    7 │     (context?.emit)?.("keyup");
+    8 │   },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-context.vue:7:23 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keyup event.
+  
+    5 │     context.emit("click");
+    6 │     context?.emit?.("keydown");
+  > 7 │     (context?.emit)?.("keyup");
+      │                       ^^^^^^^
+    8 │   },
+    9 │ };
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keyup event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

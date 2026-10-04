@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+const emit = defineEmits([`click`, "change"]);
+emit(`click`);
+emit("keydown");
+(emit)?.("CHANGE");
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup.vue:3:27 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const emit = defineEmits([`click`, "change"]);
+      │                           ^^^^^^^
+    4 │ emit(`click`);
+    5 │ emit("keydown");
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:3:36 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native change event.
+  
+    1 │ <script setup>
+    2 │ /* should generate diagnostics */
+  > 3 │ const emit = defineEmits([`click`, "change"]);
+      │                                    ^^^^^^^^
+    4 │ emit(`click`);
+    5 │ emit("keydown");
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:4:6 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    2 │ /* should generate diagnostics */
+    3 │ const emit = defineEmits([`click`, "change"]);
+  > 4 │ emit(`click`);
+      │      ^^^^^^^
+    5 │ emit("keydown");
+    6 │ (emit)?.("CHANGE");
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:5:6 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    3 │ const emit = defineEmits([`click`, "change"]);
+    4 │ emit(`click`);
+  > 5 │ emit("keydown");
+      │      ^^^^^^^^^
+    6 │ (emit)?.("CHANGE");
+    7 │ </script>
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup.vue:6:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native change event.
+  
+    4 │ emit(`click`);
+    5 │ emit("keydown");
+  > 6 │ (emit)?.("CHANGE");
+      │          ^^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native change event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-arrow.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  setup: (props, ctx) => {
+    ctx.emit("input");
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-arrow.vue:5:14 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native input event.
+  
+    3 │ export default {
+    4 │   setup: (props, ctx) => {
+  > 5 │     ctx.emit("input");
+      │              ^^^^^^^
+    6 │   },
+    7 │ };
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native input event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

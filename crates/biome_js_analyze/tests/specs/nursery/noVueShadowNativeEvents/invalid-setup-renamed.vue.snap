@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup-renamed.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  setup: function (props, { emit: fire }) {
+    fire("click");
+    fire("keydown");
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup-renamed.vue:5:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native click event.
+  
+    3 │ export default {
+    4 │   setup: function (props, { emit: fire }) {
+  > 5 │     fire("click");
+      │          ^^^^^^^
+    6 │     fire("keydown");
+    7 │   },
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native click event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup-renamed.vue:6:10 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event shadows the native keydown event.
+  
+    4 │   setup: function (props, { emit: fire }) {
+    5 │     fire("click");
+  > 6 │     fire("keydown");
+      │          ^^^^^^^^^
+    7 │   },
+    8 │ };
+  
+  i Component events don't bubble, carry an arbitrary payload, and don't support event modifiers that rely on a native event, so listeners written for the native keydown event can misbehave.
+  
+  i Rename the event after what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
