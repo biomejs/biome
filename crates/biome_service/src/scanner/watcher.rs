@@ -255,7 +255,20 @@ impl Watcher {
         workspace: &impl WorkspaceWatcherBridge,
         event: NotifyEvent,
     ) -> Vec<Diagnostic> {
+        // Reindex the owning package.json before normal path filtering so `node_modules`
+        // topology changes refresh module resolution without scanning dependency symlinks.
+        let reindex_targets = event
+            .paths
+            .iter()
+            .filter_map(|path| Utf8PathBuf::from_path_buf(path.clone()).ok())
+            .filter_map(|path| {
+                Self::find_node_modules_reindex_target(workspace, &event.kind, &path)
+            })
+            .collect::<FxHashSet<_>>();
         let paths = Self::watched_paths(workspace, event.paths);
+        for target in reindex_targets {
+            Self::reindex_file(workspace, &target);
+        }
         if paths.is_empty() {
             return vec![];
         };
@@ -309,6 +322,37 @@ impl Watcher {
             warn!("Error processing watch event: {error}");
             vec![]
         })
+    }
+
+    fn find_node_modules_reindex_target(
+        workspace: &impl WorkspaceWatcherBridge,
+        event_kind: &EventKind,
+        path: &Utf8Path,
+    ) -> Option<Utf8PathBuf> {
+        if !matches!(
+            event_kind,
+            EventKind::Create(_) | EventKind::Modify(ModifyKind::Name(_)) | EventKind::Remove(_)
+        ) {
+            return None;
+        }
+        let project_key = workspace.find_project_for_path(path)?;
+        let node_modules = path
+            .ancestors()
+            .find(|ancestor| ancestor.file_name() == Some("node_modules"))?;
+        let mut relative = path.strip_prefix(node_modules).ok()?.components();
+        let first = relative.next()?.as_str();
+        let second = relative.next();
+        // Treat create/remove/rename events at `node_modules/<name>` and
+        // `node_modules/@scope/<name>` as dependency topology changes. This
+        // intentionally includes root-level package-manager metadata.
+        if second.is_some() != first.starts_with('@') || relative.next().is_some() {
+            return None;
+        }
+        let manifest = workspace
+            .fs()
+            .auto_search_files(node_modules.parent()?, &["package.json"])
+            .map(|result| result.file_path)?;
+        (workspace.find_project_for_path(&manifest) == Some(project_key)).then_some(manifest)
     }
 
     /// Filters the paths to make sure only paths within watched folders remain.
