@@ -1,25 +1,26 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidLineComment.js
+expression: invalidMissingBannerAfterShebang.js
 ---
 # Input
 ```js
-// Copyright 2026 Acme
-// should generate diagnostics
+#!/usr/bin/env node
+/* should generate diagnostics */
 const a = 1;
 
 ```
 
 # Diagnostics
 ```
-invalidLineComment.js:1:1 lint/nursery/useBannerComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidMissingBannerAfterShebang.js:2:1 lint/nursery/useBannerComment  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The file does not start with the required banner comment.
   
-  > 1 │ // Copyright 2026 Acme
-      │ ^^^^^^^^^^^^^^^^^^^^^^
-    2 │ // should generate diagnostics
+    1 │ #!/usr/bin/env node
+  > 2 │ /* should generate diagnostics */
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ const a = 1;
+    4 │ 
   
   i A banner comment communicates licensing, copyright, or ownership information to anyone reading or auditing the file.
   
@@ -27,11 +28,12 @@ invalidLineComment.js:1:1 lint/nursery/useBannerComment  FIXABLE  ━━━━�
   
   i Unsafe fix: Insert the required banner comment.
   
-    1   │ - //·Copyright·2026·Acme
-      1 │ + /*·Copyright·2026·Acme·*/
-      2 │ + //·Copyright·2026·Acme
-    2 3 │   // should generate diagnostics
+    1 1 │   #!/usr/bin/env node
+    2   │ - /*·should·generate·diagnostics·*/
+      2 │ + /*·Copyright·2026·Acme·*/
+      3 │ + /*·should·generate·diagnostics·*/
     3 4 │   const a = 1;
+    4 5 │   
   
 
 ```
