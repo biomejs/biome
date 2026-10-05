@@ -3046,6 +3046,11 @@ export interface Nursery {
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
+	 * Require function names to match the name of the variable or property they are assigned to.
+	 * See https://biomejs.dev/linter/rules/use-matching-function-name
+	 */
+	useMatchingFunctionName?: UseMatchingFunctionNameConfiguration;
+	/**
 	 * Prefer Math.min() and Math.max() over ternaries for simple comparisons.
 	 * See https://biomejs.dev/linter/rules/use-math-min-max
 	 */
@@ -5397,6 +5402,9 @@ export type UseLayeredStylesConfiguration =
 export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLogicalPropertiesOptions;
+export type UseMatchingFunctionNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMatchingFunctionNameOptions;
 export type UseMathMinMaxConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathMinMaxOptions;
@@ -7843,6 +7851,10 @@ export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLogicalPropertiesOptions;
 }
+export interface RuleWithUseMatchingFunctionNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseMatchingFunctionNameOptions;
+}
 export interface RuleWithUseMathMinMaxOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10058,6 +10070,7 @@ export interface UseLogicalPropertiesOptions {
 	 */
 	direction?: UseLogicalPropertiesDirection;
 }
+export type UseMatchingFunctionNameOptions = {};
 export type UseMathMinMaxOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedCaptureGroupOptions = {};
@@ -11457,6 +11470,7 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
+	| "lint/nursery/useMatchingFunctionName"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"

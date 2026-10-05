@@ -1,0 +1,9 @@
+/* should not generate diagnostics */
+// biome-ignore lint/nursery/useMatchingFunctionName: test
+const foo1 = function bar() {};
+
+class C1 {
+	// biome-ignore lint/nursery/useMatchingFunctionName: test
+	@decorator
+	foo2 = function bar() {};
+}
