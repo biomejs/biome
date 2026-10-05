@@ -562,6 +562,34 @@ impl<'db> TypeData<'db> {
         }
     }
 
+    /// Classifies values for analyzer inspection without traversing compound types.
+    ///
+    /// Property shapes and class instance annotations can describe primitives.
+    /// Unlike expression-evaluation categories, their structure alone does not
+    /// prove truthiness. `None` means further traversal is needed.
+    pub(crate) fn value_conditional_type_shallow(
+        self,
+        db: &'db dyn TypeDb,
+    ) -> Option<ConditionalType> {
+        match self {
+            Self::Object(_) => Some(ConditionalType::NonNullish),
+            Self::InstanceOf(instance) => {
+                let target = instance.ty(db);
+                if target.is_builtin_object_class(db) {
+                    Some(ConditionalType::Truthy)
+                } else if matches!(
+                    target.expand_canonical_global(db),
+                    Self::Class(_) | Self::Interface(_) | Self::Object(_)
+                ) {
+                    Some(ConditionalType::NonNullish)
+                } else {
+                    None
+                }
+            }
+            _ => self.conditional_type_shallow(db),
+        }
+    }
+
     pub fn conditional_type_shallow(self, db: &'db dyn TypeDb) -> Option<ConditionalType> {
         match self {
             Self::AnyKeyword
@@ -691,6 +719,40 @@ impl<'db> TypeData<'db> {
     pub fn is_promise_class(self, db: &'db dyn TypeDb) -> bool {
         self == Self::GlobalType(PROMISE_ID_GLOBAL_TYPE_ID)
             || self.is_builtin_class_named(db, "Promise")
+    }
+
+    /// Recognizes built-in classes whose instances are non-primitive values.
+    /// A user-defined class with the same name does not establish that fact.
+    pub(crate) fn is_builtin_object_class(self, db: &'db dyn TypeDb) -> bool {
+        match self {
+            Self::GlobalType(id) => [
+                ARRAY_ID_GLOBAL_TYPE_ID,
+                PROMISE_ID_GLOBAL_TYPE_ID,
+                DATE_ID_GLOBAL_TYPE_ID,
+                ERROR_ID_GLOBAL_TYPE_ID,
+                MAP_ID_GLOBAL_TYPE_ID,
+                REG_EXP_ID_GLOBAL_TYPE_ID,
+                SET_ID_GLOBAL_TYPE_ID,
+                WEAK_MAP_ID_GLOBAL_TYPE_ID,
+            ]
+            .contains(&id),
+            Self::Class(class) if class.is_builtin(db) => {
+                class.name(db).as_ref().is_some_and(|name| {
+                    matches!(
+                        name.text(),
+                        "Array"
+                            | "Promise"
+                            | "Date"
+                            | "Error"
+                            | "Map"
+                            | "RegExp"
+                            | "Set"
+                            | "WeakMap"
+                    )
+                })
+            }
+            _ => false,
+        }
     }
 
     fn is_builtin_class_named(self, db: &'db dyn TypeDb, expected_name: &str) -> bool {
