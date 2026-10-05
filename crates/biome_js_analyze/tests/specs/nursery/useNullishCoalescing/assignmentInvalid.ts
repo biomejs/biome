@@ -19,7 +19,7 @@ d ||= 'value';
 let e: undefined = undefined;
 e ||= 'value';
 
-// Object type with null (safe fix - objects are always truthy)
+// Object-shaped annotation with null: no proven truthiness, so no safe fix.
 declare let obj: { a: string } | null;
 obj ||= { a: 'default' };
 

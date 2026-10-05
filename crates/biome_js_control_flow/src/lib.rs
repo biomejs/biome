@@ -9,6 +9,7 @@
 
 mod db;
 mod model;
+mod narrowing;
 mod nodes;
 mod visitor;
 
@@ -19,6 +20,7 @@ pub use db::{
     control_flow_model_from_snippet, control_flow_model_from_source, js_control_flow_model,
 };
 pub use model::ControlFlowModel;
+pub use narrowing::{FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph, narrowing_flow_graph};
 pub use visitor::AnyJsControlFlowRoot;
 
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
