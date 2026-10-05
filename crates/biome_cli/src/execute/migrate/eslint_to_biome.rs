@@ -187,6 +187,9 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let mut covered_by_rule = Vec::new();
             let mut not_applicable = Vec::new();
             let mut deprecated = Vec::new();
+            let mut legacy = Vec::new();
+            let mut requires_external_tool = Vec::new();
+            let mut parser_covers = Vec::new();
 
             for (rule, reason) in &self.unsupported {
                 match reason {
@@ -202,6 +205,11 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                     UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
                     UnsupportedRuleReason::NotApplicable => not_applicable.push(rule),
                     UnsupportedRuleReason::Deprecated => deprecated.push(rule),
+                    UnsupportedRuleReason::Legacy => legacy.push(rule),
+                    UnsupportedRuleReason::RequiresExternalTool => {
+                        requires_external_tool.push(rule)
+                    }
+                    UnsupportedRuleReason::ParserCovers => parser_covers.push(rule),
                 }
             }
 
@@ -308,6 +316,42 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                     &markup! { "These rules have been deprecated upstream:" },
                 )?;
                 let list: Vec<_> = deprecated
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !legacy.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules enforce legacy practices that go against Biome's focus on modern code:" },
+                )?;
+                let list: Vec<_> = legacy
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !requires_external_tool.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules require integration with an external tool, such as a compiler:" },
+                )?;
+                let list: Vec<_> = requires_external_tool
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !parser_covers.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules report syntax errors that Biome's parser already reports (so you don't lose the functionality):" },
+                )?;
+                let list: Vec<_> = parser_covers
                     .iter()
                     .map(|item| *item as &dyn biome_console::fmt::Display)
                     .collect();
