@@ -44,6 +44,37 @@ module's type table; it does not mean block- or function-scoped source code.
 Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 `src/db/type_inference/resolver.rs`.
 
+### Flow-sensitive expression reads
+
+Expression lookups refine unwritten local `let`/`const` variables and parameters
+at their runtime read locations. The semantic model supplies binding identity; a syntax-only layer
+on the JavaScript CFG supplies incoming conditions. Source locations remain separate
+from the raw type table, which can still share equivalent types.
+
+`src/db/type_inference/flow.rs` evaluates bounded per-binding flow states for
+`typeof`, literal equality, nullishness, and truthiness. Branch joins and loop
+backedges retain all reachable alternatives. `flow_expressions.rs` evaluates
+supported member, call, logical, conditional, and await operands at their own
+source locations. Structural type caches remain independent of these locations.
+Expression tables from complete inference use the same occurrence query. Binding
+and declaration queries retain their existing contracts.
+
+An object shape such as `{}` can also describe numbers and strings. Removing
+`null` from such a type does not prove that the remaining value is truthy.
+Similarly, a `void` return annotation does not guarantee runtime `undefined`;
+filtering a `void` result preserves uncertainty instead of asserting nullishness.
+
+Flow inference is conservative for writes, captured bindings, variables declared
+with `var`, exception handlers, switch, for-in/of, destructuring, and dynamic scope. Predicate/assertion functions
+and property-path refinements are not modeled. Unsupported flow preserves the raw
+lookup; a cycle or exhausted flow evaluation returns an unknown override. A raw
+classifier must not ignore such an override and report a conclusive raw result.
+
+The tracked flow graph is keyed by module and execution-root range. It depends
+on the current module syntax snapshot, not semantic-model equality alone. This
+shares graph construction across reads without promising fine-grained reuse
+across edits to the module's coarse `kind` input.
+
 ### Analyzer-facing requests
 
 A request is a typed operation used by analyzer rules. It stores module and

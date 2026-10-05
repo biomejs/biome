@@ -1,0 +1,84 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: narrowing.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function nullishGuard(value: Promise<void> | null) {
+	if (value !== null) {
+		value;
+	}
+}
+
+function typeofGuard(value: Promise<void> | string) {
+	if (typeof value === "string") return;
+	value;
+}
+
+function truthinessGuard(value: Promise<void> | false) {
+	if (value) {
+		value;
+	}
+}
+
+```
+
+# Diagnostics
+```
+narrowing.ts:5:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    3 │ function nullishGuard(value: Promise<void> | null) {
+    4 │ 	if (value !== null) {
+  > 5 │ 		value;
+      │ 		^^^^^^
+    6 │ 	}
+    7 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+narrowing.ts:11:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     9 │ function typeofGuard(value: Promise<void> | string) {
+    10 │ 	if (typeof value === "string") return;
+  > 11 │ 	value;
+       │ 	^^^^^^
+    12 │ }
+    13 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+narrowing.ts:16:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    14 │ function truthinessGuard(value: Promise<void> | false) {
+    15 │ 	if (value) {
+  > 16 │ 		value;
+       │ 		^^^^^^
+    17 │ 	}
+    18 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

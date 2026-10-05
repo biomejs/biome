@@ -6,19 +6,25 @@
 //! without resolving every type collected for the module.
 
 use super::{
-    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, LocalTypeInput,
-    LocalTypeWithImportBudgetInput,
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowRootInput,
+    LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
     ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
-    find_value_member_type_on_demand as find_value_member_type_impl, resolve_local_type_on_demand,
+    find_value_member_type_on_demand as find_value_member_type_impl, flow_expression_type,
+    resolve_local_type_on_demand,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
+use biome_js_control_flow::{
+    AnyJsControlFlowRoot, ControlFlowModel, NarrowingFlowGraph, control_flow_model,
+    narrowing_flow_graph,
+};
 use biome_js_type_info::{InferredType, TypeId, interned_types::TypeData as InferredTypeData};
+use biome_rowan::AstNode;
 
 // #region LOOKUP QUERIES
 
@@ -53,11 +59,92 @@ pub fn infer_expression_type<'db>(
                 return None;
             }
 
-            let reference = js_info.raw_expressions.get(&expression)?.clone();
+            let reference = js_info.raw_expressions.get(&expression)?;
+            if let Some(ty) = infer_flow_expression_type(db, input) {
+                return Some(ty);
+            }
             let mut ctx = ResolutionCtx::new(db, module, js_info, ImportResolution::on_demand());
-            Some(ctx.resolve(&reference))
+            Some(ctx.resolve(reference))
         },
     )
+}
+
+/// Returns an occurrence-sensitive result when runtime flow affects an expression.
+///
+/// `None` preserves the raw lookup path when no supported refinement applies.
+/// Cycles or incomplete flow evaluation return `Unknown`, not a raw fallback.
+#[salsa::tracked(returns(copy), cycle_result=infer_expression_type_cycle_result)]
+pub(crate) fn infer_flow_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let expression = input.expression(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, expression),
+        "infer_flow_expression_type",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types || !info.raw_expressions.contains_key(&expression) {
+                return None;
+            }
+            flow_expression_type(db, module, info, expression)
+        },
+    )
+}
+
+#[salsa::tracked]
+fn module_control_flow(db: &dyn ModuleDb, module: crate::ModuleInfo) -> Option<ControlFlowModel> {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    Some(control_flow_model(&info.semantic_model.root()))
+}
+
+#[salsa::tracked]
+pub(crate) fn narrowing_flow_for_root<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowRootInput<'db>,
+) -> Option<NarrowingFlowGraph> {
+    let module = input.module(db);
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    let tree = info.semantic_model.root();
+    let range = input.root(db);
+    if !tree.syntax().text_range_with_trivia().contains_range(range) {
+        return None;
+    }
+    let root = tree
+        .syntax()
+        .covering_element(range)
+        .ancestors()
+        .find_map(|node| {
+            (node.text_trimmed_range() == range)
+                .then(|| AnyJsControlFlowRoot::cast(node))
+                .flatten()
+        })?;
+    let mut nodes = root.syntax().descendants();
+    for _ in 0..16_384 {
+        let Some(node) = nodes.next() else {
+            let graph = module_control_flow(db, module).as_ref()?.graph(&root)?;
+            return narrowing_flow_graph(&graph);
+        };
+        if let Some(reference) = biome_js_syntax::JsReferenceIdentifier::cast(node)
+            && reference.value_token().is_ok_and(|token| {
+                matches!(
+                    biome_js_syntax::unescape_js_identifier(token.text_trimmed()).as_ref(),
+                    "eval" | "arguments"
+                )
+            })
+        {
+            return None;
+        }
+    }
+    None
 }
 
 /// Infers the type collected for one binding range.

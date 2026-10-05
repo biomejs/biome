@@ -64,6 +64,8 @@ mod intersections;
 mod js_doc;
 #[path = "spec_tests/module_resolution.test.rs"]
 mod module_resolution;
+#[path = "spec_tests/narrowing.test.rs"]
+mod narrowing;
 #[path = "spec_tests/normalization.test.rs"]
 mod normalization;
 #[path = "spec_tests/overloads.test.rs"]

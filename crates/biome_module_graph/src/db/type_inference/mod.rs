@@ -10,6 +10,8 @@ use biome_js_type_info::interned_types::{
 use rustc_hash::{FxHashMap, FxHashSet};
 
 mod expressions;
+mod flow;
+mod flow_expressions;
 mod globals;
 mod imports;
 mod lookup;
@@ -17,6 +19,7 @@ mod promise_classification;
 mod qualifiers;
 mod resolver;
 
+pub(in crate::db) use flow::flow_expression_type;
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
     resolve_export_type_on_demand,

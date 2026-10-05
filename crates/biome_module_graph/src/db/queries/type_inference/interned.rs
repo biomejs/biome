@@ -24,6 +24,16 @@ pub struct ExpressionTypeInput<'db> {
     pub expression: TextRange,
 }
 
+/// Identifies an execution root in the module's current syntax snapshot.
+#[salsa::interned]
+#[derive(Debug)]
+pub(crate) struct FlowRootInput<'db> {
+    #[returns(copy)]
+    pub module: ModuleInfo,
+    #[returns(copy)]
+    pub root: TextRange,
+}
+
 /// Interned input for [`super::infer_binding_type`].
 #[salsa::interned]
 #[derive(Debug)]
