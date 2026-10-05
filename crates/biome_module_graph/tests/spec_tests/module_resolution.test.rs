@@ -459,6 +459,8 @@ fn test_export_equals_namespace_visibility_and_merging() {
     for source in [
         "namespace API { const hidden = 1; export function first() { const local = 1; function nested() {} class Internal {} } } namespace API { export const second = 3; } export = API;",
         "declare namespace API { const first: number; } declare namespace API { const second: number; } declare const hidden: number; export = API;",
+        "declare namespace API { const hidden: number; const first: number; const second: number; export { first, second }; } export = API;",
+        "namespace API { export const first = 1; export declare namespace second { const local: number; } } export = API;",
         r"declare namespace \u0041PI { function first(): void; } declare namespace API { const second: number; } declare const hidden: number; export = API;",
         r"declare namespace API { function first(): void; } declare namespace \u0041PI { const second: number; } declare const hidden: number; export = \u0041PI;",
     ] {

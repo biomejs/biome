@@ -5,11 +5,11 @@ use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
-    AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsExport as JsExportSyntax, JsForVariableDeclaration,
-    JsFormalParameter, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsDeclareStatement,
-    TsImportEqualsDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
-    inner_string_text,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsExport as JsExportSyntax,
+    JsForVariableDeclaration, JsFormalParameter, JsRestParameter, JsSyntaxNode,
+    JsVariableDeclaration, TsDeclareStatement, TsImportEqualsDeclaration, TsMappedType,
+    TsModuleDeclaration, TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
@@ -655,6 +655,7 @@ impl JsModuleInfoCollector {
             return;
         }
 
+        let mut implicit_namespace_exports = FxHashMap::default();
         for child_binding in &self.bindings {
             if child_binding.name.is_empty() {
                 continue;
@@ -709,22 +710,41 @@ impl JsModuleInfoCollector {
             {
                 continue;
             }
-            let ambient = owner
-                .syntax()
-                .ancestors()
-                .any(|node| TsDeclareStatement::can_cast(node.kind()));
+            let implicit_exports = *implicit_namespace_exports
+                .entry(owner.syntax().clone())
+                .or_insert_with(|| {
+                    let ambient = owner
+                        .syntax()
+                        .ancestors()
+                        .any(|node| TsDeclareStatement::can_cast(node.kind()));
+                    ambient
+                        && !owner.body().is_ok_and(|body| {
+                            body.items().into_iter().any(|item| {
+                                item.as_js_export().is_some_and(|export| {
+                                    matches!(
+                                        export.export_clause(),
+                                        Ok(AnyJsExportClause::JsExportNamedClause(_)
+                                            | AnyJsExportClause::JsExportFromClause(_)
+                                            | AnyJsExportClause::JsExportNamedFromClause(_)
+                                            | AnyJsExportClause::TsExportAssignmentClause(_))
+                                    )
+                                })
+                            })
+                        })
+                });
             let import_alias = node
                 .syntax()
                 .ancestors()
                 .take_while(|ancestor| !TsModuleDeclaration::can_cast(ancestor.kind()))
                 .find_map(TsImportEqualsDeclaration::cast);
             let exported = node.is_exported()
-                || node
+                || declaration
                     .syntax()
                     .ancestors()
-                    .take_while(|ancestor| !TsModuleDeclaration::can_cast(ancestor.kind()))
+                    .skip(1)
+                    .take_while(|ancestor| ancestor != owner.syntax())
                     .any(|ancestor| JsExportSyntax::can_cast(ancestor.kind()));
-            if !exported && (!ambient || import_alias.is_some()) {
+            if !exported && (!implicit_exports || import_alias.is_some()) {
                 continue;
             }
             let child_scope = self.semantic_model.scope_from_id(child_binding.scope_id);
