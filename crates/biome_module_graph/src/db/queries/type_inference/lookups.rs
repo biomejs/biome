@@ -82,7 +82,8 @@ pub(in crate::db) fn flow_candidates_for_module(
             let ModuleInfoKind::Js(info) = module.kind(db) else {
                 return None;
             };
-            info.infer_types.then(|| FlowCandidates::collect(info))
+            (info.infer_types && info.has_flow_candidate_sources)
+                .then(|| FlowCandidates::collect(info))
         },
     )
 }
@@ -372,7 +373,14 @@ pub(crate) fn infer_flow_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    let candidates = flow_candidates_for_module(db, input.module(db)).as_ref()?;
+    let module = input.module(db);
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        return None;
+    };
+    if !info.has_flow_candidate_sources {
+        return None;
+    }
+    let candidates = flow_candidates_for_module(db, module).as_ref()?;
     if !candidates.contains(input.expression(db)) {
         return None;
     }

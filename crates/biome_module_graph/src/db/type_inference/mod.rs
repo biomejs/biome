@@ -12,6 +12,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 mod expressions;
 mod flow;
 mod flow_candidates;
+pub(in crate::db) mod flow_conditions;
 mod flow_expressions;
 mod globals;
 mod imports;
