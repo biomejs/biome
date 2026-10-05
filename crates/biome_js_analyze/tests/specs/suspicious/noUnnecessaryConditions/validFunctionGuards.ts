@@ -7,7 +7,6 @@ declare function overloaded(input: string): input is string;
 declare function overloaded(input: unknown): input is string;
 declare function structural(input: unknown): input is { name: string };
 declare function union(input: unknown): input is string | number;
-declare function assertString(input: unknown): asserts input is string;
 
 const alias = isString;
 const variableHeld = (input: unknown): input is string => typeof input === "string";
@@ -63,7 +62,6 @@ function unsupportedCallees(value: string | null) {
 	if (variableHeld(value)) value?.length;
 	if (generic(value)) value?.length;
 	if (overloaded(value)) value?.length;
-	assertString(value);
 	return value?.length;
 }
 

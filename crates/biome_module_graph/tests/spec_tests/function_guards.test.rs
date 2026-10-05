@@ -782,27 +782,22 @@ fn imported_guards_do_not_refine_even_when_the_export_is_available() {
 }
 
 #[test]
-fn assertion_calls_and_unchecked_predicate_calls_do_not_refine_following_reads() {
+fn unchecked_predicate_calls_do_not_refine_following_reads() {
     const SOURCE: &str = r#"
-        declare function assertString(input: unknown): asserts input is string;
         declare function isString(input: unknown): input is string;
         function inspect(value: string | number) {
-            assertString(value);
-            /*assertion*/value;
             isString(value);
             /*unchecked*/value;
         }
     "#;
     let (db, module) = guard_db(SOURCE);
-    for marker in ["assertion", "unchecked"] {
-        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
-        assert_variants(
-            &db,
-            ty,
-            &[InferredTypeData::String, InferredTypeData::Number],
-            marker,
-        );
-    }
+    let ty = normalized_type_at(&db, module, SOURCE, "unchecked", "value");
+    assert_variants(
+        &db,
+        ty,
+        &[InferredTypeData::String, InferredTypeData::Number],
+        "unchecked",
+    );
 }
 
 #[test]

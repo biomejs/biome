@@ -88,13 +88,26 @@ guards, methods, optional calls, and calls with spread arguments are unsupported
 So are declarations with default, rest, or destructured parameters, predicates
 on `this`, and predicates whose target is a named or compound type.
 
+A standalone call to a local assertion function can narrow later reads if the
+call returns normally. An `asserts condition` annotation applies condition
+analysis to the supplied argument. An `asserts value is T` annotation narrows
+an identifier argument to the supported primitive type or literal. Asserting
+`boolean` does not prove that the value is `true`. The call and its arguments
+still use the types known before the assertion.
+
+The assertion call must be non-optional and form the whole expression statement;
+parentheses around it are allowed. Calls inside assignments, logical or
+conditional expressions, return values, or other expressions do not add facts.
+The function declaration follows the same restrictions as a predicate guard.
+Calling a predicate guard without testing its result does not add facts.
+
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation
 does not guarantee runtime `undefined` either. These cases must retain
 uncertainty.
 
-Narrowing does not support `var`, imported variables, assertion functions,
-or facts about individual object properties. Unsupported control flow
+Narrowing does not support `var`, imported variables, facts about individual
+object properties, or the effects of calls that never return. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots using `eval` or `arguments` also keep ordinary
 inference. If flow solving exhausts its work limit or a query cycle occurs, the

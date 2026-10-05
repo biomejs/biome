@@ -7,7 +7,7 @@
 use super::flow_conditions::{
     ConditionStep, MAX_CONDITION_DEPTH, SyntaxGuard, condition_step, condition_subjects,
 };
-use super::flow_guards::call_predicate_subject;
+use super::flow_guards::{CallAssertion, call_assertion_condition, call_predicate_subject};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_type,
@@ -18,7 +18,7 @@ use biome_js_control_flow::{
     AnyJsControlFlowRoot, FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph,
 };
 use biome_js_semantic::{Binding, JsDeclarationKind};
-use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxNode};
+use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsCallExpression, JsSyntaxNode};
 use biome_js_type_info::interned_types::TypeData;
 use biome_js_type_info::{NarrowingPredicate, narrow_type};
 use biome_rowan::{AstNode, TextRange};
@@ -150,42 +150,26 @@ impl<'db> ResolutionCtx<'db, '_> {
                     outcome,
                 } => {
                     pending.push(*antecedent);
-                    if !relevant {
-                        let mut condition_remaining = MAX_FLOW_TYPE_STEPS;
-                        let subjects = expression_at(root.syntax(), *expression).map(|condition| {
-                            condition_subjects(
-                                condition.clone(),
-                                *outcome,
-                                &self.js_info.semantic_model,
-                                &|call| call_predicate_subject(self.js_info, call),
-                                &mut condition_remaining,
-                            )
-                            .unwrap_or_else(|| {
-                                // A matching limit does not make unrelated variables flow-dependent.
-                                condition
-                                    .syntax()
-                                    .descendants()
-                                    .take(MAX_FLOW_TYPE_STEPS)
-                                    .filter_map(AnyJsExpression::cast)
-                                    .filter_map(|expression| {
-                                        let AnyJsExpression::JsIdentifierExpression(identifier) =
-                                            expression
-                                        else {
-                                            return None;
-                                        };
-                                        identifier.name().ok()
-                                    })
-                                    .collect()
-                            })
-                        });
-                        relevant = subjects.is_some_and(|subjects| {
-                            subjects.iter().any(|subject| {
-                                self.js_info
-                                    .semantic_model
-                                    .binding(subject)
-                                    .is_some_and(|candidate| candidate == *binding)
-                            })
-                        });
+                    if !relevant && let Some(condition) = expression_at(root.syntax(), *expression)
+                    {
+                        relevant = self.condition_mentions_binding(condition, *outcome, binding);
+                    }
+                }
+                FlowNode::CallContinuation {
+                    antecedent,
+                    expression,
+                } => {
+                    pending.push(*antecedent);
+                    if !relevant
+                        && let Some(AnyJsExpression::JsCallExpression(call)) =
+                            expression_at(root.syntax(), *expression)
+                        && let Some(condition) = call_assertion_condition(self.js_info, &call)
+                    {
+                        relevant = self.condition_mentions_binding(
+                            condition,
+                            FlowOutcome::Truthy,
+                            binding,
+                        );
                     }
                 }
             }
@@ -271,7 +255,10 @@ impl<'db> ResolutionCtx<'db, '_> {
                         successors[*predecessor].push(index);
                     }
                 }
-                FlowNode::Condition { antecedent, .. } => successors[*antecedent].push(index),
+                FlowNode::Condition { antecedent, .. }
+                | FlowNode::CallContinuation { antecedent, .. } => {
+                    successors[*antecedent].push(index)
+                }
             }
         }
         let mut states = vec![TypeData::NeverKeyword; graph.nodes.len()];
@@ -313,6 +300,21 @@ impl<'db> ResolutionCtx<'db, '_> {
                         incoming
                     }
                 }
+                FlowNode::CallContinuation {
+                    antecedent,
+                    expression,
+                } => {
+                    let incoming = states[*antecedent];
+                    if incoming == TypeData::NeverKeyword {
+                        incoming
+                    } else if let Some(AnyJsExpression::JsCallExpression(call)) =
+                        expression_at(root, *expression)
+                    {
+                        self.narrow_assertion(binding, incoming, &call, &mut remaining)
+                    } else {
+                        incoming
+                    }
+                }
             };
             if states[index] != ty {
                 states[index] = ty;
@@ -325,6 +327,64 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
         }
         states[point]
+    }
+
+    fn condition_mentions_binding(
+        &self,
+        expression: AnyJsExpression,
+        outcome: FlowOutcome,
+        binding: &Binding,
+    ) -> bool {
+        let mut remaining = MAX_FLOW_TYPE_STEPS;
+        if let Some(subjects) = condition_subjects(
+            expression.clone(),
+            outcome,
+            &self.js_info.semantic_model,
+            &|call| call_predicate_subject(self.js_info, call),
+            &mut remaining,
+        ) {
+            return subjects.iter().any(|subject| {
+                self.js_info
+                    .semantic_model
+                    .binding(subject)
+                    .is_some_and(|candidate| candidate == *binding)
+            });
+        }
+        // Incomplete matching does not make unrelated bindings flow-dependent.
+        let mut descendants = expression.syntax().descendants();
+        for _ in 0..MAX_FLOW_TYPE_STEPS {
+            let Some(node) = descendants.next() else {
+                return false;
+            };
+            if let Some(expression @ AnyJsExpression::JsIdentifierExpression(_)) =
+                AnyJsExpression::cast(node)
+                && self.is_binding_read(&expression, binding)
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn narrow_assertion(
+        &mut self,
+        binding: &Binding,
+        ty: TypeData<'db>,
+        call: &JsCallExpression,
+        remaining: &mut usize,
+    ) -> TypeData<'db> {
+        match self.call_assertion(call) {
+            Some(CallAssertion::Truthy(argument)) => {
+                self.narrow_condition(binding, ty, argument, FlowOutcome::Truthy, 0, remaining)
+            }
+            Some(CallAssertion::Type {
+                argument,
+                predicate,
+            }) if self.is_binding_read(&argument, binding) => {
+                narrow_type(self.db, ty, predicate, true)
+            }
+            Some(CallAssertion::Type { .. }) | None => ty,
+        }
     }
 
     fn narrow_condition(
