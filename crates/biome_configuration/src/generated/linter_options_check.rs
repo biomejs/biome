@@ -726,11 +726,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
-        "noIteratorProperty",
-        TypeId::of::<biome_rule_options::no_iterator_property::NoIteratorPropertyOptions>(),
-    ));
-    result.push((
-        "nursery",
         "noJsRestrictedProperties",
         TypeId::of::<
             biome_rule_options::no_js_restricted_properties::NoJsRestrictedPropertiesOptions,

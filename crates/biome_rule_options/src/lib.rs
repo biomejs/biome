@@ -153,7 +153,6 @@ pub mod no_invalid_position_at_import_rule;
 pub mod no_invalid_property_init_value;
 pub mod no_invalid_use_before_declaration;
 pub mod no_irregular_whitespace;
-pub mod no_iterator_property;
 pub mod no_js_restricted_properties;
 pub mod no_json_unsafe_values;
 pub mod no_jsx_leaked_dollar;
