@@ -1061,7 +1061,7 @@ pub(crate) struct CssPropertyAtRuleData {
     pub(crate) syntax: PropertySyntaxResult,
     /// The `inherits` descriptor when its value is `true` or `false`.
     pub(crate) inherits: Option<bool>,
-    /// Whether Sass evaluation is required to determine the `inherits` descriptor.
+    /// Whether SCSS evaluation is required to determine the `inherits` descriptor.
     pub(crate) inherits_requires_evaluation: bool,
     /// The `initial-value` descriptor when a value node is present.
     pub(crate) initial_value: Option<CssPropertyInitialValueKind>,

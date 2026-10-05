@@ -15,7 +15,7 @@ use biome_rowan::TextRange;
 pub enum PropertySyntaxResult {
     /// The declaration has no `syntax` descriptor.
     Missing,
-    /// Sass evaluation is required to determine the descriptor value.
+    /// SCSS evaluation is required to determine the descriptor value.
     Dynamic,
     /// The descriptor value does not conform to the registered property syntax grammar.
     Error(PropertySyntaxParseDiagnostic),

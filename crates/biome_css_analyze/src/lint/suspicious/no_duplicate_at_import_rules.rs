@@ -24,7 +24,7 @@ declare_lint_rule! {
     /// are duplicates when either import is unconditional or when their media lists share a
     /// condition. Two imports of the same URL remain valid only when both are conditional and their
     /// media conditions do not overlap.
-    /// Sass load imports are ignored because they don't emit CSS `@import` rules.
+    /// SCSS load imports are ignored because they don't emit CSS `@import` rules.
     ///
     /// ## Examples
     ///

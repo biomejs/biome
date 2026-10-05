@@ -55,7 +55,7 @@ impl PropertySyntax {
 
     /// Returns whether a static SCSS expression has a shape accepted by this syntax.
     ///
-    /// Returns `None` when Sass evaluation is required to determine the resulting CSS value.
+    /// Returns `None` when SCSS evaluation is required to determine the resulting CSS value.
     pub fn matches_scss_value(&self, expression: &ScssExpression) -> Option<bool> {
         let values = static_scss_values(expression)?;
         Some(self.matches_static_scss_values(&values))
@@ -63,7 +63,7 @@ impl PropertySyntax {
 
     /// Returns whether a static SCSS initial value matches this syntax and is computationally independent.
     ///
-    /// Returns `None` when Sass evaluation is required to determine the resulting CSS value.
+    /// Returns `None` when SCSS evaluation is required to determine the resulting CSS value.
     pub fn matches_scss_initial_value(&self, expression: &ScssExpression) -> Option<bool> {
         let values = static_scss_values(expression)?;
         Some(

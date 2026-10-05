@@ -1,15 +1,36 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{AnyRuleStart, RuleId};
-use biome_css_syntax::{AnyCssRoot, CssSyntaxKind};
+use biome_css_syntax::{
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause,
+    ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule,
+    ScssWhileAtRule,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use std::hash::{BuildHasher, Hasher};
 
 use biome_rule_options::no_duplicate_selectors::NoDuplicateSelectorsOptions;
 
 use crate::services::semantic::Semantic;
+
+const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
+    .union(CssMediaAtRule::KIND_SET)
+    .union(CssScopeAtRule::KIND_SET)
+    .union(CssStartingStyleAtRule::KIND_SET)
+    .union(CssSupportsAtRule::KIND_SET);
+
+const SCSS_SELECTOR_CONTEXT_KINDS: SyntaxKindSet<CssLanguage> = ScssAtRootAtRule::KIND_SET
+    .union(ScssEachAtRule::KIND_SET)
+    .union(ScssElseClause::KIND_SET)
+    .union(ScssForAtRule::KIND_SET)
+    .union(ScssFunctionAtRule::KIND_SET)
+    .union(ScssIfAtRule::KIND_SET)
+    .union(ScssIncludeAtRule::KIND_SET)
+    .union(ScssMixinAtRule::KIND_SET)
+    .union(ScssWhileAtRule::KIND_SET);
 
 declare_lint_rule! {
     /// Disallow duplicate selectors.
@@ -26,9 +47,9 @@ declare_lint_rule! {
     /// `a b`. A selector inside an at-rule such as `@media` is compared only with selectors inside
     /// the same at-rule, not with a matching selector at the top level.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// This rule does not evaluate Sass. It compares selectors within the same Sass block, but does
+    /// This rule does not evaluate SCSS. It compares selectors within the same SCSS block, but does
     /// not expand mixins, includes, or `@extend`. Selectors containing interpolation or placeholders
     /// are ignored because their emitted form cannot be determined statically.
     ///
@@ -97,20 +118,7 @@ pub struct DuplicateSelectorList {
 fn scss_selector_context(rule: &AnyRuleStart) -> Option<TextRange> {
     rule.syntax()
         .ancestors()
-        .find(|ancestor| {
-            matches!(
-                ancestor.kind(),
-                CssSyntaxKind::SCSS_AT_ROOT_AT_RULE
-                    | CssSyntaxKind::SCSS_EACH_AT_RULE
-                    | CssSyntaxKind::SCSS_ELSE_CLAUSE
-                    | CssSyntaxKind::SCSS_FOR_AT_RULE
-                    | CssSyntaxKind::SCSS_FUNCTION_AT_RULE
-                    | CssSyntaxKind::SCSS_IF_AT_RULE
-                    | CssSyntaxKind::SCSS_INCLUDE_AT_RULE
-                    | CssSyntaxKind::SCSS_MIXIN_AT_RULE
-                    | CssSyntaxKind::SCSS_WHILE_AT_RULE
-            )
-        })
+        .find(|ancestor| SCSS_SELECTOR_CONTEXT_KINDS.matches(ancestor.kind()))
         .map(|ancestor| ancestor.text_trimmed_range())
 }
 
@@ -163,14 +171,8 @@ impl Rule for NoDuplicateSelectors {
                     }
 
                     let rule_node = rule.node(&root);
-                    let is_at_rule = matches!(
-                        &rule_node,
-                        AnyRuleStart::CssMediaAtRule(_)
-                            | AnyRuleStart::CssSupportsAtRule(_)
-                            | AnyRuleStart::CssContainerAtRule(_)
-                            | AnyRuleStart::CssScopeAtRule(_)
-                            | AnyRuleStart::CssStartingStyleAtRule(_)
-                    );
+                    let is_at_rule =
+                        INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind());
 
                     if is_at_rule {
                         let parent_hash = *context_hash_stack.last().unwrap();

@@ -1,7 +1,10 @@
-use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T};
-use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
+use biome_css_syntax::{
+    AnyCssRoot, CssLanguage, CssMediaAtRule, CssScopeAtRule, CssSupportsAtRule, CssSyntaxKind,
+    CssSyntaxToken, ScssAtRootAtRule, T,
+};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
@@ -9,6 +12,16 @@ use super::model::{
 };
 use crate::events::SemanticEvent;
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
+
+static EXPLICIT_COMBINATOR_KINDS: LazyLock<SyntaxKindSet<CssLanguage>> = LazyLock::new(|| {
+    SyntaxKindSet::of(T![>])
+        .union(SyntaxKindSet::of(T![+]))
+        .union(SyntaxKindSet::of(T![~]))
+        .union(SyntaxKindSet::of(T![||]))
+});
+const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssMediaAtRule::KIND_SET
+    .union(CssScopeAtRule::KIND_SET)
+    .union(CssSupportsAtRule::KIND_SET);
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
@@ -57,15 +70,15 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.all_rules.get(parent_id.index())?;
                 let typed_node = rule.node.to_node(self.root.syntax());
-                if matches!(
-                    &typed_node,
-                    AnyRuleStart::CssMediaAtRule(_)
-                        | AnyRuleStart::CssScopeAtRule(_)
-                        | AnyRuleStart::CssSupportsAtRule(_)
-                ) || matches!(
-                    &typed_node,
-                    AnyRuleStart::ScssAtRootAtRule(at_root) if at_root.selector().is_none()
-                ) {
+                let is_at_root_without_selector =
+                    if let AnyRuleStart::ScssAtRootAtRule(at_root) = &typed_node {
+                        at_root.selector().is_none()
+                    } else {
+                        false
+                    };
+                if NON_SELECTOR_RULE_KINDS.matches(typed_node.syntax().kind())
+                    || is_at_root_without_selector
+                {
                     current_parent_id = iterator
                         .next()
                         .and_then(|rule_id| self.all_rules.get(rule_id.index()))
@@ -302,7 +315,7 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
 }
 
 fn is_explicit_combinator(kind: CssSyntaxKind) -> bool {
-    matches!(kind, T![>] | T![+] | T![~] | T![||])
+    EXPLICIT_COMBINATOR_KINDS.matches(kind)
 }
 
 /// Resolves the `current` token sequence against each parent [`Selector`],

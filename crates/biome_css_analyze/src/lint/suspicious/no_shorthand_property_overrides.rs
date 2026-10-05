@@ -4,10 +4,20 @@ use biome_analyze::{
     Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
+use biome_css_syntax::{
+    AnyCssDeclarationName, CssDeclarationList, CssDeclarationOrAtRuleList,
+    CssDeclarationOrRuleList, CssGenericProperty, CssLanguage, CssPageAtRuleItemList, CssSyntaxKind,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, TextRange, TokenText, WalkEvent,
+};
 use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
+
+const DECLARATION_LIST_KINDS: SyntaxKindSet<CssLanguage> = CssDeclarationList::KIND_SET
+    .union(CssDeclarationOrAtRuleList::KIND_SET)
+    .union(CssDeclarationOrRuleList::KIND_SET)
+    .union(CssPageAtRuleItemList::KIND_SET);
 
 declare_lint_rule! {
     /// Disallow shorthand properties that override earlier, more specific properties.
@@ -18,10 +28,10 @@ declare_lint_rule! {
     ///
     /// See [MDN's shorthand property guide](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
     /// Declarations are compared within each authored declaration block. The rule does not expand
-    /// mixins or includes, so overrides introduced only after Sass expansion are not reported.
+    /// mixins or includes, so overrides introduced only after SCSS expansion are not reported.
     ///
     /// ## Examples
     ///
@@ -230,13 +240,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
 }
 
 fn is_declaration_list(kind: CssSyntaxKind) -> bool {
-    matches!(
-        kind,
-        CssSyntaxKind::CSS_DECLARATION_LIST
-            | CssSyntaxKind::CSS_DECLARATION_OR_AT_RULE_LIST
-            | CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
-            | CssSyntaxKind::CSS_PAGE_AT_RULE_ITEM_LIST
-    )
+    DECLARATION_LIST_KINDS.matches(kind)
 }
 
 fn is_declaration_in_list(node: &SyntaxNode<CssLanguage>) -> bool {

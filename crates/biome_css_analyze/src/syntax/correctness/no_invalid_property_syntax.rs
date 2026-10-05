@@ -9,9 +9,9 @@ use biome_rowan::AstNode;
 declare_syntax_rule! {
     /// Reports invalid `syntax` descriptors in CSS `@property` rules.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// A `syntax` descriptor that requires Sass evaluation is not validated. This includes values
+    /// A `syntax` descriptor that requires SCSS evaluation is not validated. This includes values
     /// produced by variables, interpolation, arithmetic expressions, or function calls.
     ///
     /// ## Examples

@@ -13,10 +13,10 @@ declare_lint_rule! {
     ///
     /// This rule checks the declaration blocks for duplicate custom properties.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
     /// Declarations are compared within each authored declaration block. The rule does not expand
-    /// mixins or includes, so duplicates introduced only after Sass expansion are not reported.
+    /// mixins or includes, so duplicates introduced only after SCSS expansion are not reported.
     ///
     /// ## Examples
     ///

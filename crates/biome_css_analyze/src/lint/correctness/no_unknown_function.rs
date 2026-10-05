@@ -9,16 +9,17 @@ use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
+use std::cmp::Ordering;
 
 declare_lint_rule! {
     /// Disallow unrecognized CSS value functions.
     ///
     /// This rule ignores double-dashed custom functions, e.g. `--custom-function()`.
-    /// In SCSS files, it also ignores Sass built-in functions and functions declared in the same file.
+    /// In SCSS files, it also ignores SCSS built-in functions and functions declared in the same file.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// The rule does not resolve functions made globally available by legacy Sass `@import`.
+    /// The rule does not resolve functions made globally available by legacy SCSS `@import`.
     /// Configure the `ignore` option for imported functions that cannot be resolved locally.
     ///
     /// Data sources of known CSS value functions are:
@@ -158,9 +159,9 @@ const SCSS_BUILT_IN_FUNCTIONS: &[&str] = &[
     "to-upper-case",
     "transparentize",
     "type-of",
+    "unique-id",
     "unit",
     "unitless",
-    "unique-id",
     "unquote",
     "variable-exists",
     "zip",
@@ -246,16 +247,22 @@ impl Rule for NoUnknownFunction {
 
 fn is_scss_built_in_function(name: &str) -> bool {
     SCSS_BUILT_IN_FUNCTIONS
-        .iter()
-        .any(|built_in| scss_function_names_equal(name, built_in))
+        .binary_search_by(|built_in| compare_scss_function_names(built_in, name))
+        .is_ok()
+}
+
+fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
+    left.bytes()
+        .map(normalize_scss_function_name_byte)
+        .cmp(right.bytes().map(normalize_scss_function_name_byte))
+}
+
+fn normalize_scss_function_name_byte(byte: u8) -> u8 {
+    if byte == b'_' { b'-' } else { byte }
 }
 
 fn scss_function_names_equal(left: &str, right: &str) -> bool {
-    left.bytes()
-        .map(|byte| if byte == b'_' { b'-' } else { byte })
-        .eq(right
-            .bytes()
-            .map(|byte| if byte == b'_' { b'-' } else { byte }))
+    compare_scss_function_names(left, right) == Ordering::Equal
 }
 
 fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
@@ -265,4 +272,22 @@ fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
         }
     }
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scss_built_in_functions_are_sorted() {
+        for pair in SCSS_BUILT_IN_FUNCTIONS.windows(2) {
+            assert_eq!(
+                compare_scss_function_names(pair[0], pair[1]),
+                Ordering::Less,
+                "{} should sort before {}",
+                pair[0],
+                pair[1]
+            );
+        }
+    }
 }

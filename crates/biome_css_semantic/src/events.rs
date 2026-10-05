@@ -1,15 +1,17 @@
 use biome_css_syntax::{
     AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssFunction, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
-    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule, CssString,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssLanguage, CssNestedQualifiedRule,
+    CssPropertyAtRule, CssQualifiedRule, CssString,
     CssSyntaxKind::*,
-    ScssExpression, decode_css_identifier,
+    ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssInterpolation,
+    ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
     single_expression_item,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -22,6 +24,16 @@ use crate::{
 };
 
 const ROOT_SELECTOR: &str = ":root";
+
+const RELATIVE_SELECTOR_LIST_PARENT_KINDS: SyntaxKindSet<CssLanguage> =
+    CssQualifiedRule::KIND_SET.union(CssNestedQualifiedRule::KIND_SET);
+const SELECTOR_LIST_PARENT_KINDS: SyntaxKindSet<CssLanguage> =
+    RELATIVE_SELECTOR_LIST_PARENT_KINDS.union(ScssAtRootSelector::KIND_SET);
+const SCSS_REQUIRES_EVALUATION_KINDS: SyntaxKindSet<CssLanguage> = ScssVariable::KIND_SET
+    .union(ScssInterpolation::KIND_SET)
+    .union(ScssBinaryExpression::KIND_SET)
+    .union(ScssUnaryExpression::KIND_SET)
+    .union(AnyCssFunction::KIND_SET);
 
 #[derive(Debug)]
 pub enum SemanticEvent {
@@ -71,24 +83,16 @@ impl SemanticEventExtractor {
             //
             // Each rule start is pushed onto a stack to maintain parent-child relationships,
             // allowing for proper scoping and inheritance of styles.
-            kind if kind == CSS_QUALIFIED_RULE
-                || kind == CSS_NESTED_QUALIFIED_RULE
-                || kind == CSS_CONTAINER_AT_RULE
-                || kind == CSS_MEDIA_AT_RULE
-                || kind == CSS_SCOPE_AT_RULE
-                || kind == CSS_STARTING_STYLE_AT_RULE
-                || kind == CSS_SUPPORTS_AT_RULE
-                || kind == SCSS_AT_ROOT_AT_RULE =>
-            {
+            kind if AnyRuleStart::can_cast(kind) => {
                 if let Some(start) = AnyRuleStart::cast(node.clone()) {
                     self.stash.push_back(SemanticEvent::RuleStart(start));
                 }
             }
             CSS_SELECTOR_LIST => {
-                if !matches!(
-                    node.parent().kind(),
-                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE | SCSS_AT_ROOT_SELECTOR)
-                ) {
+                if !node
+                    .parent()
+                    .is_some_and(|parent| SELECTOR_LIST_PARENT_KINDS.matches(parent.kind()))
+                {
                     return;
                 };
                 node.children()
@@ -96,10 +100,9 @@ impl SemanticEventExtractor {
                     .for_each(|s| self.process_selector(s));
             }
             CSS_RELATIVE_SELECTOR_LIST => {
-                if !matches!(
-                    node.parent().kind(),
-                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
-                ) {
+                if !node.parent().is_some_and(|parent| {
+                    RELATIVE_SELECTOR_LIST_PARENT_KINDS.matches(parent.kind())
+                }) {
                     return;
                 };
                 node.children()
@@ -117,7 +120,10 @@ impl SemanticEventExtractor {
                     });
             }
             CSS_DECLARATION => {
-                if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
+                if node
+                    .parent()
+                    .is_some_and(|parent| parent.kind() == CSS_SUPPORTS_FEATURE_DECLARATION)
+                {
                     return;
                 }
                 // SAFETY: checked by the previous match
@@ -324,17 +330,7 @@ impl SemanticEventExtractor {
     }
 
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
-        if matches!(
-            node.kind(),
-            CSS_QUALIFIED_RULE
-                | CSS_NESTED_QUALIFIED_RULE
-                | CSS_CONTAINER_AT_RULE
-                | CSS_MEDIA_AT_RULE
-                | CSS_SCOPE_AT_RULE
-                | CSS_STARTING_STYLE_AT_RULE
-                | CSS_SUPPORTS_AT_RULE
-                | SCSS_AT_ROOT_AT_RULE
-        ) {
+        if AnyRuleStart::can_cast(node.kind()) {
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);
@@ -386,12 +382,10 @@ fn scss_expression_string(expression: &ScssExpression) -> Option<CssString> {
 }
 
 fn scss_expression_requires_evaluation(expression: &ScssExpression) -> bool {
-    expression.syntax().descendants().any(|node| {
-        matches!(
-            node.kind(),
-            SCSS_VARIABLE | SCSS_INTERPOLATION | SCSS_BINARY_EXPRESSION | SCSS_UNARY_EXPRESSION
-        ) || AnyCssFunction::can_cast(node.kind())
-    })
+    expression
+        .syntax()
+        .descendants()
+        .any(|node| SCSS_REQUIRES_EVALUATION_KINDS.matches(node.kind()))
 }
 
 fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {

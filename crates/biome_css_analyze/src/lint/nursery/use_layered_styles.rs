@@ -2,10 +2,16 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{CssImportAtRule, CssNestedQualifiedRule, CssQualifiedRule, CssSyntaxKind};
+use biome_css_syntax::{
+    CssImportAtRule, CssLanguage, CssLayerAtRule, CssNestedQualifiedRule, CssQualifiedRule,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, declare_node_union};
+use biome_rowan::{AstNode, SyntaxKindSet, declare_node_union};
 use biome_rule_options::use_layered_styles::UseLayeredStylesOptions;
+
+const LAYERED_STYLE_ANCESTOR_KINDS: SyntaxKindSet<CssLanguage> = CssLayerAtRule::KIND_SET
+    .union(CssQualifiedRule::KIND_SET)
+    .union(CssNestedQualifiedRule::KIND_SET);
 
 declare_lint_rule! {
     /// Enforce style rules to be defined within a cascade layer.
@@ -14,9 +20,9 @@ declare_lint_rule! {
     /// Rules outside of a cascade layer (excluding `!important`) always take precedence over
     /// layered rules, making the cascade more difficult to predict and override.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// Layer membership is determined from the authored ancestors of a style rule. Sass mixins and
+    /// Layer membership is determined from the authored ancestors of a style rule. SCSS mixins and
     /// includes are not expanded, so a rule in a mixin is checked at its definition site rather than
     /// at the layer where the mixin may be included.
     ///
@@ -126,16 +132,9 @@ impl Rule for UseLayeredStyles {
             return import.layer().is_none().then_some(());
         }
 
+        // A containing layer satisfies the rule. Nested rules are covered by their outer style rule.
         for ancestor in node.syntax().ancestors().skip(1) {
-            if matches!(
-                ancestor.kind(),
-                // The rule is contained within a cascade layer.
-                CssSyntaxKind::CSS_LAYER_AT_RULE
-                    // The rule is nested inside another style rule, which is
-                    // reported on its own when it is outside a layer.
-                    | CssSyntaxKind::CSS_QUALIFIED_RULE
-                    | CssSyntaxKind::CSS_NESTED_QUALIFIED_RULE
-            ) {
+            if LAYERED_STYLE_ANCESTOR_KINDS.matches(ancestor.kind()) {
                 return None;
             }
         }

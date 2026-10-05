@@ -19,9 +19,9 @@ declare_lint_rule! {
     /// contain the same number of cells and must not be empty. When an area name appears in more
     /// than one cell, those cells must form one filled rectangle.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// A `grid-template-areas` value that requires Sass evaluation is ignored. This includes values
+    /// A `grid-template-areas` value that requires SCSS evaluation is ignored. This includes values
     /// containing variables, interpolation, functions, or arithmetic expressions.
     ///
     /// ## Examples

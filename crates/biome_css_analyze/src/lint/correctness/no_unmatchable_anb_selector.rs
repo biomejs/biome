@@ -20,9 +20,9 @@ declare_lint_rule! {
     /// See the [CSS syntax specification](https://www.w3.org/TR/css-syntax-3/#anb-microsyntax)
     /// for the complete formula syntax.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// An+B expressions containing Sass interpolation are ignored because their evaluated value is
+    /// An+B expressions containing SCSS interpolation are ignored because their evaluated value is
     /// unknown.
     ///
     /// ## Examples

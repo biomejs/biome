@@ -36,9 +36,9 @@ declare_lint_rule! {
     /// Code inside `@supports` blocks is exempt: if you feature-detect a capability before
     /// using it, the rule does not flag it.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// This rule checks authored syntax without evaluating Sass. Features produced only through
+    /// This rule checks authored syntax without evaluating SCSS. Features produced only through
     /// interpolation or function evaluation may not be reported. Static syntax inside mixin
     /// definitions is checked even when the mixin is not included.
     ///
@@ -244,7 +244,7 @@ impl Rule for UseBaseline {
             AnyBaselineCheckable::CssGenericProperty(prop) => check_property(prop, options),
             AnyBaselineCheckable::CssFunction(func) => check_function(func, options),
             AnyBaselineCheckable::CssPseudoClassIdentifier(pseudo) => check_pseudo(
-                // `:foo-#{$name}` cannot be checked until Sass resolves the name.
+                // `:foo-#{$name}` cannot be checked until SCSS resolves the name.
                 pseudo
                     .name()
                     .ok()?
@@ -257,7 +257,7 @@ impl Rule for UseBaseline {
                 options,
             ),
             AnyBaselineCheckable::CssPseudoElementIdentifier(pseudo) => check_pseudo(
-                // `::foo-#{$name}` cannot be checked until Sass resolves the name.
+                // `::foo-#{$name}` cannot be checked until SCSS resolves the name.
                 pseudo
                     .name()
                     .ok()?

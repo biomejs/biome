@@ -26,9 +26,9 @@ declare_lint_rule! {
     /// - transform functions such as `rotate()` and `translateX()` used with
     ///   `<transform-function>` or `<transform-list>`.
     ///
-    /// ## Sass limitations
+    /// ## SCSS limitations
     ///
-    /// An `initial-value` that requires Sass evaluation is not validated. This includes values
+    /// An `initial-value` that requires SCSS evaluation is not validated. This includes values
     /// produced by variables, interpolation, arithmetic expressions, or user-defined functions.
     ///
     /// ## Examples
