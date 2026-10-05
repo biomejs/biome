@@ -1,0 +1,32 @@
+/* should not generate diagnostics */
+it.each();
+it.each()(1);
+it.todo();
+describe("oo", function () {});
+test("foo", function () {});
+test(`123`, function () {});
+test("", () => {});
+test(``, () => {});
+test("123 Foo", () => {});
+test("<Foo />", () => {});
+test("élan", () => {});
+test(`${name} works`, () => {});
+test(`Foo ${name}`, () => {});
+test(tag`Foo`, () => {});
+test(title, () => {});
+test(Foo, () => {});
+foo("Foo", () => {});
+foo.test("Foo", () => {});
+beforeEach("Foo", () => {});
+benchmark("Foo", () => {});
+test.skipIf(isCI)("foo", () => {});
+foo.skipIf(isCI)("Foo", () => {});
+test.skipIf("Foo");
+bench.each("Foo", () => {});
+describe("foo", () => {
+	it("works with Foo", () => {});
+});
+test.each`
+	a
+	${1}
+`("foo $a", () => {});
