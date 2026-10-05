@@ -656,6 +656,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
 AnyCssDeclarationOrRule =
 	AnyCssRule
+	| CssKeyframesItem
 	| CssDeclarationWithSemicolon
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
