@@ -151,6 +151,7 @@ pub mod no_invalid_file_input_accept;
 pub mod no_invalid_grid_areas;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_invalid_property_init_value;
+pub mod no_invalid_this;
 pub mod no_invalid_use_before_declaration;
 pub mod no_irregular_whitespace;
 pub mod no_iterator_property;

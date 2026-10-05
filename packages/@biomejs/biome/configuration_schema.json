@@ -4642,6 +4642,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoInvalidThisConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoInvalidThisOptions" }
+			]
+		},
+		"NoInvalidThisOptions": { "type": "object", "additionalProperties": false },
 		"NoInvalidUseBeforeDeclarationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7184,6 +7191,13 @@
 					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-invalid-property-init-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidPropertyInitValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidThis": {
+					"description": "Disallow this in places where it is undefined.\nSee https://biomejs.dev/linter/rules/no-invalid-this",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInvalidThisConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10184,6 +10198,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoInvalidPropertyInitValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoInvalidThisOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoInvalidThisOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
