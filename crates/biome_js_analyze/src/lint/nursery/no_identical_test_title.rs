@@ -77,6 +77,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintJest("no-identical-title").same(),
             RuleSource::EslintVitest("no-identical-title").same(),
+            RuleSource::EslintPlaywright("no-identical-title").same(),
         ],
         domains: &[RuleDomain::Test],
     }

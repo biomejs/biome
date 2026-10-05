@@ -37,7 +37,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noUnsafeNegation",
         language: "js",
-        sources: &[RuleSource::Eslint("no-unsafe-negation").same()],
+        sources: &[
+            RuleSource::Eslint("no-unsafe-negation").same(),
+            RuleSource::Eslint("no-negated-in-lhs").inspired(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
