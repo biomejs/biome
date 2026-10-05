@@ -1,9 +1,10 @@
 use crate::bindings::EmbeddedBinding;
+use crate::components::{ComponentNameSegments, EmbeddedElement, find_component_at};
 use crate::references::{
     EmbeddedTypeReference, EmbeddedValueReference, is_potential_vue_directive_reference,
     svelte_store_reference_name, vue_directive_name_matches_reference_name,
 };
-use biome_rowan::TokenText;
+use biome_rowan::{TextRange, TokenText};
 
 /// The result of resolving a Vue custom directive in an embedded document.
 ///
@@ -129,6 +130,8 @@ pub struct EmbeddedData {
     type_references: Vec<EmbeddedTypeReference>,
     /// Vue custom-directive declarations available to the host template.
     vue_directive_declarations: VueDirectiveDeclarations,
+    /// Tags of the host document in source order
+    elements: Vec<EmbeddedElement>,
 }
 
 impl EmbeddedData {
@@ -137,12 +140,14 @@ impl EmbeddedData {
         value_references: Vec<EmbeddedValueReference>,
         type_references: Vec<EmbeddedTypeReference>,
         vue_directive_declarations: VueDirectiveDeclarations,
+        elements: Vec<EmbeddedElement>,
     ) -> Self {
         Self {
             bindings,
             value_references,
             type_references,
             vue_directive_declarations,
+            elements,
         }
     }
 
@@ -196,6 +201,12 @@ impl EmbeddedData {
     /// Resolves a Vue custom directive against declarations in the host component.
     pub fn resolve_vue_directive(&self, name: &str) -> VueDirectiveResolution {
         self.vue_directive_declarations.resolve(name)
+    }
+
+    /// Returns the name segments of the component whose tag in the host
+    /// document contains `range`.
+    pub fn component_at(&self, range: TextRange) -> Option<&ComponentNameSegments> {
+        find_component_at(&self.elements, range)
     }
 }
 
@@ -309,6 +320,7 @@ mod tests {
             }],
             Vec::new(),
             VueDirectiveDeclarations::default(),
+            Vec::new(),
         );
 
         assert!(data.is_vue_directive_used("vClickOutside"));

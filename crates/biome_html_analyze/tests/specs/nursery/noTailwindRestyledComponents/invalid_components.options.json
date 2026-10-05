@@ -1,0 +1,45 @@
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noTailwindRestyledComponents": {
+          "level": "error",
+          "options": {
+            "allow": [
+              {
+                "components": "Card",
+                "categories": [
+                  "shape"
+                ],
+                "classes": [
+                  "shadow-lg"
+                ]
+              },
+              {
+                "components": [
+                  "Button",
+                  "Badge"
+                ],
+                "categories": [
+                  "color"
+                ]
+              },
+              {
+                "components": "*",
+                "categories": [
+                  "motion"
+                ]
+              },
+              {
+                "components": "Panel.Root",
+                "categories": [
+                  "spacing"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

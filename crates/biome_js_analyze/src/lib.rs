@@ -28,6 +28,7 @@ use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
+use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -64,6 +65,8 @@ pub struct JsAnalyzerServices {
     language_db: Option<Rc<dyn LanguageDb>>,
     parsed_source: Option<AnyParsedSource>,
     embedded_data: Option<Arc<EmbeddedData>>,
+    /// The offset of the analyzed snippet in its host document.
+    snippet_offset: Option<TextSize>,
     project_layout: Arc<ProjectLayout>,
     source_type: JsFileSource,
 }
@@ -91,6 +94,7 @@ impl From<(Rc<dyn ModuleDb>, Arc<ProjectLayout>, JsFileSource)> for JsAnalyzerSe
             language_db: None,
             parsed_source: None,
             embedded_data: None,
+            snippet_offset: None,
             project_layout,
             source_type,
         }
@@ -104,6 +108,7 @@ impl From<&AnyJsRoot> for JsAnalyzerServices {
             language_db: None,
             parsed_source: None,
             embedded_data: None,
+            snippet_offset: None,
             project_layout: Arc::new(ProjectLayout::default()),
             source_type: JsFileSource::default(),
         }
@@ -133,6 +138,11 @@ impl JsAnalyzerServices {
 
     pub fn with_embedded_data(mut self, embedded_data: Option<Arc<EmbeddedData>>) -> Self {
         self.embedded_data = embedded_data;
+        self
+    }
+
+    pub fn with_snippet_offset(mut self, snippet_offset: Option<TextSize>) -> Self {
+        self.snippet_offset = snippet_offset;
         self
     }
 
@@ -204,6 +214,7 @@ where
         language_db: embedded_db,
         parsed_source,
         embedded_data,
+        snippet_offset,
         project_layout,
         source_type,
     } = services;
@@ -282,10 +293,15 @@ where
     if let Some(db) = &embedded_db {
         services.insert_service(db.clone());
     }
+    let snippet_offset = snippet_offset.unwrap_or_default();
     if let Some(embedded_data) = embedded_data {
-        services.insert_service(EmbeddedService::from_data(embedded_data));
+        services.insert_service(EmbeddedService::from_data(embedded_data, snippet_offset));
     } else if let Some(embedded_db) = embedded_db {
-        services.insert_service(EmbeddedService::new(embedded_db, options.file_path.clone()));
+        services.insert_service(EmbeddedService::new(
+            embedded_db,
+            options.file_path.clone(),
+            snippet_offset,
+        ));
     }
 
     let ctx = AnalyzerContext {

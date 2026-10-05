@@ -1191,7 +1191,9 @@ fn js_analyzer_services(
 
     let services = services.with_language_db(workspace_db.rc_language_db());
     match parsed_source {
-        Some(source) => services.with_parsed_source(source.clone()),
+        Some(source) => services
+            .with_parsed_source(source.clone())
+            .with_snippet_offset(source.diagnostic_offset(workspace_db)),
         None => services,
     }
 }
@@ -1210,7 +1212,8 @@ fn js_analyzer_services_for_fix(
         params.module_db.clone(),
         params.project_layout.clone(),
         source_type,
-    );
+    )
+    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1310,7 +1313,8 @@ pub(super) fn lint_with_inspector(
         params.module_db.clone(),
         params.project_layout.clone(),
         files_source,
-    );
+    )
+    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
