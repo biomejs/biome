@@ -3264,6 +3264,11 @@ export interface Nursery {
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
+	 * Require test and test suite titles to start with a lowercase letter.
+	 * See https://biomejs.dev/linter/rules/use-lowercase-test-title
+	 */
+	useLowercaseTestTitle?: UseLowercaseTestTitleConfiguration;
+	/**
 	 * Use modern Math APIs for common mathematical operations.
 	 * See https://biomejs.dev/linter/rules/use-modern-math-apis
 	 */
@@ -5710,6 +5715,9 @@ export type UseLayeredStylesConfiguration =
 export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLogicalPropertiesOptions;
+export type UseLowercaseTestTitleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseLowercaseTestTitleOptions;
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
@@ -8203,6 +8211,14 @@ export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLogicalPropertiesOptions;
 }
+export interface RuleWithUseLowercaseTestTitleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseLowercaseTestTitleOptions;
+}
 export interface RuleWithUseModernMathApisOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10478,6 +10494,12 @@ export interface UseLogicalPropertiesOptions {
 	 */
 	direction?: UseLogicalPropertiesDirection;
 }
+export interface UseLowercaseTestTitleOptions {
+	/**
+	 * A list of prefixes. Titles that start with one of these prefixes are not checked.
+	 */
+	allowedPrefixes?: string[];
+}
 export type UseModernMathApisOptions = {};
 export type UseNamedLayerOptions = {};
 /**
@@ -12043,6 +12065,9 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
+	| "lint/nursery/useLowercaseTestTitle"
+	| "lint/nursery/useMathMinMax"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
