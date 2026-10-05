@@ -1,0 +1,350 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: functionGuards.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function isString(input: unknown): input is string {
+	return typeof input === "string";
+}
+
+declare function isNull(input: unknown): input is null;
+declare function isReady(input: unknown): input is "ready";
+declare function secondString(this: void, ignored: unknown, input: unknown): input is string;
+declare function escaped(/u0076alue: unknown): /u{76}alue is string;
+declare function identity<T>(input: T): T;
+
+function branches(value: "ready" | null) {
+	if (isString(value)) {
+		if (value) {}
+	} else {
+		if (value) {}
+	}
+}
+
+function earlyReturn(value: string | null) {
+	if (!isString(value)) return;
+	return value?.length;
+}
+
+function falseBranch(value: string | null) {
+	if (isNull(value)) return;
+	return value ?? "fallback";
+}
+
+function literal(value: "ready" | "") {
+	if (isReady(value)) {
+		if (value) {}
+	} else {
+		if (value) {}
+	}
+}
+
+function logical(value: string | null) {
+	return isString(value) && value?.length;
+}
+
+function conditional(value: string | null) {
+	return isString(value) ? value?.length : null;
+}
+
+function loop(value: string | null) {
+	while (isString(value)) {
+		value?.length;
+	}
+}
+
+function secondArgument(value: string | null, other: unknown) {
+	if (secondString(other, value)) {
+		return value?.length;
+	}
+}
+
+function escapedParameter(value: string | null) {
+	if (escaped(value)) {
+		return value?.length;
+	}
+}
+
+function nestedCall(value: string | null) {
+	if (isString(value)) {
+		return identity(value)?.length;
+	}
+}
+
+```
+
+# Diagnostics
+```
+functionGuards.ts:15:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    13 │ function branches(value: "ready" | null) {
+    14 │ 	if (isString(value)) {
+  > 15 │ 		if (value) {}
+       │ 		    ^^^^^
+    16 │ 	} else {
+    17 │ 		if (value) {}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+functionGuards.ts:17:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    15 │ 		if (value) {}
+    16 │ 	} else {
+  > 17 │ 		if (value) {}
+       │ 		    ^^^^^
+    18 │ 	}
+    19 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+functionGuards.ts:23:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    21 │ function earlyReturn(value: string | null) {
+    22 │ 	if (!isString(value)) return;
+  > 23 │ 	return value?.length;
+       │ 	       ^^^^^
+    24 │ }
+    25 │ 
+  
+  i Replace ?. with ..
+  
+    21 │ function earlyReturn(value: string | null) {
+    22 │ 	if (!isString(value)) return;
+  > 23 │ 	return value?.length;
+       │ 	            ^^
+    24 │ }
+    25 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:28:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    26 │ function falseBranch(value: string | null) {
+    27 │ 	if (isNull(value)) return;
+  > 28 │ 	return value ?? "fallback";
+       │ 	       ^^^^^
+    29 │ }
+    30 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    26 │ function falseBranch(value: string | null) {
+    27 │ 	if (isNull(value)) return;
+  > 28 │ 	return value ?? "fallback";
+       │ 	             ^^
+    29 │ }
+    30 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+functionGuards.ts:33:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    31 │ function literal(value: "ready" | "") {
+    32 │ 	if (isReady(value)) {
+  > 33 │ 		if (value) {}
+       │ 		    ^^^^^
+    34 │ 	} else {
+    35 │ 		if (value) {}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+functionGuards.ts:35:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    33 │ 		if (value) {}
+    34 │ 	} else {
+  > 35 │ 		if (value) {}
+       │ 		    ^^^^^
+    36 │ 	}
+    37 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+functionGuards.ts:40:28 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    39 │ function logical(value: string | null) {
+  > 40 │ 	return isString(value) && value?.length;
+       │ 	                          ^^^^^
+    41 │ }
+    42 │ 
+  
+  i Replace ?. with ..
+  
+    39 │ function logical(value: string | null) {
+  > 40 │ 	return isString(value) && value?.length;
+       │ 	                               ^^
+    41 │ }
+    42 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:44:27 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    43 │ function conditional(value: string | null) {
+  > 44 │ 	return isString(value) ? value?.length : null;
+       │ 	                         ^^^^^
+    45 │ }
+    46 │ 
+  
+  i Replace ?. with ..
+  
+    43 │ function conditional(value: string | null) {
+  > 44 │ 	return isString(value) ? value?.length : null;
+       │ 	                              ^^
+    45 │ }
+    46 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:49:3 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    47 │ function loop(value: string | null) {
+    48 │ 	while (isString(value)) {
+  > 49 │ 		value?.length;
+       │ 		^^^^^
+    50 │ 	}
+    51 │ }
+  
+  i Replace ?. with ..
+  
+    47 │ function loop(value: string | null) {
+    48 │ 	while (isString(value)) {
+  > 49 │ 		value?.length;
+       │ 		     ^^
+    50 │ 	}
+    51 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:55:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    53 │ function secondArgument(value: string | null, other: unknown) {
+    54 │ 	if (secondString(other, value)) {
+  > 55 │ 		return value?.length;
+       │ 		       ^^^^^
+    56 │ 	}
+    57 │ }
+  
+  i Replace ?. with ..
+  
+    53 │ function secondArgument(value: string | null, other: unknown) {
+    54 │ 	if (secondString(other, value)) {
+  > 55 │ 		return value?.length;
+       │ 		            ^^
+    56 │ 	}
+    57 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:61:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    59 │ function escapedParameter(value: string | null) {
+    60 │ 	if (escaped(value)) {
+  > 61 │ 		return value?.length;
+       │ 		       ^^^^^
+    62 │ 	}
+    63 │ }
+  
+  i Replace ?. with ..
+  
+    59 │ function escapedParameter(value: string | null) {
+    60 │ 	if (escaped(value)) {
+  > 61 │ 		return value?.length;
+       │ 		            ^^
+    62 │ 	}
+    63 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+functionGuards.ts:67:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    65 │ function nestedCall(value: string | null) {
+    66 │ 	if (isString(value)) {
+  > 67 │ 		return identity(value)?.length;
+       │ 		       ^^^^^^^^^^^^^^^
+    68 │ 	}
+    69 │ }
+  
+  i Replace ?. with ..
+  
+    65 │ function nestedCall(value: string | null) {
+    66 │ 	if (isString(value)) {
+  > 67 │ 		return identity(value)?.length;
+       │ 		                      ^^
+    68 │ 	}
+    69 │ }
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
