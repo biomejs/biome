@@ -4662,16 +4662,6 @@
 			"type": "object",
 			"additionalProperties": false
 		},
-		"NoIteratorPropertyConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoIteratorPropertyOptions" }
-			]
-		},
-		"NoIteratorPropertyOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoJsRestrictedPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7184,13 +7174,6 @@
 					"description": "Checks that the initial-value of an @property rule follows the value format declared by its syntax.\nSee https://biomejs.dev/linter/rules/no-invalid-property-init-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidPropertyInitValueConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noIteratorProperty": {
-					"description": "Disallow the use of the __iterator__ property.\nSee https://biomejs.dev/linter/rules/no-iterator-property",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoIteratorPropertyConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10202,15 +10185,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoIrregularWhitespaceOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoIteratorPropertyOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoIteratorPropertyOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
