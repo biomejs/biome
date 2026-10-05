@@ -655,7 +655,7 @@ impl JsModuleInfoCollector {
             return;
         }
 
-        let mut implicit_namespace_exports = FxHashMap::default();
+        let mut namespace_exports = FxHashMap::default();
         for child_binding in &self.bindings {
             if child_binding.name.is_empty() {
                 continue;
@@ -710,41 +710,74 @@ impl JsModuleInfoCollector {
             {
                 continue;
             }
-            let implicit_exports = *implicit_namespace_exports
+            let (implicit_exports, aliases) = namespace_exports
                 .entry(owner.syntax().clone())
                 .or_insert_with(|| {
                     let ambient = owner
                         .syntax()
                         .ancestors()
                         .any(|node| TsDeclareStatement::can_cast(node.kind()));
-                    ambient
-                        && !owner.body().is_ok_and(|body| {
-                            body.items().into_iter().any(|item| {
-                                item.as_js_export().is_some_and(|export| {
-                                    matches!(
-                                        export.export_clause(),
-                                        Ok(AnyJsExportClause::JsExportNamedClause(_)
-                                            | AnyJsExportClause::JsExportFromClause(_)
-                                            | AnyJsExportClause::JsExportNamedFromClause(_)
-                                            | AnyJsExportClause::TsExportAssignmentClause(_))
-                                    )
-                                })
-                            })
-                        })
+                    let mut explicit_exports = false;
+                    let mut aliases = FxHashMap::<TextRange, Vec<Text>>::default();
+                    if let Ok(body) = owner.body() {
+                        for item in body.items() {
+                            let Some(export) = item.as_js_export() else {
+                                continue;
+                            };
+                            match export.export_clause() {
+                                Ok(AnyJsExportClause::JsExportNamedClause(clause)) => {
+                                    explicit_exports = true;
+                                    for specifier in clause.specifiers().into_iter().flatten() {
+                                        let Ok(local) = specifier
+                                            .local_name()
+                                            .and_then(|name| name.value_token())
+                                        else {
+                                            continue;
+                                        };
+                                        let Ok(export_name) = specifier.exported_name() else {
+                                            continue;
+                                        };
+                                        let Some(binding) = self
+                                            .find_binding_in_scope(
+                                                local.text_trimmed(),
+                                                owner_scope.id(),
+                                            )
+                                            .and_then(|reference| {
+                                                self.bindings
+                                                    .get(reference.value_ty_or_ty().index())
+                                            })
+                                        else {
+                                            continue;
+                                        };
+                                        aliases.entry(binding.range).or_default().push(export_name);
+                                    }
+                                }
+                                Ok(
+                                    AnyJsExportClause::JsExportFromClause(_)
+                                    | AnyJsExportClause::JsExportNamedFromClause(_)
+                                    | AnyJsExportClause::TsExportAssignmentClause(_),
+                                ) => explicit_exports = true,
+                                _ => {}
+                            }
+                        }
+                    }
+                    (ambient && !explicit_exports, aliases)
                 });
             let import_alias = node
                 .syntax()
                 .ancestors()
                 .take_while(|ancestor| !TsModuleDeclaration::can_cast(ancestor.kind()))
                 .find_map(TsImportEqualsDeclaration::cast);
-            let exported = node.is_exported()
-                || declaration
-                    .syntax()
-                    .ancestors()
-                    .skip(1)
-                    .take_while(|ancestor| ancestor != owner.syntax())
-                    .any(|ancestor| JsExportSyntax::can_cast(ancestor.kind()));
-            if !exported && (!implicit_exports || import_alias.is_some()) {
+            let exported = declaration
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .take_while(|ancestor| ancestor != owner.syntax())
+                .any(|ancestor| JsExportSyntax::can_cast(ancestor.kind()));
+            if !exported
+                && (!*implicit_exports || import_alias.is_some())
+                && !aliases.contains_key(&child_binding.range)
+            {
                 continue;
             }
             let child_scope = self.semantic_model.scope_from_id(child_binding.scope_id);
@@ -753,9 +786,20 @@ impl JsModuleInfoCollector {
                     .parent()
                     .is_some_and(|parent| parent.id() == owner_scope.id())
             {
-                exports
-                    .entry(child_binding.name.clone())
-                    .or_insert_with(|| JsExport::Own(JsOwnExport::Binding(child_binding.range)));
+                if exported || (*implicit_exports && import_alias.is_none()) {
+                    exports
+                        .entry(child_binding.name.clone())
+                        .or_insert_with(|| {
+                            JsExport::Own(JsOwnExport::Binding(child_binding.range))
+                        });
+                }
+                if let Some(names) = aliases.get(&child_binding.range) {
+                    for name in names {
+                        exports.entry(name.clone()).or_insert_with(|| {
+                            JsExport::Own(JsOwnExport::Binding(child_binding.range))
+                        });
+                    }
+                }
             }
         }
     }
