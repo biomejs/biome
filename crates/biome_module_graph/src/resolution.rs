@@ -33,6 +33,9 @@ pub enum ResolutionMode {
     /// [ResolveError::BunBuiltIn]: biome_resolver::ResolveError::BunBuiltIn
     JavaScript,
 
+    /// Runtime entrypoints without requiring a TypeScript declaration entrypoint.
+    JavaScriptRuntime,
+
     /// Rules for stylesheet imports: `@import` rules of CSS files, and
     /// `<link rel="stylesheet">` elements and `<style>` blocks of HTML-like
     /// documents.
@@ -115,6 +118,14 @@ fn resolve_options(mode: ResolutionMode) -> ResolveOptions<'static> {
             resolve_node_builtins: true,
             resolve_bun_builtins: true,
             resolve_types: true,
+            ..Default::default()
+        },
+        ResolutionMode::JavaScriptRuntime => ResolveOptions {
+            condition_names: &["import", "default"],
+            default_files: &["index"],
+            extensions: &["js", "json", "node"],
+            resolve_node_builtins: true,
+            resolve_bun_builtins: true,
             ..Default::default()
         },
         ResolutionMode::Css => ResolveOptions {

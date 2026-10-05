@@ -1,0 +1,268 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=correctness/noUnresolvedImports index.mjs meta.js await.js using.js loop.js lexical.js class.js function.js method.js block.js hoisted.js
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "rules": { "correctness": { "noUnresolvedImports": "error" } } } }
+```
+
+## `await.js`
+
+```js
+await Promise.resolve();
+```
+
+## `block.js`
+
+```js
+{ const require = 1; console.log(require); } module.exports = {};
+```
+
+## `class.js`
+
+```js
+class module {}
+```
+
+## `function.js`
+
+```js
+async function run() { await Promise.resolve(); } module.exports = { run };
+```
+
+## `hoisted.js`
+
+```js
+var require = 1; module.exports = {};
+```
+
+## `index.mjs`
+
+```mjs
+import { absent as missing_meta } from 'meta';
+import { absent as missing_await } from 'await';
+import { absent as missing_using } from 'using';
+import { absent as missing_loop } from 'loop';
+import { absent as missing_lexical } from 'lexical';
+import { absent as missing_class } from 'class';
+import valid_function from 'function'; console.log(valid_function);
+import valid_method from 'method'; console.log(valid_method);
+import valid_block from 'block'; console.log(valid_block);
+import valid_hoisted from 'hoisted'; console.log(valid_hoisted);
+
+```
+
+## `lexical.js`
+
+```js
+const require = 1; console.log(require);
+```
+
+## `loop.js`
+
+```js
+for await (const value of []) { console.log(value); }
+```
+
+## `meta.js`
+
+```js
+console.log(import.meta.url);
+```
+
+## `method.js`
+
+```js
+module.exports = { async run() { await Promise.resolve(); } };
+```
+
+## `node_modules/await/package.json`
+
+```json
+{ "name": "await", "main": "../../await.js" }
+```
+
+## `node_modules/block/package.json`
+
+```json
+{ "name": "block", "main": "../../block.js" }
+```
+
+## `node_modules/class/package.json`
+
+```json
+{ "name": "class", "main": "../../class.js" }
+```
+
+## `node_modules/function/package.json`
+
+```json
+{ "name": "function", "main": "../../function.js" }
+```
+
+## `node_modules/hoisted/package.json`
+
+```json
+{ "name": "hoisted", "main": "../../hoisted.js" }
+```
+
+## `node_modules/lexical/package.json`
+
+```json
+{ "name": "lexical", "main": "../../lexical.js" }
+```
+
+## `node_modules/loop/package.json`
+
+```json
+{ "name": "loop", "main": "../../loop.js" }
+```
+
+## `node_modules/meta/package.json`
+
+```json
+{ "name": "meta", "main": "../../meta.js" }
+```
+
+## `node_modules/method/package.json`
+
+```json
+{ "name": "method", "main": "../../method.js" }
+```
+
+## `node_modules/using/package.json`
+
+```json
+{ "name": "using", "main": "../../using.js" }
+```
+
+## `using.js`
+
+```js
+await using resource = null;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+index.mjs:1:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module meta has no export named absent.
+  
+  > 1 │ import { absent as missing_meta } from 'meta';
+      │          ^^^^^^
+    2 │ import { absent as missing_await } from 'await';
+    3 │ import { absent as missing_using } from 'using';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.mjs:2:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module await has no export named absent.
+  
+    1 │ import { absent as missing_meta } from 'meta';
+  > 2 │ import { absent as missing_await } from 'await';
+      │          ^^^^^^
+    3 │ import { absent as missing_using } from 'using';
+    4 │ import { absent as missing_loop } from 'loop';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.mjs:3:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module using has no export named absent.
+  
+    1 │ import { absent as missing_meta } from 'meta';
+    2 │ import { absent as missing_await } from 'await';
+  > 3 │ import { absent as missing_using } from 'using';
+      │          ^^^^^^
+    4 │ import { absent as missing_loop } from 'loop';
+    5 │ import { absent as missing_lexical } from 'lexical';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.mjs:4:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module loop has no export named absent.
+  
+    2 │ import { absent as missing_await } from 'await';
+    3 │ import { absent as missing_using } from 'using';
+  > 4 │ import { absent as missing_loop } from 'loop';
+      │          ^^^^^^
+    5 │ import { absent as missing_lexical } from 'lexical';
+    6 │ import { absent as missing_class } from 'class';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.mjs:5:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module lexical has no export named absent.
+  
+    3 │ import { absent as missing_using } from 'using';
+    4 │ import { absent as missing_loop } from 'loop';
+  > 5 │ import { absent as missing_lexical } from 'lexical';
+      │          ^^^^^^
+    6 │ import { absent as missing_class } from 'class';
+    7 │ import valid_function from 'function'; console.log(valid_function);
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.mjs:6:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module class has no export named absent.
+  
+    4 │ import { absent as missing_loop } from 'loop';
+    5 │ import { absent as missing_lexical } from 'lexical';
+  > 6 │ import { absent as missing_class } from 'class';
+      │          ^^^^^^
+    7 │ import valid_function from 'function'; console.log(valid_function);
+    8 │ import valid_method from 'method'; console.log(valid_method);
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+Checked 11 files in <TIME>. No fixes applied.
+Found 6 errors.
+```

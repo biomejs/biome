@@ -1,7 +1,7 @@
 use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
 use biome_module_graph::{
     ImportSymbol, JsExport, JsExportedSymbolLookup, JsImport, JsOwnExport, JsReexport, ModuleDb,
-    SymbolFromModuleInfo, find_js_exported_symbol,
+    ResolutionMode, SymbolFromModuleInfo, find_js_exported_symbol, resolve_specifier,
 };
 use biome_resolver::ResolveError;
 use biome_rowan::{Text, TextRange, TextSize};
@@ -946,4 +946,59 @@ fn test_infer_module_types_resolves_redis_commander_types() {
         .expect("RedisCommander binding type must be inferred");
     let commander_ty = inferred.resolve_type(&db, commander_ty);
     assert_ne!(commander_ty, InferredTypeData::Unknown);
+}
+
+#[test]
+fn test_runtime_entrypoint_resolution_preserves_type_resolution() {
+    for main in ["lib/index.js", "lib/index", "lib"] {
+        let fs = MemoryFileSystem::default();
+        fs.insert("/src/index.ts".into(), "import entry from 'example';");
+        fs.insert(
+            "/node_modules/example/package.json".into(),
+            format!(r#"{{ "name": "example", "main": "{main}" }}"#),
+        );
+        fs.insert(
+            "/node_modules/example/lib/index.js".into(),
+            "module.exports = { value: 1 };",
+        );
+        let db = build_js_db(
+            &fs,
+            &[
+                BiomePath::new("/src/index.ts"),
+                BiomePath::new("/node_modules/example/lib/index.js"),
+            ],
+            false,
+        );
+        assert!(
+            resolve_specifier(
+                &db,
+                Utf8Path::new("/src"),
+                "example",
+                ResolutionMode::JavaScript
+            )
+            .path()
+            .is_err()
+        );
+        assert_eq!(
+            resolve_specifier(
+                &db,
+                Utf8Path::new("/src"),
+                "example",
+                ResolutionMode::JavaScriptRuntime
+            )
+            .path()
+            .as_path(),
+            Some(Utf8Path::new("/node_modules/example/lib/index.js"))
+        );
+        assert!(
+            resolve_specifier(
+                &db,
+                Utf8Path::new("/src"),
+                "missing",
+                ResolutionMode::JavaScriptRuntime
+            )
+            .path()
+            .is_err()
+        );
+    }
 }

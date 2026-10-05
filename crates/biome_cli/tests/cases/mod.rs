@@ -51,6 +51,7 @@ mod suppressions;
 mod tailwind_directives;
 mod type_inference_profile;
 mod unknown_files;
+mod untyped_runtime_imports;
 mod vcs_ignored_files;
 mod vue_cross_language_rules;
 mod watcher;

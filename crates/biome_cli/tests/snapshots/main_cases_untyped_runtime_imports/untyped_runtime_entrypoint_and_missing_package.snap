@@ -1,0 +1,94 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=correctness/noUnresolvedImports valid.mjs missing.mjs
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "rules": { "correctness": { "noUnresolvedImports": "error" } } } }
+```
+
+## `missing.mjs`
+
+```mjs
+import missing from 'missing'; console.log(missing);
+```
+
+## `node_modules/directory/lib/index.js`
+
+```js
+module.exports = { value: 1 };
+```
+
+## `node_modules/directory/package.json`
+
+```json
+{ "name": "directory", "main": "lib" }
+```
+
+## `node_modules/example/lib/index.js`
+
+```js
+module.exports = { value: 1 };
+```
+
+## `node_modules/example/package.json`
+
+```json
+{ "name": "example", "main": "lib/index.js" }
+```
+
+## `node_modules/extensionless/lib/index.js`
+
+```js
+module.exports = { value: 1 };
+```
+
+## `node_modules/extensionless/package.json`
+
+```json
+{ "name": "extensionless", "main": "lib/index" }
+```
+
+## `valid.mjs`
+
+```mjs
+import example from 'example'; import extensionless from 'extensionless'; import directory from 'directory'; console.log(example.value, extensionless.value, directory.value);
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+missing.mjs:1:21 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier missing cannot be resolved: module not found
+  
+  > 1 │ import missing from 'missing'; console.log(missing);
+      │                     ^^^^^^^^^
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+Found 1 error.
+```

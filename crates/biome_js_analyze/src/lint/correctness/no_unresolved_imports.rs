@@ -4,13 +4,20 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike, JsModuleSource};
-use biome_module_graph::{
-    JsExportedSymbolLookup, ModuleDb, ModuleInfo, ModuleInfoKind, SUPPORTED_EXTENSIONS,
-    SymbolFromModuleInfo, find_js_exported_symbol,
+use biome_js_semantic::JsDeclarationKind;
+use biome_js_syntax::function_ext::AnyFunctionLike;
+use biome_js_syntax::{
+    AnyJsImportClause, AnyJsImportLike, JsAwaitExpression, JsExport, JsExportNamedFromClause,
+    JsForOfStatement, JsImport, JsImportMetaExpression, JsModuleSource, JsVariableDeclaration,
+    TsImportEqualsDeclaration,
 };
+use biome_module_graph::{
+    JsExportedSymbolLookup, JsModuleInfo, ModuleDb, ModuleInfo, ModuleInfoKind, ResolutionMode,
+    SUPPORTED_EXTENSIONS, SymbolFromModuleInfo, find_js_exported_symbol, resolve_module_import,
+};
+use biome_package::PackageType;
 use biome_resolver::ResolveError;
-use biome_rowan::{AstNode, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, Text, TextRange, TokenText};
 use biome_rule_options::no_unresolved_imports::NoUnresolvedImportsOptions;
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -114,8 +121,8 @@ impl Rule for NoUnresolvedImports {
             return Vec::new();
         };
 
-        let resolved_path = match resolved.path().as_deref() {
-            Ok(resolved_path) => resolved_path,
+        let (resolved_path, runtime_fallback) = match resolved.path().as_deref() {
+            Ok(resolved_path) => (resolved_path.to_path_buf(), false),
             Err(resolve_error) => {
                 // Runtime built-ins (e.g. `node:fs`, `bun:sqlite`) are valid
                 // imports — they simply cannot be resolved to a file path.
@@ -132,17 +139,76 @@ impl Rule for NoUnresolvedImports {
                     return Vec::new();
                 }
 
-                return vec![NoUnresolvedImportsState::UnresolvedPath {
-                    range: node.syntax().text_trimmed_range(),
-                    specifier,
-                    resolve_error: *resolve_error,
-                }];
+                let imports_types = match node {
+                    AnyJsImportLike::JsModuleSource(source) => {
+                        source.imports_only_types()
+                            || source
+                                .syntax()
+                                .grand_parent()
+                                .and_then(TsImportEqualsDeclaration::cast)
+                                .is_some_and(|declaration| declaration.type_token().is_some())
+                            || source.parent::<AnyJsImportClause>().is_some_and(|clause| {
+                                clause.named_specifiers().is_some_and(|specifiers| {
+                                    specifiers.specifiers().iter().any(|specifier| {
+                                        specifier
+                                            .is_ok_and(|specifier| specifier.imports_only_types())
+                                    })
+                                })
+                            })
+                            || source
+                                .parent::<JsExportNamedFromClause>()
+                                .is_some_and(|clause| {
+                                    clause.specifiers().iter().any(|specifier| {
+                                        specifier
+                                            .is_ok_and(|specifier| specifier.type_token().is_some())
+                                    })
+                                })
+                    }
+                    _ => false,
+                };
+                let runtime_path = (!imports_types)
+                    .then(|| {
+                        resolve_module_import(
+                            ctx.db(),
+                            owner,
+                            &specifier,
+                            ResolutionMode::JavaScriptRuntime,
+                        )
+                    })
+                    .and_then(|resolved| resolved.path().as_ref().ok().cloned());
+                match runtime_path {
+                    Some(path) => (path, true),
+                    None => {
+                        return vec![NoUnresolvedImportsState::UnresolvedPath {
+                            range: node.syntax().text_trimmed_range(),
+                            specifier,
+                            resolve_error: *resolve_error,
+                        }];
+                    }
+                }
             }
         };
 
-        let Some(target_info) = ctx.module_info_for_path(resolved_path) else {
+        let Some(target_info) = ctx.module_info_for_path(&resolved_path) else {
             return Vec::new();
         };
+
+        if runtime_fallback {
+            let ModuleInfoKind::Js(info) = target_info.kind(ctx.db()) else {
+                return Vec::new();
+            };
+            let esm = has_runtime_module_syntax(&info)
+                || resolved_path.extension() == Some("mjs")
+                || (resolved_path.extension() == Some("js")
+                    && ctx
+                        .project_layout()
+                        .find_node_manifest_for_path(&resolved_path)
+                        .is_some_and(|(_, manifest)| manifest.r#type == Some(PackageType::Module)));
+            if !esm {
+                // CommonJS exports cannot be validated without declarations.
+                return Vec::new();
+            }
+        }
 
         let options = GetUnresolvedImportsOptions {
             module_db: ctx.db(),
@@ -240,6 +306,44 @@ impl Rule for NoUnresolvedImports {
 
         Some(diagnostic)
     }
+}
+
+fn has_runtime_module_syntax(module: &JsModuleInfo) -> bool {
+    let model = &module.semantic_model;
+    if model.root().syntax().descendants().any(|node| {
+        if JsImport::can_cast(node.kind())
+            || JsExport::can_cast(node.kind())
+            || JsImportMetaExpression::can_cast(node.kind())
+        {
+            return true;
+        }
+        let awaits = JsAwaitExpression::can_cast(node.kind())
+            || JsForOfStatement::cast_ref(&node)
+                .is_some_and(|statement| statement.await_token().is_some())
+            || JsVariableDeclaration::cast_ref(&node)
+                .is_some_and(|declaration| declaration.await_token().is_some());
+        awaits
+            && !node
+                .ancestors()
+                .any(|ancestor| AnyFunctionLike::can_cast(ancestor.kind()))
+    }) {
+        return true;
+    }
+    ["require", "module", "exports", "__dirname", "__filename"]
+        .into_iter()
+        .any(|name| {
+            model
+                .global_scope()
+                .get_binding(name)
+                .is_some_and(|binding| {
+                    matches!(
+                        binding.declaration_kind(),
+                        JsDeclarationKind::Value
+                            | JsDeclarationKind::Class
+                            | JsDeclarationKind::Using
+                    )
+                })
+        })
 }
 
 struct GetUnresolvedImportsOptions<'a> {

@@ -1,0 +1,295 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=correctness/noUnresolvedImports index.ts runtime.js literal.js empty.js implicit.js
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "rules": { "correctness": { "noUnresolvedImports": "error" } } } }
+```
+
+## `empty.js`
+
+```js
+export {};
+```
+
+## `implicit.js`
+
+```js
+
+```
+
+## `index.ts`
+
+```ts
+
+import { present } from 'example';
+import runtime = require('example');
+import type EqualsType = require('example');
+import { absent } from 'example';
+import type { TypeOnly } from 'example';
+import { type InlineType } from 'example';
+import { present as value, type MixedType } from 'example';
+export { present, type MixedExportType } from 'example';
+export type { TypeExport } from 'example';
+import literal from 'literal';
+import { absent as missingLiteral } from 'literal';
+import missingDefault from 'empty';
+import implicitDefault, { absent as implicitNamed } from 'implicit';
+console.log(present, absent, value, runtime, literal, missingLiteral, missingDefault, implicitDefault, implicitNamed);
+
+```
+
+## `literal.js`
+
+```js
+export default 1;
+```
+
+## `node_modules/empty/package.json`
+
+```json
+{ "name": "empty", "main": "../../empty.js" }
+```
+
+## `node_modules/example/package.json`
+
+```json
+{ "name": "example", "main": "../../runtime.js" }
+```
+
+## `node_modules/implicit/package.json`
+
+```json
+{ "name": "implicit", "main": "../../implicit.js" }
+```
+
+## `node_modules/literal/package.json`
+
+```json
+{ "name": "literal", "main": "../../literal.js" }
+```
+
+## `package.json`
+
+```json
+{ "type": "module" }
+```
+
+## `runtime.js`
+
+```js
+export const present = 1;
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+index.ts:4:34 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+    2 │ import { present } from 'example';
+    3 │ import runtime = require('example');
+  > 4 │ import type EqualsType = require('example');
+      │                                  ^^^^^^^^^
+    5 │ import { absent } from 'example';
+    6 │ import type { TypeOnly } from 'example';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:5:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module example has no export named absent.
+  
+    3 │ import runtime = require('example');
+    4 │ import type EqualsType = require('example');
+  > 5 │ import { absent } from 'example';
+      │          ^^^^^^
+    6 │ import type { TypeOnly } from 'example';
+    7 │ import { type InlineType } from 'example';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.ts:6:31 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+    4 │ import type EqualsType = require('example');
+    5 │ import { absent } from 'example';
+  > 6 │ import type { TypeOnly } from 'example';
+      │                               ^^^^^^^^^
+    7 │ import { type InlineType } from 'example';
+    8 │ import { present as value, type MixedType } from 'example';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:7:33 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+    5 │ import { absent } from 'example';
+    6 │ import type { TypeOnly } from 'example';
+  > 7 │ import { type InlineType } from 'example';
+      │                                 ^^^^^^^^^
+    8 │ import { present as value, type MixedType } from 'example';
+    9 │ export { present, type MixedExportType } from 'example';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:8:50 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+     6 │ import type { TypeOnly } from 'example';
+     7 │ import { type InlineType } from 'example';
+   > 8 │ import { present as value, type MixedType } from 'example';
+       │                                                  ^^^^^^^^^
+     9 │ export { present, type MixedExportType } from 'example';
+    10 │ export type { TypeExport } from 'example';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:9:47 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+     7 │ import { type InlineType } from 'example';
+     8 │ import { present as value, type MixedType } from 'example';
+   > 9 │ export { present, type MixedExportType } from 'example';
+       │                                               ^^^^^^^^^
+    10 │ export type { TypeExport } from 'example';
+    11 │ import literal from 'literal';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:10:33 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The import specifier example cannot be resolved: found directory without index
+  
+     8 │ import { present as value, type MixedType } from 'example';
+     9 │ export { present, type MixedExportType } from 'example';
+  > 10 │ export type { TypeExport } from 'example';
+       │                                 ^^^^^^^^^
+    11 │ import literal from 'literal';
+    12 │ import { absent as missingLiteral } from 'literal';
+  
+  i Make sure the specifier is correct and your project is set up correctly.
+  
+
+```
+
+```block
+index.ts:12:10 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module literal has no export named absent.
+  
+    10 │ export type { TypeExport } from 'example';
+    11 │ import literal from 'literal';
+  > 12 │ import { absent as missingLiteral } from 'literal';
+       │          ^^^^^^
+    13 │ import missingDefault from 'empty';
+    14 │ import implicitDefault, { absent as implicitNamed } from 'implicit';
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.ts:13:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module empty has no default export.
+  
+    11 │ import literal from 'literal';
+    12 │ import { absent as missingLiteral } from 'literal';
+  > 13 │ import missingDefault from 'empty';
+       │        ^^^^^^^^^^^^^^
+    14 │ import implicitDefault, { absent as implicitNamed } from 'implicit';
+    15 │ console.log(present, absent, value, runtime, literal, missingLiteral, missingDefault, implicitDefault, implicitNamed);
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.ts:14:8 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module implicit has no default export.
+  
+    12 │ import { absent as missingLiteral } from 'literal';
+    13 │ import missingDefault from 'empty';
+  > 14 │ import implicitDefault, { absent as implicitNamed } from 'implicit';
+       │        ^^^^^^^^^^^^^^^
+    15 │ console.log(present, absent, value, runtime, literal, missingLiteral, missingDefault, implicitDefault, implicitNamed);
+    16 │ 
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+index.ts:14:27 lint/correctness/noUnresolvedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The module implicit has no export named absent.
+  
+    12 │ import { absent as missingLiteral } from 'literal';
+    13 │ import missingDefault from 'empty';
+  > 14 │ import implicitDefault, { absent as implicitNamed } from 'implicit';
+       │                           ^^^^^^
+    15 │ console.log(present, absent, value, runtime, literal, missingLiteral, missingDefault, implicitDefault, implicitNamed);
+    16 │ 
+  
+  i Make sure that the module is correct and that you're importing the right symbol.
+  
+
+```
+
+```block
+Checked 5 files in <TIME>. No fixes applied.
+Found 11 errors.
+```

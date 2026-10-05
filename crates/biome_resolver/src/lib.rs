@@ -800,7 +800,7 @@ fn resolve_package_path(
                     }
                 }
             } else if let Some(target) = &package_json.main {
-                let options = options.without_extensions_or_manifests();
+                let options = options.with_type_roots_and_without_manifests(options.type_roots);
                 return resolve_relative_path(target, &package_path, fs, &options);
             }
         }
