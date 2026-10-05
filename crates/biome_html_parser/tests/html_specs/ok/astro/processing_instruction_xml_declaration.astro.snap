@@ -1,0 +1,203 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+---
+const title = "Logo";
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+	<title>{title}</title>
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: AstroFrontmatterElement {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: AstroEmbeddedContent {
+            content_token: HTML_LITERAL@3..26 "const title = \"Logo\";\n" [Newline("\n")] [],
+        },
+        r_fence_token: FENCE@26..29 "---" [] [],
+    },
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@29..32 "<?" [Newline("\n")] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@32..36 "xml" [] [Whitespace(" ")],
+        },
+        attributes: HtmlAttributeList [
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@36..43 "version" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@43..44 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@44..50 "\"1.0\"" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@50..58 "encoding" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@58..59 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@59..66 "\"UTF-8\"" [] [],
+                    },
+                },
+            },
+        ],
+        end_token: PI_END@66..68 "?>" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@68..70 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@70..74 "svg" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@74..79 "xmlns" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@79..80 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@80..108 "\"http://www.w3.org/2000/svg\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@108..109 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@109..112 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: TITLE_KW@112..117 "title" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@117..118 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlSingleTextExpression {
+                            l_curly_token: L_CURLY@118..119 "{" [] [],
+                            expression: HtmlTextExpression {
+                                html_literal_token: HTML_LITERAL@119..124 "title" [] [],
+                            },
+                            r_curly_token: R_CURLY@124..125 "}" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@125..126 "<" [] [],
+                        slash_token: SLASH@126..127 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: TITLE_KW@127..132 "title" [] [],
+                        },
+                        r_angle_token: R_ANGLE@132..133 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@133..135 "<" [Newline("\n")] [],
+                slash_token: SLASH@135..136 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@136..139 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@139..140 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@140..141 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..141
+  0: (empty)
+  1: ASTRO_FRONTMATTER_ELEMENT@0..29
+    0: FENCE@0..3 "---" [] []
+    1: ASTRO_EMBEDDED_CONTENT@3..26
+      0: HTML_LITERAL@3..26 "const title = \"Logo\";\n" [Newline("\n")] []
+    2: FENCE@26..29 "---" [] []
+  2: HTML_PROCESSING_INSTRUCTION@29..68
+    0: PI_START@29..32 "<?" [Newline("\n")] []
+    1: HTML_TAG_NAME@32..36
+      0: HTML_LITERAL@32..36 "xml" [] [Whitespace(" ")]
+    2: HTML_ATTRIBUTE_LIST@36..66
+      0: HTML_ATTRIBUTE@36..50
+        0: HTML_ATTRIBUTE_NAME@36..43
+          0: HTML_LITERAL@36..43 "version" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@43..50
+          0: EQ@43..44 "=" [] []
+          1: HTML_STRING@44..50
+            0: HTML_STRING_LITERAL@44..50 "\"1.0\"" [] [Whitespace(" ")]
+      1: HTML_ATTRIBUTE@50..66
+        0: HTML_ATTRIBUTE_NAME@50..58
+          0: HTML_LITERAL@50..58 "encoding" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@58..66
+          0: EQ@58..59 "=" [] []
+          1: HTML_STRING@59..66
+            0: HTML_STRING_LITERAL@59..66 "\"UTF-8\"" [] []
+    3: PI_END@66..68 "?>" [] []
+  3: (empty)
+  4: HTML_ELEMENT_LIST@68..140
+    0: HTML_ELEMENT@68..140
+      0: HTML_OPENING_ELEMENT@68..109
+        0: L_ANGLE@68..70 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@70..74
+          0: SVG_KW@70..74 "svg" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@74..108
+          0: HTML_ATTRIBUTE@74..108
+            0: HTML_ATTRIBUTE_NAME@74..79
+              0: HTML_LITERAL@74..79 "xmlns" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@79..108
+              0: EQ@79..80 "=" [] []
+              1: HTML_STRING@80..108
+                0: HTML_STRING_LITERAL@80..108 "\"http://www.w3.org/2000/svg\"" [] []
+        3: R_ANGLE@108..109 ">" [] []
+      1: HTML_ELEMENT_LIST@109..133
+        0: HTML_ELEMENT@109..133
+          0: HTML_OPENING_ELEMENT@109..118
+            0: L_ANGLE@109..112 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@112..117
+              0: TITLE_KW@112..117 "title" [] []
+            2: HTML_ATTRIBUTE_LIST@117..117
+            3: R_ANGLE@117..118 ">" [] []
+          1: HTML_ELEMENT_LIST@118..125
+            0: HTML_SINGLE_TEXT_EXPRESSION@118..125
+              0: L_CURLY@118..119 "{" [] []
+              1: HTML_TEXT_EXPRESSION@119..124
+                0: HTML_LITERAL@119..124 "title" [] []
+              2: R_CURLY@124..125 "}" [] []
+          2: HTML_CLOSING_ELEMENT@125..133
+            0: L_ANGLE@125..126 "<" [] []
+            1: SLASH@126..127 "/" [] []
+            2: HTML_TAG_NAME@127..132
+              0: TITLE_KW@127..132 "title" [] []
+            3: R_ANGLE@132..133 ">" [] []
+      2: HTML_CLOSING_ELEMENT@133..140
+        0: L_ANGLE@133..135 "<" [Newline("\n")] []
+        1: SLASH@135..136 "/" [] []
+        2: HTML_TAG_NAME@136..139
+          0: SVG_KW@136..139 "svg" [] []
+        3: R_ANGLE@139..140 ">" [] []
+  5: EOF@140..141 "" [Newline("\n")] []
+
+```

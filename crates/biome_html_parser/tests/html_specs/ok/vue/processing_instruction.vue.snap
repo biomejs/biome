@@ -1,0 +1,226 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<template>
+	<?xml version="1.0" encoding="UTF-8"?>
+	<svg></svg>
+	<?foo bar?>
+	<p>after</p>
+</template>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@10..14 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@14..18 "xml" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@18..25 "version" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@25..26 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@26..32 "\"1.0\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@32..40 "encoding" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@40..41 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@41..48 "\"UTF-8\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    end_token: PI_END@48..50 "?>" [] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: SVG_KW@53..56 "svg" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@56..57 ">" [] [],
+                    },
+                    children: HtmlElementList [],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@57..58 "<" [] [],
+                        slash_token: SLASH@58..59 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: SVG_KW@59..62 "svg" [] [],
+                        },
+                        r_angle_token: R_ANGLE@62..63 ">" [] [],
+                    },
+                },
+                HtmlProcessingInstruction {
+                    start_token: PI_START@63..67 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@67..71 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@71..74 "bar" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: PI_END@74..76 "?>" [] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@79..80 "p" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@80..81 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@81..86 "after" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@86..87 "<" [] [],
+                        slash_token: SLASH@87..88 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: P_KW@88..89 "p" [] [],
+                        },
+                        r_angle_token: R_ANGLE@89..90 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@90..92 "<" [Newline("\n")] [],
+                slash_token: SLASH@92..93 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@93..101 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@101..102 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@102..103 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..103
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..102
+    0: HTML_ELEMENT@0..102
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: TEMPLATE_KW@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..90
+        0: HTML_PROCESSING_INSTRUCTION@10..50
+          0: PI_START@10..14 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@14..18
+            0: HTML_LITERAL@14..18 "xml" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@18..48
+            0: HTML_ATTRIBUTE@18..32
+              0: HTML_ATTRIBUTE_NAME@18..25
+                0: HTML_LITERAL@18..25 "version" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@25..32
+                0: EQ@25..26 "=" [] []
+                1: HTML_STRING@26..32
+                  0: HTML_STRING_LITERAL@26..32 "\"1.0\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@32..48
+              0: HTML_ATTRIBUTE_NAME@32..40
+                0: HTML_LITERAL@32..40 "encoding" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@40..48
+                0: EQ@40..41 "=" [] []
+                1: HTML_STRING@41..48
+                  0: HTML_STRING_LITERAL@41..48 "\"UTF-8\"" [] []
+          3: PI_END@48..50 "?>" [] []
+        1: HTML_ELEMENT@50..63
+          0: HTML_OPENING_ELEMENT@50..57
+            0: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@53..56
+              0: SVG_KW@53..56 "svg" [] []
+            2: HTML_ATTRIBUTE_LIST@56..56
+            3: R_ANGLE@56..57 ">" [] []
+          1: HTML_ELEMENT_LIST@57..57
+          2: HTML_CLOSING_ELEMENT@57..63
+            0: L_ANGLE@57..58 "<" [] []
+            1: SLASH@58..59 "/" [] []
+            2: HTML_TAG_NAME@59..62
+              0: SVG_KW@59..62 "svg" [] []
+            3: R_ANGLE@62..63 ">" [] []
+        2: HTML_PROCESSING_INSTRUCTION@63..76
+          0: PI_START@63..67 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@67..71
+            0: HTML_LITERAL@67..71 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@71..74
+            0: HTML_ATTRIBUTE@71..74
+              0: HTML_ATTRIBUTE_NAME@71..74
+                0: HTML_LITERAL@71..74 "bar" [] []
+              1: (empty)
+          3: PI_END@74..76 "?>" [] []
+        3: HTML_ELEMENT@76..90
+          0: HTML_OPENING_ELEMENT@76..81
+            0: L_ANGLE@76..79 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@79..80
+              0: P_KW@79..80 "p" [] []
+            2: HTML_ATTRIBUTE_LIST@80..80
+            3: R_ANGLE@80..81 ">" [] []
+          1: HTML_ELEMENT_LIST@81..86
+            0: HTML_CONTENT@81..86
+              0: HTML_LITERAL@81..86 "after" [] []
+          2: HTML_CLOSING_ELEMENT@86..90
+            0: L_ANGLE@86..87 "<" [] []
+            1: SLASH@87..88 "/" [] []
+            2: HTML_TAG_NAME@88..89
+              0: P_KW@88..89 "p" [] []
+            3: R_ANGLE@89..90 ">" [] []
+      2: HTML_CLOSING_ELEMENT@90..102
+        0: L_ANGLE@90..92 "<" [Newline("\n")] []
+        1: SLASH@92..93 "/" [] []
+        2: HTML_TAG_NAME@93..101
+          0: TEMPLATE_KW@93..101 "template" [] []
+        3: R_ANGLE@101..102 ">" [] []
+  5: EOF@102..103 "" [Newline("\n")] []
+
+```

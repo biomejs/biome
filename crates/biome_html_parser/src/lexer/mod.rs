@@ -188,6 +188,9 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
+            QST if self.inside_processing_instruction() && self.at_pi_end() => {
+                self.consume_pi_end()
+            }
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => match self.consume_js_comment_in_tag() {
@@ -250,6 +253,9 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
+            QST if self.inside_processing_instruction() && self.at_pi_end() => {
+                self.consume_pi_end()
+            }
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => self.consume_byte(T![/]),
@@ -321,6 +327,9 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
+            QST if self.inside_processing_instruction() && self.at_pi_end() => {
+                self.consume_pi_end()
+            }
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => match self.consume_js_comment_in_tag() {

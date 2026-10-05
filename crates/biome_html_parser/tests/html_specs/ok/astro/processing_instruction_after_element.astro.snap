@@ -1,0 +1,146 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<svg></svg>
+<?xml version="1.0"?>
+<p>after</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@1..4 "svg" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@5..6 "<" [] [],
+                slash_token: SLASH@6..7 "/" [] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@7..10 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@10..11 ">" [] [],
+            },
+        },
+        HtmlProcessingInstruction {
+            start_token: PI_START@11..14 "<?" [Newline("\n")] [],
+            target: HtmlTagName {
+                value_token: HTML_LITERAL@14..18 "xml" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@18..25 "version" [] [],
+                    },
+                    initializer: HtmlAttributeInitializerClause {
+                        eq_token: EQ@25..26 "=" [] [],
+                        value: HtmlString {
+                            value_token: HTML_STRING_LITERAL@26..31 "\"1.0\"" [] [],
+                        },
+                    },
+                },
+            ],
+            end_token: PI_END@31..33 "?>" [] [],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@33..35 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: P_KW@35..36 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@36..37 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@37..42 "after" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@42..43 "<" [] [],
+                slash_token: SLASH@43..44 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@44..45 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..47
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..46
+    0: HTML_ELEMENT@0..11
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: SVG_KW@1..4 "svg" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..5
+      2: HTML_CLOSING_ELEMENT@5..11
+        0: L_ANGLE@5..6 "<" [] []
+        1: SLASH@6..7 "/" [] []
+        2: HTML_TAG_NAME@7..10
+          0: SVG_KW@7..10 "svg" [] []
+        3: R_ANGLE@10..11 ">" [] []
+    1: HTML_PROCESSING_INSTRUCTION@11..33
+      0: PI_START@11..14 "<?" [Newline("\n")] []
+      1: HTML_TAG_NAME@14..18
+        0: HTML_LITERAL@14..18 "xml" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@18..31
+        0: HTML_ATTRIBUTE@18..31
+          0: HTML_ATTRIBUTE_NAME@18..25
+            0: HTML_LITERAL@18..25 "version" [] []
+          1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@25..31
+            0: EQ@25..26 "=" [] []
+            1: HTML_STRING@26..31
+              0: HTML_STRING_LITERAL@26..31 "\"1.0\"" [] []
+      3: PI_END@31..33 "?>" [] []
+    2: HTML_ELEMENT@33..46
+      0: HTML_OPENING_ELEMENT@33..37
+        0: L_ANGLE@33..35 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@35..36
+          0: P_KW@35..36 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@36..36
+        3: R_ANGLE@36..37 ">" [] []
+      1: HTML_ELEMENT_LIST@37..42
+        0: HTML_CONTENT@37..42
+          0: HTML_LITERAL@37..42 "after" [] []
+      2: HTML_CLOSING_ELEMENT@42..46
+        0: L_ANGLE@42..43 "<" [] []
+        1: SLASH@43..44 "/" [] []
+        2: HTML_TAG_NAME@44..45
+          0: P_KW@44..45 "p" [] []
+        3: R_ANGLE@45..46 ">" [] []
+  5: EOF@46..47 "" [Newline("\n")] []
+
+```

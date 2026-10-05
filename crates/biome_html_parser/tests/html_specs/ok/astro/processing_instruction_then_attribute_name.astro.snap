@@ -1,0 +1,130 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<?xml?>
+<div a?>x</div>
+<input b?>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..5 "xml" [] [],
+        },
+        attributes: HtmlAttributeList [],
+        end_token: PI_END@5..7 "?>" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@7..9 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@9..13 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@13..15 "a?" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@15..16 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@16..17 "x" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@17..18 "<" [] [],
+                slash_token: SLASH@18..19 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@19..22 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@22..23 ">" [] [],
+            },
+        },
+        HtmlSelfClosingElement {
+            l_angle_token: L_ANGLE@23..25 "<" [Newline("\n")] [],
+            name: HtmlTagName {
+                value_token: INPUT_KW@25..31 "input" [] [Whitespace(" ")],
+            },
+            attributes: HtmlAttributeList [
+                HtmlAttribute {
+                    name: HtmlAttributeName {
+                        value_token: HTML_LITERAL@31..33 "b?" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+            ],
+            slash_token: missing (optional),
+            r_angle_token: R_ANGLE@33..34 ">" [] [],
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..35
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..7
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..5
+      0: HTML_LITERAL@2..5 "xml" [] []
+    2: HTML_ATTRIBUTE_LIST@5..5
+    3: PI_END@5..7 "?>" [] []
+  3: (empty)
+  4: HTML_ELEMENT_LIST@7..34
+    0: HTML_ELEMENT@7..23
+      0: HTML_OPENING_ELEMENT@7..16
+        0: L_ANGLE@7..9 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@9..13
+          0: DIV_KW@9..13 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@13..15
+          0: HTML_ATTRIBUTE@13..15
+            0: HTML_ATTRIBUTE_NAME@13..15
+              0: HTML_LITERAL@13..15 "a?" [] []
+            1: (empty)
+        3: R_ANGLE@15..16 ">" [] []
+      1: HTML_ELEMENT_LIST@16..17
+        0: HTML_CONTENT@16..17
+          0: HTML_LITERAL@16..17 "x" [] []
+      2: HTML_CLOSING_ELEMENT@17..23
+        0: L_ANGLE@17..18 "<" [] []
+        1: SLASH@18..19 "/" [] []
+        2: HTML_TAG_NAME@19..22
+          0: DIV_KW@19..22 "div" [] []
+        3: R_ANGLE@22..23 ">" [] []
+    1: HTML_SELF_CLOSING_ELEMENT@23..34
+      0: L_ANGLE@23..25 "<" [Newline("\n")] []
+      1: HTML_TAG_NAME@25..31
+        0: INPUT_KW@25..31 "input" [] [Whitespace(" ")]
+      2: HTML_ATTRIBUTE_LIST@31..33
+        0: HTML_ATTRIBUTE@31..33
+          0: HTML_ATTRIBUTE_NAME@31..33
+            0: HTML_LITERAL@31..33 "b?" [] []
+          1: (empty)
+      3: (empty)
+      4: R_ANGLE@33..34 ">" [] []
+  5: EOF@34..35 "" [Newline("\n")] []
+
+```
